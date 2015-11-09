@@ -1,0 +1,1 @@
+The specification of an apt-juju package:
