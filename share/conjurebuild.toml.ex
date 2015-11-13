@@ -10,7 +10,9 @@
 
 # Define what config options can be modified, these will use
 # the existing config's defaults
-"editable"               = ["bind-address", "backup_retention", "dataset-size"]
+"editable"               = ["bind-address",
+                            "backup_retention_count",
+                            "dataset-size"]
 
 # User can change from default 0.0.0.0, we place our own
 # recommendation here as well
