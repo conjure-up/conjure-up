@@ -1,4 +1,4 @@
-# apt-juju
+# conjure
 > Installing cloud packages like whoa.
 
 # license
