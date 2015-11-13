@@ -1,6 +1,12 @@
 # conjure
 > Installing cloud packages like whoa.
 
+# what it is
+
+This is the build application for generating debian packages utilizing metadata
+gained through the charmstore api and making use of a terminal ui giving a user
+more control over their charm installation.
+
 # license
 
 The MIT License (MIT)
