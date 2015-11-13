@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-""" Parses build specifications and composes build out tasks
+""" Parses editable config options
 """
 
 import toml
@@ -41,11 +41,12 @@ class Parser:
         """
         self.buildcfg = buildcfg
         self.buildopts = None
+        self.__parse_config()
 
     def __parse_config(self):
         """ Parse TOML
 
-        Parses a TOML configuration to provide options to the build tasks
+        Parses a TOML configuration
         """
         if not os.path.exists(self.buildcfg):
             raise ParserException("Unable to load build "
@@ -53,7 +54,7 @@ class Parser:
         with open(self.buildcfg, "r") as fp:
             self.buildopts = toml.loads(fp.read())
 
-    def __validate_config_options(self):
+    def validate_config_options(self):
         """ Pull acceptable editable config options from
         the editable key and validate any overrides
         """
