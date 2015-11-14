@@ -1,3 +1,4 @@
 toml
 requests
-urwid
+urwid==1.2.1
+tornado
