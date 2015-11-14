@@ -1,6 +1,14 @@
 # -*- mode:toml; -*-
 
-[config]
+"charm"                  = "mysql"
+
+# Define what config options can be modified, these will use
+# the existing config's defaults
+"allowed_fields"         = ["bind-address",
+                            "backup_retention_count",
+                            "dataset-size"]
+
+[fields]
 # Define options that can be configured during install
 # along with setting a default recommended option
 
@@ -8,11 +16,6 @@
 # backup_retention_count, make these editable and include
 # dataset-size as is and make editable.
 
-# Define what config options can be modified, these will use
-# the existing config's defaults
-"editable"               = ["bind-address",
-                            "backup_retention_count",
-                            "dataset-size"]
 
 # User can change from default 0.0.0.0, we place our own
 # recommendation here as well

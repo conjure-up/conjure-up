@@ -58,11 +58,9 @@ class Parser:
         """ Pull acceptable editable config options from
         the editable key and validate any overrides
         """
-        opts = copy.copy(self.buildopts['config'])
-        editable_set = set(opts['editable'])
-
-        del opts['editable']
-        additional_set = set(opts.keys())
-        if not additional_set.issubset(editable_set):
+        opts = copy.copy(self.buildopts)
+        allowed_set = set(opts['allowed_fields'])
+        additional_set = set(opts['fields'].keys())
+        if not additional_set.issubset(allowed_set):
             raise ParserException("Options specified that are not "
-                                  "defined in the config.editable list")
+                                  "defined in the allowed_fields list")

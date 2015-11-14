@@ -59,3 +59,36 @@ def query_cs(endpoint):
         raise CharmNotFoundError("{type} {charm_id}".format(**rj))
 
     return r.json()
+
+
+class CharmMeta:
+    def __init__(self, charm, series="trusty"):
+        """ init
+
+        Arguments:
+        charm: Name of charm
+        series: Ubuntu series, defaults: trusty
+        """
+        self.charm = charm
+        self.series = series
+        self.meta_path = path.join(self.series, self.charm, 'meta')
+
+    def charm_config(self):
+        """ Charm Config
+
+        Returns:
+        Charm configuration specification as stored in its config.yaml
+        """
+        endpoint = path.join(self.meta_path, 'charm-config')
+        res = query_cs(endpoint)
+        return res['Options']
+
+    def charm_metadata(self):
+        """ Metadata
+
+        Returns:
+        Metadata about the charm, summary, description, etc.
+        """
+        endpoint = path.join(self.meta_path, 'charm-metadata')
+        res = query_cs(endpoint)
+        return res
