@@ -8,6 +8,9 @@
                             "backup_retention_count",
                             "dataset-size"]
 
+# Ubuntu series this package will support
+"series" = ["trusty", "xenial"]
+
 [fields]
 # Define options that can be configured during install
 # along with setting a default recommended option

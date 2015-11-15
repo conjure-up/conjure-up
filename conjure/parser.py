@@ -59,6 +59,12 @@ class Parser:
         the editable key and validate any overrides
         """
         opts = copy.copy(self.buildopts)
+        if 'fields' not in opts:
+            return
+        if not opts['fields']:
+            raise ParserException("A [fields] stanza was found but no "
+                                  "configurable keys defined. Remove this "
+                                  "heading from the config")
         allowed_set = set(opts['allowed_fields'])
         additional_set = set(opts['fields'].keys())
         if not additional_set.issubset(allowed_set):
