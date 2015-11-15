@@ -2,3 +2,4 @@ toml
 requests
 urwid==1.2.1
 tornado
+ubuntui
