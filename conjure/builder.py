@@ -23,7 +23,7 @@
 This class handles the build tasks for generating a deb package
 """
 
-from .builder import Parser, ParserException
+from .parser import Parser, ParserException
 
 
 class Builder:

@@ -61,7 +61,7 @@ class Juju:
         """ Juju debug-log
 
         Arguments:
-        include
+        include: Filter to query log output
         callback: Callback handler
         """
         def update(data, returncode):

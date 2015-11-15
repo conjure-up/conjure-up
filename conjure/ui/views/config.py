@@ -18,16 +18,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-""" View policy base
+""" Configuration View
+
+Allows user to make changes to defined configuration options for the service
+prior to deploy.
 """
 
-from urwid import WidgetWrap
-from conjure.ev import EventLoop
+from . import ViewPolicy
 
 
-class ViewPolicy(WidgetWrap):
-    def keypress(self, size, key):
-        if key in ['ctrl q']:
-            EventLoop.exit()
+class ConfigView(ViewPolicy):
+    def __init__(self):
+        super().__init__()
 
-        return super().keypress(size, key)
+    def render(self):
+        """ Renders view
+        """
+        pass
