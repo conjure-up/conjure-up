@@ -39,12 +39,11 @@ class EventLoop:
     loop = None
 
     @classmethod
-    def build_loop(cls, ui, palette, unhandled_input, **kwargs):
+    def build_loop(cls, ui, palette, **kwargs):
         """ Builds eventloop
         """
         extra_opts = {
             'screen': urwid.raw_display.Screen(),
-            'unhandled_input': unhandled_input,
             'handle_mouse': True
         }
         extra_opts['screen'].set_terminal_properties(colors=256)
