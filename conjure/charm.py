@@ -83,6 +83,16 @@ class CharmMeta:
         res = query_cs(endpoint)
         return res['Options']
 
+    def id(self):
+        """ Charm ID
+
+        Returns:
+        Charm ID
+        """
+        endpoint = path.join(self.meta_path, 'id')
+        res = query_cs(endpoint)
+        return res
+
     def metadata(self):
         """ Metadata
 

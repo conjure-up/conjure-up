@@ -24,28 +24,33 @@ This class handles the build tasks for generating a deb package
 """
 
 from .charm import CharmMeta
-from .parser import Parser, ParserException
+from .parser import Parser
+from .shell import shell
 from .template import render
 from os import makedirs, path
+from tornado.process import cpu_count
 import copy
 import tempfile
+import argparse
+import sys
+
+
+class BuilderException(Exception):
+    """ Problem in builder
+    """
+    pass
 
 
 class Builder:
-    def __init__(self, opts):
+    def __init__(self, build_conf):
         """ init
 
         Pulls in charm metadata and sets up build directory
 
         Arguments:
-        opts: Options passed in from cli
+        build_conf: Build configuration
         """
-        self.opts = opts
-        self.data = {}
-        if not opts.build_config:
-            raise ParserException("Must pass a --build-config <toml>")
-        else:
-            self.build_conf = Parser(opts.build_config)
+        self.build_conf = Parser(build_conf)
 
         self.charm = CharmMeta(self.build_conf['charm'])
         self.meta = self.charm.metadata()
@@ -63,3 +68,40 @@ class Builder:
         render(source='debian/changelog',
                target=path.join(self.build_dir, 'debian/changelog'),
                context=ctx)
+
+    def buildpackage(self):
+        """ Builds a debian package
+        """
+        series = self.charm.id()['series']
+        sh = shell("sbuild -d {}-amd64 -j{}".format(series, cpu_count()))
+        if sh.code > 0:
+            raise BuilderException("Failed to build: {}".format(sh.errors()))
+
+    def create_build_env(self, series="trusty"):
+        """ Creates a sbuild environment
+
+        Arguments:
+        series: Ubuntu series, defaults to trusty
+        """
+        sh = shell("mk-sbuild {}".format(series))
+        if sh.code > 0:
+            raise BuilderException(
+                "Could not create build environment: {}".format(sh.errors()))
+
+
+def parse_options(argv):
+    parser = argparse.ArgumentParser(description="Conjure builder",
+                                     prog="conjure-build")
+    parser.add_argument('-c', '--config', dest='build_conf',
+                        help='Path to Conjure build config')
+
+    return parser.parge_args(argv)
+
+
+def main():
+    opts = parse_options(sys.argv[1:])
+
+    if not opts.build_conf:
+        raise BuilderException(
+            "A build config is required, see conjure-build help.")
+    builder = Builder(opts.build_conf)
