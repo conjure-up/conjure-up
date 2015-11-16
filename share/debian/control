@@ -1,0 +1,23 @@
+Source: {{charm}}
+Section: admin
+Priority: extra
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Build-Depends: debhelper (>= 9),
+               dh-python,
+               pep8,
+               pyflakes,
+               python3-all,
+               python3-nose,
+               python3-setuptools,
+               python3-urwid
+Standards-Version: 3.9.6
+Homepage: https://github.com/Ubuntu-Solutions-Engineering/conjure
+X-Python3-Version: >= 3.3
+Vcs-Browser: https://github.com/Ubuntu-Solutions-Engineering/conjure
+Vcs-Git: https://github.com/Ubuntu-Solutions-Engineering/conjure.git
+
+Package: {{charm}}
+Architecture: all
+Depends: python3-urwid, ${misc:Depends}, ${python3:Depends}, ${python:Depends}
+Description: {{summary}}
+ {{description}}

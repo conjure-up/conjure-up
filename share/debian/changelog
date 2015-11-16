@@ -1,0 +1,7 @@
+{{charm}} ({{version}}) {{series}}; urgency=medium
+
+{%- for c in changelog %}
+  {{changelog}}
+{%- endfor %}
+
+ -- {{maintainer}}  {{timestamp}}
