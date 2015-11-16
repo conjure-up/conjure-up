@@ -21,7 +21,7 @@
 """ Parses editable config options
 """
 
-import toml
+from . import toml
 import os
 import copy
 
@@ -42,6 +42,9 @@ class Parser:
         self.buildcfg = buildcfg
         self.buildopts = None
         self.__parse_config()
+
+    def __getitem__(self, val):
+        return self.buildopts[val]
 
     def __parse_config(self):
         """ Parse TOML

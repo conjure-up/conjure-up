@@ -26,12 +26,15 @@ This class handles the build tasks for generating a deb package
 from .charm import CharmMeta
 from .parser import Parser
 from .template import render
-from .sbuild import SBuild
-from os import makedirs, path
+from os import path
 import copy
-import tempfile
 import argparse
 import sys
+import shutil
+import logging
+import textwrap
+
+log = logging.getLogger('builder')
 
 
 class BuilderException(Exception):
@@ -41,50 +44,80 @@ class BuilderException(Exception):
 
 
 class Builder:
-    def __init__(self, build_conf):
+    def __init__(self, opts):
         """ init
 
         Pulls in charm metadata and sets up build directory
 
         Arguments:
         build_conf: Build configuration
+        dist_dir: Output directory for finished build
         """
-        self.build_conf = Parser(build_conf)
+        self.opts = opts
+        self.build_conf = Parser(opts.build_conf)
+        self.dist_dir = opts.dist_dir
+        self.charm = CharmMeta(self.build_conf['name'])
 
-        self.charm = CharmMeta(self.build_conf['charm'])
-        self.meta = self.charm.metadata()
-        self.id = self.charm.id()
-        self.build_dir = tempfile.mkdtemp()
-        makedirs(path.join(self.build_dir, 'debian'))
-
-    def write_changelog(self):
-        """ Write debian/changelog
+    def context(self):
+        """ Generate dictionary for writing to debian directory
         """
-        ctx = copy.copy(self.meta)
-        ctx['maintainer'] = self.charm['maintainer']
-        ctx['version'] = self.charm['version']
-        ctx['series'] = 'trusty'
-        ctx['changelog'] = ['Built by Conjure']
-        render(source='debian/changelog',
-               target=path.join(self.build_dir, 'debian/changelog'),
-               context=ctx)
+        meta = self.charm.metadata
+        ctx = copy.copy(meta)
+        ctx.update(**self.charm.id)
+        ctx['Maintainer'] = self.build_conf['maintainer']
+        ctx['Version'] = self.build_conf['version']
+        ctx['Description'] = "\n".join([' {}'.format(l) for l in
+                                        textwrap.wrap(ctx['Description'], 79)])
+        ctx['Changelog'] = ['Built by Conjure']
+        return ctx
+
+    def render(self):
+        """ Writes out debian template files to dist directory
+        """
+        deb_dir = path.join(self.dist_dir, 'debian')
+        for fname in ['changelog', 'control', 'postinst']:
+            render(source="debian/{}".format(fname),
+                   target=path.join(deb_dir, fname),
+                   context=self.context())
+        # Render .install file
+        paths = {'InstallPaths': [
+            ('conjurebuild.toml',
+             'usr/share/conjure/{}'.format(self.context()['Name']))
+        ]}
+        render(source="debian/install",
+               target=path.join(deb_dir,
+                                "{}.install".format(self.context()['Name'])),
+               context=paths)
 
 
 def parse_options(argv):
     parser = argparse.ArgumentParser(description="Conjure builder",
                                      prog="conjure-build")
-    parser.add_argument('-c', '--config', dest='build_conf',
+    parser.add_argument('-i', '--initialize', action='store_true',
+                        dest='initialize',
+                        help='Initialize a conjure project')
+    parser.add_argument('-c', '--config', dest='build_conf', metavar='CONFIG',
                         help='Path to Conjure build config')
+    parser.add_argument('-o', '--output', dest='dist_dir',
+                        help='Output directory', metavar='DIR')
 
-    return parser.parge_args(argv)
+    return parser.parse_args(argv)
 
 
 def main():
     opts = parse_options(sys.argv[1:])
 
+    if opts.initialize:
+        if path.exists(path.join(opts.dist_dir)):
+            raise BuilderException(
+                "Initalize was started but destination "
+                "directory already exists.")
+        shutil.copytree('templates', opts.dist_dir)
+        print("Initialized: {}".format(opts.dist_dir))
+        sys.exit(0)
+
     if not opts.build_conf:
         raise BuilderException(
             "A build config is required, see conjure-build help.")
-    builder = Builder(opts.build_conf)
-
-    SBuild.build(builder.id['series'])
+    builder = Builder(opts)
+    builder.render()

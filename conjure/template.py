@@ -67,4 +67,4 @@ def render(source, target, context, owner='root', group='root',
         # This is a terrible default directory permission, as the file
         # or its siblings will often contain secrets.
         os.makedirs(os.path.dirname(target))
-    FS.spew(target, content.encode(encoding), owner)
+    FS.spew(target, content)
