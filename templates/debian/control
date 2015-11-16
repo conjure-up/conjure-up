@@ -9,7 +9,8 @@ Build-Depends: debhelper (>= 9),
                python3-all,
                python3-nose,
                python3-setuptools,
-               python3-urwid
+               python3-urwid,
+               python3-jinja2
 Standards-Version: 3.9.6
 Homepage: https://github.com/Ubuntu-Solutions-Engineering/conjure
 X-Python3-Version: >= 3.3

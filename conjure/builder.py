@@ -23,18 +23,43 @@
 This class handles the build tasks for generating a deb package
 """
 
+from .charm import CharmMeta
 from .parser import Parser, ParserException
+from .template import render
+from os import makedirs, path
+import copy
+import tempfile
 
 
 class Builder:
     def __init__(self, opts):
         """ init
 
+        Pulls in charm metadata and sets up build directory
+
         Arguments:
         opts: Options passed in from cli
         """
         self.opts = opts
+        self.data = {}
         if not opts.build_config:
             raise ParserException("Must pass a --build-config <toml>")
         else:
             self.build_conf = Parser(opts.build_config)
+
+        self.charm = CharmMeta(self.build_conf['charm'])
+        self.meta = self.charm.metadata()
+        self.build_dir = tempfile.mkdtemp()
+        makedirs(path.join(self.build_dir, 'debian'))
+
+    def write_changelog(self):
+        """ Write debian/changelog
+        """
+        ctx = copy.copy(self.meta)
+        ctx['maintainer'] = self.charm['maintainer']
+        ctx['version'] = self.charm['version']
+        ctx['series'] = 'trusty'
+        ctx['changelog'] = ['Built by Conjure']
+        render(source='debian/changelog',
+               target=path.join(self.build_dir, 'debian/changelog'),
+               context=ctx)

@@ -1,6 +1,12 @@
 # -*- mode:toml; -*-
 
-"charm"                  = "mysql"
+"name"                   = "mysql"
+
+# Package version
+"version"                = "0.0.1"
+
+# Maintainer
+"maintainer"             = "A. Unix <a.unix@example.com>"
 
 # Define what config options can be modified, these will use
 # the existing config's defaults
@@ -9,7 +15,7 @@
                             "dataset-size"]
 
 # Ubuntu series this package will support
-"series" = ["trusty", "xenial"]
+"series"                 = ["trusty", "xenial"]
 
 [fields]
 # Define options that can be configured during install

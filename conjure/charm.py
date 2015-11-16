@@ -73,7 +73,7 @@ class CharmMeta:
         self.series = series
         self.meta_path = path.join(self.series, self.charm, 'meta')
 
-    def charm_config(self):
+    def config(self):
         """ Charm Config
 
         Returns:
@@ -83,7 +83,7 @@ class CharmMeta:
         res = query_cs(endpoint)
         return res['Options']
 
-    def charm_metadata(self):
+    def metadata(self):
         """ Metadata
 
         Returns:
