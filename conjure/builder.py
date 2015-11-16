@@ -26,6 +26,7 @@ This class handles the build tasks for generating a deb package
 from .charm import CharmMeta
 from .parser import Parser
 from .template import render
+from .sbuild import SBuild
 from os import makedirs, path
 import copy
 import tempfile
@@ -52,6 +53,7 @@ class Builder:
 
         self.charm = CharmMeta(self.build_conf['charm'])
         self.meta = self.charm.metadata()
+        self.id = self.charm.id()
         self.build_dir = tempfile.mkdtemp()
         makedirs(path.join(self.build_dir, 'debian'))
 
@@ -84,3 +86,5 @@ def main():
         raise BuilderException(
             "A build config is required, see conjure-build help.")
     builder = Builder(opts.build_conf)
+
+    SBuild.build(builder.id['series'])

@@ -32,7 +32,7 @@ class SBuildException(Exception):
 
 class SBuild:
     @classmethod
-    def buildpackage(cls, series="trusty"):
+    def build(cls, series="trusty"):
         """ Builds a debian package
 
         Arguments:
@@ -40,14 +40,14 @@ class SBuild:
         """
         if not cls._has_schroot(series):
             raise SBuildException(
-                "Unable to find chroot for {}, run create_build_env "
-                "to setup a new environment".format(series))
+                "Unable to find chroot for {series}, run `mk-sbuild {series} "
+                "to setup a new environment".format(series=series))
         sh = shell("sbuild -d {}-amd64 -j{}".format(series, cpu_count()))
         if sh.code > 0:
             raise SBuildException("Failed to build: {}".format(sh.errors()))
 
     @classmethod
-    def create_build_env(cls, series="trusty"):
+    def create_env(cls, series="trusty"):
         """ Creates a sbuild environment
 
         Arguments:
