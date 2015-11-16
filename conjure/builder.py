@@ -25,10 +25,8 @@ This class handles the build tasks for generating a deb package
 
 from .charm import CharmMeta
 from .parser import Parser
-from .shell import shell
 from .template import render
 from os import makedirs, path
-from tornado.process import cpu_count
 import copy
 import tempfile
 import argparse
@@ -68,25 +66,6 @@ class Builder:
         render(source='debian/changelog',
                target=path.join(self.build_dir, 'debian/changelog'),
                context=ctx)
-
-    def buildpackage(self):
-        """ Builds a debian package
-        """
-        series = self.charm.id()['series']
-        sh = shell("sbuild -d {}-amd64 -j{}".format(series, cpu_count()))
-        if sh.code > 0:
-            raise BuilderException("Failed to build: {}".format(sh.errors()))
-
-    def create_build_env(self, series="trusty"):
-        """ Creates a sbuild environment
-
-        Arguments:
-        series: Ubuntu series, defaults to trusty
-        """
-        sh = shell("mk-sbuild {}".format(series))
-        if sh.code > 0:
-            raise BuilderException(
-                "Could not create build environment: {}".format(sh.errors()))
 
 
 def parse_options(argv):
