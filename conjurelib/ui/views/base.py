@@ -22,7 +22,7 @@
 """
 
 from urwid import WidgetWrap
-from conjure.ev import EventLoop
+from conjurelib.ev import EventLoop
 
 
 class ViewPolicy(WidgetWrap):

@@ -1,0 +1,34 @@
+Source: conjure
+Section: admin
+Priority: extra
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Build-Depends: debhelper (>= 9),
+               dh-python,
+               pep8,
+               pyflakes,
+               python3-all,
+               python3-jinja2,
+               python3-nose,
+               python3-requests,
+               python3-setuptools,
+               python3-tornado,
+               python3-urwid,
+               python3-urwid-ubuntu,
+               python3-yaml
+Standards-Version: 3.9.6
+Homepage: https://github.com/Ubuntu-Solutions-Engineering/conjure
+X-Python3-Version: >= 3.3
+Vcs-Browser: https://github.com/Ubuntu-Solutions-Engineering/conjure
+Vcs-Git: https://github.com/Ubuntu-Solutions-Engineering/conjure.git
+
+Package: conjure
+Architecture: all
+Depends: gawk,
+         juju-core,
+         ${misc:Depends},
+         ${python3:Depends},
+         ${shlibs:Depends}
+Description: Conjure Runner
+ This package provides Conjure an interface to configuring apt installable
+ packages from the cloud. It utilizes apt, juju, and conjures custom
+ configuration views.

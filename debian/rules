@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+
+export PYBUILD_NAME=conjure
+export PYBUILD_INSTALL_DIR=usr/share/conjure
+export PYBUILD_INSTALL_ARGS_python3=--install-lib=usr/share/conjure \
+	--install-data=usr/ \
+	--install-scripts=usr/share/conjure \
+	--root=$(CURDIR)/debian/conjure/ \
+	--no-compile -O0
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_auto_test:
+	@echo "No tests."
