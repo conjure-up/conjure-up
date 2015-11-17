@@ -29,12 +29,9 @@ setuptools.setup(
     description="Conjure for apt cloud packages",
     url="https://github.com/ubuntu-solutions-engineering/conjure",
     install_requires=[
-        "shell",
         "requests",
         "urwid==1.2.1",
-        "tornado",
-        "toml",
-        "ubuntui"
+        "tornado"
     ],
     setup_requires=[
         "flake8",
@@ -44,7 +41,8 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "conjure = conjure.cli:main",
-            "conjure-build = conjure.builder:main"
+            "conjure-build = conjure.builder:main",
+            "conjure-setup = conjure.app:main"
         ]
     }
 )

@@ -20,10 +20,28 @@
 
 from jinja2 import FileSystemLoader, Environment, exceptions
 from .utils import FS
+from tempfile import NamedTemporaryFile
 import logging
 import os
+import yaml
 
 log = logging.getLogger('template')
+
+
+def render_charm_conf(name, options):
+    """ Render a yaml config suitable for charm deployment
+
+    Arguments:
+    name: service/charm name
+    options: dictionary of config options and their values
+
+    Returns:
+    Path to charm config file
+    """
+    ctx = dict(name=options)
+    with NamedTemporaryFile(mode='w+', encoding='utf-8') as tempf:
+        tempf.write(yaml.dump(ctx, default_flow_style=False))
+        return tempf.name
 
 
 def render(source, target, context, owner='root', group='root',

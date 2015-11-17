@@ -23,7 +23,16 @@
 
 from .ev import EventLoop
 from .palette import STYLES
-from .ui.views import WelcomeView
+from .signals import Signal
+import sys
+import argparse
+import os.path as path
+
+
+class ApplicationException(Exception):
+    """ Error in application
+    """
+    pass
 
 
 class Application:
@@ -34,7 +43,35 @@ class Application:
         opts: Options passed in from cli
         """
         self.opts = opts
+        self.controllers = {
+            "Welcome": None,
+            "Config": None,
+            "Finalize": None
+        }
 
     def start(self):
         EventLoop.build_loop(WelcomeView(), STYLES)
         EventLoop.run()
+
+
+def parse_options(argv):
+    parser = argparse.ArgumentParser(description="Conjure setup",
+                                     prog="conjure-setup")
+    parser.add_argument('-c', '--config', dest='build_conf', metavar='CONFIG',
+                        help='Path to Conjure config')
+
+    return parser.parse_args(argv)
+
+
+def main():
+    opts = parse_options(sys.argv[1:])
+
+    if not opts.build_conf:
+        raise ApplicationException(
+            "A conjure config is required, see conjure-setup -h.")
+
+    if not path.exists(opts.build_conf):
+        raise ApplicationException("Unable to find {}".format(opts.build_conf))
+
+    app = Application(opts)
+    app.start()
