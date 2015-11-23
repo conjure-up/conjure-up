@@ -11,7 +11,6 @@ Build-Depends: debhelper (>= 9),
                python3-nose,
                python3-requests,
                python3-setuptools,
-               python3-tornado,
                python3-urwid,
                python3-urwid-ubuntu,
                python3-yaml
@@ -25,6 +24,8 @@ Package: conjure
 Architecture: all
 Depends: gawk,
          juju-core,
+         python3-urwid,
+         python3-yaml,
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
