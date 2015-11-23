@@ -19,7 +19,7 @@
 # THE SOFTWARE.
 
 import urwid
-from tornado.ioloop import IOLoop
+import asyncio
 
 import logging
 
@@ -49,8 +49,10 @@ class EventLoop:
         extra_opts['screen'].set_terminal_properties(colors=256)
         extra_opts['screen'].reset_default_terminal_palette()
         extra_opts.update(**kwargs)
-        evl = urwid.TornadoEventLoop(IOLoop())
-        cls.loop = urwid.MainLoop(ui, palette, event_loop=evl, **extra_opts)
+        evl = asyncio.get_event_loop()
+        cls.loop = urwid.MainLoop(ui, palette,
+                                  event_loop=urwid.AsyncioEventLoop(loop=evl),
+                                  **extra_opts)
 
     @classmethod
     def exit(cls, err=0):
