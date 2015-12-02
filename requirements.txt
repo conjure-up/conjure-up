@@ -3,3 +3,4 @@ ubuntui
 pyyaml
 jinja2
 theblues
+jujuclient
