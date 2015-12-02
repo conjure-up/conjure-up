@@ -1,5 +1,3 @@
-requests
-urwid==1.2.1
-tornado
+urwid
 ubuntui
 yaml
