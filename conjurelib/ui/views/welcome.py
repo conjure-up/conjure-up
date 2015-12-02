@@ -34,17 +34,25 @@ class WelcomeView(WidgetWrap):
     def _generate_config_options(self):
         """ Generates the charm config map and associating the proper input
         widget for the option type
+
+        The config items are a dictionary of:
+        {'config': {'Type': boolean,
+                    'Default': False,
+                    'Description': "config desc"}}
         """
         for k, v in self.charm_config.items():
             description = Text(k[v]['Description'])
             itype = k[v]['Type']
             if itype == 'string':
-                default = StringEditor("")
-                default.value = k[v]['Default']
+                default = StringEditor(default=k[v]['Default'])
             elif itype == 'int':
-                default = IntegerEditor("", default=k[v]['Default'])
+                default = IntegerEditor(default=k[v]['Default'])
             else:
                 default = YesNo()
+                # Check the boolean type for setting initial state of
+                # radio button
+                if k[v]['Default']:
+                    default.set_default('Yes', True)
 
             self.charm_config_ui[k] = {
                 'input': default,
