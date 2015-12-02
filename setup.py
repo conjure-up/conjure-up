@@ -28,15 +28,6 @@ setuptools.setup(
     author_email="adam.stokes@ubuntu.com",
     description="Conjure for apt cloud packages",
     url="https://github.com/ubuntu-solutions-engineering/conjure",
-    install_requires=[
-        "requests",
-        "urwid==1.2.1",
-        "tornado"
-    ],
-    setup_requires=[
-        "flake8",
-        "pep8"
-    ],
     packages=setuptools.find_packages(),
     entry_points={
         "console_scripts": [
