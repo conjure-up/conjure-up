@@ -19,11 +19,24 @@
 # THE SOFTWARE.
 
 from conjurelib.ui.views import WelcomeView
+from conjurelib.juju import Juju
 
 
 class WelcomeController:
     def __init__(self, common):
         self.common = common
+        self.view = WelcomeView(self.common)
+
+    def finish(self):
+        if not Juju.available():
+            print("Taking you to juju controller")
+        else:
+            print("Taking you to finalize controller")
 
     def render(self):
-        self.common['ui'].set_body(WelcomeView())
+        charm_metadata = self.common['charm']['charm-metadata']
+        self.common['ui'].set_header(
+            title="Install {}".format(charm_metadata['Name']),
+            excerpt=charm_metadata['Summary']
+        )
+        self.common['ui'].set_body(self.view)

@@ -19,9 +19,39 @@
 # THE SOFTWARE.
 
 from urwid import WidgetWrap, Text, Pile
+from ubuntui.widgets.input import (StringEditor,
+                                   IntegerEditor,
+                                   YesNo)
 
 
 class WelcomeView(WidgetWrap):
-    def __init__(self):
-        text = [Text("Welcome to APP-NAME")]
-        super().__init__(Pile(text))
+    def __init__(self, common):
+        self.common = common
+        self.charm_config = self.common['charm']['charm-config']['Options']
+        self.charm_config_ui = {}
+        super().__init__(Pile(self.build_config_items()))
+
+    def _generate_config_options(self):
+        """ Generates the charm config map and associating the proper input
+        widget for the option type
+        """
+        for k, v in self.charm_config.items():
+            description = Text(k[v]['Description'])
+            itype = k[v]['Type']
+            if itype == 'string':
+                default = StringEditor("")
+                default.value = k[v]['Default']
+            elif itype == 'int':
+                default = IntegerEditor("", default=k[v]['Default'])
+            else:
+                default = YesNo()
+
+            self.charm_config_ui[k] = {
+                'input': default,
+                'description': description
+            }
+
+    def build_config_items(self):
+        """ Builds the form for modifying the charms config options
+        """
+        return [Text("Nup")]

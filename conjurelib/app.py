@@ -23,8 +23,10 @@
 
 from .ev import EventLoop
 from ubuntui.palette import STYLES
-from .controllers import WelcomeController
+from .controllers import (WelcomeController)
 from .ui import ConjureUI
+from .parser import Parser
+from .charm import query_cs
 import sys
 import argparse
 import os.path as path
@@ -45,12 +47,15 @@ class Application:
         """
         self.common = {
             'opts': opts,
-            'ui': ConjureUI()
+            'ui': ConjureUI(),
+            'config': Parser(opts.build_conf),
         }
+
+        # Load charm metadata
+        self.common['charm'] = query_cs(self.common['config']['name'])
 
         self.controllers = {
             'Welcome': WelcomeController(self.common),
-            'Config': None,
             'Juju': None,
             'Maas': None,
             'Finalize': None
@@ -60,11 +65,13 @@ class Application:
         if key in ['q', 'Q']:
             EventLoop.exit(0)
 
-    def welcome(self, *args, **kwargs):
+    def _start(self, *args, **kwargs):
+        """ Initially load the welcome screen
+        """
         self.controllers['Welcome'].render()
 
     def start(self):
-        EventLoop.set_alarm_in(0.05, self.welcome)
+        EventLoop.set_alarm_in(0.05, self._start)
         EventLoop.build_loop(self.common['ui'], STYLES,
                              unhandled_input=self.unhandled_input)
         EventLoop.run()

@@ -58,6 +58,7 @@ class Builder:
         self.dist_dir = opts.dist_dir
         self.charm = query_cs(self.build_conf['name'])
 
+    @property
     def context(self):
         """ Generate dictionary for writing to debian directory
         """
@@ -78,15 +79,15 @@ class Builder:
         for fname in ['changelog', 'control', 'postinst']:
             render(source="debian/{}".format(fname),
                    target=path.join(deb_dir, fname),
-                   context=self.context())
+                   context=self.context)
         # Render .install file
         paths = {'InstallPaths': [
             ('conjurebuild.toml',
-             'usr/share/conjure/{}'.format(self.context()['Name']))
+             'usr/share/conjure/{}'.format(self.context['Name']))
         ]}
         render(source="debian/install",
                target=path.join(deb_dir,
-                                "{}.install".format(self.context()['Name'])),
+                                "{}.install".format(self.context['Name'])),
                context=paths)
 
 

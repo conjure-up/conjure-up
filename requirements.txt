@@ -2,3 +2,4 @@ urwid
 ubuntui
 pyyaml
 jinja2
+theblues

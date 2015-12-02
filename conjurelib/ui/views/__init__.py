@@ -19,4 +19,3 @@
 # THE SOFTWARE.
 
 from .welcome import WelcomeView  # noqa
-from .config import ConfigView  # noqa

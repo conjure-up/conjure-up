@@ -21,7 +21,7 @@
 """ Juju helpers
 """
 import shlex
-from subprocess import check_output
+from subprocess import check_output, call
 
 
 class Juju:
@@ -30,6 +30,15 @@ class Juju:
         """ Performs juju bootstrap
         """
         check_output(['juju', 'bootstrap', '--debug'])
+
+    @classmethod
+    def available(cls):
+        """ Checks if juju is available
+
+        Returns:
+        True/False if juju status was successful and a environment is found
+        """
+        return 0 == call(['juju', 'status'])
 
     @classmethod
     def deploy(cls, charm, charm_config):

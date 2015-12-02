@@ -86,9 +86,3 @@ class Parser:
             raise ParserException("A [fields] stanza was found but no "
                                   "configurable keys defined. Remove this "
                                   "heading from the config")
-
-        allowed_set = set(opts['allowed_fields'])
-        additional_set = set(opts['fields'].keys())
-        if not additional_set.issubset(allowed_set):
-            raise ParserException("Options specified that are not "
-                                  "defined in the allowed_fields list")
