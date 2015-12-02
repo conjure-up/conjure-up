@@ -18,16 +18,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-""" View policy base
-"""
-
-from urwid import WidgetWrap
-from conjurelib.ev import EventLoop
-
-
-class ViewPolicy(WidgetWrap):
-    def keypress(self, size, key):
-        if key in ['ctrl q']:
-            EventLoop.exit()
-
-        return super().keypress(size, key)
+from .welcome import WelcomeController  # noqa

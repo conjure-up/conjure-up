@@ -18,5 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .welcome import WelcomeView  # noqa
-from .config import ConfigView  # noqa
+from conjurelib.ui.views import WelcomeView
+
+
+class WelcomeController:
+    def __init__(self, common):
+        self.common = common
+
+    def render(self):
+        self.common['ui'].set_body(WelcomeView())

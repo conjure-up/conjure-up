@@ -21,7 +21,7 @@
 """ sbuild helpers
 """
 from .shell import shell
-from tornado.process import cpu_count
+from multiprocessing import cpu_count
 
 
 class SBuildException(Exception):

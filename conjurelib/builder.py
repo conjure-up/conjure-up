@@ -23,7 +23,7 @@
 This class handles the build tasks for generating a deb package
 """
 
-from .charm import CharmMeta
+from .charm import query_cs
 from .parser import Parser
 from .template import render
 from os import path
@@ -56,19 +56,19 @@ class Builder:
         self.opts = opts
         self.build_conf = Parser(opts.build_conf)
         self.dist_dir = opts.dist_dir
-        self.charm = CharmMeta(self.build_conf['name'])
+        self.charm = query_cs(self.build_conf['name'])
 
     def context(self):
         """ Generate dictionary for writing to debian directory
         """
-        meta = self.charm.metadata
-        ctx = copy.copy(meta)
-        ctx.update(**self.charm.id)
-        ctx['Maintainer'] = self.build_conf['maintainer']
-        ctx['Version'] = self.build_conf['version']
-        ctx['Description'] = "\n".join([' {}'.format(l) for l in
-                                        textwrap.wrap(ctx['Description'], 79)])
-        ctx['Changelog'] = ['Built by Conjure']
+        ctx = copy.copy(self.charm)
+        ctx['Packaging'] = {
+            'Maintainer': self.build_conf['maintainer'],
+            'Version': self.build_conf['version'],
+            'Description': "\n".join([' {}'.format(l) for l in
+                                     textwrap.wrap(ctx['Description'], 79)]),
+            'Changelog': ['Built by Conjure']
+        }
         return ctx
 
     def render(self):

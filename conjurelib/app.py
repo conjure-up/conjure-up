@@ -23,7 +23,8 @@
 
 from .ev import EventLoop
 from .palette import STYLES
-from .signals import Signal
+from .controllers import WelcomeController
+from .ui import ConjureUI
 import sys
 import argparse
 import os.path as path
@@ -42,15 +43,30 @@ class Application:
         Arguments:
         opts: Options passed in from cli
         """
-        self.opts = opts
-        self.controllers = {
-            "Welcome": None,
-            "Config": None,
-            "Finalize": None
+        self.common = {
+            'opts': opts,
+            'ui': ConjureUI()
         }
 
+        self.controllers = {
+            'Welcome': WelcomeController(self.common),
+            'Config': None,
+            'Juju': None,
+            'Maas': None,
+            'Finalize': None
+        }
+
+    def unhandled_input(self, key):
+        if key in ['q', 'Q']:
+            EventLoop.exit(0)
+
+    def welcome(self, *args, **kwargs):
+        self.controllers['Welcome'].render()
+
     def start(self):
-        EventLoop.build_loop(WelcomeView(), STYLES)
+        EventLoop.set_alarm_in(0.05, self.welcome)
+        EventLoop.build_loop(self.common['ui'], STYLES,
+                             unhandled_input=self.unhandled_input)
         EventLoop.run()
 
 

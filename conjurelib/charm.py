@@ -30,78 +30,24 @@ https://api.jujucharms.com/charmstore/v4/hadoop/meta/bundles-containing
 
 
 """
-import os.path as path
-import requests
+from theblues.charmstore import CharmStore
+from theblues.errors import EntityNotFound
 import logging
 
 log = logging.getLogger('charm')
 
 
-class CharmNotFoundError(Exception):
-    """ Exception in querying charmstore
-    """
-    pass
-
-
-def query_cs(endpoint):
-    """ This helper routine will query the charm store to pull latest revisions
-    and charmstore url for the api.
+def query_cs(charm):
+    """ This helper routine will query the charm store to pull latest metadata
 
     Arguments:
-    endpoint: api endpoint, eg ~adam-stokes/ghost/meta/id
+    charm: Name of charm to query
+
+    Returns:
+    Dictionary of metadata
     """
-    charm_store_url = 'https://api.jujucharms.com/v4/'
-    url = path.join(charm_store_url, endpoint)
-    r = requests.get(url)
-    if r.status_code != 200:
-        log.error("could not find charm store URL for charm '{}'".format(url))
-        rj = r.json()
-        raise CharmNotFoundError("{type} {charm_id}".format(**rj))
-
-    return r.json()
-
-
-class CharmMeta:
-    def __init__(self, charm, series="trusty"):
-        """ init
-
-        Arguments:
-        charm: Name of charm
-        series: Ubuntu series, defaults: trusty
-        """
-        self.charm = charm
-        self.series = series
-        self.meta_path = path.join(self.series, self.charm, 'meta')
-
-    @property
-    def config(self):
-        """ Charm Config
-
-        Returns:
-        Charm configuration specification as stored in its config.yaml
-        """
-        endpoint = path.join(self.meta_path, 'charm-config')
-        res = query_cs(endpoint)
-        return res['Options']
-
-    @property
-    def id(self):
-        """ Charm ID
-
-        Returns:
-        Charm ID
-        """
-        endpoint = path.join(self.meta_path, 'id')
-        res = query_cs(endpoint)
-        return res
-
-    @property
-    def metadata(self):
-        """ Metadata
-
-        Returns:
-        Metadata about the charm, summary, description, etc.
-        """
-        endpoint = path.join(self.meta_path, 'charm-metadata')
-        res = query_cs(endpoint)
-        return res
+    cs = CharmStore('https://api.jujucharms.com/v4')
+    try:
+        return cs.charm(charm)
+    except EntityNotFound as e:
+        raise Exception("Unable to find charm: {}".format(e))

@@ -21,53 +21,32 @@
 """ Juju helpers
 """
 import shlex
-from .async import check_output
+from subprocess import check_output
 
 
 class Juju:
     @classmethod
-    def bootstrap(cls, callback):
+    def bootstrap(cls):
         """ Performs juju bootstrap
-
-        Arguments:
-        callback: Callback handler
         """
-        def update(data, returncode):
-            if returncode != 0:
-                return
-            callback("conjure: {}".format(data))
-
-        check_output(['juju', 'bootstrap', '--debug'], update)
+        check_output(['juju', 'bootstrap', '--debug'])
 
     @classmethod
-    def deploy(cls, charm, charm_config, callback):
+    def deploy(cls, charm, charm_config):
         """ Juju deploy service
 
         Arguments:
         charm: Name of charm(service) to deploy
         charm_config: YAML formatted service config
-        callback: Callback handler
         """
-        def update(data, returncode):
-            if returncode != 0:
-                return
-            callback("conjure: {}".format(data))
 
-        check_output(['juju', 'deploy', '--config', charm_config, charm],
-                     update)
+        check_output(['juju', 'deploy', '--config', charm_config, charm])
 
     @classmethod
-    def debug_log(cls, include="*", callback=None):
+    def debug_log(cls, include="*"):
         """ Juju debug-log
 
         Arguments:
         include: Filter to query log output
-        callback: Callback handler
         """
-        def update(data, returncode):
-            if returncode != 0:
-                return
-            callback("conjure: {}".format(data))
-
-        check_output(['juju', 'debug-log', shlex.quote(include)],
-                     update)
+        check_output(['juju', 'debug-log', shlex.quote(include)])

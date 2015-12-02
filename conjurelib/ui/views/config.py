@@ -24,14 +24,9 @@ Allows user to make changes to defined configuration options for the service
 prior to deploy.
 """
 
-from . import ViewPolicy
+from urwid import WidgetWrap
 
 
-class ConfigView(ViewPolicy):
+class ConfigView(WidgetWrap):
     def __init__(self):
         super().__init__()
-
-    def render(self):
-        """ Renders view
-        """
-        pass

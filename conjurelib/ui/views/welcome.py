@@ -18,14 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from . import ViewPolicy
+from urwid import WidgetWrap, Text, Pile
 
 
-class WelcomeView(ViewPolicy):
+class WelcomeView(WidgetWrap):
     def __init__(self):
-        super().__init__()
-
-    def render(self):
-        """ Renders view
-        """
-        pass
+        text = [Text("Welcome to APP-NAME")]
+        super().__init__(Pile(text))
