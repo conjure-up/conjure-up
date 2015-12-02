@@ -23,9 +23,11 @@
 This class handles the build tasks for generating a deb package
 """
 
+from . import toml
 from .charm import query_cs
 from .parser import Parser
 from .template import render
+from .utils import FS
 from os import path
 import copy
 import argparse
@@ -57,6 +59,7 @@ class Builder:
         self.build_conf = Parser(opts.build_conf)
         self.dist_dir = opts.dist_dir
         self.charm = query_cs(self.build_conf['name'])
+        self._update_build_conf()
 
     @property
     def context(self):
@@ -71,6 +74,17 @@ class Builder:
             'Changelog': ['Built by Conjure']
         }
         return ctx
+
+    def _update_build_conf(self):
+        """ Updates conjure build config
+        """
+        charm_config = self.charm['Meta']['charm-config']['Options']
+        charm_meta = self.charm['Meta']['charm-metadata']
+        self.build_conf['fields'] = charm_config
+        self.build_conf['name'] = charm_meta['Name']
+        self.build_conf['summary'] = charm_meta['Summary']
+        self.build_conf['description'] = charm_meta['Description']
+        FS.spew(self.opts.build_conf, self.build_conf)
 
     def render(self):
         """ Writes out debian template files to dist directory

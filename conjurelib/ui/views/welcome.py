@@ -27,7 +27,8 @@ from ubuntui.widgets.input import (StringEditor,
 class WelcomeView(WidgetWrap):
     def __init__(self, common):
         self.common = common
-        self.charm_config = self.common['charm']['charm-config']['Options']
+        _charm_config = self.common['charm']['Meta']['charm-config']
+        self.charm_config = _charm_config['Options']
         self.charm_config_ui = {}
         super().__init__(Pile(self.build_config_items()))
 

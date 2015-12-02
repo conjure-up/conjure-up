@@ -34,7 +34,7 @@ class WelcomeController:
             print("Taking you to finalize controller")
 
     def render(self):
-        charm_metadata = self.common['charm']['charm-metadata']
+        charm_metadata = self.common['charm']['Meta']['charm-metadata']
         self.common['ui'].set_header(
             title="Install {}".format(charm_metadata['Name']),
             excerpt=charm_metadata['Summary']
