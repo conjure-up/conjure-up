@@ -18,10 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from urwid import WidgetWrap, Text, Pile
+from urwid import WidgetWrap, Text, Pile, Columns
 from ubuntui.widgets.input import (StringEditor,
                                    IntegerEditor,
                                    YesNo)
+from ubuntui.widgets.buttons import (cancel_btn, done_btn)
+from ubuntui.widgets.meta import MetaScroll
+from ubuntui.utils import Color, Padding
 
 
 class WelcomeView(WidgetWrap):
@@ -29,7 +32,12 @@ class WelcomeView(WidgetWrap):
         self.common = common
         self.charm_config = self.common['config']['fields']
         self.charm_config_ui = {}
-        super().__init__(Pile(self.build_config_items()))
+        _pile = [
+            Padding.center_79(self.build_config_items()),
+            Padding.line_break(""),
+            Padding.center_20(self.buttons())
+        ]
+        super().__init__(Pile(_pile))
 
     def _generate_config_options(self):
         """ Generates the charm config map and associating the proper input
@@ -59,7 +67,39 @@ class WelcomeView(WidgetWrap):
                 'description': description
             }
 
+    def buttons(self):
+        cancel = cancel_btn(on_press=self.cancel)
+        done = done_btn(on_press=self.done)
+
+        buttons = [
+            Color.button(done, focus_map='button focus'),
+            Color.button(cancel, focus_map='button focus')
+        ]
+        return Pile(buttons)
+
     def build_config_items(self):
         """ Builds the form for modifying the charms config options
         """
-        return [Text("Nup")]
+        self._generate_config_options()
+        items = [MetaScroll()]
+        cols = []
+        for k, v in self.charm_config_ui.items():
+            cols.append(
+                Columns(
+                    [
+                        ("weight", 0.2, Text(k, align="right"))
+                        ("weight", 0.3, Pile([
+                            v['input'],
+                            v['description']
+                        ]))
+                    ]
+                )
+            )
+        items.expand(cols)
+        return items
+
+    def cancel(self, button):
+        pass
+
+    def done(self, result):
+        pass
