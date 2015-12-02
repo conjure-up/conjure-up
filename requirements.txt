@@ -1,3 +1,4 @@
 urwid
 ubuntui
 pyyaml
+jinja2

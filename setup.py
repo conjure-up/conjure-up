@@ -31,7 +31,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={
         "console_scripts": [
-            "conjure = conjurelib.cli:main",
+            # "conjure = conjurelib.cli:main",
             "conjure-build = conjurelib.builder:main",
             "conjure-setup = conjurelib.app:main"
         ]

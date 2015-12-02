@@ -18,4 +18,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ubuntui import Frame as ConjureUI  # noqa
+from ubuntui.frame import Frame as ConjureUI  # noqa

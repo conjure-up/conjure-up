@@ -22,7 +22,7 @@
 """
 
 from .ev import EventLoop
-from .palette import STYLES
+from ubuntui.palette import STYLES
 from .controllers import WelcomeController
 from .ui import ConjureUI
 import sys
