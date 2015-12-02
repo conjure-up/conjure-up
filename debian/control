@@ -14,10 +14,11 @@ Build-Depends: debhelper (>= 9),
                python3-theblues,
                python3-urwid,
                python3-urwid-ubuntu,
-               python3-yaml
+               python3-yaml,
+               python3-jujuclient
 Standards-Version: 3.9.6
 Homepage: https://github.com/Ubuntu-Solutions-Engineering/conjure
-X-Python3-Version: >= 3.3
+X-Python3-Version: >= 3.4
 Vcs-Browser: https://github.com/Ubuntu-Solutions-Engineering/conjure
 Vcs-Git: https://github.com/Ubuntu-Solutions-Engineering/conjure.git
 
@@ -31,6 +32,7 @@ Depends: gawk,
          python3-urwid,
          python3-urwid-ubuntu,
          python3-yaml,
+         python3-jujuclient,
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
