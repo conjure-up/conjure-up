@@ -26,7 +26,6 @@ from ubuntui.palette import STYLES
 from .controllers import (WelcomeController)
 from .ui import ConjureUI
 from .parser import Parser
-from .charm import query_cs
 import sys
 import argparse
 import os.path as path
@@ -50,9 +49,6 @@ class Application:
             'ui': ConjureUI(),
             'config': Parser(opts.build_conf),
         }
-
-        # Load charm metadata
-        self.common['charm'] = query_cs(self.common['config']['name'])
 
         self.controllers = {
             'Welcome': WelcomeController(self.common),

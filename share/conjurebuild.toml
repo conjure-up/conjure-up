@@ -7,21 +7,3 @@
 
 # Maintainer
 "maintainer"             = "A. Unix <a.unix@example.com>"
-
-# Ubuntu series this package will support
-"series"                 = ["trusty", "xenial"]
-
-[fields]
-# Override any default options that can be configured during install
-
-# Example, mysql, has options such as bind-address and
-# backup_retention_count, make these editable and include
-# dataset-size as is and make editable.
-
-# User can change from default 0.0.0.0, we place our own
-# recommendation here as well
-"bind-address"           = "172.16.0.4"
-
-# Change the backup retention from default of 7 to our
-# recommended 5, also configurable at install.
-"backup_retention_count" = 5

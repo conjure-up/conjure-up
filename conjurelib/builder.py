@@ -29,7 +29,7 @@ from .parser import Parser
 from .template import render
 from .utils import FS
 from os import path
-import copy
+import time
 import argparse
 import sys
 import shutil
@@ -61,19 +61,16 @@ class Builder:
         self.charm = query_cs(self.build_conf['name'])
         self._update_build_conf()
 
-    @property
-    def context(self):
-        """ Generate dictionary for writing to debian directory
+    def _wrap_description(self, description):
+        """ Indents description
         """
-        ctx = copy.copy(self.charm)
-        ctx['Packaging'] = {
-            'Maintainer': self.build_conf['maintainer'],
-            'Version': self.build_conf['version'],
-            'Description': "\n".join([' {}'.format(l) for l in
-                                     textwrap.wrap(ctx['Description'], 79)]),
-            'Changelog': ['Built by Conjure']
-        }
-        return ctx
+        return "\n".join([' {}'.format(l) for l in
+                         textwrap.wrap(description, 79)])
+
+    def timestamp(self):
+        """ Formats current datetime
+        """
+        return time.strftime('%a, %d %b %Y %X %z')
 
     def _update_build_conf(self):
         """ Updates conjure build config
@@ -83,8 +80,12 @@ class Builder:
         self.build_conf['fields'] = charm_config
         self.build_conf['name'] = charm_meta['Name']
         self.build_conf['summary'] = charm_meta['Summary']
-        self.build_conf['description'] = charm_meta['Description']
-        FS.spew(self.opts.build_conf, self.build_conf)
+        self.build_conf['description'] = self._wrap_description(
+            charm_meta['Description'])
+        self.build_conf['changelog'] = ['Automatic conjure build']
+        self.build_conf['series'] = self.opts.series
+        self.build_conf['timestamp'] = self.timestamp()
+        FS.spew(self.opts.build_conf, toml.dumps(self.build_conf.to_dict))
 
     def render(self):
         """ Writes out debian template files to dist directory
@@ -93,15 +94,15 @@ class Builder:
         for fname in ['changelog', 'control', 'postinst']:
             render(source="debian/{}".format(fname),
                    target=path.join(deb_dir, fname),
-                   context=self.context)
+                   context=self.build_conf.to_dict)
         # Render .install file
         paths = {'InstallPaths': [
             ('conjurebuild.toml',
-             'usr/share/conjure/{}'.format(self.context['Name']))
+             'usr/share/conjure/{}'.format(self.build_conf['name']))
         ]}
         render(source="debian/install",
                target=path.join(deb_dir,
-                                "{}.install".format(self.context['Name'])),
+                                "{}.install".format(self.build_conf['name'])),
                context=paths)
 
 
@@ -115,6 +116,8 @@ def parse_options(argv):
                         help='Path to Conjure build config')
     parser.add_argument('-o', '--output', dest='dist_dir',
                         help='Output directory', metavar='DIR')
+    parser.add_argument('-s', '--series', dest='series',
+                        default='trusty', help='Ubuntu Series to build for.')
 
     return parser.parse_args(argv)
 

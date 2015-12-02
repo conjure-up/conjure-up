@@ -46,6 +46,13 @@ class Parser:
     def __getitem__(self, val):
         return self.buildopts[val]
 
+    def __setitem__(self, key, val):
+        self.buildopts[key] = val
+
+    @property
+    def to_dict(self):
+        return self.buildopts
+
     def __parse_config(self):
         """ Parse TOML
 
