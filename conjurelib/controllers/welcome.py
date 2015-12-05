@@ -25,7 +25,7 @@ from conjurelib.juju import Juju
 class WelcomeController:
     def __init__(self, common):
         self.common = common
-        self.view = WelcomeView(self.common)
+        self.view = WelcomeView(self.common, self.finish)
 
     def finish(self):
         if not Juju.available():

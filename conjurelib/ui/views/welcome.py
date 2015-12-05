@@ -25,11 +25,13 @@ from ubuntui.widgets.input import (StringEditor,
 from ubuntui.widgets.buttons import (cancel_btn, done_btn)
 from ubuntui.widgets.meta import MetaScroll
 from ubuntui.utils import Color, Padding
+from conjurelib.ev import EventLoop
 
 
 class WelcomeView(WidgetWrap):
-    def __init__(self, common):
+    def __init__(self, common, cb):
         self.common = common
+        self.cb = cb
         self.charm_config = self.common['config']['fields']
         self.charm_config_ui = {}
         _pile = [
@@ -99,7 +101,7 @@ class WelcomeView(WidgetWrap):
         return items
 
     def cancel(self, button):
-        pass
+        EventLoop.exit(0)
 
     def done(self, result):
-        pass
+        self.cb()
