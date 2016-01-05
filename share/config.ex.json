@@ -1,6 +1,7 @@
 {
   "name": "bigdata",
   "version": "0.0.1",
+  "summary": "Juju solutions for big data",
   "maintainer": "Adam Stokes <adam.stokes@ubuntu.com>",
   "bundles": [
     "hdp-core-batch-processing",
