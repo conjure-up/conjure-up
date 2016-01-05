@@ -3,9 +3,8 @@
 
 # what it is
 
-This is the build application for generating debian packages utilizing metadata
-gained through the charmstore api and making use of a terminal ui giving a user
-more control over their charm installation.
+This is the runtime application for processing juju bundles/charms for easier
+installation via `apt-get install` and a install wizard.
 
 # license
 
