@@ -17,14 +17,3 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-
-""" Charm utilities
-
-Simple wrapper around theblues charmstore client
-
-Api for the charmstore:
-https://github.com/juju/charmstore/blob/v4/docs/API.md
-"""
-from theblues.charmstore import CharmStore
-
-cs = CharmStore('https://api.jujucharms.com/v4')

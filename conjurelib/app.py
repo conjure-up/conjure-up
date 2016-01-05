@@ -21,11 +21,11 @@
 """ Application entrypoint
 """
 
-from .ev import EventLoop
+from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 from .controllers import (WelcomeController)
 from .ui import ConjureUI
-from .parser import Parser
+import json
 import sys
 import argparse
 import os.path as path
@@ -44,10 +44,13 @@ class Application:
         Arguments:
         opts: Options passed in from cli
         """
+        with open(opts.build_conf) as json_f:
+            config = json.load(json_f)
+
         self.common = {
             'opts': opts,
             'ui': ConjureUI(),
-            'config': Parser(opts.build_conf),
+            'config': config,
         }
 
         self.controllers = {
@@ -67,9 +70,9 @@ class Application:
         self.controllers['Welcome'].render()
 
     def start(self):
-        EventLoop.set_alarm_in(0.05, self._start)
         EventLoop.build_loop(self.common['ui'], STYLES,
                              unhandled_input=self.unhandled_input)
+        EventLoop.set_alarm_in(0.05, self._start)
         EventLoop.run()
 
 

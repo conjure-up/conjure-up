@@ -19,20 +19,17 @@
 # THE SOFTWARE.
 
 from urwid import WidgetWrap, Text, Pile, Columns
-from ubuntui.widgets.input import (StringEditor,
-                                   IntegerEditor,
-                                   YesNo)
 from ubuntui.widgets.buttons import (cancel_btn, done_btn)
 from ubuntui.widgets.meta import MetaScroll
 from ubuntui.utils import Color, Padding
-from conjurelib.ev import EventLoop
+from ubuntui.ev import EventLoop
 
 
 class WelcomeView(WidgetWrap):
     def __init__(self, common, cb):
         self.common = common
         self.cb = cb
-        self.charm_config = self.common['config']['fields']
+        self.charm_config = self.common['config']
         self.charm_config_ui = {}
         _pile = [
             Padding.center_79(self.build_config_items()),
@@ -40,34 +37,6 @@ class WelcomeView(WidgetWrap):
             Padding.center_20(self.buttons())
         ]
         super().__init__(Pile(_pile))
-
-    def _generate_config_options(self):
-        """ Generates the charm config map and associating the proper input
-        widget for the option type
-
-        The config items are a dictionary of:
-        {'config': {'Type': boolean,
-                    'Default': False,
-                    'Description': "config desc"}}
-        """
-        for k, v in self.charm_config.items():
-            description = Text(k[v]['Description'])
-            itype = k[v]['Type']
-            if itype == 'string':
-                default = StringEditor(default=k[v]['Default'])
-            elif itype == 'int':
-                default = IntegerEditor(default=k[v]['Default'])
-            else:
-                default = YesNo()
-                # Check the boolean type for setting initial state of
-                # radio button
-                if k[v]['Default']:
-                    default.set_default('Yes', True)
-
-            self.charm_config_ui[k] = {
-                'input': default,
-                'description': description
-            }
 
     def buttons(self):
         cancel = cancel_btn(on_press=self.cancel)
@@ -78,6 +47,11 @@ class WelcomeView(WidgetWrap):
             Color.button(cancel, focus_map='button focus')
         ]
         return Pile(buttons)
+
+    def build_menuable_items(self):
+        """ Builds a list of bundles available to install
+        """
+        pass
 
     def build_config_items(self):
         """ Builds the form for modifying the charms config options
@@ -104,4 +78,4 @@ class WelcomeView(WidgetWrap):
         EventLoop.exit(0)
 
     def done(self, result):
-        self.cb()
+        self.cb(self.charm_config['name'])

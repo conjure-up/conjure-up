@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 from conjurelib.ui.views import WelcomeView
+from conjurelib.models.charm import CharmModel
 from conjurelib.juju import Juju
 
 
@@ -27,7 +28,14 @@ class WelcomeController:
         self.common = common
         self.view = WelcomeView(self.common, self.finish)
 
-    def finish(self):
+    def finish(self, name, config):
+        """ Finalizes welcome controller
+
+        Arguments:
+        name: name of charm/bundle to use
+        config: config options to pass to juju deploy
+        """
+        model = CharmModel(name, config)
         if not Juju.available():
             print("Taking you to juju controller")
         else:

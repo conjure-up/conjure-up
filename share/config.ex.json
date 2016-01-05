@@ -1,0 +1,16 @@
+{
+  "name": "bigdata",
+  "version": "0.0.1",
+  "maintainer": "Adam Stokes <adam.stokes@ubuntu.com>",
+  "bundles": [
+    "hdp-core-batch-processing",
+    "high-performance-batch-processing",
+    "data-analytics-with-sql-like",
+    "data-analytics-with-pig-latin",
+    "real-time-analytics-with-storm"
+  ],
+  "recommendedCharms": [
+    "kibana",
+    "elasticsearch"
+  ]
+}

@@ -1,9 +1,0 @@
-# -*- mode:toml; -*-
-
-"name"                   = "mysql"
-
-# Package version
-"version"                = "0.0.1"
-
-# Maintainer
-"maintainer"             = "A. Unix <a.unix@example.com>"
