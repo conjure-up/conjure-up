@@ -52,13 +52,12 @@ class WelcomeView(WidgetWrap):
         """
         bundles = self.common['config']['bundles']
         cols = []
-        for idx, bundle in enumerate(bundles, 1):
+        for bundle in bundles:
             cols.append(
                 Columns(
                     [
                         ("weight", 0.2, Color.body(
-                            menu_btn(label="{}. {}".format(idx,
-                                                           bundle['name']),
+                            menu_btn(label=bundle['name'],
                                      on_press=self.done),
                             focus_map="button_primary focus")),
                         ("weight", 0.3, Text(bundle['summary'],
@@ -75,4 +74,4 @@ class WelcomeView(WidgetWrap):
         EventLoop.exit(0)
 
     def done(self, result):
-        self.cb("Finished.")
+        self.cb(result.label)

@@ -18,6 +18,32 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .welcome import WelcomeView  # noqa
-from .provider import ProviderView  # noqa
-from .maasprovider import MaasProviderView  # noqa
+import yaml
+
+
+class ProviderModel:
+
+    name = None
+    type = None
+    env = {}
+    config = {}
+
+    # List of available providers
+    available = [
+        ('Local', 'Deploy to the current machine using containers.'),
+        ('MAAS', 'Deploy to a MAAS environment.'),
+        ('OpenStack', 'Deploy to an OpenStack environment.')
+    ]
+
+    @classmethod
+    def to_yaml(cls):
+        """ Outputs environment credentials to YAML
+        """
+        cls.env['default'] = cls.name
+        cls.env['environments'] = {
+            cls.name: {
+                'type': cls.type
+            }
+        }
+        cls.env['environments'][cls.name].update(cls.config)
+        return yaml.safe_dump(cls.env, default_flow_style=False)

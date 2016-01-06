@@ -20,6 +20,7 @@
 
 from conjurelib.ui.views import WelcomeView
 from conjurelib.models.charm import CharmModel
+from .provider import ProviderController
 from conjurelib.juju import Juju
 
 
@@ -28,19 +29,24 @@ class WelcomeController:
         self.common = common
         self.view = WelcomeView(self.common, self.finish)
 
-    def finish(self, msg):
+    def finish(self, name):
         """ Finalizes welcome controller
 
         Arguments:
         name: name of charm/bundle to use
-        config: config options to pass to juju deploy
         """
-        # model = CharmModel(name, config)
-        # if not Juju.available():
-        #     print("Taking you to juju controller")
-        # else:
-        #     print("Taking you to finalize controller")
-        print(msg)
+        deploy_key = next((n for n in
+                           self.common['config']['bundles']
+                           if n["name"] == name), None)
+
+        if deploy_key is None:
+            raise Exception(
+                "Unable to determine bundle to deploy: {}".format(name))
+
+        if Juju.available():
+            print("Deploying to existing juju")
+        else:
+            ProviderController(self.common).render()
 
     def render(self):
         config = self.common['config']

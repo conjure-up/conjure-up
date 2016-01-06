@@ -18,6 +18,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .welcome import WelcomeView  # noqa
-from .provider import ProviderView  # noqa
-from .maasprovider import MaasProviderView  # noqa
+from .base import ProviderModel
+
+
+class MaasProviderModel(ProviderModel):
+    name = "maas"
+    type = "maas"
+    config = {
+        'enable-os-upgrade': False,
+        'enable-os-refresh-update': False,
+        'maas-server': None,
+        'maas-oauth': None
+    }

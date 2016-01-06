@@ -19,3 +19,4 @@
 # THE SOFTWARE.
 
 from .welcome import WelcomeController  # noqa
+from .provider import ProviderController  # noqa

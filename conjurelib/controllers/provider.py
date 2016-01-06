@@ -18,6 +18,33 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .welcome import WelcomeView  # noqa
-from .provider import ProviderView  # noqa
-from .maasprovider import MaasProviderView  # noqa
+from conjurelib.ui.views import ProviderView
+from conjurelib.models.providers.base import ProviderModel
+from .providers import MaasProviderController
+
+
+class ProviderController:
+    def __init__(self, common):
+        self.common = common
+        self.view = ProviderView(self.common,
+                                 ProviderModel.available,
+                                 self.render_provider_view)
+
+    def render_provider_view(self, provider):
+        """ Renders the provider specific view
+
+        Arguments:
+        provider: name of provider to use
+        """
+        provider = provider.lower()
+        if provider == "maas":
+            MaasProviderController(self.common).render()
+
+    def render(self):
+        self.common['ui'].set_header(
+            title="Select a Juju provider",
+            excerpt="A Juju environment is required to deploy the solution. "
+            "Since no existing environments were found please "
+            "select the provider you wish use."
+        )
+        self.common['ui'].set_body(self.view)

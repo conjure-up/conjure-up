@@ -20,16 +20,18 @@
 
 """ Juju helpers
 """
-import shlex
-from subprocess import check_output, call
+from .utils import Host
+from .shell import shell
 
 
 class Juju:
+    cmd_prefix = "sudo -E -H -u {}".format(Host.install_user())
+
     @classmethod
     def bootstrap(cls):
         """ Performs juju bootstrap
         """
-        check_output(['juju', 'bootstrap', '--debug'])
+        return shell('{} juju bootstrap --debug'.format(cls.cmd_prefix))
 
     @classmethod
     def available(cls):
@@ -38,24 +40,27 @@ class Juju:
         Returns:
         True/False if juju status was successful and a environment is found
         """
-        return 0 == call(['juju', 'status'])
+        return 0 == shell('{} juju status'.format(cls.cmd_prefix)).code
 
     @classmethod
-    def deploy(cls, charm, charm_config):
+    def deploy_charm(cls, charm, charm_config):
         """ Juju deploy service
 
         Arguments:
         charm: Name of charm(service) to deploy
         charm_config: YAML formatted service config
         """
-
-        check_output(['juju', 'deploy', '--config', charm_config, charm])
+        return shell('{} juju deploy --config {} {}'.format(cls.cmd_prefix,
+                                                            charm_config,
+                                                            charm))
 
     @classmethod
-    def debug_log(cls, include="*"):
-        """ Juju debug-log
+    def deploy_bundle(cls, bundle):
+        """ Juju deploy bundle
 
         Arguments:
-        include: Filter to query log output
+        charm: Name of bundle to deploy
         """
-        check_output(['juju', 'debug-log', shlex.quote(include)])
+        bundle_str = "cs:bundle/{}".format(bundle)
+        return shell('{} juju deploy {}'.format(cls.cmd_prefix,
+                                                bundle_str))

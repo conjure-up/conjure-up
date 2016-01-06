@@ -18,6 +18,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .welcome import WelcomeView  # noqa
-from .provider import ProviderView  # noqa
-from .maasprovider import MaasProviderView  # noqa
+from conjurelib.ui.views import MaasProviderView
+from conjurelib.models.providers import MaasProviderModel
+
+
+class MaasProviderController:
+    def __init__(self, common):
+        self.common = common
+        self.view = MaasProviderView(self.common,
+                                     self.finish)
+        self.model = MaasProviderModel
+
+    def finish(self, result):
+        """ Deploys to the maas provider
+        """
+        self.model.config['maas-server'] = result['maas_server'].value
+        self.model.config['maas-oauth'] = result['maas_apikey'].value
+        print("Deploying with: {}".format(self.model.to_yaml()))
+
+    def render(self):
+        self.common['ui'].set_header(
+            title="MAAS Provider",
+            excerpt="Enter your MAAS credentials to "
+            "enable deploying to this provider."
+        )
+        self.common['ui'].set_body(self.view)

@@ -18,6 +18,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .welcome import WelcomeView  # noqa
-from .provider import ProviderView  # noqa
-from .maasprovider import MaasProviderView  # noqa
+from ubuntui.views import SelectorWithDescriptionWidget
+
+
+class ProviderView(SelectorWithDescriptionWidget):
+    def __init__(self, common, providers, cb):
+        self.common = common
+        title = "Choose a provider to deploy the solution to"
+        super().__init__(title, providers, cb)

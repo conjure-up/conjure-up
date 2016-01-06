@@ -28,6 +28,26 @@ class UtilsException(Exception):
     pass
 
 
+class Host:
+    """ host utilities
+    """
+
+    @classmethod
+    def install_user(cls):
+        """ returns sudo user
+        """
+        user = os.getenv('SUDO_USER', None)
+        if not user:
+            user = os.getenv('USER', 'root')
+        return user
+
+    @classmethod
+    def install_home(cls):
+        """ returns installer user home
+        """
+        return os.path.expanduser("~" + cls.install_user())
+
+
 class FS:
     """ filesystem utility class
     """
