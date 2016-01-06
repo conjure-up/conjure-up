@@ -18,19 +18,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from conjurelib.ui.views import OpenStackProviderView
-from conjurelib.models.providers import OpenStackProviderModel
+from conjurelib.ui.views import LocalProviderView
+from conjurelib.models.providers import LocalProviderModel
 
 
-class OpenStackProviderController:
+class LocalProviderController:
     def __init__(self, common):
         self.common = common
-        self.view = OpenStackProviderView(self.common,
-                                          self.finish)
-        self.model = OpenStackProviderModel
+        self.view = LocalProviderView(self.common,
+                                      self.finish)
+        self.model = LocalProviderModel
 
     def finish(self, result):
-        """ Deploys to the openstack provider
+        """ Deploys to the local provider
         """
         for k in result.keys():
             if k in self.model.config:
@@ -39,8 +39,8 @@ class OpenStackProviderController:
 
     def render(self):
         self.common['ui'].set_header(
-            title="OpenStack Provider",
-            excerpt="Enter your OpenStack credentials to "
-            "enable deploying to this provider."
+            title="Local Provider",
+            excerpt="Enter optional configuration items for the Local "
+            "provider before deploying."
         )
         self.common['ui'].set_body(self.view)

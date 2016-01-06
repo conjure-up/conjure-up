@@ -21,7 +21,8 @@
 from conjurelib.ui.views import ProviderView
 from conjurelib.models.providers.base import ProviderModel
 from .providers import (MaasProviderController,
-                        OpenStackProviderController)
+                        OpenStackProviderController,
+                        LocalProviderController)
 
 
 class ProviderController:
@@ -42,6 +43,8 @@ class ProviderController:
             MaasProviderController(self.common).render()
         elif provider == "openstack":
             OpenStackProviderController(self.common).render()
+        elif provider == "local":
+            LocalProviderController(self.common).render()
 
     def render(self):
         self.common['ui'].set_header(

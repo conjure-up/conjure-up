@@ -18,29 +18,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from conjurelib.ui.views import OpenStackProviderView
-from conjurelib.models.providers import OpenStackProviderModel
+from ubuntui.dialog import Dialog
 
 
-class OpenStackProviderController:
-    def __init__(self, common):
+class LocalProviderView(Dialog):
+
+    input_items = [
+        ('apt-http-proxy', 'APT HTTP Proxy'),
+        ('apt-https-proxy', 'APT HTTPS Proxy'),
+        ('http-proxy', 'HTTP Proxy'),
+        ('https-proxy', 'HTTPS Proxy')
+    ]
+
+    def __init__(self, common, cb):
         self.common = common
-        self.view = OpenStackProviderView(self.common,
-                                          self.finish)
-        self.model = OpenStackProviderModel
-
-    def finish(self, result):
-        """ Deploys to the openstack provider
-        """
-        for k in result.keys():
-            if k in self.model.config:
-                self.model.config[k] = result[k].value
-        print("Deploying with: {}".format(self.model.to_yaml()))
-
-    def render(self):
-        self.common['ui'].set_header(
-            title="OpenStack Provider",
-            excerpt="Enter your OpenStack credentials to "
-            "enable deploying to this provider."
-        )
-        self.common['ui'].set_body(self.view)
+        title = "Local Configuration"
+        super().__init__(title, cb)

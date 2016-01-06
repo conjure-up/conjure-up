@@ -20,3 +20,4 @@
 
 from .maas import MaasProviderController  # noqa
 from .openstack import OpenStackProviderController  # noqa
+from .local import LocalProviderController  # noqa

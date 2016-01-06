@@ -26,5 +26,9 @@ class LocalProviderModel(ProviderModel):
     type = "local"
     config = {
         'enable-os-upgrade': False,
-        'enable-os-refresh-update': False
+        'enable-os-refresh-update': False,
+        'https-proxy': None,
+        'http-proxy': None,
+        'apt-http-proxy': None,
+        'apt-https-proxy': None
     }

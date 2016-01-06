@@ -45,5 +45,8 @@ class ProviderModel:
                 'type': cls.type
             }
         }
-        cls.env['environments'][cls.name].update(cls.config)
+
+        sanitize_config = {k: v for k, v in cls.config.items()
+                           if v is not None}
+        cls.env['environments'][cls.name].update(sanitize_config)
         return yaml.safe_dump(cls.env, default_flow_style=False)
