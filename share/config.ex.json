@@ -1,15 +1,30 @@
 {
   "name": "bigdata",
   "version": "0.0.1",
-  "summary": "Juju solutions for big data",
+  "summary": "Juju solutions for Big Data",
+  "excerpt": "When exploring big data solutions, one of the most daunting tasks users face is the setup and configuration of these usually complex tools. This can take from hours to days, time you could and should spend testing, evaluating, and putting your big data solutions to good use to benefit your business.",
   "maintainer": "Adam Stokes <adam.stokes@ubuntu.com>",
-  "bundles": [
-    "hdp-core-batch-processing",
-    "high-performance-batch-processing",
-    "data-analytics-with-sql-like",
-    "data-analytics-with-pig-latin",
-    "real-time-analytics-with-storm"
-  ],
+  "bundles": [{
+    "key": "hdp-core-batch-processing",
+    "name": "Hadoop Core Batch Processing",
+    "summary": "Run a standard Mapreduce job using the hadoop core batch processing solution."
+  }, {
+    "key": "high-performance-batch-processing",
+    "name": "High Performance Batch Processing",
+    "summary": "For higher performance run your native mapreduce application on top of Tez."
+  }, {
+    "key": "data-analytics-with-sql-like",
+    "name": "Data Analytics with SQL-like",
+    "summary": "Run simple SQL-like analytics with Hive"
+  }, {
+    "key": "data-analytics-with-pig-latin",
+    "name": "Data Analytics with Pig Latin",
+    "summary": "Analyse unstructured data analytics with Pig"
+  }, {
+    "key": "real-time-analytics-with-storm",
+    "name": "Real Time Analytics with Storm",
+    "summary": "Run real-time analytics with Storm"
+  }],
   "recommendedCharms": [
     "kibana",
     "elasticsearch"

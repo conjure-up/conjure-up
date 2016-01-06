@@ -18,11 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from urwid import WidgetWrap, Text, Pile, Columns, ListBox
-from ubuntui.widgets.buttons import (cancel_btn, done_btn)
-from ubuntui.widgets.meta import MetaScroll
+from __future__ import unicode_literals
+from urwid import WidgetWrap, Text, Pile, ListBox, BoxAdapter, Divider, Columns
+from ubuntui.widgets.buttons import (cancel_btn, menu_btn)
 from ubuntui.utils import Color, Padding
 from ubuntui.ev import EventLoop
+from ubuntui.lists import SimpleList
 
 
 class WelcomeView(WidgetWrap):
@@ -30,7 +31,9 @@ class WelcomeView(WidgetWrap):
         self.common = common
         self.cb = cb
         _pile = [
-            Padding.center_79(self.build_menuable_items()),
+            Padding.center_90(Text("Choose a solution to get started:")),
+            Padding.center_90(Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}")),
+            Padding.center_90(self.build_menuable_items()),
             Padding.line_break(""),
             Padding.center_20(self.buttons())
         ]
@@ -38,10 +41,8 @@ class WelcomeView(WidgetWrap):
 
     def buttons(self):
         cancel = cancel_btn(on_press=self.cancel)
-        done = done_btn(on_press=self.done)
 
         buttons = [
-            Color.button_primary(done, focus_map='button_primary focus'),
             Color.button_secondary(cancel, focus_map='button_secondary focus')
         ]
         return Pile(buttons)
@@ -49,29 +50,26 @@ class WelcomeView(WidgetWrap):
     def build_menuable_items(self):
         """ Builds a list of bundles available to install
         """
-        items = [Text(x) for x in self.common['config']['bundles']]
-        return Pile(items)
-
-    # def build_config_items(self):
-    #     """ Builds the form for modifying the charms config options
-    #     """
-    #     self._generate_config_options()
-    #     items = [MetaScroll()]
-    #     cols = []
-    #     for k, v in self.charm_config_ui.items():
-    #         cols.append(
-    #             Columns(
-    #                 [
-    #                     ("weight", 0.2, Text(k, align="right"))
-    #                     ("weight", 0.3, Pile([
-    #                         v['input'],
-    #                         v['description']
-    #                     ]))
-    #                 ]
-    #             )
-    #         )
-    #     items.expand(cols)
-    #     return items
+        bundles = self.common['config']['bundles']
+        cols = []
+        for idx, bundle in enumerate(bundles, 1):
+            cols.append(
+                Columns(
+                    [
+                        ("weight", 0.2, Color.body(
+                            menu_btn(label="{}. {}".format(idx,
+                                                           bundle['name']),
+                                     on_press=self.done),
+                            focus_map="button_primary focus")),
+                        ("weight", 0.3, Text(bundle['summary'],
+                                             align="left"))
+                    ],
+                    dividechars=1
+                )
+            )
+            cols.append(Padding.line_break(""))
+        return BoxAdapter(SimpleList(cols),
+                          height=len(cols)+2)
 
     def cancel(self, button):
         EventLoop.exit(0)

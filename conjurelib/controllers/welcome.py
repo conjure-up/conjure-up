@@ -45,7 +45,7 @@ class WelcomeController:
     def render(self):
         config = self.common['config']
         self.common['ui'].set_header(
-            title="Install {}".format(config['name']),
-            excerpt=config['summary']
+            title=config['summary'],
+            excerpt=config['excerpt']
         )
         self.common['ui'].set_body(self.view)
