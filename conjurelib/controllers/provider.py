@@ -45,6 +45,6 @@ class ProviderController:
             title="Select a Juju provider",
             excerpt="A Juju environment is required to deploy the solution. "
             "Since no existing environments were found please "
-            "select the provider you wish use."
+            "select the provider you wish to use."
         )
         self.common['ui'].set_body(self.view)
