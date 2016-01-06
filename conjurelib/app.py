@@ -53,13 +53,6 @@ class Application:
             'config': config,
         }
 
-        self.controllers = {
-            'Welcome': WelcomeController(self.common),
-            'Juju': None,
-            'Maas': None,
-            'Finalize': None
-        }
-
     def unhandled_input(self, key):
         if key in ['q', 'Q']:
             EventLoop.exit(0)
@@ -67,7 +60,7 @@ class Application:
     def _start(self, *args, **kwargs):
         """ Initially load the welcome screen
         """
-        self.controllers['Welcome'].render()
+        WelcomeController(self.common).render()
 
     def start(self):
         EventLoop.build_loop(self.common['ui'], STYLES,

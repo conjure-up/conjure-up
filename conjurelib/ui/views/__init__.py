@@ -21,3 +21,4 @@
 from .welcome import WelcomeView  # noqa
 from .provider import ProviderView  # noqa
 from .maasprovider import MaasProviderView  # noqa
+from .openstackprovider import OpenStackProviderView  # noqa

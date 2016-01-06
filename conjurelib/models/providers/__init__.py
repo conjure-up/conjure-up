@@ -20,3 +20,4 @@
 
 from .local import LocalProviderModel  # noqa
 from .maas import MaasProviderModel  # noqa
+from .openstack import OpenStackProviderModel  # noqa

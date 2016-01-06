@@ -32,8 +32,9 @@ class MaasProviderController:
     def finish(self, result):
         """ Deploys to the maas provider
         """
-        self.model.config['maas-server'] = result['maas_server'].value
-        self.model.config['maas-oauth'] = result['maas_apikey'].value
+        for k in result.keys():
+            if k in self.model.config:
+                self.model.config[k] = result[k].value
         print("Deploying with: {}".format(self.model.to_yaml()))
 
     def render(self):

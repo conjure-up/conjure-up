@@ -18,5 +18,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .maas import MaasProviderController  # noqa
-from .openstack import OpenStackProviderController  # noqa
+from ubuntui.views import OpenStackInput
+
+
+class OpenStackProviderView(OpenStackInput):
+    def __init__(self, common, cb):
+        self.common = common
+        title = "OpenStack Credentials"
+        super().__init__(title, cb)

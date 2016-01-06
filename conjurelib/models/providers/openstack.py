@@ -18,5 +18,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .maas import MaasProviderController  # noqa
-from .openstack import OpenStackProviderController  # noqa
+from .base import ProviderModel
+
+
+class OpenStackProviderModel(ProviderModel):
+    name = "openstack"
+    type = "openstack"
+    config = {
+        'enable-os-upgrade': False,
+        'enable-os-refresh-update': False,
+        'use-floating-ip': True,
+        'use-default-secgroup': True,
+        'network': None,
+        'auth-url': None,
+        'tenant-name': None,
+        'region': None,
+        'auth-mode': None,
+        'username': None,
+        'password': None
+    }

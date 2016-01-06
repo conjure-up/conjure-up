@@ -18,5 +18,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .maas import MaasProviderController  # noqa
-from .openstack import OpenStackProviderController  # noqa
+from conjurelib.ui.views import OpenStackProviderView
+from conjurelib.models.providers import OpenStackProviderModel
+
+
+class OpenStackProviderController:
+    def __init__(self, common):
+        self.common = common
+        self.view = OpenStackProviderView(self.common,
+                                          self.finish)
+        self.model = OpenStackProviderModel
+
+    def finish(self, result):
+        """ Deploys to the maas provider
+        """
+        for k in result.keys():
+            if k in self.model.config:
+                self.model.config[k] = result[k].value
+        print("Deploying with: {}".format(self.model.to_yaml()))
+
+    def render(self):
+        self.common['ui'].set_header(
+            title="OpenStack Provider",
+            excerpt="Enter your OpenStack credentials to "
+            "enable deploying to this provider."
+        )
+        self.common['ui'].set_body(self.view)
