@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 from ubuntui.views import MaasServerInput
+from ubuntui.ev import EventLoop
 
 
 class MaasProviderView(MaasServerInput):
@@ -26,3 +27,6 @@ class MaasProviderView(MaasServerInput):
         self.common = common
         title = "MAAS Credentials"
         super().__init__(title, cb)
+
+    def cancel(self, btn):
+        EventLoop.exit(0)

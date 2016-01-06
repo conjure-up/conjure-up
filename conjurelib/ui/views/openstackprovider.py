@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 from ubuntui.views import OpenStackInput
+from ubuntui.ev import EventLoop
 
 
 class OpenStackProviderView(OpenStackInput):
@@ -26,3 +27,6 @@ class OpenStackProviderView(OpenStackInput):
         self.common = common
         title = "OpenStack Credentials"
         super().__init__(title, cb)
+
+    def cancel(self, btn):
+        EventLoop.exit(0)

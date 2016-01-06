@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 from ubuntui.dialog import Dialog
+from ubuntui.ev import EventLoop
 
 
 class LocalProviderView(Dialog):
@@ -34,3 +35,6 @@ class LocalProviderView(Dialog):
         self.common = common
         title = "Local Configuration"
         super().__init__(title, cb)
+
+    def cancel(self, btn):
+        EventLoop.exit(0)

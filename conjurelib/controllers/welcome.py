@@ -19,7 +19,6 @@
 # THE SOFTWARE.
 
 from conjurelib.ui.views import WelcomeView
-from conjurelib.models.charm import CharmModel
 from .provider import ProviderController
 from conjurelib.juju import Juju
 

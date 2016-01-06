@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 from ubuntui.views import SelectorWithDescriptionWidget
+from ubuntui.ev import EventLoop
 
 
 class ProviderView(SelectorWithDescriptionWidget):
@@ -26,3 +27,6 @@ class ProviderView(SelectorWithDescriptionWidget):
         self.common = common
         title = "Choose a provider to deploy the solution to"
         super().__init__(title, providers, cb)
+
+    def cancel(self, btn):
+        EventLoop.exit(0)
