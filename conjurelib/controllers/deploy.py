@@ -23,14 +23,16 @@ from conjurelib.models import CharmModel
 
 
 class DeployController:
-    def __init__(self, common):
+
+    def __init__(self, common, provider):
         self.common = common
-        self.view = DeployView(self.common, self.finish)
+        self.provider = provider
+        self.view = DeployView(self.common, self.provider, self.finish)
 
     def finish(self):
         """ handles deployment
         """
-        print("Deploying: juju deploy {}".format(CharmModel.to_path()))
+        print("Deployed: juju deploy {}".format(CharmModel.to_path()))
 
     def render(self):
         config = self.common['config']

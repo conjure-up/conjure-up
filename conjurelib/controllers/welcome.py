@@ -43,7 +43,7 @@ class WelcomeController:
             raise Exception(
                 "Unable to determine bundle to deploy: {}".format(name))
 
-        CharmModel.bundle = deploy_key['key']
+        CharmModel.bundle = deploy_key
 
         if Juju.available():
             print("Deploying to existing juju")

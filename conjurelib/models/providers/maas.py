@@ -30,3 +30,4 @@ class MaasProviderModel(ProviderModel):
         'maas-server': None,
         'maas-oauth': None
     }
+    supports_placement = True

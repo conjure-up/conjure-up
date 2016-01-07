@@ -20,15 +20,16 @@
 
 from ubuntui.dialog import Dialog
 from ubuntui.ev import EventLoop
+from ubuntui.widgets import StringEditor
 
 
 class LocalProviderView(Dialog):
 
     input_items = [
-        ('apt-http-proxy', 'APT HTTP Proxy'),
-        ('apt-https-proxy', 'APT HTTPS Proxy'),
-        ('http-proxy', 'HTTP Proxy'),
-        ('https-proxy', 'HTTPS Proxy')
+        ('apt-http-proxy', 'APT HTTP Proxy: ', StringEditor()),
+        ('apt-https-proxy', 'APT HTTPS Proxy: ', StringEditor()),
+        ('http-proxy', 'HTTP Proxy: ', StringEditor()),
+        ('https-proxy', 'HTTPS Proxy: ', StringEditor())
     ]
 
     def __init__(self, common, cb):

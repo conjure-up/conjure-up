@@ -28,6 +28,10 @@ class ProviderModel:
     env = {}
     config = {}
 
+    # Does the inherited provider support placing
+    # services on specific machines?
+    supports_placement = False
+
     # List of available providers
     available = [
         ('Local', 'Deploy to the current machine using containers.'),

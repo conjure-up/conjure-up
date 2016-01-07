@@ -40,7 +40,7 @@ class OpenStackProviderController:
         Juju.create_environment(self.common['config']['juju_env'],
                                 "openstack",
                                 self.model.to_yaml())
-        DeployController(self.common).render()
+        DeployController(self.common, self.model).render()
 
     def render(self):
         self.common['ui'].set_header(

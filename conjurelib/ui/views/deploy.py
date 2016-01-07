@@ -18,18 +18,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from urwid import WidgetWrap, Text, ListBox
+from urwid import WidgetWrap, Text, Filler, Pile
 from ubuntui.utils import Padding
 from ubuntui.ev import EventLoop
 
 
 class DeployView(WidgetWrap):
-    def __init__(self, common, cb):
+    def __init__(self, common, provider, cb):
         self.common = common
+        self.provider = provider
+        self.text = Text(self.provider.to_yaml())
         _pile = [
-            Padding.center_79(Text("Please wait..."))
+            Padding.center_79(self.text)
         ]
-        super().__init__(ListBox(_pile))
+        super().__init__(Filler(Pile(_pile), valign="middle"))
+
+    def set_status(self, msg):
+        self.text.set_text(msg)
 
     def cancel(self, btn):
         EventLoop.exit(0)

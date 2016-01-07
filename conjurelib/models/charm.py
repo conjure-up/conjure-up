@@ -22,8 +22,43 @@
 class CharmModel:
     """ Stores charm/bundle location for juju deploy
     """
-    bundle = None
-    charm = None
+    bundle = {
+        "key": None,
+        "name": None,
+        "summary": None
+    }
+    charm = {
+        "key": None,
+        "name": None,
+        "summary": None
+    }
+
+    @classmethod
+    def resource(cls):
+        """ Returns defined bundle or charm
+        """
+        if cls.bundle is not None:
+            return cls.bundle
+        if cls.charm is not None:
+            return cls.charm
+
+    @classmethod
+    def key(cls):
+        """ Returns key of resource
+        """
+        return cls.resource().get('key', None)
+
+    @classmethod
+    def name(cls):
+        """ Returns name of resource
+        """
+        return cls.resource().get('name', None)
+
+    @classmethod
+    def summary(cls):
+        """ Returns summary of resource
+        """
+        return cls.resource().get('summary', None)
 
     @classmethod
     def to_path(cls):
@@ -31,6 +66,6 @@ class CharmModel:
         on if it's a bundle or a charm
         """
         if cls.bundle is not None:
-            return "cs:bundle/{}".format(cls.bundle)
+            return "cs:bundle/{}".format(cls.key())
         if cls.charm is not None:
-            return "cs:{}".format(cls.charm)
+            return "cs:{}".format(cls.key())
