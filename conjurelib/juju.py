@@ -53,9 +53,10 @@ class Juju:
         charm: Name of charm(service) to deploy
         charm_config: YAML formatted service config
         """
-        return shell('{} juju deploy --config {} {}'.format(cls.cmd_prefix,
-                                                            charm_config,
-                                                            charm))
+        return shell('{} juju deploy --debug '
+                     '--config {} {}'.format(cls.cmd_prefix,
+                                             charm_config,
+                                             charm))
 
     @classmethod
     def deploy_bundle(cls, bundle):

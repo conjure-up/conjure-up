@@ -20,12 +20,17 @@
 
 from ubuntui.dialog import Dialog
 from ubuntui.ev import EventLoop
-from ubuntui.widgets import StringEditor
+from ubuntui.widgets import StringEditor, Selector
 
 
 class LocalProviderView(Dialog):
 
+    containers = ['lxc', 'kvm']
+
     input_items = [
+        ('container',
+         'Container Type: ',
+         Selector(containers)),
         ('apt-http-proxy', 'APT HTTP Proxy: ', StringEditor()),
         ('apt-https-proxy', 'APT HTTPS Proxy: ', StringEditor()),
         ('http-proxy', 'HTTP Proxy: ', StringEditor()),

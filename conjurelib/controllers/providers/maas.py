@@ -34,9 +34,7 @@ class MaasProviderController:
     def finish(self, result):
         """ Deploys to the maas provider
         """
-        for k in result.keys():
-            if k in self.model.config:
-                self.model.config[k] = result[k].value
+        self.model.config.update({k: v.value for k, v in result.items()})
         Juju.create_environment(self.common['config']['juju_env'],
                                 "maas",
                                 self.model.to_yaml())
