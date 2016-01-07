@@ -65,9 +65,8 @@ class Juju:
         Arguments:
         charm: Name of bundle to deploy
         """
-        bundle_str = "cs:bundle/{}".format(bundle)
         return shell('{} juju deploy {}'.format(cls.cmd_prefix,
-                                                bundle_str))
+                                                bundle))
 
     @classmethod
     def create_environment(cls, path, env, config):

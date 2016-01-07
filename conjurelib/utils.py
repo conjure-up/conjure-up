@@ -20,12 +20,33 @@
 
 import shutil
 import os
+from subprocess import check_call, CalledProcessError, DEVNULL
 
 
 class UtilsException(Exception):
     """ Error in utils
     """
     pass
+
+
+class APT:
+    @classmethod
+    def install(cls, pkgs):
+        """ Install apt packages
+
+        Arguments: list of packages
+        """
+        if not isinstance(pkgs, list):
+            pkgs = [pkgs]
+        cmd = ("DEBIAN_FRONTEND=noninteractive sudo -E "
+               "/usr/bin/apt-get -qyf "
+               "-o Dpkg::Options::=--force-confdef "
+               "-o Dpkg::Options::=--force-confold "
+               "install {0}".format(" ".join(pkgs)))
+        try:
+            check_call(cmd, stdout=DEVNULL, stderr=DEVNULL, shell=True)
+        except CalledProcessError as e:
+            raise UtilsException("Problem with package install: {0}".format(e))
 
 
 class Host:

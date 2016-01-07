@@ -18,4 +18,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ubuntui.frame import Frame as ConjureUI  # noqa
+from ubuntui.frame import Frame  # noqa
+from ubuntui.views import ErrorView
+from conjurelib import async
+from ubuntui.ev import EventLoop
+
+
+class ConjureUI(Frame):
+    def show_exception_message(self, ex):
+        if isinstance(ex, async.ThreadCancelledException):
+            pass
+        else:
+            self.frame.body = ErrorView(ex.args[0])
+
+        EventLoop.remove_alarms()

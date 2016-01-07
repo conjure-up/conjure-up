@@ -20,6 +20,9 @@
 
 from conjurelib.ui.views import DeployView
 from conjurelib.models import CharmModel
+from conjurelib import async
+from conjurelib.utils import APT
+from functools import partial
 
 
 class DeployController:
@@ -28,6 +31,12 @@ class DeployController:
         self.common = common
         self.provider = provider
         self.view = DeployView(self.common, self.provider, self.finish)
+        if provider.name == "local":
+            async.submit(partial(APT.install, ['juju-local']),
+                         self.common['ui'].show_exception_message)
+        else:
+            async.submit(partial(APT.install, ['juju']),
+                         self.common['ui'].show_exception_message)
 
     def finish(self):
         """ handles deployment
