@@ -6,6 +6,14 @@
 This is the runtime application for processing juju bundles/charms for easier
 installation via `apt-get install` and a install wizard.
 
+# how to use
+
+```
+$ sudo apt-add-repository ppa:conjure/ppa
+$ sudo apt-get update
+$ sudo apt-get install bigdata
+```
+
 # license
 
 The MIT License (MIT)
