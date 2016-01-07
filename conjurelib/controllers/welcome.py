@@ -19,6 +19,7 @@
 # THE SOFTWARE.
 
 from conjurelib.ui.views import WelcomeView
+from conjurelib.models import CharmModel
 from .provider import ProviderController
 from conjurelib.juju import Juju
 
@@ -41,6 +42,8 @@ class WelcomeController:
         if deploy_key is None:
             raise Exception(
                 "Unable to determine bundle to deploy: {}".format(name))
+
+        CharmModel.bundle = deploy_key['key']
 
         if Juju.available():
             print("Deploying to existing juju")

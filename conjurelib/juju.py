@@ -20,8 +20,10 @@
 
 """ Juju helpers
 """
-from .utils import Host
+from .utils import Host, FS
 from .shell import shell
+import shutil
+import os
 
 
 class Juju:
@@ -64,3 +66,23 @@ class Juju:
         bundle_str = "cs:bundle/{}".format(bundle)
         return shell('{} juju deploy {}'.format(cls.cmd_prefix,
                                                 bundle_str))
+
+    @classmethod
+    def create_environment(cls, path, env, config):
+        """ Creates a Juju environments.yaml file to bootstrap. This
+        will backup the existing environments.yaml if exists.
+
+        Arguments:
+        path: location to store the environments.yaml
+        env: environment type (eg. maas)
+        config: YAML output of the environments configuration
+        """
+        juju_home_dir = os.path.dirname(path)
+
+        if os.path.exists(path):
+            env_backup_fn = "{}.bak".format(os.path.basename(path))
+            shutil.move(path, os.path.join(juju_home_dir, env_backup_fn))
+        else:
+            FS.mkdir(juju_home_dir)
+        FS.spew(path, config, Host.install_user())
+        return shell("{} juju switch {}".format(cls.cmd_prefix, env))

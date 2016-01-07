@@ -51,6 +51,11 @@ class Host:
 class FS:
     """ filesystem utility class
     """
+    @classmethod
+    def mkdir(cls, path):
+        if not os.path.isdir(path):
+            os.makedirs(path)
+            FS.chown(path, Host.install_user(), recursive=True)
 
     @classmethod
     def chown(cls, path, user, group=None, recursive=False):
@@ -62,6 +67,9 @@ class FS:
         group: new owner group name
         recursive: set files/dirs recursively
         """
+        if group is None:
+            group = user
+
         try:
             if not recursive or os.path.isfile(path):
                 shutil.chown(path, user, group)

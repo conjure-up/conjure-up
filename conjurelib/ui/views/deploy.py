@@ -18,9 +18,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .welcome import WelcomeView  # noqa
-from .provider import ProviderView  # noqa
-from .maasprovider import MaasProviderView  # noqa
-from .openstackprovider import OpenStackProviderView  # noqa
-from .localprovider import LocalProviderView  # noqa
-from .deploy import DeployView  # noqa
+from urwid import WidgetWrap, Text, ListBox
+from ubuntui.utils import Padding
+from ubuntui.ev import EventLoop
+
+
+class DeployView(WidgetWrap):
+    def __init__(self, common, cb):
+        self.common = common
+        _pile = [
+            Padding.center_79(Text("Please wait..."))
+        ]
+        super().__init__(ListBox(_pile))
+
+    def cancel(self, btn):
+        EventLoop.exit(0)

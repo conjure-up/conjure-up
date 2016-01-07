@@ -25,6 +25,7 @@ from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 from .controllers import (WelcomeController)
 from .ui import ConjureUI
+from .utils import Host
 import json
 import sys
 import argparse
@@ -50,8 +51,12 @@ class Application:
         self.common = {
             'opts': opts,
             'ui': ConjureUI(),
-            'config': config,
+            'config': config
         }
+        self.common['config']['install_user'] = Host.install_user()
+        self.common['config']['juju_env'] = path.join(
+            Host.install_home(),
+            '.juju/environments.yaml')
 
     def unhandled_input(self, key):
         if key in ['q', 'Q']:

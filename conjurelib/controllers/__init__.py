@@ -20,3 +20,4 @@
 
 from .welcome import WelcomeController  # noqa
 from .provider import ProviderController  # noqa
+from .deploy import DeployController  # noqa

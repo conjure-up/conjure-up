@@ -18,9 +18,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from .welcome import WelcomeView  # noqa
-from .provider import ProviderView  # noqa
-from .maasprovider import MaasProviderView  # noqa
-from .openstackprovider import OpenStackProviderView  # noqa
-from .localprovider import LocalProviderView  # noqa
-from .deploy import DeployView  # noqa
+from conjurelib.ui.views import DeployView
+from conjurelib.models import CharmModel
+
+
+class DeployController:
+    def __init__(self, common):
+        self.common = common
+        self.view = DeployView(self.common, self.finish)
+
+    def finish(self):
+        """ handles deployment
+        """
+        print("Deploying: juju deploy {}".format(CharmModel.to_path()))
+
+    def render(self):
+        config = self.common['config']
+        self.common['ui'].set_header(
+            title=config['summary'],
+            excerpt="Please wait, deploying your solution: "
+            "juju deploy {}".format(CharmModel.to_path())
+        )
+        self.common['ui'].set_body(self.view)

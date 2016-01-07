@@ -18,36 +18,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import yaml
-from tempfile import NamedTemporaryFile
-
 
 class CharmModel:
-    def __init__(self, name, charm_config):
-        """ init
+    """ Stores charm/bundle location for juju deploy
+    """
+    bundle = None
+    charm = None
 
-        Arguments:
-        name: name of charm
-        charm_config: Config options from charmstore
+    @classmethod
+    def to_path(cls):
+        """ Returns proper path to pass to juju deploy depending
+        on if it's a bundle or a charm
         """
-        self.name = name
-        self.charm_config = {}
-
-    def __getitem__(self, val):
-        return self.charm_config.get(val, False)
-
-    def __setitem__(self, key, val):
-        self.charm_config[key] = val
-
-    def to_yaml_f(self):
-        """ Writes YAML output to a file suitable for passing to Juju during
-        deployment
-
-        Returns:
-        Path to temporary file
-        """
-        final = {}
-        final[self.name] = self.charm_config
-        with NamedTemporaryFile(mode='w+', encoding='utf-8') as tempf:
-            tempf.write(yaml.dump(final, default_flow_style=False))
-            return tempf.name
+        if cls.bundle is not None:
+            return "cs:bundle/{}".format(cls.bundle)
+        if cls.charm is not None:
+            return "cs:{}".format(cls.charm)

@@ -20,6 +20,8 @@
 
 from conjurelib.ui.views import LocalProviderView
 from conjurelib.models.providers import LocalProviderModel
+from conjurelib.juju import Juju
+from conjurelib.controllers.deploy import DeployController
 
 
 class LocalProviderController:
@@ -35,7 +37,10 @@ class LocalProviderController:
         for k in result.keys():
             if k in self.model.config:
                 self.model.config[k] = result[k].value
-        print("Deploying with: {}".format(self.model.to_yaml()))
+        Juju.create_environment(self.common['config']['juju_env'],
+                                "local",
+                                self.model.to_yaml())
+        DeployController(self.common).render()
 
     def render(self):
         self.common['ui'].set_header(
