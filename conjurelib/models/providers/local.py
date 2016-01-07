@@ -19,16 +19,18 @@
 # THE SOFTWARE.
 
 from .base import ProviderModel
+from collections import OrderedDict
 
 
 class LocalProviderModel(ProviderModel):
     name = "local"
     type = "local"
-    config = {
-        'enable-os-upgrade': False,
-        'enable-os-refresh-update': False,
-        'https-proxy': None,
-        'http-proxy': None,
-        'apt-http-proxy': None,
-        'apt-https-proxy': None
-    }
+    config = OrderedDict([
+        ('container', ['lxc', 'kvm']),
+        ('apt-http-proxy', None),
+        ('apt-https-proxy', None),
+        ('http-proxy', None),
+        ('https-proxy', None),
+        ('enable-os-refresh-update', False),
+        ('enable-os-upgrade', False)
+    ])

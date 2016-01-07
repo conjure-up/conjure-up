@@ -18,11 +18,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ubuntui.views import MaasServerInput
+from ubuntui.dialog import opts_to_ui, Dialog
 from ubuntui.ev import EventLoop
+from conjurelib.models.providers import MaasProviderModel
 
 
-class MaasProviderView(MaasServerInput):
+class MaasProviderView(Dialog):
+    input_items = opts_to_ui(MaasProviderModel.config)
+
     def __init__(self, common, cb):
         self.common = common
         title = "MAAS Credentials"

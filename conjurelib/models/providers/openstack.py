@@ -19,21 +19,20 @@
 # THE SOFTWARE.
 
 from .base import ProviderModel
+from collections import OrderedDict
 
 
 class OpenStackProviderModel(ProviderModel):
     name = "openstack"
     type = "openstack"
-    config = {
-        'enable-os-upgrade': False,
-        'enable-os-refresh-update': False,
-        'use-floating-ip': True,
-        'use-default-secgroup': True,
-        'network': None,
-        'auth-url': None,
-        'tenant-name': None,
-        'region': None,
-        'auth-mode': None,
-        'username': None,
-        'password': None
-    }
+    config = OrderedDict([
+        ('username', None),
+        ('password', None),
+        ('auth-mode', None),
+        ('auth-url', None),
+        ('network', None),
+        ('region', None),
+        ('tenant-name', None),
+        ('use-default-secgroup', True),
+        ('use-floating-ip', True)
+    ])

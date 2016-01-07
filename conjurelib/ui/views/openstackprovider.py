@@ -18,11 +18,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ubuntui.views import OpenStackInput
 from ubuntui.ev import EventLoop
+from ubuntui.dialog import opts_to_ui, Dialog
+from conjurelib.models.providers import OpenStackProviderModel
 
 
-class OpenStackProviderView(OpenStackInput):
+class OpenStackProviderView(Dialog):
+
+    input_items = opts_to_ui(OpenStackProviderModel.config)
+
     def __init__(self, common, cb):
         self.common = common
         title = "OpenStack Credentials"

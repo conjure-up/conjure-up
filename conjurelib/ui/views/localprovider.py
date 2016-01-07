@@ -18,24 +18,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ubuntui.dialog import Dialog
+from ubuntui.dialog import Dialog, opts_to_ui
 from ubuntui.ev import EventLoop
-from ubuntui.widgets import StringEditor, Selector
+from conjurelib.models.providers import LocalProviderModel
 
 
 class LocalProviderView(Dialog):
 
-    containers = ['lxc', 'kvm']
-
-    input_items = [
-        ('container',
-         'Container Type: ',
-         Selector(containers)),
-        ('apt-http-proxy', 'APT HTTP Proxy: ', StringEditor()),
-        ('apt-https-proxy', 'APT HTTPS Proxy: ', StringEditor()),
-        ('http-proxy', 'HTTP Proxy: ', StringEditor()),
-        ('https-proxy', 'HTTPS Proxy: ', StringEditor())
-    ]
+    input_items = opts_to_ui(LocalProviderModel.config)
 
     def __init__(self, common, cb):
         self.common = common

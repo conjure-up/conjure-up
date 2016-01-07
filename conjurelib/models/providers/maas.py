@@ -19,15 +19,16 @@
 # THE SOFTWARE.
 
 from .base import ProviderModel
+from collections import OrderedDict
 
 
 class MaasProviderModel(ProviderModel):
     name = "maas"
     type = "maas"
-    config = {
-        'enable-os-upgrade': False,
-        'enable-os-refresh-update': False,
-        'maas-server': None,
-        'maas-oauth': None
-    }
+    config = OrderedDict([
+        ('maas-server', None),
+        ('maas-oauth', None),
+        ('enable-os-upgrade', False),
+        ('enable-os-refresh-update', False),
+    ])
     supports_placement = True
