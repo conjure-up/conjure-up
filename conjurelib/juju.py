@@ -24,6 +24,7 @@ from .utils import Host, FS
 from .shell import shell
 import shutil
 import os
+import yaml
 
 
 class Juju:
@@ -86,3 +87,17 @@ class Juju:
             FS.mkdir(juju_home_dir)
         FS.spew(path, config, Host.install_user())
         return shell("{} juju switch {}".format(cls.cmd_prefix, env))
+
+    @classmethod
+    def env(cls, path):
+        """ Returns a parsed environments.yaml to dictionary
+        """
+        with open(path) as env:
+            return yaml.load(env)
+
+    @classmethod
+    def current_env(cls, path):
+        """ Grabs the current default environment
+        """
+        env = cls.env(path)
+        return env.get('default', None)

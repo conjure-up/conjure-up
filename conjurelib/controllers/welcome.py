@@ -20,7 +20,11 @@
 
 from conjurelib.ui.views import WelcomeView
 from conjurelib.models import CharmModel
+from conjurelib.models.providers import (OpenStackProviderModel,
+                                         LocalProviderModel,
+                                         MaasProviderModel)
 from .provider import ProviderController
+from .deploy import DeployController
 from conjurelib.juju import Juju
 
 
@@ -46,7 +50,18 @@ class WelcomeController:
         CharmModel.bundle = deploy_key
 
         if Juju.available():
-            print("Deploying to existing juju")
+            path = self.common['config']['juju_env']
+            env = Juju.current_env(path)
+            opts = Juju.env(path)['environments'][env]
+            if env == "local":
+                model = LocalProviderModel
+            elif env == "maas":
+                model = MaasProviderModel
+            elif env == "openstack":
+                model = OpenStackProviderModel
+            model.config.update(**opts)
+            DeployController(self.common, model).render()
+
         else:
             ProviderController(self.common).render()
 
