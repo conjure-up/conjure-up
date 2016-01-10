@@ -63,8 +63,12 @@ class DeployController:
             mainview = PlacerView(placement_controller,
                                   bundleplacer_cfg)
             self.common['ui'].set_header(
-                title="Bundle Editor"
+                title="Bundle Editor: {}".format(
+                    self.common['config']['summary']),
+                excerpt="Choose where your services should be "
+                "placed in your available infrastructure"
             )
+            self.common['ui'].set_subheader("Machine Placement")
             self.common['ui'].set_body(mainview)
             mainview.update()
 

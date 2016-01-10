@@ -69,6 +69,7 @@ class WelcomeController:
         config = self.common['config']
         self.common['ui'].set_header(
             title=config['summary'],
-            excerpt=config['excerpt']
+            excerpt=config['excerpt'],
         )
+        self.common['ui'].set_footer("(Q)uit")
         self.common['ui'].set_body(self.view)
