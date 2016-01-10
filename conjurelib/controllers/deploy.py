@@ -18,11 +18,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from conjurelib.ui.views import DeployView
-from conjurelib.models import CharmModel
+import os
+# from conjurelib.ui.views import DeployView
+# from conjurelib.models import CharmModel
 from conjurelib import async
 from conjurelib.utils import APT
 from functools import partial
+
+from bundleplacer.config import Config
+from bundleplacer.fixtures.maas import FakeMaasState
+from bundleplacer.placerview import PlacerView
+from bundleplacer.controller import PlacementController
 
 
 class DeployController:
@@ -30,24 +36,42 @@ class DeployController:
     def __init__(self, common, provider):
         self.common = common
         self.provider = provider
-        self.view = DeployView(self.common, self.provider, self.finish)
+        # self.view = DeployView(self.common, self.provider, self.finish)
         if provider.name == "local":
             async.submit(partial(APT.install, ['juju-local']),
-                         self.common['ui'].show_exception_message)
-        else:
-            async.submit(partial(APT.install, ['juju']),
                          self.common['ui'].show_exception_message)
 
     def finish(self):
         """ handles deployment
         """
-        print("Deployed: juju deploy {}".format(CharmModel.to_path()))
+        pass
 
     def render(self):
-        config = self.common['config']
-        self.common['ui'].set_header(
-            title=config['summary'],
-            excerpt="Please wait, deploying your solution: "
-            "juju deploy {}".format(CharmModel.to_path())
-        )
-        self.common['ui'].set_body(self.view)
+        # TODO: demo specific should be changed afterwards
+        if self.provider.name == "maas":
+            DEMO_BUNDLE = os.path.join(
+                Config.share_path(), "data-analytics-with-sql-like.yaml")
+            DEMO_METADATA = os.path.join(
+                Config.share_path(),
+                "data-analytics-with-sql-like-metadata.yaml")
+            bundleplacer_cfg = Config('bundle-placer',
+                                      {'bundle_filename': DEMO_BUNDLE,
+                                       'metadata_filename': DEMO_METADATA})
+            placement_controller = PlacementController(
+                config=bundleplacer_cfg,
+                maas_state=FakeMaasState())
+            mainview = PlacerView(placement_controller,
+                                  bundleplacer_cfg)
+            self.common['ui'].set_header(
+                title="Bundle Editor"
+            )
+            self.common['ui'].set_body(mainview)
+            mainview.update()
+
+        # config = self.common['config']
+        # self.common['ui'].set_header(
+        #     title=config['summary'],
+        #     excerpt="Please wait, deploying your solution: "
+        #     "juju deploy {}".format(CharmModel.to_path())
+        # )
+        # self.common['ui'].set_body(self.view)
