@@ -23,6 +23,7 @@ import os
 # from conjurelib.models import CharmModel
 from conjurelib import async
 from conjurelib.utils import APT
+from conjurelib.controllers.finish import FinishController
 from functools import partial
 
 from bundleplacer.config import Config
@@ -41,10 +42,10 @@ class DeployController:
             async.submit(partial(APT.install, ['juju-local']),
                          self.common['ui'].show_exception_message)
 
-    def finish(self):
+    def finish(self, *args):
         """ handles deployment
         """
-        pass
+        FinishController(self.common).render()
 
     def render(self):
         # TODO: demo specific should be changed afterwards
@@ -61,7 +62,8 @@ class DeployController:
                 config=bundleplacer_cfg,
                 maas_state=FakeMaasState())
             mainview = PlacerView(placement_controller,
-                                  bundleplacer_cfg)
+                                  bundleplacer_cfg,
+                                  self.finish)
             self.common['ui'].set_header(
                 title="Bundle Editor: {}".format(
                     self.common['config']['summary']),
@@ -71,11 +73,3 @@ class DeployController:
             self.common['ui'].set_subheader("Machine Placement")
             self.common['ui'].set_body(mainview)
             mainview.update()
-
-        # config = self.common['config']
-        # self.common['ui'].set_header(
-        #     title=config['summary'],
-        #     excerpt="Please wait, deploying your solution: "
-        #     "juju deploy {}".format(CharmModel.to_path())
-        # )
-        # self.common['ui'].set_body(self.view)

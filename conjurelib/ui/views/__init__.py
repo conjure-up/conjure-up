@@ -24,3 +24,4 @@ from .maasprovider import MaasProviderView  # noqa
 from .openstackprovider import OpenStackProviderView  # noqa
 from .localprovider import LocalProviderView  # noqa
 from .deploy import DeployView  # noqa
+from .finish import FinishView  # noqa
