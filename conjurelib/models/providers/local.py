@@ -27,7 +27,7 @@ class LocalProviderModel(ProviderModel):
     description = "Deploy using containers."
     type = "local"
     config = OrderedDict([
-        ('container', ['lxc', 'kvm']),
+        ('container', ['lxc', 'kvm', 'lxd']),
         ('apt-http-proxy', None),
         ('apt-https-proxy', None),
         ('http-proxy', None),
