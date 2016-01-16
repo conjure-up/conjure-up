@@ -23,7 +23,8 @@ from collections import OrderedDict
 
 
 class MaasProviderModel(ProviderModel):
-    name = "maas"
+    name = "MAAS"
+    description = "Deploy to a MAAS environment."
     type = "maas"
     config = OrderedDict([
         ('maas-server', None),

@@ -23,7 +23,8 @@ from collections import OrderedDict
 
 
 class OpenStackProviderModel(ProviderModel):
-    name = "openstack"
+    name = "OpenStack"
+    description = "Deploy to an OpenStack environment."
     type = "openstack"
     config = OrderedDict([
         ('username', None),

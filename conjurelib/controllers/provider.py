@@ -19,7 +19,6 @@
 # THE SOFTWARE.
 
 from conjurelib.ui.views import ProviderView
-from conjurelib.models.providers.base import ProviderModel
 from .providers import (MaasProviderController,
                         OpenStackProviderController,
                         LocalProviderController)
@@ -29,7 +28,6 @@ class ProviderController:
     def __init__(self, common):
         self.common = common
         self.view = ProviderView(self.common,
-                                 ProviderModel.available,
                                  self.render_provider_view)
 
     def render_provider_view(self, provider):

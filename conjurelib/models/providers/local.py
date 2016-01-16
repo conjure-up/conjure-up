@@ -23,7 +23,8 @@ from collections import OrderedDict
 
 
 class LocalProviderModel(ProviderModel):
-    name = "local"
+    name = "Local"
+    description = "Deploy using containers."
     type = "local"
     config = OrderedDict([
         ('container', ['lxc', 'kvm']),

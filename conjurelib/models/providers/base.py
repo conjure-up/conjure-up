@@ -32,18 +32,11 @@ class ProviderModel:
     # services on specific machines?
     supports_placement = False
 
-    # List of available providers
-    available = [
-        ('Local', 'Deploy to the current machine using containers.'),
-        ('MAAS', 'Deploy to a MAAS environment.'),
-        ('OpenStack', 'Deploy to an OpenStack environment.')
-    ]
-
     @classmethod
     def to_yaml(cls):
         """ Outputs environment credentials to YAML
         """
-        cls.env['default'] = cls.name
+        cls.env['default'] = cls.name.lower()
         cls.env['environments'] = {
             cls.name: {
                 'type': cls.type

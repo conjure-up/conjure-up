@@ -26,6 +26,9 @@ from ubuntui.palette import STYLES
 from .controllers import (WelcomeController)
 from .ui import ConjureUI
 from .utils import Host
+from .models.providers import (LocalProviderModel,
+                               MaasProviderModel,
+                               OpenStackProviderModel)
 import json
 import sys
 import argparse
@@ -51,7 +54,12 @@ class Application:
         self.common = {
             'opts': opts,
             'ui': ConjureUI(),
-            'config': config
+            'config': config,
+            'providers': [
+                LocalProviderModel,
+                MaasProviderModel,
+                OpenStackProviderModel
+            ]
         }
         self.common['config']['install_user'] = Host.install_user()
         self.common['config']['juju_env'] = path.join(
