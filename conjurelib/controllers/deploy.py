@@ -21,8 +21,6 @@
 import os
 # from conjurelib.ui.views import DeployView
 # from conjurelib.models import CharmModel
-from conjurelib import async
-from conjurelib.utils import APT
 from conjurelib.controllers.finish import FinishController
 from functools import partial
 
@@ -38,9 +36,6 @@ class DeployController:
         self.common = common
         self.provider = provider
         # self.view = DeployView(self.common, self.provider, self.finish)
-        if provider.name == "local":
-            async.submit(partial(APT.install, ['juju-local']),
-                         self.common['ui'].show_exception_message)
 
     def finish(self, *args):
         """ handles deployment
@@ -49,7 +44,7 @@ class DeployController:
 
     def render(self):
         # TODO: demo specific should be changed afterwards
-        if self.provider.name == "maas":
+        if self.provider.name.lower() == "maas":
             DEMO_BUNDLE = os.path.join(
                 Config.share_path(), "data-analytics-with-sql-like.yaml")
             DEMO_METADATA = os.path.join(

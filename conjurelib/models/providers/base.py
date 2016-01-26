@@ -25,6 +25,7 @@ class ProviderModel:
 
     name = None
     type = None
+    description = None
     env = {}
     config = {}
 
@@ -38,12 +39,12 @@ class ProviderModel:
         """
         cls.env['default'] = cls.name.lower()
         cls.env['environments'] = {
-            cls.name: {
+            cls.name.lower(): {
                 'type': cls.type
             }
         }
 
         sanitize_config = {k: v for k, v in cls.config.items()
                            if v is not None}
-        cls.env['environments'][cls.name].update(sanitize_config)
+        cls.env['environments'][cls.name.lower()].update(sanitize_config)
         return yaml.safe_dump(cls.env, default_flow_style=False)
