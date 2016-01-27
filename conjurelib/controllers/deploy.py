@@ -22,7 +22,6 @@ import os
 # from conjurelib.ui.views import DeployView
 # from conjurelib.models import CharmModel
 from conjurelib.controllers.finish import FinishController
-from functools import partial
 
 from bundleplacer.config import Config
 from bundleplacer.fixtures.maas import FakeMaasState
