@@ -25,9 +25,8 @@ from collections import OrderedDict
 class LocalProviderModel(ProviderModel):
     name = "Local"
     description = "Deploy using containers."
-    type = "local"
+    type = "lxd"
     config = OrderedDict([
-        ('container', ['lxc', 'kvm', 'lxd']),
         ('apt-http-proxy', None),
         ('apt-https-proxy', None),
         ('http-proxy', None),
