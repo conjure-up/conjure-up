@@ -19,8 +19,7 @@
 # THE SOFTWARE.
 
 import os
-# from conjurelib.ui.views import DeployView
-# from conjurelib.models import CharmModel
+from conjurelib.ui.views import DeployView
 from conjurelib.controllers.finish import FinishController
 
 from bundleplacer.config import Config
@@ -34,7 +33,6 @@ class DeployController:
     def __init__(self, common, provider):
         self.common = common
         self.provider = provider
-        # self.view = DeployView(self.common, self.provider, self.finish)
 
     def finish(self, *args):
         """ handles deployment
@@ -42,6 +40,13 @@ class DeployController:
         FinishController(self.common).render()
 
     def render(self):
+        if self.provider.name.lower() == "local":
+            view = DeployView(self.common, self.provider, self.finish)
+            self.common['ui'].set_header(
+                title="Deploying: {}".format(self.common['config']['name'])
+            )
+            self.common['ui'].set_body(view)
+
         # TODO: demo specific should be changed afterwards
         if self.provider.name.lower() == "maas":
             DEMO_BUNDLE = os.path.join(
