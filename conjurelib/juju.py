@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Canonical Ltd.
+# Copyright (c) 2015, 2016 Canonical Ltd.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
 
 """ Juju helpers
 """
-from .utils import Host, FS
+from .utils import FS
 from .shell import shell
 import shutil
 import os
@@ -28,13 +28,12 @@ import yaml
 
 
 class Juju:
-    cmd_prefix = "sudo -E -H -u {}".format(Host.install_user())
 
     @classmethod
     def bootstrap(cls):
         """ Performs juju bootstrap
         """
-        return shell('{} juju bootstrap --debug'.format(cls.cmd_prefix))
+        return shell('juju bootstrap --debug')
 
     @classmethod
     def available(cls):
@@ -43,30 +42,17 @@ class Juju:
         Returns:
         True/False if juju status was successful and a environment is found
         """
-        return 0 == shell('{} juju status'.format(cls.cmd_prefix)).code
-
-    @classmethod
-    def deploy_charm(cls, charm, charm_config):
-        """ Juju deploy service
-
-        Arguments:
-        charm: Name of charm(service) to deploy
-        charm_config: YAML formatted service config
-        """
-        return shell('{} juju deploy --debug '
-                     '--config {} {}'.format(cls.cmd_prefix,
-                                             charm_config,
-                                             charm))
+        return 0 == shell('juju status').code
 
     @classmethod
     def deploy_bundle(cls, bundle):
         """ Juju deploy bundle
 
         Arguments:
-        charm: Name of bundle to deploy
+        bundle: Name of bundle to deploy, can be a path to local bundle file or
+                charmstore path.
         """
-        return shell('{} juju deploy {}'.format(cls.cmd_prefix,
-                                                bundle))
+        return shell('juju deploy {}'.format(bundle))
 
     @classmethod
     def create_environment(cls, path, env, config):
@@ -85,8 +71,8 @@ class Juju:
             shutil.move(path, os.path.join(juju_home_dir, env_backup_fn))
         else:
             FS.mkdir(juju_home_dir)
-        FS.spew(path, config, Host.install_user())
-        return shell("{} juju switch {}".format(cls.cmd_prefix, env))
+        FS.spew(path, config)
+        return shell("juju switch {}".format(env))
 
     @classmethod
     def env(cls, path):
