@@ -73,3 +73,14 @@ class CharmModel:
             return cls.key()
         else:
             return "{}-{}".format(cls.key(), cls.revision())
+
+    @classmethod
+    def to_path(cls):
+        """ Returns bundle path suitable for juju deploy <bundle>
+        """
+        bundle = cls.key()
+        if bundle is None:
+            raise CharmModelException("Unable to determine bundle")
+        if cls.revision() is not None:
+            bundle = "{}-{}".format(bundle, cls.revision())
+        return "cs:bundle/{}".format(bundle)

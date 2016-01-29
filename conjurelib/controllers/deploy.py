@@ -18,9 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import os
 import time
 from ubuntui.ev import EventLoop
+from conjurelib.charm import get_bundle
+from conjurelib.models.charm import CharmModel
 from conjurelib.ui.views import DeployView
 from conjurelib.controllers.finish import FinishController
 
@@ -42,10 +43,11 @@ class DeployController:
         FinishController(self.common).render()
 
     def render(self):
+        # Grab bundle and deploy or render placement if MAAS
         if self.provider.name.lower() == "local":
             view = DeployView(self.common, self.provider, self.finish)
             self.common['ui'].set_header(
-                title="Deploying: {}".format(self.common['config']['name'])
+                title="Deploying: {}".format(CharmModel.to_path())
             )
             self.common['ui'].set_body(view)
 
@@ -56,14 +58,11 @@ class DeployController:
 
         # TODO: demo specific should be changed afterwards
         if self.provider.name.lower() == "maas":
-            DEMO_BUNDLE = os.path.join(
-                Config.share_path(), "data-analytics-with-sql-like.yaml")
-            DEMO_METADATA = os.path.join(
-                Config.share_path(),
-                "data-analytics-with-sql-like-metadata.yaml")
-            bundleplacer_cfg = Config('bundle-placer',
-                                      {'bundle_filename': DEMO_BUNDLE,
-                                       'metadata_filename': DEMO_METADATA})
+            bundle = get_bundle(CharmModel.to_entity())
+            bundleplacer_cfg = Config(
+                'bundle-placer',
+                {'bundle': bundle,
+                 'metadata': self.common['config']['metadata']})
             placement_controller = PlacementController(
                 config=bundleplacer_cfg,
                 maas_state=FakeMaasState())
