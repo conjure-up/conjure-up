@@ -18,8 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import time
+from functools import partial
 from ubuntui.ev import EventLoop
+from conjurelib.async import AsyncPool
+from conjurelib.juju import Juju
 from conjurelib.charm import get_bundle
 from conjurelib.models.charm import CharmModel
 from conjurelib.ui.views import DeployView
@@ -51,10 +53,17 @@ class DeployController:
             )
             self.common['ui'].set_body(view)
 
-            def stfu(*args):
-                view.set_status(time.asctime())
-                EventLoop.set_alarm_in(1, stfu)
-            EventLoop.set_alarm_in(1, stfu)
+            def read_status(*args):
+                services = Juju.status()['services']
+                services = "\n".join(services.keys())
+                view.set_status(services)
+                EventLoop.set_alarm_in(3, read_status)
+
+            def error(*args):
+                print(args)
+            AsyncPool.submit(
+                partial(Juju.deploy_bundle, CharmModel.to_path()))
+            EventLoop.set_alarm_in(1, read_status)
 
         # TODO: demo specific should be changed afterwards
         if self.provider.name.lower() == "maas":

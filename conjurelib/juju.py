@@ -25,6 +25,7 @@ from .shell import shell
 import shutil
 import os
 import yaml
+import json
 
 
 class Juju:
@@ -33,7 +34,7 @@ class Juju:
     def bootstrap(cls):
         """ Performs juju bootstrap
         """
-        return shell('juju bootstrap --debug')
+        return shell('juju bootstrap --debug --upload-tools')
 
     @classmethod
     def available(cls):
@@ -49,7 +50,8 @@ class Juju:
         """ Returns juju status output
         """
         if cls.available():
-            return shell('juju status --format tabular').output()
+            out = shell('juju status --format json').output().pop()
+            return json.loads(out)
         return "Juju status not available at this time"
 
     @classmethod
