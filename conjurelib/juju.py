@@ -45,6 +45,14 @@ class Juju:
         return 0 == shell('juju status').code
 
     @classmethod
+    def status(cls):
+        """ Returns juju status output
+        """
+        if cls.available():
+            return shell('juju status --format tabular').output()
+        return "Juju status not available at this time"
+
+    @classmethod
     def deploy_bundle(cls, bundle):
         """ Juju deploy bundle
 
