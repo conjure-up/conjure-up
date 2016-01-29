@@ -33,9 +33,6 @@ class CharmModel:
         "revision": None
     }
 
-    # Bypass revision from config and pull down latest bundle from charmstore.
-    use_latest = False
-
     @classmethod
     def key(cls):
         """ Returns key of resource
@@ -61,14 +58,18 @@ class CharmModel:
         return cls.bundle.get('revision', None)
 
     @classmethod
-    def to_path(cls):
-        """ Returns proper path to pass to juju deploy depending
-        on if it's a bundle or a charm
+    def to_entity(cls, use_latest=True):
+        """ Returns proper entity key to query the charmstore.
+
+        Arguments:
+        use_latest: Use latest bundle revision from charmstore
+
+        Returns:
+        Formatted entity string suitable for charmstore lookup
         """
-        if cls.key() is None or (cls.revision() is
-                                 None and not cls.use_latest):
+        if cls.key() is None:
             raise CharmModelException("Unable to determine bundle path.")
-        if cls.use_latest:
-            return "cs:bundle/{}".format(cls.key())
+        if use_latest:
+            return cls.key()
         else:
-            return "cs:bundle/{}/{}".format(cls.key(), cls.revision())
+            return "{}-{}".format(cls.key(), cls.revision())

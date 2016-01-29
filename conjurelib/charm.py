@@ -25,6 +25,30 @@ Simple wrapper around theblues charmstore client
 Api for the charmstore:
 https://github.com/juju/charmstore/blob/v4/docs/API.md
 """
+import os.path as path
+import yaml
+import requests
 from theblues.charmstore import CharmStore
 
 cs = CharmStore('https://api.jujucharms.com/v4')
+
+
+class CharmStoreException(Exception):
+    """ CharmStore exception """
+
+
+def get_bundle(bundle):
+    """ Attempts to grab the bundle.yaml
+
+    Arguments:
+    bundle: name of bundle
+
+    Returns:
+    Dictionary of bundle's yaml
+    """
+    archive_url = path.join(cs.archive_url(bundle), 'bundle.yaml')
+    req = requests.get(archive_url)
+    if not req.ok:
+        raise CharmStoreException(
+            "Unable to find bundle: RESP {}".format(req))
+    return yaml.safe_load(req.text)
