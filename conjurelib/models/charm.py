@@ -19,53 +19,56 @@
 # THE SOFTWARE.
 
 
+class CharmModelException(Exception):
+    """ Exception in CharmModel """
+
+
 class CharmModel:
     """ Stores charm/bundle location for juju deploy
     """
     bundle = {
         "key": None,
         "name": None,
-        "summary": None
-    }
-    charm = {
-        "key": None,
-        "name": None,
-        "summary": None
+        "summary": None,
+        "revision": None
     }
 
-    @classmethod
-    def resource(cls):
-        """ Returns defined bundle or charm
-        """
-        if cls.bundle is not None:
-            return cls.bundle
-        if cls.charm is not None:
-            return cls.charm
+    # Bypass revision from config and pull down latest bundle from charmstore.
+    use_latest = False
 
     @classmethod
     def key(cls):
         """ Returns key of resource
         """
-        return cls.resource().get('key', None)
+        return cls.bundle.get('key', None)
 
     @classmethod
     def name(cls):
         """ Returns name of resource
         """
-        return cls.resource().get('name', None)
+        return cls.bundle.get('name', None)
 
     @classmethod
     def summary(cls):
         """ Returns summary of resource
         """
-        return cls.resource().get('summary', None)
+        return cls.bundle.get('summary', None)
+
+    @classmethod
+    def revision(cls):
+        """ Returns revision of resource
+        """
+        return cls.bundle.get('revision', None)
 
     @classmethod
     def to_path(cls):
         """ Returns proper path to pass to juju deploy depending
         on if it's a bundle or a charm
         """
-        if cls.bundle is not None:
+        if cls.key() is None or (cls.revision() is
+                                 None and not cls.use_latest):
+            raise CharmModelException("Unable to determine bundle path.")
+        if cls.use_latest:
             return "cs:bundle/{}".format(cls.key())
-        if cls.charm is not None:
-            return "cs:{}".format(cls.key())
+        else:
+            return "cs:bundle/{}/{}".format(cls.key(), cls.revision())

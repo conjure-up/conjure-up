@@ -51,6 +51,10 @@ class Application:
         with open(opts.build_conf) as json_f:
             config = json.load(json_f)
 
+        with open(opts.build_metadata) as json_f:
+            metadata = json.load(json_f)
+            config['metadata'] = metadata
+
         self.common = {
             'opts': opts,
             'ui': ConjureUI(),
@@ -87,6 +91,9 @@ def parse_options(argv):
                                      prog="conjure-setup")
     parser.add_argument('-c', '--config', dest='build_conf', metavar='CONFIG',
                         help='Path to Conjure config')
+    parser.add_argument('-m', '--metadata', dest='build_metadata',
+                        metavar='METADATA',
+                        help='Path to bundle services metadata')
 
     return parser.parse_args(argv)
 
@@ -100,6 +107,11 @@ def main():
 
     if not path.exists(opts.build_conf):
         raise ApplicationException("Unable to find {}".format(opts.build_conf))
+
+    if not path.exists(opts.build_metadata):
+        raise ApplicationException("Unable to find {} metadata".format(
+            opts.build_metadata
+        ))
 
     app = Application(opts)
     app.start()

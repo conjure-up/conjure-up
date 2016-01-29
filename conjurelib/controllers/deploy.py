@@ -19,6 +19,8 @@
 # THE SOFTWARE.
 
 import os
+import time
+from ubuntui.ev import EventLoop
 from conjurelib.ui.views import DeployView
 from conjurelib.controllers.finish import FinishController
 
@@ -46,6 +48,11 @@ class DeployController:
                 title="Deploying: {}".format(self.common['config']['name'])
             )
             self.common['ui'].set_body(view)
+
+            def stfu(*args):
+                view.set_status(time.asctime())
+                EventLoop.set_alarm_in(1, stfu)
+            EventLoop.set_alarm_in(1, stfu)
 
         # TODO: demo specific should be changed afterwards
         if self.provider.name.lower() == "maas":
