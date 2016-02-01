@@ -20,7 +20,7 @@
 
 """ Juju helpers
 """
-from .utils import FS
+from .utils import FS, Host
 from .shell import shell
 import shutil
 import os
@@ -97,3 +97,15 @@ class Juju:
         """
         env = cls.env(path)
         return env.get('default', None)
+
+    @classmethod
+    def list_envs(cls):
+        """ List known juju environments
+        """
+        juju_env_dir = os.path.join(Host.juju_path(), 'environments')
+        if os.path.isdir(juju_env_dir):
+            envs = os.listdir(juju_env_dir)
+            envs = [os.path.splitext(f)[0] for f in envs]
+            return envs
+        else:
+            return None

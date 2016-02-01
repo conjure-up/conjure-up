@@ -20,15 +20,14 @@
 
 """ Charm utilities
 
-Simple wrapper around theblues charmstore client
-
 Api for the charmstore:
 https://github.com/juju/charmstore/blob/v4/docs/API.md
 """
 import yaml
-from theblues.charmstore import CharmStore, EntityNotFound
+import requests
+import os.path as path
 
-cs = CharmStore('https://api.jujucharms.com/v4')
+cs = 'https://api.jujucharms.com/v4'
 
 
 class CharmStoreException(Exception):
@@ -44,10 +43,8 @@ def get_bundle(bundle):
     Returns:
     Dictionary of bundle's yaml
     """
-    try:
-        return yaml.safe_load(cs.files(bundle,
-                                       filename='bundle.yaml',
-                                       read_file=True))
-    except EntityNotFound as e:
-        raise CharmStoreException(
-            "Unable to find bundle: {}".format(e))
+    bundle = path.join(cs, bundle, 'archive/bundle.yaml')
+    req = requests.get(bundle)
+    if not req.ok:
+        raise CharmStoreException("Problem getting bundle: {}".format(req))
+    return yaml.safe_load(req.text)

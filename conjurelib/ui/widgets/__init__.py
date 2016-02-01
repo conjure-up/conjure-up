@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Canonical, Ltd.
+# Copyright (c) 2016 Canonical Ltd.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -17,22 +17,3 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-
-import setuptools
-import conjurelib
-
-
-setuptools.setup(
-    name="conjure",
-    version=conjurelib.__version__,
-    author="Adam Stokes",
-    author_email="adam.stokes@ubuntu.com",
-    description="Conjure for apt cloud packages",
-    url="https://github.com/ubuntu-solutions-engineering/conjure",
-    packages=setuptools.find_packages(),
-    entry_points={
-        "console_scripts": [
-            "conjure-setup = conjurelib.app:main"
-        ]
-    }
-)

@@ -68,6 +68,12 @@ class Host:
         """
         return os.path.expanduser("~" + cls.install_user())
 
+    @classmethod
+    def juju_path(cls):
+        """ returns juju path for $user
+        """
+        return os.path.join(cls.install_home(), '.juju')
+
 
 class FS:
     """ filesystem utility class

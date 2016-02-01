@@ -2,7 +2,8 @@ Source: conjure
 Section: admin
 Priority: extra
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Build-Depends: debhelper (>= 9),
+Build-Depends: bundle-placer,
+               debhelper (>= 9),
                dh-python,
                pep8,
                pyflakes,
@@ -11,12 +12,9 @@ Build-Depends: debhelper (>= 9),
                python3-nose,
                python3-requests,
                python3-setuptools,
-               python3-theblues,
                python3-urwid,
                python3-urwid-ubuntu,
-               python3-yaml,
-               python3-jujuclient,
-               bundle-placer
+               python3-yaml
 Standards-Version: 3.9.6
 Homepage: https://github.com/Ubuntu-Solutions-Engineering/conjure
 X-Python3-Version: >= 3.4
@@ -25,16 +23,14 @@ Vcs-Git: https://github.com/Ubuntu-Solutions-Engineering/conjure.git
 
 Package: conjure
 Architecture: all
-Depends: gawk,
+Depends: bundle-placer,
+         gawk,
          juju-core,
          python3-jinja2,
          python3-requests,
-         python3-theblues,
          python3-urwid,
          python3-urwid-ubuntu,
          python3-yaml,
-         python3-jujuclient,
-         bundle-placer,
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
