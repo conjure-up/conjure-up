@@ -33,7 +33,11 @@ class LXD:
             'lxc image alias list|grep -q \'ubuntu-trusty\'').code
 
     @classmethod
-    def import_image(cls):
+    def import_image(cls, series='trusty'):
         """ Import lxd image
+
+        Params:
+        series: Ubuntu distro series (defaults: trusty)
         """
-        return shell('lxd-images import ubuntu --alias ubuntu-trusty')
+        return shell(
+            'lxd-images import ubuntu --alias ubuntu-{}'.format(series))

@@ -6,7 +6,7 @@ TOPDIR              := $(shell basename `pwd`)
 GIT_REV		    			:= $(shell git log --oneline -n1| cut -d" " -f1)
 VERSION             := $(shell ./tools/version)
 UPSTREAM_MACUMBA    := https://github.com/Ubuntu-Solutions-Engineering/macumba.git
-UPSTREAM_MACUMBA_COMMIT := 5674861
+UPSTREAM_MACUMBA_COMMIT := v0.7
 UPSTREAM_MAASCLIENT := https://github.com/Ubuntu-Solutions-Engineering/maasclient.git
 UPSTREAM_MAASCLIENT_COMMIT := 357db23
 

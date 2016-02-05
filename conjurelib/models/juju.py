@@ -22,7 +22,7 @@ import time
 from .machine import Machine
 from .service import Service
 
-from macumba import RequestTimeout
+from macumba.errors import RequestTimeout
 
 log = logging.getLogger('models.juju')
 

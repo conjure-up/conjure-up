@@ -20,21 +20,40 @@
 
 """ Juju helpers
 """
-from .utils import FS, Host
 from .shell import shell
-import shutil
 import os
 import yaml
-import json
+from macumba.v2 import JujuClient
+from .models.juju import JujuState
 
 
 class Juju:
+    is_authenticated = False
+    jujuc = None
+
+    @classmethod
+    def login(cls, model='lxd'):
+        """ Login to Juju API server
+
+        Params:
+        model: Model to access
+        """
+        env = cls.env()
+        uuid = env['server-user'][model]['server-uuid']
+        server = env['server-data'][uuid]['api-endpoints'][0]
+        password = env['server-data'][uuid]['identities']['admin']
+        url = os.path.join('wss://', server, 'model', uuid, 'api')
+        cls.jujuc = JujuClient(
+            url=url,
+            password=password)
+        cls.jujuc.login()
+        cls.is_authenticated = True
 
     @classmethod
     def bootstrap(cls):
         """ Performs juju bootstrap
         """
-        return shell('juju bootstrap --debug --upload-tools')
+        return shell('juju bootstrap --upload-tools')
 
     @classmethod
     def available(cls):
@@ -47,12 +66,11 @@ class Juju:
 
     @classmethod
     def status(cls):
-        """ Returns juju status output
+        """ Returns JujuState()
         """
-        if cls.available():
-            out = shell('juju status --format json').output().pop()
-            return json.loads(out)
-        return "Juju status not available at this time"
+        if cls.is_authenticated:
+            return JujuState(cls.jujuc)
+        raise Exception('Unable to query Juju API for status update.')
 
     @classmethod
     def deploy_bundle(cls, bundle):
@@ -65,47 +83,37 @@ class Juju:
         return shell('juju deploy {}'.format(bundle))
 
     @classmethod
-    def create_environment(cls, path, env, config):
-        """ Creates a Juju environments.yaml file to bootstrap. This
-        will backup the existing environments.yaml if exists.
-
-        Arguments:
-        path: location to store the environments.yaml
-        env: environment type (eg. maas)
-        config: YAML output of the environments configuration
+    def create_environment(cls):
+        """ Creates a Juju environments.yaml file to bootstrap.
         """
-        juju_home_dir = os.path.dirname(path)
+        env_f = os.path.expanduser('~/.juju/environments.yaml')
 
-        if os.path.exists(path):
-            env_backup_fn = "{}.bak".format(os.path.basename(path))
-            shutil.move(path, os.path.join(juju_home_dir, env_backup_fn))
-        else:
-            FS.mkdir(juju_home_dir)
-        FS.spew(path, config)
-        return shell("juju switch {}".format(env))
+        if not os.path.exists(env_f):
+            shell('juju init')
 
     @classmethod
-    def env(cls, path):
+    def env(cls):
         """ Returns a parsed environments.yaml to dictionary
         """
-        with open(path) as env:
-            return yaml.load(env)
+        env = os.path.expanduser('~/.juju/models/cache.yaml')
+        if not os.path.isfile(env):
+            raise Exception('No cached environment found.')
+        with open(env) as env_fp:
+            return yaml.load(env_fp)
 
     @classmethod
-    def current_env(cls, path):
+    def current_env(cls):
         """ Grabs the current default environment
         """
-        env = cls.env(path)
-        return env.get('default', None)
+        env = os.path.expanduser('~/.juju/current-model')
+        if not os.path.isfile(env):
+            return None
+        with open(env) as fp:
+            return fp.read().strip()
 
     @classmethod
     def list_envs(cls):
         """ List known juju environments
         """
-        juju_env_dir = os.path.join(Host.juju_path(), 'environments')
-        if os.path.isdir(juju_env_dir):
-            envs = os.listdir(juju_env_dir)
-            envs = [os.path.splitext(f)[0] for f in envs]
-            return envs
-        else:
-            return None
+        env = cls.env()
+        return list(env['server-user'].keys())
