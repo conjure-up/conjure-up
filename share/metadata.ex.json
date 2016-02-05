@@ -1,0 +1,15 @@
+{
+  "hdp-core-batch-processing": {
+    "compute-node": {
+      "allowed_assignment_types": ["BareMetal", "KVM"]
+    },
+    "hdphive": {
+      "allowed_assignment_types": ["KVM", "LXC"]
+    }
+  },
+  "data-analytics-with-sql-like": {
+    "compute-node": {
+      "allowed_assignment_types": ["BareMetal"]
+    }
+  }
+}

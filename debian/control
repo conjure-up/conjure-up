@@ -35,7 +35,7 @@ Depends: bundle-placer,
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
-Description: Conjure Runner
+Description: Package runtime for apt installable juju bundles.
  This package provides Conjure an interface to configuring apt installable
  packages from the cloud. It utilizes apt, juju, and conjures custom
  configuration views.

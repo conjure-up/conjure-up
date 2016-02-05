@@ -1,3 +1,7 @@
+# NAME
+
+conjure-setup - Runtime installer for APT-Juju packages.
+
 # SYNOPSIS
 
 ```

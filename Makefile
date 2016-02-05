@@ -56,6 +56,7 @@ git-sync-requirements:
 	rm -rf tmp && mkdir -p tmp
 	rm -rf macumba
 	rm -rf maasclient
+	rm -rf ubuntui
 	git clone -q $(UPSTREAM_MACUMBA) tmp/macumba
 	git clone -q $(UPSTREAM_MAASCLIENT) tmp/maasclient
 	git clone -q $(UPSTREAM_UBUNTUI) tmp/ubuntui
