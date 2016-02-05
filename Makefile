@@ -9,6 +9,8 @@ UPSTREAM_MACUMBA    := https://github.com/Ubuntu-Solutions-Engineering/macumba.g
 UPSTREAM_MACUMBA_COMMIT := v0.7
 UPSTREAM_MAASCLIENT := https://github.com/Ubuntu-Solutions-Engineering/maasclient.git
 UPSTREAM_MAASCLIENT_COMMIT := 357db23
+UPSTREAM_UBUNTUI := https://github.com/Ubuntu-Solutions-Engineering/urwid-ubuntu.git
+UPSTREAM_UBUNTUI_COMMIT := v0.0.3
 
 .PHONY: install-dependencies
 install-dependencies:
@@ -35,16 +37,16 @@ clean:
 
 DPKGBUILDARGS = -us -uc -i'.git.*|.tox|.bzr.*|.editorconfig|.travis-yaml|macumba\/debian|maasclient\/debian'
 deb-src: clean update_version
-	@dpkg-buildpackage -S -sa $(DPKGBUILDARGS)
+	@debuild -S -sa $(DPKGBUILDARGS)
 
 deb-release:
-	@dpkg-buildpackage -S -sd $(DPKGBUILDARGS)
+	@debuild -S -sd $(DPKGBUILDARGS)
 
 deb: clean update_version man-pages
-	@dpkg-buildpackage -b $(DPKGBUILDARGS)
+	@debuild -b $(DPKGBUILDARGS)
 
 man-pages:
-	@pandoc -s docs/conjure-setup.rst -t man -o man/en/conjure-setup.1
+	@pandoc -s docs/conjure-setup.md -t man -o man/en/conjure-setup.1
 
 current_version:
 	@echo $(VERSION)
@@ -56,10 +58,13 @@ git-sync-requirements:
 	rm -rf maasclient
 	git clone -q $(UPSTREAM_MACUMBA) tmp/macumba
 	git clone -q $(UPSTREAM_MAASCLIENT) tmp/maasclient
+	git clone -q $(UPSTREAM_UBUNTUI) tmp/ubuntui
 	(cd tmp/maasclient && git checkout -q -f $(UPSTREAM_MAASCLIENT_COMMIT))
 	(cd tmp/macumba && git checkout -q -f $(UPSTREAM_MACUMBA_COMMIT))
-	rsync -az --delete tmp/macumba/macumba .
-	rsync -az --delete tmp/maasclient/maasclient .
+	(cd tmp/ubuntui && git checkout -q -f $(UPSTREAM_UBUNTUI_COMMIT))
+	rsync -C -az --delete tmp/macumba/macumba .
+	rsync -C -az --delete tmp/maasclient/maasclient .
+	rsync -C -az --delete tmp/ubuntui/ubuntui .
 	rm -rf tmp
 
 git_rev:

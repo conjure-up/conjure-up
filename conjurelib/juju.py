@@ -68,9 +68,9 @@ class Juju:
     def status(cls):
         """ Returns JujuState()
         """
-        if cls.is_authenticated:
-            return JujuState(cls.jujuc)
-        raise Exception('Unable to query Juju API for status update.')
+        if not cls.is_authenticated:
+            cls.login()
+        return JujuState(cls.jujuc)
 
     @classmethod
     def deploy_bundle(cls, bundle):
