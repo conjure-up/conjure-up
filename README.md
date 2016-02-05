@@ -12,6 +12,8 @@ installation via `apt-get install` and a install wizard.
 $ sudo apt-add-repository ppa:conjure/ppa
 $ sudo apt-get update
 $ sudo apt-get install bigdata
+
+$ bigdata-install
 ```
 
 # license
