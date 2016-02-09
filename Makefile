@@ -23,7 +23,7 @@ uninstall-dependencies:
 
 update_version: git-sync-requirements
 	wrap-and-sort
-	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjurelib/__init__.py
+	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjure/__init__.py
 
 clean:
 	@-debian/rules clean

@@ -1,5 +1,5 @@
-from conjure.ui.views import LocalJujuModelView
-from conjure.models.jujumodels import LocalJujuModel
+from conjure.ui.views.local import LocalJujuModelView
+from conjure.models.jujumodels.local import LocalJujuModel
 from conjure.juju import Juju
 from conjure.controllers.deploy import DeployController
 

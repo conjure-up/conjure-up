@@ -24,11 +24,11 @@
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 from conjure.juju import Juju
-from conjure.controllers import (WelcomeController)
+from conjure.controllers.welcome import WelcomeController
 from conjure.ui import ConjureUI
-from conjure.models.jujumodels import (LocalJujuModel,
-                                       MaasJujuModel,
-                                       OpenStackJujuModel)
+from conjure.models.jujumodels.local import LocalJujuModel
+from conjure.models.jujumodels.maas import MaasJujuModel
+from conjure.models.jujumodels.openstack import OpenStackJujuModel
 from conjure import async
 import json
 import sys

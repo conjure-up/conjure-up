@@ -1,8 +1,8 @@
 from conjure.ui.views.jujumodel import (NewModelView, ExistingModelView)
 from conjure.controllers.deploy import DeployController
-from conjure.controllers.jujumodels import (MaasJujuModelController,
-                                            OpenStackJujuModelController,
-                                            LocalJujuModelController)
+from conjure.controllers.jujumodels.maas import MaasJujuModelController
+from conjure.controllers.jujumodels.openstack import OpenStackJujuModelController  # noqa
+from conjure.controllers.jujumodels.local import LocalJujuModelController
 
 
 class JujuModelController:

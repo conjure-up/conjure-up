@@ -1,5 +1,5 @@
-from conjure.ui.views import MaasJujuModelView
-from conjure.models.models import MaasJujuModel
+from conjure.ui.views.maas import MaasJujuModelView
+from conjure.models.jujumodels.maas import MaasJujuModel
 from conjure.juju import Juju
 from conjure.controllers.deploy import DeployController
 

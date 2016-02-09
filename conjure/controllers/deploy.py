@@ -4,7 +4,7 @@ from conjure.async import AsyncPool
 from conjure.juju import Juju
 from conjure.charm import get_bundle
 from conjure.models.charm import CharmModel
-from conjure.ui.views import DeployView
+from conjure.ui.views.deploy import DeployView
 from conjure.controllers.finish import FinishController
 
 from bundleplacer.config import Config

@@ -1,4 +1,4 @@
-from conjure.ui.views import FinishView
+from conjure.ui.views.finish import FinishView
 from ubuntui.ev import EventLoop
 
 

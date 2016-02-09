@@ -1,4 +1,4 @@
-from conjure.ui.views import WelcomeView
+from conjure.ui.views.welcome import WelcomeView
 from conjure.models import CharmModel
 from conjure.controllers.jujumodel import JujuModelController
 

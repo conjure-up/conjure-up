@@ -1,5 +1,5 @@
-from conjure.ui.views import OpenStackJujuModelView
-from conjure.models.models import OpenStackJujuModel
+from conjure.ui.views.openstack import OpenStackJujuModelView
+from conjure.models.jujumodels.openstack import OpenStackJujuModel
 from conjure.controllers.deploy import DeployController
 from conjure.juju import Juju
 
