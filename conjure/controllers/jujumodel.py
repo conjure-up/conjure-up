@@ -26,11 +26,15 @@ class JujuModelController:
         """
         self.common['juju'].switch(model)
         model_info = self.common['juju'].client.Client(request="ModelInfo")
-        if model_info['ProviderType'] in self.common['juju-models'].keys():
+        if model_info['ProviderType'] in self.common['juju-models']:
             model = self.common['juju-models'][model_info['ProviderType']]
             model.name = model_info['Name']
             model.provider_type = model_info['ProviderType']
-        DeployController(self.common, model).render()
+            DeployController(self.common, model).render()
+        else:
+            raise Exception("Unknown Provider Type found: {}".format(
+                model_info['ProviderType']
+            ))
 
     def render_model_view(self, model):
         """ No juju model found, render the selected models view
