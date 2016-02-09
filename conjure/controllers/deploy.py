@@ -34,7 +34,7 @@ class DeployController:
             self.common['ui'].set_body(view)
 
             def read_status(*args):
-                services = Juju.status()['services']
+                services = Juju.client.Client(request="FullStatus")
                 services = "\n".join(services.keys())
                 view.set_status(services)
                 EventLoop.set_alarm_in(3, read_status)

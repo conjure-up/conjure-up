@@ -10,9 +10,17 @@ class JujuModelController:
         self.common = common
         self.jujumodels = jujumodels
         if self.jujumodels is None:
+            self.excerpt = (
+                "A Juju environment is required to deploy the solution. "
+                "Since no existing environments were found please "
+                "select the model you wish to use.")
+
             self.view = NewModelView(self.common,
                                      self.render_model_view)
         else:
+            self.excerpt = (
+                "It looks like there are existing Juju Models, please select "
+                "the model you wish to deploy to.")
             self.view = ExistingModelView(self.common,
                                           self.jujumodels,
                                           self.deploy)
@@ -54,8 +62,6 @@ class JujuModelController:
     def render(self):
         self.common['ui'].set_header(
             title="Select a Juju Model",
-            excerpt="A Juju environment is required to deploy the solution. "
-            "Since no existing environments were found please "
-            "select the model you wish to use."
+            excerpt=self.excerpt
         )
         self.common['ui'].set_body(self.view)

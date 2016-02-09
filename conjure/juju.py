@@ -20,11 +20,11 @@
 
 """ Juju helpers
 """
-from .shell import shell
+from conjure.shell import shell
 import os
 import yaml
 from macumba.v2 import JujuClient
-from .models.juju import JujuState
+import q
 
 
 class Juju:
@@ -37,7 +37,7 @@ class Juju:
     def login(cls, model='lxd'):
         """ Login to Juju API server
 
-        Params:
+        Arguments:
         model: Model to access
         """
         if cls.is_authenticated is True:
@@ -57,7 +57,7 @@ class Juju:
     def list_models(cls, user='user-admin'):
         """ List current known juju models for user
 
-        Params:
+        Arguments:
         user: user to list models for (default: user-admin)
         """
         models = Juju.client.ModelManager(request="ListModels",
@@ -80,12 +80,16 @@ class Juju:
         return 0 == shell('juju status').code
 
     @classmethod
-    def status(cls):
-        """ Returns JujuState()
+    def switch(cls, jujumodel):
+        """ Switch to a Juju Model
+
+        Arguments:
+        jujumodel: Model to select
+
+        Returns:
+        False if failed to switch to Juju Model.
         """
-        if not cls.is_authenticated:
-            cls.login()
-        return JujuState(cls.client)
+        return 0 == shell('juju switch {}'.format(jujumodel)).code
 
     @classmethod
     def deploy_bundle(cls, bundle):
@@ -95,6 +99,7 @@ class Juju:
         bundle: Name of bundle to deploy, can be a path to local bundle file or
                 charmstore path.
         """
+        q(bundle)
         return shell('juju deploy {}'.format(bundle))
 
     @classmethod

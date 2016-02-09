@@ -27,7 +27,7 @@ class ExistingModelView(SelectorWithDescriptionWidget):
                 _models.append((_model.name, _model.description))
             else:
                 _models.append((name, ""))
-        super().__init__(title, models, cb)
+        super().__init__(title, _models, cb)
 
     def cancel(self, btn):
         EventLoop.exit(0)
