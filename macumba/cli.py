@@ -33,11 +33,11 @@ def parse_options(argv):
 
 
 def main():
-    juju_home = os.getenv("JUJU_HOME", "~/.juju")
     opts = parse_options(sys.argv[1:])
     if not opts.model:
         raise Exception("Must choose a Environment/Model.")
     if opts.v1:
+        juju_home = os.getenv("JUJU_HOME", "~/.juju")
         from .v1 import JujuClient  # noqa
         env = os.path.expanduser(
             os.path.join(
@@ -53,6 +53,8 @@ def main():
         url = os.path.join('wss://', server, 'environment', uuid, 'api')
 
     elif opts.v2:
+        xdg_home = os.getenv("XDG_DATA_HOME", "~/.local/share")
+        juju_home = os.path.join(xdg_home, 'juju')
         from .v2 import JujuClient  # noqa
         env = os.path.expanduser(
             os.path.join(
