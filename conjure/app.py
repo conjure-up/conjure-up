@@ -60,11 +60,11 @@ class Application:
             'opts': opts,
             'ui': ConjureUI(),
             'config': config,
-            'juju-models': [
-                LocalJujuModel,
-                MaasJujuModel,
-                OpenStackJujuModel
-            ],
+            'juju-models': {
+                'lxd': LocalJujuModel,
+                'maas': MaasJujuModel,
+                'openstack': OpenStackJujuModel
+            },
             'juju': Juju
         }
 

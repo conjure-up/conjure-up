@@ -29,7 +29,6 @@ class WelcomeController:
             self.juju.login()
             models = self.juju.list_models()
             JujuModelController(self.common, models).render()
-
         else:
             JujuModelController(self.common, None).render()
 

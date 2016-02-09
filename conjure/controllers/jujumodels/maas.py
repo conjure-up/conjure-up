@@ -1,5 +1,6 @@
 from conjure.ui.views import MaasJujuModelView
 from conjure.models.models import MaasJujuModel
+from conjure.juju import Juju
 from conjure.controllers.deploy import DeployController
 
 
@@ -14,6 +15,7 @@ class MaasJujuModelController:
         """ Deploys to the maas model
         """
         self.model.config.update({k: v.value for k, v in result.items()})
+        Juju.create_environment()
         DeployController(self.common, self.model).render()
 
     def render(self):

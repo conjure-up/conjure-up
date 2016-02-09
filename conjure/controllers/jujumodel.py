@@ -1,8 +1,8 @@
-from conjure.ui.views import (NewModelView, ExistingModelView)
+from conjure.ui.views.jujumodel import (NewModelView, ExistingModelView)
 from conjure.controllers.deploy import DeployController
-from .jujumodels import (MaasModelController,
-                         OpenStackModelController,
-                         LocalModelController)
+from conjure.controllers.jujumodels import (MaasJujuModelController,
+                                            OpenStackJujuModelController,
+                                            LocalJujuModelController)
 
 
 class JujuModelController:
@@ -26,7 +26,11 @@ class JujuModelController:
         """
         self.common['juju'].switch(model)
         model_info = self.common['juju'].client.Client(request="ModelInfo")
-        DeployController(self.common, model_info['name']).render()
+        if model_info['ProviderType'] in self.common['juju-models'].keys():
+            model = self.common['juju-models'][model_info['ProviderType']]
+            model.name = model_info['Name']
+            model.provider_type = model_info['ProviderType']
+        DeployController(self.common, model).render()
 
     def render_model_view(self, model):
         """ No juju model found, render the selected models view
@@ -37,11 +41,11 @@ class JujuModelController:
         """
         model = model.lower()
         if model == "maas":
-            MaasModelController(self.common).render()
+            MaasJujuModelController(self.common).render()
         elif model == "openstack":
-            OpenStackModelController(self.common).render()
+            OpenStackJujuModelController(self.common).render()
         elif model == "local":
-            LocalModelController(self.common).render()
+            LocalJujuModelController(self.common).render()
 
     def render(self):
         self.common['ui'].set_header(

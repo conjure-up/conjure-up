@@ -1,6 +1,7 @@
 from conjure.ui.views import OpenStackJujuModelView
 from conjure.models.models import OpenStackJujuModel
 from conjure.controllers.deploy import DeployController
+from conjure.juju import Juju
 
 
 class OpenStackJujuModelController:
@@ -14,6 +15,7 @@ class OpenStackJujuModelController:
         """ Deploys to the openstack model
         """
         self.model.config.update({k: v.value for k, v in result.items()})
+        Juju.create_environment()
         DeployController(self.common, self.model).render()
 
     def render(self):
