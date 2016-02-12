@@ -1,5 +1,5 @@
 from conjure.ui.views.local import LocalJujuModelView
-from conjure.models.jujumodels.local import LocalJujuModel
+from conjure.models.jujumodel import JujuModel
 from conjure.juju import Juju
 from conjure.controllers.deploy import DeployController
 
@@ -9,12 +9,16 @@ class LocalJujuModelController:
         self.common = common
         self.view = LocalJujuModelView(self.common,
                                        self.finish)
-        self.model = LocalJujuModel
+        self.model = JujuModel(self.common['juju-modles']['name'])
+        # If there are no options go directly to finish
+        if not self.model['options']:
+            self.finish()
 
-    def finish(self, result):
+    def finish(self, result=None):
         """ Deploys to the local model
         """
-        self.model.config.update({k: v.value for k, v in result.items()})
+        if result is not None:
+            self.model.config.update({k: v.value for k, v in result.items()})
         Juju.create_environment()
         DeployController(self.common, self.model).render()
 

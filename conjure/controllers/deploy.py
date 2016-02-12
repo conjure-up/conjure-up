@@ -26,7 +26,7 @@ class DeployController:
 
     def render(self):
         # Grab bundle and deploy or render placement if MAAS
-        if self.jujumodel.provider_type.lower() == "lxd":
+        if self.jujumodel['provider_type'].lower() == "lxd":
             view = DeployView(self.common, self.jujumodel, self.finish)
             self.common['ui'].set_header(
                 title="Deploying: {}".format(CharmModel.to_path())

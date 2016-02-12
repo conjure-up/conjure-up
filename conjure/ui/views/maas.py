@@ -1,13 +1,13 @@
 from ubuntui.dialog import opts_to_ui, Dialog
 from ubuntui.ev import EventLoop
-from conjure.models.jujumodels.maas import MaasJujuModel
 
 
 class MaasJujuModelView(Dialog):
-    input_items = opts_to_ui(MaasJujuModel.config)
 
     def __init__(self, common, cb):
         self.common = common
+        self.config = self.common['config']
+        self.input_items = opts_to_ui(self.config['juju-models']['maas'])
         title = "MAAS Credentials"
         super().__init__(title, cb)
 

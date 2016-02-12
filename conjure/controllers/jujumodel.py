@@ -37,8 +37,6 @@ class JujuModelController:
         model_info = self.common['juju'].client.Client(request="ModelInfo")
         if model_info['ProviderType'] in self.config['juju-models']:
             model = self.config['juju-models'][model_info['ProviderType']]
-            model.name = model_info['Name']
-            model.provider_type = model_info['ProviderType']
             DeployController(self.common, model).render()
         else:
             raise Exception("Unknown Provider Type found: {}".format(
