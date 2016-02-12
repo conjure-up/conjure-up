@@ -1,0 +1,33 @@
+{
+    "lxd": {
+        "name": "Local",
+        "description": "Deploy using LXD",
+        "provider_type": "lxd",
+        "options": {}
+    },
+    "maas": {
+        "name": "MAAS",
+        "description": "Deploy using MAAS",
+        "provider_type": "maas",
+        "options": {
+            "maas-server": "",
+            "maas-oauth": ""
+        }
+    },
+    "openstack": {
+        "name": "OpenStack",
+        "description": "Deploy to an OpenStack environment.",
+        "provider_type": "openstack",
+        "options": {
+            "username": "",
+            "password": "",
+            "auth-mode": "",
+            "auth-url": "",
+            "network": "",
+            "region": "",
+            "tenant-name": "",
+            "use-default-secgroup": true,
+            "use-floating-ip": true
+        }
+    }
+}

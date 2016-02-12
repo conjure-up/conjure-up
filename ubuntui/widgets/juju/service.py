@@ -18,4 +18,4 @@ class UnitWidget(WidgetWrap):
                   'networks',
                   'life']
         for m in _attrs:
-            setattr(self, m, Text(getattr(self.service, m)))
+            setattr(self, m, Text(str(self.service.get(m))))

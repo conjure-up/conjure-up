@@ -1,1 +1,1 @@
-share                        usr/share/conjure
+share/*                        usr/share/conjure/.

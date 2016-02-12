@@ -53,18 +53,15 @@ class Application:
             config = json.load(json_f)
 
         with open(opts.build_metadata) as json_f:
-            metadata = json.load(json_f)
-            config['metadata'] = metadata
+            config['metadata'] = json.load(json_f)
+
+        with open('/usr/share/conjure/providers.json') as json_f:
+            config['juju-models'] = json.load(json_f)
 
         self.common = {
             'opts': opts,
             'ui': ConjureUI(),
             'config': config,
-            'juju-models': {
-                'lxd': LocalJujuModel,
-                'maas': MaasJujuModel,
-                'openstack': OpenStackJujuModel
-            },
             'juju': Juju
         }
 

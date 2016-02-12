@@ -25,4 +25,4 @@ class MachineWidget(WidgetWrap):
                   'has_vote',
                   'wants_vote']
         for m in _attrs:
-            setattr(self, m, Text(getattr(self.machine, m)))
+            setattr(self, m, Text(str(self.machine.get(m))))
