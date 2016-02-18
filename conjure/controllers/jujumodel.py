@@ -14,14 +14,20 @@ class JujuModelController:
             self.excerpt = (
                 "A Juju environment is required to deploy the solution. "
                 "Since no existing environments were found please "
-                "select the model you wish to use.")
+                "select the model you wish to use. This would be the "
+                "equivalent of running `juju bootstrap -e <model>`.\n\n"
+                "For more information type `{cmd}` at your "
+                "command prompt.".format(cmd='juju help bootstrap'))
 
             self.view = NewModelView(self.common,
                                      self.render_model_view)
         else:
             self.excerpt = (
                 "It looks like there are existing Juju Models, please select "
-                "the model you wish to deploy to.")
+                "the model you wish to deploy to. This would be the "
+                "equivalent of running `juju list-models`.\n\n"
+                "For more information type `{cmd}` at your "
+                "command prompt.".format(cmd='juju help controllers'))
             self.view = ExistingModelView(self.common,
                                           self.jujumodels,
                                           self.deploy)
@@ -34,14 +40,7 @@ class JujuModelController:
         model: Juju model to deploy to
         """
         self.common['juju'].switch(model)
-        model_info = self.common['juju'].client.Client(request="ModelInfo")
-        if model_info['ProviderType'] in self.config['juju-models']:
-            model = self.config['juju-models'][model_info['ProviderType']]
-            DeployController(self.common, model).render()
-        else:
-            raise Exception("Unknown Provider Type found: {}".format(
-                model_info['ProviderType']
-            ))
+        DeployController(self.common, model).render()
 
     def render_model_view(self, model):
         """ No juju model found, render the selected models view
