@@ -1,4 +1,5 @@
-from ubuntui.views import SelectorWithDescriptionWidget
+from ubuntui.views import (SelectorWidget,
+                           SelectorWithDescriptionWidget)
 from ubuntui.ev import EventLoop
 
 
@@ -17,18 +18,14 @@ class NewModelView(SelectorWithDescriptionWidget):
         EventLoop.exit(0)
 
 
-class ExistingModelView(SelectorWithDescriptionWidget):
+class ExistingModelView(SelectorWidget):
     def __init__(self, common, models, cb):
         self.common = common
         self.config = self.common['config']
         title = "Choose an existing Juju Model to deploy the solution to"
         _models = []
         for name in models:
-            if name in self.config['juju-models']:
-                _model = self.config['juju-models'][name]
-                _models.append((_model['name'], _model['description']))
-            else:
-                _models.append((name, ""))
+            _models.append(name)
         super().__init__(title, _models, cb)
 
     def cancel(self, btn):

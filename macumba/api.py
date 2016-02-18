@@ -57,7 +57,7 @@ class Base:
             self.conn = JujuWS(url, password)
 
         self.creds = {'Type': 'Admin',
-                      'Version': 2,
+                      'Version': 3,
                       'Request': 'Login',
                       'RequestId': 1,
                       'Params': {'auth-tag': user,

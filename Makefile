@@ -6,11 +6,11 @@ TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
 VERSION := $(shell ./tools/version)
 UPSTREAM_MACUMBA := https://github.com/Ubuntu-Solutions-Engineering/macumba.git
-UPSTREAM_MACUMBA_COMMIT := v0.9
+UPSTREAM_MACUMBA_COMMIT := v0.9.1
 UPSTREAM_MAASCLIENT := https://github.com/Ubuntu-Solutions-Engineering/maasclient.git
 UPSTREAM_MAASCLIENT_COMMIT := v0.3
 UPSTREAM_UBUNTUI := https://github.com/Ubuntu-Solutions-Engineering/urwid-ubuntu.git
-UPSTREAM_UBUNTUI_COMMIT := v0.1.0
+UPSTREAM_UBUNTUI_COMMIT := v0.1.1
 
 .PHONY: install-dependencies
 install-dependencies:
