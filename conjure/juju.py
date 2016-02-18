@@ -21,6 +21,7 @@
 """ Juju helpers
 """
 from conjure.shell import shell
+from conjure.utils import Host
 import os
 import yaml
 from macumba.v2 import JujuClient
@@ -30,8 +31,6 @@ import q
 class Juju:
     is_authenticated = False
     client = None
-    juju_data_dir = os.getenv('JUJU_DATA',
-                              os.path.expanduser('~/.local/share/juju'))
 
     @classmethod
     def login(cls, model='lxd'):
@@ -106,7 +105,7 @@ class Juju:
     def create_environment(cls):
         """ Creates a Juju environments.yaml file to bootstrap.
         """
-        env_f = os.path.join(cls.juju_data_dir, 'environments.yaml')
+        env_f = os.path.join(Host.juju_path(), 'environments.yaml')
 
         if not os.path.exists(env_f):
             shell('juju init')
@@ -115,7 +114,7 @@ class Juju:
     def read_environment_yaml(cls):
         """ Reads a Juju environments.yaml file.
         """
-        env_f = os.path.join(cls.juju_data_dir, 'environments.yaml')
+        env_f = os.path.join(Host.juju_path(), 'environments.yaml')
         if not os.path.isfile(env_f):
             raise Exception('Unable to find environments.yaml')
         with open(env_f) as fp:
@@ -125,7 +124,7 @@ class Juju:
     def env(cls):
         """ Returns a parsed environments.yaml to dictionary
         """
-        env = os.path.join(cls.juju_data_dir, 'models/cache.yaml')
+        env = os.path.join(Host.juju_path(), 'models/cache.yaml')
         if not os.path.isfile(env):
             raise Exception('No cached environment found.')
         with open(env) as env_fp:
@@ -135,7 +134,7 @@ class Juju:
     def current_env(cls):
         """ Grabs the current default environment
         """
-        env = os.path.join(cls.juju_data_dir, 'current-model')
+        env = os.path.join(Host.juju_path(), 'current-model')
         if not os.path.isfile(env):
             return None
         with open(env) as fp:

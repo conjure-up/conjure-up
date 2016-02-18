@@ -72,7 +72,8 @@ class Host:
     def juju_path(cls):
         """ returns juju path for $user
         """
-        return os.path.join(cls.install_home(), '.juju')
+        return os.getenv('JUJU_DATA',
+                         os.path.expanduser('~/.local/share/juju'))
 
 
 class FS:
