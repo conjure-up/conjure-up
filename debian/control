@@ -23,8 +23,7 @@ Vcs-Git: https://github.com/Ubuntu-Solutions-Engineering/conjure.git
 
 Package: conjure
 Architecture: all
-Depends: bundle-placer,
-         juju-core,
+Depends: juju-core,
          lxd,
          lxd-client,
          python3-jinja2,
