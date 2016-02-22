@@ -3,6 +3,7 @@ from conjure.controllers.deploy import DeployController
 from conjure.controllers.jujumodels.maas import MaasJujuModelController
 from conjure.controllers.jujumodels.openstack import OpenStackJujuModelController  # noqa
 from conjure.controllers.jujumodels.local import LocalJujuModelController
+from conjure.juju import Juju
 
 
 class JujuModelController:
@@ -39,7 +40,7 @@ class JujuModelController:
         Arguments:
         model: Juju model to deploy to
         """
-        self.common['juju'].switch(model)
+        Juju.switch(model)
         DeployController(self.common, model).render()
 
     def render_model_view(self, model):

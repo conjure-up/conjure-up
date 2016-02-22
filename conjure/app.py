@@ -52,14 +52,13 @@ class Application:
         with open(opts.build_metadata) as json_f:
             config['metadata'] = json.load(json_f)
 
-        with open('/usr/share/conjure/juju-models.json') as json_f:
-            config['juju-models'] = json.load(json_f)
+        # with open('/usr/share/conjure/juju-models.json') as json_f:
+        #     config['juju-models'] = json.load(json_f)
 
         self.common = {
             'opts': opts,
             'ui': ConjureUI(),
-            'config': config,
-            'juju': Juju
+            'config': config
         }
 
     def unhandled_input(self, key):

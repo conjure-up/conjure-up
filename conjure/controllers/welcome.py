@@ -8,7 +8,6 @@ from ubuntui.ev import EventLoop
 class WelcomeController:
     def __init__(self, common):
         self.common = common
-        self.juju = self.common['juju']
         self.view = WelcomeView(self.common, self.finish)
 
     def finish(self, name):
