@@ -52,7 +52,7 @@ class Application:
         with open(opts.build_metadata) as json_f:
             config['metadata'] = json.load(json_f)
 
-        with open('/usr/share/conjure/providers.json') as json_f:
+        with open('/usr/share/conjure/juju-models.json') as json_f:
             config['juju-models'] = json.load(json_f)
 
         self.common = {

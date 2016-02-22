@@ -5,12 +5,6 @@ NAME = conjure
 TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
 VERSION := $(shell ./tools/version)
-UPSTREAM_MACUMBA := https://github.com/Ubuntu-Solutions-Engineering/macumba.git
-UPSTREAM_MACUMBA_COMMIT := v0.9.1
-UPSTREAM_MAASCLIENT := https://github.com/Ubuntu-Solutions-Engineering/maasclient.git
-UPSTREAM_MAASCLIENT_COMMIT := v0.3
-UPSTREAM_UBUNTUI := https://github.com/Ubuntu-Solutions-Engineering/urwid-ubuntu.git
-UPSTREAM_UBUNTUI_COMMIT := v0.1.1
 
 .PHONY: install-dependencies
 install-dependencies:
@@ -52,21 +46,8 @@ current_version:
 	@echo $(VERSION)
 
 git-sync-requirements:
-	@echo Syncing git repos $(UPSTREAM_MACUMBA), $(UPSTREAM_MAASCLIENT), $(UPSTREAM_UBUNTUI)
-	@rm -rf tmp && mkdir -p tmp
-	@rm -rf macumba
-	@rm -rf maasclient
-	@rm -rf ubuntui
-	@git clone -q $(UPSTREAM_MACUMBA) tmp/macumba
-	@git clone -q $(UPSTREAM_MAASCLIENT) tmp/maasclient
-	@git clone -q $(UPSTREAM_UBUNTUI) tmp/ubuntui
-	@(cd tmp/maasclient && git checkout -q -f $(UPSTREAM_MAASCLIENT_COMMIT))
-	@(cd tmp/macumba && git checkout -q -f $(UPSTREAM_MACUMBA_COMMIT))
-	@(cd tmp/ubuntui && git checkout -q -f $(UPSTREAM_UBUNTUI_COMMIT))
-	@rsync -C -az --delete tmp/macumba/macumba .
-	@rsync -C -az --delete tmp/maasclient/maasclient .
-	@rsync -C -az --delete tmp/ubuntui/ubuntui .
-	@rm -rf tmp
+	if [ ! -f tools/sync-repo.py ]; then echo "Need to download sync-repo.py from https://git.io/v2mEw" && exit 1; fi
+	tools/sync-repo.py -m repo-manifest.json -f
 
 git_rev:
 	@echo $(GIT_REV)
