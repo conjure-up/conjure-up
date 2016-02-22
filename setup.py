@@ -24,5 +24,5 @@ setuptools.setup(
     data_files=[
         ('share/man/man1', ['man/en/conjure-setup.1'])
     ],
-    # install_requires=open('requirements.txt', 'r').readlines()
+    install_requires=open('requirements.txt', 'r').readlines()
 )
