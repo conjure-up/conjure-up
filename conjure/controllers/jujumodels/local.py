@@ -1,6 +1,5 @@
 from conjure.ui.views.local import LocalJujuModelView
 from conjure.models.jujumodel import JujuModel
-from conjure.juju import Juju
 from conjure.controllers.deploy import DeployController
 
 
@@ -19,7 +18,6 @@ class LocalJujuModelController:
         """
         if result is not None:
             self.model.config.update({k: v.value for k, v in result.items()})
-        Juju.create_environment()
         DeployController(self.common, self.model).render()
 
     def render(self):

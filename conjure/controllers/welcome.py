@@ -1,6 +1,8 @@
 from conjure.ui.views.welcome import WelcomeView
 from conjure.models import CharmModel
 from conjure.controllers.jujumodel import JujuModelController
+from conjure.api.models import list_models
+from ubuntui.ev import EventLoop
 
 
 class WelcomeController:
@@ -25,12 +27,12 @@ class WelcomeController:
 
         CharmModel.bundle = deploy_key
 
-        if self.juju.available():
-            self.juju.login()
-            models = self.juju.list_models()
-            JujuModelController(self.common, models).render()
+        if not self.juju.available():
+            self.common['ui'].show_error_message(
+                "For now, initialize a juju model.")
+            EventLoop.remove_alarms()
         else:
-            JujuModelController(self.common, None).render()
+            JujuModelController(self.common, list_models()).render()
 
     def render(self):
         config = self.common['config']
@@ -38,5 +40,4 @@ class WelcomeController:
             title=config['summary'],
             excerpt=config['excerpt'],
         )
-        self.common['ui'].set_footer("(Q)uit")
         self.common['ui'].set_body(self.view)

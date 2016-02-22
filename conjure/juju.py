@@ -25,7 +25,16 @@ from conjure.utils import Host
 import os
 import yaml
 from macumba.v2 import JujuClient
-import q
+from macumba.errors import LoginError
+from functools import wraps
+
+
+def requires_login(f):
+    def _decorator(*args, **kwargs):
+        if not Juju.is_authenticated:
+            Juju.login()
+        return f(*args, **kwargs)
+    return wraps(f)(_decorator)
 
 
 class Juju:
@@ -35,9 +44,6 @@ class Juju:
     @classmethod
     def login(cls, model='lxd'):
         """ Login to Juju API server
-
-        Arguments:
-        model: Model to access
         """
         if cls.is_authenticated is True:
             return
@@ -49,19 +55,11 @@ class Juju:
         cls.client = JujuClient(
             url=url,
             password=password)
-        cls.client.login()
+        try:
+            cls.client.login()
+        except LoginError as e:
+            raise e
         cls.is_authenticated = True
-
-    @classmethod
-    def list_models(cls, user='user-admin'):
-        """ List current known juju models for user
-
-        Arguments:
-        user: user to list models for (default: user-admin)
-        """
-        models = Juju.client.ModelManager(request="ListModels",
-                                          params={'Tag': user})
-        return [x['Name'] for x in models['UserModels']]
 
     @classmethod
     def bootstrap(cls):
@@ -98,31 +96,11 @@ class Juju:
         bundle: Name of bundle to deploy, can be a path to local bundle file or
                 charmstore path.
         """
-        q(bundle)
         return shell('juju deploy {}'.format(bundle))
 
     @classmethod
-    def create_environment(cls):
-        """ Creates a Juju environments.yaml file to bootstrap.
-        """
-        env_f = os.path.join(Host.juju_path(), 'environments.yaml')
-
-        if not os.path.exists(env_f):
-            shell('juju init')
-
-    @classmethod
-    def read_environment_yaml(cls):
-        """ Reads a Juju environments.yaml file.
-        """
-        env_f = os.path.join(Host.juju_path(), 'environments.yaml')
-        if not os.path.isfile(env_f):
-            raise Exception('Unable to find environments.yaml')
-        with open(env_f) as fp:
-            return yaml.load(fp)
-
-    @classmethod
     def env(cls):
-        """ Returns a parsed environments.yaml to dictionary
+        """ Returns a parsed models/cache.yaml to dictionary
         """
         env = os.path.join(Host.juju_path(), 'models/cache.yaml')
         if not os.path.isfile(env):

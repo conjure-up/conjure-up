@@ -15,6 +15,9 @@ class ConjureUI(Frame):
 
         EventLoop.remove_alarms()
 
+    def show_error_message(self, msg):
+        self.frame.body = ErrorView(msg)
+
     def keypress(self, size, key):
         key = self.key_conversion_map.get(key, key)
         return super().keypress(size, key)
