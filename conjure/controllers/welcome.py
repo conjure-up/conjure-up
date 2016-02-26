@@ -1,6 +1,6 @@
 from conjure.ui.views.welcome import WelcomeView
 from conjure.models import CharmModel
-from conjure.controllers.jujumodel import JujuModelController
+from conjure.controllers.cloud import CloudController
 from conjure.juju import Juju
 from ubuntui.ev import EventLoop
 
@@ -31,7 +31,7 @@ class WelcomeController:
                 "For now, initialize a juju model.")
             EventLoop.remove_alarms()
         else:
-            JujuModelController(self.common, Juju.clouds().keys()).render()
+            CloudController(self.common, Juju.clouds().keys()).render()
 
     def render(self):
         config = self.common['config']
