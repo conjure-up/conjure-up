@@ -23,7 +23,6 @@
 
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
-from conjure.juju import Juju
 from conjure.controllers.welcome import WelcomeController
 from conjure.ui import ConjureUI
 from conjure import async

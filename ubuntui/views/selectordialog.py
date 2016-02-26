@@ -60,7 +60,7 @@ class SelectorWidget(WidgetWrap):
 
     def submit(self, button):
         for item in self.radio_items.keys():
-            _item = self.radio_items[item][0]
+            _item = self.radio_items[item]
             if _item.get_state():
                 selected_item = _item.label
         self.emit_done_signal(selected_item)

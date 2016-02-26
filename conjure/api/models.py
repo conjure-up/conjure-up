@@ -4,7 +4,7 @@ from conjure.juju import Juju, requires_login
 
 
 @requires_login
-def list_models(user='user-admin'):
+def list_models():
     """ Lists Juju Models
 
     Arguments:
@@ -14,5 +14,5 @@ def list_models(user='user-admin'):
     Dictionary of known Juju Models (default: user-admin)
     """
     models = Juju.client.ModelManager(request="ListModels",
-                                      params={'Tag': user})
+                                      params={'Tag': 'user-admin'})
     return [x['Name'] for x in models['UserModels']]
