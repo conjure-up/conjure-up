@@ -34,7 +34,7 @@ class JujuControllerController:
         controller: Juju controller to deploy to
         existing: is the controller new or not
         """
-        DeployController(self.common, controller).render()
+        DeployController(self.common, controller, existing).render()
 
     def render(self):
         self.common['ui'].set_header(

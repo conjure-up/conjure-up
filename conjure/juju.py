@@ -28,7 +28,6 @@ import json
 from macumba.v2 import JujuClient
 from macumba.errors import LoginError
 from functools import wraps
-import q
 
 
 def requires_login(f):
@@ -62,10 +61,10 @@ class JujuCloudNotFound(Exception):
 class Juju:
     is_authenticated = False
     client = None
-    user = None
+    user_tag = None
 
     @classmethod
-    def login(cls, user='admin@local'):
+    def login(cls):
         """ Login to Juju API server
         """
         if cls.is_authenticated is True:
@@ -79,11 +78,12 @@ class Juju:
         account = cls.account(current_controller)
         uuid = env['uuid']
         server = env['api-endpoints'][0]
-        q(account, env, uuid, server)
-        cls.user = account['current']
-        password = account['users'][cls.user]['password']
+        cls.user_tag = "user-{}".format(account['current'])
+        current_user = account['current']
+        password = account['users'][current_user]['password']
         url = os.path.join('wss://', server, 'model', uuid, 'api')
         cls.client = JujuClient(
+            user=cls.user_tag,
             url=url,
             password=password)
         try:
@@ -93,10 +93,18 @@ class Juju:
         cls.is_authenticated = True
 
     @classmethod
-    def bootstrap(cls):
+    def bootstrap(cls, controller, cloud, upload_tools=True):
         """ Performs juju bootstrap
+
+        Arguments:
+        controller: name of your controller
+        cloud: name of local or public cloud to deploy to
+        upload_tools: True/False if you want to pass in --upload-tools
         """
-        return shell('juju bootstrap --upload-tools')
+        cmd = "juju bootstrap {} {}".format(controller, cloud)
+        if upload_tools:
+            cmd += " --upload-tools"
+        return shell(cmd)
 
     @classmethod
     def available(cls):

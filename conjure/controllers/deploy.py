@@ -15,9 +15,10 @@ from bundleplacer.controller import PlacementController
 
 class DeployController:
 
-    def __init__(self, common, jujumodel):
+    def __init__(self, common, controller, existing):
         self.common = common
-        self.jujumodel = jujumodel
+        self.controller = controller
+        self.existing = existing
 
     def finish(self, *args):
         """ handles deployment
@@ -26,24 +27,23 @@ class DeployController:
 
     def render(self):
         # Grab bundle and deploy or render placement if MAAS
-        if self.jujumodel['provider_type'].lower() == "lxd":
-            view = DeployView(self.common, self.jujumodel, self.finish)
-            self.common['ui'].set_header(
-                title="Deploying: {}".format(CharmModel.to_path())
-            )
-            self.common['ui'].set_body(view)
+        view = DeployView(self.common, self.jujumodel, self.finish)
+        self.common['ui'].set_header(
+            title="Deploying: {}".format(CharmModel.to_path())
+        )
+        self.common['ui'].set_body(view)
 
-            def read_status(*args):
-                services = Juju.client.Client(request="FullStatus")
-                services = "\n".join(services.keys())
-                view.set_status(services)
-                EventLoop.set_alarm_in(3, read_status)
+        def read_status(*args):
+            services = Juju.client.Client(request="FullStatus")
+            services = "\n".join(services.keys())
+            view.set_status(services)
+            EventLoop.set_alarm_in(3, read_status)
 
-            def error(*args):
-                print(args)
-            AsyncPool.submit(
-                partial(Juju.deploy_bundle, CharmModel.to_path()))
-            EventLoop.set_alarm_in(1, read_status)
+        def error(*args):
+            print(args)
+        AsyncPool.submit(
+            partial(Juju.deploy_bundle, CharmModel.to_path()))
+        EventLoop.set_alarm_in(1, read_status)
 
         # TODO: demo specific should be changed afterwards
         # if self.provider.name.lower() == "maas":

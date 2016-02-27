@@ -40,7 +40,7 @@ class JujuControllerView(WidgetWrap):
                 items.append(Padding.center_60(RadioButton(self.group, c)))
         items.append(Padding.line_break(""))
         items.append(Padding.center_60(
-            Text("Or enter a new controller name:")))
+            Text("Enter a new controller name:")))
         items.append(Padding.center_60(Color.string_input(
             self.input_new_controller, focus_map="string_input focus")))
         items.append(

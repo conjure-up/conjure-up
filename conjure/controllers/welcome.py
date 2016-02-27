@@ -2,7 +2,6 @@ from conjure.ui.views.welcome import WelcomeView
 from conjure.models import CharmModel
 from conjure.controllers.cloud import CloudController
 from conjure.juju import Juju
-from ubuntui.ev import EventLoop
 
 
 class WelcomeController:
@@ -25,13 +24,7 @@ class WelcomeController:
                 "Unable to determine bundle to deploy: {}".format(name))
 
         CharmModel.bundle = deploy_key
-
-        if not Juju.available():
-            self.common['ui'].show_error_message(
-                "For now, initialize a juju model.")
-            EventLoop.remove_alarms()
-        else:
-            CloudController(self.common, Juju.clouds().keys()).render()
+        CloudController(self.common, Juju.clouds().keys()).render()
 
     def render(self):
         config = self.common['config']
