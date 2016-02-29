@@ -7,12 +7,12 @@ class JujuControllerController:
     def __init__(self, common, cloud=None):
         self.common = common
         self.cloud = cloud
-        self.controllers = Juju.controllers()
+        self.models = Juju.models()
         self.config = self.common['config']
         self.excerpt = (
             "Please select the controller:model you wish to deploy to")
         self.view = JujuControllerView(self.common,
-                                       self.controllers,
+                                       self.models,
                                        self.deploy)
 
     def deploy(self, controller):

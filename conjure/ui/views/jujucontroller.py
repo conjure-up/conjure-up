@@ -8,10 +8,10 @@ from conjure.juju import Juju
 
 
 class JujuControllerView(WidgetWrap):
-    def __init__(self, common, controllers, cb):
+    def __init__(self, common, models, cb):
         self.common = common
         self.cb = cb
-        self.controllers = controllers
+        self.models = models
         self.input_new_controller = StringEditor()
         self.group = []
         self.config = self.common['config']
@@ -31,20 +31,19 @@ class JujuControllerView(WidgetWrap):
 
     def _build_widget(self):
         items = [
-            Padding.center_60(Text("Controllers", align="center")),
+            Padding.center_60(Text("Please select an option below:",
+                                   align="center")),
             Padding.center_60(
                 Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1))
         ]
-        if self.controllers is not None:
-            items.append(Padding.center_60(Text("Controller:Model")))
-            for c in self.controllers:
-                Juju.switch(c)
-                items.append(Text(c))
-                if len(list_models()) > 0:
-                    for m in list_models():
-                        items.append(Padding.center_60(
-                            RadioButton(self.group, "{}:{}".format(c, m))))
-        items.append(Padding.line_break(""))
+        if self.models is not None:
+            for k in self.models.keys():
+                _models = self.models[k]['accounts']['admin@local']['models']
+                items.append(Padding.center_60(Text(k)))
+                for m in _models:
+                    items.append(Padding.center_60(
+                        RadioButton(self.group, "{}:{}".format(k, m))))
+                items.append(Padding.line_break(""))
         items.append(
             Padding.center_60(
                 Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)))
