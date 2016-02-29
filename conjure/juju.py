@@ -124,7 +124,7 @@ class Juju:
         Dictionary of all known clouds including newly created MAAS/Local
         """
         sh = shell('juju list-clouds --format json')
-        q(json.loads(sh.output()))
+        q(json.loads(sh.output()[0]))
         return json.loads(sh.output()[0])
 
     @classmethod

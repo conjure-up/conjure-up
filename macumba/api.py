@@ -10,7 +10,6 @@ from .errors import (LoginError,
                      BadResponseError,
                      MacumbaError)
 from .ws import JujuWS
-import q
 
 log = logging.getLogger('macumba')
 
@@ -63,7 +62,6 @@ class Base:
                       'RequestId': 1,
                       'Params': {'auth-tag': user,
                                  'credentials': password}}
-        q(self.creds)
 
     def _prepare_strparams(self, d):
         r = {}

@@ -10,12 +10,12 @@ Build-Depends: bundle-placer,
                python3-all,
                python3-jinja2,
                python3-nose,
+               python3-q,
                python3-requests,
                python3-setuptools,
                python3-urwid,
                python3-urwid-ubuntu,
-               python3-yaml,
-               python3-q
+               python3-yaml
 Standards-Version: 3.9.6
 Homepage: https://github.com/Ubuntu-Solutions-Engineering/conjure
 X-Python3-Version: >= 3.4
@@ -28,12 +28,12 @@ Depends: juju-core,
          lxd,
          lxd-client,
          python3-jinja2,
+         python3-q
+         ${misc:Depends},
          python3-requests,
          python3-urwid,
          python3-urwid-ubuntu,
          python3-yaml,
-         python3-q
-         ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
 Description: Package runtime for apt installable juju bundles.
