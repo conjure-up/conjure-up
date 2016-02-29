@@ -3,7 +3,8 @@ from ubuntui.utils import Color, Padding
 from ubuntui.widgets.input import StringEditor
 from urwid import (WidgetWrap, RadioButton, Pile, Button,
                    Text, Divider, Filler)
-import q
+from conjure.api.models import list_models
+from conjure.juju import Juju
 
 
 class JujuControllerView(WidgetWrap):
@@ -35,14 +36,15 @@ class JujuControllerView(WidgetWrap):
                 Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1))
         ]
         if self.controllers is not None:
-            items.append(Padding.center_60(Text("Existing Controllers:")))
+            items.append(Padding.center_60(Text("Controller:Model")))
             for c in self.controllers:
-                items.append(Padding.center_60(RadioButton(self.group, c)))
+                Juju.switch(c)
+                items.append(Text(c))
+                if len(list_models()) > 0:
+                    for m in list_models():
+                        items.append(Padding.center_60(
+                            RadioButton(self.group, "{}:{}".format(c, m))))
         items.append(Padding.line_break(""))
-        items.append(Padding.center_60(
-            Text("Enter a new controller name:")))
-        items.append(Padding.center_60(Color.string_input(
-            self.input_new_controller, focus_map="string_input focus")))
         items.append(
             Padding.center_60(
                 Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)))

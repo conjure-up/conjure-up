@@ -4,37 +4,25 @@ from conjure.juju import Juju
 
 
 class JujuControllerController:
-    def __init__(self, common, cloud):
+    def __init__(self, common, cloud=None):
         self.common = common
         self.cloud = cloud
         self.controllers = Juju.controllers()
         self.config = self.common['config']
-        if self.controllers is None:
-            self.excerpt = (
-                "A Juju controller is required to deploy the solution. "
-                "Since no existing controllers were found please "
-                "type a name to create a new controller.")
+        self.excerpt = (
+            "Please select the controller:model you wish to deploy to")
+        self.view = JujuControllerView(self.common,
+                                       self.controllers,
+                                       self.deploy)
 
-            self.view = JujuControllerView(self.common,
-                                           None,
-                                           self.deploy)
-        else:
-            self.excerpt = (
-                "It looks like there are existing Juju controllers, "
-                "please select the controller you wish to deploy to or "
-                "enter a new name to create a new controller.")
-            self.view = JujuControllerView(self.common,
-                                           self.controllers,
-                                           self.deploy)
-
-    def deploy(self, controller, existing=True):
+    def deploy(self, controller):
         """ Deploy to juju controller
 
         Arguments:
         controller: Juju controller to deploy to
-        existing: is the controller new or not
         """
-        DeployController(self.common, controller, existing).render()
+        Juju.switch(controller)
+        DeployController(self.common, controller).render()
 
     def render(self):
         self.common['ui'].set_header(

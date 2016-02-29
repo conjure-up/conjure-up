@@ -28,6 +28,7 @@ import json
 from macumba.v2 import JujuClient
 from macumba.errors import LoginError
 from functools import wraps
+import q
 
 
 def requires_login(f):
@@ -123,6 +124,7 @@ class Juju:
         Dictionary of all known clouds including newly created MAAS/Local
         """
         sh = shell('juju list-clouds --format json')
+        q(json.loads(sh.output()))
         return json.loads(sh.output()[0])
 
     @classmethod

@@ -1,6 +1,7 @@
 from conjure.ui.views.welcome import WelcomeView
 from conjure.models import CharmModel
 from conjure.controllers.cloud import CloudController
+from conjure.controllers.jujucontroller import JujuControllerController
 from conjure.juju import Juju
 
 
@@ -24,7 +25,10 @@ class WelcomeController:
                 "Unable to determine bundle to deploy: {}".format(name))
 
         CharmModel.bundle = deploy_key
-        CloudController(self.common, Juju.clouds().keys()).render()
+        if Juju.controllers() is None:
+            CloudController(self.common, Juju.clouds().keys()).render()
+        else:
+            JujuControllerController(self.common).render()
 
     def render(self):
         config = self.common['config']
