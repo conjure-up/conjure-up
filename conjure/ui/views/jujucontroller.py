@@ -51,12 +51,15 @@ class JujuControllerView(WidgetWrap):
         return Filler(Pile(items), valign="middle")
 
     def submit(self, btn):
-        if self.input_new_controller.value is not None:
-            controller = (self.input_new_controller.value, True)
-        else:
-            for item in self.group:
-                if item.get_state():
-                    controller = (item.label, False)
+        # if self.input_new_controller.value is not None:
+        #     controller = (self.input_new_controller.value, True)
+        # else:
+        #     for item in self.group:
+        #         if item.get_state():
+        #             controller = (item.label, False)
+        for item in self.group:
+            if item.get_state():
+                controller = item.label
         self.cb(controller)
 
     def cancel(self, btn):
