@@ -65,10 +65,10 @@ class Juju:
     user_tag = None
 
     @classmethod
-    def login(cls):
+    def login(cls, force=False):
         """ Login to Juju API server
         """
-        if cls.is_authenticated is True:
+        if cls.is_authenticated is True and not force:
             return
 
         current_controller = cls.current_controller()
@@ -150,7 +150,10 @@ class Juju:
         Returns:
         False if failed to switch to Juju Model.
         """
-        return 0 == shell('juju switch {}'.format(model)).code
+        ret = 0 == shell('juju switch {}'.format(model)).code
+        if ret:
+            cls.login(True)
+        return ret
 
     @classmethod
     def deploy_bundle(cls, bundle):
