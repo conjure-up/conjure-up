@@ -21,8 +21,6 @@ class JujuControllerController:
         Arguments:
         controller: Juju controller to deploy to
         """
-        import q
-        q("switching controller", controller)
         Juju.switch(controller)
         DeployController(self.common, controller).render()
 

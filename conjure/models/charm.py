@@ -1,6 +1,3 @@
-import q
-
-
 class CharmModelException(Exception):
     """ Exception in CharmModel """
 
