@@ -53,11 +53,11 @@ class JujuControllerView(WidgetWrap):
         ]
         if self.models is not None:
             for k in self.models.keys():
-                _models = self.models[k]['accounts']['admin@local']['models']
-                items.append(Padding.center_60(Text(k)))
-                for m in _models:
-                    items.append(Padding.center_60(
-                        RadioButton(self.group, "{}:{}".format(k, m))))
+                items.append(Padding.center_60(
+                    Text("Controller: {}".format(k))))
+                for m in self.models[k]:
+                    items.append(Padding.center_58(
+                        RadioButton(self.group, "{}:{}".format(k, m['name']))))
                 items.append(Padding.line_break(""))
         items.append(
             Padding.center_60(

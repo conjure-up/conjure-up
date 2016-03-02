@@ -4,7 +4,7 @@ from conjure.juju import Juju
 
 
 class CloudController:
-    def __init__(self, common, clouds):
+    def __init__(self, common):
         self.common = common
         self.clouds = sorted(Juju.clouds().keys())
         self.config = self.common['config']

@@ -15,7 +15,6 @@ class JujuControllerController:
         self.common = common
         self.cloud = cloud
         self.bootstrap = bootstrap
-        self.models = Juju.models()
         self.config = self.common['config']
         if self.cloud and self.bootstrap:
             self.excerpt = (
@@ -24,10 +23,15 @@ class JujuControllerController:
                                            None,
                                            self.deploy)
         else:
+            controllers = Juju.controllers().keys()
+            models = {}
+            for c in controllers:
+                Juju.switch(c)
+                models[c] = Juju.models()
             self.excerpt = (
-                "Please select the controller:model you wish to deploy to")
+                "Please select the model you wish to deploy to")
             self.view = JujuControllerView(self.common,
-                                           self.models,
+                                           models,
                                            self.deploy)
 
     def deploy(self, controller):
@@ -39,7 +43,7 @@ class JujuControllerController:
         if self.bootstrap:
             Juju.bootstrap(controller, self.cloud)
         Juju.switch(controller)
-        DeployController(self.common).render()
+        DeployController(self.common, controller).render()
 
     def render(self):
         self.common['ui'].set_header(
