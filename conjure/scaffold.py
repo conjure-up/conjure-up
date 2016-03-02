@@ -6,6 +6,7 @@ import sys
 import json
 import os
 from conjure.shell import shell
+from conjure.lxd import LXD
 
 
 class ScaffoldException(Exception):
@@ -21,6 +22,13 @@ class Scaffold:
         Arguments:
         opts: Options passed in from cli
         """
+        if os.path.isdir(opts.directory):
+            raise ScaffoldException(
+                "{} exists, please specify another.".format(opts.directory)
+            )
+
+        shell('mkdir -p {}'.format(opts.directory))
+
         config_path = "/usr/share/{}/config.json".format(opts.name)
         if not os.path.isfile(config_path):
             raise ScaffoldException(
@@ -34,8 +42,7 @@ class Scaffold:
             print("Creating {} directory".format(bundle_key_path))
             shell('mkdir -p {}'.format(bundle_key_path))
 
-        lxd_sh_path = os.path.join(opts.directory, 'lxd.sh')
-        shell('touch {}'.format(lxd_sh_path))
+        LXD.render_lxd_sh(os.path.join(opts.directory, 'lxd.sh'))
 
 
 def parse_options(argv):
@@ -61,12 +68,9 @@ def main():
             "A project directory is required."
         )
 
-    if os.path.isdir(opts.directory):
-        raise ScaffoldException(
-            "{} exists, please specify another.".format(opts.directory)
-        )
-
-    shell('mkdir -p {}'.format(opts.directory))
-
-    app = Scaffold(opts)
-    app.start()
+    try:
+        Scaffold(opts)
+        sys.exit(0)
+    except ScaffoldException as e:
+        print(e)
+        sys.exit(1)
