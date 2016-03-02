@@ -81,7 +81,7 @@ def create_charm_class(servicename, service_dict, servicemeta, relations):
 
     # is_subordinate = 'to' not in service_dict.keys()
 
-    is_subordinate = service_dict['num_units'] == 0
+    is_subordinate = service_dict.get('num_units', 0) == 0
 
     charm_name = service_dict['charm'].split('/')[-1]
     charm_name = '-'.join(charm_name.split('-')[:-1])

@@ -9,6 +9,7 @@ from conjure.ui.views.deploy import DeployView
 from conjure.controllers.finish import FinishController
 
 from bundleplacer.config import Config
+from bundleplacer.maas import connect_to_maas
 from bundleplacer.fixtures.maas import FakeMaasState
 from bundleplacer.placerview import PlacerView
 from bundleplacer.controller import PlacementController
@@ -19,9 +20,8 @@ class DeployController:
 
     def __init__(self, common, controller):
         self.common = common
-        self.controller = controller
+        self.controller, self.model = controller.split(":")
         self.controller_info = model_info(self.controller)
-        q(self.controller_info)
 
     def finish(self, *args):
         """ handles deployment
