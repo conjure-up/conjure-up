@@ -117,6 +117,35 @@ class Juju:
         return 0 == shell('juju status').code
 
     @classmethod
+    def credential(cls, cloud, user):
+        """ Get credentials for user
+
+        Arguments:
+        cloud: cloud applicable to user credentials
+        user: user listed in the credentials
+        """
+        creds = cls.credentials()
+        if cloud in creds.keys():
+            if user in creds[cloud].keys():
+                return creds[cloud][user]
+        raise JujuModelUserNotFound(
+            "Unable to locate credentials for: {}".format(user))
+
+    @classmethod
+    def credentials(cls):
+        """ List credentials
+
+        Returns:
+        List of credentials
+        """
+        sh = shell('juju list-credentials --format yaml')
+        if sh.code > 0:
+            raise JujuNotFoundException(
+                "Unable to list credentials: {}".format(sh.errors()))
+        env = yaml.safe_load("\n".join(sh.output()))
+        return env['credentials']
+
+    @classmethod
     def clouds(cls):
         """ List available clouds
 
@@ -124,7 +153,6 @@ class Juju:
         Dictionary of all known clouds including newly created MAAS/Local
         """
         sh = shell('juju list-clouds --format json')
-        q(json.loads(sh.output()[0]))
         return json.loads(sh.output()[0])
 
     @classmethod
@@ -194,14 +222,12 @@ class Juju:
         Returns:
         List of known controllers
         """
-        controllers = os.path.join(Host.juju_path(), 'controllers.yaml')
-        if not os.path.isfile(controllers):
+        sh = shell('juju list-controllers --format json')
+        if sh.code > 0:
             raise JujuNotFoundException(
-                "Unable to find: {}".format(controllers))
-        with open(controllers, 'r') as c:
-            env = yaml.load(c)
-            return env['controllers']
-        return None
+                "Unable to list controllers: {}".format(sh.errors()))
+        env = json.loads(sh.output()[0])
+        return env['controllers']
 
     @classmethod
     def account(cls, controller):
@@ -244,45 +270,40 @@ class Juju:
         raise JujuControllerNotFound("Unable to find accounts")
 
     @classmethod
-    def model_by_user(cls, controller, user):
+    def model_by_owner(cls, user):
         """ List model associated with user
 
         Arguments:
-        controller: controller to search
         user: username to query
 
         Returns:
-        Dictionary containing the current model and associated models
-
-        eg: {'current': 'mycontroller',
-             'models': [{'mycontroller': {
-                             'uuid' : fdsa
-                            }
-                        }]}
+        Dictionary containing model information for user
         """
-        model = cls.model(controller)
-        if model and user in model:
-            return model[user]
+        models = cls.models()
+        for m in models:
+            if m['owner'] == user:
+                return m
         raise JujuModelUserNotFound(
-            "Unable to find user: {} in controller: {}".format(
-                user, controller
+            "Unable to find user: {}".format(
+                user
             ))
 
     @classmethod
-    def model(cls, controller):
-        """ List model information for model
+    def model(cls, name):
+        """ List information for model
 
         Arguments:
-        controller: controller id
+        name: model name
 
         Returns:
-        List of accounts associated with model
+        Dictionary of model information
         """
         models = cls.models()
-        if models and controller in models:
-            return models[controller]['accounts']
+        for m in models:
+            if m['name'] == name:
+                return m
         raise JujuControllerNotFound(
-            "Unable to find model for controller: {}".format(controller))
+            "Unable to find model: {}".format(name))
 
     @classmethod
     def models(cls):
@@ -291,11 +312,8 @@ class Juju:
         Returns:
         List of known models
         """
-        env = os.path.join(Host.juju_path(), 'models.yaml')
-        if not os.path.isfile(env):
+        sh = shell('juju list-models --format json')
+        if sh.code > 0:
             raise JujuNotFoundException(
-                "Unable to find: {}".format(env))
-        with open(env, 'r') as c:
-            env = yaml.load(c)
-            return env['controllers']
-        raise JujuModelNotFound("Unable to list models")
+                "Unable to list models: {}".format(sh.errors()))
+        return json.loads(sh.output()[0])

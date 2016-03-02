@@ -26,7 +26,7 @@ class WelcomeController:
 
         CharmModel.bundle = deploy_key
         if Juju.controllers() is None:
-            CloudController(self.common, Juju.clouds().keys()).render()
+            CloudController(self.common).render()
         else:
             JujuControllerController(self.common).render()
 

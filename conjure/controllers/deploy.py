@@ -21,6 +21,7 @@ class DeployController:
         self.common = common
         self.controller = controller
         self.controller_info = model_info(self.controller)
+        q(self.controller_info)
 
     def finish(self, *args):
         """ handles deployment
@@ -30,7 +31,6 @@ class DeployController:
     def render(self):
         # Grab bundle and deploy or render placement if MAAS
         if self.controller_info['ProviderType'] == 'maas':
-            q(self.controller_info)
             bundle = get_bundle(CharmModel.to_entity(), to_file=True)
             q(bundle)
             metadata_filename = self.common['config']['metadata_filename']

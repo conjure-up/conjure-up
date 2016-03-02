@@ -3,19 +3,21 @@ from ubuntui.utils import Color, Padding
 from ubuntui.widgets.input import StringEditor
 from urwid import (WidgetWrap, RadioButton, Pile, Button,
                    Text, Divider, Filler)
-from conjure.api.models import list_models
-from conjure.juju import Juju
 
 
 class JujuControllerView(WidgetWrap):
-    def __init__(self, common, models, cb):
+    def __init__(self, common, models=None, cb=None):
         self.common = common
         self.cb = cb
         self.models = models
         self.input_new_controller = StringEditor()
         self.group = []
         self.config = self.common['config']
-        super().__init__(self._build_widget())
+
+        if self.models is not None:
+            super().__init__(self._build_existingcontroller_widget())
+        else:
+            super().__init__(self._build_newcontroller_widget())
 
     def _build_buttons(self):
         buttons = [
@@ -29,7 +31,20 @@ class JujuControllerView(WidgetWrap):
         ]
         return Pile(buttons)
 
-    def _build_widget(self):
+    def _build_newcontroller_widget(self):
+        items = [
+            Padding.center_60(Text("Please fill out the input below:",
+                                   align="center")),
+            Padding.center_60(
+                Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)),
+            Padding.center_60(self.input_new_controller),
+            Padding.center_60(
+                Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)),
+            Padding.center_20(self._build_buttons())
+        ]
+        return Filler(Pile(items), valign="middle")
+
+    def _build_existingcontroller_widget(self):
         items = [
             Padding.center_60(Text("Please select an option below:",
                                    align="center")),
@@ -51,15 +66,12 @@ class JujuControllerView(WidgetWrap):
         return Filler(Pile(items), valign="middle")
 
     def submit(self, btn):
-        # if self.input_new_controller.value is not None:
-        #     controller = (self.input_new_controller.value, True)
-        # else:
-        #     for item in self.group:
-        #         if item.get_state():
-        #             controller = (item.label, False)
-        for item in self.group:
-            if item.get_state():
-                controller = item.label
+        if self.models is not None:
+            for item in self.group:
+                if item.get_state():
+                    controller = item.label
+        else:
+            controller = self.input_new_controller.value
         self.cb(controller)
 
     def cancel(self, btn):
