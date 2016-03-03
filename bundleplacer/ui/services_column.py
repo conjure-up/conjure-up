@@ -20,6 +20,7 @@ from urwid import Divider, Pile, WidgetWrap
 from bundleplacer.assignmenttype import AssignmentType
 
 from bundleplacer.ui.services_list import ServicesList
+from bundleplacer.ui.simple_service_widget import ServiceWidgetState
 
 
 log = logging.getLogger('bundleplacer')
@@ -43,9 +44,8 @@ class ServicesColumn(WidgetWrap):
         return True
 
     def build_widgets(self):
-        togglefunc = self.display_controller.do_toggle_selected_charm
         self.services_list = ServicesList(self.placement_controller,
-                                          togglefunc,
+                                          self.display_controller,
                                           ignore_assigned=False,
                                           ignore_deployed=False,
                                           show_type='all',
@@ -81,4 +81,4 @@ class ServicesColumn(WidgetWrap):
 
     def clear_selections(self):
         for sw in self.services_list.service_widgets:
-            sw.is_selected = False
+            sw.state = ServiceWidgetState.UNSELECTED

@@ -15,7 +15,8 @@
 
 import logging
 
-from urwid import AttrMap, Button, Divider, GridFlow, Pile, Text, WidgetWrap
+
+from urwid import AttrMap, Divider, GridFlow, Pile, Text, WidgetWrap
 
 from ubuntui.widgets.buttons import MenuSelectButton
 
@@ -31,20 +32,18 @@ class SimpleMachineWidget(WidgetWrap):
 
     machine - the machine to display
 
-    select_action - action function to call when (un)selected. passed
-    this widget.
-
     controller - a PlacementController instance
+
+    display_controller - a PlacerView instance
 
     show_assignments - display info about which charms are assigned
     and what assignment type (LXC, KVM, etc) they have.
 
     """
 
-    def __init__(self, machine, select_action, controller,
+    def __init__(self, machine, controller,
                  display_controller, show_assignments=True):
         self.machine = machine
-        self.select_action = select_action
         self.controller = controller
         self.display_controller = display_controller
         self.show_assignments = show_assignments
@@ -59,7 +58,7 @@ class SimpleMachineWidget(WidgetWrap):
     def build_widgets(self):
 
         self.button = MenuSelectButton("I AM A MACHINE", self.do_select)
-        self.action_button_grid = GridFlow([], 22, 1, 1, 'center')
+        self.action_button_grid = GridFlow([], 22, 1, 1, 'right')
         self.action_buttons = []
 
         self.pile = Pile([self.button])
@@ -92,9 +91,8 @@ class SimpleMachineWidget(WidgetWrap):
                 'storage: {}'.format(m.storage)]
 
     def update_selected(self):
-        charmnames = ", ".join([c.charm_name for c in
-                                self.display_controller.selected_charms])
-        msg = Text("  Add {} to {}:".format(charmnames,
+        cn = self.display_controller.selected_charm.charm_name
+        msg = Text("  Add {} to {}:".format(cn,
                                             self.machine.hostname))
         self.pile.contents = [(msg, self.pile.options()),
                               (self.action_button_grid,
@@ -121,23 +119,25 @@ class SimpleMachineWidget(WidgetWrap):
                         'Add as KVM',
                         self.select_kvm)]
 
-        selected_charms = self.display_controller.selected_charms
-
-        allowed_sets = [set(sc.allowed_assignment_types)
-                        for sc in selected_charms]
-        allowed_types = set([atype for atype, _, _ in all_actions])
-        allowed_types = allowed_types.intersection(*allowed_sets)
+        sc = self.display_controller.selected_charm
+        if sc:
+            allowed_set = set(sc.allowed_assignment_types)
+            allowed_types = set([atype for atype, _, _ in all_actions])
+            allowed_types = allowed_types.intersection(allowed_set)
+        else:
+            allowed_types = set()
 
         # + 1 for the cancel button:
         if len(self.action_buttons) == len(allowed_types) + 1:
             return
 
-        self.action_buttons = [AttrMap(Button(label, on_press=func),
+        self.action_buttons = [AttrMap(MenuSelectButton(label,
+                                                        on_press=func),
                                        'button_secondary',
                                        'button_secondary focus')
                                for atype, label, func in all_actions
                                if atype in allowed_types]
-        self.action_buttons.append(AttrMap(Button("Cancel",
+        self.action_buttons.append(AttrMap(MenuSelectButton("Cancel",
                                                   on_press=self.do_cancel),
                                            'button_secondary',
                                            'button_secondary focus'))
@@ -147,18 +147,16 @@ class SimpleMachineWidget(WidgetWrap):
                                             self.action_buttons]
 
     def do_select(self, sender):
-        if len(self.display_controller.selected_charms) == 0:
+        if self.display_controller.selected_charm is None:
             return
         self.is_selected = True
         self.update()
-        self.select_action(self)
         self.pile.focus_position = 1
         self.action_button_grid.focus_position = 0
 
     def do_cancel(self, sender):
         self.is_selected = False
         self.update()
-        self.select_action(self)
         self.pile.focus_position = 0
 
     def _do_select_assignment(self, atype):
@@ -167,7 +165,7 @@ class SimpleMachineWidget(WidgetWrap):
          AssignmentType.LXC:
          self.display_controller.do_select_lxc,
          AssignmentType.KVM:
-         self.display_controller.do_select_kvm}[atype]()
+         self.display_controller.do_select_kvm}[atype](self.machine)
         self.pile.focus_position = 0
 
     def select_baremetal(self, sender):

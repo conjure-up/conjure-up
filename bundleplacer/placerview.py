@@ -21,7 +21,6 @@ from urwid import WidgetWrap
 from bundleplacer.ui import PlacementView
 from ubuntui.ev import EventLoop
 
-
 from bundleplacer.assignmenttype import AssignmentType
 
 log = logging.getLogger('bundleplacer')
@@ -32,8 +31,8 @@ class PlacerView(WidgetWrap):
         self.placement_controller = placement_controller
         self.config = config
         self.cb = cb
-        self._selected_machines = set()
-        self._selected_charms = set()
+        self.selected_machine = None
+        self.selected_charm = None
         self.pv = PlacementView(
             display_controller=self,
             placement_controller=self.placement_controller,
@@ -55,42 +54,26 @@ class PlacerView(WidgetWrap):
     def do_deploy(self):
         self.cb()
 
-    def _do_select(self, atype):
-        for m in self._selected_machines:
-            for c in self._selected_charms:
-                self.placement_controller.assign(m, c, atype)
-        self._selected_charms = set()
-        self._selected_machines = set()
+    def _do_select(self, machine, atype):
+        self.placement_controller.assign(machine,
+                                         self.selected_charm,
+                                         atype)
         self.pv.reset_selections()
 
-    def do_select_baremetal(self):
-        self._do_select(AssignmentType.BareMetal)
+    def do_select_baremetal(self, machine):
+        self._do_select(machine, AssignmentType.BareMetal)
 
-    def do_select_lxc(self):
-        self._do_select(AssignmentType.LXC)
+    def do_select_lxc(self, machine):
+        self._do_select(machine, AssignmentType.LXC)
 
-    def do_select_kvm(self):
-        self._do_select(AssignmentType.KVM)
+    def do_select_kvm(self, machine):
+        self._do_select(machine, AssignmentType.KVM)
 
-    def do_toggle_selected_machine(self, machinewidget):
-        m = machinewidget.machine
-        if m in self._selected_machines:
-            self._selected_machines.remove(m)
-        else:
-            self._selected_machines.add(m)
+    def set_selected_charm(self, charm):
+        self.selected_charm = charm
 
-    @property
-    def selected_machines(self):
-        return list(self._selected_machines)
+    def edit_placement(self):
+        self.pv.edit_placement()
 
-    def do_toggle_selected_charm(self, servicewidget):
-        charm_class = servicewidget.charm_class
-        if charm_class in self._selected_charms:
-            self._selected_charms.remove(charm_class)
-        else:
-            self._selected_charms.add(charm_class)
-            self.pv.focus_machines_column()
-
-    @property
-    def selected_charms(self):
-        return list(self._selected_charms)
+    def edit_relations(self):
+        self.pv.edit_relations()

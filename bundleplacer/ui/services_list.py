@@ -32,7 +32,7 @@ class ServicesList(WidgetWrap):
 
     controller - a PlacementController
 
-    action - an action function passed to SimpleServiceWidget.
+    display_controller - a PlacerView
 
     machine - a machine instance to query for constraint checking. If
     None, no constraint checking is done. If set, only services whose
@@ -56,14 +56,14 @@ class ServicesList(WidgetWrap):
 
     """
 
-    def __init__(self, controller, action,
+    def __init__(self, placement_controller, display_controller,
                  machine=None, ignore_assigned=False,
                  ignore_deployed=False, assigned_only=False,
                  deployed_only=False, show_type='all',
                  show_constraints=False, show_placements=False,
                  title="Services", trace_updates=False):
-        self.controller = controller
-        self.action = action
+        self.placement_controller = placement_controller
+        self.display_controller = display_controller
         self.service_widgets = []
         self.machine = machine
         self.ignore_assigned = ignore_assigned
@@ -128,11 +128,12 @@ class ServicesList(WidgetWrap):
             if self.trace:
                 log.debug("{}: {} {}".format(self.title, cc, s))
 
-        for cc in self.controller.charm_classes():
+        for cc in self.placement_controller.charm_classes():
             if self.machine:
+                pc = self.placement_controller
                 if not satisfies(self.machine, cc.constraints)[0] \
-                   or not (self.controller.is_assigned_to(cc, self.machine) or
-                           self.controller.is_deployed_to(cc, self.machine)):
+                   or not (pc.is_assigned_to(cc, self.machine) or
+                           pc.is_deployed_to(cc, self.machine)):
                     self.remove_service_widget(cc)
                     trace(cc, "removed because machine doesn't match")
                     continue
@@ -141,16 +142,17 @@ class ServicesList(WidgetWrap):
                 raise Exception("Can't both ignore and only show assigned.")
 
             if self.ignore_assigned:
-                n = self.controller.assignment_machine_count_for_charm(cc)
+                pc = self.placement_controller
+                n = pc.assignment_machine_count_for_charm(cc)
                 if n == cc.required_num_units() \
                    and not cc.allow_multi_units \
-                   and self.controller.is_assigned(cc):
+                   and self.placement_controller.is_assigned(cc):
                     self.remove_service_widget(cc)
                     trace(cc, "removed because max units are "
                           "assigned")
                     continue
             elif self.assigned_only:
-                if not self.controller.is_assigned(cc):
+                if not self.placement_controller.is_assigned(cc):
                     self.remove_service_widget(cc)
                     trace(cc, "removed because it is not assigned and "
                           "assigned_only is True")
@@ -160,19 +162,20 @@ class ServicesList(WidgetWrap):
                 raise Exception("Can't both ignore and only show deployed.")
 
             if self.ignore_deployed:
-                n = self.controller.deployment_machine_count_for_charm(cc)
+                pc = self.placement_controller
+                n = pc.deployment_machine_count_for_charm(cc)
                 if n == cc.required_num_units() \
-                   and self.controller.is_deployed(cc):
+                   and self.placement_controller.is_deployed(cc):
                     self.remove_service_widget(cc)
                     trace(cc, "removed because the required number of units"
                           " has been deployed")
                     continue
             elif self.deployed_only:
-                if not self.controller.is_deployed(cc):
+                if not self.placement_controller.is_deployed(cc):
                     self.remove_service_widget(cc)
                     continue
 
-            state, _, _ = self.controller.get_charm_state(cc)
+            state, _, _ = self.placement_controller.get_charm_state(cc)
             if self.show_type == 'required':
                 if state != CharmState.REQUIRED:
                     self.remove_service_widget(cc)
@@ -183,8 +186,9 @@ class ServicesList(WidgetWrap):
                     trace(cc, "removed because show_type is 'non-required' and"
                           "state is REQUIRED.")
                     continue
-                assigned_or_deployed = (self.controller.is_assigned(cc) or
-                                        self.controller.is_deployed(cc))
+                assigned_or_deployed = (
+                    self.placement_controller.is_assigned(cc) or
+                    self.placement_controller.is_deployed(cc))
                 if not cc.allow_multi_units and assigned_or_deployed:
                     self.remove_service_widget(cc)
                     trace(cc, "removed because it doesn't allow multiple units"
@@ -200,8 +204,8 @@ class ServicesList(WidgetWrap):
         self.sort_service_widgets()
 
     def add_service_widget(self, charm_class):
-        sw = SimpleServiceWidget(charm_class, self.controller,
-                                 self.action,
+        sw = SimpleServiceWidget(charm_class, self.placement_controller,
+                                 self.display_controller,
                                  show_placements=self.show_placements)
         self.service_widgets.append(sw)
         options = self.service_pile.options()

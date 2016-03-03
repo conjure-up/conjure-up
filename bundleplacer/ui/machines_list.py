@@ -47,14 +47,13 @@ class MachinesList(WidgetWrap):
 
     """
 
-    def __init__(self, controller, display_controller, select_action,
+    def __init__(self, controller, display_controller,
                  constraints=None, show_hardware=False,
                  title_widgets=None, show_assignments=True,
                  show_placeholders=True, show_only_ready=False,
                  show_filter_box=False):
         self.controller = controller
         self.display_controller = display_controller
-        self.select_action = select_action
         self.machine_widgets = []
         if constraints is None:
             self.constraints = {}
@@ -153,7 +152,7 @@ class MachinesList(WidgetWrap):
         self.sort_machine_widgets()
 
     def add_machine_widget(self, machine):
-        mw = SimpleMachineWidget(machine, self.select_action,
+        mw = SimpleMachineWidget(machine,
                                  self.controller,
                                  self.display_controller,
                                  self.show_assignments)

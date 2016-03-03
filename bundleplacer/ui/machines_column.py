@@ -43,10 +43,9 @@ class MachinesColumn(WidgetWrap):
         return True
 
     def build_widgets(self):
-        togglefunc = self.display_controller.do_toggle_selected_machine
         self.machines_list = MachinesList(self.placement_controller,
                                           self.display_controller,
-                                          togglefunc,
+                                          None,
                                           show_hardware=True,
                                           show_assignments=False,
                                           show_placeholders=False,

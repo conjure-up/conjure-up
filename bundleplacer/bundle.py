@@ -24,11 +24,16 @@ from bundleplacer.async import submit
 from bundleplacer.charm import Charm
 from bundleplacer.assignmenttype import AssignmentType, label_to_atype
 
-
 log = logging.getLogger('bundleplacer')
 
 
 class CharmStoreAPI:
+    """Concurrently lookup data from the juju charm store.
+
+    use the get_* functions to get a Future whose result will be the
+    requested charm info
+
+    """
     _charmstore = None
     _cache = {}
     _cachelock = RLock()
@@ -38,38 +43,55 @@ class CharmStoreAPI:
             csurl = 'https://api.jujucharms.com/v4'
             CharmStoreAPI._charmstore = CharmStore(csurl)
 
-    def do_remote_lookup(self, charm_name, metakey):
+    def _do_remote_lookup(self, charm_name, metakey):
         entity = CharmStoreAPI._charmstore.entity(charm_name)
         with CharmStoreAPI._cachelock:
             CharmStoreAPI._cache[charm_name] = entity
         return entity
 
-    def wait_for_pending_lookup(self, f, charm_name, metakey):
-        entity = f.result()
+    def _wait_for_pending_lookup(self, f, charm_name, metakey):
+        try:
+            entity = f.result()
+        except:
+            return None
+
+        if metakey is None:
+            return entity
         return entity['Meta']['charm-metadata'][metakey]
 
-    def _lookup(self, charm_name, metakey):
+    def _lookup(self, charm_name, metakey, exc_cb):
         with CharmStoreAPI._cachelock:
             if charm_name in CharmStoreAPI._cache:
                 val = CharmStoreAPI._cache[charm_name]
                 if isinstance(val, Future):
-                    f = submit(partial(self.wait_for_pending_lookup,
+                    f = submit(partial(self._wait_for_pending_lookup,
                                        val, charm_name, metakey),
-                               lambda _: None)
+                               exc_cb)
                 else:
-                    d = val['Meta']['charm-metadata'][metakey]
-                    f = submit(lambda: d, lambda _: None)
+                    if metakey is None:
+                        d = val
+                    else:
+                        d = val['Meta']['charm-metadata'][metakey]
+                    f = submit(lambda: d, exc_cb)
             else:
-                f = submit(partial(self.do_remote_lookup,
-                                   charm_name,
+                whole_entity_f = submit(partial(self._do_remote_lookup,
+                                                charm_name,
+                                                metakey),
+                                        exc_cb)
+                CharmStoreAPI._cache[charm_name] = whole_entity_f
+
+                f = submit(partial(self._wait_for_pending_lookup,
+                                   whole_entity_f, charm_name,
                                    metakey),
-                           lambda _: None)
-                CharmStoreAPI._cache[charm_name] = f
+                           exc_cb)
 
         return f
 
-    def get_summary(self, charm_name):
-        return self._lookup(charm_name, 'Summary')
+    def get_summary(self, charm_name, exc_cb):
+        return self._lookup(charm_name, 'Summary', exc_cb)
+
+    def get_entity(self, charm_name, exc_cb):
+        return self._lookup(charm_name, None, exc_cb)
 
 
 def create_charm_class(servicename, service_dict, servicemeta, relations):
@@ -127,6 +149,11 @@ class Bundle:
             self._metadata = {}
         if 'services' not in self._bundle.keys():
             raise Exception("Invalid Bundle.")
+
+    def add_new_charm(self, charm_name, charm_dict):
+        new_dict = {'charm': charm_dict['Id'],
+                    'num_units': 1}
+        self._bundle['services'][charm_name] = new_dict
 
     @property
     def charm_classes(self):

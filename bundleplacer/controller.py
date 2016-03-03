@@ -288,6 +288,9 @@ class PlacementController:
                     ms.append(m)
         return ms
 
+    def add_new_charm(self, charm_name, charm_dict):
+        self.bundle.add_new_charm(charm_name, charm_dict)
+
     def charm_classes(self):
         return self.bundle.charm_classes
 
