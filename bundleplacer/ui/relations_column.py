@@ -137,8 +137,8 @@ class CharmMetadataController:
         metas = r.json()
         for charm_name, charm_dict in metas.items():
             md = charm_dict["Meta"]["charm-metadata"]
-            rd = md["Requires"]
-            pd = md["Provides"]
+            rd = md.get("Requires", {})
+            pd = md.get("Provides", {})
             requires = []
             provides = []
             for relname, d in rd.items():
