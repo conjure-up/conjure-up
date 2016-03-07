@@ -120,7 +120,7 @@ class MachinesList(WidgetWrap):
         def get_placement_filter_label(d):
             s = ""
             for atype, al in d.items():
-                s += " ".join(["{} {}".format(cc.charm_name,
+                s += " ".join(["{} {}".format(cc.service_name,
                                               cc.display_name)
                                for cc in al])
             return s

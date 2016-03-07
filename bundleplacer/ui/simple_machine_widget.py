@@ -91,7 +91,7 @@ class SimpleMachineWidget(WidgetWrap):
                 'storage: {}'.format(m.storage)]
 
     def update_selected(self):
-        cn = self.display_controller.selected_charm.charm_name
+        cn = self.display_controller.selected_charm.service_name
         msg = Text("  Add {} to {}:".format(cn,
                                             self.machine.hostname))
         self.pile.contents = [(msg, self.pile.options()),

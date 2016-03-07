@@ -162,6 +162,7 @@ class SimpleServiceWidget(WidgetWrap):
                                             self.action_buttons]
 
     def do_select(self, sender):
+        self.display_controller.clear_selections()
         if self.state == ServiceWidgetState.SELECTED:
             self.state = ServiceWidgetState.UNSELECTED
             self.display_controller.set_selected_charm(None)

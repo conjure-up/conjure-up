@@ -37,12 +37,12 @@ class CharmStoreSearchWidget(WidgetWrap):
 
     def build_widgets(self):
         self.info_text = Text("")
-        self.editbox = Edit()
+        self.editbox = Edit(caption=('text', "Search Charm Store: "))
 
         connect_signal(self.editbox, 'change',
                        self.handle_edit_changed)
 
-        self.do_search_button = AttrMap(Button("Search Charm Store",
+        self.do_search_button = AttrMap(Button("Search",
                                                on_press=self.do_search),
                                         'button_secondary',
                                         'button_secondary focus')

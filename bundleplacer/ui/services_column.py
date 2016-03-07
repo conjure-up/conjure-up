@@ -82,3 +82,6 @@ class ServicesColumn(WidgetWrap):
     def clear_selections(self):
         for sw in self.services_list.service_widgets:
             sw.state = ServiceWidgetState.UNSELECTED
+
+    def select_service(self, service_name):
+        self.services_list.select_service(service_name)

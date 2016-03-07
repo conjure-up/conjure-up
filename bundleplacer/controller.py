@@ -178,7 +178,7 @@ class PlacementController:
 
             flat_ad = {}
             for atype, al in ad.items():
-                flat_al = [cc.charm_name for cc in al]
+                flat_al = [cc.service_name for cc in al]
                 flat_ad[atype.name] = flat_al
 
             flat_assignments[iid]['assignments'] = flat_ad
@@ -186,7 +186,7 @@ class PlacementController:
         for iid, dd in self.deployments.items():
             flat_dd = {}
             for atype, dl in dd.items():
-                flat_dl = [cc.charm_name for cc in dl]
+                flat_dl = [cc.service_name for cc in dl]
                 flat_dd[atype.name] = flat_dl
             flat_assignments[iid]['deployments'] = flat_dd
 
@@ -207,7 +207,7 @@ class PlacementController:
         """
         def find_charm_class(name):
             for cc in self.charm_classes():
-                if cc.charm_name == name:
+                if cc.service_name == name:
                     return cc
             log.warning("Could not find charm class "
                         "matching saved charm name {}".format(name))
@@ -288,8 +288,14 @@ class PlacementController:
                     ms.append(m)
         return ms
 
-    def add_new_charm(self, charm_name, charm_dict):
-        self.bundle.add_new_charm(charm_name, charm_dict)
+    def add_new_service(self, service_name, charm_dict):
+        self.bundle.add_new_service(service_name, charm_dict)
+
+    def add_relation(self, c1_name, c1_rel, c2_name, c2_rel):
+        self.bundle.add_relation(c1_name, c1_rel, c2_name, c2_rel)
+
+    def is_related(self, c1_name, c1_rel, c2_name, c2_rel):
+        return self.bundle.is_related(c1_name, c1_rel, c2_name, c2_rel)
 
     def charm_classes(self):
         return self.bundle.charm_classes
@@ -460,11 +466,11 @@ class PlacementController:
         depending = set()
 
         def conflicts_with(other_charm):
-            return (charm.charm_name in other_charm.conflicts or
-                    other_charm.charm_name in charm.conflicts)
+            return (charm.service_name in other_charm.conflicts or
+                    other_charm.service_name in charm.conflicts)
 
         def depends(a_charm, b_charm):
-            return b_charm.charm_name in a_charm.depends
+            return b_charm.service_name in a_charm.depends
 
         required_charms = [c for c in self.charm_classes()
                            if c.is_core]
@@ -482,7 +488,7 @@ class PlacementController:
                     state = CharmState.REQUIRED
                 depending.add(other_charm)
 
-        if charm.charm_name in [c.charm_name for c in required_charms]:
+        if charm.service_name in [c.service_name for c in required_charms]:
             state = CharmState.REQUIRED
 
         n_required = charm.required_num_units()
@@ -490,7 +496,7 @@ class PlacementController:
         if n_required > 1 and not charm.allow_multi_units:
             log.error("Inconsistent charm definition for {}:"
                       " - requires {} units but does not allow "
-                      "multi units.".format(charm.charm_name, n_required))
+                      "multi units.".format(charm.service_name, n_required))
 
         n_units = (self.assignment_machine_count_for_charm(charm) +
                    self.deployment_machine_count_for_charm(charm))
@@ -560,7 +566,7 @@ class PlacementController:
             msg = ("Not enough empty machines could be found for the "
                    "following required services. Please add machines and "
                    "try again, or finish placement manually.")
-            m = ", ".join([c.charm_name for c in unassigned_reqs])
+            m = ", ".join([c.service_name for c in unassigned_reqs])
             return (False, msg + "\n" + m)
         return (True, "")
 
@@ -658,13 +664,13 @@ class PlacementController:
                                          'cpu-cores': max_cpus})
         self._machines.append(controller)
 
-        charm_name_counter = Counter()
+        service_name_counter = Counter()
 
         def placeholder_for_charm(charm_class):
-            mnum = charm_name_counter[charm_class.charm_name]
-            charm_name_counter[charm_class.charm_name] += 1
+            mnum = service_name_counter[charm_class.service_name]
+            service_name_counter[charm_class.service_name] += 1
 
-            instance_id = '{}-machine-{}'.format(charm_class.charm_name,
+            instance_id = '{}-machine-{}'.format(charm_class.service_name,
                                                  mnum)
             m_name = 'machine {} for {}'.format(mnum,
                                                 charm_class.display_name)
@@ -705,9 +711,9 @@ class BundleWriter:
 
         tolist = []
         num_units = 1
-        if svc.charm_name in services:
-            num_units = services[svc.charm_name]['num_units'] + 1
-            tolist = services[svc.charm_name]['to']
+        if svc.service_name in services:
+            num_units = services[svc.service_name]['num_units'] + 1
+            tolist = services[svc.service_name]['to']
 
         d = dict(charm=svc.charm_source,
                  num_units=num_units,
@@ -730,7 +736,7 @@ class BundleWriter:
 
     def _get_used_relations(self, services):
         relations = []
-        service_names = [s.charm_name for s in services]
+        service_names = [s.service_name for s in services]
         for svc in services:
             for src, dst in svc.relations:
                 src_charm = src.split(":")[0]
@@ -769,7 +775,7 @@ class BundleWriter:
                     sd = self._dict_for_service(svc, atype,
                                                 iid_map.get(iid, None),
                                                 services)
-                    services[svc.charm_name] = sd
+                    services[svc.service_name] = sd
                     servicenames.append(svc)
 
         bundle['machines'] = machines

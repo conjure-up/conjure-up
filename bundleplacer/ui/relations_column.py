@@ -19,8 +19,7 @@ from functools import partial
 import requests
 from threading import RLock
 
-from urwid import (AttrMap, Button, Columns, Divider, Pile, Text,
-                   WidgetWrap)
+from urwid import AttrMap, Divider, Pile, Text, WidgetWrap
 
 from bundleplacer.async import submit
 
@@ -40,14 +39,17 @@ class RelationType(Enum):
 
 class RelationWidget(WidgetWrap):
 
-    def __init__(self, relation_name, interface, reltype, select_cb,
-                 charm_name=None):
-        self.relation_name = relation_name
+    def __init__(self, source_service_name, source_relname, interface,
+                 reltype, target_service_name, target_relname,
+                 placement_controller, select_cb):
+        self.source_service_name = source_service_name
+        self.source_relname = source_relname
         self.interface = interface
         self.reltype = reltype
+        self.target_service_name = target_service_name
+        self.target_relname = target_relname
         self.select_cb = select_cb
-        self.is_selected = False
-        self.charm_name = charm_name
+        self.placement_controller = placement_controller
         w = self.build_widgets()
         super().__init__(w)
         self.update()
@@ -56,31 +58,55 @@ class RelationWidget(WidgetWrap):
         return True
 
     def build_widgets(self):
-        rs = str(self.reltype.name).lower()
-        title = "{} ({} interface '{}')".format(self.relation_name,
-                                                rs,
-                                                self.interface)
-        if self.charm_name:
-            title = "{}".format(self.charm_name, title)
-        self.button = MenuSelectButton(title,
+
+        self.button = MenuSelectButton("",
                                        on_press=self.do_select)
-        return self.button
+        return AttrMap(self.button, 'text',
+                       'button_secondary focus')
 
     def update(self):
-        if self.is_selected:
-            self._w = AttrMap(self.button, 'deploy_highlight_start',
-                              'button_secondary focus')
-        else:
-            self._w = AttrMap(self.button, 'text',
-                              'button_secondary focus')
+        arrow = {RelationType.Provides: "\N{RIGHTWARDS ARROW}",
+                 RelationType.Requires:
+                 "\N{LEFTWARDS ARROW}"}[self.reltype]
+
+        pc = self.placement_controller
+        self.connected = pc.is_related(self.source_service_name,
+                                       self.source_relname,
+                                       self.target_service_name,
+                                       self.target_relname)
+
+        connstr = {True: "\N{CHECK MARK} ",
+                   False: "  "}[self.connected]
+            
+        title = "{} {} {}  {}:{}".format(connstr,
+                                         self.source_relname,
+                                         arrow,
+                                         self.target_service_name,
+                                         self.target_relname)
+        self.button.set_label(title)
 
     def do_select(self, sender):
-        self.is_selected = not self.is_selected
-        self.select_cb(self, self.relation_name, self.interface,
-                       selected=self.is_selected)
+        self.select_cb(self.source_relname, self.target_service_name,
+                       self.target_relname)
 
 
-class RelationController:
+class NoRelationWidget(WidgetWrap):
+    def __init__(self, relname, iface, reltype):
+        other_reltype = {RelationType.Requires: RelationType.Provides,
+                         RelationType.Provides: RelationType.Requires}[reltype]
+        s = "({}: nothing {} {})".format(
+            relname, other_reltype.name.lower(), iface)
+        super().__init__(AttrMap(MenuSelectButton(s), 'label',
+                                 'button_secondary focus'))
+
+    def selectable(self):
+        return True
+
+    def update(self):
+        "no op"
+
+
+class CharmMetadataController:
 
     def __init__(self, charms):
         self.charms = charms
@@ -119,12 +145,14 @@ class RelationController:
                 iface = d["Interface"]
                 requires.append((relname, iface))
                 self.charms_requiring_iface[iface].append((relname,
-                                                           charm_name))
+                                                           charm_name,
+                                                           charm_name)) # MMCC TODO: need service name here
             for relname, d in pd.items():
                 iface = d["Interface"]
                 provides.append((relname, iface))
                 self.charms_providing_iface[iface].append((relname,
-                                                           charm_name))
+                                                           charm_name,
+                                                           charm_name)) # MMCC TODO: need service name here
 
             self.charm_info[charm_name] = dict(requires=requires,
                                                provides=provides)
@@ -159,143 +187,96 @@ class RelationsColumn(WidgetWrap):
                  placement_view):
         self.placement_controller = placement_controller
         charms = placement_controller.charm_classes()
-        self.rel_controller = RelationController(charms)
+        self.metadata_controller = CharmMetadataController(charms)
         self.charm = None
         self.provides = set()
         self.requires = set()
         self.placement_view = placement_view
-        self.selected_iface = None
         w = self.build_widgets()
         super().__init__(w)
         self.update()
 
     def build_widgets(self):
-        self.title = Text(('body', "Charm added. Edit relations:"),
-                          align='center')
-        self.my_title = Text(('body', "Relations "), align='center')
-
-        self.my_relations = Pile([Divider(),
-                                  self.my_title])
-        self.their_title = Text(('body', ""), align='center')
-        self.their_relations = Pile([Divider(),
-                                     self.their_title])
-
-        self.columns = Columns([self.my_relations,
-                                self.their_relations],
-                               dividechars=2)
-        # TODO MMCC need a "done" button,
-        self.pile = Pile([Divider(), Divider(), self.title, self.columns])
+        self.title = Text('')
+        self.relation_widgets = []
+        self.pile = Pile([Divider(), self.title] + self.relation_widgets)
         return self.pile
 
-    def set_charm(self, charm_name):
-        self.rel_controller.add_charm(charm_name)
-        self.charm = next((c for c in self.controller.charm_classes()
-                           if c.charm_name == charm_name), None)
-    
+    def refresh(self):
+        self.set_charm(self.charm)
+
+    def add_charm(self, charm_name):
+        self.metadata_controller.add_charm(charm_name)
+
+    def set_charm(self, charm):
+        self.charm = charm
+        self.add_charm(charm.charm_name)
+        self.pile.contents = self.pile.contents[:2]
+        self.provides = set()
+        self.requires = set()
+        self.relation_widgets = []
+
     def update(self):
         if self.charm is None:
             return
 
-        self.my_title.set_text(('body', "Relations "
-                                "for {}".format(self.charm.charm_name)))
+        self.title.set_text(('body', "Edit relations for {}".format(
+            self.charm.service_name)))
 
-        p = set(self.rel_controller.get_provides(self.charm.charm_name))
-        r = set(self.rel_controller.get_requires(self.charm.charm_name))
-        new_p = p - self.provides
+        if len(self.relation_widgets) == 0:
+            self.title.set_text(('body', "Loading Relations..."))
+        else:
+            self.title.set_text(('body', "Select Relations:"))
+
+        p = set(self.metadata_controller.get_provides(self.charm.charm_name))
+        r = set(self.metadata_controller.get_requires(self.charm.charm_name))
+        new_provides = p - self.provides
         self.provides.update(p)
-        new_r = r - self.requires
+        new_requires = r - self.requires
         self.requires.update(r)
 
-        if len(self.provides) + len(self.requires) == 0:
-            self.title.set_text(('body', "{} added. Loading "
-                                 "Relations...".format(self.charm.charm_name)))
-        else:
-            self.title.set_text(('body', "{} added. Select "
-                                 "relations:".format(self.charm.charm_name)))
-            
-        for relname, iface in sorted(new_p):
-            mrw = RelationWidget(relname, iface, RelationType.Provides,
-                                 self.select_mine)
-            self.my_relations.contents.append((mrw,
-                                               self.my_relations.options()))
-        for relname, iface in sorted(new_r):
-            mrw = RelationWidget(relname, iface, RelationType.Requires,
-                                 self.select_mine)
-            self.my_relations.contents.append((mrw,
-                                               self.my_relations.options()))
+        args = [(relname, iface, RelationType.Provides,
+                 self.metadata_controller.charms_requiring_iface[iface])
+                for relname, iface in sorted(new_provides)]
+        
+        args += [(relname, iface, RelationType.Requires,
+                  self.metadata_controller.charms_providing_iface[iface])
+                 for relname, iface in sorted(new_requires)]
 
-        # TODO MMCC: can't seem to select the column with theirs...
-        iface = None
-        if self.selected_iface:
-            iface = self.selected_iface
-            cur_w = self.selected_widget
-        elif (self.columns.focus_position == 0 and
-              self.my_relations.focus_position >= 2):
-            cur_w = self.my_relations.focus
-            if isinstance(cur_w, RelationWidget):
-                iface = cur_w.interface
-
-        if iface:
-            if cur_w.reltype == RelationType.Requires:
-                cs = self.rel_controller.charms_providing_iface[iface]
-                verb = "provide"
-                present_participle = "providing"
-            else:
-                cs = self.rel_controller.charms_requiring_iface[iface]
-                verb = "require"
-                present_participle = "requiring"
+        for relname, iface, reltype, matches in args:
+            if len(matches) == 0:
+                rw = NoRelationWidget(relname, iface, reltype)
+                self.relation_widgets.append(rw)
+                self.pile.contents.append((rw,
+                                           self.pile.options()))
                 
-            theirs = [RelationWidget(relname, iface,
-                                     RelationType.Provides,
-                                     self.select_theirs,
-                                     charm_name=charm_name) for
-                      (relname, charm_name) in cs]
-            if len(theirs) > 0:
-                self.their_title.set_text("Charms {} {}".format(
-                    present_participle, iface))
-            else:
-                self.their_title.set_text("No charms in this bundle "
-                                          "{} {}".format(verb, iface))
-                
-            opts = self.their_relations.options()
-            self.their_relations.contents[2:] = [(w, opts)
-                                                 for w in theirs]
+            for tgt_relname, tgt_charm_name, tgt_service_name in matches:
+                if tgt_charm_name == self.charm.charm_name:
+                    continue
+                rw = RelationWidget(self.charm.service_name, relname,
+                                    iface, reltype, tgt_service_name,
+                                    tgt_relname,
+                                    self.placement_controller,
+                                    self.do_select)
+                self.relation_widgets.append(rw)
+                self.pile.contents.append((rw,
+                                           self.pile.options()))
 
-        for w, _ in self.my_relations.contents[2:]:
-            w.update()
-
-        for w, _ in self.their_relations.contents[2:]:
+        for w, _ in self.pile.contents[2:]:
             w.update()
 
     def focus_prev_or_top(self):
-        self.pile.focus_position = len(self.pile.contents) - 1
-        self.columns.focus_position = 1
-        if len(self.their_relations.contents) <= 2:
+        # ? self.pile.focus_position = len(self.pile.contents) - 1
+
+        if len(self.pile.contents) <= 2:
             return
-        pos = self.their_relations.focus_position
+        pos = self.pile.focus_position
         if pos < 2:
-            self.their_relations.focus_position = 2
+            self.pile.focus_position = 2
 
-    def select_mine(self, widget, name, interface, selected):
-        for w, _ in self.my_relations.contents:
-            if isinstance(w, RelationWidget):
-                if not selected or w.interface != interface:
-                    w.is_selected = False
-                    w.update()
-        if selected:
-            self.selected_relation_name = name
-            self.selected_iface = interface
-            self.selected_widget = widget
-        else:
-            self.selected_relation_name = None
-            self.selected_iface = None
-            self.selected_widget = None
-        if len(self.their_relations.contents) > 2:
-            self.focus_theirs()
-        self.update()
-
-    def select_theirs(self, their_charm_name, their_relation_name):
-        self.controller.add_relation(self.charm,
-                                     self.selected_relation_name,
-                                     their_charm_name,
-                                     their_relation_name)
+    def do_select(self, source_relname, tgt_service_name,
+                  tgt_relation_name):
+        self.placement_controller.add_relation(self.charm.charm_name,
+                                               source_relname,
+                                               tgt_service_name,
+                                               tgt_relation_name)

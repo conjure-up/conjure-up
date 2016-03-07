@@ -76,4 +76,8 @@ class PlacerView(WidgetWrap):
         self.pv.edit_placement()
 
     def edit_relations(self):
-        self.pv.edit_relations()
+        assert self.selected_charm is not None
+        self.pv.edit_relations(self.selected_charm)
+
+    def clear_selections(self):
+        self.pv.clear_selections()

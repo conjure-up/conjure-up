@@ -22,16 +22,14 @@ log = logging.getLogger('bundleplacer')
 
 
 class FilterBox(WidgetWrap):
-
     def __init__(self, edit_changed_cb):
         self.label = Text("")
         self.info_text = Text("")
-        self.editbox = Edit()
+        self.editbox = Edit(caption=('text', "Filter: "))
         connect_signal(self.editbox, 'change',
                        edit_changed_cb)
 
-        w = Pile([Columns([('pack', self.label),
-                           AttrMap(self.editbox,
+        w = Pile([Columns([AttrMap(self.editbox,
                                    'filter', 'filter_focus')])
                   # self.info_text  # -- WORKAROUND for issue #194
                   ])
@@ -40,7 +38,7 @@ class FilterBox(WidgetWrap):
     def set_info(self, n_showing, n_total):
         m = ["Filter ", ('label', "({} of {} shown): ".format(n_showing,
                                                               n_total))]
-        self.label.set_text(m)
+        self.editbox.set_caption(m)
         if False:   # WORKAROUND for issue #194
             t = ''
         else:

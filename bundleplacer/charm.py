@@ -20,11 +20,12 @@ log = logging.getLogger('bundleplacer')
 
 
 class Charm:
-    def __init__(self, charm_name, charm_source, summary_future,
+    def __init__(self, service_name, charm_source, summary_future,
                  constraints, depends, conflicts,
                  allowed_assignment_types, num_units, options,
                  allow_multi_units, subordinate, required, relations):
-        self.charm_name = charm_name
+        self.service_name = service_name
+        self.charm_name = '-'.join(charm_source.split('/')[-1].split('-')[:-1])
         self.charm_source = charm_source
         self.summary_future = summary_future
         self._summary = "Loading summary…"
@@ -48,22 +49,22 @@ class Charm:
 
     @property
     def display_name(self):
-        return "{} ({})".format(self.charm_name,
+        return "{} ({})".format(self.service_name,
                                 self.charm_source)
 
     def required_num_units(self):
         return self.num_units
 
     def __repr__(self):
-        return "<Charm {}>".format(self.charm_name)
+        return "<Charm {}>".format(self.service_name)
 
     def __eq__(self, other):
-        me = self.charm_source + self.charm_name
-        them = other.charm_source + other.charm_name
+        me = self.charm_source + self.service_name
+        them = other.charm_source + other.service_name
         return me == them
 
     def __hash__(self):
         """We assume that we won't instantiate multiple Charm objects for the
         same class that have different properties.
         """
-        return hash(self.charm_source + self.charm_name)
+        return hash(self.charm_source + self.service_name)

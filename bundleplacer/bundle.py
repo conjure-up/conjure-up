@@ -19,7 +19,7 @@ import logging
 from theblues.charmstore import CharmStore
 from threading import RLock
 import yaml
-
+import q
 from bundleplacer.async import submit
 from bundleplacer.charm import Charm
 from bundleplacer.assignmenttype import AssignmentType, label_to_atype
@@ -113,7 +113,7 @@ def create_charm_class(servicename, service_dict, servicemeta, relations):
         if src.startswith(servicename) or dst.startswith(servicename):
             myrelations.append((src, dst))
 
-    charm = Charm(charm_name=servicename,
+    charm = Charm(service_name=servicename,
                   charm_source=service_dict['charm'],
                   summary_future=None,
                   constraints=servicemeta.get('constraints', {}),
@@ -150,11 +150,28 @@ class Bundle:
         if 'services' not in self._bundle.keys():
             raise Exception("Invalid Bundle.")
 
-    def add_new_charm(self, charm_name, charm_dict):
+    def add_new_service(self, service_name, charm_dict):
         new_dict = {'charm': charm_dict['Id'],
                     'num_units': 1}
-        self._bundle['services'][charm_name] = new_dict
+        self._bundle['services'][service_name] = new_dict
 
+    def add_relation(self, c1_name, c1_rel, c2_name, c2_rel):
+        r = ["{}:{}".format(c1_name, c1_rel),
+             "{}:{}".format(c2_name, c2_rel)]
+        self._bundle['relations'].append(r)
+
+    @q.t
+    def is_related(self, c1_name, c1_rel, c2_name, c2_rel):
+        a = "{}:{}".format(c1_name, c1_rel)
+        b = "{}:{}".format(c2_name, c2_rel)
+        rels = self._bundle['relations']
+        q(rels)
+        q([a,b])
+        q([a,b] in rels)
+        q([b,a])
+        q([b,a] in rels)
+        return [a, b] in rels or [b, a] in rels
+    
     @property
     def charm_classes(self):
         charm_classes = []

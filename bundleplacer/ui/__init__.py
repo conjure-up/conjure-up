@@ -30,8 +30,8 @@ from bundleplacer.ui.machines_column import MachinesColumn
 from bundleplacer.ui.relations_column import RelationsColumn
 from bundleplacer.ui.machine_chooser import MachineChooser
 from bundleplacer.ui.service_chooser import ServiceChooser
-# from bundleplacer.ui.relation_editor import RelationEditWidget
 
+import q
 
 log = logging.getLogger('bundleplacer')
 
@@ -67,7 +67,7 @@ class PlacementView(WidgetWrap):
         super().__init__(w)
         self.reset_selections(top=True)  # calls self.update
         ### TEMP
-        self.charm_search_widget.editbox.set_edit_text("wordpress")
+        self.charm_search_widget.editbox.set_edit_text("apache-hadoop-plugin")
 
     def scroll_down(self):
         pass
@@ -239,11 +239,13 @@ class PlacementView(WidgetWrap):
                 self.columns.contents[-1] = (self.relations_column, h_opts)
             self.prev_state = self.state
 
+        self.services_column.update()
+
         if self.state == UIState.PLACEMENT_EDITOR:
-            self.services_column.update()
             self.machines_column.update()
         elif self.state == UIState.RELATION_EDITOR:
-            pass  # self.relation_edit_widget.update()
+            self.relations_column.update()
+
         self.charm_search_widget.update()
 
         unplaced = self.placement_controller.unassigned_undeployed_services()
@@ -276,15 +278,29 @@ class PlacementView(WidgetWrap):
         self.placement_controller.clear_all_assignments()
 
     def do_add_charm(self, charm_name, charm_dict):
-        self.placement_controller.add_new_charm(charm_name, charm_dict)
+        """Add new service and focus its widget.
+
+        For simplicity, the service's service_name and charm_name will
+        be the same.
+        """
+        self.placement_controller.add_new_service(charm_name, charm_dict)
+        self.frame.focus_position = 'body'
+        self.columns.focus_position = 0
         self.update()
+        self.services_column.select_service(charm_name)
+        if self.state == UIState.RELATION_EDITOR:
+            self.relations_column.add_charm(charm_name)
+            self.relations_column.refresh()
 
     def do_clear_machine(self, sender, machine):
         self.placement_controller.clear_assignments(machine)
 
-    def reset_selections(self, top=False):
+    def clear_selections(self):
         self.services_column.clear_selections()
         self.machines_column.clear_selections()
+
+    def reset_selections(self, top=False):
+        self.clear_selections()
         self.update()
         self.columns.focus_position = 0
 
@@ -306,8 +322,9 @@ class PlacementView(WidgetWrap):
         self.update()
         self.focus_machines_column()
 
-    def edit_relations(self):
+    def edit_relations(self, selected_charm):
         self.state = UIState.RELATION_EDITOR
+        self.relations_column.set_charm(selected_charm)
         self.update()
         self.focus_relations_column()
 
