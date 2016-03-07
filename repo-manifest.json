@@ -17,7 +17,7 @@
         },
         {
             "url": "https://github.com/Ubuntu-Solutions-Engineering/bundle-placement.git",
-            "version": "fba47e6",
+            "version": "master",
             "directories": "bundleplacer"
         }
 
