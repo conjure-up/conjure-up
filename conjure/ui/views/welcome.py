@@ -10,6 +10,7 @@ class WelcomeView(WidgetWrap):
     def __init__(self, common, cb):
         self.common = common
         self.cb = cb
+        self.current_focus = 2
         _pile = [
             Padding.center_90(Text("Choose a solution to get started:")),
             Padding.center_90(Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}")),
@@ -18,6 +19,17 @@ class WelcomeView(WidgetWrap):
             Padding.center_20(self.buttons())
         ]
         super().__init__(ListBox(_pile))
+
+    def _swap_focus(self):
+        if self._w.focus_position == 2:
+            self._w.focus_position = 4
+        else:
+            self._w.focus_position = 2
+
+    def keypress(self, size, key):
+        if key in ['tab', 'shift tab']:
+            self._swap_focus()
+        return super().keypress(size, key)
 
     def buttons(self):
         cancel = cancel_btn(on_press=self.cancel)

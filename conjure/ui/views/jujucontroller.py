@@ -19,6 +19,17 @@ class JujuControllerView(WidgetWrap):
         else:
             super().__init__(self._build_newcontroller_widget())
 
+    def _swap_focus(self):
+        if self._w.body.focus_position == 3:
+            self._w.body.focus_position = 6
+        else:
+            self._w.body.focus_position = 3
+
+    def keypress(self, size, key):
+        if key in ['tab', 'shift tab']:
+            self._swap_focus()
+        return super().keypress(size, key)
+
     def _build_buttons(self):
         buttons = [
             Padding.line_break(""),
