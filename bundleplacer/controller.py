@@ -20,7 +20,7 @@ import yaml
 from multiprocessing import cpu_count
 
 from bundleplacer.maas import (satisfies, MaasMachineStatus)
-from bundleplacer.state import CharmState
+from bundleplacer.state import ServiceState
 
 from bundleplacer.assignmenttype import AssignmentType
 from bundleplacer.bundle import Bundle
@@ -117,7 +117,7 @@ class PlacementController:
                                                   'Subordinate Charms')
         self.def_placeholder = PlaceholderMachine('_default',
                                                   'Juju Default')
-        # assignments is {id: {atype: [charm class]}}
+        # assignments is {id: {atype: [service]}}
         self.assignments = defaultdict(lambda: defaultdict(list))
         self.deployments = defaultdict(lambda: defaultdict(list))
         self.autosave_filename = None
@@ -205,12 +205,12 @@ class PlacementController:
         """Load assignments from file object written to by save().
         replaces current assignments.
         """
-        def find_charm_class(name):
-            for cc in self.charm_classes():
-                if cc.service_name == name:
-                    return cc
-            log.warning("Could not find charm class "
-                        "matching saved charm name {}".format(name))
+        def find_service(name):
+            for s in self.services():
+                if s.service_name == name:
+                    return s
+            log.warning("Could not find service "
+                        "matching saved service name {}".format(name))
             return None
 
         file_assignments = yaml.load(f)
@@ -226,7 +226,7 @@ class PlacementController:
 
             ad = d.get('assignments', {})
             for atypestr, al in ad.items():
-                new_al = [find_charm_class(ccname)
+                new_al = [find_service(ccname)
                           for ccname in al]
                 new_al = [x for x in new_al if x is not None]
                 at = AssignmentType.__members__[atypestr]
@@ -234,7 +234,7 @@ class PlacementController:
 
             dd = d.get('deployments', {})
             for atypestr, dl in dd.items():
-                new_dl = [find_charm_class(ccname)
+                new_dl = [find_service(ccname)
                           for ccname in dl]
                 new_dl = [x for x in new_dl if x is not None]
                 at = AssignmentType.__members__[atypestr]
@@ -272,8 +272,8 @@ class PlacementController:
             return ms
 
     def machines_pending(self, include_placeholders=False):
-        """Returns a list of machines that have charms assigned to them which
-        are not yet deployed.
+        """Returns a list of machines that have services assigned to them
+        which are not yet deployed.
 
         Excludes placeholder machines by default, so this can be used
         to e.g. get the number of real machines to wait for.
@@ -288,46 +288,59 @@ class PlacementController:
                     ms.append(m)
         return ms
 
-    def add_new_service(self, service_name, charm_dict):
-        self.bundle.add_new_service(service_name, charm_dict)
+    def add_new_service(self, charm_name, charm_dict, service_name=None):
+        """adds a service with the default name of 'charm_name' or
+        'charm_name-1', etc"""
+        self.bundle.add_new_service(charm_name, charm_dict, service_name)
 
-    def add_relation(self, c1_name, c1_rel, c2_name, c2_rel):
-        self.bundle.add_relation(c1_name, c1_rel, c2_name, c2_rel)
+    def add_relation(self, s1_name, s1_rel, s2_name, s2_rel):
+        self.bundle.add_relation(s1_name, s1_rel, s2_name, s2_rel)
 
-    def is_related(self, c1_name, c1_rel, c2_name, c2_rel):
-        return self.bundle.is_related(c1_name, c1_rel, c2_name, c2_rel)
+    def is_related(self, s1_name, s1_rel, s2_name, s2_rel):
+        return self.bundle.is_related(s1_name, s1_rel, s2_name, s2_rel)
 
-    def charm_classes(self):
-        return self.bundle.charm_classes
+    def services(self):
+        return self.bundle.services
 
-    def assigned_charm_classes(self):
-        """Returns a deduplicated list of all charms that have a placement
+    def charm_names(self):
+        seen = set()
+        return [s.charm_name for s in self.bundle.services
+                if s.charm_name not in seen and not seen.add(s.charm_name)]
+
+    def services_with_charm(self, charm_name):
+        return [s for s in self.bundle.services
+                if s.charm_name == charm_name]
+
+    @property
+    def assigned_services(self):
+        """Returns a deduplicated list of all services that have a placement
         assigned, but are not yet deployed.
 
         """
-        return list(self.assigned_services)
+        return list(self._assigned_services)
 
-    def deployed_charm_classes(self):
-        """Returns a deduplicated list of all charms that have been deployed.
+    @property
+    def deployed_services(self):
+        """Returns a deduplicated list of all services that have been deployed.
         """
-        return list(self.deployed_services)
+        return list(self._deployed_services)
 
-    def assign(self, machine, charm_class, atype):
-        if not charm_class.allow_multi_units:
+    def assign(self, machine, service, atype):
+        if not service.allow_multi_units:
             for m, d in self.assignments.items():
                 for at, l in d.items():
-                    if charm_class in l:
-                        l.remove(charm_class)
+                    if service in l:
+                        l.remove(service)
 
-        self.assignments[machine.instance_id][atype].append(charm_class)
+        self.assignments[machine.instance_id][atype].append(service)
         self.update_and_save()
 
-    def mark_deployed(self, machine, charm_class, atype):
-        self.deployments[machine.instance_id][atype].append(charm_class)
-        self.assignments[machine.instance_id][atype].remove(charm_class)
+    def mark_deployed(self, machine, service, atype):
+        self.deployments[machine.instance_id][atype].append(service)
+        self.assignments[machine.instance_id][atype].remove(service)
         self.update_and_save()
 
-    def _get_machines_by_atype(self, a_dict, charm_class):
+    def _get_machines_by_atype(self, a_dict, service):
         "Helper for get_assignments and get_deployments"
         all_machines = self.machines()
 
@@ -341,26 +354,26 @@ class PlacementController:
 
             for atype, assignment_list in d.items():
                 for c in assignment_list:
-                    if c == charm_class:
+                    if c == service:
                         machines_by_atype[atype].append(m)
 
         return machines_by_atype
 
-    def get_assignments(self, charm_class):
-        """returns assignments for a given charm
+    def get_assignments(self, service):
+        """returns assignments for a given service
 
         returns a dict like {assignment_type : [machines]}
         """
         return self._get_machines_by_atype(self.assignments,
-                                           charm_class)
+                                           service)
 
-    def get_deployments(self, charm_class):
-        """returns deployments for a given charm
+    def get_deployments(self, service):
+        """returns deployments for a given service
 
         returns a dict like {assignment_type : [machines]}
         """
         return self._get_machines_by_atype(self.deployments,
-                                           charm_class)
+                                           service)
 
     def clear_all_assignments(self):
         self.assignments = defaultdict(lambda: defaultdict(list))
@@ -387,27 +400,27 @@ class PlacementController:
     def assignments_for_machine(self, m):
         """Returns all assignments for given machine
 
-        {assignment_type: [charm_class]}
+        {assignment_type: [service]}
         """
         return self.assignments[m.instance_id]
 
     def deployments_for_machine(self, m):
         """Returns deployments
-        {atype: [charm_class]}
+        {atype: [service]}
         """
         return self.deployments[m.instance_id]
 
-    def is_assigned_to(self, charm_class, machine):
+    def is_assigned_to(self, service, machine):
         assignment_dict = self.assignments[machine.instance_id]
-        for atype, charm_classes in assignment_dict.items():
-            if charm_class in charm_classes:
+        for atype, services in assignment_dict.items():
+            if service in services:
                 return True
         return False
 
-    def is_deployed_to(self, charm_class, machine):
+    def is_deployed_to(self, service, machine):
         dd = self.deployments[machine.instance_id]
-        for atype, charm_classes in dd.items():
-            if charm_class in charm_classes:
+        for atype, services in dd.items():
+            if service in services:
                 return True
         return False
 
@@ -416,16 +429,16 @@ class PlacementController:
         self.update_and_save()
 
     def reset_assigned_deployed(self):
-        self.assigned_services = set()
-        self.deployed_services = set()
-        for cc in self.charm_classes():
+        self._assigned_services = set()
+        self._deployed_services = set()
+        for cc in self.services():
             ad = self.get_assignments(cc)
             is_assigned = False
             for atype, al in ad.items():
                 if len(al) > 0:
                     is_assigned = True
             if is_assigned:
-                self.assigned_services.add(cc)
+                self._assigned_services.add(cc)
 
             dd = self.get_deployments(cc)
             is_deployed = False
@@ -433,108 +446,108 @@ class PlacementController:
                 if len(dl) > 0:
                     is_deployed = True
             if is_deployed:
-                self.deployed_services.add(cc)
+                self._deployed_services.add(cc)
 
-    def is_assigned(self, charm):
-        return charm in self.assigned_services
+    def is_assigned(self, service):
+        return service in self._assigned_services
 
-    def is_deployed(self, charm):
-        return charm in self.deployed_services
+    def is_deployed(self, service):
+        return service in self._deployed_services
 
-    def get_charm_state(self, charm):
-        """Returns tuple of charm state:
+    def get_service_state(self, service):
+        """Returns tuple of service state:
         (state, cons, deps)
 
-        state is a CharmState:
+        state is a ServiceState:
 
-        - REQUIRED means that the charm still must be assigned before
+        - REQUIRED means that the service still must be assigned before
         deploying is OK.
 
-        IF a charm dependency forced this, then the other charm will
-        be in 'deps'.  'deps' is NOT just a list of all charms that
-        depend on the given charm.
+        IF a service dependency forced this, then the other service will
+        be in 'deps'.  'deps' is NOT just a list of all services that
+        depend on the given service.
 
         - CONFLICTED means that it can't be assigned until a conflicting
-        charm is unassigned.  In this case, the conflicting charm is in
+        service is unassigned.  In this case, the conflicting service is in
         'cons'.
 
         - OPTIONAL means that it is ok either way. deps and cons are unused
 
         """
-        state = CharmState.OPTIONAL
+        state = ServiceState.OPTIONAL
         conflicting = set()
         depending = set()
 
-        def conflicts_with(other_charm):
-            return (charm.service_name in other_charm.conflicts or
-                    other_charm.service_name in charm.conflicts)
+        def conflicts_with(other_service):
+            return (service.service_name in other_service.conflicts or
+                    other_service.service_name in service.conflicts)
 
-        def depends(a_charm, b_charm):
-            return b_charm.service_name in a_charm.depends
+        def depends(a_service, b_service):
+            return b_service.service_name in a_service.depends
 
-        required_charms = [c for c in self.charm_classes()
-                           if c.is_core]
+        required_services = [c for c in self.services()
+                             if c.is_core]
 
-        planned_or_deployed = (self.assigned_charm_classes() +
-                               required_charms +
-                               self.deployed_charm_classes())
+        planned_or_deployed = (self.assigned_services +
+                               required_services +
+                               self.deployed_services)
 
-        for other_charm in planned_or_deployed:
-            if conflicts_with(other_charm):
-                state = CharmState.CONFLICTED
-                conflicting.add(other_charm)
-            if depends(other_charm, charm):
-                if state != CharmState.CONFLICTED:
-                    state = CharmState.REQUIRED
-                depending.add(other_charm)
+        for other_service in planned_or_deployed:
+            if conflicts_with(other_service):
+                state = ServiceState.CONFLICTED
+                conflicting.add(other_service)
+            if depends(other_service, service):
+                if state != ServiceState.CONFLICTED:
+                    state = ServiceState.REQUIRED
+                depending.add(other_service)
 
-        if charm.service_name in [c.service_name for c in required_charms]:
-            state = CharmState.REQUIRED
+        if service.service_name in [c.service_name for c in required_services]:
+            state = ServiceState.REQUIRED
 
-        n_required = charm.required_num_units()
+        n_required = service.required_num_units()
         # sanity check:
-        if n_required > 1 and not charm.allow_multi_units:
-            log.error("Inconsistent charm definition for {}:"
+        if n_required > 1 and not service.allow_multi_units:
+            log.error("Inconsistent service definition for {}:"
                       " - requires {} units but does not allow "
-                      "multi units.".format(charm.service_name, n_required))
+                      "multi units.".format(service.service_name, n_required))
 
-        n_units = (self.assignment_machine_count_for_charm(charm) +
-                   self.deployment_machine_count_for_charm(charm))
+        n_units = (self.assignment_machine_count_for_service(service) +
+                   self.deployment_machine_count_for_service(service))
 
-        if state == CharmState.OPTIONAL and \
+        if state == ServiceState.OPTIONAL and \
            n_units > 0 and n_units < n_required:
-            state = CharmState.REQUIRED
-        elif state == CharmState.REQUIRED and n_units >= n_required:
+            state = ServiceState.REQUIRED
+        elif state == ServiceState.REQUIRED and n_units >= n_required:
             if n_units > 0:
-                state = CharmState.OPTIONAL
+                state = ServiceState.OPTIONAL
 
         return (state, list(conflicting), list(depending))
 
     def unassigned_undeployed_services(self):
-        all_charms = set(self.charm_classes())
-        return (all_charms -
-                (self.assigned_services.union(self.deployed_services)))
+        all_services = set(self.services())
+        return (all_services -
+                (self._assigned_services.union(self._deployed_services)))
 
     def can_deploy(self):
         unassigned_requireds = [cc for cc in
                                 self.unassigned_undeployed_services()
-                                if self.get_charm_state(cc)[0] ==
-                                CharmState.REQUIRED]
+                                if self.get_service_state(cc)[0] ==
+                                ServiceState.REQUIRED]
 
-        underassigned = [cc for cc in self.assigned_services if
-                         (self.assignment_machine_count_for_charm(cc) +
-                          self.deployment_machine_count_for_charm(cc)) <
+        underassigned = [cc for cc in self._assigned_services if
+                         (self.assignment_machine_count_for_service(cc) +
+                          self.deployment_machine_count_for_service(cc)) <
                          cc.required_num_units()]
         return len(unassigned_requireds) + len(underassigned) == 0
 
-    def assignment_machine_count_for_charm(self, cc):
+    def assignment_machine_count_for_service(self, cc):
         """Returns the total number of assignments of any type for a given
-        charm."""
+        service."""
         return sum([len(al) for al in self.get_assignments(cc).values()])
 
-    def deployment_machine_count_for_charm(self, cc):
+    def deployment_machine_count_for_service(self, cc):
         """Returns the total number of deployments of any type for a given
-        charm."""
+        service."""
         return sum([len(al) for al in self.get_deployments(cc).values()])
 
     def autoassign_unassigned_services(self):
@@ -553,14 +566,14 @@ class PlacementController:
         unassigned_defaults = self.gen_defaults(unassigned_services,
                                                 empty_machines)
 
-        for mid, charm_classes in unassigned_defaults.items():
-            self.assignments[mid] = charm_classes
+        for mid, services in unassigned_defaults.items():
+            self.assignments[mid] = services
 
         self.update_and_save()
 
         unassigned_services = list(self.unassigned_undeployed_services())
         unassigned_reqs = [c for c in unassigned_services if
-                           self.get_charm_state(c)[0] == CharmState.REQUIRED]
+                           self.get_service_state(c)[0] == ServiceState.REQUIRED]
 
         if len(unassigned_reqs) > 0:
             msg = ("Not enough empty machines could be found for the "
@@ -579,8 +592,8 @@ class PlacementController:
             al.append(s)
         self.update_and_save()
 
-    def gen_defaults(self, charm_classes=None, maas_machines=None):
-        """Generates an assignments dictionary for the given charm classes and
+    def gen_defaults(self, services=None, maas_machines=None):
+        """Generates an assignments dictionary for the given service classes and
         machines, based on constraints.
 
         Does not alter controller state.
@@ -593,9 +606,9 @@ class PlacementController:
         if self.maas_state is None:
             raise PlacementError("Can't call gen_defaults with no maas_state")
 
-        if charm_classes is None:
-            charm_classes = self.charm_classes()
-        log.debug("in gen_defaults, charm_classes is {}".format(charm_classes))
+        if services is None:
+            services = self.services()
+        log.debug("in gen_defaults, services is {}".format(services))
         assignments = defaultdict(lambda: defaultdict(list))
 
         if maas_machines is None:
@@ -611,40 +624,40 @@ class PlacementController:
 
             return None
 
-        isolated_charms, controller_charms = [], []
-        subordinate_charms = []
+        isolated_services, controller_services = [], []
+        subordinate_services = []
 
-        for charm_class in charm_classes:
-            state, _, _ = self.get_charm_state(charm_class)
-            if state != CharmState.REQUIRED:
+        for service in services:
+            state, _, _ = self.get_service_state(service)
+            if state != ServiceState.REQUIRED:
                 continue
-            if charm_class.isolate:
-                assert(not charm_class.subordinate)
-                isolated_charms.append(charm_class)
-            elif charm_class.subordinate:
-                assert(not charm_class.isolate)
-                subordinate_charms.append(charm_class)
+            if service.isolate:
+                assert(not service.subordinate)
+                isolated_services.append(service)
+            elif service.subordinate:
+                assert(not service.isolate)
+                subordinate_services.append(service)
             else:
-                controller_charms.append(charm_class)
+                controller_services.append(service)
 
-        for charm_class in isolated_charms:
-            for n in range(charm_class.required_num_units()):
-                m = satisfying_machine(charm_class.constraints)
+        for service in isolated_services:
+            for n in range(service.required_num_units()):
+                m = satisfying_machine(service.constraints)
                 if m:
                     l = assignments[m.instance_id][AssignmentType.BareMetal]
-                    l.append(charm_class)
+                    l.append(service)
 
         controller_machine = satisfying_machine({})
         if controller_machine:
-            for charm_class in controller_charms:
+            for service in controller_services:
                 ad = assignments[controller_machine.instance_id]
                 l = ad[DEFAULT_SHARED_ASSIGNMENT_TYPE]
-                l.append(charm_class)
+                l.append(service)
 
-        for charm_class in subordinate_charms:
+        for service in subordinate_services:
             ad = assignments[self.sub_placeholder.instance_id]
             l = ad[AssignmentType.DEFAULT]
-            l.append(charm_class)
+            l.append(service)
 
         import pprint
         log.debug(pprint.pformat(assignments))
@@ -666,37 +679,37 @@ class PlacementController:
 
         service_name_counter = Counter()
 
-        def placeholder_for_charm(charm_class):
-            mnum = service_name_counter[charm_class.service_name]
-            service_name_counter[charm_class.service_name] += 1
+        def placeholder_for_service(service):
+            mnum = service_name_counter[service.service_name]
+            service_name_counter[service.service_name] += 1
 
-            instance_id = '{}-machine-{}'.format(charm_class.service_name,
+            instance_id = '{}-machine-{}'.format(service.service_name,
                                                  mnum)
             m_name = 'machine {} for {}'.format(mnum,
-                                                charm_class.display_name)
+                                                service.display_name)
 
             return PlaceholderMachine(instance_id, m_name,
-                                      charm_class.constraints)
+                                      service.constraints)
 
-        for charm_class in self.charm_classes():
-            state, _, _ = self.get_charm_state(charm_class)
-            if state != CharmState.REQUIRED:
+        for service in self.services():
+            state, _, _ = self.get_service_state(service)
+            if state != ServiceState.REQUIRED:
                 continue
-            if charm_class.isolate:
-                assert(not charm_class.subordinate)
-                for n in range(charm_class.required_num_units()):
-                    pm = placeholder_for_charm(charm_class)
+            if service.isolate:
+                assert(not service.subordinate)
+                for n in range(service.required_num_units()):
+                    pm = placeholder_for_service(service)
                     self._machines.append(pm)
                     ad = assignments[pm.instance_id]
-                    ad[AssignmentType.DEFAULT].append(charm_class)
-            elif charm_class.subordinate:
-                assert(not charm_class.isolate)
+                    ad[AssignmentType.DEFAULT].append(service)
+            elif service.subordinate:
+                assert(not service.isolate)
                 ad = assignments[self.sub_placeholder.instance_id]
                 l = ad[AssignmentType.DEFAULT]
-                l.append(charm_class)
+                l.append(service)
             else:
                 ad = assignments[controller.instance_id]
-                ad[AssignmentType.LXC].append(charm_class)
+                ad[AssignmentType.LXC].append(service)
 
         import pprint
         log.debug("gen_single() = '{}'".format(pprint.pformat(assignments)))
@@ -739,9 +752,10 @@ class BundleWriter:
         service_names = [s.service_name for s in services]
         for svc in services:
             for src, dst in svc.relations:
-                src_charm = src.split(":")[0]
-                dst_charm = dst.split(":")[0]
-                if src_charm in service_names and dst_charm in service_names:
+                src_service = src.split(":")[0]
+                dst_service = dst.split(":")[0]
+                if src_service in service_names and \
+                   dst_service in service_names:
                     relations.append([src, dst])
         # uniquify list of relations
         seen = set()

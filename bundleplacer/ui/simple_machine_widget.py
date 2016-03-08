@@ -91,7 +91,7 @@ class SimpleMachineWidget(WidgetWrap):
                 'storage: {}'.format(m.storage)]
 
     def update_selected(self):
-        cn = self.display_controller.selected_charm.service_name
+        cn = self.display_controller.selected_service.service_name
         msg = Text("  Add {} to {}:".format(cn,
                                             self.machine.hostname))
         self.pile.contents = [(msg, self.pile.options()),
@@ -119,7 +119,7 @@ class SimpleMachineWidget(WidgetWrap):
                         'Add as KVM',
                         self.select_kvm)]
 
-        sc = self.display_controller.selected_charm
+        sc = self.display_controller.selected_service
         if sc:
             allowed_set = set(sc.allowed_assignment_types)
             allowed_types = set([atype for atype, _, _ in all_actions])
@@ -147,7 +147,7 @@ class SimpleMachineWidget(WidgetWrap):
                                             self.action_buttons]
 
     def do_select(self, sender):
-        if self.display_controller.selected_charm is None:
+        if self.display_controller.selected_service is None:
             return
         self.is_selected = True
         self.update()

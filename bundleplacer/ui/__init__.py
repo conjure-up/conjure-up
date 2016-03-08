@@ -28,10 +28,6 @@ from bundleplacer.ui.filter_box import FilterBox
 from bundleplacer.ui.services_column import ServicesColumn
 from bundleplacer.ui.machines_column import MachinesColumn
 from bundleplacer.ui.relations_column import RelationsColumn
-from bundleplacer.ui.machine_chooser import MachineChooser
-from bundleplacer.ui.service_chooser import ServiceChooser
-
-import q
 
 log = logging.getLogger('bundleplacer')
 
@@ -249,7 +245,7 @@ class PlacementView(WidgetWrap):
         self.charm_search_widget.update()
 
         unplaced = self.placement_controller.unassigned_undeployed_services()
-        all = self.placement_controller.charm_classes()
+        all = self.placement_controller.services()
         n_total = len(all)
         remaining = len(unplaced) + len([c for c in all if c.subordinate])
         dmsg = "Deploy (Auto-assigning {}/{} charms)".format(remaining,
@@ -280,17 +276,17 @@ class PlacementView(WidgetWrap):
     def do_add_charm(self, charm_name, charm_dict):
         """Add new service and focus its widget.
 
-        For simplicity, the service's service_name and charm_name will
-        be the same.
         """
-        self.placement_controller.add_new_service(charm_name, charm_dict)
+        service_name = self.placement_controller.add_new_service(charm_name,
+                                                                 charm_dict)
         self.frame.focus_position = 'body'
         self.columns.focus_position = 0
         self.update()
-        self.services_column.select_service(charm_name)
         if self.state == UIState.RELATION_EDITOR:
             self.relations_column.add_charm(charm_name)
             self.relations_column.refresh()
+        else:
+            self.services_column.select_service(service_name)
 
     def do_clear_machine(self, sender, machine):
         self.placement_controller.clear_assignments(machine)
@@ -322,24 +318,14 @@ class PlacementView(WidgetWrap):
         self.update()
         self.focus_machines_column()
 
-    def edit_relations(self, selected_charm):
+    def edit_relations(self, service):
         self.state = UIState.RELATION_EDITOR
-        self.relations_column.set_charm(selected_charm)
+        self.relations_column.set_service(service)
         self.update()
         self.focus_relations_column()
 
-    def do_show_service_chooser(self, sender, machine):
-        self.show_overlay(ServiceChooser(self.placement_controller,
-                                         machine,
-                                         self))
-
     def do_deploy(self, sender):
         self.do_deploy_cb()
-
-    def do_show_machine_chooser(self, sender, charm_class):
-        self.show_overlay(MachineChooser(self.placement_controller,
-                                         charm_class,
-                                         self))
 
     def show_overlay(self, overlay_widget):
         self.orig_w = self._w

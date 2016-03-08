@@ -19,9 +19,8 @@ import logging
 from theblues.charmstore import CharmStore
 from threading import RLock
 import yaml
-import q
 from bundleplacer.async import submit
-from bundleplacer.charm import Charm
+from bundleplacer.service import Service
 from bundleplacer.assignmenttype import AssignmentType, label_to_atype
 
 log = logging.getLogger('bundleplacer')
@@ -94,7 +93,7 @@ class CharmStoreAPI:
         return self._lookup(charm_name, None, exc_cb)
 
 
-def create_charm_class(servicename, service_dict, servicemeta, relations):
+def create_service(servicename, service_dict, servicemeta, relations):
     # some attempts to guess at subordinate status from bundle format,
     # to avoid having to include it in metadata:
 
@@ -113,27 +112,28 @@ def create_charm_class(servicename, service_dict, servicemeta, relations):
         if src.startswith(servicename) or dst.startswith(servicename):
             myrelations.append((src, dst))
 
-    charm = Charm(service_name=servicename,
-                  charm_source=service_dict['charm'],
-                  summary_future=None,
-                  constraints=servicemeta.get('constraints', {}),
-                  depends=servicemeta.get('depends', []),
-                  conflicts=servicemeta.get('conflicts', []),
-                  allowed_assignment_types=servicemeta.get(
-                      'allowed_assignment_types',
-                      list(AssignmentType)),
-                  num_units=service_dict.get('num_units', 1),
-                  options=service_dict.get('options', {}),
-                  allow_multi_units=servicemeta.get('allow_multi_units', True),
-                  subordinate=is_subordinate,
-                  required=servicemeta.get('required', True),
-                  relations=myrelations)
+    service = Service(service_name=servicename,
+                      charm_source=service_dict['charm'],
+                      summary_future=None,
+                      constraints=servicemeta.get('constraints', {}),
+                      depends=servicemeta.get('depends', []),
+                      conflicts=servicemeta.get('conflicts', []),
+                      allowed_assignment_types=servicemeta.get(
+                          'allowed_assignment_types',
+                          list(AssignmentType)),
+                      num_units=service_dict.get('num_units', 1),
+                      options=service_dict.get('options', {}),
+                      allow_multi_units=servicemeta.get('allow_multi_units', True),
+                      subordinate=is_subordinate,
+                      required=servicemeta.get('required', True),
+                      relations=myrelations)
 
     # Make sure to map any strings to an assignment type enum
-    if any(isinstance(atype, str) for atype in charm.allowed_assignment_types):
-        charm.allowed_assignment_types = label_to_atype(
-            charm.allowed_assignment_types)
-    return charm
+    if any(isinstance(atype, str)
+           for atype in service.allowed_assignment_types):
+        service.allowed_assignment_types = label_to_atype(
+            service.allowed_assignment_types)
+    return service
 
 
 class Bundle:
@@ -150,40 +150,47 @@ class Bundle:
         if 'services' not in self._bundle.keys():
             raise Exception("Invalid Bundle.")
 
-    def add_new_service(self, service_name, charm_dict):
+    def add_new_service(self, charm_name, charm_dict, service_name=None):
+        if service_name is None:
+            i = 1
+            service_name = charm_name
+            while service_name in self._bundle['services']:
+                service_name = "{}-{}".format(charm_name, i)
+                i += 1
+
         new_dict = {'charm': charm_dict['Id'],
                     'num_units': 1}
         self._bundle['services'][service_name] = new_dict
 
-    def add_relation(self, c1_name, c1_rel, c2_name, c2_rel):
-        r = ["{}:{}".format(c1_name, c1_rel),
-             "{}:{}".format(c2_name, c2_rel)]
+    def add_relation(self, s1_name, s1_rel, s2_name, s2_rel):
+        r = ["{}:{}".format(s1_name, s1_rel),
+             "{}:{}".format(s2_name, s2_rel)]
         self._bundle['relations'].append(r)
 
-    @q.t
-    def is_related(self, c1_name, c1_rel, c2_name, c2_rel):
-        a = "{}:{}".format(c1_name, c1_rel)
-        b = "{}:{}".format(c2_name, c2_rel)
+    def is_related(self, s1_name, s1_rel, s2_name, s2_rel):
+        """Checks if a relation exists. If the relation in the bundle does not
+        specify relation names, this returns true for any relation names.
+        """
+        a = "{}:{}".format(s1_name, s1_rel)
+        b = "{}:{}".format(s2_name, s2_rel)
         rels = self._bundle['relations']
-        q(rels)
-        q([a,b])
-        q([a,b] in rels)
-        q([b,a])
-        q([b,a] in rels)
-        return [a, b] in rels or [b, a] in rels
+        return ([a, b] in rels or [b, a] in rels or
+                [s1_name, s2_name] in rels or
+                [s2_name, s1_name] in rels)
     
     @property
-    def charm_classes(self):
-        charm_classes = []
+    def services(self):
+        services = []
         metadata = self._metadata.get('services', {})
-        services = self._bundle.get('services', {})
+        bundle_services = self._bundle.get('services', {})
         relations = self._bundle.get('relations', [])
-        for servicename, sd in services.items():
+        for servicename, sd in bundle_services.items():
             sm = metadata.get(servicename, {})
-            charm_classes.append(create_charm_class(servicename, sd,
-                                                    sm, relations))
-        return charm_classes
+            services.append(create_service(servicename, sd,
+                                           sm, relations))
+        return services
 
     def extra_items(self):
         return {k: v for k, v in self._bundle.items()
                 if k not in ['services', 'machines', 'relations']}
+

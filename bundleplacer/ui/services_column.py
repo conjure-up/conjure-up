@@ -17,8 +17,6 @@ import logging
 
 from urwid import Divider, Pile, WidgetWrap
 
-from bundleplacer.assignmenttype import AssignmentType
-
 from bundleplacer.ui.services_list import ServicesList
 from bundleplacer.ui.simple_service_widget import ServiceWidgetState
 
@@ -63,7 +61,7 @@ class ServicesColumn(WidgetWrap):
         self.update()
         moved = self.services_list.focus_top_or_next()
         fsw = self.services_list.focused_service_widget()
-        if not moved or (fsw and fsw.charm_class.subordinate):
+        if not moved or (fsw and fsw.service.subordinate):
             self.placement_view.focus_footer()
 
     def update(self):
@@ -72,12 +70,6 @@ class ServicesColumn(WidgetWrap):
     def do_reset_to_defaults(self, sender):
         self.placement_controller.set_all_assignments(
             self.placement_controller.gen_defaults())
-
-    def do_place_subordinate(self, sender, charm_class):
-        sub_placeholder = self.placement_controller.sub_placeholder
-        self.placement_controller.assign(sub_placeholder,
-                                         charm_class,
-                                         AssignmentType.BareMetal)
 
     def clear_selections(self):
         for sw in self.services_list.service_widgets:

@@ -32,7 +32,7 @@ class SimpleServiceWidget(WidgetWrap):
 
     """A widget displaying a service as a button
 
-    charm_class - the class describing the service to display
+    service - the service to display
 
     placement_controller - a PlacementController instance
 
@@ -47,9 +47,9 @@ class SimpleServiceWidget(WidgetWrap):
 
     """
 
-    def __init__(self, charm_class, placement_controller,
+    def __init__(self, service, placement_controller,
                  display_controller, show_placements=False):
-        self.charm_class = charm_class
+        self.service = service
         self.placement_controller = placement_controller
         self.display_controller = display_controller
         self.show_placements = show_placements
@@ -62,9 +62,9 @@ class SimpleServiceWidget(WidgetWrap):
         return True
 
     def build_widgets(self):
-        self.title_markup = [self.charm_class.display_name]
+        self.title_markup = [self.service.display_name]
 
-        if self.charm_class.subordinate:
+        if self.service.subordinate:
             self.button = MenuSelectButton("I AM A SUBORDINATE SERVICE")
         else:
             self.button = MenuSelectButton("I AM A SERVICE", self.do_select)
@@ -76,7 +76,7 @@ class SimpleServiceWidget(WidgetWrap):
         return self.pile
 
     def get_markup(self):
-        if self.charm_class.subordinate:
+        if self.service.subordinate:
             return self.title_markup, []
 
         if self.state == ServiceWidgetState.SELECTED:
@@ -87,8 +87,8 @@ class SimpleServiceWidget(WidgetWrap):
         main_markup = selection_markup + self.title_markup
 
         info_markup = []
-        p = self.placement_controller.get_assignments(self.charm_class)
-        nr = self.charm_class.required_num_units()
+        p = self.placement_controller.get_assignments(self.service)
+        nr = self.service.required_num_units()
         info_str = " ({} of {} placed)".format(len(p), nr)
 
         info_markup.append(info_str)
@@ -107,7 +107,7 @@ class SimpleServiceWidget(WidgetWrap):
             return s
 
         info_markup += ["    Assignments: "]
-        ad = self.placement_controller.get_assignments(self.charm_class)
+        ad = self.placement_controller.get_assignments(self.service)
         info_markup += string_for_placement_dict(ad)
         return main_markup, info_markup
 
@@ -165,9 +165,9 @@ class SimpleServiceWidget(WidgetWrap):
         self.display_controller.clear_selections()
         if self.state == ServiceWidgetState.SELECTED:
             self.state = ServiceWidgetState.UNSELECTED
-            self.display_controller.set_selected_charm(None)
+            self.display_controller.set_selected_service(None)
         else:
-            self.display_controller.set_selected_charm(self.charm_class)
+            self.display_controller.set_selected_service(self.service)
             self.state = ServiceWidgetState.CHOOSING
             self.pile.focus_position = 1
             self.action_button_grid.focus_position = 0

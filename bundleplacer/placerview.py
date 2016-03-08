@@ -32,7 +32,7 @@ class PlacerView(WidgetWrap):
         self.config = config
         self.cb = cb
         self.selected_machine = None
-        self.selected_charm = None
+        self.selected_service = None
         self.pv = PlacementView(
             display_controller=self,
             placement_controller=self.placement_controller,
@@ -56,7 +56,7 @@ class PlacerView(WidgetWrap):
 
     def _do_select(self, machine, atype):
         self.placement_controller.assign(machine,
-                                         self.selected_charm,
+                                         self.selected_service,
                                          atype)
         self.pv.reset_selections()
 
@@ -69,15 +69,15 @@ class PlacerView(WidgetWrap):
     def do_select_kvm(self, machine):
         self._do_select(machine, AssignmentType.KVM)
 
-    def set_selected_charm(self, charm):
-        self.selected_charm = charm
+    def set_selected_service(self, service):
+        self.selected_service = service
 
     def edit_placement(self):
         self.pv.edit_placement()
 
     def edit_relations(self):
-        assert self.selected_charm is not None
-        self.pv.edit_relations(self.selected_charm)
+        assert self.selected_service is not None
+        self.pv.edit_relations(self.selected_service)
 
     def clear_selections(self):
         self.pv.clear_selections()

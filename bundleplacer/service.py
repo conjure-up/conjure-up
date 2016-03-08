@@ -19,7 +19,7 @@ import logging
 log = logging.getLogger('bundleplacer')
 
 
-class Charm:
+class Service:
     def __init__(self, service_name, charm_source, summary_future,
                  constraints, depends, conflicts,
                  allowed_assignment_types, num_units, options,
@@ -56,7 +56,7 @@ class Charm:
         return self.num_units
 
     def __repr__(self):
-        return "<Charm {}>".format(self.service_name)
+        return "<Service {}>".format(self.service_name)
 
     def __eq__(self, other):
         me = self.charm_source + self.service_name

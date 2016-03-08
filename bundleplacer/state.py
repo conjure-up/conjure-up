@@ -35,9 +35,9 @@ class ControllerState(IntEnum):
     ADD_SERVICES = 3
 
 
-class CharmState(Enum):
+class ServiceState(Enum):
 
-    """ Charm relation states """
+    """ Service interaction states """
     REQUIRED = 0
     OPTIONAL = 1
     CONFLICTED = 2

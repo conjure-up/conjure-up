@@ -25,8 +25,6 @@ from bundleplacer.async import submit
 
 from ubuntui.widgets.buttons import MenuSelectButton
 
-import q
-
 import logging
 
 log = logging.getLogger('bundleplacer')
@@ -106,10 +104,11 @@ class NoRelationWidget(WidgetWrap):
         "no op"
 
 
-class CharmMetadataController:
+class MetadataController:
 
-    def __init__(self, charms):
-        self.charms = charms
+    def __init__(self, placement_controller):
+        self.placement_controller = placement_controller
+        self.charm_names = placement_controller.charm_names()
         # charm_name : charm_metadata        
         self.charm_info = {}
         self.metadata_future = None
@@ -117,7 +116,7 @@ class CharmMetadataController:
         self.charms_providing_iface = defaultdict(list)
         self.charms_requiring_iface = defaultdict(list)
         
-        self.load([c.charm_name for c in self.charms])
+        self.load(self.charm_names)
 
     def load(self, charm_names):
         if self.metadata_future:
@@ -145,14 +144,13 @@ class CharmMetadataController:
                 iface = d["Interface"]
                 requires.append((relname, iface))
                 self.charms_requiring_iface[iface].append((relname,
-                                                           charm_name,
-                                                           charm_name)) # MMCC TODO: need service name here
+                                                           charm_name))
+
             for relname, d in pd.items():
                 iface = d["Interface"]
                 provides.append((relname, iface))
                 self.charms_providing_iface[iface].append((relname,
-                                                           charm_name,
-                                                           charm_name)) # MMCC TODO: need service name here
+                                                           charm_name))
 
             self.charm_info[charm_name] = dict(requires=requires,
                                                provides=provides)
@@ -174,21 +172,34 @@ class CharmMetadataController:
             return []
         return self.charm_info[charm_name]['requires']
 
+    def get_services_for_iface(self, iface, reltype):
+        services = []
+        if reltype == RelationType.Requires:
+            cs = self.charms_requiring_iface[iface]
+        else:
+            cs = self.charms_providing_iface[iface]
+
+        for relname, charm_name in cs:
+            pc = self.placement_controller
+            services += [(relname, s) for s in
+                         pc.services_with_charm(charm_name)]
+
+        return services
+            
     def handle_search_error(self, e):
         pass                    # TODO MMCC
 
 
 class RelationsColumn(WidgetWrap):
 
-    """UI to edit relations of a charm
+    """UI to edit relations of a service
     """
 
     def __init__(self, display_controller, placement_controller,
                  placement_view):
         self.placement_controller = placement_controller
-        charms = placement_controller.charm_classes()
-        self.metadata_controller = CharmMetadataController(charms)
-        self.charm = None
+        self.metadata_controller = MetadataController(placement_controller)
+        self.service = None
         self.provides = set()
         self.requires = set()
         self.placement_view = placement_view
@@ -203,44 +214,45 @@ class RelationsColumn(WidgetWrap):
         return self.pile
 
     def refresh(self):
-        self.set_charm(self.charm)
+        self.set_service(self.service)
 
     def add_charm(self, charm_name):
         self.metadata_controller.add_charm(charm_name)
 
-    def set_charm(self, charm):
-        self.charm = charm
-        self.add_charm(charm.charm_name)
+    def set_service(self, service):
+        self.service = service
+        self.add_charm(service.charm_name)
         self.pile.contents = self.pile.contents[:2]
         self.provides = set()
         self.requires = set()
         self.relation_widgets = []
 
     def update(self):
-        if self.charm is None:
+        if self.service is None:
             return
 
         self.title.set_text(('body', "Edit relations for {}".format(
-            self.charm.service_name)))
+            self.service.service_name)))
 
         if len(self.relation_widgets) == 0:
             self.title.set_text(('body', "Loading Relations..."))
         else:
             self.title.set_text(('body', "Select Relations:"))
 
-        p = set(self.metadata_controller.get_provides(self.charm.charm_name))
-        r = set(self.metadata_controller.get_requires(self.charm.charm_name))
+        p = set(self.metadata_controller.get_provides(self.service.charm_name))
+        r = set(self.metadata_controller.get_requires(self.service.charm_name))
         new_provides = p - self.provides
         self.provides.update(p)
         new_requires = r - self.requires
         self.requires.update(r)
 
+        mc = self.metadata_controller
         args = [(relname, iface, RelationType.Provides,
-                 self.metadata_controller.charms_requiring_iface[iface])
+                 mc.get_services_for_iface(iface, RelationType.Requires))
                 for relname, iface in sorted(new_provides)]
         
         args += [(relname, iface, RelationType.Requires,
-                  self.metadata_controller.charms_providing_iface[iface])
+                  mc.get_services_for_iface(iface, RelationType.Provides))
                  for relname, iface in sorted(new_requires)]
 
         for relname, iface, reltype, matches in args:
@@ -249,12 +261,12 @@ class RelationsColumn(WidgetWrap):
                 self.relation_widgets.append(rw)
                 self.pile.contents.append((rw,
                                            self.pile.options()))
-                
-            for tgt_relname, tgt_charm_name, tgt_service_name in matches:
-                if tgt_charm_name == self.charm.charm_name:
+
+            for tgt_relname, tgt_service in matches:
+                if tgt_service.charm_name == self.service.charm_name:
                     continue
-                rw = RelationWidget(self.charm.service_name, relname,
-                                    iface, reltype, tgt_service_name,
+                rw = RelationWidget(self.service.service_name, relname,
+                                    iface, reltype, tgt_service.service_name,
                                     tgt_relname,
                                     self.placement_controller,
                                     self.do_select)
@@ -276,7 +288,7 @@ class RelationsColumn(WidgetWrap):
 
     def do_select(self, source_relname, tgt_service_name,
                   tgt_relation_name):
-        self.placement_controller.add_relation(self.charm.charm_name,
+        self.placement_controller.add_relation(self.service.service_name,
                                                source_relname,
                                                tgt_service_name,
                                                tgt_relation_name)

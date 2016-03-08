@@ -18,7 +18,7 @@ import logging
 from urwid import Divider, Pile, Text, WidgetWrap
 
 from bundleplacer.maas import satisfies
-from bundleplacer.state import CharmState
+from bundleplacer.state import ServiceState
 from bundleplacer.ui.simple_service_widget import SimpleServiceWidget
 
 log = logging.getLogger('bundleplacer.ui')
@@ -26,7 +26,7 @@ log = logging.getLogger('bundleplacer.ui')
 
 class ServicesList(WidgetWrap):
 
-    """A list of services (charm classes) with flexible display options.
+    """A list of services with flexible display options.
 
     Note that not all combinations of display options make sense. YMMV.
 
@@ -50,7 +50,7 @@ class ServicesList(WidgetWrap):
     for the various services
 
     show_type - string, one of 'all', 'required' or 'non-required',
-    controls which charm states should be shown. default is 'all'.
+    controls which service states should be shown. default is 'all'.
 
     trace_updates - bool, enable verbose update logging
 
@@ -118,25 +118,25 @@ class ServicesList(WidgetWrap):
             return self.service_pile.focus
         return None
 
-    def find_service_widget(self, cc):
+    def find_service_widget(self, s):
         return next((sw for sw in self.service_widgets if
-                     sw.charm_class.service_name == cc.service_name),
+                     sw.service.service_name == s.service_name),
                     None)
 
     def update(self):
 
-        def trace(cc, s):
+        def trace(service, s):
             if self.trace:
-                log.debug("{}: {} {}".format(self.title, cc, s))
+                log.debug("{}: {} {}".format(self.title, service, s))
 
-        for cc in self.placement_controller.charm_classes():
+        for s in self.placement_controller.services():
             if self.machine:
                 pc = self.placement_controller
-                if not satisfies(self.machine, cc.constraints)[0] \
-                   or not (pc.is_assigned_to(cc, self.machine) or
-                           pc.is_deployed_to(cc, self.machine)):
-                    self.remove_service_widget(cc)
-                    trace(cc, "removed because machine doesn't match")
+                if not satisfies(self.machine, s.constraints)[0] \
+                   or not (pc.is_assigned_to(s, self.machine) or
+                           pc.is_deployed_to(s, self.machine)):
+                    self.remove_service_widget(s)
+                    trace(s, "removed because machine doesn't match")
                     continue
 
             if self.ignore_assigned and self.assigned_only:
@@ -144,18 +144,18 @@ class ServicesList(WidgetWrap):
 
             if self.ignore_assigned:
                 pc = self.placement_controller
-                n = pc.assignment_machine_count_for_charm(cc)
-                if n == cc.required_num_units() \
-                   and not cc.allow_multi_units \
-                   and self.placement_controller.is_assigned(cc):
-                    self.remove_service_widget(cc)
-                    trace(cc, "removed because max units are "
+                n = pc.assignment_machine_count_for_service(s)
+                if n == s.required_num_units() \
+                   and not s.allow_multi_units \
+                   and self.placement_controller.is_assigned(s):
+                    self.remove_service_widget(s)
+                    trace(s, "removed because max units are "
                           "assigned")
                     continue
             elif self.assigned_only:
-                if not self.placement_controller.is_assigned(cc):
-                    self.remove_service_widget(cc)
-                    trace(cc, "removed because it is not assigned and "
+                if not self.placement_controller.is_assigned(s):
+                    self.remove_service_widget(s)
+                    trace(s, "removed because it is not assigned and "
                           "assigned_only is True")
                     continue
 
@@ -164,48 +164,48 @@ class ServicesList(WidgetWrap):
 
             if self.ignore_deployed:
                 pc = self.placement_controller
-                n = pc.deployment_machine_count_for_charm(cc)
-                if n == cc.required_num_units() \
-                   and self.placement_controller.is_deployed(cc):
-                    self.remove_service_widget(cc)
-                    trace(cc, "removed because the required number of units"
+                n = pc.deployment_machine_count_for_service(s)
+                if n == s.required_num_units() \
+                   and self.placement_controller.is_deployed(s):
+                    self.remove_service_widget(s)
+                    trace(s, "removed because the required number of units"
                           " has been deployed")
                     continue
             elif self.deployed_only:
-                if not self.placement_controller.is_deployed(cc):
-                    self.remove_service_widget(cc)
+                if not self.placement_controller.is_deployed(s):
+                    self.remove_service_widget(s)
                     continue
 
-            state, _, _ = self.placement_controller.get_charm_state(cc)
+            state, _, _ = self.placement_controller.get_service_state(s)
             if self.show_type == 'required':
-                if state != CharmState.REQUIRED:
-                    self.remove_service_widget(cc)
+                if state != ServiceState.REQUIRED:
+                    self.remove_service_widget(s)
                     continue
             elif self.show_type == 'non-required':
-                if state == CharmState.REQUIRED:
-                    self.remove_service_widget(cc)
-                    trace(cc, "removed because show_type is 'non-required' and"
+                if state == ServiceState.REQUIRED:
+                    self.remove_service_widget(s)
+                    trace(s, "removed because show_type is 'non-required' and"
                           "state is REQUIRED.")
                     continue
                 assigned_or_deployed = (
-                    self.placement_controller.is_assigned(cc) or
-                    self.placement_controller.is_deployed(cc))
-                if not cc.allow_multi_units and assigned_or_deployed:
-                    self.remove_service_widget(cc)
-                    trace(cc, "removed because it doesn't allow multiple units"
+                    self.placement_controller.is_assigned(s) or
+                    self.placement_controller.is_deployed(s))
+                if not s.allow_multi_units and assigned_or_deployed:
+                    self.remove_service_widget(s)
+                    trace(s, "removed because it doesn't allow multiple units"
                           " and is not assigned or deployed.")
                     continue
 
-            sw = self.find_service_widget(cc)
+            sw = self.find_service_widget(s)
             if sw is None:
-                sw = self.add_service_widget(cc)
-                trace(cc, "added widget")
+                sw = self.add_service_widget(s)
+                trace(s, "added widget")
             sw.update()
 
         self.sort_service_widgets()
 
-    def add_service_widget(self, charm_class):
-        sw = SimpleServiceWidget(charm_class, self.placement_controller,
+    def add_service_widget(self, service):
+        sw = SimpleServiceWidget(service, self.placement_controller,
                                  self.display_controller,
                                  show_placements=self.show_placements)
         self.service_widgets.append(sw)
@@ -220,8 +220,8 @@ class ServicesList(WidgetWrap):
         #                                            'label'), options))
         return sw
 
-    def remove_service_widget(self, charm_class):
-        sw = self.find_service_widget(charm_class)
+    def remove_service_widget(self, service):
+        sw = self.find_service_widget(service)
 
         if sw is None:
             return
@@ -238,11 +238,11 @@ class ServicesList(WidgetWrap):
 
     def sort_service_widgets(self):
         def keyfunc(sw):
-            cc = sw.charm_class
-            if cc.subordinate:
+            s = sw.service
+            if s.subordinate:
                 skey = 'z'
             else:
-                skey = cc.service_name
+                skey = s.service_name
             return skey
         self.service_widgets.sort(key=keyfunc)
 
@@ -257,7 +257,7 @@ class ServicesList(WidgetWrap):
     def select_service(self, service_name):
         idx = 0
         for w, opts in self.service_pile.contents:
-            if w.charm_class.service_name == service_name:
+            if w.service.service_name == service_name:
                 self.service_pile.focus_position = idx
                 return
             idx += 1
