@@ -1,7 +1,3 @@
-from functools import partial
-from ubuntui.ev import EventLoop
-from conjure.async import AsyncPool
-from conjure.juju import Juju
 from conjure.api.models import model_info, model_cache_controller_provider
 from conjure.charm import get_bundle
 from conjure.models.charm import CharmModel
@@ -11,8 +7,9 @@ from conjure.controllers.finish import FinishController
 from bundleplacer.config import Config
 from bundleplacer.maas import connect_to_maas
 from bundleplacer.placerview import PlacerView
-from bundleplacer.controller import PlacementController
+from bundleplacer.controller import PlacementController, BundleWriter
 from urllib.parse import urlparse
+from tempfile import NamedTemporaryFile
 import q
 
 
@@ -22,10 +19,18 @@ class DeployController:
         self.common = common
         self.controller, self.model = controller.split(":")
         self.controller_info = model_info(self.controller)
+        self.placement_controller = None
 
     def finish(self, *args):
         """ handles deployment
         """
+        if self.placement_controller is not None:
+            # We did some placement alteration
+            bw = BundleWriter(self.placement_controller)
+            with NamedTemporaryFile(mode="w", encoding="utf-8",
+                                    delete=False) as tempf:
+                bw.write_bundle(tempf.name)
+                q(tempf.name)
         FinishController(self.common).render()
 
     def render(self):
@@ -39,7 +44,6 @@ class DeployController:
                 api_key=bootstrap_config['maas-oauth'])
             q(creds)
             maas, maas_state = connect_to_maas(creds)
-            q(maas_state.nodes())
             bundle = get_bundle(CharmModel.to_entity(), to_file=True)
             q(bundle)
             metadata_filename = self.common['config']['metadata_filename']
@@ -48,11 +52,11 @@ class DeployController:
                 {'bundle_filename': bundle,
                  'metadata_filename': metadata_filename})
             q(bundleplacer_cfg)
-            placement_controller = PlacementController(
+            self.placement_controller = PlacementController(
                 config=bundleplacer_cfg,
                 maas_state=maas_state)
-            q(placement_controller)
-            mainview = PlacerView(placement_controller,
+            q(self.placement_controller)
+            mainview = PlacerView(self.placement_controller,
                                   bundleplacer_cfg,
                                   self.finish)
             q(mainview)

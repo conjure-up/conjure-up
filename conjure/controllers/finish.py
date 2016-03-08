@@ -21,11 +21,6 @@ class FinishController:
             "deployed."
         )
         self.common['ui'].set_body(self.view)
-        # FIXME: Demo specific
-        bundles = self.common['config']['bundles']
-        for bundle in bundles:
-            self.view.set_status("Installing {}...".format(
-                bundle['name']))
 
         self.view.set_status("\n\n")
         self.view.set_status("Completed the install, please visit "
