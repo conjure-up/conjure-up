@@ -28,7 +28,6 @@ import json
 from macumba.v2 import JujuClient
 from macumba.errors import LoginError
 from functools import wraps
-import q
 
 
 def requires_login(f):
@@ -132,13 +131,19 @@ class Juju:
             "Unable to locate credentials for: {}".format(user))
 
     @classmethod
-    def credentials(cls):
+    def credentials(cls, secrets=False):
         """ List credentials
+
+        Arguments:
+        secrets: True/False whether to show secrets (ie password)
 
         Returns:
         List of credentials
         """
-        sh = shell('juju list-credentials --format yaml')
+        cmd = 'juju list-credentials --format yaml'
+        if secrets:
+            cmd += ' --show-secrets'
+        sh = shell(cmd)
         if sh.code > 0:
             raise JujuNotFoundException(
                 "Unable to list credentials: {}".format(sh.errors()))
@@ -152,8 +157,12 @@ class Juju:
         Returns:
         Dictionary of all known clouds including newly created MAAS/Local
         """
-        sh = shell('juju list-clouds --format json')
-        return json.loads(sh.output()[0])
+        sh = shell('juju list-clouds --format yaml')
+        if sh.code > 0:
+            raise JujuNotFoundException(
+                "Unable to list clouds: {}".format(sh.errors())
+            )
+        return yaml.safe_load("\n".join(sh.output()))
 
     @classmethod
     def cloud(cls, name):
