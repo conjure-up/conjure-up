@@ -18,7 +18,7 @@ class JujuControllerController:
         self.config = self.common['config']
         if self.cloud and self.bootstrap:
             self.excerpt = (
-                "Please name your controller")
+                "Please name your new controller")
             self.view = JujuControllerView(self.common,
                                            None,
                                            self.deploy)

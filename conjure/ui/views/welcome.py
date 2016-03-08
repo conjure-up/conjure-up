@@ -21,6 +21,8 @@ class WelcomeView(WidgetWrap):
         super().__init__(ListBox(_pile))
 
     def _swap_focus(self):
+        import q
+        q(self._w)
         if self._w.focus_position == 2:
             self._w.focus_position = 4
         else:

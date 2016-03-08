@@ -10,7 +10,8 @@ class JujuControllerView(WidgetWrap):
         self.common = common
         self.cb = cb
         self.models = models
-        self.input_new_controller = StringEditor()
+        self.input_new_controller = StringEditor(
+            default='my-default-controller')
         self.group = []
         self.config = self.common['config']
 
@@ -48,7 +49,9 @@ class JujuControllerView(WidgetWrap):
                                    align="center")),
             Padding.center_60(
                 Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)),
-            Padding.center_60(self.input_new_controller),
+            Padding.center_60(
+                Color.string_input(self.input_new_controller,
+                                   focus_map='string_input focus')),
             Padding.center_60(
                 Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)),
             Padding.center_20(self._build_buttons())
@@ -66,7 +69,7 @@ class JujuControllerView(WidgetWrap):
             for k in self.models.keys():
                 items.append(Padding.center_60(
                     Text("Controller: {}".format(k))))
-                for m in self.models[k]:
+                for m in self.models[k]['models']:
                     items.append(Padding.center_58(
                         RadioButton(self.group, "{}:{}".format(k, m['name']))))
                 items.append(Padding.line_break(""))
