@@ -2,29 +2,38 @@ from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.input import StringEditor
 from urwid import (WidgetWrap, RadioButton, Pile, Button,
-                   Text, Divider, Filler)
+                   Text, Divider, Filler, Columns)
 
 
 class JujuControllerView(WidgetWrap):
+    controller_mode = None
+
     def __init__(self, common, models=None, cb=None):
         self.common = common
         self.cb = cb
         self.models = models
-        self.input_new_controller = StringEditor(
-            default='my-default-controller')
+        self.input_new_controller = StringEditor()
         self.group = []
         self.config = self.common['config']
 
         if self.models is not None:
+            self.controller_mode = 'existing'
             super().__init__(self._build_existingcontroller_widget())
         else:
+            self.controller_mode = 'new'
             super().__init__(self._build_newcontroller_widget())
 
     def _swap_focus(self):
-        if self._w.body.focus_position == 3:
-            self._w.body.focus_position = 6
+        if self.controller_mode == 'existing':
+            if self._w.body.focus_position == 3:
+                self._w.body.focus_position = 6
+            else:
+                self._w.body.focus_position = 3
         else:
-            self._w.body.focus_position = 3
+            if self._w.body.focus_position == 2:
+                self._w.body.focus_position = 4
+            else:
+                self._w.body.focus_position = 2
 
     def keypress(self, size, key):
         if key in ['tab', 'shift tab']:
@@ -50,8 +59,13 @@ class JujuControllerView(WidgetWrap):
             Padding.center_60(
                 Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)),
             Padding.center_60(
-                Color.string_input(self.input_new_controller,
-                                   focus_map='string_input focus')),
+                Columns(
+                    [
+                        ('weight', 0.2, Text("Controller")),
+                        Color.string_input(self.input_new_controller,
+                                           focus_map='string_input focus'),
+                    ]
+                )),
             Padding.center_60(
                 Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)),
             Padding.center_20(self._build_buttons())
