@@ -57,7 +57,7 @@ class CloudView(WidgetWrap):
         total_items.append(
             Padding.center_60(
                 Color.button_primary(
-                    Button("Add a new local cloud", self.submit_new_cloud),
+                    Button("Add a new cloud", self.submit_new_cloud),
                     focus_map='button_primary focus'
                 )
             )

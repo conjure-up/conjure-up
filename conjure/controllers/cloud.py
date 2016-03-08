@@ -10,7 +10,7 @@ class CloudController:
         self.clouds = sorted(Juju.clouds().keys())
         self.config = self.common['config']
         self.excerpt = ("Please select from a list of available clouds or "
-                        "optionally create a new local cloud.")
+                        "optionally create a new cloud.")
         self.view = CloudView(self.common,
                               self.clouds,
                               self.finish)

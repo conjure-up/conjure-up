@@ -1,6 +1,7 @@
 from conjure.ui.views.jujucontroller import JujuControllerView
 from conjure.controllers.deploy import DeployController
 from conjure.juju import Juju
+import q
 
 
 class JujuControllerController:
@@ -40,9 +41,9 @@ class JujuControllerController:
         Arguments:
         controller: Juju controller to deploy to
         """
-        if self.bootstrap:
-            Juju.bootstrap(controller, self.cloud)
-        Juju.switch(controller)
+        # if self.bootstrap:
+        #     Juju.bootstrap(controller, self.cloud)
+        # Juju.switch(controller)
         DeployController(self.common, controller).render()
 
     def render(self):

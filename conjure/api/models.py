@@ -33,3 +33,37 @@ def model_info(model):
     """
     return Juju.client.Client(request="ModelInfo",
                               params={"Name": model})
+
+
+def model_cache_environment(controller):
+    """ Returns known controller environment defined in the models
+    cache.
+
+    Arguments:
+    controller: name of controller environment
+    """
+    return Juju.model_cache()['environments'].get(controller, False)
+
+
+def model_cache_server_data(uuid):
+    """ Returns server data for controller
+
+    Arguments:
+    uuid: server uuid for controller environment
+    """
+    return Juju.model_cache()['server-data'].get(uuid, False)
+
+
+def model_cache_controller_provider(uuid):
+    """ Returns provider information for controller
+
+    Arguments:
+    uuid: server uuid for controller environment
+
+    Returns:
+    config or false.
+    """
+    s = model_cache_server_data(uuid)
+    if s:
+        return s['bootstrap-config']
+    return False

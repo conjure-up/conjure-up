@@ -2,7 +2,7 @@ from functools import partial
 from ubuntui.ev import EventLoop
 from conjure.async import AsyncPool
 from conjure.juju import Juju
-from conjure.api.models import model_info
+from conjure.api.models import model_info, model_cache_controller_provider
 from conjure.charm import get_bundle
 from conjure.models.charm import CharmModel
 from conjure.ui.views.deploy import DeployView
@@ -31,6 +31,13 @@ class DeployController:
     def render(self):
         # Grab bundle and deploy or render placement if MAAS
         if self.controller_info['ProviderType'] == 'maas':
+            bootstrap_config = model_cache_controller_provider(
+                self.controller_info['ServerUUID'])
+            creds = dict(
+                api_host=bootstrap_config['maas-server'],
+                api_key=bootstrap_config['maas-oauth'])
+            q(creds)
+            maas, maas_state = connect_to_maas(creds)
             bundle = get_bundle(CharmModel.to_entity(), to_file=True)
             q(bundle)
             metadata_filename = self.common['config']['metadata_filename']
@@ -41,7 +48,7 @@ class DeployController:
             q(bundleplacer_cfg)
             placement_controller = PlacementController(
                 config=bundleplacer_cfg,
-                maas_state=FakeMaasState())
+                maas_state=maas_state)
             q(placement_controller)
             mainview = PlacerView(placement_controller,
                                   bundleplacer_cfg,

@@ -24,19 +24,23 @@ class JujuControllerView(WidgetWrap):
             super().__init__(self._build_newcontroller_widget())
 
     def _swap_focus(self):
+        w_count = len(self._w.body.contents) - 1
+        pos = self._w.body.focus_position
         if self.controller_mode == 'existing':
-            if self._w.body.focus_position == 3:
-                self._w.body.focus_position = 6
+            if pos >= 3 and pos < w_count:
+                self._w.body.focus_position = w_count
             else:
                 self._w.body.focus_position = 3
         else:
-            if self._w.body.focus_position == 2:
-                self._w.body.focus_position = 4
+            if pos >= 2 and pos < w_count:
+                self._w.body.focus_position = w_count
             else:
                 self._w.body.focus_position = 2
 
     def keypress(self, size, key):
         if key in ['tab', 'shift tab']:
+            import q
+            q(self._w.body, self._w.body.focus_position)
             self._swap_focus()
         return super().keypress(size, key)
 
@@ -79,14 +83,13 @@ class JujuControllerView(WidgetWrap):
             Padding.center_60(
                 Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1))
         ]
-        if self.models is not None:
-            for k in self.models.keys():
-                items.append(Padding.center_60(
-                    Text("Controller: {}".format(k))))
-                for m in self.models[k]['models']:
-                    items.append(Padding.center_58(
-                        RadioButton(self.group, "{}:{}".format(k, m['name']))))
-                items.append(Padding.line_break(""))
+        for k in self.models.keys():
+            items.append(Padding.center_60(
+                Text("Controller: {}".format(k))))
+            for m in self.models[k]['models']:
+                items.append(Padding.center_58(
+                    RadioButton(self.group, "{}:{}".format(k, m['name']))))
+            items.append(Padding.line_break(""))
         items.append(
             Padding.center_60(
                 Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)))
