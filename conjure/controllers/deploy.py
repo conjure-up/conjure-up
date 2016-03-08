@@ -10,9 +10,9 @@ from conjure.controllers.finish import FinishController
 
 from bundleplacer.config import Config
 from bundleplacer.maas import connect_to_maas
-from bundleplacer.fixtures.maas import FakeMaasState
 from bundleplacer.placerview import PlacerView
 from bundleplacer.controller import PlacementController
+from urllib.parse import urlparse
 import q
 
 
@@ -33,11 +33,13 @@ class DeployController:
         if self.controller_info['ProviderType'] == 'maas':
             bootstrap_config = model_cache_controller_provider(
                 self.controller_info['ServerUUID'])
+            maas_server = urlparse(bootstrap_config['maas-server'])
             creds = dict(
-                api_host=bootstrap_config['maas-server'],
+                api_host=maas_server.hostname,
                 api_key=bootstrap_config['maas-oauth'])
             q(creds)
             maas, maas_state = connect_to_maas(creds)
+            q(maas_state.nodes())
             bundle = get_bundle(CharmModel.to_entity(), to_file=True)
             q(bundle)
             metadata_filename = self.common['config']['metadata_filename']
