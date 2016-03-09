@@ -29,7 +29,7 @@ class CloudController:
 
     def render(self):
         self.common['ui'].set_header(
-            title="Select a Cloud",
+            title="Cloud Providers",
             excerpt=self.excerpt
         )
         self.common['ui'].set_body(self.view)
