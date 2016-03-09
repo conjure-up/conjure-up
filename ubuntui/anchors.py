@@ -20,7 +20,7 @@ class Header(WidgetWrap):
         self._subheader = Text(subheader, align='center')
         widgets = []
         if self._title is not None:
-            widgets.append(Color.frame_header(Text(self._title)))
+            widgets.append(Color.frame_header(Text(self._title.upper())))
         widgets.append(Color.frame_subheader(self._subheader))
         if self._excerpt is not None:
             widgets.append(Text(""))
@@ -44,9 +44,9 @@ class Header(WidgetWrap):
         attr: (optional) Attribute lookup
         """
         if attr is not None:
-            self._title.set_text(val)
+            self._title.set_text(val.upper())
         else:
-            self._title.set_text((attr, val))
+            self._title.set_text((attr, val.upper()))
 
     @property
     def subheader(self):

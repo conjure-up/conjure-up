@@ -12,7 +12,7 @@
         },
         {
             "url": "https://github.com/Ubuntu-Solutions-Engineering/urwid-ubuntu.git",
-            "version": "b5a8f2d",
+            "version": "master",
             "directories": "ubuntui"
         },
         {

@@ -1,7 +1,7 @@
 from conjure.ui.views.cloud import CloudView
 from conjure.controllers.jujucontroller import JujuControllerController
 from conjure.juju import Juju
-import q
+import q  # noqa
 
 
 class CloudController:

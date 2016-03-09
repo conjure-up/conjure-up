@@ -17,8 +17,7 @@ class DeployController:
 
     def __init__(self, common, controller):
         self.common = common
-        self.controller, self.model = controller.split(":")
-        self.controller_info = model_info(self.controller)
+        self.controller_info = model_info(controller)
         self.placement_controller = None
 
     def finish(self, *args):

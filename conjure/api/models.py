@@ -17,7 +17,7 @@ def list_models(user='user-admin'):
     """
     models = Juju.client.ModelManager(request="ListModels",
                                       params={'Tag': user})
-    return [x['Name'] for x in models['UserModels']]
+    return models['UserModels']
 
 
 @q.t
@@ -42,7 +42,7 @@ def model_cache_environment(controller):
     Arguments:
     controller: name of controller environment
     """
-    return Juju.model_cache()['environments'].get(controller, False)
+    return Juju.model_cache()['environment'].get(controller, False)
 
 
 def model_cache_server_data(uuid):

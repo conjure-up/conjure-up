@@ -1,8 +1,11 @@
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
+from ubuntui.widgets.hr import HR
+from ubuntui.widgets.text import Instruction
 from ubuntui.widgets.input import StringEditor
-from urwid import (WidgetWrap, RadioButton, Pile, Button,
-                   Text, Divider, Filler, Columns)
+from ubuntui.widgets.buttons import (cancel_btn, confirm_btn)
+from urwid import (WidgetWrap, Pile,
+                   Text, Filler, Columns)
 
 
 class JujuControllerView(WidgetWrap):
@@ -45,23 +48,20 @@ class JujuControllerView(WidgetWrap):
         return super().keypress(size, key)
 
     def _build_buttons(self):
+        cancel = cancel_btn(on_press=self.cancel)
         buttons = [
             Padding.line_break(""),
-            Color.button_primary(
-                Button("Confirm", self.submit),
-                focus_map='button_primary focus'),
-            Color.button_secondary(
-                Button("Cancel", self.cancel),
-                focus_map='button_secondary focus'),
+            Color.button_secondary(cancel,
+                                   focus_map='button_secondary focus'),
         ]
         return Pile(buttons)
 
     def _build_newcontroller_widget(self):
         items = [
-            Padding.center_60(Text("Please fill out the input below:",
-                                   align="center")),
-            Padding.center_60(
-                Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)),
+            Padding.center_60(Instruction(
+                "Please fill out the input below:",
+                align="center")),
+            Padding.center_60(HR()),
             Padding.center_60(
                 Columns(
                     [
@@ -70,40 +70,38 @@ class JujuControllerView(WidgetWrap):
                                            focus_map='string_input focus'),
                     ]
                 )),
-            Padding.center_60(
-                Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)),
+            Padding.center_60(HR()),
             Padding.center_20(self._build_buttons())
         ]
         return Filler(Pile(items), valign="middle")
 
     def _build_existingcontroller_widget(self):
         items = [
-            Padding.center_60(Text("Please select an option below:",
-                                   align="center")),
-            Padding.center_60(
-                Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1))
+            Padding.center_60(Instruction("Please select an option below:",
+                                          align="center")),
+            Padding.center_60(HR())
         ]
         for k in self.models.keys():
             items.append(Padding.center_60(
-                Text("Controller: {}".format(k))))
+                Instruction("Controller: {}".format(k))))
             for m in self.models[k]['models']:
-                items.append(Padding.center_58(
-                    RadioButton(self.group, "{}:{}".format(k, m['name']))))
+                items.append(
+                    Padding.center_50(
+                        Color.body(
+                            confirm_btn(label="{}:{}".format(k, m['name']),
+                                        on_press=self.submit),
+                            focus_map='menu_button focus'
+                        )
+                    )
+                )
             items.append(Padding.line_break(""))
         items.append(
-            Padding.center_60(
-                Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)))
+            Padding.center_60(HR()))
         items.append(Padding.center_20(self._build_buttons()))
         return Filler(Pile(items), valign="middle")
 
-    def submit(self, btn):
-        if self.models is not None:
-            for item in self.group:
-                if item.get_state():
-                    controller = item.label
-        else:
-            controller = self.input_new_controller.value
-        self.cb(controller)
+    def submit(self, result):
+        self.cb(result.label)
 
     def cancel(self, btn):
         EventLoop.exit(0)

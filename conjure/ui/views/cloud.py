@@ -1,6 +1,9 @@
-from urwid import (WidgetWrap, RadioButton, Button, Columns, Text, Pile,
-                   Divider, Filler)
+from urwid import (WidgetWrap, RadioButton, Columns, Pile,
+                   Filler)
 from ubuntui.utils import Color, Padding
+from ubuntui.widgets.hr import HR
+from ubuntui.widgets.text import Instruction
+from ubuntui.widgets.buttons import cancel_btn, confirm_btn
 from ubuntui.ev import EventLoop
 from collections import OrderedDict
 
@@ -10,7 +13,6 @@ class CloudView(WidgetWrap):
         self.common = common
         self.cb = cb
         self.config = self.common['config']
-        self.title = "Clouds"
         self.radio_items = OrderedDict()
         for item in clouds:
             self.add_radio(item)
@@ -33,38 +35,37 @@ class CloudView(WidgetWrap):
         self.radio_items[item] = RadioButton(group, item)
 
     def _build_buttons(self):
+        confirm = confirm_btn(on_press=self.submit)
+        cancel = cancel_btn(on_press=self.cancel)
         buttons = [
-            Color.button_primary(
-                Button("Confirm", self.submit),
-                focus_map='button_primary focus'),
-            Color.button_secondary(
-                Button("Cancel", self.cancel),
-                focus_map='button_secondary focus')
+            Padding.line_break(""),
+            Color.button_primary(confirm,
+                                 focus_map='button_primary focus'),
+            Color.button_secondary(cancel,
+                                   focus_map='button_secondary focus'),
         ]
         return Pile(buttons)
 
     def _build_widget(self):
         total_items = [
-            Padding.center_60(Text(self.title, align="center")),
-            Padding.center_60(
-                Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1))
+            Padding.center_60(Instruction("Cloud", align='center')),
+            Padding.center_60(HR())
         ]
         for item in self.radio_items.keys():
             opt = self.radio_items[item]
             col = Columns([opt])
             total_items.append(Padding.center_60(col))
         total_items.append(Padding.line_break(""))
+        confirm = confirm_btn(label='Add a new cloud',
+                              on_press=self.submit_new_cloud)
         total_items.append(
             Padding.center_60(
-                Color.button_primary(
-                    Button("Add a new cloud", self.submit_new_cloud),
-                    focus_map='button_primary focus'
-                )
+                Color.button_primary(confirm,
+                                     focus_map='button_primary focus')
             )
         )
         total_items.append(
-            Padding.center_60(
-                Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)))
+            Padding.center_60(HR()))
         total_items.append(Padding.center_20(self._build_buttons()))
         return Filler(Pile(total_items), valign='middle')
 

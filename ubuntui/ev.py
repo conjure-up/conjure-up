@@ -71,6 +71,10 @@ class EventLoop:
         cls.alarms = {}
 
     @classmethod
+    def screen_size(cls):
+        return cls.loop.screen_size
+
+    @classmethod
     def run(cls):
         """ Run eventloop
         """

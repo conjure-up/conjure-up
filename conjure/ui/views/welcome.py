@@ -1,9 +1,11 @@
 from __future__ import unicode_literals
-from urwid import WidgetWrap, Text, Pile, ListBox, BoxAdapter, Divider, Columns
+from urwid import (WidgetWrap, Text, Pile, ListBox,
+                   SimpleListWalker, Columns, Filler)
+from ubuntui.widgets.hr import HR
 from ubuntui.widgets.buttons import (cancel_btn, menu_btn)
 from ubuntui.utils import Color, Padding
 from ubuntui.ev import EventLoop
-from ubuntui.lists import SimpleList
+import q
 
 
 class WelcomeView(WidgetWrap):
@@ -12,21 +14,21 @@ class WelcomeView(WidgetWrap):
         self.cb = cb
         self.current_focus = 2
         _pile = [
-            Padding.center_90(Text("Choose a solution to get started:")),
-            Padding.center_90(Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}")),
+            Padding.center_90(
+                Color.info_context(Text("Choose a solution to get started:"))),
+            Padding.center_90(HR()),
             Padding.center_90(self.build_menuable_items()),
             Padding.line_break(""),
             Padding.center_20(self.buttons())
         ]
-        super().__init__(ListBox(_pile))
+        super().__init__(Filler(Pile(_pile), valign="top"))
 
     def _swap_focus(self):
-        import q
         q(self._w)
-        if self._w.focus_position == 2:
-            self._w.focus_position = 4
+        if self._w.body.focus_position == 2:
+            self._w.body.focus_position = 4
         else:
-            self._w.focus_position = 2
+            self._w.body.focus_position = 2
 
     def keypress(self, size, key):
         if key in ['tab', 'shift tab']:
@@ -53,7 +55,7 @@ class WelcomeView(WidgetWrap):
                         ("weight", 0.2, Color.body(
                             menu_btn(label=bundle['name'],
                                      on_press=self.done),
-                            focus_map="button_primary focus")),
+                            focus_map="menu_button focus")),
                         ("weight", 0.3, Text(bundle['summary'],
                                              align="left"))
                     ],
@@ -61,8 +63,7 @@ class WelcomeView(WidgetWrap):
                 )
             )
             cols.append(Padding.line_break(""))
-        return BoxAdapter(SimpleList(cols),
-                          height=len(cols)+2)
+        return Pile(cols)
 
     def cancel(self, button):
         EventLoop.exit(0)
