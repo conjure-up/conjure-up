@@ -72,7 +72,7 @@ class DeployController:
                                      self.finish)
             q(view)
             self.common['ui'].set_header(
-                title="Summary of deployment"
+                title="Deploy Summary"
             )
             self.common['ui'].set_body(view)
 

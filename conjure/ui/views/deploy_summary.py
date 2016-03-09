@@ -5,8 +5,10 @@ List out the updated bundle in a cleaner view showing what
 charms and their relations will be done.
 """
 
-from urwid import WidgetWrap, Text, Pile, ListBox, Divider, Columns, Filler
+from urwid import WidgetWrap, Text, Pile, Columns, Filler
 from ubuntui.widgets.buttons import (cancel_btn, confirm_btn)
+from ubuntui.widgets.text import Instruction, ColumnHeader
+from ubuntui.widgets.hr import HR
 from ubuntui.utils import Color, Padding
 from ubuntui.ev import EventLoop
 import yaml
@@ -25,13 +27,15 @@ class DeploySummaryView(WidgetWrap):
         self.bundle = bundle
         self.cb = cb
         _pile = [
-            Padding.center_90(Text("Summary")),
-            Padding.center_90(Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}")),
+            Padding.center_90(
+                Instruction(
+                    "Services and Relations to be deployed and set.")),
+            Padding.center_90(HR()),
             Padding.center_90(self.build_summary()),
             Padding.line_break(""),
             Padding.center_20(self._build_buttons())
         ]
-        super().__init__(Filler(Pile(_pile), valign="middle"))
+        super().__init__(Filler(Pile(_pile), valign="top"))
 
     def _build_buttons(self):
         cancel = cancel_btn(on_press=self.cancel)
@@ -50,14 +54,15 @@ class DeploySummaryView(WidgetWrap):
         rows = []
         rows.append(
             Columns([
-                Text("Services to deploy"),
-                Text("Relations that will be set")
+                ColumnHeader("Services"),
+                ColumnHeader("Relations")
             ], dividechars=1)
         )
+        services = ", ".join(self.bundle['services'].keys())
         rows.append(
             Columns(
                     [
-                        Text(yaml.dump(self.bundle['services'])),
+                        Text(services),
                         Text(yaml.dump(self.bundle['relations']))
                     ],
                     dividechars=1
