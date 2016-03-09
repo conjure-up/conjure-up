@@ -1,7 +1,7 @@
 from conjure.api.models import model_info, model_cache_controller_provider
 from conjure.charm import get_bundle
 from conjure.models.charm import CharmModel
-from conjure.ui.views.deploy import DeployView
+from conjure.ui.views.deploy_summary import DeploySummaryView
 from conjure.controllers.finish import FinishController
 
 from bundleplacer.config import Config
@@ -9,7 +9,7 @@ from bundleplacer.maas import connect_to_maas
 from bundleplacer.placerview import PlacerView
 from bundleplacer.controller import PlacementController, BundleWriter
 from urllib.parse import urlparse
-from tempfile import NamedTemporaryFile
+import yaml
 import q
 
 
@@ -19,6 +19,7 @@ class DeployController:
         self.common = common
         self.controller_info = model_info(controller)
         self.placement_controller = None
+        self.bundle = None
 
     def finish(self, *args):
         """ handles deployment
@@ -26,10 +27,7 @@ class DeployController:
         if self.placement_controller is not None:
             # We did some placement alteration
             bw = BundleWriter(self.placement_controller)
-            with NamedTemporaryFile(mode="w", encoding="utf-8",
-                                    delete=False) as tempf:
-                bw.write_bundle(tempf.name)
-                q(tempf.name)
+            bw.write_bundle(self.bundle)
         FinishController(self.common).render()
 
     def render(self):
@@ -43,12 +41,12 @@ class DeployController:
                 api_key=bootstrap_config['maas-oauth'])
             q(creds)
             maas, maas_state = connect_to_maas(creds)
-            bundle = get_bundle(CharmModel.to_entity(), to_file=True)
-            q(bundle)
+            self.bundle = get_bundle(CharmModel.to_entity(), to_file=True)
+            q(self.bundle)
             metadata_filename = self.common['config']['metadata_filename']
             bundleplacer_cfg = Config(
                 'bundle-placer',
-                {'bundle_filename': bundle,
+                {'bundle_filename': self.bundle,
                  'metadata_filename': metadata_filename})
             q(bundleplacer_cfg)
             self.placement_controller = PlacementController(
@@ -69,10 +67,12 @@ class DeployController:
             self.common['ui'].set_body(mainview)
             mainview.update()
         else:
-            view = DeployView(self.common, self.finish)
+            self.bundle = get_bundle(CharmModel.to_entity(), to_file=True)
+            view = DeploySummaryView(self.common, yaml.load(open(self.bundle)),
+                                     self.finish)
             q(view)
             self.common['ui'].set_header(
-                title="Deploying: {}".format(CharmModel.to_path())
+                title="Summary of deployment"
             )
             self.common['ui'].set_body(view)
 

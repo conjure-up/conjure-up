@@ -29,9 +29,9 @@ class DeploySummaryView(WidgetWrap):
             Padding.center_90(Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}")),
             Padding.center_90(self.build_summary()),
             Padding.line_break(""),
-            Padding.center_20(self.buttons())
+            Padding.center_20(self._build_buttons())
         ]
-        super().__init__(ListBox(_pile))
+        super().__init__(Filler(Pile(_pile), valign="middle"))
 
     def _build_buttons(self):
         cancel = cancel_btn(on_press=self.cancel)
@@ -63,7 +63,7 @@ class DeploySummaryView(WidgetWrap):
                     dividechars=1
                 )
             )
-        return Filler(Pile(rows), valign="middle")
+        return Pile(rows)
 
     def cancel(self, button):
         EventLoop.exit(0)
