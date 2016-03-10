@@ -58,9 +58,7 @@ class JujuControllerView(WidgetWrap):
 
     def _build_newcontroller_widget(self):
         items = [
-            Padding.center_60(Instruction(
-                "Please fill out the input below:",
-                align="center")),
+            Padding.center_60(Instruction("Please fill out the input below:")),
             Padding.center_60(HR()),
             Padding.center_60(
                 Columns(
@@ -77,18 +75,20 @@ class JujuControllerView(WidgetWrap):
 
     def _build_existingcontroller_widget(self):
         items = [
-            Padding.center_60(Instruction("Please select an option below:",
-                                          align="center")),
+            Padding.center_60(Instruction("Please select an option below:")),
             Padding.center_60(HR())
         ]
-        for k in self.models.keys():
+        for k in sorted(self.models.keys()):
+            controller_name = k.split('local.').pop()
+
             items.append(Padding.center_60(
-                Instruction("Controller: {}".format(k))))
+                Instruction("Controller: {}".format(controller_name))))
             for m in self.models[k]['models']:
                 items.append(
                     Padding.center_50(
                         Color.body(
-                            confirm_btn(label="{}:{}".format(k, m['name']),
+                            confirm_btn(label="{}:{}".format(controller_name,
+                                                             m['name']),
                                         on_press=self.submit),
                             focus_map='menu_button focus'
                         )
