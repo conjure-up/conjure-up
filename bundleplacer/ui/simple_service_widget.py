@@ -176,6 +176,7 @@ class SimpleServiceWidget(WidgetWrap):
     def do_cancel(self, sender):
         self.state = ServiceWidgetState.UNSELECTED
         self.update()
+        self.display_controller.show_default_view()
         self.pile.focus_position = 0
 
     def handle_placement_button_pressed(self, sender):

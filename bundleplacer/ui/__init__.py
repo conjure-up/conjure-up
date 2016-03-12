@@ -23,7 +23,7 @@ from urwid import (AttrMap, Button, Columns, Divider, Filler, Overlay,
 from ubuntui.views import InfoDialogWidget
 from ubuntui.widgets import MetaScroll
 
-from bundleplacer.ui.charmstore_search_widget import CharmStoreSearchWidget
+from bundleplacer.ui.charmstore import CharmstoreColumn, CharmStoreSearchWidget
 from bundleplacer.ui.filter_box import FilterBox
 from bundleplacer.ui.services_column import ServicesColumn
 from bundleplacer.ui.machines_column import MachinesColumn
@@ -38,7 +38,7 @@ BUTTON_SIZE = 20
 class UIState(Enum):
     PLACEMENT_EDITOR = 0
     RELATION_EDITOR = 1
-
+    CHARMSTORE_VIEW = 2         # This is the default
 
 class PlacementView(WidgetWrap):
 
@@ -52,7 +52,7 @@ class PlacementView(WidgetWrap):
     """
 
     def __init__(self, display_controller, placement_controller,
-                 config, do_deploy_cb, initial_state=UIState.PLACEMENT_EDITOR):
+                 config, do_deploy_cb, initial_state=UIState.CHARMSTORE_VIEW):
         self.display_controller = display_controller
         self.placement_controller = placement_controller
         self.config = config
@@ -62,8 +62,6 @@ class PlacementView(WidgetWrap):
         w = self.build_widgets()
         super().__init__(w)
         self.reset_selections(top=True)  # calls self.update
-        ### TEMP
-        self.charm_search_widget.editbox.set_edit_text("apache-hadoop-plugin")
 
     def scroll_down(self):
         pass
@@ -76,10 +74,11 @@ class PlacementView(WidgetWrap):
         self.frame.footer.focus_position = 1
 
     def handle_tab(self, backward):
-        if self.state == UIState.PLACEMENT_EDITOR:
-            tabloop = ['headercol1', 'col1', 'headercol2', 'col2', 'footer']
-        else:
+        if self.state == UIState.RELATION_EDITOR:
+            # Relation editor has no header col.
             tabloop = ['headercol1', 'col1', 'col2', 'footer']
+        else:
+            tabloop = ['headercol1', 'col1', 'headercol2', 'col2', 'footer']
 
         def goto_header_col1():
             self.frame.focus_position = 'header'
@@ -97,8 +96,10 @@ class PlacementView(WidgetWrap):
             self.frame.focus_position = 'body'
             if self.state == UIState.PLACEMENT_EDITOR:
                 self.focus_machines_column()
-            else:
+            elif self.state == UIState.RELATION_EDITOR:
                 self.focus_relations_column()
+            else:
+                self.focus_charmstore_column()
 
         actions = {'headercol1': goto_header_col1,
                    'headercol2': goto_header_col2,
@@ -136,19 +137,26 @@ class PlacementView(WidgetWrap):
                                         'button_secondary',
                                         'button_secondary focus')
 
-        self.charm_search_widget = CharmStoreSearchWidget(self.do_add_charm)
-
         self.services_buttons = [self.clear_all_button]
         self.services_button_grid = GridFlow(self.services_buttons,
                                              36, 1, 0, 'center')
 
-        self.services_header_pile = Pile([Text(("body", "Services"),
+        self.services_header_pile = Pile([Text(("bobdy", "Services"),
                                                align='center'),
                                           Divider(),
-                                          self.services_button_grid,
-                                          Divider(),
-                                          self.charm_search_widget])
+                                          self.services_button_grid])
+
         return self.services_header_pile
+
+    def get_charmstore_header(self, charmstore_column):
+        self.charm_search_widget = CharmStoreSearchWidget(self.do_add_charm,
+                                                          charmstore_column)
+        self.charm_search_header_pile = Pile([Text(("bobdy", "Add Charms"),
+                                                   align='center'),
+                                              Divider(),
+                                              self.charm_search_widget])
+
+        return self.charm_search_header_pile
 
     def get_machines_header(self, machines_column):
 
@@ -177,7 +185,7 @@ class PlacementView(WidgetWrap):
         return self.machines_header_pile
 
     def get_relations_header(self):
-        return Text("RELATIONS!")
+        return Text("Relation Editor")
 
     def build_widgets(self):
 
@@ -191,12 +199,17 @@ class PlacementView(WidgetWrap):
         self.relations_column = RelationsColumn(self.display_controller,
                                                 self.placement_controller,
                                                 self)
+        self.charmstore_column = CharmstoreColumn(self.display_controller,
+                                                  self.placement_controller,
+                                                  self)
 
         self.machines_header = self.get_machines_header(self.machines_column)
         self.relations_header = self.get_relations_header()
+        self.services_header = self.get_services_header()
+        self.charmstore_header = self.get_charmstore_header(
+            self.charmstore_column)
 
-        cs = [self.get_services_header(),
-              self.machines_header]
+        cs = [self.services_header, self.charmstore_header]
 
         self.header_columns = Columns(cs, dividechars=2)
 
@@ -233,6 +246,11 @@ class PlacementView(WidgetWrap):
                 self.header_columns.contents[-1] = (self.relations_header,
                                                     h_opts)
                 self.columns.contents[-1] = (self.relations_column, h_opts)
+            elif self.state == UIState.CHARMSTORE_VIEW:
+                self.header_columns.contents[-1] = (self.charmstore_header,
+                                                    h_opts)
+                self.columns.contents[-1] = (self.charmstore_column, h_opts)
+
             self.prev_state = self.state
 
         self.services_column.update()
@@ -277,16 +295,14 @@ class PlacementView(WidgetWrap):
         """Add new service and focus its widget.
 
         """
+        assert(self.state == UIState.CHARMSTORE_VIEW)
         service_name = self.placement_controller.add_new_service(charm_name,
                                                                  charm_dict)
         self.frame.focus_position = 'body'
         self.columns.focus_position = 0
+        self.relations_column.add_charm(charm_name)
         self.update()
-        if self.state == UIState.RELATION_EDITOR:
-            self.relations_column.add_charm(charm_name)
-            self.relations_column.refresh()
-        else:
-            self.services_column.select_service(service_name)
+        self.services_column.select_service(service_name)
 
     def do_clear_machine(self, sender, machine):
         self.placement_controller.clear_assignments(machine)
@@ -297,6 +313,7 @@ class PlacementView(WidgetWrap):
 
     def reset_selections(self, top=False):
         self.clear_selections()
+        self.state = UIState.CHARMSTORE_VIEW
         self.update()
         self.columns.focus_position = 0
 
@@ -313,10 +330,18 @@ class PlacementView(WidgetWrap):
         self.columns.focus_position = 1
         self.relations_column.focus_prev_or_top()
 
+    def focus_charmstore_column(self):
+        self.columns.focus_position = 1
+        self.charmstore_column.focus_prev_or_top()
+
     def edit_placement(self):
         self.state = UIState.PLACEMENT_EDITOR
         self.update()
         self.focus_machines_column()
+
+    def show_default_view(self):
+        self.state = UIState.CHARMSTORE_VIEW
+        self.update()
 
     def edit_relations(self, service):
         self.state = UIState.RELATION_EDITOR

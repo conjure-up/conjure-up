@@ -16,12 +16,13 @@
 from concurrent.futures import Future
 from functools import partial
 import logging
-from theblues.charmstore import CharmStore
+import requests
 from threading import RLock
 import yaml
 from bundleplacer.async import submit
 from bundleplacer.service import Service
 from bundleplacer.assignmenttype import AssignmentType, label_to_atype
+
 
 log = logging.getLogger('bundleplacer')
 
@@ -33,17 +34,20 @@ class CharmStoreAPI:
     requested charm info
 
     """
-    _charmstore = None
     _cache = {}
     _cachelock = RLock()
 
     def __init__(self):
-        if not CharmStoreAPI._charmstore:
-            csurl = 'https://api.jujucharms.com/v4'
-            CharmStoreAPI._charmstore = CharmStore(csurl)
+        self.baseurl = 'https://api.jujucharms.com/v4'
 
     def _do_remote_lookup(self, charm_name, metakey):
-        entity = CharmStoreAPI._charmstore.entity(charm_name)
+        url = (self.baseurl + '/meta/' +
+               'any?include=charm-metadata&id={}'.format(charm_name))
+        r = requests.get(url)
+        rj = r.json()
+        if len(rj.items()) != 1:
+            raise Exception("Got wrong number of results from charm store")
+        entity = list(rj.values())[0]
         with CharmStoreAPI._cachelock:
             CharmStoreAPI._cache[charm_name] = entity
         return entity
@@ -92,6 +96,16 @@ class CharmStoreAPI:
     def get_entity(self, charm_name, exc_cb):
         return self._lookup(charm_name, None, exc_cb)
 
+    def get_matches(self, substring, exc_cb):
+        def _do_search():
+            url = (self.baseurl + "/search?text={}".format(substring) +
+                   "&autocomplete=1&limit=10&include=charm-metadata")
+            r = requests.get(url)
+            rj = r.json()
+            return rj
+        f = submit(_do_search, exc_cb)
+        return f
+
 
 def create_service(servicename, service_dict, servicemeta, relations):
     # some attempts to guess at subordinate status from bundle format,
@@ -123,7 +137,8 @@ def create_service(servicename, service_dict, servicemeta, relations):
                           list(AssignmentType)),
                       num_units=service_dict.get('num_units', 1),
                       options=service_dict.get('options', {}),
-                      allow_multi_units=servicemeta.get('allow_multi_units', True),
+                      allow_multi_units=servicemeta.get('allow_multi_units',
+                                                        True),
                       subordinate=is_subordinate,
                       required=servicemeta.get('required', True),
                       relations=myrelations)
@@ -177,7 +192,7 @@ class Bundle:
         return ([a, b] in rels or [b, a] in rels or
                 [s1_name, s2_name] in rels or
                 [s2_name, s1_name] in rels)
-    
+
     @property
     def services(self):
         services = []
@@ -193,4 +208,3 @@ class Bundle:
     def extra_items(self):
         return {k: v for k, v in self._bundle.items()
                 if k not in ['services', 'machines', 'relations']}
-

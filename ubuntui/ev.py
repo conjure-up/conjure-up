@@ -51,8 +51,9 @@ class EventLoop:
 
     @classmethod
     def set_alarm_in(cls, interval, cb):
-        return cls.add_alarm(cls.loop.set_alarm_in(interval, cb),
-                             str(uuid.uuid1()))
+        handle = cls.loop.set_alarm_in(interval, cb)
+        cls.add_alarm(handle, str(uuid.uuid1()))
+        return handle
 
     @classmethod
     def add_alarm(cls, handle, name):
