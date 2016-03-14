@@ -174,19 +174,6 @@ class Juju:
         return ret
 
     @classmethod
-    def status(cls):
-        """ Status of current model
-
-        Returns:
-        Dictionary of status
-        """
-        sh = shell('juju status --format yaml')
-        if sh.code > 0:
-            raise JujuNotFoundException(
-                "Unable to get status output: {}".format(sh.errors()))
-        return yaml.safe_load("\n".join(sh.output()))
-
-    @classmethod
     def deploy_bundle(cls, bundle):
         """ Juju deploy bundle
 

@@ -4,7 +4,7 @@ from urwid import (Text, WidgetWrap)
 from conjure.ui.widgets.service import ServiceInfoWidget
 from ubuntui.widgets.table import Table
 from ubuntui.utils import Color
-from conjure.juju import Juju
+from conjure.api.models import model_status
 
 
 log = logging.getLogger('services_status')
@@ -43,7 +43,7 @@ class ServicesView(WidgetWrap):
     def refresh_nodes(self):
         """ Adds services to the view if they don't already exist
         """
-        status = Juju.status()
+        status = model_status()
         for service, info in status['services'].items():
             services_list = []
             try:

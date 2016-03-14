@@ -35,6 +35,16 @@ def model_info(model):
                               params={"Name": model})
 
 
+@requires_login
+def model_status():
+    """ Returns the FullStatus output of a model
+
+    Returns:
+    Dictionary of model status
+    """
+    return Juju.client.Client(request="FullStatus")
+
+
 def model_cache_environment(controller):
     """ Returns known controller environment defined in the models
     cache.
