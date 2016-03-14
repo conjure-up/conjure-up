@@ -57,7 +57,7 @@ class Juju:
 
         env = cls.controller(current_controller)
         account = cls.account(current_controller)
-        uuid = env['uuid']
+        uuid = cls.model(cls.current_model())['model-uuid']
         server = env['api-endpoints'][0]
         cls.user_tag = "user-{}".format(account['current'])
         current_user = account['current']
@@ -301,7 +301,7 @@ class Juju:
         Returns:
         Dictionary of model information
         """
-        models = cls.models()
+        models = cls.models()['models']
         for m in models:
             if m['name'] == name:
                 return m
@@ -315,11 +315,15 @@ class Juju:
         Returns:
         List of known models
         """
-        sh = shell('juju list-models --format json')
+        sh = shell('juju list-models --format yaml')
         if sh.code > 0:
             raise JujuNotFoundException(
                 "Unable to list models: {}".format(sh.errors()))
-        return json.loads(sh.output()[0])
+        return yaml.safe_load("\n".join(sh.output()))
+
+    @classmethod
+    def current_model(cls):
+        return cls.models()['current-model']
 
     @classmethod
     def model_cache(cls):
