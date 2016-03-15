@@ -15,6 +15,9 @@ class ServiceWidget:
         self.Name = Text(name)
         self.Icon = Text("")
         self.Units = []
-        for n, unit in service['Units'].items():
-            w = UnitWidget(n, unit)
-            self.Units.append(w)
+        try:
+            for n, unit in service['Units'].items():
+                w = UnitWidget(n, unit)
+                self.Units.append(w)
+        except:
+            pass

@@ -5,7 +5,6 @@ from ubuntui.widgets.juju.service import ServiceWidget
 from ubuntui.widgets.table import Table
 from ubuntui.utils import Color
 from conjure.api.models import model_status
-import q
 
 
 log = logging.getLogger('services_status')
@@ -61,7 +60,6 @@ class ServicesView(WidgetWrap):
                             services_list.append(('fixed', width,
                                                   getattr(unit_w, k)))
 
-                    q("new row ", services_list)
                     self.table.addColumns(unit._name, services_list)
                     self.table.addColumns(
                         unit._name,

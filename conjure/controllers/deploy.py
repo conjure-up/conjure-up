@@ -3,12 +3,15 @@ from conjure.charm import get_bundle
 from conjure.models.charm import CharmModel
 from conjure.ui.views.deploy_summary import DeploySummaryView
 from conjure.controllers.finish import FinishController
+from conjure.async import AsyncPool
+from conjure.juju import Juju
 
 from bundleplacer.config import Config
 from bundleplacer.maas import connect_to_maas
 from bundleplacer.placerview import PlacerView
 from bundleplacer.controller import PlacementController, BundleWriter
 from urllib.parse import urlparse
+from functools import partial
 import yaml
 import q
 
@@ -84,6 +87,6 @@ class DeployController:
 
             # def error(*args):
             #     print(args)
-            # AsyncPool.submit(
-            #     partial(Juju.deploy_bundle, CharmModel.to_path()))
+            AsyncPool.submit(
+                partial(Juju.deploy_bundle, CharmModel.to_path()))
             # EventLoop.set_alarm_in(1, read_status)
