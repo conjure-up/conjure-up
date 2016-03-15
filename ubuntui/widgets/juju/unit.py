@@ -1,23 +1,23 @@
 """ Represents a Single Juju unit UI widget
 """
 
-from urwid import WidgetWrap, Text
+from urwid import Text
 
 
-class UnitWidget(WidgetWrap):
-    def __init__(self, unit):
+class UnitWidget:
+    def __init__(self, name, unit):
         """ Init
 
         Params:
         machine: Juju Unit Class
         """
-        self.unit = unit
-        _attrs = ['unit_name',
-                  'workload_state',
-                  'extended_agent_state',
-                  'workload_info',
-                  'machine_id',
-                  'public_address',
-                  'agent_state_info']
-        for m in _attrs:
-            setattr(self, m, Text(getattr(self.unit, m)))
+        self._unit = unit
+        self._name = name
+        self.Name = Text(self._name)
+        self.AgentState = Text(unit['AgentState'])
+        self.PublicAddress = Text(unit['PublicAddress'])
+        self.Machine = Text(unit['Machine'])
+        self.AgentStateInfo = Text(unit['AgentStateInfo'])
+        self.WorkloadInfo = Text(unit['Workload']['Info'])
+        self.WorkloadStatus = Text(unit['Workload']['Status'])
+        self.Icon = Text("")

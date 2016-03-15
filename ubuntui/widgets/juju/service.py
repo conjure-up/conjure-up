@@ -1,21 +1,20 @@
 """ Represents a Single Juju service UI widget
 """
 
-from urwid import WidgetWrap, Text
+from urwid import Text
+from ubuntui.widgets.juju.unit import UnitWidget
 
 
-class UnitWidget(WidgetWrap):
-    def __init__(self, service):
+class ServiceWidget:
+    def __init__(self, name, service):
         """ Init
 
         Params:
         machine: Juju Service Class
         """
-        self.service = service
-        _attrs = ['service_name',
-                  'charm',
-                  'exposed',
-                  'networks',
-                  'life']
-        for m in _attrs:
-            setattr(self, m, Text(str(self.service.get(m))))
+        self.Name = Text(name)
+        self.Icon = Text("")
+        self.Units = []
+        for n, unit in service['Units'].items():
+            w = UnitWidget(n, unit)
+            self.Units.append(w)

@@ -1,28 +1,24 @@
 """ Represents a Single Juju machine UI widget
 """
 
-from urwid import WidgetWrap, Text
+from urwid import Text
 
 
-class MachineWidget(WidgetWrap):
+class MachineWidget:
     def __init__(self, machine):
         """ Init
 
         Params:
-        machine: Juju Machine Class (see https://git.io/vg0Xe)
+        machine: Juju Machine Dictionary
         """
         self.machine = machine
-        _attrs = ['machine_id',
-                  'cpu_cores',
-                  'storage',
-                  'mem',
-                  'agent',
-                  'agent_state',
-                  'agent_state_info',
-                  'agent_version',
-                  'dns_name',
-                  'err',
-                  'has_vote',
-                  'wants_vote']
+        _attrs = ['Id',
+                  'Hardware',
+                  'Series',
+                  'WantsVote',
+                  'InstanceState',
+                  'DNSName',
+                  'HasVote',
+                  'InstanceID']
         for m in _attrs:
             setattr(self, m, Text(str(self.machine.get(m))))

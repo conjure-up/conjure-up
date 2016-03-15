@@ -1,4 +1,4 @@
-from conjure.ui.views.finish import FinishView
+from conjure.ui.views.services import ServicesView
 from ubuntui.ev import EventLoop
 
 
@@ -6,25 +6,22 @@ class FinishController:
 
     def __init__(self, common):
         self.common = common
-        self.view = FinishView(self.common, self.finish)
+        self.view = ServicesView(self.common)
 
-    def finish(self):
-        """ handles deployment
-        """
-        EventLoop.exit(0)
+    def refresh(self, *args):
+        self.view.refresh_nodes()
+        EventLoop.set_alarm_in(1, self.refresh)
 
     def render(self):
         self.common['ui'].set_header(
-            title="Installing solution: {}".format(
-                self.common['config']['summary']),
-            excerpt="Please wait while services are being "
-            "deployed."
+            title="Status: {}".format(
+                self.common['config']['summary'])
         )
         self.common['ui'].set_body(self.view)
 
-        self.view.set_status("\n\n")
-        self.view.set_status("Completed the install, please visit "
-                             "https://jujucharms.com/docs/stable/"
-                             "juju-managing to learn how to manage "
-                             "your new {} solution!".format(
-                                 self.common['config']['name']))
+        self.common['ui'].set_footer("Please visit "
+                                     "https://jujucharms.com/docs/stable/"
+                                     "juju-managing to learn how to manage "
+                                     "your new {} solution!".format(
+                                         self.common['config']['name']))
+        EventLoop.set_alarm_in(1, self.refresh)
