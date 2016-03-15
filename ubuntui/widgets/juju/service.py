@@ -13,11 +13,8 @@ class ServiceWidget:
         machine: Juju Service Class
         """
         self.Name = Text(name)
-        self.Icon = Text("")
         self.Units = []
-        try:
+        if service['Units']:
             for n, unit in service['Units'].items():
                 w = UnitWidget(n, unit)
                 self.Units.append(w)
-        except:
-            pass
