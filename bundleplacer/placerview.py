@@ -27,17 +27,21 @@ log = logging.getLogger('bundleplacer')
 
 
 class PlacerView(WidgetWrap):
-    def __init__(self, placement_controller, config, cb):
+    def __init__(self, placement_controller, config, cb,
+                 has_maas=False):
         self.placement_controller = placement_controller
         self.config = config
         self.cb = cb
+        self.has_maas = has_maas
+
         self.selected_machine = None
         self.selected_service = None
         self.pv = PlacementView(
             display_controller=self,
             placement_controller=self.placement_controller,
             config=self.config,
-            do_deploy_cb=self.do_deploy)
+            do_deploy_cb=self.do_deploy,
+            has_maas=has_maas)
         super().__init__(self.pv)
         self.pv.reset_selections(top=True)
 
@@ -71,6 +75,10 @@ class PlacerView(WidgetWrap):
 
     def set_selected_service(self, service):
         self.selected_service = service
+
+    def remove_service(self, service):
+        self.placement_controller.remove_service(service.service_name)
+        self.pv.update()
 
     def show_default_view(self):
         self.pv.show_default_view()

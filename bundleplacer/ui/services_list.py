@@ -38,43 +38,20 @@ class ServicesList(WidgetWrap):
     None, no constraint checking is done. If set, only services whose
     constraints are satisfied by 'machine' are shown.
 
-    ignore_assigned - bool, whether or not to display services that
-    have already been assigned to a machine (but not yet deployed)
-
-    ignore_deployed - bool, whether or not to display services that
-    have already been deployed
-
-    deployed_only - bool, only show deployed services
-
     show_constraints - bool, whether or not to display the constraints
     for the various services
-
-    show_type - string, one of 'all', 'required' or 'non-required',
-    controls which service states should be shown. default is 'all'.
-
-    trace_updates - bool, enable verbose update logging
 
     """
 
     def __init__(self, placement_controller, display_controller,
-                 machine=None, ignore_assigned=False,
-                 ignore_deployed=False, assigned_only=False,
-                 deployed_only=False, show_type='all',
                  show_constraints=False, show_placements=False,
-                 title="Services", trace_updates=False):
+                 title="Services"):
         self.placement_controller = placement_controller
         self.display_controller = display_controller
         self.service_widgets = []
-        self.machine = machine
-        self.ignore_assigned = ignore_assigned
-        self.ignore_deployed = ignore_deployed
-        self.assigned_only = assigned_only
-        self.deployed_only = deployed_only
-        self.show_type = show_type
         self.show_constraints = show_constraints
         self.show_placements = show_placements
         self.title = title
-        self.trace = trace_updates
         w = self.build_widgets()
         self.update()
         super().__init__(w)
@@ -124,83 +101,18 @@ class ServicesList(WidgetWrap):
                     None)
 
     def update(self):
-
-        def trace(service, s):
-            if self.trace:
-                log.debug("{}: {} {}".format(self.title, service, s))
-
         for s in self.placement_controller.services():
-            if self.machine:
-                pc = self.placement_controller
-                if not satisfies(self.machine, s.constraints)[0] \
-                   or not (pc.is_assigned_to(s, self.machine) or
-                           pc.is_deployed_to(s, self.machine)):
-                    self.remove_service_widget(s)
-                    trace(s, "removed because machine doesn't match")
-                    continue
-
-            if self.ignore_assigned and self.assigned_only:
-                raise Exception("Can't both ignore and only show assigned.")
-
-            if self.ignore_assigned:
-                pc = self.placement_controller
-                n = pc.assignment_machine_count_for_service(s)
-                if n == s.required_num_units() \
-                   and not s.allow_multi_units \
-                   and self.placement_controller.is_assigned(s):
-                    self.remove_service_widget(s)
-                    trace(s, "removed because max units are "
-                          "assigned")
-                    continue
-            elif self.assigned_only:
-                if not self.placement_controller.is_assigned(s):
-                    self.remove_service_widget(s)
-                    trace(s, "removed because it is not assigned and "
-                          "assigned_only is True")
-                    continue
-
-            if self.ignore_deployed and self.deployed_only:
-                raise Exception("Can't both ignore and only show deployed.")
-
-            if self.ignore_deployed:
-                pc = self.placement_controller
-                n = pc.deployment_machine_count_for_service(s)
-                if n == s.required_num_units() \
-                   and self.placement_controller.is_deployed(s):
-                    self.remove_service_widget(s)
-                    trace(s, "removed because the required number of units"
-                          " has been deployed")
-                    continue
-            elif self.deployed_only:
-                if not self.placement_controller.is_deployed(s):
-                    self.remove_service_widget(s)
-                    continue
-
-            state, _, _ = self.placement_controller.get_service_state(s)
-            if self.show_type == 'required':
-                if state != ServiceState.REQUIRED:
-                    self.remove_service_widget(s)
-                    continue
-            elif self.show_type == 'non-required':
-                if state == ServiceState.REQUIRED:
-                    self.remove_service_widget(s)
-                    trace(s, "removed because show_type is 'non-required' and"
-                          "state is REQUIRED.")
-                    continue
-                assigned_or_deployed = (
-                    self.placement_controller.is_assigned(s) or
-                    self.placement_controller.is_deployed(s))
-                if not s.allow_multi_units and assigned_or_deployed:
-                    self.remove_service_widget(s)
-                    trace(s, "removed because it doesn't allow multiple units"
-                          " and is not assigned or deployed.")
-                    continue
 
             sw = self.find_service_widget(s)
             if sw is None:
                 sw = self.add_service_widget(s)
-                trace(s, "added widget")
             sw.update()
+
+        allnames = [s.service_name
+                    for s in self.placement_controller.services()]
+        for sw in self.service_widgets:
+            if sw.service.service_name not in allnames:
+                self.remove_service_widget(sw.service)
 
         self.sort_service_widgets()
 

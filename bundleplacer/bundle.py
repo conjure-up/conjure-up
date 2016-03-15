@@ -177,6 +177,16 @@ class Bundle:
                     'num_units': 1}
         self._bundle['services'][service_name] = new_dict
 
+    def remove_service(self, service_name):
+        if service_name in self._bundle['services']:
+            del self._bundle['services'][service_name]
+
+        for r1, r2 in self._bundle['relations']:
+            s1, _ = r1.split(':')
+            s2, _ = r2.split(':')
+            if s1 == service_name or s2 == service_name:
+                self._bundle['relations'].remove([r1, r2])
+
     def add_relation(self, s1_name, s1_rel, s2_name, s2_rel):
         r = ["{}:{}".format(s1_name, s1_rel),
              "{}:{}".format(s2_name, s2_rel)]

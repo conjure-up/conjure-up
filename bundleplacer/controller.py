@@ -293,6 +293,9 @@ class PlacementController:
         'charm_name-1', etc"""
         self.bundle.add_new_service(charm_name, charm_dict, service_name)
 
+    def remove_service(self, service_name):
+        self.bundle.remove_service(service_name)
+
     def add_relation(self, s1_name, s1_rel, s2_name, s2_rel):
         self.bundle.add_relation(s1_name, s1_rel, s2_name, s2_rel)
 

@@ -44,9 +44,6 @@ class ServicesColumn(WidgetWrap):
     def build_widgets(self):
         self.services_list = ServicesList(self.placement_controller,
                                           self.display_controller,
-                                          ignore_assigned=False,
-                                          ignore_deployed=False,
-                                          show_type='all',
                                           title=None)
 
         self.services_pile = Pile([self.services_list, Divider()])

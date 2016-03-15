@@ -49,6 +49,8 @@ def parse_options(argv):
                         metavar='metadatafile',
                         help="Optional metadata file describing constraints "
                         "on services in bundle")
+    parser.add_argument("--fake-maas", dest="fake_maas",
+                        action="store_true", default=False)
     parser.add_argument("--maas-ip", dest="maas_ip", default=None)
     parser.add_argument("--maas-cred", dest="maas_cred", default=None)
     parser.add_argument("-o", dest="out_filename", default=None)
@@ -71,9 +73,12 @@ def main():
         creds = dict(api_host=opts.maas_ip,
                      api_key=opts.maas_cred)
         maas, maas_state = connect_to_maas(creds)
+    elif opts.fake_maas:
+            maas = None
+            maas_state = FakeMaasState()
     else:
         maas = None
-        maas_state = FakeMaasState()
+        maas_state = None
 
     placement_controller = PlacementController(config=config,
                                                maas_state=maas_state)
@@ -92,7 +97,8 @@ def main():
         async.shutdown()
         raise urwid.ExitMainLoop()
 
-    mainview = PlacerView(placement_controller, config, cb)
+    has_maas = (maas_state is not None)
+    mainview = PlacerView(placement_controller, config, cb, has_maas=has_maas)
     ui = PlacerUI(mainview)
 
     def unhandled_input(key):
