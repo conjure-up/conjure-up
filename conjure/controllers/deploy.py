@@ -63,7 +63,7 @@ class DeployController:
             q(self.placement_controller)
             mainview = PlacerView(self.placement_controller,
                                   bundleplacer_cfg,
-                                  self.finish)
+                                  self.finish, has_maas=True)
             q(mainview)
             self.common['ui'].set_header(
                 title=self.common['config']['summary'],
