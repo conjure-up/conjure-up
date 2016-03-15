@@ -18,6 +18,7 @@ class FinishController:
                 self.common['config']['summary'])
         )
         self.common['ui'].set_body(self.view)
+        self.common['ui'].set_subheader('Deploy Status - (Q)uit')
 
         self.common['ui'].set_footer("Please visit "
                                      "https://jujucharms.com/docs/stable/"

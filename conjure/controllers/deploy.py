@@ -77,6 +77,7 @@ class DeployController:
             self.common['ui'].set_header(
                 title="Deploy Summary"
             )
+            self.common['ui'].set_subheader("Summary")
             self.common['ui'].set_body(view)
 
             # def read_status(*args):
