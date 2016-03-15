@@ -31,6 +31,11 @@ class DeployController:
             # We did some placement alteration
             bw = BundleWriter(self.placement_controller)
             bw.write_bundle(self.bundle)
+            AsyncPool.submit(
+                partial(Juju.deploy_bundle, self.bundle))
+        else:
+            AsyncPool.submit(
+                partial(Juju.deploy_bundle, CharmModel.to_path()))
         FinishController(self.common).render()
 
     def render(self):
@@ -61,12 +66,11 @@ class DeployController:
                                   self.finish)
             q(mainview)
             self.common['ui'].set_header(
-                title="Bundle Editor: {}".format(
-                    self.common['config']['summary']),
-                excerpt="Choose where your services should be "
-                "placed in your available infrastructure"
+                title=self.common['config']['summary'],
+                excerpt=("Place services, add additional charms, and manage "
+                         "service relations")
             )
-            self.common['ui'].set_subheader("Machine Placement")
+            self.common['ui'].set_subheader("Bundle Editor")
             self.common['ui'].set_body(mainview)
             mainview.update()
         else:
@@ -79,15 +83,3 @@ class DeployController:
             )
             self.common['ui'].set_subheader("Summary")
             self.common['ui'].set_body(view)
-
-            # def read_status(*args):
-            #     services = Juju.client.Client(request="FullStatus")
-            #     services = "\n".join(services.keys())
-            #     view.set_status(services)
-            #     EventLoop.set_alarm_in(3, read_status)
-
-            # def error(*args):
-            #     print(args)
-            AsyncPool.submit(
-                partial(Juju.deploy_bundle, CharmModel.to_path()))
-            # EventLoop.set_alarm_in(1, read_status)
