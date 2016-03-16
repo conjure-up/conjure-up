@@ -35,6 +35,8 @@ def label_to_atype(labels):
             atypes.append(AssignmentType.BareMetal)
         elif label.lower() == "kvm":
             atypes.append(AssignmentType.KVM)
+        elif label.lower() == "lxd":
+            atypes.append(AssignmentType.LXD)
         else:
             return [AssignmentType.DEFAULT]
     return atypes
@@ -46,3 +48,4 @@ class AssignmentType(Enum):
     BareMetal = 1
     KVM = 2
     LXC = 3
+    LXD = 4

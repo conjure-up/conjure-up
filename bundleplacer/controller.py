@@ -28,7 +28,7 @@ from bundleplacer.bundle import Bundle
 log = logging.getLogger('bundleplacer')
 
 
-DEFAULT_SHARED_ASSIGNMENT_TYPE = AssignmentType.LXC
+DEFAULT_SHARED_ASSIGNMENT_TYPE = AssignmentType.LXD
 
 
 class PlaceholderMachine:
@@ -712,7 +712,7 @@ class PlacementController:
                 l.append(service)
             else:
                 ad = assignments[controller.instance_id]
-                ad[AssignmentType.LXC].append(service)
+                ad[AssignmentType.LXD].append(service)
 
         import pprint
         log.debug("gen_single() = '{}'".format(pprint.pformat(assignments)))
@@ -738,6 +738,7 @@ class BundleWriter:
             prefix = {AssignmentType.DEFAULT: "",
                       AssignmentType.BareMetal: "",
                       AssignmentType.KVM: "kvm:",
+                      AssignmentType.LXD: "lxd:",
                       AssignmentType.LXC: "lxc:"}[atype]
             tolist.append("{}{}".format(prefix, to))
 

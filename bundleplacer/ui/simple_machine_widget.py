@@ -16,9 +16,9 @@
 import logging
 
 
-from urwid import AttrMap, Divider, GridFlow, Pile, Text, WidgetWrap
+from urwid import AttrMap, Columns, Divider, Pile, Text, WidgetWrap
 
-from ubuntui.widgets.buttons import MenuSelectButton
+from ubuntui.widgets.buttons import MenuSelectButton, PlainButton
 
 from bundleplacer.assignmenttype import AssignmentType
 
@@ -58,7 +58,7 @@ class SimpleMachineWidget(WidgetWrap):
     def build_widgets(self):
 
         self.button = MenuSelectButton("I AM A MACHINE", self.do_select)
-        self.action_button_grid = GridFlow([], 22, 1, 1, 'right')
+        self.action_button_cols = Columns([])
         self.action_buttons = []
 
         self.pile = Pile([self.button])
@@ -95,7 +95,7 @@ class SimpleMachineWidget(WidgetWrap):
         msg = Text("  Add {} to {}:".format(cn,
                                             self.machine.hostname))
         self.pile.contents = [(msg, self.pile.options()),
-                              (self.action_button_grid,
+                              (self.action_button_cols,
                                self.pile.options()),
                               (Divider(), self.pile.options())]
 
@@ -112,9 +112,9 @@ class SimpleMachineWidget(WidgetWrap):
         all_actions = [(AssignmentType.BareMetal,
                         'Add as Bare Metal',
                         self.select_baremetal),
-                       (AssignmentType.LXC,
-                        'Add as LXC',
-                        self.select_lxc),
+                       (AssignmentType.LXD,
+                        'Add as LXD',
+                        self.select_lxd),
                        (AssignmentType.KVM,
                         'Add as KVM',
                         self.select_kvm)]
@@ -131,19 +131,20 @@ class SimpleMachineWidget(WidgetWrap):
         if len(self.action_buttons) == len(allowed_types) + 1:
             return
 
-        self.action_buttons = [AttrMap(MenuSelectButton(label,
-                                                        on_press=func),
+        self.action_buttons = [AttrMap(PlainButton(label,
+                                                   on_press=func),
                                        'button_secondary',
                                        'button_secondary focus')
                                for atype, label, func in all_actions
                                if atype in allowed_types]
-        self.action_buttons.append(AttrMap(MenuSelectButton("Cancel",
-                                                  on_press=self.do_cancel),
-                                           'button_secondary',
-                                           'button_secondary focus'))
+        self.action_buttons.append(
+            AttrMap(PlainButton("Cancel",
+                                on_press=self.do_cancel),
+                    'button_secondary',
+                    'button_secondary focus'))
 
-        opts = self.action_button_grid.options()
-        self.action_button_grid.contents = [(b, opts) for b in
+        opts = self.action_button_cols.options()
+        self.action_button_cols.contents = [(b, opts) for b in
                                             self.action_buttons]
 
     def do_select(self, sender):
@@ -152,7 +153,7 @@ class SimpleMachineWidget(WidgetWrap):
         self.is_selected = True
         self.update()
         self.pile.focus_position = 1
-        self.action_button_grid.focus_position = 0
+        self.action_button_cols.focus_position = 0
 
     def do_cancel(self, sender):
         self.is_selected = False
@@ -162,8 +163,8 @@ class SimpleMachineWidget(WidgetWrap):
     def _do_select_assignment(self, atype):
         {AssignmentType.BareMetal:
          self.display_controller.do_select_baremetal,
-         AssignmentType.LXC:
-         self.display_controller.do_select_lxc,
+         AssignmentType.LXD:
+         self.display_controller.do_select_lxd,
          AssignmentType.KVM:
          self.display_controller.do_select_kvm}[atype](self.machine)
         self.pile.focus_position = 0
@@ -171,8 +172,8 @@ class SimpleMachineWidget(WidgetWrap):
     def select_baremetal(self, sender):
         self._do_select_assignment(AssignmentType.BareMetal)
 
-    def select_lxc(self, sender):
-        self._do_select_assignment(AssignmentType.LXC)
+    def select_lxd(self, sender):
+        self._do_select_assignment(AssignmentType.LXD)
 
     def select_kvm(self, sender):
         self._do_select_assignment(AssignmentType.KVM)

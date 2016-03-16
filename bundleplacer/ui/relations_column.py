@@ -263,7 +263,7 @@ class RelationsColumn(WidgetWrap):
                                            self.pile.options()))
 
             for tgt_relname, tgt_service in matches:
-                if tgt_service.charm_name == self.service.charm_name:
+                if tgt_service.service_name == self.service.service_name:
                     continue
                 rw = RelationWidget(self.service.service_name, relname,
                                     iface, reltype, tgt_service.service_name,

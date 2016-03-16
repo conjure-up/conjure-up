@@ -65,7 +65,6 @@ class Footer(WidgetWrap):
     def __init__(self, message="", completion=0):
         message_widget = (Text(message))
         status = [
-            Padding.line_break(""),
             message_widget
         ]
         super().__init__(Color.frame_footer(Pile(status)))

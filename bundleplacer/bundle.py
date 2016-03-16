@@ -182,8 +182,8 @@ class Bundle:
             del self._bundle['services'][service_name]
 
         for r1, r2 in self._bundle['relations']:
-            s1, _ = r1.split(':')
-            s2, _ = r2.split(':')
+            s1 = r1.split(':')[0]
+            s2 = r2.split(':')[0]
             if s1 == service_name or s2 == service_name:
                 self._bundle['relations'].remove([r1, r2])
 

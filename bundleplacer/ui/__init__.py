@@ -62,6 +62,7 @@ class PlacementView(WidgetWrap):
         self.config = config
         self.do_deploy_cb = do_deploy_cb
         self.state = initial_state
+        self.has_maas = has_maas
         self.prev_state = None
         w = self.build_widgets()
         super().__init__(w)
@@ -75,7 +76,7 @@ class PlacementView(WidgetWrap):
 
     def focus_footer(self):
         self.frame.focus_position = 'footer'
-        self.frame.footer.focus_position = 1
+        self.footer_grid.focus_position = 1
 
     def handle_tab(self, backward):
         if self.state == UIState.RELATION_EDITOR:
@@ -146,17 +147,17 @@ class PlacementView(WidgetWrap):
         self.services_button_grid = GridFlow(self.services_buttons,
                                              36, 1, 0, 'center')
 
-        self.services_header_pile = Pile([Text(("bobdy", "Services"),
-                                               align='center'),
-                                          Divider(),
-                                          self.services_button_grid])
+        ws = [Text(("body", "Services"), align='center'),
+              Divider()]
+        if self.has_maas:
+            ws.append(self.services_button_grid)
 
-        return self.services_header_pile
+        return Pile(ws)
 
     def get_charmstore_header(self, charmstore_column):
         self.charm_search_widget = CharmStoreSearchWidget(self.do_add_charm,
                                                           charmstore_column)
-        self.charm_search_header_pile = Pile([Text(("bobdy", "Add Charms"),
+        self.charm_search_header_pile = Pile([Text(("body", "Add Charms"),
                                                    align='center'),
                                               Divider(),
                                               self.charm_search_widget])
@@ -231,11 +232,17 @@ class PlacementView(WidgetWrap):
         b = AttrMap(self.deploy_button,
                     'frame_header',
                     'button_primary focus')
+        self.footer_grid = GridFlow([self.deploy_button_label,
+                                     Padding(b, width=28,
+                                             align='center')],
+                                    28, 1, 1, 'right')
+        f = AttrMap(self.footer_grid,
+                    'frame_footer',
+                    'frame_footer')
 
         self.frame = Frame(header=self.header_columns,
                            body=self.placement_edit_body,
-                           footer=GridFlow([self.deploy_button_label,
-                                            b], 22, 1, 1, 'right'))
+                           footer=f)
         return self.frame
 
     def update(self):
@@ -274,8 +281,8 @@ class PlacementView(WidgetWrap):
         n_total = len(all) - n_subs
         remaining = len(unplaced) - n_subs
         if remaining > 0:
-            dmsg = "Auto-assigning {}/{} charms".format(remaining,
-                                                                  n_total)
+            dmsg = "\nAuto-assigning {}/{} services".format(remaining,
+                                                            n_total)
         else:
             dmsg = ""
         self.deploy_button_label.set_text(dmsg)

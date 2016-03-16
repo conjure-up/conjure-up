@@ -67,8 +67,8 @@ class PlacerView(WidgetWrap):
     def do_select_baremetal(self, machine):
         self._do_select(machine, AssignmentType.BareMetal)
 
-    def do_select_lxc(self, machine):
-        self._do_select(machine, AssignmentType.LXC)
+    def do_select_lxd(self, machine):
+        self._do_select(machine, AssignmentType.LXD)
 
     def do_select_kvm(self, machine):
         self._do_select(machine, AssignmentType.KVM)

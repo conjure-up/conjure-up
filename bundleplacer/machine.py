@@ -132,16 +132,16 @@ class Machine:
     def container(self, container_id):
         """ Inspect a container
 
-        :param container_id: lxc container id
+        :param container_id: lxd container id
         :type container_id: int
         :returns: Returns a dictionary of the container information for
-                  specific machine and lxc id.
+                  specific machine and lxd id.
         :rtype: dict
         """
         for m in self.containers:
             if m.machine_id == container_id:
                 return m
-        return Machine('0/lxc/0', {'agent-state': 'unallocated',
+        return Machine('0/lxd/0', {'agent-state': 'unallocated',
                                    'dns-name': 'unallocated'})
 
     def __str__(self):

@@ -40,6 +40,14 @@ class DeployController:
 
     def render(self):
         # Grab bundle and deploy or render placement if MAAS
+        self.bundle = get_bundle(CharmModel.to_entity(), to_file=True)
+        metadata_filename = self.common['config']['metadata_filename']
+
+        bundleplacer_cfg = Config(
+            'bundle-placer',
+            {'bundle_filename': self.bundle,
+             'metadata_filename': metadata_filename})
+
         if self.controller_info['ProviderType'] == 'maas':
             bootstrap_config = model_cache_controller_provider(
                 self.controller_info['ServerUUID'])
@@ -47,24 +55,13 @@ class DeployController:
             creds = dict(
                 api_host=maas_server.hostname,
                 api_key=bootstrap_config['maas-oauth'])
-            q(creds)
             maas, maas_state = connect_to_maas(creds)
-            self.bundle = get_bundle(CharmModel.to_entity(), to_file=True)
-            q(self.bundle)
-            metadata_filename = self.common['config']['metadata_filename']
-            bundleplacer_cfg = Config(
-                'bundle-placer',
-                {'bundle_filename': self.bundle,
-                 'metadata_filename': metadata_filename})
-            q(bundleplacer_cfg)
             self.placement_controller = PlacementController(
                 config=bundleplacer_cfg,
                 maas_state=maas_state)
-            q(self.placement_controller)
             mainview = PlacerView(self.placement_controller,
                                   bundleplacer_cfg,
                                   self.finish, has_maas=True)
-            q(mainview)
             self.common['ui'].set_header(
                 title=self.common['config']['summary'],
                 excerpt=("Place services, add additional charms, and manage "
@@ -74,12 +71,15 @@ class DeployController:
             self.common['ui'].set_body(mainview)
             mainview.update()
         else:
-            self.bundle = get_bundle(CharmModel.to_entity(), to_file=True)
-            view = DeploySummaryView(self.common, yaml.load(open(self.bundle)),
-                                     self.finish)
-            q(view)
+            self.placement_controller = PlacementController(
+                config=bundleplacer_cfg)
+            mainview = PlacerView(self.placement_controller,
+                                  bundleplacer_cfg,
+                                  self.finish)
             self.common['ui'].set_header(
-                title="Deploy Summary"
+                title=self.common['config']['summary'],
+                excerpt=("Add additional charms and manage service relations")
             )
-            self.common['ui'].set_subheader("Summary")
-            self.common['ui'].set_body(view)
+            self.common['ui'].set_subheader("Bundle Editor")
+            self.common['ui'].set_body(mainview)
+            mainview.update()
