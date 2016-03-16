@@ -92,6 +92,8 @@ class NoRelationWidget(WidgetWrap):
     def __init__(self, relname, iface, reltype):
         other_reltype = {RelationType.Requires: RelationType.Provides,
                          RelationType.Provides: RelationType.Requires}[reltype]
+        self.source_relname = relname
+        self.reltype = reltype
         s = "({}: nothing {} {})".format(
             relname, other_reltype.name.lower(), iface)
         super().__init__(AttrMap(MenuSelectButton(s), 'label',
@@ -276,6 +278,7 @@ class RelationsColumn(WidgetWrap):
 
         for w, _ in self.pile.contents[2:]:
             w.update()
+        self.sort_relation_widgets()
 
     def focus_prev_or_top(self):
         # ? self.pile.focus_position = len(self.pile.contents) - 1
@@ -288,7 +291,23 @@ class RelationsColumn(WidgetWrap):
 
     def do_select(self, source_relname, tgt_service_name,
                   tgt_relation_name):
-        self.placement_controller.add_relation(self.service.service_name,
-                                               source_relname,
-                                               tgt_service_name,
-                                               tgt_relation_name)
+        self.placement_controller.toggle_relation(self.service.service_name,
+                                                  source_relname,
+                                                  tgt_service_name,
+                                                  tgt_relation_name)
+        self.update()
+
+    def sort_relation_widgets(self):
+        def keyfunc(rw):
+            return str(rw.reltype) + rw.source_relname
+        self.relation_widgets.sort(key=keyfunc)
+
+        def wrappedkeyfunc(t):
+            rw, options = t
+            if isinstance(rw, RelationWidget):
+                return keyfunc(rw)
+            if isinstance(rw, NoRelationWidget):
+                return 'z' + keyfunc(rw)
+            return 'A'
+
+        self.pile.contents.sort(key=wrappedkeyfunc)

@@ -296,8 +296,11 @@ class PlacementController:
     def remove_service(self, service_name):
         self.bundle.remove_service(service_name)
 
-    def add_relation(self, s1_name, s1_rel, s2_name, s2_rel):
-        self.bundle.add_relation(s1_name, s1_rel, s2_name, s2_rel)
+    def toggle_relation(self, s1_name, s1_rel, s2_name, s2_rel):
+        if self.bundle.is_related(s1_name, s1_rel, s2_name, s2_rel):
+            self.bundle.remove_relation(s1_name, s1_rel, s2_name, s2_rel)
+        else:
+            self.bundle.add_relation(s1_name, s1_rel, s2_name, s2_rel)
 
     def is_related(self, s1_name, s1_rel, s2_name, s2_rel):
         return self.bundle.is_related(s1_name, s1_rel, s2_name, s2_rel)

@@ -4,6 +4,7 @@
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 from conjure.controllers.welcome import WelcomeController
+from conjure.controllers.finish import FinishController
 from conjure.ui import ConjureUI
 from conjure import async
 import json
@@ -46,7 +47,10 @@ class Application:
     def _start(self, *args, **kwargs):
         """ Initially load the welcome screen
         """
-        WelcomeController(self.common).render()
+        if self.common['opts'].status_only:
+            FinishController(self.common).render()
+        else:
+            WelcomeController(self.common).render()
 
     def start(self):
         EventLoop.build_loop(self.common['ui'], STYLES,
@@ -63,6 +67,10 @@ def parse_options(argv):
     parser.add_argument('-m', '--metadata', dest='build_metadata',
                         metavar='METADATA',
                         help='Path to bundle services metadata')
+    parser.add_argument('-s', '--status-only', action='store_true',
+                        dest='status_only',
+                        help='Only display the Status of '
+                        'existing deployed bundled.')
 
     return parser.parse_args(argv)
 

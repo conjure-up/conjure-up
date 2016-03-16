@@ -192,16 +192,25 @@ class Bundle:
              "{}:{}".format(s2_name, s2_rel)]
         self._bundle['relations'].append(r)
 
+    def remove_relation(self, s1_name, s1_rel, s2_name, s2_rel):
+        r = self.find_relation(s1_name, s1_rel, s2_name, s2_rel)
+        self._bundle['relations'].remove(r)
+
     def is_related(self, s1_name, s1_rel, s2_name, s2_rel):
         """Checks if a relation exists. If the relation in the bundle does not
         specify relation names, this returns true for any relation names.
         """
+        r = self.find_relation(s1_name, s1_rel, s2_name, s2_rel)
+        return r is not None
+
+    def find_relation(self, s1_name, s1_rel, s2_name, s2_rel):
         a = "{}:{}".format(s1_name, s1_rel)
         b = "{}:{}".format(s2_name, s2_rel)
         rels = self._bundle['relations']
-        return ([a, b] in rels or [b, a] in rels or
-                [s1_name, s2_name] in rels or
-                [s2_name, s1_name] in rels)
+        for x in [[a, b], [b, a], [s1_name, s2_name], [s2_name, s1_name]]:
+            if x in rels:
+                return x
+        return None
 
     @property
     def services(self):
