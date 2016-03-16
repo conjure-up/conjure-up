@@ -1,7 +1,6 @@
 from conjure.api.models import model_info, model_cache_controller_provider
 from conjure.charm import get_bundle
 from conjure.models.charm import CharmModel
-from conjure.ui.views.deploy_summary import DeploySummaryView
 from conjure.controllers.finish import FinishController
 from conjure.async import AsyncPool
 from conjure.juju import Juju
@@ -12,8 +11,6 @@ from bundleplacer.placerview import PlacerView
 from bundleplacer.controller import PlacementController, BundleWriter
 from urllib.parse import urlparse
 from functools import partial
-import yaml
-import q
 
 
 class DeployController:
@@ -27,15 +24,10 @@ class DeployController:
     def finish(self, *args):
         """ handles deployment
         """
-        if self.placement_controller is not None:
-            # We did some placement alteration
-            bw = BundleWriter(self.placement_controller)
-            bw.write_bundle(self.bundle)
-            AsyncPool.submit(
-                partial(Juju.deploy_bundle, self.bundle))
-        else:
-            AsyncPool.submit(
-                partial(Juju.deploy_bundle, CharmModel.to_path()))
+        bw = BundleWriter(self.placement_controller)
+        bw.write_bundle(self.bundle)
+        AsyncPool.submit(
+            partial(Juju.deploy_bundle, self.bundle))
         FinishController(self.common).render()
 
     def render(self):
