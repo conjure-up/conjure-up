@@ -63,7 +63,7 @@ class JujuControllerView(WidgetWrap):
             Padding.center_60(
                 Columns(
                     [
-                        ('weight', 0.2, Text("Controller")),
+                        ('weight', 0.2, Text("Model")),
                         Color.string_input(self.input_new_controller,
                                            focus_map='string_input focus'),
                     ]
@@ -82,7 +82,7 @@ class JujuControllerView(WidgetWrap):
             controller_name = k.split('local.').pop()
 
             items.append(Padding.center_60(
-                Instruction("Controller: {}".format(controller_name))))
+                Instruction("Model: {}".format(controller_name))))
             for m in self.models[k]['models']:
                 items.append(
                     Padding.center_50(

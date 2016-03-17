@@ -19,7 +19,7 @@ class JujuControllerController:
         self.config = self.common['config']
         if self.cloud and self.bootstrap:
             self.excerpt = (
-                "Please name your new controller")
+                "Please name your new model")
             self.view = JujuControllerView(self.common,
                                            None,
                                            self.deploy)
@@ -35,20 +35,28 @@ class JujuControllerController:
                                            models,
                                            self.deploy)
 
-    def deploy(self, controller):
+    def deploy(self, controller, default_model=None):
         """ Deploy to juju controller
 
         Arguments:
         controller: Juju controller to deploy to
+        default_model: Optional name to give the default model
         """
-        # if self.bootstrap:
-        #     Juju.bootstrap(controller, self.cloud)
-        Juju.switch(controller)
-        DeployController(self.common, controller).render()
+        if self.bootstrap:
+            Juju.bootstrap(controller, self.cloud)
+
+        model = ""
+        if default_model is None:
+            model = "{}:default".format(controller)
+            Juju.switch(model)
+        else:
+            model = "{}:{}".format(controller, default_model)
+            Juju.switch(model)
+        DeployController(self.common, model).render()
 
     def render(self):
         self.common['ui'].set_header(
-            title="Juju Controller",
+            title="Juju Model",
             excerpt=self.excerpt
         )
         self.common['ui'].set_body(self.view)

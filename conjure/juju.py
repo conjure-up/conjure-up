@@ -305,7 +305,8 @@ class Juju:
         if sh.code > 0:
             raise JujuNotFoundException(
                 "Unable to list models: {}".format(sh.errors()))
-        return yaml.safe_load("\n".join(sh.output()))
+        out = yaml.safe_load("\n".join(sh.output()))
+        return out
 
     @classmethod
     def current_model(cls):
