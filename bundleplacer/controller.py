@@ -595,7 +595,8 @@ class PlacementController:
         for s in self.unassigned_undeployed_services():
             d = self.assignments[self.def_placeholder.instance_id]
             al = d[DEFAULT_SHARED_ASSIGNMENT_TYPE]
-            al.append(s)
+            for i in range(s.num_units):
+                al.append(s)
         self.update_and_save()
 
     def gen_defaults(self, services=None, maas_machines=None):
@@ -732,7 +733,7 @@ class BundleWriter:
         num_units = 1
         if svc.service_name in services:
             num_units = services[svc.service_name]['num_units'] + 1
-            tolist = services[svc.service_name]['to']
+            tolist = services[svc.service_name].get('to', [])
 
         d = dict(charm=svc.charm_source,
                  num_units=num_units,

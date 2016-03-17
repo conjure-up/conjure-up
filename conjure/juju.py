@@ -5,7 +5,6 @@ from conjure.utils import Host
 import os
 import yaml
 import json
-import q
 from macumba.v2 import JujuClient
 from macumba.errors import LoginError
 from functools import wraps
@@ -320,5 +319,4 @@ class Juju:
         types are associated to a particular controller.
         """
         cache_path = os.path.join(Host.juju_path(), 'models/cache.yaml')
-        q(cache_path)
         return yaml.safe_load(open(cache_path))

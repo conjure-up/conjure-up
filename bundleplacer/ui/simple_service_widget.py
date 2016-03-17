@@ -62,7 +62,6 @@ class SimpleServiceWidget(WidgetWrap):
         return True
 
     def build_widgets(self):
-        self.title_markup = [self.service.display_name]
 
         if self.service.subordinate:
             self.button = MenuSelectButton("I AM A SUBORDINATE SERVICE")
@@ -77,18 +76,21 @@ class SimpleServiceWidget(WidgetWrap):
 
     def get_markup(self):
         if self.service.subordinate:
-            return self.title_markup, []
+            return [self.service.service_name +
+                    " (subordinate)\n  " +
+                    self.service.charm_source], []
 
-        main_markup = self.title_markup
-
+        title_markup = [self.service.service_name +
+                        "\n  " +
+                        self.service.charm_source]
         info_markup = []
 
         if not self.display_controller.has_maas:
-            return main_markup, info_markup
+            return title_markup, info_markup
 
         p = self.placement_controller.get_assignments(self.service)
         nr = self.service.required_num_units()
-        info_str = " ({} of {} placed)".format(len(p), nr)
+        info_str = "  ({} of {} placed)".format(len(p), nr)
 
         info_markup.append(info_str)
 
@@ -108,7 +110,7 @@ class SimpleServiceWidget(WidgetWrap):
         info_markup += ["    Assignments: "]
         ad = self.placement_controller.get_assignments(self.service)
         info_markup += string_for_placement_dict(ad)
-        return main_markup, info_markup
+        return title_markup, info_markup
 
     def update_choosing(self):
         title_markup, _ = self.get_markup()
