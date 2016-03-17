@@ -1,6 +1,6 @@
 from conjure.api.models import model_info, model_cache_controller_provider
 from conjure.charm import get_bundle
-from conjure.models.charm import CharmModel
+from conjure.models.bundle import BundleModel
 from conjure.controllers.deploysummary import DeploySummaryController
 
 from bundleplacer.config import Config
@@ -27,7 +27,7 @@ class DeployController:
 
     def render(self):
         # Grab bundle and deploy or render placement if MAAS
-        self.bundle = get_bundle(CharmModel.to_entity(), to_file=True)
+        self.bundle = get_bundle(BundleModel.to_entity(), to_file=True)
         metadata_filename = self.common['config']['metadata_filename']
 
         bundleplacer_cfg = Config(

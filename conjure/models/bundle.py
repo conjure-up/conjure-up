@@ -1,15 +1,16 @@
-class CharmModelException(Exception):
-    """ Exception in CharmModel """
+class BundleModelException(Exception):
+    """ Exception in BundleModel """
 
 
-class CharmModel:
-    """ Stores charm/bundle location for juju deploy
+class BundleModel:
+    """ Stores bundle location for juju deploy
     """
     bundle = {
         "key": None,
         "name": None,
         "summary": None,
-        "revision": None
+        "revision": None,
+        "location": None
     }
 
     @classmethod
@@ -17,6 +18,13 @@ class CharmModel:
         """ Returns key of resource
         """
         return cls.bundle.get('key', None)
+
+    @classmethod
+    def location(cls):
+        """ Location of bundle, this will override key as
+        location can contain namespaced bundles
+        """
+        return cls.bundle.get('location', None)
 
     @classmethod
     def name(cls):
@@ -46,12 +54,13 @@ class CharmModel:
         Returns:
         Formatted entity string suitable for charmstore lookup
         """
-        if cls.key() is None:
-            raise CharmModelException("Unable to determine bundle path.")
-        if use_latest:
-            return cls.key()
-        else:
+        if cls.location() is None and cls.key() is None:
+            raise BundleModelException("Unable to determine bundle path.")
+        if cls.location():
+            return cls.location()
+        if not use_latest:
             return "{}-{}".format(cls.key(), cls.revision())
+        return cls.key()
 
     @classmethod
     def to_path(cls):
@@ -59,7 +68,7 @@ class CharmModel:
         """
         bundle = cls.key()
         if bundle is None:
-            raise CharmModelException("Unable to determine bundle")
+            raise BundleModelException("Unable to determine bundle")
         if cls.revision() is not None:
             bundle = "{}-{}".format(bundle, cls.revision())
         return "cs:bundle/{}".format(bundle)

@@ -17,7 +17,6 @@ class CharmStoreException(Exception):
     """ CharmStore exception """
 
 
-@q.t
 def get_bundle(bundle, to_file=False):
     """ Attempts to grab the bundle.yaml
 
@@ -30,6 +29,7 @@ def get_bundle(bundle, to_file=False):
     then returns the path to the downloaded bundle
     """
     bundle = path.join(cs, bundle, 'archive/bundle.yaml')
+    q("Downloading bundle, ", bundle)
     req = requests.get(bundle)
     if not req.ok:
         raise CharmStoreException("Problem getting bundle: {}".format(req))

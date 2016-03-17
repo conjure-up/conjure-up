@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
-from urwid import (WidgetWrap, Text, Pile, ListBox,
-                   SimpleListWalker, Columns, Filler)
+from urwid import (WidgetWrap, Text, Pile,
+                   Columns, Filler)
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.buttons import (cancel_btn, menu_btn)
 from ubuntui.utils import Color, Padding

@@ -101,7 +101,7 @@ class ServicesView(WidgetWrap):
         unit: current unit for service
         """
         unit_w.PublicAddress.set_text(unit['PublicAddress'])
-        unit_w.AgentStatus.set_text(unit['WorkloadStatus']['Status'])
+        unit_w.AgentStatus.set_text(unit['AgentStatus']['Status'])
         unit_w.WorkloadInfo.set_text(unit['WorkloadStatus']['Info'])
         unit_w.Icon.set_text(
-            self.status_icon_state(unit['WorkloadStatus']['Status']))
+            self.status_icon_state(unit['AgentStatus']['Status']))

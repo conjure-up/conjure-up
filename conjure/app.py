@@ -67,7 +67,7 @@ def parse_options(argv):
     parser.add_argument('-m', '--metadata', dest='build_metadata',
                         metavar='METADATA',
                         help='Path to bundle services metadata')
-    parser.add_argument('-s', '--status-only', action='store_true',
+    parser.add_argument('-s', '--status', action='store_true',
                         dest='status_only',
                         help='Only display the Status of '
                         'existing deployed bundled.')
