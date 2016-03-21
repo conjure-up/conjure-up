@@ -1,26 +1,24 @@
 from conjure.ui.views.jujucontroller import JujuControllerView
-from conjure.controllers.deploy import DeployController
 from conjure.juju import Juju
-import q  # noqa
 
 
 class JujuControllerController:
-    def __init__(self, common, cloud=None, bootstrap=False):
+    def __init__(self, app, cloud=None, bootstrap=False):
         """ init
 
         Arguments:
-        common: common dictionary for conjure
+        app: common dictionary for conjure
         cloud: defined cloud to use when deploying
         bootstrap: is this a new environment that needs to be bootstrapped
         """
-        self.common = common
+        self.app = app
         self.cloud = cloud
         self.bootstrap = bootstrap
-        self.config = self.common['config']
+        self.config = self.app.config
         if self.cloud and self.bootstrap:
             self.excerpt = (
                 "Please name your new model")
-            self.view = JujuControllerView(self.common,
+            self.view = JujuControllerView(self.app,
                                            None,
                                            self.deploy)
         else:
@@ -31,7 +29,7 @@ class JujuControllerController:
                 models[c] = Juju.models()
             self.excerpt = (
                 "Please select the model you wish to deploy to")
-            self.view = JujuControllerView(self.common,
+            self.view = JujuControllerView(self.app,
                                            models,
                                            self.deploy)
 
@@ -52,11 +50,11 @@ class JujuControllerController:
         else:
             model = "{}:{}".format(controller, default_model)
             Juju.switch(model)
-        DeployController(self.common, model).render()
+        self.app.controllers['deploy'](self.app, model).render()
 
     def render(self):
-        self.common['ui'].set_header(
+        self.app.ui.set_header(
             title="Juju Model",
             excerpt=self.excerpt
         )
-        self.common['ui'].set_body(self.view)
+        self.app.ui.set_body(self.view)

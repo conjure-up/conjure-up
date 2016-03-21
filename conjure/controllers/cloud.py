@@ -1,17 +1,16 @@
 from conjure.ui.views.cloud import CloudView
-from conjure.controllers.jujucontroller import JujuControllerController
 from conjure.juju import Juju
-import q  # noqa
 
 
 class CloudController:
-    def __init__(self, common):
-        self.common = common
+
+    def __init__(self, app):
+        self.app = app
         self.clouds = sorted(Juju.clouds().keys())
-        self.config = self.common['config']
+        self.config = self.app.config
         self.excerpt = ("Please select from a list of available clouds or "
                         "optionally create a new cloud.")
-        self.view = CloudView(self.common,
+        self.view = CloudView(self.app,
                               self.clouds,
                               self.finish)
 
@@ -22,14 +21,13 @@ class CloudController:
         cloud: Cloud to create the controller/model on.
         create_cloud: True/False, if true display create cloud interface
         """
-        q(cloud, create_cloud)
         if not create_cloud and cloud is not None:
-            JujuControllerController(self.common,
-                                     cloud, bootstrap=True).render()
+            self.app.controllers['jujucontroller'](
+                self.app, cloud, bootstrap=True).render()
 
     def render(self):
-        self.common['ui'].set_header(
+        self.app.ui.set_header(
             title="Cloud Providers",
             excerpt=self.excerpt
         )
-        self.common['ui'].set_body(self.view)
+        self.app.ui.set_body(self.view)

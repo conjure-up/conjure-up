@@ -3,10 +3,14 @@
 
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
-from conjure.controllers.welcome import WelcomeController
-from conjure.controllers.finish import FinishController
 from conjure.ui import ConjureUI
 from conjure import async
+from conjure.controllers.welcome import WelcomeController
+from conjure.controllers.finish import FinishController
+from conjure.controllers.deploysummary import DeploySummaryController
+from conjure.controllers.deploy import DeployController
+from conjure.controllers.cloud import CloudController
+from conjure.controllers.jujucontroller import JujuControllerController
 import json
 import sys
 import argparse
@@ -16,27 +20,46 @@ import os.path as path
 class ApplicationException(Exception):
     """ Error in application
     """
-    pass
+
+
+class ApplicationConfig:
+    """ Application config encapsulating common attributes
+    used throughout the lifetime of the application.
+    """
+    def __init__(self):
+        self.ui = None
+        self.config = None
+        self.argv = None
+        self.controllers = None
 
 
 class Application:
-    def __init__(self, opts):
+    def __init__(self, argv):
         """ init
 
         Arguments:
-        opts: Options passed in from cli
+        argv: Options passed in from cli
         """
-        with open(opts.build_conf) as json_f:
+        self.app = ApplicationConfig()
+        self.app.argv = argv
+        self.app.ui = ConjureUI()
+
+        with open(argv.build_conf) as json_f:
             config = json.load(json_f)
 
-        with open(opts.build_metadata) as json_f:
-            config['metadata_filename'] = path.abspath(opts.build_metadata)
+        with open(argv.build_metadata) as json_f:
+            config['metadata_filename'] = path.abspath(argv.build_metadata)
             config['metadata'] = json.load(json_f)
 
-        self.common = {
-            'opts': opts,
-            'ui': ConjureUI(),
-            'config': config
+        self.app.config = config
+
+        self.app.controllers = {
+            'welcome': WelcomeController,
+            'clouds': CloudController,
+            'deploy': DeployController,
+            'deploysummary': DeploySummaryController,
+            'jujucontroller': JujuControllerController,
+            'finish': FinishController
         }
 
     def unhandled_input(self, key):
@@ -47,13 +70,13 @@ class Application:
     def _start(self, *args, **kwargs):
         """ Initially load the welcome screen
         """
-        if self.common['opts'].status_only:
-            FinishController(self.common).render()
+        if self.app.argv.status_only:
+            self.app.controllers['finish'](self.app).render()
         else:
-            WelcomeController(self.common).render()
+            self.app.controllers['welcome'](self.app).render()
 
     def start(self):
-        EventLoop.build_loop(self.common['ui'], STYLES,
+        EventLoop.build_loop(self.app.ui, STYLES,
                              unhandled_input=self.unhandled_input)
         EventLoop.set_alarm_in(0.05, self._start)
         EventLoop.run()

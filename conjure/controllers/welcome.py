@@ -1,14 +1,12 @@
 from conjure.ui.views.welcome import WelcomeView
 from conjure.models.bundle import BundleModel
-from conjure.controllers.cloud import CloudController
-from conjure.controllers.jujucontroller import JujuControllerController
 from conjure.juju import Juju
 
 
 class WelcomeController:
-    def __init__(self, common):
-        self.common = common
-        self.view = WelcomeView(self.common, self.finish)
+    def __init__(self, app):
+        self.app = app
+        self.view = WelcomeView(self.app, self.finish)
 
     def finish(self, name):
         """ Finalizes welcome controller
@@ -17,7 +15,7 @@ class WelcomeController:
         name: name of charm/bundle to use
         """
         deploy_key = next((n for n in
-                           self.common['config']['bundles']
+                           self.app.config['bundles']
                            if n["name"] == name), None)
 
         if deploy_key is None:
@@ -26,14 +24,14 @@ class WelcomeController:
 
         BundleModel.bundle = deploy_key
         if Juju.controllers() is None:
-            CloudController(self.common).render()
+            self.app.controllers['clouds'](self.app).render()
         else:
-            JujuControllerController(self.common).render()
+            self.app.controllers['jujucontroller'](self.app).render()
 
     def render(self):
-        config = self.common['config']
-        self.common['ui'].set_header(
+        config = self.app.config
+        self.app.ui.set_header(
             title=config['summary'],
             excerpt=config['excerpt'],
         )
-        self.common['ui'].set_body(self.view)
+        self.app.ui.set_body(self.view)

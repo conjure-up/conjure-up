@@ -1,7 +1,6 @@
 from conjure.api.models import model_info, model_cache_controller_provider
 from conjure.charm import get_bundle
 from conjure.models.bundle import BundleModel
-from conjure.controllers.deploysummary import DeploySummaryController
 
 from bundleplacer.config import Config
 from bundleplacer.maas import connect_to_maas
@@ -12,8 +11,8 @@ from urllib.parse import urlparse
 
 class DeployController:
 
-    def __init__(self, common, controller):
-        self.common = common
+    def __init__(self, app, controller):
+        self.app = app
         self.controller_info = model_info(controller)
         self.placement_controller = None
         self.bundle = None
@@ -23,12 +22,12 @@ class DeployController:
         """
         bw = BundleWriter(self.placement_controller)
         bw.write_bundle(self.bundle)
-        DeploySummaryController(self.common, self.bundle).render()
+        self.app.controllers['deploysummary'](self.app, self.bundle).render()
 
     def render(self):
         # Grab bundle and deploy or render placement if MAAS
         self.bundle = get_bundle(BundleModel.to_entity(), to_file=True)
-        metadata_filename = self.common['config']['metadata_filename']
+        metadata_filename = self.app.config['metadata_filename']
 
         bundleplacer_cfg = Config(
             'bundle-placer',
@@ -49,13 +48,13 @@ class DeployController:
             mainview = PlacerView(self.placement_controller,
                                   bundleplacer_cfg,
                                   self.finish, has_maas=True)
-            self.common['ui'].set_header(
-                title=self.common['config']['summary'],
+            self.app.ui.set_header(
+                title=self.app.config['summary'],
                 excerpt=("Place services, add additional charms, and manage "
                          "service relations")
             )
-            self.common['ui'].set_subheader("Bundle Editor")
-            self.common['ui'].set_body(mainview)
+            self.app.ui.set_subheader("Bundle Editor")
+            self.app.ui.set_body(mainview)
             mainview.update()
         else:
             self.placement_controller = PlacementController(
@@ -63,10 +62,10 @@ class DeployController:
             mainview = PlacerView(self.placement_controller,
                                   bundleplacer_cfg,
                                   self.finish)
-            self.common['ui'].set_header(
-                title=self.common['config']['summary'],
+            self.app.ui.set_header(
+                title=self.app.config['summary'],
                 excerpt=("Add additional charms and manage service relations")
             )
-            self.common['ui'].set_subheader("Bundle Editor")
-            self.common['ui'].set_body(mainview)
+            self.app.ui.set_subheader("Bundle Editor")
+            self.app.ui.set_body(mainview)
             mainview.update()
