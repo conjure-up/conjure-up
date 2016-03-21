@@ -9,8 +9,8 @@ import q
 
 
 class WelcomeView(WidgetWrap):
-    def __init__(self, common, cb):
-        self.common = common
+    def __init__(self, app, cb):
+        self.app = app
         self.cb = cb
         self.current_focus = 2
         _pile = [
@@ -46,7 +46,7 @@ class WelcomeView(WidgetWrap):
     def build_menuable_items(self):
         """ Builds a list of bundles available to install
         """
-        bundles = self.common['config']['bundles']
+        bundles = self.app.config['bundles']
         cols = []
         for bundle in bundles:
             cols.append(
