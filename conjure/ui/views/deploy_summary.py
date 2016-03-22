@@ -59,8 +59,7 @@ class DeploySummaryView(WidgetWrap):
 
         machines = None
         if not self.bundle['machines']:
-            machines = ("They will be autoplaced across multiple machines "
-                        "(or containers if using a LXD model).")
+            machines = ("They will be autoplaced across multiple containers.")
         else:
             machines = ("They will be placed across the {} machine(s) "
                         "selected in the previous view.".format(
