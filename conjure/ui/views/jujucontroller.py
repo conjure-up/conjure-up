@@ -3,7 +3,7 @@ from ubuntui.utils import Color, Padding
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.text import Instruction
 from ubuntui.widgets.input import StringEditor
-from ubuntui.widgets.buttons import (cancel_btn, confirm_btn)
+from ubuntui.widgets.buttons import (cancel_btn, confirm_btn, PlainButton)
 from urwid import (WidgetWrap, Pile,
                    Text, Filler, Columns)
 
@@ -95,10 +95,19 @@ class JujuControllerView(WidgetWrap):
                     )
                 )
             items.append(Padding.line_break(""))
+        items.append(Padding.center_50(
+            Color.body(
+                PlainButton(label="Select a new Cloud Provider",
+                            on_press=self.select_cloud),
+                focus_map='menu_button focus')
+        ))
         items.append(
             Padding.center_60(HR()))
         items.append(Padding.center_20(self._build_buttons()))
         return Filler(Pile(items), valign="middle")
+
+    def select_cloud(self, btn):
+        return self.app.controllers['clouds'].render()
 
     def submit(self, result):
         self.cb(result.label)

@@ -11,7 +11,7 @@ class CloudController:
     def _list_clouds(self):
         """ Returns list of clouds filtering out any results
         """
-        clouds = set(sorted(Juju.clouds().keys()))
+        clouds = set(Juju.clouds().keys())
 
         if BundleModel.whitelist():
             whitelist = set(BundleModel.whitelist())
@@ -21,7 +21,7 @@ class CloudController:
             blacklist = set(BundleModel.blacklist())
             return list(clouds ^ blacklist)
 
-        return list(clouds)
+        return sorted(list(clouds))
 
     def finish(self, cloud=None, create_cloud=False, back=False):
         """ Load the Model controller passing along the selected cloud.
