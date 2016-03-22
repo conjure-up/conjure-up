@@ -96,6 +96,12 @@ class Juju:
         return 0 == shell('juju status').code
 
     @classmethod
+    def autoload_credentials(cls):
+        """ Automatically checks known places for cloud credentials
+        """
+        return 0 == shell('juju autoload-credentials').code
+
+    @classmethod
     def credential(cls, cloud, user):
         """ Get credentials for user
 
