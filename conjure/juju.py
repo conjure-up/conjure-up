@@ -47,6 +47,9 @@ class Juju:
     def login(cls, force=False):
         """ Login to Juju API server
         """
+        if not cls.available():
+            return
+
         if cls.is_authenticated is True and not force:
             return
 

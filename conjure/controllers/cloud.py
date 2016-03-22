@@ -1,18 +1,27 @@
 from conjure.ui.views.cloud import CloudView
 from conjure.juju import Juju
+from conjure.models.bundle import BundleModel
 
 
 class CloudController:
 
     def __init__(self, app):
         self.app = app
-        self.clouds = sorted(Juju.clouds().keys())
-        self.config = self.app.config
-        self.excerpt = ("Please select from a list of available clouds or "
-                        "optionally create a new cloud.")
-        self.view = CloudView(self.app,
-                              self.clouds,
-                              self.finish)
+
+    def _list_clouds(self):
+        """ Returns list of clouds filtering out any results
+        """
+        clouds = set(sorted(Juju.clouds().keys()))
+
+        if BundleModel.whitelist():
+            whitelist = set(BundleModel.whitelist())
+            return list(clouds & whitelist)
+
+        elif BundleModel.blacklist():
+            blacklist = set(BundleModel.blacklist())
+            return list(clouds ^ blacklist)
+
+        return list(clouds)
 
     def finish(self, cloud=None, create_cloud=False, back=False):
         """ Load the Model controller passing along the selected cloud.
@@ -30,6 +39,13 @@ class CloudController:
                 cloud, bootstrap=True)
 
     def render(self):
+        self.clouds = self._list_clouds()
+        self.config = self.app.config
+        self.excerpt = ("Please select from a list of available clouds")
+        self.view = CloudView(self.app,
+                              self.clouds,
+                              self.finish)
+
         self.app.ui.set_header(
             title="Cloud Providers",
             excerpt=self.excerpt

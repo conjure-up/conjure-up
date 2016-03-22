@@ -6,13 +6,14 @@ class FinishController:
 
     def __init__(self, app):
         self.app = app
-        self.view = ServicesView(self.app)
 
     def refresh(self, *args):
         self.view.refresh_nodes()
         EventLoop.set_alarm_in(1, self.refresh)
 
     def render(self):
+        self.view = ServicesView(self.app)
+
         self.app.ui.set_header(
             title="Status: {}".format(
                 self.app.config['summary'])

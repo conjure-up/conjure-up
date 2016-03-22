@@ -3,8 +3,7 @@ from urwid import (WidgetWrap, Pile,
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.text import Instruction
-from ubuntui.widgets.buttons import cancel_btn, confirm_btn, menu_btn
-from ubuntui.ev import EventLoop
+from ubuntui.widgets.buttons import cancel_btn, menu_btn
 
 
 class CloudView(WidgetWrap):
@@ -50,15 +49,6 @@ class CloudView(WidgetWrap):
                     focus_map='menu_button focus'
                 )
             ))
-        total_items.append(Padding.line_break(""))
-        confirm = confirm_btn(label='Add a new cloud',
-                              on_press=self.submit_new_cloud)
-        total_items.append(
-            Padding.center_60(
-                Color.button_primary(confirm,
-                                     focus_map='button_primary focus')
-            )
-        )
         total_items.append(
             Padding.center_60(HR()))
         total_items.append(Padding.center_20(self._build_buttons()))
@@ -67,8 +57,5 @@ class CloudView(WidgetWrap):
     def submit(self, result):
         self.cb(result.label)
 
-    def submit_new_cloud(self, result):
-        self.cb(None, create_cloud=True)
-
     def cancel(self, btn):
-        EventLoop.exit(0)
+        self.cb(back=True)

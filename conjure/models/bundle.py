@@ -10,7 +10,10 @@ class BundleModel:
         "name": None,
         "summary": None,
         "revision": None,
-        "location": None
+        "location": None,
+        "blacklist": [],
+        "whitelist": [],
+        "recommendedCharms": []
     }
 
     @classmethod
@@ -43,6 +46,24 @@ class BundleModel:
         """ Returns revision of resource
         """
         return cls.bundle.get('revision', None)
+
+    @classmethod
+    def whitelist(cls):
+        """ Returns whitelisted provider types
+        """
+        return cls.bundle.get('whitelist', [])
+
+    @classmethod
+    def blacklist(cls):
+        """ Returns blacklisted provider types
+        """
+        return cls.bundle.get('blacklist', [])
+
+    @classmethod
+    def recommended(cls):
+        """ Returns recommended charms
+        """
+        return cls.bundle.get('recommendedCharms', [])
 
     @classmethod
     def to_entity(cls, use_latest=True):
