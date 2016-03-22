@@ -249,7 +249,7 @@ class PlacementView(WidgetWrap):
         if self.prev_state != self.state:
             h_opts = self.header_columns.options()
             c_opts = self.columns.options()
-            
+
             if self.state == UIState.PLACEMENT_EDITOR:
                 self.header_columns.contents[-1] = (self.machines_header,
                                                     h_opts)
@@ -320,6 +320,18 @@ class PlacementView(WidgetWrap):
         self.relations_column.add_charm(charm_name)
         self.update()
         self.services_column.select_service(service_name)
+
+    def do_add_bundle(self, bundle_dict):
+        assert(self.state == UIState.CHARMSTORE_VIEW)
+        new_bundle = self.placement_controller.merge_bundle(bundle_dict)
+        self.frame.focus_position = 'body'
+        self.columns.focus_position = 0
+        charms = list(set([s.charm_name for s in new_bundle.services]))
+        for charm in charms:
+            self.relations_column.add_charm(charm)
+        self.update()
+        first_service = new_bundle.services[0].service_name
+        self.services_column.select_service(first_service)
 
     def do_clear_machine(self, sender, machine):
         self.placement_controller.clear_assignments(machine)

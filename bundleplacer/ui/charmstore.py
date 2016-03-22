@@ -62,18 +62,17 @@ class CharmStoreSearchWidget(WidgetWrap):
 
             if self._suggested_results is None:
                 self._suggested_results = self._search_result
-            
+
             # result being None indicates an error, which was handled by
             # handle_search_error.
             if self._search_result is None:
                 return
-            self.set_column(self._search_result['Results'])
+            br, cr = self._search_result
+            self.set_column(br, cr)
 
-    def set_column(self, results):
+    def set_column(self, bundle_results, charm_results):
         self.charmstore_column.clear_search_results()
-        for r in results:
-            match_name = r['Id']
-            self.charmstore_column.add_result(match_name, r)
+        self.charmstore_column.add_results(bundle_results, charm_results)
         self.charmstore_column.update()
 
     def handle_edit_changed(self, sender, userdata):
@@ -107,28 +106,62 @@ class CharmStoreSearchWidget(WidgetWrap):
 
 
 class CharmWidget(WidgetWrap):
-    def __init__(self, charm_source, charm_dict, add_cb):
+    def __init__(self, charm_dict, add_cb):
         self.add_cb = add_cb
-        self.charm_source = charm_source
         self.charm_dict = charm_dict
+        self.charm_source = charm_dict['Id']
         self.md = charm_dict['Meta']['charm-metadata']
+        self.charm_name = self.md['Name']
         w = self.build_widgets()
         super().__init__(w)
 
     def selectable(self):
         return True
-        
+
     def build_widgets(self):
         self.charm_name = self.md['Name']
-        source = self.charm_source
         summary = self.md['Summary']
-        s = "{} ({})\n    {}\n".format(self.charm_name, source, summary)
+        s = "{} ({})\n {}\n".format(self.charm_name,
+                                    self.charm_source, summary)
         return AttrMap(MenuSelectButton(s, on_press=self.handle_press),
                        'text',
                        'button_secondary focus')
 
     def handle_press(self, button):
         self.add_cb(self.charm_name, self.charm_dict)
+
+
+class BundleWidget(WidgetWrap):
+    def __init__(self, bundle_dict, add_cb):
+        self.add_cb = add_cb
+        self.bundle_source = bundle_dict['Id']
+        self.bundle_dict = bundle_dict
+        self.md = bundle_dict['Meta']['bundle-metadata']
+        w = self.build_widgets()
+        super().__init__(w)
+
+    def selectable(self):
+        return True
+
+    def build_widgets(self):
+        name_with_rev = self.bundle_source.split("/")[-1]
+        bundle_name = "-".join(name_with_rev.split("-")[:-1])
+
+        if 'Machines' in self.md:
+            summary = ("{} services "
+                       "on {} machines").format(len(self.md['Services']),
+                                                len(self.md['Machines']))
+        else:
+            summary = "{} services".format(len(self.md['Services']))
+        s = "bundle: {} ({})\n    {}\n".format(bundle_name, self.bundle_source,
+                                               summary)
+
+        return AttrMap(MenuSelectButton(s, on_press=self.handle_press),
+                       'text',
+                       'button_secondary focus')
+
+    def handle_press(self, button):
+        self.add_cb(self.md)
 
 
 class CharmstoreColumnUIState(Enum):
@@ -148,7 +181,8 @@ class CharmstoreColumn(WidgetWrap):
         w = self.build_widgets()
         super().__init__(w)
         self._related_charms = []
-        self._search_results = []
+        self._bundle_results = []
+        self._charm_results = []
         self.searching = False
         self.refresh_related()
         self.update()
@@ -163,7 +197,8 @@ class CharmstoreColumn(WidgetWrap):
         pass
 
     def clear_search_results(self):
-        self._search_results = []
+        self._bundle_results = []
+        self._charm_results = []
 
     def handle_search_change(self, s):
         if s == "":
@@ -177,11 +212,17 @@ class CharmstoreColumn(WidgetWrap):
 
     def update(self):
         opts = self.pile.options()
-        self.pile.contents[2:] = [(CharmWidget(n, d, self.do_add_charm),
-                                   opts) for n, d in self._search_results
-                                  if 'Meta' in d]
+        bundle_widgets = [(BundleWidget(d, self.do_add_bundle),
+                           opts) for d in self._bundle_results
+                          if 'bundle-metadata' in d.get('Meta', {})]
+        charm_widgets = [(CharmWidget(d, self.do_add_charm),
+                          opts) for d in self._charm_results
+                         if 'charm-metadata' in d.get('Meta', {})]
+
+        self.pile.contents[2:] = bundle_widgets + charm_widgets
+
         if self.state == CharmstoreColumnUIState.RELATED:
-            #self.title.set_text("Charms Related to this Bundle")
+            # self.title.set_text("Charms Related to this Bundle")
             self.title.set_text("Popular Charms:")
 
         else:
@@ -190,8 +231,9 @@ class CharmstoreColumn(WidgetWrap):
                     self.current_search_string)
                 self.title.set_text(msg)
             else:
-                n = len(self._search_results)
-                if n == 0:
+                bn = len(self._bundle_results)
+                cn = len(self._charm_results)
+                if bn + cn == 0:
                     advice = ""
                     if len(self.current_search_string) < 3:
                         advice = "Try a longer search string."
@@ -199,12 +241,13 @@ class CharmstoreColumn(WidgetWrap):
                            "{}\n".format(self.current_search_string,
                                          advice))
                 else:
-                    msg = ("{} charms matching {}:"
-                           "\n".format(n, self.current_search_string))
+                    msg = ("{} bundles and {} charms matching {}:"
+                           "\n".format(bn, cn, self.current_search_string))
             self.title.set_text(msg)
 
-    def add_result(self, charm_name, charm_dict):
-        self._search_results.append((charm_name, charm_dict))
+    def add_results(self, bundle_results, charm_results):
+        self._bundle_results += bundle_results
+        self._charm_results += charm_results
 
     def focus_prev_or_top(self):
         if len(self.pile.contents) > 2:
@@ -213,6 +256,9 @@ class CharmstoreColumn(WidgetWrap):
     def do_add_charm(self, charm_name, charm_dict):
         self.placement_view.do_add_charm(charm_name,
                                          charm_dict)
+
+    def do_add_bundle(self, bundle_dict):
+        self.placement_view.do_add_bundle(bundle_dict)
 
     def handle_error(self, e):
         msg = "Error searching for {}: {}".format(self.current_search_string,

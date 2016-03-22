@@ -27,6 +27,11 @@ from bundleplacer.assignmenttype import AssignmentType, label_to_atype
 log = logging.getLogger('bundleplacer')
 
 
+class keydict(dict):
+    def __missing__(self, key):
+        return key
+
+
 class CharmStoreAPI:
     """Concurrently lookup data from the juju charm store.
 
@@ -98,16 +103,28 @@ class CharmStoreAPI:
 
     def get_matches(self, substring, exc_cb):
         def _do_search():
-            url = (self.baseurl + "/search?text={}".format(substring) +
-                   "&autocomplete=1&limit=10&include=charm-metadata")
-            r = requests.get(url)
-            rj = r.json()
-            return rj
+            url = (self.baseurl +
+                   "/search?text={}&autocomplete=1".format(substring) +
+                   "&limit=5&include=charm-metadata&include=bundle-metadata")
+            charm_url = url + "&type=charm"
+            bundle_url = url + "&type=bundle"
+            cr = requests.get(charm_url)
+            crj = cr.json()
+            br = requests.get(bundle_url)
+            brj = br.json()
+            return brj['Results'], crj['Results']
+
         f = submit(_do_search, exc_cb)
         return f
 
 
 def create_service(servicename, service_dict, servicemeta, relations):
+
+    # a little cleaning to normalize a dict from the charmstore v4 api:
+    service_dict = {k.lower(): v for k, v in service_dict.items()}
+    if 'num_units' not in service_dict:
+        service_dict['num_units'] = service_dict.get('numunits', 0)
+
     # some attempts to guess at subordinate status from bundle format,
     # to avoid having to include it in metadata:
 
@@ -151,17 +168,35 @@ def create_service(servicename, service_dict, servicemeta, relations):
     return service
 
 
+class BundleMergeException(Exception):
+    """Error merging two bundles"""
+
 class Bundle:
-    def __init__(self, filename, metadatafilename):
+    def __init__(self, filename=None, metadatafilename=None,
+                 bundle_data=None, metadata=None):
+        assert(filename or bundle_data)
         self.filename = filename
         self.metadatafilename = metadatafilename
-        with open(self.filename) as f:
-            self._bundle = yaml.load(f)
+        if self.filename:
+            with open(self.filename) as f:
+                self._bundle = yaml.load(f)
+        else:
+            self._bundle = bundle_data
         if metadatafilename:
             with open(self.metadatafilename) as f:
                 self._metadata = yaml.load(f)
+        elif metadata:
+            self._metadata = metadata
         else:
             self._metadata = {}
+
+        self._bundle = {k.lower(): v for
+                        k, v in self._bundle.items()}
+        for k in ['machines', 'services']:
+            for name, val in self._bundle[k].items():
+                self._bundle[k][name] = {key.lower(): v for
+                                         key, v in val.items()}
+
         if 'services' not in self._bundle.keys():
             raise Exception("Invalid Bundle.")
 
@@ -224,6 +259,95 @@ class Bundle:
                                            sm, relations))
         return services
 
+    @property
+    def machines(self):
+        return self._bundle.get('machines', {})
+
+    @property
+    def assignments(self):
+        """returns a dict of service_name: [to-strings]"""
+        assert 'services' in self._bundle
+        assignments = {}
+        for sname, sd in self._bundle['services'].items():
+            if 'to' in sd:
+                assignments[sname] = sd['to']
+        return assignments
+
     def extra_items(self):
         return {k: v for k, v in self._bundle.items()
                 if k not in ['services', 'machines', 'relations']}
+
+    def update(self, other_bundle):
+        """Merges one bundle with another, renaming any duplicate service
+        names or machine names.
+
+        returns a pair: (new_machines, new_services, new_assignments)
+        """
+        new_machines = {}
+        new_services = []
+        new_assignments = {}
+
+        assert 'services' in self._bundle
+
+        # check for conflicts that can't be resolved by renaming
+        for k, v in self._bundle.items():
+            if k in ['services', 'machines', 'relations']:
+                continue
+            if self._bundle[k] != other_bundle._bundle[k]:
+                m = "Can't merge top level key {}".format(k)
+                raise BundleMergeException(m)
+
+        service_renames = keydict()
+        for sname, sd in other_bundle._bundle['services'].items():
+            if sname in self._bundle['services']:
+                newname = sname + "-1"
+                service_renames[sname] = newname
+
+        # generate machine renames and merge machines
+        machine_renames = keydict()
+        n_machines_mine = len(self._bundle['machines'])
+        other_machines = other_bundle._bundle.get('machines', {})
+        for mname, md in other_machines.items():
+            if mname in self._bundle['machines']:
+                newname = str(int(mname) + n_machines_mine)
+                machine_renames[mname] = newname
+            self._bundle['machines'][machine_renames[mname]] = md
+            new_machines[machine_renames[mname]] = md
+
+        # apply service renames to relations
+        def rename_relation(r, rd):
+            parts = r.split(":")
+            if len(parts) > 1:
+                return "{}:{}".format(rd[parts[0]],
+                                      parts[1])
+            else:
+                return rd[parts[0]]
+
+        for (or1, or2) in other_bundle._bundle['relations']:
+            nr1 = rename_relation(or1, service_renames)
+            nr2 = rename_relation(or2, service_renames)
+            if [nr1, nr2] in self._bundle['relations'] or\
+               [nr2, nr1] in self._bundle['relations']:
+                continue
+            self._bundle['relations'].append([nr1, nr2])
+
+        # apply machine renames to services
+        def rename_machine(to, md):
+            parts = to.split(":")
+            if len(parts) > 1:
+                return "{}:{}".format(parts[0],
+                                      md[parts[1]])
+            else:
+                return md[parts[0]]
+
+        for sname, sd in other_bundle._bundle['services'].items():
+            new_sd = sd.copy()
+            if 'to' in sd:
+                new_sd['to'] = [rename_machine(to, machine_renames)
+                                for to in sd['to']]
+            self._bundle['services'][service_renames[sname]] = new_sd
+            new_services.append(service_renames[sname])
+            if 'to' in sd:
+                new_assignments[service_renames[sname]] = new_sd['to']
+
+        return new_machines, new_services, new_assignments

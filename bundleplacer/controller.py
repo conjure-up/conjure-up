@@ -22,8 +22,9 @@ from multiprocessing import cpu_count
 from bundleplacer.maas import (satisfies, MaasMachineStatus)
 from bundleplacer.state import ServiceState
 
-from bundleplacer.assignmenttype import AssignmentType
+from bundleplacer.assignmenttype import AssignmentType, label_to_atype
 from bundleplacer.bundle import Bundle
+
 
 log = logging.getLogger('bundleplacer')
 
@@ -121,8 +122,10 @@ class PlacementController:
         self.assignments = defaultdict(lambda: defaultdict(list))
         self.deployments = defaultdict(lambda: defaultdict(list))
         self.autosave_filename = None
-        self.bundle = Bundle(config.getopt('bundle_filename'),
-                             config.getopt('metadata_filename'))
+        mf = config.getopt('metadata_filename')
+        self.bundle = Bundle(filename=config.getopt('bundle_filename'),
+                             metadatafilename=mf)
+        self.update_from_bundle()
         self.reset_assigned_deployed()
 
     def get_temp_copy(self):
@@ -292,6 +295,42 @@ class PlacementController:
         """adds a service with the default name of 'charm_name' or
         'charm_name-1', etc"""
         self.bundle.add_new_service(charm_name, charm_dict, service_name)
+
+    def update_from_bundle(self):
+        self.add_bundle_machines(self.bundle.machines)
+        self.add_bundle_assignments(self.bundle.assignments)
+
+    def merge_bundle(self, bundle_dict):
+        new_bundle = Bundle(bundle_data=bundle_dict)
+        t = self.bundle.update(new_bundle)
+        new_machines, new_services, new_assignments = t
+        self.add_bundle_machines(new_machines)
+        self.add_bundle_assignments(new_assignments)
+        return new_bundle
+
+    def add_bundle_machines(self, machines):
+        for mid, md in machines.items():
+            pm = PlaceholderMachine(mid, "bundle-machine-" + mid,
+                                    md.get('constraints', {}))
+            self._machines.append(pm)
+
+    def add_bundle_assignments(self, new_as):
+        for sname, tostrs in new_as.items():
+            service = next((s for s in self.bundle.services
+                            if s.service_name == sname), None)
+            if service is None:
+                continue
+            for tostr in tostrs:
+                parts = tostr.split(":")
+                if len(parts) > 1:
+                    atype, mid = parts
+                    atype = label_to_atype([atype])[0]
+                else:
+                    atype, mid = AssignmentType.DEFAULT, parts[0]
+                machine = next((m for m in self._machines if
+                                m.instance_id == mid), None)
+                if machine:
+                    self.assign(machine, service, atype)
 
     def remove_service(self, service_name):
         self.bundle.remove_service(service_name)
@@ -774,17 +813,22 @@ class BundleWriter:
         bundle = {}
         services = {}
         servicenames = []
-        machines = {}
+        machines = self.controller.bundle.machines
         iid_map = {}            # maps iid to juju machine number
 
         self.controller.autoassign_unassigned_to_default()
 
         # get a machine dict for every machine with at least one
         # service
+        existing_ids = list(machines.keys()) + ["_subordinates", "_default"]
+        for mid in machines.keys():
+            iid_map[mid] = mid
+
         for iid, d in self.controller.assignments.items():
             if sum([len(svcs) for svcs in d.values()]) == 0:
                 continue
-            if iid not in ["_subordinates", "_default"]:
+
+            if iid not in existing_ids:
                 machine_id = len(machines) + 1
                 iid_map[iid] = machine_id
                 machines[machine_id] = self._dict_for_machine(iid)
