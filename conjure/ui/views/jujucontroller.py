@@ -1,4 +1,3 @@
-from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.text import Instruction

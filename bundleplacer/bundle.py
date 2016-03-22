@@ -193,7 +193,7 @@ class Bundle:
         self._bundle = {k.lower(): v for
                         k, v in self._bundle.items()}
         for k in ['machines', 'services']:
-            for name, val in self._bundle[k].items():
+            for name, val in self._bundle.get(k, {}).items():
                 self._bundle[k][name] = {key.lower(): v for
                                          key, v in val.items()}
 
