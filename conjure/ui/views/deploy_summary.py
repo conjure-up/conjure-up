@@ -10,7 +10,6 @@ from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.text import Instruction, ColumnHeader
 from ubuntui.widgets.hr import HR
 from ubuntui.utils import Color, Padding
-from ubuntui.ev import EventLoop
 import yaml
 
 
@@ -54,29 +53,23 @@ class DeploySummaryView(WidgetWrap):
         """
         rows = []
         rows.append(
-            Columns([
-                ColumnHeader("Services"),
-                ColumnHeader("Relations"),
-                ColumnHeader("Machines")
-            ], dividechars=1)
-        )
+            Text("You will be deploying these services: {}.  ".format(
+                ", ".join(self.bundle['services'].keys())
+            )))
 
         machines = None
         if not self.bundle['machines']:
-            machines = "Machines will be autoplaced."
+            machines = ("They will be autoplaced across multiple machines "
+                        "(or containers if using a LXD model).")
         else:
-            machines = yaml.dump(self.bundle['machines'])
+            machines = ("They will be placed across the {} machine(s) "
+                        "selected in the previous view.".format(
+                            len(self.bundle['machines'].keys())
+                        ))
+        rows.append(Padding.line_break(""))
+        rows.append(Text(machines))
+        rows.append(Padding.line_break(""))
 
-        rows.append(
-            Columns(
-                    [
-                        Text(", ".join(self.bundle['services'].keys())),
-                        Text(yaml.dump(self.bundle['relations'])),
-                        Text(machines)
-                    ],
-                    dividechars=1
-                )
-            )
         return Pile(rows)
 
     def done(self, button):
