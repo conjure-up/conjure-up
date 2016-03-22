@@ -1,6 +1,9 @@
 import shutil
 import os
+import logging
 from subprocess import check_call, CalledProcessError, DEVNULL
+
+log = logging.getLogger('utils')
 
 
 class UtilsException(Exception):
@@ -120,3 +123,27 @@ class FS:
                 return f.read().strip()
         except IOError:
             raise IOError
+
+
+class Net:
+    def pollinate(session, tag):
+        """ fetches random seed
+
+        Tag definitions:
+            ET - error timeout
+            EB - error juju bootstrap
+            EJ - error reading juju environment
+        :param str session: randomly generated session id
+        :param str tag: custom tag
+        """
+        if not os.path.isfile('/usr/bin/pollinate'):
+            return
+
+        agent_str = 'uoi/{}/{}'.format(session, tag)
+        try:
+            cmd = ("sudo su - -c 'pollinate -q -r --curl-opts "
+                   "\"-k --user-agent {}\"'".format(agent_str))
+            log.info("pollinate: {}".format(cmd))
+            check_call(cmd, shell=True)
+        except CalledProcessError as e:
+            log.warning("Generating random seed failed: {}".format(e))
