@@ -12,19 +12,18 @@ from ubuntui.widgets.hr import HR
 from ubuntui.utils import Color, Padding
 from ubuntui.ev import EventLoop
 import yaml
-import q
 
 
 class DeploySummaryView(WidgetWrap):
-    def __init__(self, common, bundle, cb):
+    def __init__(self, app, bundle, cb):
         """ Init
 
         Arguments:
-        common: common config
+        app: app config
         bundle: dictionary of bundle
         cb: callback
         """
-        self.common = common
+        self.app = app
         with open(bundle) as b:
             self.bundle = yaml.load(b)
         self.cb = cb
@@ -40,14 +39,11 @@ class DeploySummaryView(WidgetWrap):
         super().__init__(Filler(Pile(_pile), valign="top"))
 
     def _build_buttons(self):
-        reset = PlainButton(label="Start Over", on_press=self.reset)
         deploy = PlainButton(label="Deploy", on_press=self.done)
-        cancel = PlainButton(label="Quit", on_press=self.cancel)
+        cancel = PlainButton(label="Cancel", on_press=self.cancel)
         buttons = [
             Color.button_primary(deploy,
                                  focus_map='button_primary focus'),
-            Color.button_secondary(reset,
-                                   focus_map='button_secondary focus'),
             Color.button_secondary(cancel,
                                    focus_map='button_secondary focus')
         ]
@@ -83,11 +79,8 @@ class DeploySummaryView(WidgetWrap):
             )
         return Pile(rows)
 
-    def reset(self, button):
-        self.cb(reset=True)
-
     def done(self, button):
         self.cb()
 
     def cancel(self, button):
-        EventLoop.exit(0)
+        self.cb(back=True)

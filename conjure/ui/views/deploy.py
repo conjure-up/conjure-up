@@ -5,8 +5,8 @@ from ubuntui.ev import EventLoop
 
 
 class DeployView(WidgetWrap):
-    def __init__(self, common, cb):
-        self.common = common
+    def __init__(self, app, cb):
+        self.app = app
         self.text = Text("deploying...")
         _pile = [
             Padding.center_79(self.text),

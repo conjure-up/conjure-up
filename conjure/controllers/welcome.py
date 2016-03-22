@@ -24,9 +24,9 @@ class WelcomeController:
 
         BundleModel.bundle = deploy_key
         if Juju.controllers() is None:
-            self.app.controllers['clouds'](self.app).render()
+            self.app.controllers['clouds'].render()
         else:
-            self.app.controllers['jujucontroller'](self.app).render()
+            self.app.controllers['jujucontroller'].render()
 
     def render(self):
         config = self.app.config

@@ -11,13 +11,13 @@ from urwid import (WidgetWrap, Pile,
 class JujuControllerView(WidgetWrap):
     controller_mode = None
 
-    def __init__(self, common, models=None, cb=None):
-        self.common = common
+    def __init__(self, app, models=None, cb=None):
+        self.app = app
         self.cb = cb
         self.models = models
         self.input_new_controller = StringEditor()
         self.group = []
-        self.config = self.common['config']
+        self.config = self.app.config
 
         if self.models is not None:
             self.controller_mode = 'existing'
@@ -104,4 +104,4 @@ class JujuControllerView(WidgetWrap):
         self.cb(result.label)
 
     def cancel(self, btn):
-        EventLoop.exit(0)
+        self.cb(back=True)

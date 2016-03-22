@@ -5,7 +5,6 @@ from ubuntui.widgets.juju.service import ServiceWidget
 from ubuntui.widgets.table import Table
 from ubuntui.utils import Color
 from conjure.api.models import model_status
-import q
 
 
 log = logging.getLogger('services_status')
@@ -21,8 +20,8 @@ class ServicesView(WidgetWrap):
         ('Machine', "Machine", 12),
     ]
 
-    def __init__(self, common):
-        self.common = common
+    def __init__(self, app):
+        self.app = app
         self.deployed = {}
         self.unit_w = None
         self.log_cache = None

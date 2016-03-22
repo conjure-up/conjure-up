@@ -11,20 +11,27 @@ from urllib.parse import urlparse
 
 class DeployController:
 
-    def __init__(self, app, controller):
+    def __init__(self, app):
         self.app = app
-        self.controller_info = model_info(controller)
         self.placement_controller = None
         self.bundle = None
 
-    def finish(self, *args):
+    def finish(self, back=False):
         """ handles deployment
+
+        Arguments:
+        back: if true returns to previous controller
         """
+        if back:
+            return self.app.controllers['jujucontroller'].render()
+
         bw = BundleWriter(self.placement_controller)
         bw.write_bundle(self.bundle)
-        self.app.controllers['deploysummary'](self.app, self.bundle).render()
+        self.app.controllers['deploysummary'].render(self.bundle)
 
-    def render(self):
+    def render(self, model):
+        self.app.current_model = model
+        info = model_info(self.app.current_model)
         # Grab bundle and deploy or render placement if MAAS
         self.bundle = get_bundle(BundleModel.to_entity(), to_file=True)
         metadata_filename = self.app.config['metadata_filename']
@@ -32,11 +39,12 @@ class DeployController:
         bundleplacer_cfg = Config(
             'bundle-placer',
             {'bundle_filename': self.bundle,
-             'metadata_filename': metadata_filename})
+             'metadata_filename': metadata_filename,
+             'config_filename': self.app.argv.build_conf})
 
-        if self.controller_info['ProviderType'] == 'maas':
+        if info['ProviderType'] == 'maas':
             bootstrap_config = model_cache_controller_provider(
-                self.controller_info['ServerUUID'])
+                info['ServerUUID'])
             maas_server = urlparse(bootstrap_config['maas-server'])
             creds = dict(
                 api_host=maas_server.hostname,

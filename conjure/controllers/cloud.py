@@ -14,16 +14,20 @@ class CloudController:
                               self.clouds,
                               self.finish)
 
-    def finish(self, cloud=None, create_cloud=False):
+    def finish(self, cloud=None, create_cloud=False, back=False):
         """ Load the Model controller passing along the selected cloud.
 
         Arguments:
         cloud: Cloud to create the controller/model on.
         create_cloud: True/False, if true display create cloud interface
+        back: if true loads previous controller
         """
+        if back:
+            return self.app.controllers['welcome'].render()
+
         if not create_cloud and cloud is not None:
-            self.app.controllers['jujucontroller'](
-                self.app, cloud, bootstrap=True).render()
+            self.app.controllers['jujucontroller'].render(
+                cloud, bootstrap=True)
 
     def render(self):
         self.app.ui.set_header(

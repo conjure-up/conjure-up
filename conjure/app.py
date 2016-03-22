@@ -31,6 +31,7 @@ class ApplicationConfig:
         self.config = None
         self.argv = None
         self.controllers = None
+        self.current_model = None
 
 
 class Application:
@@ -54,12 +55,12 @@ class Application:
         self.app.config = config
 
         self.app.controllers = {
-            'welcome': WelcomeController,
-            'clouds': CloudController,
-            'deploy': DeployController,
-            'deploysummary': DeploySummaryController,
-            'jujucontroller': JujuControllerController,
-            'finish': FinishController
+            'welcome': WelcomeController(self.app),
+            'clouds': CloudController(self.app),
+            'deploy': DeployController(self.app),
+            'deploysummary': DeploySummaryController(self.app),
+            'jujucontroller': JujuControllerController(self.app),
+            'finish': FinishController(self.app)
         }
 
     def unhandled_input(self, key):
@@ -71,9 +72,9 @@ class Application:
         """ Initially load the welcome screen
         """
         if self.app.argv.status_only:
-            self.app.controllers['finish'](self.app).render()
+            self.app.controllers['finish'].render()
         else:
-            self.app.controllers['welcome'](self.app).render()
+            self.app.controllers['welcome'].render()
 
     def start(self):
         EventLoop.build_loop(self.app.ui, STYLES,

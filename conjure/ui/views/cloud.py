@@ -8,11 +8,11 @@ from ubuntui.ev import EventLoop
 
 
 class CloudView(WidgetWrap):
-    def __init__(self, common, clouds, cb):
-        self.common = common
+    def __init__(self, app, clouds, cb):
+        self.app = app
         self.cb = cb
         self.clouds = clouds
-        self.config = self.common['config']
+        self.config = self.app.config
         super().__init__(self._build_widget())
 
     def keypress(self, size, key):

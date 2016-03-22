@@ -5,8 +5,26 @@ from conjure.async import AsyncPool
 
 
 class DeploySummaryController:
-    def __init__(self, app, bundle):
+    def __init__(self, app):
         self.app = app
+
+    def finish(self, back=False):
+        """ Load the finish controller
+
+        Arguments:
+        back: If true will go back to previous controller
+        """
+        if back:
+            return self.app.controllers['deploy'].render(
+                self.app.current_model
+            )
+        else:
+            AsyncPool.submit(
+                partial(Juju.deploy_bundle, self.bundle)
+            )
+            self.app.controllers['finish'].render()
+
+    def render(self, bundle):
         self.bundle = bundle
         self.excerpt = ("Please review the deployment summary before "
                         "proceeding.")
@@ -14,21 +32,6 @@ class DeploySummaryController:
                                       self.bundle,
                                       self.finish)
 
-    def finish(self, reset=False):
-        """ Load the finish controller or optionally startover.
-
-        Arguments:
-        reset: If true will send user back to welcome controller
-        """
-        if reset:
-            self.app.controllers['welcome'](self.app).render()
-        else:
-            AsyncPool.submit(
-                partial(Juju.deploy_bundle, self.bundle)
-            )
-            self.app.controllers['finish'](self.app).render()
-
-    def render(self):
         self.app.ui.set_header(
             title="Deploy Summary",
             excerpt=self.excerpt

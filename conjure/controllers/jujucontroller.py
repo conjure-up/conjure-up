@@ -1,26 +1,52 @@
 from conjure.ui.views.jujucontroller import JujuControllerView
 from conjure.juju import Juju
+from conjure.async import AsyncPool
+from functools import partial
 
 
 class JujuControllerController:
-    def __init__(self, app, cloud=None, bootstrap=False):
+    def __init__(self, app):
         """ init
 
         Arguments:
         app: common dictionary for conjure
+        """
+        self.app = app
+        self.cloud = None
+        self.bootstrap = None
+
+    def finish(self, controller=None, back=False):
+        """ Deploy to juju controller
+
+        Arguments:
+        controller: Juju controller to deploy to
+        back: if true returns to previous controller
+        """
+        if back:
+            return self.app.controllers['welcome'].render()
+
+        if self.bootstrap:
+            # FIXME: Once admin/default models exist in juju
+            AsyncPool.submit(
+                partial(Juju.bootstrap, 'conjure', self.cloud))
+
+        Juju.switch(controller)
+        self.app.controllers['deploy'].render(controller)
+
+    def render(self, cloud=None, bootstrap=None):
+        """ Render controller
+
+        Arguments:
         cloud: defined cloud to use when deploying
         bootstrap: is this a new environment that needs to be bootstrapped
         """
-        self.app = app
+
         self.cloud = cloud
         self.bootstrap = bootstrap
-        self.config = self.app.config
+
         if self.cloud and self.bootstrap:
-            self.excerpt = (
-                "Please name your new model")
-            self.view = JujuControllerView(self.app,
-                                           None,
-                                           self.deploy)
+            # FIXME: Once admin/default models exist in juju
+            return self.finish('conjure:conjure')
         else:
             controllers = Juju.controllers().keys()
             models = {}
@@ -31,28 +57,8 @@ class JujuControllerController:
                 "Please select the model you wish to deploy to")
             self.view = JujuControllerView(self.app,
                                            models,
-                                           self.deploy)
+                                           self.finish)
 
-    def deploy(self, controller, default_model=None):
-        """ Deploy to juju controller
-
-        Arguments:
-        controller: Juju controller to deploy to
-        default_model: Optional name to give the default model
-        """
-        if self.bootstrap:
-            Juju.bootstrap(controller, self.cloud)
-
-        model = ""
-        if default_model is None:
-            model = "{}:default".format(controller)
-            Juju.switch(model)
-        else:
-            model = "{}:{}".format(controller, default_model)
-            Juju.switch(model)
-        self.app.controllers['deploy'](self.app, model).render()
-
-    def render(self):
         self.app.ui.set_header(
             title="Juju Model",
             excerpt=self.excerpt
