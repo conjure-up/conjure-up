@@ -1,8 +1,7 @@
-from jinja2 import FileSystemLoader, Environment, exceptions
-from .utils import FS
+from jinja2 import FileSystemLoader, Environment
+from conjure.utils import FS
 from tempfile import NamedTemporaryFile
 import logging
-import os
 import yaml
 
 log = logging.getLogger('template')
@@ -24,45 +23,25 @@ def render_charm_conf(name, options):
         return tempf.name
 
 
-def render(source, target, context, owner='root', group='root',
-           perms=0o444, templates_dir=None, encoding='UTF-8',
-           template_loader=None):
+def load(name, path):
+    """ load template file
+    :param str name: name of template file
+    :param str path: directory location of templates
     """
-    Render a template.
+    env = Environment(
+        loader=FileSystemLoader(path))
+    return env.get_template(name)
 
-    The `source` path, if not absolute, is relative to the `templates_dir`.
 
-    The `target` path should be absolute.
+def save(template, opts):
+    """ Saves template to temporary file
 
-    The context should be a dict containing the values to be replaced in the
-    template.
-
-    The `owner`, `group`, and `perms` options will be passed to `write_file`.
-
-    If omitted, `templates_dir` defaults to the `templates` folder in the
-    charm.
-
-    Note: Using this requires python-jinja2; if it is not installed, calling
-    this will attempt to use charmhelpers.fetch.apt_install to install it.
+    Arguments:
+    template: loaded jinja template
+    opts: dictionary of items to be passed into template
     """
-
-    if template_loader:
-        template_env = Environment(loader=template_loader)
-    else:
-        if templates_dir is None:
-            templates_dir = 'templates'
-        template_env = Environment(loader=FileSystemLoader(templates_dir))
-    try:
-        source = source
-        template = template_env.get_template(source)
-    except exceptions.TemplateNotFound as e:
-        log.error('Could not load template {} from {}.'.format(source,
-                                                               templates_dir))
-        raise e
-    content = template.render(context)
-    target_dir = os.path.dirname(target)
-    if not os.path.exists(target_dir):
-        # This is a terrible default directory permission, as the file
-        # or its siblings will often contain secrets.
-        os.makedirs(os.path.dirname(target))
-    FS.spew(target, content)
+    modified = template.render(**opts)
+    with NamedTemporaryFile(mode='w', encoding='utf-8',
+                            delete=False) as tempf:
+        FS.spew(tempf.name, modified)
+        return tempf.name
