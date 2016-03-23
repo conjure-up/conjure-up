@@ -26,9 +26,11 @@ class JujuControllerController:
             return self.app.controllers['welcome'].render()
 
         if self.bootstrap:
+            import q
+            q('bootstrap here.', controller)
             # FIXME: Once admin/default models exist in juju
-            AsyncPool.submit(
-                partial(Juju.bootstrap, 'conjure', self.cloud))
+            # AsyncPool.submit(
+            #     partial(Juju.bootstrap, 'conjure', self.cloud))
 
         Juju.switch(controller)
         self.app.controllers['deploy'].render(controller)

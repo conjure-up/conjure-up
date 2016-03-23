@@ -34,9 +34,13 @@ class CloudController:
         if back:
             return self.app.controllers['welcome'].render()
 
-        if not create_cloud and cloud is not None:
-            self.app.controllers['jujucontroller'].render(
-                cloud, bootstrap=True)
+        if create_cloud:
+            return self.app.controllers['newcloud'].render(cloud)
+
+        # TODO: Move to newcloud controller
+        # if not create_cloud and cloud is not None:
+        #     self.app.controllers['jujucontroller'].render(
+        #         cloud, bootstrap=True)
 
     def render(self):
         self.clouds = self._list_clouds()

@@ -55,7 +55,7 @@ class CloudView(WidgetWrap):
         return Filler(Pile(total_items), valign='middle')
 
     def submit(self, result):
-        self.cb(result.label)
+        self.cb(result.label, create_cloud=True)
 
     def cancel(self, btn):
         self.cb(back=True)

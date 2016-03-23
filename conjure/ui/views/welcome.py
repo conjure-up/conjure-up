@@ -5,7 +5,6 @@ from ubuntui.widgets.hr import HR
 from ubuntui.widgets.buttons import (cancel_btn, menu_btn)
 from ubuntui.utils import Color, Padding
 from ubuntui.ev import EventLoop
-import q
 
 
 class WelcomeView(WidgetWrap):
@@ -24,7 +23,6 @@ class WelcomeView(WidgetWrap):
         super().__init__(Filler(Pile(_pile), valign="top"))
 
     def _swap_focus(self):
-        q(self._w)
         if self._w.body.focus_position == 2:
             self._w.body.focus_position = 4
         else:

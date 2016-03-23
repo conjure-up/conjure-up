@@ -10,6 +10,7 @@ from conjure.controllers.finish import FinishController
 from conjure.controllers.deploysummary import DeploySummaryController
 from conjure.controllers.deploy import DeployController
 from conjure.controllers.cloud import CloudController
+from conjure.controllers.newcloud import NewCloudController
 from conjure.controllers.jujucontroller import JujuControllerController
 import json
 import sys
@@ -57,6 +58,7 @@ class Application:
         self.app.controllers = {
             'welcome': WelcomeController(self.app),
             'clouds': CloudController(self.app),
+            'newcloud': NewCloudController(self.app),
             'deploy': DeployController(self.app),
             'deploysummary': DeploySummaryController(self.app),
             'jujucontroller': JujuControllerController(self.app),
