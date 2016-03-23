@@ -16,7 +16,7 @@ class ServicesView(WidgetWrap):
         ('Icon', "", 2),
         ('Name', "Service", 0),
         ('AgentStatus', "Status", 12),
-        ('PublicAddress', "IP", 12),
+        ('PublicAddress', "IP", 16),
         ('Machine', "Machine", 12),
     ]
 
@@ -99,8 +99,11 @@ class ServicesView(WidgetWrap):
         unit_w: UnitInfo widget
         unit: current unit for service
         """
-        unit_w.PublicAddress.set_text(unit['PublicAddress'])
-        unit_w.AgentStatus.set_text(unit['AgentStatus']['Status'])
-        unit_w.WorkloadInfo.set_text(unit['WorkloadStatus']['Info'])
-        unit_w.Icon.set_text(
-            self.status_icon_state(unit['AgentStatus']['Status']))
+        if 'PublicAddress' in unit:
+            unit_w.PublicAddress.set_text(unit['PublicAddress'])
+        if 'AgentStatus' in unit:
+            unit_w.AgentStatus.set_text(unit['AgentStatus']['Status'])
+            unit_w.Icon.set_text(
+                self.status_icon_state(unit['AgentStatus']['Status']))
+        if 'WorkloadStatus' in unit:
+            unit_w.WorkloadInfo.set_text(unit['WorkloadStatus']['Info'])

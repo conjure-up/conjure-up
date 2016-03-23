@@ -18,12 +18,10 @@ class UnitWidget:
         self.Machine = Text(unit.get('Machine', ''))
 
         agent_status = unit.get('AgentStatus', {})
-        if agent_status:
-            self.AgentStatus = Text(agent_status.get('Status', ''))
-            self.AgentStatusInfo = Text(agent_status.get('Info', ''))
+        self.AgentStatus = Text(agent_status.get('Status', ''))
+        self.AgentStatusInfo = Text(agent_status.get('Info', ''))
 
         workload = unit.get('WorkloadStatus', {})
-        if workload:
-            self.WorkloadInfo = Text(workload.get('Info', ''))
-            self.WorkloadStatus = Text(workload.get('Status'))
+        self.WorkloadInfo = Text(workload.get('Info', ''))
+        self.WorkloadStatus = Text(workload.get('Status', ''))
         self.Icon = Text("")

@@ -12,6 +12,7 @@ from conjure.controllers.deploy import DeployController
 from conjure.controllers.cloud import CloudController
 from conjure.controllers.newcloud import NewCloudController
 from conjure.controllers.jujucontroller import JujuControllerController
+from conjure.controllers.bootstrapwait import BootstrapWaitController
 import json
 import sys
 import argparse
@@ -59,6 +60,7 @@ class Application:
             'welcome': WelcomeController(self.app),
             'clouds': CloudController(self.app),
             'newcloud': NewCloudController(self.app),
+            'bootstrapwait': BootstrapWaitController(self.app),
             'deploy': DeployController(self.app),
             'deploysummary': DeploySummaryController(self.app),
             'jujucontroller': JujuControllerController(self.app),

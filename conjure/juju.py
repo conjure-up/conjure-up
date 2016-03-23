@@ -87,8 +87,6 @@ class Juju:
         cmd = "juju bootstrap {} {}".format(controller, cloud)
         if upload_tools:
             cmd += " --upload-tools"
-        import q
-        q(cmd)
         return shell(cmd)
 
     @classmethod

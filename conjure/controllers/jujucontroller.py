@@ -1,6 +1,6 @@
 from conjure.ui.views.jujucontroller import JujuControllerView
 from conjure.juju import Juju
-from conjure.async import AsyncPool
+from conjure.async import submit
 from functools import partial
 
 
@@ -14,6 +14,10 @@ class JujuControllerController:
         self.app = app
         self.cloud = None
         self.bootstrap = None
+        self._bootstrap_future = None
+
+    def handle_exception(self, exc):
+        self.app.ui.show_exception_message(exc)
 
     def finish(self, controller=None, back=False):
         """ Deploy to juju controller
@@ -22,19 +26,33 @@ class JujuControllerController:
         controller: Juju controller to deploy to
         back: if true returns to previous controller
         """
+        self.controller = controller
+
         if back:
             return self.app.controllers['welcome'].render()
 
         if self.bootstrap:
-            import q
-            q('bootstrap here.', controller)
             # FIXME: Once admin/default models exist in juju
-            # AsyncPool.submit(
-            #     partial(Juju.bootstrap, 'conjure', self.cloud))
-            Juju.bootstrap('conjure', self.cloud)
+            self._bootstrap_future = submit(
+                self._do_bootstrap,
+                self.handle_exception)
+            self._bootstrap_future.add_done_callback(
+                self._handle_bootstrap_done)
 
-        Juju.switch(controller)
-        self.app.controllers['deploy'].render(controller)
+        self.app.controllers['bootstrapwait'].render()
+
+    def _do_bootstrap(self):
+        return Juju.bootstrap('conjure', self.cloud)
+
+    def _handle_bootstrap_done(self, future):
+        result = self._bootstrap_future.result()
+        self._bootstrap_future = None
+
+        import q
+        q(result.output())
+
+        Juju.switch(self.controller)
+        self.app.controllers['deploy'].render(self.controller)
 
     def render(self, cloud=None, bootstrap=None):
         """ Render controller
