@@ -10,7 +10,6 @@ Build-Depends: bundle-placer,
                python3-all,
                python3-jinja2,
                python3-nose,
-               python3-q,
                python3-requests,
                python3-requests-oauthlib,
                python3-setuptools,
@@ -25,17 +24,16 @@ Vcs-Git: https://github.com/Ubuntu-Solutions-Engineering/conjure.git
 
 Package: conjure
 Architecture: all
-Depends: juju-core,
+Depends: juju2,
          lxd,
          lxd-client,
          python3-jinja2,
-         python3-q
-         ${misc:Depends},
          python3-requests,
          python3-requests-oauthlib,
          python3-urwid,
          python3-urwid-ubuntu,
          python3-yaml,
+         ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
 Description: Package runtime for apt installable juju bundles.

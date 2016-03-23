@@ -18,8 +18,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={
         "console_scripts": [
-            "conjure-setup = conjure.app:main",
-            "conjure-scaffold = conjure.scaffold:main"
+            "conjure-setup = conjure.app:main"
         ]
     },
     data_files=[
