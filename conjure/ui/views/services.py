@@ -57,10 +57,14 @@ class ServicesView(WidgetWrap):
                         if width == 0:
                             services_list.append(getattr(unit_w, k))
                         else:
+                            if not hasattr(unit_w, k):
+                                continue
                             services_list.append(('fixed', width,
                                                   getattr(unit_w, k)))
 
                     self.table.addColumns(unit._name, services_list)
+                    if not hasattr(unit_w, 'WorkloadInfo'):
+                        continue
                     self.table.addColumns(
                         unit._name,
                         [
@@ -99,11 +103,14 @@ class ServicesView(WidgetWrap):
         unit_w: UnitInfo widget
         unit: current unit for service
         """
-        if 'PublicAddress' in unit:
+        try:
             unit_w.PublicAddress.set_text(unit['PublicAddress'])
-        if 'AgentStatus' in unit:
-            unit_w.AgentStatus.set_text(unit['AgentStatus']['Status'])
+            unit_w.AgentStatus.set_text(unit.get['AgentStatus']['Status'])
+            unit_w.WorkloadInfo.set_text(unit['WorkloadStatus']['Info'])
             unit_w.Icon.set_text(
                 self.status_icon_state(unit['AgentStatus']['Status']))
-        if 'WorkloadStatus' in unit:
-            unit_w.WorkloadInfo.set_text(unit['WorkloadStatus']['Info'])
+        except:
+            # FIXME: Once juju beta3 comes out and we can rely on the updated
+            # status api output
+            # self.app.ui.show_exception_message(e)
+            pass
