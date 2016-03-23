@@ -8,7 +8,7 @@ class BootstrapWaitController:
 
     def refresh(self, *args):
         self.view.redraw_kitt()
-        EventLoop.set_alarm_in(1, self.refresh)
+        EventLoop.set_alarm_in(0.3, self.refresh)
 
     def render(self):
         self.view = BootstrapWaitView(self.app)
@@ -18,4 +18,4 @@ class BootstrapWaitController:
         )
         self.app.ui.set_body(self.view)
         self.app.ui.set_subheader("Press (Q) to cancel bootstrap and exit.")
-        EventLoop.set_alarm_in(1, self.refresh)
+        EventLoop.set_alarm_in(0.3, self.refresh)
