@@ -41,8 +41,6 @@ class JujuControllerView(WidgetWrap):
 
     def keypress(self, size, key):
         if key in ['tab', 'shift tab']:
-            import q
-            q(self._w.body, self._w.body.focus_position)
             self._swap_focus()
         return super().keypress(size, key)
 

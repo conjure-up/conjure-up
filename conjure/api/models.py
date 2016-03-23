@@ -1,10 +1,8 @@
 """ Interfaces to Juju API ModelManager """
 
 from conjure.juju import Juju, requires_login
-import q
 
 
-@q.t
 @requires_login
 def list_models(user='user-admin'):
     """ Lists Juju Models
@@ -20,7 +18,6 @@ def list_models(user='user-admin'):
     return models['UserModels']
 
 
-@q.t
 @requires_login
 def model_info(model):
     """ Returns information on select model

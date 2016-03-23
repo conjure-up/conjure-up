@@ -8,7 +8,6 @@ import requests
 import os.path as path
 from tempfile import NamedTemporaryFile
 from conjure.utils import FS
-import q
 
 cs = 'https://api.jujucharms.com/v4'
 
@@ -29,7 +28,6 @@ def get_bundle(bundle, to_file=False):
     then returns the path to the downloaded bundle
     """
     bundle = path.join(cs, bundle, 'archive/bundle.yaml')
-    q("Downloading bundle, ", bundle)
     req = requests.get(bundle)
     if not req.ok:
         raise CharmStoreException("Problem getting bundle: {}".format(req))
