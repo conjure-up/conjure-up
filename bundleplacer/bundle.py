@@ -171,6 +171,7 @@ def create_service(servicename, service_dict, servicemeta, relations):
 class BundleMergeException(Exception):
     """Error merging two bundles"""
 
+
 class Bundle:
     def __init__(self, filename=None, metadatafilename=None,
                  bundle_data=None, metadata=None):

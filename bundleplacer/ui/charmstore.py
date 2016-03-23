@@ -17,9 +17,8 @@ from enum import Enum
 import logging
 
 
-from urwid import (AttrMap, Button, Columns, Divider, connect_signal,
-                   ListBox, Filler, BoxAdapter, Edit, Filler, Padding,
-                   Pile, SimpleFocusListWalker, Text, WidgetWrap)
+from urwid import (AttrMap, Divider, connect_signal, Edit, Padding,
+                   Pile, Text, WidgetWrap)
 
 from ubuntui.ev import EventLoop
 from ubuntui.widgets.buttons import MenuSelectButton

@@ -618,7 +618,8 @@ class PlacementController:
 
         unassigned_services = list(self.unassigned_undeployed_services())
         unassigned_reqs = [c for c in unassigned_services if
-                           self.get_service_state(c)[0] == ServiceState.REQUIRED]
+                           self.get_service_state(c)[0] ==
+                           ServiceState.REQUIRED]
 
         if len(unassigned_reqs) > 0:
             msg = ("Not enough empty machines could be found for the "

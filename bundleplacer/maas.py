@@ -329,28 +329,41 @@ class MaasState:
         else:
             self._nodes_future = submit(_do_update, lambda _: None)
 
-        self._filtered_nodes = self._maas_client_nodes
         if constraints:
-            cd = dict(x.split('=') for x in constraints.split(' '))
-            arch = cd.get('arch', None)
-            tagstr = cd.get('tags', None)
-            satisfying_nodes = []
-            for n in self._maas_client_nodes:
-                if arch:
-                    n_arch = n['architecture'].split('/')[0]
-                    if n_arch != arch:
-                        continue
-                if tagstr:
-                    c_tags = set(cd['tags'].split(','))
-                    n_tags = set(n['tag_names'])
-                    if not c_tags.issubset(n_tags):
-                        continue
-                satisfying_nodes.append(n)
-
-            self._filtered_nodes = satisfying_nodes
+            self._filtered_nodes = self._filter_nodes(self._maas_client_nodes,
+                                                      constraints)
+        else:
+            self._filtered_nodes = self._maas_client_nodes
 
         self._start_time = time.time()
         return self._filtered_nodes
+
+    def nodes_uncached(self, constraints=None):
+        if constraints:
+            return self._filter_nodes(self.maas_client.nodes)
+        else:
+            return self.maas_client.nodes
+
+    def _filter_nodes(self, nodes, constraints):
+        assert constraints is not None
+
+        cd = dict(x.split('=') for x in constraints.split(' '))
+        arch = cd.get('arch', None)
+        tagstr = cd.get('tags', None)
+        satisfying_nodes = []
+        for n in self._maas_client_nodes:
+            if arch:
+                n_arch = n['architecture'].split('/')[0]
+                if n_arch != arch:
+                    continue
+            if tagstr:
+                c_tags = set(cd['tags'].split(','))
+                n_tags = set(n['tag_names'])
+                if not c_tags.issubset(n_tags):
+                    continue
+            satisfying_nodes.append(n)
+
+        return satisfying_nodes
 
     def invalidate_nodes_cache(self):
         """Force reload on next access"""
@@ -384,7 +397,6 @@ class MaasState:
         """
         nodes = [n for n in self.nodes(constraints)
                  if n['hostname'] != 'juju-bootstrap.maas']
-
         all_machines = [MaasMachine(-1, m) for m in nodes]
         if state:
             return [m for m in all_machines if m.status == state]

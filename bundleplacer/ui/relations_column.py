@@ -75,7 +75,7 @@ class RelationWidget(WidgetWrap):
 
         connstr = {True: "\N{CHECK MARK} ",
                    False: "  "}[self.connected]
-            
+
         title = "{} {} {}  {}:{}".format(connstr,
                                          self.source_relname,
                                          arrow,
@@ -111,13 +111,13 @@ class MetadataController:
     def __init__(self, placement_controller):
         self.placement_controller = placement_controller
         self.charm_names = placement_controller.charm_names()
-        # charm_name : charm_metadata        
+        # charm_name : charm_metadata
         self.charm_info = {}
         self.metadata_future = None
         self.metadata_future_lock = RLock()
         self.charms_providing_iface = defaultdict(list)
         self.charms_requiring_iface = defaultdict(list)
-        
+
         self.load(self.charm_names)
 
     def load(self, charm_names):
@@ -163,7 +163,7 @@ class MetadataController:
     def add_charm(self, charm_name):
         if charm_name not in self.charm_info:
             self.load([charm_name])
-    
+
     def get_provides(self, charm_name):
         if not self.loaded():
             return []
@@ -187,7 +187,7 @@ class MetadataController:
                          pc.services_with_charm(charm_name)]
 
         return services
-            
+
     def handle_search_error(self, e):
         pass                    # TODO MMCC
 
@@ -252,7 +252,7 @@ class RelationsColumn(WidgetWrap):
         args = [(relname, iface, RelationType.Provides,
                  mc.get_services_for_iface(iface, RelationType.Requires))
                 for relname, iface in sorted(new_provides)]
-        
+
         args += [(relname, iface, RelationType.Requires,
                   mc.get_services_for_iface(iface, RelationType.Provides))
                  for relname, iface in sorted(new_requires)]

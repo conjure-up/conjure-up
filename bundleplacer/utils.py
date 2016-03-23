@@ -32,8 +32,6 @@ import urwid
 import itertools
 import configparser
 import time
-from importlib import import_module
-import pkgutil
 import sys
 import errno
 import shutil

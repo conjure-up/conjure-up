@@ -17,8 +17,6 @@ import logging
 
 from urwid import Divider, Pile, Text, WidgetWrap
 
-from bundleplacer.maas import satisfies
-from bundleplacer.state import ServiceState
 from bundleplacer.ui.simple_service_widget import SimpleServiceWidget
 
 log = logging.getLogger('bundleplacer.ui')
@@ -38,18 +36,13 @@ class ServicesList(WidgetWrap):
     None, no constraint checking is done. If set, only services whose
     constraints are satisfied by 'machine' are shown.
 
-    show_constraints - bool, whether or not to display the constraints
-    for the various services
-
     """
 
     def __init__(self, placement_controller, display_controller,
-                 show_constraints=False, show_placements=False,
-                 title="Services"):
+                 show_placements=False, title="Services"):
         self.placement_controller = placement_controller
         self.display_controller = display_controller
         self.service_widgets = []
-        self.show_constraints = show_constraints
         self.show_placements = show_placements
         self.title = title
         w = self.build_widgets()
