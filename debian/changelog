@@ -1,5 +1,5 @@
-conjure (0.0.6) wily; urgency=medium
+conjure (0.0.1) xenial; urgency=medium
 
-  * Initial Release
+  * Initial Release (LP: #1561037)
 
  -- Adam Stokes <adam.stokes@ubuntu.com>  Tue, 17 Nov 2015 10:25:15 -0400
