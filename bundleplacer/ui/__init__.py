@@ -24,6 +24,7 @@ from ubuntui.widgets.buttons import PlainButton, MenuSelectButton
 from ubuntui.views import InfoDialogWidget
 from ubuntui.widgets import MetaScroll
 
+from bundleplacer.charmstore_api import MetadataController
 from bundleplacer.ui.charmstore import CharmstoreColumn, CharmStoreSearchWidget
 from bundleplacer.ui.filter_box import FilterBox
 from bundleplacer.ui.services_column import ServicesColumn
@@ -64,6 +65,7 @@ class PlacementView(WidgetWrap):
         self.state = initial_state
         self.has_maas = has_maas
         self.prev_state = None
+        self.metadata_controller = MetadataController(placement_controller, config)
         w = self.build_widgets()
         super().__init__(w)
         self.reset_selections(top=True)  # calls self.update
@@ -156,7 +158,8 @@ class PlacementView(WidgetWrap):
 
     def get_charmstore_header(self, charmstore_column):
         self.charm_search_widget = CharmStoreSearchWidget(self.do_add_charm,
-                                                          charmstore_column)
+                                                          charmstore_column,
+                                                          self.config)
         self.charm_search_header_pile = Pile([Text(("body", "Add Charms"),
                                                    align='center'),
                                               Divider(),
@@ -204,10 +207,12 @@ class PlacementView(WidgetWrap):
                                               self)
         self.relations_column = RelationsColumn(self.display_controller,
                                                 self.placement_controller,
-                                                self)
+                                                self,
+                                                self.metadata_controller)
         self.charmstore_column = CharmstoreColumn(self.display_controller,
                                                   self.placement_controller,
-                                                  self)
+                                                  self,
+                                                  self.metadata_controller)
 
         self.machines_header = self.get_machines_header(self.machines_column)
         self.relations_header = self.get_relations_header()

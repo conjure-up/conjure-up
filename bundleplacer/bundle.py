@@ -13,16 +13,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from concurrent.futures import Future
-from functools import partial
 import logging
-import requests
-from threading import RLock
 import yaml
-from bundleplacer.async import submit
-from bundleplacer.service import Service
-from bundleplacer.assignmenttype import AssignmentType, label_to_atype
 
+from bundleplacer.assignmenttype import AssignmentType, label_to_atype
+from bundleplacer.service import Service
 
 log = logging.getLogger('bundleplacer')
 
@@ -30,92 +25,6 @@ log = logging.getLogger('bundleplacer')
 class keydict(dict):
     def __missing__(self, key):
         return key
-
-
-class CharmStoreAPI:
-    """Concurrently lookup data from the juju charm store.
-
-    use the get_* functions to get a Future whose result will be the
-    requested charm info
-
-    """
-    _cache = {}
-    _cachelock = RLock()
-
-    def __init__(self):
-        self.baseurl = 'https://api.jujucharms.com/v4'
-
-    def _do_remote_lookup(self, charm_name, metakey):
-        url = (self.baseurl + '/meta/' +
-               'any?include=charm-metadata&id={}'.format(charm_name))
-        r = requests.get(url)
-        rj = r.json()
-        if len(rj.items()) != 1:
-            raise Exception("Got wrong number of results from charm store")
-        entity = list(rj.values())[0]
-        with CharmStoreAPI._cachelock:
-            CharmStoreAPI._cache[charm_name] = entity
-        return entity
-
-    def _wait_for_pending_lookup(self, f, charm_name, metakey):
-        try:
-            entity = f.result()
-        except:
-            return None
-
-        if metakey is None:
-            return entity
-        return entity['Meta']['charm-metadata'][metakey]
-
-    def _lookup(self, charm_name, metakey, exc_cb):
-        with CharmStoreAPI._cachelock:
-            if charm_name in CharmStoreAPI._cache:
-                val = CharmStoreAPI._cache[charm_name]
-                if isinstance(val, Future):
-                    f = submit(partial(self._wait_for_pending_lookup,
-                                       val, charm_name, metakey),
-                               exc_cb)
-                else:
-                    if metakey is None:
-                        d = val
-                    else:
-                        d = val['Meta']['charm-metadata'][metakey]
-                    f = submit(lambda: d, exc_cb)
-            else:
-                whole_entity_f = submit(partial(self._do_remote_lookup,
-                                                charm_name,
-                                                metakey),
-                                        exc_cb)
-                CharmStoreAPI._cache[charm_name] = whole_entity_f
-
-                f = submit(partial(self._wait_for_pending_lookup,
-                                   whole_entity_f, charm_name,
-                                   metakey),
-                           exc_cb)
-
-        return f
-
-    def get_summary(self, charm_name, exc_cb):
-        return self._lookup(charm_name, 'Summary', exc_cb)
-
-    def get_entity(self, charm_name, exc_cb):
-        return self._lookup(charm_name, None, exc_cb)
-
-    def get_matches(self, substring, exc_cb):
-        def _do_search():
-            url = (self.baseurl +
-                   "/search?text={}&autocomplete=1".format(substring) +
-                   "&limit=5&include=charm-metadata&include=bundle-metadata")
-            charm_url = url + "&type=charm"
-            bundle_url = url + "&type=bundle"
-            cr = requests.get(charm_url)
-            crj = cr.json()
-            br = requests.get(bundle_url)
-            brj = br.json()
-            return brj['Results'], crj['Results']
-
-        f = submit(_do_search, exc_cb)
-        return f
 
 
 def create_service(servicename, service_dict, servicemeta, relations):

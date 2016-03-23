@@ -13,26 +13,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict
-from enum import Enum
-from functools import partial
-import requests
-from threading import RLock
-
 from urwid import AttrMap, Divider, Pile, Text, WidgetWrap
 
-from bundleplacer.async import submit
-
 from ubuntui.widgets.buttons import MenuSelectButton
+
+from bundleplacer.relationtype import RelationType
 
 import logging
 
 log = logging.getLogger('bundleplacer')
-
-
-class RelationType(Enum):
-    Requires = 0
-    Provides = 1
 
 
 class RelationWidget(WidgetWrap):
@@ -106,101 +95,15 @@ class NoRelationWidget(WidgetWrap):
         "no op"
 
 
-class MetadataController:
-
-    def __init__(self, placement_controller):
-        self.placement_controller = placement_controller
-        self.charm_names = placement_controller.charm_names()
-        # charm_name : charm_metadata
-        self.charm_info = {}
-        self.metadata_future = None
-        self.metadata_future_lock = RLock()
-        self.charms_providing_iface = defaultdict(list)
-        self.charms_requiring_iface = defaultdict(list)
-
-        self.load(self.charm_names)
-
-    def load(self, charm_names):
-        if self.metadata_future:
-            # just wait for successive loads:
-            self.metadata_future.result()
-
-        with self.metadata_future_lock:
-            self.metadata_future = submit(partial(self._do_load,
-                                                  charm_names),
-                                          self.handle_search_error)
-
-    def _do_load(self, charm_names):
-        ids = "&".join(["id={}".format(n) for n in charm_names])
-        url = 'https://api.jujucharms.com/v4/meta/any?include=charm-metadata&'
-        url += ids
-        r = requests.get(url)
-        metas = r.json()
-        for charm_name, charm_dict in metas.items():
-            md = charm_dict["Meta"]["charm-metadata"]
-            rd = md.get("Requires", {})
-            pd = md.get("Provides", {})
-            requires = []
-            provides = []
-            for relname, d in rd.items():
-                iface = d["Interface"]
-                requires.append((relname, iface))
-                self.charms_requiring_iface[iface].append((relname,
-                                                           charm_name))
-
-            for relname, d in pd.items():
-                iface = d["Interface"]
-                provides.append((relname, iface))
-                self.charms_providing_iface[iface].append((relname,
-                                                           charm_name))
-
-            self.charm_info[charm_name] = dict(requires=requires,
-                                               provides=provides)
-
-    def loaded(self):
-        return self.metadata_future.done()
-
-    def add_charm(self, charm_name):
-        if charm_name not in self.charm_info:
-            self.load([charm_name])
-
-    def get_provides(self, charm_name):
-        if not self.loaded():
-            return []
-        return self.charm_info[charm_name]['provides']
-
-    def get_requires(self, charm_name):
-        if not self.loaded():
-            return []
-        return self.charm_info[charm_name]['requires']
-
-    def get_services_for_iface(self, iface, reltype):
-        services = []
-        if reltype == RelationType.Requires:
-            cs = self.charms_requiring_iface[iface]
-        else:
-            cs = self.charms_providing_iface[iface]
-
-        for relname, charm_name in cs:
-            pc = self.placement_controller
-            services += [(relname, s) for s in
-                         pc.services_with_charm(charm_name)]
-
-        return services
-
-    def handle_search_error(self, e):
-        pass                    # TODO MMCC
-
-
 class RelationsColumn(WidgetWrap):
 
     """UI to edit relations of a service
     """
 
     def __init__(self, display_controller, placement_controller,
-                 placement_view):
+                 placement_view, metadata_controller):
         self.placement_controller = placement_controller
-        self.metadata_controller = MetadataController(placement_controller)
+        self.metadata_controller = metadata_controller
         self.service = None
         self.provides = set()
         self.requires = set()
