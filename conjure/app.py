@@ -14,10 +14,15 @@ from conjure.controllers.cloud import CloudController
 from conjure.controllers.newcloud import NewCloudController
 from conjure.controllers.jujucontroller import JujuControllerController
 from conjure.controllers.bootstrapwait import BootstrapWaitController
+from conjure.log import setup_logging
 import json
 import sys
 import argparse
 import os.path as path
+import logging
+
+
+log = logging.getLogger('app')
 
 
 class ApplicationException(Exception):
@@ -35,6 +40,7 @@ class ApplicationConfig:
         self.argv = None
         self.controllers = None
         self.current_model = None
+        self.log = None
 
 
 class Application:
@@ -56,6 +62,8 @@ class Application:
             config['metadata'] = json.load(json_f)
 
         self.app.config = config
+        self.app.log = setup_logging(self.app.config['name'],
+                                     debug=self.app.argv.debug)
 
         self.app.controllers = {
             'welcome': WelcomeController(self.app),
@@ -100,6 +108,9 @@ def parse_options(argv):
                         dest='status_only',
                         help='Only display the Status of '
                         'existing deployed bundled.')
+    parser.add_argument('-d', '--debug', action='store_true',
+                        dest='debug',
+                        help='Enable debug logging.')
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
     return parser.parse_args(argv)

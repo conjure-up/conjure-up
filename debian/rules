@@ -15,7 +15,7 @@ export PYBUILD_INSTALL_ARGS_python3=--install-lib=usr/share/conjure \
 
 override_dh_install:
 	mkdir -p $(PKGDIR)/usr/share/man/man1
-	help2man $(PKGDIR)/usr/share/conjure/conjure-setup -n "apt install juju bundles" --no-info > $(PKGDIR)/usr/share/man/man1/conjure-setup.1
+	help2man $(PKGDIR)/usr/share/conjure/conjure-setup -n "apt install juju bundles" --no-info -o $(PKGDIR)/usr/share/man/man1/conjure-setup.1
 	dh_install
 
 override_dh_auto_test:
