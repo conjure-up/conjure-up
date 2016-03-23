@@ -215,7 +215,7 @@ class Bundle:
 
         # generate machine renames and merge machines
         machine_renames = keydict()
-        n_machines_mine = len(self._bundle['machines'])
+        n_machines_mine = len(self._bundle.get('machines', {}))
         other_machines = other_bundle._bundle.get('machines', {})
         for mname, md in other_machines.items():
             if mname in self._bundle['machines']:
