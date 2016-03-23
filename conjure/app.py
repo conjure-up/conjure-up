@@ -76,6 +76,8 @@ class Application:
             'finish': FinishController(self.app)
         }
 
+        self.app.log.info('Initialized controllers, starting loop.')
+
     def unhandled_input(self, key):
         if key in ['q', 'Q']:
             async.shutdown()

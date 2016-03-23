@@ -1,18 +1,17 @@
 import logging
-import logging.handlers
+from logging.handlers import SysLogHandler
 
 
 def setup_logging(app, debug=False):
-    cmdslog = logging.handlers.SysLogHandler('/dev/log')
+    cmdslog = SysLogHandler('/dev/log',
+                            facility=SysLogHandler.LOG_DAEMON)
     if debug:
-        env = 'DEBUG'
+        env = logging.DEBUG
     else:
-        env = 'INFO'
+        env = logging.INFO
     cmdslog.setLevel(env)
     cmdslog.setFormatter(logging.Formatter(
-        "[%(levelname)-4s: %(asctime)s, "
-        "%(filename)s:%(lineno)d] %(message)s",
-        datefmt='%m-%d %H:%M:%S'))
+        "%(name)s: [%(levelname)s]: %(message)s"))
 
     logger = logging.getLogger(app)
     logger.setLevel(env)
