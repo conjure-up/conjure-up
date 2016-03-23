@@ -41,7 +41,9 @@ class JujuControllerController:
             self._bootstrap_future.add_done_callback(
                 self._handle_bootstrap_done)
 
-        self.app.controllers['bootstrapwait'].render()
+            self.app.controllers['bootstrapwait'].render()
+        else:
+            self.app.controllers['deploy'].render(self.controller)
 
     def _handle_bootstrap_done(self, future):
         result = self._bootstrap_future.result()
