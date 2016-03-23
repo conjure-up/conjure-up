@@ -49,14 +49,14 @@ class MetadataController:
             bundle_config = json.load(cf)
         key = self.config.getopt('bundle_key')
         bundles = bundle_config['bundles']
-        if type(bundles) == type([]):
-            recommendeds = next((d for d in bundles if d['key'] == key),
-                                [])
-        else:
-            recommendeds = bundles[key].get('recommendedCharms',
-                                            [])
-        self.recommended_charm_names = recommendeds
 
+        if type(bundles) == type([]):
+            bundle_dict = next((d for d in bundles if d['key'] == key),
+                               {})
+        else:
+            bundle_dict = bundles[key]
+        self.recommended_charm_names = bundle_dict.get('recommendedCharms',
+                                                       [])
 
     def load(self, charm_names):
         if self.metadata_future:

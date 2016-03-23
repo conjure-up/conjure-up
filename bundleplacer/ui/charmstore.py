@@ -105,6 +105,7 @@ class CharmWidget(WidgetWrap):
         self.charm_dict = charm_dict
         self.add_cb = add_cb
         self.recommended = recommended
+        self.header = None
         self.charm_source = charm_dict['Id']
         self.md = charm_dict['Meta']['charm-metadata']
         self.charm_name = self.md['Name']
@@ -114,22 +115,26 @@ class CharmWidget(WidgetWrap):
     def selectable(self):
         return True
 
+    def set_header(self, header):
+        self.header = header
+        self._w = self.build_widgets()
+
     def build_widgets(self):
         self.charm_name = self.md['Name']
         summary = self.md['Summary']
-        s = ""
-        pad = ""
+        top = []
+        pad = 0
+        if self.header:
+            top = [Text("\n{}\n".format(self.header))]
         if self.recommended:
-            s = "Recommended:\n"
-            pad = "  "
-        s += "{}{} ({})\n{}{}\n".format(pad,
-                                        self.charm_name,
-                                        self.charm_source,
-                                        2*pad,
-                                        summary)
-        return AttrMap(MenuSelectButton(s, on_press=self.handle_press),
-                       'text',
-                       'button_secondary focus')
+            pad = 2
+        s = "{} ({})\n  {}\n".format(self.charm_name,
+                                     self.charm_source,
+                                     summary)
+        b = MenuSelectButton(s, on_press=self.handle_press)
+        return Pile(top + [AttrMap(Padding(b, left=pad),
+                                   'text',
+                                   'button_secondary focus')])
 
     def handle_press(self, button):
         self.add_cb(self.charm_name, self.charm_dict)
@@ -140,12 +145,17 @@ class BundleWidget(WidgetWrap):
         self.add_cb = add_cb
         self.bundle_source = bundle_dict['Id']
         self.bundle_dict = bundle_dict
+        self.header = None
         self.md = bundle_dict['Meta']['bundle-metadata']
         w = self.build_widgets()
         super().__init__(w)
 
     def selectable(self):
         return True
+
+    def set_header(self, header):
+        self.header = header
+        self._w = self.build_widgets()
 
     def build_widgets(self):
         name_with_rev = self.bundle_source.split("/")[-1]
@@ -157,12 +167,17 @@ class BundleWidget(WidgetWrap):
                                                 len(self.md['Machines']))
         else:
             summary = "{} services".format(len(self.md['Services']))
-        s = "bundle: {} ({})\n    {}\n".format(bundle_name, self.bundle_source,
+        s = "{} ({})\n    {}\n".format(bundle_name, self.bundle_source,
                                                summary)
 
-        return AttrMap(MenuSelectButton(s, on_press=self.handle_press),
-                       'text',
-                       'button_secondary focus')
+        top = []
+        if self.header:
+            top = [Text("\n{}\n".format(self.header))]
+
+        b = MenuSelectButton(s, on_press=self.handle_press)
+        return Pile(top + [AttrMap(b,
+                                   'text',
+                                   'button_secondary focus')])
 
     def handle_press(self, button):
         self.add_cb(self.md)
@@ -223,13 +238,23 @@ class CharmstoreColumn(WidgetWrap):
             self._recommended_widgets = [(CharmWidget(d, self.do_add_charm,
                                                       recommended=True),
                                           opts) for d in rec_dicts]
+            if len(self._recommended_widgets) > 0:
+                top_w = self._recommended_widgets[0][0]
+                top_w.set_header("Recommended Charms")
 
         bundle_widgets = [(BundleWidget(d, self.do_add_bundle),
                            opts) for d in self._bundle_results
                           if 'bundle-metadata' in d.get('Meta', {})]
+        if len(bundle_widgets) > 0:
+            top_w = bundle_widgets[0][0]
+            top_w.set_header("Bundles")
+
         charm_widgets = [(CharmWidget(d, self.do_add_charm),
                           opts) for d in self._charm_results
                          if 'charm-metadata' in d.get('Meta', {})]
+        if len(charm_widgets) > 0:
+            top_w = charm_widgets[0][0]
+            top_w.set_header("Charms")
 
         if self.state == CharmstoreColumnUIState.RELATED:
             # self.title.set_text("Charms Related to this Bundle")
