@@ -1,69 +1,111 @@
-Schema = {
-    'aws': {
-        'access-key': None,
-        'secret-key': None,
-        'region': 'us-east-1'
-    },
-    'maas': {
-        'maas-server': None,
-        'maas-oauth': None
-    },
-    'azure': {
-        'application-id': None,
-        'subscription-id': None,
-        'tenant-id': None,
-        'application-password': None,
-        'location': None,
-        'endpoint': None,
-        'storage-endpoint': None,
-        'storage-account-type': None,
-        'storage-account': None,
-        'storage-account-key': None,
-        'controller-resource-group': None
-    },
-    'gce': {
-        'private-key': None,
-        'client-id': None,
-        'client-email': None,
-        'region': None,
-        'project-id': None,
-        'image-endpoint': None
-    },
-    'cloudsigma': {
-        'username': None,
-        'password': None,
-        'region': None,
-        'endpoint': None
-    },
-    'joyent': {
-        'sdc-user': None,
-        'sdc-key-id': None,
-        'sdc-url': 'https://us-west-1.api.joyentcloud.com',
-        'manta-user': None,
-        'manta-key-id': None,
-        'manta-url': 'https://us-east.manta.joyent.com',
-        'private-key-path': None,
-        'private-key': None,
-        'algorithm': 'rsa-sah256'
-    },
-    'openstack': {
-        'username': None,
-        'password': None,
-        'tenant-name': None,
-        'auth-url': None,
-        'auth-mode': None,
-        'access-key': None,
-        'secret-key': None,
-        'region': None,
-        'use-floating-ip': None,
-        'use-default-secgroup': None,
-        'network': None
-    },
-    'vsphere': {
-        'datacenter': None,
-        'host': None,
-        'user': None,
-        'password': None,
-        'external-network': None
-    }
-}
+from collections import OrderedDict
+from ubuntui.widgets.input import (StringEditor, YesNo, PasswordEditor)
+
+Schema = OrderedDict([
+    ('aws', OrderedDict([
+        ('access-key', StringEditor()),
+        ('secret-key', StringEditor()),
+        ('region', StringEditor(default='us-east-1'))
+    ])),
+    ('aws-china', OrderedDict([
+        ('access-key', StringEditor()),
+        ('secret-key', StringEditor()),
+        ('region', StringEditor(default='cn-north-1'))
+    ])),
+    ('aws-gov', OrderedDict([
+        ('access-key', StringEditor()),
+        ('secret-key', StringEditor()),
+        ('region', StringEditor(default='us-gov-west-1'))
+    ])),
+    ('maas', OrderedDict([
+        ('maas-server', StringEditor()),
+        ('maas-oauth', StringEditor())
+    ])),
+    ('azure', OrderedDict([
+        ('application-id', StringEditor()),
+        ('subscription-id', StringEditor()),
+        ('tenant-id', StringEditor()),
+        ('application-password', PasswordEditor()),
+        ('location', StringEditor()),
+        ('endpoint', StringEditor()),
+        ('storage-endpoint', StringEditor()),
+        ('storage-account-type', StringEditor()),
+        ('storage-account', StringEditor()),
+        ('storage-account-key', StringEditor()),
+        ('controller-resource-group', StringEditor())
+    ])),
+    ('azure-china', OrderedDict([
+        ('application-id', StringEditor()),
+        ('subscription-id', StringEditor()),
+        ('tenant-id', StringEditor()),
+        ('application-password', PasswordEditor()),
+        ('location', StringEditor()),
+        ('endpoint', StringEditor()),
+        ('storage-endpoint', StringEditor()),
+        ('storage-account-type', StringEditor()),
+        ('storage-account', StringEditor()),
+        ('storage-account-key', StringEditor()),
+        ('controller-resource-group', StringEditor())
+    ])),
+    ('gce', OrderedDict([
+        ('private-key', StringEditor()),
+        ('client-id', StringEditor()),
+        ('client-email', StringEditor()),
+        ('region', StringEditor()),
+        ('project-id', StringEditor()),
+        ('image-endpoint', StringEditor())
+    ])),
+    ('cloudsigma', OrderedDict([
+        ('username', StringEditor()),
+        ('password', PasswordEditor()),
+        ('region', StringEditor()),
+        ('endpoint', StringEditor())
+    ])),
+    ('joyent', OrderedDict([
+        ('sdc-user', StringEditor()),
+        ('sdc-key-id', StringEditor()),
+        ('sdc-url', StringEditor(
+            default='https://us-west-1.api.joyentcloud.com')),
+        ('private-key-path', StringEditor()),
+        ('algorithm', StringEditor(default='rsa-sha256'))
+    ])),
+    ('openstack', OrderedDict([
+        ('username', StringEditor()),
+        ('password', PasswordEditor()),
+        ('tenant-name', StringEditor()),
+        ('auth-url', StringEditor()),
+        ('auth-mode', StringEditor()),
+        ('access-key', StringEditor()),
+        ('secret-key', StringEditor()),
+        ('region', StringEditor()),
+        ('use-floating-ip', YesNo()),
+        ('use-default-secgroup', YesNo()),
+        ('network', StringEditor())
+    ])),
+    ('rackspace', OrderedDict([
+        ('username', StringEditor()),
+        ('password', PasswordEditor()),
+        ('tenant-name', StringEditor()),
+        ('auth-url', StringEditor()),
+        ('auth-mode', StringEditor()),
+        ('access-key', StringEditor()),
+        ('secret-key', StringEditor()),
+        ('region', StringEditor()),
+        ('use-floating-ip', YesNo()),
+        ('use-default-secgroup', YesNo()),
+        ('network', StringEditor())
+    ])),
+    ('vsphere', OrderedDict([
+        ('datacenter', StringEditor()),
+        ('host', StringEditor()),
+        ('user', StringEditor()),
+        ('password', PasswordEditor()),
+        ('external-network', StringEditor())
+    ])),
+    ('manual', OrderedDict([
+        ('bootstrap-host', StringEditor()),
+        ('bootstrap-user', StringEditor()),
+        ('use-sshstorage', YesNo())
+    ])),
+
+])

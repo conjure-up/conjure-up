@@ -1,4 +1,3 @@
-from ubuntui.widgets.input import StringEditor
 from ubuntui.widgets.buttons import (confirm_btn, cancel_btn)
 from ubuntui.widgets.text import Instruction
 from ubuntui.utils import Color, Padding
@@ -45,10 +44,7 @@ class NewCloudView(WidgetWrap):
 
     def build_inputs(self):
         items = []
-        for k in sorted(self.input_items.keys()):
-            self.input_items[k] = StringEditor()
-            import q
-            q(self.input_items)
+        for k in self.input_items.keys():
             col = Columns(
                 [
                     ('weight', 0.5, Text(k, align='right')),

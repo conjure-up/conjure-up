@@ -285,7 +285,7 @@ class Bundle:
         returns a pair: (new_machines, new_services, new_assignments)
         """
         new_machines = {}
-        new_services = []
+        new_service_names = []
         new_assignments = {}
 
         assert 'services' in self._bundle
@@ -347,8 +347,11 @@ class Bundle:
                 new_sd['to'] = [rename_machine(to, machine_renames)
                                 for to in sd['to']]
             self._bundle['services'][service_renames[sname]] = new_sd
-            new_services.append(service_renames[sname])
+            new_service_names.append(service_renames[sname])
             if 'to' in sd:
                 new_assignments[service_renames[sname]] = new_sd['to']
+
+        new_services = [s for s in self.services
+                        if s.service_name in new_service_names]
 
         return new_machines, new_services, new_assignments

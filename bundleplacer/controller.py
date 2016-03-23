@@ -299,6 +299,7 @@ class PlacementController:
     def update_from_bundle(self):
         self.add_bundle_machines(self.bundle.machines)
         self.add_bundle_assignments(self.bundle.assignments)
+        self.add_subordinates(self.bundle.services)
 
     def merge_bundle(self, bundle_dict):
         new_bundle = Bundle(bundle_data=bundle_dict)
@@ -306,6 +307,7 @@ class PlacementController:
         new_machines, new_services, new_assignments = t
         self.add_bundle_machines(new_machines)
         self.add_bundle_assignments(new_assignments)
+        self.add_subordinates(new_services)
         return new_bundle
 
     def add_bundle_machines(self, machines):
@@ -331,6 +333,13 @@ class PlacementController:
                                 m.instance_id == mid), None)
                 if machine:
                     self.assign(machine, service, atype)
+
+    def add_subordinates(self, all_services):
+        """looks through all_services and assigns any subordinates to the
+        subordinate placeholder."""
+        d = self.assignments[self.sub_placeholder.instance_id]
+        al = d[AssignmentType.DEFAULT]
+        al += [s for s in all_services if s.subordinate]
 
     def remove_service(self, service_name):
         self.bundle.remove_service(service_name)
@@ -630,8 +639,9 @@ class PlacementController:
         return (True, "")
 
     def autoassign_unassigned_to_default(self):
-        """Assigns all unassigned services to juju default placeholder."""
-
+        """Assigns all unassigned *non-subordinate* services to juju default
+        placeholder.
+        """
         for s in self.unassigned_undeployed_services():
             d = self.assignments[self.def_placeholder.instance_id]
             al = d[DEFAULT_SHARED_ASSIGNMENT_TYPE]
@@ -776,8 +786,10 @@ class BundleWriter:
             tolist = services[svc.service_name].get('to', [])
 
         d = dict(charm=svc.charm_source,
-                 num_units=num_units,
                  options=svc.options)
+        if not svc.subordinate:
+            d['num_units'] = num_units
+
         if to is not None:
             prefix = {AssignmentType.DEFAULT: "",
                       AssignmentType.BareMetal: "",
