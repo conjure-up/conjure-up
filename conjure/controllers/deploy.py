@@ -43,7 +43,8 @@ class DeployController:
             'bundle-placer',
             {'bundle_filename': self.bundle,
              'metadata_filename': metadata_filename,
-             'config_filename': self.app.argv.build_conf})
+             'config_filename': self.app.argv.build_conf,
+             'bundle_key': BundleModel.key()})
 
         if info['ProviderType'] == 'maas':
             bootstrap_config = model_cache_controller_provider(
