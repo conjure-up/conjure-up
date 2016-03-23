@@ -7,7 +7,8 @@ import yaml
 import json
 from macumba.v2 import JujuClient
 from macumba.errors import LoginError
-from functools import wraps
+from functools import wraps, partial
+from conjure import async
 
 
 def requires_login(f):
@@ -88,6 +89,14 @@ class Juju:
         if upload_tools:
             cmd += " --upload-tools"
         return shell(cmd)
+
+    @classmethod
+    def bootstrap_async(cls, controller, cloud,
+                        upload_tools=True, exc_cb=None):
+        """ Performs a bootstrap asynchronously
+        """
+        return async.submit(partial(cls.bootstrap, controller,
+                                    cloud, upload_tools), exc_cb)
 
     @classmethod
     def available(cls):

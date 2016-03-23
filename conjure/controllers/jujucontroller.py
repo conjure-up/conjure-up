@@ -1,7 +1,9 @@
 from conjure.ui.views.jujucontroller import JujuControllerView
 from conjure.juju import Juju
-from conjure.async import submit
-from functools import partial
+from ubuntui.ev import EventLoop
+import logging
+
+log = logging.getLogger('jujucontroller')
 
 
 class JujuControllerController:
@@ -32,25 +34,21 @@ class JujuControllerController:
             return self.app.controllers['welcome'].render()
 
         if self.bootstrap:
-            # FIXME: Once admin/default models exist in juju
-            self._bootstrap_future = submit(
-                self._do_bootstrap,
-                self.handle_exception)
+            self._bootstrap_future = Juju.bootstrap_async(
+                'conjure',
+                self.cloud,
+                exc_cb=self.handle_exception)
             self._bootstrap_future.add_done_callback(
                 self._handle_bootstrap_done)
 
         self.app.controllers['bootstrapwait'].render()
 
-    def _do_bootstrap(self):
-        return Juju.bootstrap('conjure', self.cloud)
-
     def _handle_bootstrap_done(self, future):
         result = self._bootstrap_future.result()
+        log.debug(result)
         self._bootstrap_future = None
 
-        import q
-        q(result.output())
-
+        EventLoop.remove_alarms()
         Juju.switch(self.controller)
         self.app.controllers['deploy'].render(self.controller)
 

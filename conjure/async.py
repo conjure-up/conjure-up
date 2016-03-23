@@ -30,6 +30,7 @@ def submit(func, exc_callback):
         return
     f = AsyncPool.submit(func)
     f.add_done_callback(cb)
+    return f
 
 
 def shutdown():

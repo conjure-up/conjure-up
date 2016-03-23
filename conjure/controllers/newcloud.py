@@ -69,7 +69,7 @@ class NewCloudController:
         # if cloud is LXD bypass all this
         if cloud == 'lxd':
             return self.app.controllers['jujucontroller'].render(
-                bootstrap=True)
+                cloud='lxd', bootstrap=True)
 
         try:
             creds = Schema[cloud]
