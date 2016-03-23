@@ -2,6 +2,7 @@ from conjure.ui.views.deploy_summary import DeploySummaryView
 from conjure.juju import Juju
 from functools import partial
 from conjure.async import AsyncPool
+from conjure.utils import pollinate
 
 
 class DeploySummaryController:
@@ -22,6 +23,7 @@ class DeploySummaryController:
             AsyncPool.submit(
                 partial(Juju.deploy_bundle, self.bundle)
             )
+            pollinate(self.app.session_id, 'DS')
             self.app.controllers['finish'].render()
 
     def render(self, bundle):
@@ -37,3 +39,4 @@ class DeploySummaryController:
             excerpt=self.excerpt
         )
         self.app.ui.set_body(self.view)
+        pollinate(self.app.session_id, 'SS')

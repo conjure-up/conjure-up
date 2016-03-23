@@ -1,6 +1,7 @@
 from conjure.ui.views.cloud import CloudView
 from conjure.juju import Juju
 from conjure.models.bundle import BundleModel
+from conjure.utils import pollinate
 
 
 class CloudController:
@@ -36,6 +37,8 @@ class CloudController:
 
         if create_cloud:
             return self.app.controllers['newcloud'].render(cloud)
+
+        pollinate(self.app.session_id, 'CS')
 
         # TODO: Move to newcloud controller
         # if not create_cloud and cloud is not None:
