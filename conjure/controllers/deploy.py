@@ -3,11 +3,13 @@ from conjure.charm import get_bundle
 from conjure.models.bundle import BundleModel
 from conjure.shell import shell
 from conjure import template
+from conjure.utils import pollinate
 
 from bundleplacer.config import Config
 from bundleplacer.maas import connect_to_maas
 from bundleplacer.placerview import PlacerView
 from bundleplacer.controller import PlacementController, BundleWriter
+
 from urllib.parse import urlparse
 import os.path as path
 
@@ -30,6 +32,7 @@ class DeployController:
 
         bw = BundleWriter(self.placement_controller)
         bw.write_bundle(self.bundle)
+        pollinate(self.app.session_id, 'PC')
         self.app.controllers['deploysummary'].render(self.bundle)
 
     def render(self, model):
@@ -47,6 +50,7 @@ class DeployController:
              'bundle_key': BundleModel.key()})
 
         if info['ProviderType'] == 'maas':
+            pollinate(self.app.session_id, 'PM')
             bootstrap_config = model_cache_controller_provider(
                 info['ServerUUID'])
             maas_server = urlparse(bootstrap_config['maas-server'])
@@ -69,6 +73,7 @@ class DeployController:
             self.app.ui.set_body(mainview)
             mainview.update()
         else:
+            pollinate(self.app.session_id, 'PS')
             # TODO: cleanup a bit
             # FIXME: needs refinement.
             if info['ProviderType'] == 'lxd':

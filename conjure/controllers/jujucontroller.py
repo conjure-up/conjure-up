@@ -1,4 +1,5 @@
 from conjure.ui.views.jujucontroller import JujuControllerView
+from conjure.utils import pollinate
 from conjure.juju import Juju
 from ubuntui.ev import EventLoop
 import logging
@@ -19,6 +20,7 @@ class JujuControllerController:
         self._bootstrap_future = None
 
     def handle_exception(self, exc):
+        pollinate(self.app.session_id, 'EB')
         self.app.ui.show_exception_message(exc)
 
     def finish(self, controller=None, back=False):
@@ -34,6 +36,7 @@ class JujuControllerController:
             return self.app.controllers['welcome'].render()
 
         if self.bootstrap:
+            pollinate(self.app.session_id, 'JS')
             self._bootstrap_future = Juju.bootstrap_async(
                 'conjure',
                 self.cloud,
@@ -49,7 +52,7 @@ class JujuControllerController:
         result = self._bootstrap_future.result()
         log.debug(result)
         self._bootstrap_future = None
-
+        pollinate(self.app.session_id, 'JC')
         EventLoop.remove_alarms()
         Juju.switch(self.controller)
         self.app.controllers['deploy'].render(self.controller)

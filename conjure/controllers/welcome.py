@@ -1,6 +1,7 @@
 from conjure.ui.views.welcome import WelcomeView
 from conjure.models.bundle import BundleModel
 from conjure.juju import Juju
+from conjure.utils import pollinate
 
 
 class WelcomeController:
@@ -23,12 +24,14 @@ class WelcomeController:
                 "Unable to determine bundle to deploy: {}".format(name))
 
         BundleModel.bundle = deploy_key
+        pollinate(self.app.session_id, 'BS')
         if Juju.controllers() is None:
             self.app.controllers['clouds'].render()
         else:
             self.app.controllers['jujucontroller'].render()
 
     def render(self):
+        pollinate(self.app.session_id, 'WS')
         config = self.app.config
         self.app.ui.set_header(
             title=config['summary'],

@@ -18,8 +18,10 @@ from conjure.log import setup_logging
 import json
 import sys
 import argparse
+import os
 import os.path as path
 import logging
+import uuid
 
 
 log = logging.getLogger('app')
@@ -41,6 +43,8 @@ class ApplicationConfig:
         self.controllers = None
         self.current_model = None
         self.log = None
+        self.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
+                                    str(uuid.uuid4()))
 
 
 class Application:

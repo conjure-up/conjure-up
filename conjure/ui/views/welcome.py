@@ -5,6 +5,7 @@ from ubuntui.widgets.hr import HR
 from ubuntui.widgets.buttons import (cancel_btn, menu_btn)
 from ubuntui.utils import Color, Padding
 from ubuntui.ev import EventLoop
+from conjure.utils import pollinate
 
 
 class WelcomeView(WidgetWrap):
@@ -64,6 +65,7 @@ class WelcomeView(WidgetWrap):
         return Pile(cols)
 
     def cancel(self, button):
+        pollinate(self.app.session_id, 'UC')
         EventLoop.exit(0)
 
     def done(self, result):

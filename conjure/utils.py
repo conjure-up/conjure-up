@@ -2,6 +2,7 @@ import shutil
 import os
 import logging
 from subprocess import check_call, CalledProcessError, DEVNULL
+from conjure.models.bundle import BundleModel
 
 log = logging.getLogger('utils')
 
@@ -125,25 +126,45 @@ class FS:
             raise IOError
 
 
-class Net:
-    def pollinate(session, tag):
-        """ fetches random seed
+def pollinate(session, tag):
+    """ fetches random seed
 
-        Tag definitions:
-            ET - error timeout
-            EB - error juju bootstrap
-            EJ - error reading juju environment
-        :param str session: randomly generated session id
-        :param str tag: custom tag
-        """
-        if not os.path.isfile('/usr/bin/pollinate'):
-            return
+    Tag definitions:
+        WS - welcome shown
+        BS - bundle selected
+        CS - cloud selected
+        CC - cloud creation started
+        CA - cloud credentials added
+        JS - juju bootstrap started
+        JC - juju bootstrap completed
+        CS - controller selected
+        PM - placement/bundle editor shown (maas)
+        PS - placement/bundle editor shown (other)
+        PC - placements committed
+        SS - deploy summary shown
+        DS - deploy started
+        DC - deploy complete (currently unused)
 
-        agent_str = 'uoi/{}/{}'.format(session, tag)
-        try:
-            cmd = ("sudo su - -c 'pollinate -q -r --curl-opts "
-                   "\"-k --user-agent {}\"'".format(agent_str))
-            log.info("pollinate: {}".format(cmd))
-            check_call(cmd, shell=True)
-        except CalledProcessError as e:
-            log.warning("Generating random seed failed: {}".format(e))
+        UC - user cancelled
+        EC - error getting credentials
+        EP - error in placement/bundle editor
+        EB - error juju bootstrap
+        ED - error deploying (unused)
+
+    :param str session: randomly generated session id
+    :param str tag: custom tag
+    """
+    if not os.path.isfile('/usr/bin/pollinate'):
+        log.warning("pollinate binary not found")
+        return
+    bundle_key = BundleModel.key()
+    if not bundle_key:
+        bundle_key = '-'
+    agent_str = 'conjure/{}/{}/{}'.format(session, bundle_key, tag)
+    try:
+        cmd = ("sudo su - -c 'pollinate -q -r --curl-opts "
+               "\"-k --user-agent {}\"'".format(agent_str))
+        log.info("pollinate: {}".format(cmd))
+        check_call(cmd, shell=True)
+    except CalledProcessError as e:
+        log.warning("Generating random seed failed: {}".format(e))
