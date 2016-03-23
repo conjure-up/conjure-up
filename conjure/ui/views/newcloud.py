@@ -45,6 +45,9 @@ class NewCloudView(WidgetWrap):
     def build_inputs(self):
         items = []
         for k in self.input_items.keys():
+            # Don't treat 'private' keys as input
+            if k.startswith('_'):
+                continue
             col = Columns(
                 [
                     ('weight', 0.5, Text(k, align='right')),

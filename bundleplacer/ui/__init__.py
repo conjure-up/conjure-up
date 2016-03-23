@@ -273,8 +273,6 @@ class PlacementView(WidgetWrap):
         elif self.state == UIState.RELATION_EDITOR:
             self.relations_column.update()
 
-        self.charm_search_widget.update()
-
         unplaced = self.placement_controller.unassigned_undeployed_services()
         all = self.placement_controller.services()
         n_subs = len([c for c in all if c.subordinate])

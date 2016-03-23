@@ -3,21 +3,25 @@ from ubuntui.widgets.input import (StringEditor, YesNo, PasswordEditor)
 
 Schema = OrderedDict([
     ('aws', OrderedDict([
+        ('_auth-type', 'access-key'),
         ('access-key', StringEditor()),
         ('secret-key', StringEditor()),
         ('region', StringEditor(default='us-east-1'))
     ])),
     ('aws-china', OrderedDict([
+        ('_auth-type', 'access-key'),
         ('access-key', StringEditor()),
         ('secret-key', StringEditor()),
         ('region', StringEditor(default='cn-north-1'))
     ])),
     ('aws-gov', OrderedDict([
+        ('_auth-type', 'access-key'),
         ('access-key', StringEditor()),
         ('secret-key', StringEditor()),
         ('region', StringEditor(default='us-gov-west-1'))
     ])),
     ('maas', OrderedDict([
+        ('_auth-type', 'oauth1'),
         ('maas-server', StringEditor()),
         ('maas-oauth', StringEditor())
     ])),
@@ -47,7 +51,7 @@ Schema = OrderedDict([
         ('storage-account-key', StringEditor()),
         ('controller-resource-group', StringEditor())
     ])),
-    ('gce', OrderedDict([
+    ('google', OrderedDict([
         ('private-key', StringEditor()),
         ('client-id', StringEditor()),
         ('client-email', StringEditor()),

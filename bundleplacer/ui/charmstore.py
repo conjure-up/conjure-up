@@ -38,9 +38,11 @@ class CharmStoreSearchWidget(WidgetWrap):
         self.search_text = ""
         self._search_future = None
         self._search_result = None
-        self._suggested_results = None
+        self._popular_results = None
         w = self.build_widgets()
         super().__init__(w)
+        # populate popular_results with an initial search
+        self.really_search()
 
     def build_widgets(self):
         self.editbox = Edit(caption=('text', "Search Charm Store: "))
@@ -51,23 +53,22 @@ class CharmStoreSearchWidget(WidgetWrap):
         return Padding(AttrMap(self.editbox,
                                'filter', 'filter_focus'), left=2, right=2)
 
-    def update(self):
-        if self._search_future is None and self._suggested_results is None:
-            self.really_search()
+    def _handle_search_done(self, future):
+        assert(future == self._search_future)
+        self._search_result = self._search_future.result()
+        self._search_future = None
 
-        if self._search_future and self._search_future.done():
-            self._search_result = self._search_future.result()
-            self._search_future = None
+        if self._popular_results is None:
+            self._popular_results = self._search_result
 
-            if self._suggested_results is None:
-                self._suggested_results = self._search_result
-
-            # result being None indicates an error, which was handled by
-            # handle_search_error.
-            if self._search_result is None:
-                return
+        # result being None indicates an error, which was handled by
+        # handle_search_error.
+        if self._search_result:
             br, cr = self._search_result
             self.set_column(br, cr)
+        self.charmstore_column.loading = False
+        self.charmstore_column.update()
+
 
     def set_column(self, bundle_results, charm_results):
         self.charmstore_column.clear_search_results()
@@ -89,13 +90,7 @@ class CharmStoreSearchWidget(WidgetWrap):
         self.search_delay_alarm = None
         self._search_future = self.api.get_matches(self.search_text,
                                                    self.handle_search_error)
-
-        def update_immediately(future):
-            self.update()
-            self.charmstore_column.searching = False
-            self.charmstore_column.update()
-
-        self._search_future.add_done_callback(update_immediately)
+        self._search_future.add_done_callback(self._handle_search_done)
 
     def handle_search_error(self, e):
         self.charmstore_column.handle_error(e)
@@ -182,8 +177,7 @@ class CharmstoreColumn(WidgetWrap):
         self._related_charms = []
         self._bundle_results = []
         self._charm_results = []
-        self.searching = False
-        self.refresh_related()
+        self.loading = True
         self.update()
 
     def build_widgets(self):
@@ -191,9 +185,6 @@ class CharmstoreColumn(WidgetWrap):
         self.pile = Pile([Divider(),
                           self.title])
         return self.pile
-
-    def refresh_related(self):
-        pass
 
     def clear_search_results(self):
         self._bundle_results = []
@@ -206,7 +197,7 @@ class CharmstoreColumn(WidgetWrap):
         else:
             self.state = CharmstoreColumnUIState.SEARCH_RESULTS
         self.current_search_string = s
-        self.searching = True
+        self.loading = True
         self.update()
 
     def update(self):
@@ -222,10 +213,13 @@ class CharmstoreColumn(WidgetWrap):
 
         if self.state == CharmstoreColumnUIState.RELATED:
             # self.title.set_text("Charms Related to this Bundle")
-            self.title.set_text("Popular Charms:")
+            if self.loading:
+                self.title.set_text("Loading Popular Charms…")
+            else:
+                self.title.set_text("Popular Charms:")
 
         else:
-            if self.searching:
+            if self.loading:
                 msg = "Searching for '{}'…\n".format(
                     self.current_search_string)
                 self.title.set_text(msg)
