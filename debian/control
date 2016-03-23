@@ -6,6 +6,7 @@ Build-Depends: bundle-placer,
                debhelper (>= 9),
                dh-python,
                pep8,
+               help2man,
                pyflakes,
                python3-all,
                python3-bson,
@@ -40,7 +41,7 @@ Depends: juju2,
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
-Description: Package runtime for apt installable juju bundles.
+Description: Package runtime for apt installable juju bundles
  This package provides Conjure an interface to configuring apt installable
  packages from the cloud. It utilizes apt, juju, and conjures custom
  configuration views.

@@ -5,6 +5,7 @@ from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 from conjure.ui import ConjureUI
 from conjure import async
+from conjure import __version__ as VERSION
 from conjure.controllers.welcome import WelcomeController
 from conjure.controllers.finish import FinishController
 from conjure.controllers.deploysummary import DeploySummaryController
@@ -99,7 +100,8 @@ def parse_options(argv):
                         dest='status_only',
                         help='Only display the Status of '
                         'existing deployed bundled.')
-
+    parser.add_argument(
+        '--version', action='version', version='%(prog)s {}'.format(VERSION))
     return parser.parse_args(argv)
 
 

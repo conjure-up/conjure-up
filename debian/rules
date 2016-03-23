@@ -1,15 +1,22 @@
 #!/usr/bin/make -f
 
+PKGDIR=debian/conjure
+
 export PYBUILD_NAME=conjure
 export PYBUILD_INSTALL_DIR=usr/share/conjure
 export PYBUILD_INSTALL_ARGS_python3=--install-lib=usr/share/conjure \
 	--install-data=usr/ \
 	--install-scripts=usr/share/conjure \
-	--root=$(CURDIR)/debian/conjure/ \
+	--root=$(PKGDIR) \
 	--no-compile -O0
 
 %:
 	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_install:
+	mkdir -p $(PKGDIR)/usr/share/man/man1
+	help2man $(PKGDIR)/usr/share/conjure/conjure-setup -n "apt install juju bundles" --no-info > $(PKGDIR)/usr/share/man/man1/conjure-setup.1
+	dh_install
 
 override_dh_auto_test:
 	@echo "No tests."
