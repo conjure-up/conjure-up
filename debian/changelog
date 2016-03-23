@@ -1,4 +1,4 @@
-conjure (0.0.1) xenial; urgency=medium
+conjure (0.0.6) xenial; urgency=medium
 
   * Initial Release (LP: #1561037)
 
