@@ -21,9 +21,4 @@ class FinishController:
         self.app.ui.set_body(self.view)
         self.app.ui.set_subheader('Deploy Status - (Q)uit')
 
-        self.app.ui.set_footer("Please visit "
-                               "https://jujucharms.com/docs/stable/"
-                               "juju-managing to learn how to manage "
-                               "your new {} solution!".format(
-                                   self.app.config['name']))
         EventLoop.set_alarm_in(1, self.refresh)

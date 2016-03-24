@@ -23,7 +23,7 @@ class DeploySummaryController:
             AsyncPool.submit(
                 partial(Juju.deploy_bundle, self.bundle)
             )
-            pollinate(self.app.session_id, 'DS')
+            pollinate(self.app.session_id, 'DS', self.app.log)
             self.app.controllers['finish'].render()
 
     def render(self, bundle):
@@ -39,4 +39,4 @@ class DeploySummaryController:
             excerpt=self.excerpt
         )
         self.app.ui.set_body(self.view)
-        pollinate(self.app.session_id, 'SS')
+        pollinate(self.app.session_id, 'SS', self.app.log)

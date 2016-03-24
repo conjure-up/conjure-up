@@ -20,7 +20,7 @@ class JujuControllerController:
         self._bootstrap_future = None
 
     def handle_exception(self, exc):
-        pollinate(self.app.session_id, 'EB')
+        pollinate(self.app.session_id, 'EB', self.app.log)
         self.app.ui.show_exception_message(exc)
 
     def finish(self, controller=None, back=False):
@@ -36,7 +36,7 @@ class JujuControllerController:
             return self.app.controllers['welcome'].render()
 
         if self.bootstrap:
-            pollinate(self.app.session_id, 'JS')
+            pollinate(self.app.session_id, 'JS', self.app.log)
             self._bootstrap_future = Juju.bootstrap_async(
                 'conjure',
                 self.cloud,
@@ -52,7 +52,7 @@ class JujuControllerController:
         result = self._bootstrap_future.result()
         log.debug(result)
         self._bootstrap_future = None
-        pollinate(self.app.session_id, 'JC')
+        pollinate(self.app.session_id, 'JC', self.app.log)
         EventLoop.remove_alarms()
         Juju.switch(self.controller)
         self.app.controllers['deploy'].render(self.controller)

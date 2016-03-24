@@ -38,12 +38,7 @@ class CloudController:
         if create_cloud:
             return self.app.controllers['newcloud'].render(cloud)
 
-        pollinate(self.app.session_id, 'CS')
-
-        # TODO: Move to newcloud controller
-        # if not create_cloud and cloud is not None:
-        #     self.app.controllers['jujucontroller'].render(
-        #         cloud, bootstrap=True)
+        pollinate(self.app.session_id, 'CS', self.app.log)
 
     def render(self):
         self.clouds = self._list_clouds()

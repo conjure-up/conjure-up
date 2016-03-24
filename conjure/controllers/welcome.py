@@ -24,14 +24,14 @@ class WelcomeController:
                 "Unable to determine bundle to deploy: {}".format(name))
 
         BundleModel.bundle = deploy_key
-        pollinate(self.app.session_id, 'BS')
+        pollinate(self.app.session_id, 'BS', self.app.log)
         if Juju.controllers() is None:
             self.app.controllers['clouds'].render()
         else:
             self.app.controllers['jujucontroller'].render()
 
     def render(self):
-        pollinate(self.app.session_id, 'WS')
+        pollinate(self.app.session_id, 'WS', self.app.log)
         config = self.app.config
         self.app.ui.set_header(
             title=config['summary'],

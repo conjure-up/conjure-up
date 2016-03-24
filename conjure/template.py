@@ -1,5 +1,5 @@
 from jinja2 import FileSystemLoader, Environment
-from conjure.utils import FS
+from conjure.utils import spew
 from tempfile import NamedTemporaryFile
 import logging
 import yaml
@@ -43,5 +43,5 @@ def save(template, opts):
     modified = template.render(**opts)
     with NamedTemporaryFile(mode='w', encoding='utf-8',
                             delete=False) as tempf:
-        FS.spew(tempf.name, modified)
+        spew(tempf.name, modified)
         return tempf.name

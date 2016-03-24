@@ -20,11 +20,7 @@ import sys
 import argparse
 import os
 import os.path as path
-import logging
 import uuid
-
-
-log = logging.getLogger('app')
 
 
 class ApplicationException(Exception):
@@ -42,9 +38,9 @@ class ApplicationConfig:
         self.argv = None
         self.controllers = None
         self.current_model = None
-        self.log = None
         self.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
                                     str(uuid.uuid4()))
+        self.log = None
 
 
 class Application:
@@ -66,8 +62,6 @@ class Application:
             config['metadata'] = json.load(json_f)
 
         self.app.config = config
-        self.app.log = setup_logging(self.app.config['name'],
-                                     debug=self.app.argv.debug)
 
         self.app.controllers = {
             'welcome': WelcomeController(self.app),
@@ -80,6 +74,8 @@ class Application:
             'finish': FinishController(self.app)
         }
 
+        self.app.log = setup_logging(self.app.config['name'],
+                                     self.app.argv.debug)
         self.app.log.info('Initialized controllers, starting loop.')
 
     def unhandled_input(self, key):

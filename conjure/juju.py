@@ -1,7 +1,7 @@
 """ Juju helpers
 """
 from conjure.shell import shell
-from conjure.utils import Host
+from conjure.utils import juju_path
 import os
 import yaml
 import json
@@ -97,6 +97,13 @@ class Juju:
         """
         return async.submit(partial(cls.bootstrap, controller,
                                     cloud, upload_tools), exc_cb)
+
+    @classmethod
+    def log(cls, limit=1):
+        """ returns juju debug-log output
+        """
+        sh = shell('juju debug-log -T')
+        return sh
 
     @classmethod
     def available(cls):
@@ -204,7 +211,7 @@ class Juju:
     def current_controller(cls):
         """ Grabs the current default controller
         """
-        env = os.path.join(Host.juju_path(), 'current-controller')
+        env = os.path.join(juju_path(), 'current-controller')
         if not os.path.isfile(env):
             return None
         with open(env) as fp:
@@ -267,7 +274,7 @@ class Juju:
         Returns:
         List of known accounts
         """
-        env = os.path.join(Host.juju_path(), 'accounts.yaml')
+        env = os.path.join(juju_path(), 'accounts.yaml')
         if not os.path.isfile(env):
             raise JujuNotFoundException(
                 "Unable to find: {}".format(env))
@@ -337,5 +344,5 @@ class Juju:
         This is currently necessary as there is no way to tell what provider
         types are associated to a particular controller.
         """
-        cache_path = os.path.join(Host.juju_path(), 'models/cache.yaml')
+        cache_path = os.path.join(juju_path(), 'models/cache.yaml')
         return yaml.safe_load(open(cache_path))

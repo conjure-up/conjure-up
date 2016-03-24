@@ -32,7 +32,7 @@ class DeployController:
 
         bw = BundleWriter(self.placement_controller)
         bw.write_bundle(self.bundle)
-        pollinate(self.app.session_id, 'PC')
+        pollinate(self.app.session_id, 'PC', self.app.log)
         self.app.controllers['deploysummary'].render(self.bundle)
 
     def render(self, model):
@@ -50,7 +50,7 @@ class DeployController:
              'bundle_key': BundleModel.key()})
 
         if info['ProviderType'] == 'maas':
-            pollinate(self.app.session_id, 'PM')
+            pollinate(self.app.session_id, 'PM', self.app.log)
             bootstrap_config = model_cache_controller_provider(
                 info['ServerUUID'])
             maas_server = urlparse(bootstrap_config['maas-server'])
@@ -73,7 +73,7 @@ class DeployController:
             self.app.ui.set_body(mainview)
             mainview.update()
         else:
-            pollinate(self.app.session_id, 'PS')
+            pollinate(self.app.session_id, 'PS', self.app.log)
             # TODO: cleanup a bit
             # FIXME: needs refinement.
             if info['ProviderType'] == 'lxd':

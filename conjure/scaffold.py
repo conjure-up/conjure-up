@@ -6,7 +6,6 @@ import sys
 import json
 import os
 from conjure.shell import shell
-from conjure.lxd import LXD
 
 
 class ScaffoldException(Exception):
@@ -42,7 +41,7 @@ class Scaffold:
             print("Creating {} directory".format(bundle_key_path))
             shell('mkdir -p {}'.format(bundle_key_path))
 
-        LXD.render_lxd_sh(os.path.join(opts.directory, 'lxd.sh'))
+        # render_lxd_sh(os.path.join(opts.directory, 'lxd.sh'))
 
 
 def parse_options(argv):

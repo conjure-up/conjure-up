@@ -1,6 +1,6 @@
 from conjure.ui.views.newcloud import NewCloudView
 from conjure.models.provider import Schema
-from conjure.utils import Host, pollinate
+from conjure.utils import juju_path, pollinate
 import os.path as path
 import yaml
 
@@ -35,7 +35,7 @@ class NewCloudController:
         if back:
             return self.app.controllers['clouds'].render()
 
-        cred_path = path.join(Host.juju_path(), 'credentials.yaml')
+        cred_path = path.join(juju_path(), 'credentials.yaml')
         if path.isfile(cred_path):
             existing_creds = yaml.safe_load(open(cred_path))
 
@@ -57,7 +57,7 @@ class NewCloudController:
         if self.cloud == 'maas':
             self.cloud = '{}/{}'.format(self.cloud,
                                         credentials['maas-server'].value)
-        pollinate(self.app.session_id, 'CA')
+        pollinate(self.app.session_id, 'CA', self.app.log)
         self.app.controllers['jujucontroller'].render(
             self.cloud, bootstrap=True)
 
@@ -75,7 +75,7 @@ class NewCloudController:
         try:
             creds = Schema[cloud]
         except KeyError as e:
-            pollinate(self.app.session_id, 'EC')
+            pollinate(self.app.session_id, 'EC', self.app.log)
             self.app.ui.show_exception_message(e)
 
         self.config = self.app.config
