@@ -9,6 +9,7 @@ from macumba.v2 import JujuClient
 from macumba.errors import LoginError
 from functools import wraps, partial
 from conjure import async
+from subprocess import call
 
 
 def requires_login(f):
@@ -84,8 +85,8 @@ class Juju:
         controller: name of your controller
         cloud: name of local or public cloud to deploy to
         """
-        cmd = ("juju bootstrap {} {} "
-               "--debug --upload-tools ".format(controller, cloud))
+        cmd = ("juju bootstrap {} {} --upload-tools ".format(
+            controller, cloud))
         return shell(cmd)
 
     @classmethod

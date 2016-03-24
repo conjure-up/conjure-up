@@ -36,7 +36,6 @@ class JujuControllerController:
             return self.app.controllers['welcome'].render()
 
         if self.bootstrap:
-            pollinate(self.app.session_id, 'JS', self.app.log)
             self._bootstrap_future = Juju.bootstrap_async(
                 'conjure',
                 self.cloud,
@@ -45,12 +44,17 @@ class JujuControllerController:
                 self._handle_bootstrap_done)
 
             self.app.controllers['bootstrapwait'].render()
+            pollinate(self.app.session_id, 'JS', self.app.log)
+
         else:
             self.app.controllers['deploy'].render(self.controller)
 
     def _handle_bootstrap_done(self, future):
+        self.app.log.debug("handle bootstrap")
         result = self._bootstrap_future.result()
-        log.debug(result)
+        if result.code > 0:
+            self.app.log.error(result.errors())
+            raise Exception(result.errors())
         self._bootstrap_future = None
         pollinate(self.app.session_id, 'JC', self.app.log)
         EventLoop.remove_alarms()

@@ -27,7 +27,7 @@ Vcs-Git: https://github.com/Ubuntu-Solutions-Engineering/conjure.git
 
 Package: conjure
 Architecture: all
-Depends: juju2,
+Depends: juju-core (>= 2.0~),
          rsyslog,
          lxd,
          lxd-client,
