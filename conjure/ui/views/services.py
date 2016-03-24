@@ -49,7 +49,7 @@ class ServicesView(WidgetWrap):
         try:
             self.app.ui.set_footer(out.output()[-1])
         except:
-            self.app.ui.set_footer('')
+            self.app.ui.set_footer('Running...')
         for name, service in status['Services'].items():
             service_w = ServiceWidget(name, service)
             for unit in service_w.Units:
