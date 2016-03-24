@@ -1,0 +1,6 @@
+--ignore-dir=debian
+--ignore-dir=.pybuild
+--ignore-dir=.tox
+--ignore-dir=maasclient
+--ignore-dir=bundleplacer
+--ignore-dir=macumba
