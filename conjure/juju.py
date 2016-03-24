@@ -77,26 +77,23 @@ class Juju:
         cls.is_authenticated = True
 
     @classmethod
-    def bootstrap(cls, controller, cloud, upload_tools=True):
+    def bootstrap(cls, controller, cloud):
         """ Performs juju bootstrap
 
         Arguments:
         controller: name of your controller
         cloud: name of local or public cloud to deploy to
-        upload_tools: True/False if you want to pass in --upload-tools
         """
-        cmd = "juju bootstrap {} {}".format(controller, cloud)
-        if upload_tools:
-            cmd += " --upload-tools"
+        cmd = ("juju bootstrap {} {} "
+               "--debug --upload-tools ".format(controller, cloud))
         return shell(cmd)
 
     @classmethod
-    def bootstrap_async(cls, controller, cloud,
-                        upload_tools=True, exc_cb=None):
+    def bootstrap_async(cls, controller, cloud, exc_cb=None):
         """ Performs a bootstrap asynchronously
         """
         return async.submit(partial(cls.bootstrap, controller,
-                                    cloud, upload_tools), exc_cb)
+                                    cloud), exc_cb)
 
     @classmethod
     def log(cls, limit=1):

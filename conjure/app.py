@@ -76,7 +76,6 @@ class Application:
 
         self.app.log = setup_logging(self.app.config['name'],
                                      self.app.argv.debug)
-        self.app.log.info('Initialized controllers, starting loop.')
 
     def unhandled_input(self, key):
         if key in ['q', 'Q']:

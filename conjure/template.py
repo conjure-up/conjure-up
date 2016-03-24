@@ -1,10 +1,7 @@
 from jinja2 import FileSystemLoader, Environment
 from conjure.utils import spew
 from tempfile import NamedTemporaryFile
-import logging
 import yaml
-
-log = logging.getLogger('template')
 
 
 def render_charm_conf(name, options):

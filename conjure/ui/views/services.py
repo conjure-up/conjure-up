@@ -45,16 +45,11 @@ class ServicesView(WidgetWrap):
         """ Adds services to the view if they don't already exist
         """
         status = model_status()
-        if len(status['Services'].keys()) == 0:
-            self.app.ui.set_footer(
-                'Services being deployed, they will be displayed momentarily.')
-            return
-        else:
-            out = Juju.log()
-            try:
-                self.app.ui.set_footer(out.output()[-1])
-            except:
-                self.app.ui.set_footer('')
+        out = Juju.log()
+        try:
+            self.app.ui.set_footer(out.output()[-1])
+        except:
+            self.app.ui.set_footer('')
         for name, service in status['Services'].items():
             service_w = ServiceWidget(name, service)
             for unit in service_w.Units:
