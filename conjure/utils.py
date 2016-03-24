@@ -2,6 +2,7 @@ import shutil
 import os
 from subprocess import check_call, CalledProcessError
 from conjure.models.bundle import BundleModel
+from conjure.async import submit
 
 
 class UtilsException(Exception):
@@ -131,10 +132,12 @@ def pollinate(session, tag, log):
     if not bundle_key:
         bundle_key = '-'
     agent_str = 'conjure/{}/{}/{}'.format(session, bundle_key, tag)
-    try:
-        cmd = ("sudo su - -c 'pollinate -q -r --curl-opts "
-               "\"-k --user-agent {}\"'".format(agent_str))
-        log.info("pollinate: {}".format(cmd))
-        check_call(cmd, shell=True)
-    except CalledProcessError as e:
-        log.warning("Generating random seed failed: {}".format(e))
+    def do_pollinate():
+        try:
+            cmd = ("sudo su - -c 'pollinate -q -r --curl-opts "
+                   "\"-k --user-agent {}\"'".format(agent_str))
+            log.info("pollinate: {}".format(cmd))
+            check_call(cmd, shell=True)
+        except CalledProcessError as e:
+            log.warning("Generating random seed failed: {}".format(e))
+    submit(do_pollinate, lambda _: None)
