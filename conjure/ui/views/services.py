@@ -128,4 +128,5 @@ class ServicesView(WidgetWrap):
                 unit_w.Icon.set_text(
                     self.status_icon_state(unit['AgentStatus']['Status']))
         except Exception as e:
+            self.app.log.exception(e)
             self.app.ui.show_exception_message(e)
