@@ -47,7 +47,8 @@ class DeployController:
             {'bundle_filename': self.bundle,
              'metadata_filename': metadata_filename,
              'config_filename': self.app.argv.build_conf,
-             'bundle_key': BundleModel.key()})
+             'bundle_key': BundleModel.key(),
+             'provider_type': info['ProviderType']})
 
         if info['ProviderType'] == 'maas':
             pollinate(self.app.session_id, 'PM', self.app.log)
