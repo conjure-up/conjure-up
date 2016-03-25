@@ -81,14 +81,11 @@ class JujuControllerController:
             for c in controllers:
                 Juju.switch(c)
                 models[c] = Juju.models()
-            self.excerpt = (
-                "Please select the model you wish to deploy to")
             self.view = JujuControllerView(self.app,
                                            models,
                                            self.finish)
 
         self.app.ui.set_header(
             title="Juju Model",
-            excerpt=self.excerpt
         )
         self.app.ui.set_body(self.view)

@@ -72,7 +72,10 @@ class JujuControllerView(WidgetWrap):
 
     def _build_existingcontroller_widget(self):
         items = [
-            Padding.center_60(Instruction("Please select an option below:")),
+            Padding.center_60(
+                Instruction(
+                    "Please select a model below or optionally "
+                    "create a new model:")),
             Padding.center_60(HR())
         ]
         for k in sorted(self.models.keys()):
@@ -81,6 +84,8 @@ class JujuControllerView(WidgetWrap):
             items.append(Padding.center_60(
                 Instruction("Model: {}".format(controller_name))))
             for m in self.models[k]['models']:
+                if m['name'] == 'admin':
+                    continue
                 items.append(
                     Padding.center_50(
                         Color.body(
