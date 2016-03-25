@@ -98,8 +98,7 @@ class Application:
 
 
 def parse_options(argv):
-    parser = argparse.ArgumentParser(description="Conjure setup",
-                                     prog="conjure-setup")
+    parser = argparse.ArgumentParser(prog="conjure-setup")
     parser.add_argument('-c', '--config', dest='build_conf', metavar='CONFIG',
                         help='Path to Conjure config')
     parser.add_argument('-m', '--metadata', dest='build_metadata',
