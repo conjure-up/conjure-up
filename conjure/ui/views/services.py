@@ -47,12 +47,13 @@ class ServicesView(WidgetWrap):
         status = model_status()
         out = Juju.log()
         try:
-            self.app.ui.set_footer(out.output()[-1])
+            self.app.ui.set_footer("{}...".format(out.output()[-1][:130]))
         except:
             self.app.ui.set_footer('Running...')
         for name, service in status['Services'].items():
             service_w = ServiceWidget(name, service)
             for unit in service_w.Units:
+                self.app.log.debug("{}".format(unit._name))
                 services_list = []
                 try:
                     unit_w = self.deployed[unit._name]
@@ -82,14 +83,17 @@ class ServicesView(WidgetWrap):
                 self.update_ui_state(unit_w, unit._unit)
 
     def status_icon_state(self, agent_state):
-        if agent_state == "maintenance":
+        if agent_state == "maintenance" \
+           or agent_state == "allocating" \
+           or agent_state == "executing":
             pending_status = [("pending_icon", "\N{CIRCLED BULLET}"),
                               ("pending_icon", "\N{CIRCLED WHITE BULLET}"),
                               ("pending_icon", "\N{FISHEYE}")]
             status = random.choice(pending_status)
-        elif agent_state == "executing":
+        elif agent_state == "waiting":
             status = ("pending_icon", "\N{HOURGLASS}")
-        elif agent_state == "idle":
+        elif agent_state == "idle" \
+                or agent_state == "active":
             status = ("success_icon", "\u2713")
         elif agent_state == "blocked":
             status = ("error_icon", "\N{BLACK FLAG}")
@@ -110,13 +114,18 @@ class ServicesView(WidgetWrap):
         unit: current unit for service
         """
         try:
+            self.app.log.debug('agent status {} workload status {}'.format(
+                unit['AgentStatus']['Status'],
+                unit['WorkloadStatus']['Status']))
             unit_w.PublicAddress.set_text(unit['PublicAddress'])
-            unit_w.AgentStatus.set_text(unit.get['AgentStatus']['Status'])
             unit_w.WorkloadInfo.set_text(unit['WorkloadStatus']['Info'])
-            unit_w.Icon.set_text(
-                self.status_icon_state(unit['AgentStatus']['Status']))
-        except:
-            # FIXME: Once juju beta3 comes out and we can rely on the updated
-            # status api output
-            # self.app.ui.show_exception_message(e)
-            pass
+            if unit['WorkloadStatus']['Status'] != 'unknown':
+                unit_w.AgentStatus.set_text(unit['WorkloadStatus']['Status'])
+                unit_w.Icon.set_text(
+                    self.status_icon_state(unit['WorkloadStatus']['Status']))
+            else:
+                unit_w.AgentStatus.set_text(unit['AgentStatus']['Status'])
+                unit_w.Icon.set_text(
+                    self.status_icon_state(unit['AgentStatus']['Status']))
+        except Exception as e:
+            self.app.ui.show_exception_message(e)
