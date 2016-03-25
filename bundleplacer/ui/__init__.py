@@ -149,7 +149,7 @@ class PlacementView(WidgetWrap):
         self.services_button_grid = GridFlow(self.services_buttons,
                                              36, 1, 0, 'center')
 
-        ws = [Text(("body", "Services"), align='center'),
+        ws = [Divider(), Text(("body", "Services"), align='center'),
               Divider()]
         if self.has_maas:
             ws.append(self.services_button_grid)
@@ -160,7 +160,8 @@ class PlacementView(WidgetWrap):
         self.charm_search_widget = CharmStoreSearchWidget(self.do_add_charm,
                                                           charmstore_column,
                                                           self.config)
-        self.charm_search_header_pile = Pile([Text(("body", "Add Charms"),
+        self.charm_search_header_pile = Pile([Divider(),
+                                              Text(("body", "Add Charms"),
                                                    align='center'),
                                               Divider(),
                                               self.charm_search_widget])
@@ -182,7 +183,8 @@ class PlacementView(WidgetWrap):
 
         f = machines_column.machines_list.handle_filter_change
         self.filter_edit_box = FilterBox(f)
-        pl = [Text(('body',
+        pl = [Divider(),
+              Text(('body',
                     "Ready Machines {}".format(MetaScroll().get_text()[0])),
                    align='center'),
               Divider(),
@@ -194,7 +196,10 @@ class PlacementView(WidgetWrap):
         return self.machines_header_pile
 
     def get_relations_header(self):
-        return Text("Relation Editor")
+        return Pile([Divider(),
+                     Text(('body', "Relation Editor"),
+                          align='center'),
+                     Divider()])
 
     def build_widgets(self):
 
