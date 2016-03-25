@@ -57,11 +57,6 @@ class Config:
             raise ConfigException("Unable to save configuration: {}".format(e))
 
     @property
-    def juju_env(self):
-        "TODO: fake"
-        return defaultdict(lambda: defaultdict(lambda: "?"))
-
-    @property
     def cfg_path(self):
         """ top level configuration path """
         fn = '~/.config/{}'.format(self.name)

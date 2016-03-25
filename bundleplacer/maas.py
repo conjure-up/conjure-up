@@ -308,6 +308,10 @@ class MaasState:
         self._nodes_lock = RLock()
         self._nodes_future = None
         self._start_time = 0
+        self.server_hostname = maas_client.server_hostname
+
+    def get_server_config(self, param):
+        return self.maas_client.get_server_config(param)
 
     def nodes(self, constraints=None):
         """ Cache MAAS nodes

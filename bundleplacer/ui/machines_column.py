@@ -61,10 +61,11 @@ class MachinesColumn(WidgetWrap):
 
     def update(self):
         self.machines_list.update()
-        bc = self.placement_view.config.juju_env['bootstrap-config']
+        maasinfo = self.placement_controller.maasinfo
         empty_maas_msg = ("There are no available machines.\n"
                           "Open {} to add machines to "
-                          "'{}':".format(bc['maas-server'], bc['name']))
+                          "'{}':".format(maasinfo['server_name'],
+                                         maasinfo['server_hostname']))
 
         self.empty_maas_widgets = Pile([Text([('error_icon',
                                                "\N{WARNING SIGN} "),

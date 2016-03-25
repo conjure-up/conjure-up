@@ -20,6 +20,7 @@ import bson
 from requests_oauthlib import OAuth1
 import requests
 import json
+from urllib.parse import urlsplit
 
 
 class MaasClient:
@@ -34,6 +35,7 @@ class MaasClient:
         :param auth: MAAS Authorization class (required)
         """
         self.auth = auth
+        self.server_hostname = urlsplit(auth.api_url).netloc
 
     def _oauth(self):
         """ Generates OAuth attributes for protected resources

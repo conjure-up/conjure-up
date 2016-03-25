@@ -174,12 +174,10 @@ class PlacementView(WidgetWrap):
         self.open_maas_button = AttrMap(b,
                                         'button_secondary',
                                         'button_secondary focus')
+        self.maastitle = Text("Connected to MAAS")
+        maastitle_widgets = Padding(Columns([self.maastitle, (22, self.open_maas_button)]),
+                                    align='center', width='pack', left=2, right=2)
 
-        bc = self.config.juju_env['bootstrap-config']
-        maasname = "'{}' <{}>".format(bc['name'], bc['maas-server'])
-        maastitle = "Connected to MAAS {}".format(maasname)
-        maastitle_grid = GridFlow([Text(maastitle), self.open_maas_button],
-                                  22, 1, 1, 'center')
 
         f = machines_column.machines_list.handle_filter_change
         self.filter_edit_box = FilterBox(f)
@@ -188,12 +186,18 @@ class PlacementView(WidgetWrap):
                     "Ready Machines {}".format(MetaScroll().get_text()[0])),
                    align='center'),
               Divider(),
-              maastitle_grid,
+              maastitle_widgets,
               Divider(),
               self.filter_edit_box]
 
         self.machines_header_pile = Pile(pl)
         return self.machines_header_pile
+
+    def update_machines_header(self):
+        maasinfo = self.placement_controller.maasinfo
+        maasname = "'{}' <{}>".format(maasinfo['server_name'],
+                                      maasinfo['server_hostname'])
+        self.maastitle.set_text("Connected to MAAS {}".format(maasname))
 
     def get_relations_header(self):
         return Pile([Divider(),
@@ -261,6 +265,7 @@ class PlacementView(WidgetWrap):
             c_opts = self.columns.options()
 
             if self.state == UIState.PLACEMENT_EDITOR:
+                self.update_machines_header()
                 self.header_columns.contents[-1] = (self.machines_header,
                                                     h_opts)
                 self.columns.contents[-1] = (self.machines_column, c_opts)

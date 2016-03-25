@@ -26,9 +26,10 @@ from bundleplacer.relationtype import RelationType
 
 class MetadataController:
 
-    def __init__(self, placement_controller, config):
+    def __init__(self, placement_controller, config, error_cb=None):
         self.placement_controller = placement_controller
         self.config = config
+        self.error_cb = error_cb
         self.charm_names = placement_controller.charm_names()
         # charm_name : charm_metadata full dict
         self.charm_info = {}
@@ -133,7 +134,7 @@ class MetadataController:
         return services
 
     def handle_search_error(self, e):
-        pass                    # TODO MMCC
+        self.error_cb(e)
 
 
 class CharmStoreAPI:
