@@ -2,8 +2,7 @@ Source: conjure
 Section: admin
 Priority: extra
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Build-Depends: bundle-placer,
-               debhelper (>= 9),
+Build-Depends: debhelper (>= 9),
                dh-python,
                pep8,
                help2man,
@@ -42,7 +41,7 @@ Depends: juju-core (>= 2.0~),
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
-Description: Package runtime for apt installable juju bundles
- This package provides Conjure an interface to configuring apt installable
- packages from the cloud. It utilizes apt, juju, and conjures custom
+Description: Package runtime for apt-installable juju bundles
+ This package provides Conjure, an interface to configuring apt-installable
+ packages from the cloud. It utilizes apt, juju, and conjure's custom
  configuration views.
