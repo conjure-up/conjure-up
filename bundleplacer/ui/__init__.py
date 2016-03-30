@@ -65,7 +65,8 @@ class PlacementView(WidgetWrap):
         self.state = initial_state
         self.has_maas = has_maas
         self.prev_state = None
-        self.metadata_controller = MetadataController(placement_controller, config)
+        self.metadata_controller = MetadataController(placement_controller,
+                                                      config)
         w = self.build_widgets()
         super().__init__(w)
         self.reset_selections(top=True)  # calls self.update
@@ -175,9 +176,11 @@ class PlacementView(WidgetWrap):
                                         'button_secondary',
                                         'button_secondary focus')
         self.maastitle = Text("Connected to MAAS")
-        maastitle_widgets = Padding(Columns([self.maastitle, (22, self.open_maas_button)]),
-                                    align='center', width='pack', left=2, right=2)
-
+        maastitle_widgets = Padding(Columns([self.maastitle,
+                                             (22, self.open_maas_button)]),
+                                    align='center',
+                                    width='pack', left=2,
+                                    right=2)
 
         f = machines_column.machines_list.handle_filter_change
         self.filter_edit_box = FilterBox(f)

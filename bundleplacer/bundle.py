@@ -173,6 +173,12 @@ class Bundle:
     def machines(self):
         return self._bundle.get('machines', {})
 
+    def clear_machines_and_placement(self):
+        self._bundle['machines'] = {}
+        for sname, sd in self._bundle['services'].items():
+            if 'to' in sd:
+                del(sd['to'])
+
     @property
     def assignments(self):
         """returns a dict of service_name: [to-strings]"""

@@ -51,7 +51,7 @@ class MetadataController:
         key = self.config.getopt('bundle_key')
         bundles = bundle_config['bundles']
 
-        if type(bundles) == type([]):
+        if isinstance(bundles, list):
             bundle_dict = next((d for d in bundles if d['key'] == key),
                                {})
         else:

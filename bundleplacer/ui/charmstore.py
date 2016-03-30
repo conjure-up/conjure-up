@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from enum import Enum
-import json
 import logging
 
 
@@ -168,7 +167,7 @@ class BundleWidget(WidgetWrap):
         else:
             summary = "{} services".format(len(self.md['Services']))
         s = "{} ({})\n    {}\n".format(bundle_name, self.bundle_source,
-                                               summary)
+                                       summary)
 
         top = []
         if self.header:
@@ -280,7 +279,8 @@ class CharmstoreColumn(WidgetWrap):
                            "{}\n".format(self.current_search_string,
                                          advice))
                 else:
-                    msg = ("Showing the top {} bundles and {} charms matching {}:"
+                    msg = ("Showing the top {} bundles and {} "
+                           "charms matching {}:"
                            "\n".format(bn, cn, self.current_search_string))
             self.title.set_text(msg)
             extra_widgets = [(self.title, opts)]
