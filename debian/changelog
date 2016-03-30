@@ -1,11 +1,11 @@
-conjure (0.0.7) xenial; urgency=medium
-
-  * Dev release
-
- -- Adam Stokes <adam.stokes@ubuntu.com>  Fri, 25 Mar 2016 09:19:54 -0400
-
 conjure (0.0.6) xenial; urgency=medium
 
   * Initial Release (LP: #1561037)
+  * d/control
+    - Fix grammatical errors
+    - Remove unused build-dep (bundle-placer)
+  * d/copyright
+    - Fix header to point to correct upstream location
+    - remove duplicate copyright globs
 
  -- Adam Stokes <adam.stokes@ubuntu.com>  Tue, 17 Nov 2015 10:25:15 -0400
