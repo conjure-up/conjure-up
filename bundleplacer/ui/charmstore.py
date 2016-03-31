@@ -293,7 +293,11 @@ class CharmstoreColumn(WidgetWrap):
 
     def focus_prev_or_top(self):
         if len(self.pile.contents) > 2:
-            self.pile.focus_position = 2
+            if self.state == CharmstoreColumnUIState.RELATED and \
+               not self.loading:
+                self.pile.focus_position = 1
+            else:
+                self.pile.focus_position = 2
 
     def do_add_charm(self, charm_name, charm_dict):
         self.placement_view.do_add_charm(charm_name,
