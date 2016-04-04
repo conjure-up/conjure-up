@@ -28,6 +28,7 @@ clean:
 	@rm -rf cover
 	@rm -rf .coverage
 	@rm -rf .tox
+	@rm -rf dist
 
 DPKGBUILDARGS = -us -uc -i'.git.*|.tox|.bzr.*|.editorconfig|.travis-yaml|macumba\/debian|maasclient\/debian'
 deb-src: clean update_version

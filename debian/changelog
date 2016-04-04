@@ -7,5 +7,6 @@ conjure (0.0.6) xenial; urgency=medium
   * d/copyright
     - Fix header to point to correct upstream location
     - remove duplicate copyright globs
+    - Add missing copyright directories
 
  -- Adam Stokes <adam.stokes@ubuntu.com>  Tue, 17 Nov 2015 10:25:15 -0400
