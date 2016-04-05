@@ -289,7 +289,14 @@ class CharmstoreColumn(WidgetWrap):
 
     def add_results(self, bundle_results, charm_results):
         self._bundle_results += bundle_results
-        self._charm_results += charm_results
+        self._bundle_results = self._bundle_results[:5]
+        existing_charms = [s.charm_source.rsplit('-', 1)[0] for s in
+                           self.placement_controller.bundle.services]
+        filtered_charm_results = [c for c in charm_results
+                                  if c['Id'].rsplit('-', 1)[0]
+                                  not in existing_charms]
+        self._charm_results += filtered_charm_results
+        self._charm_results = self._charm_results[:10]
 
     def focus_prev_or_top(self):
         if len(self.pile.contents) > 2:

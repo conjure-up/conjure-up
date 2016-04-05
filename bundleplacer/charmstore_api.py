@@ -210,7 +210,7 @@ class CharmStoreAPI:
         def _do_search():
             url = (self.baseurl +
                    "/search?text={}&autocomplete=1".format(substring) +
-                   "&limit=5&include=charm-metadata&include=bundle-metadata")
+                   "&limit=20&include=charm-metadata&include=bundle-metadata")
             charm_url = url + "&type=charm"
             bundle_url = url + "&type=bundle"
             cr = requests.get(charm_url)
