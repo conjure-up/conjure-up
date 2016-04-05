@@ -5,7 +5,6 @@ from ubuntui.widgets.juju.service import ServiceWidget
 from ubuntui.widgets.table import Table
 from ubuntui.utils import Color
 from conjure.api.models import model_status
-from conjure.juju import Juju
 
 
 log = logging.getLogger('services_status')
@@ -108,6 +107,7 @@ class ServicesView(WidgetWrap):
         unit_w: UnitInfo widget
         unit: current unit for service
         """
+        unit_w.Machine.set_text(unit.get('Machine', '-'))
         try:
             self.app.log.debug('agent status {} workload status {}'.format(
                 unit['AgentStatus']['Status'],
