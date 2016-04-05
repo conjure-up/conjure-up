@@ -113,12 +113,15 @@ def pollinate(session, tag, log):
         SS - deploy summary shown
         DS - deploy started
         DC - deploy complete (currently unused)
+        XA - pre processing started
+        XB - post processing started
 
         UC - user cancelled
         EC - error getting credentials
         EP - error in placement/bundle editor
         EB - error juju bootstrap
         ED - error deploying (unused)
+        EX - error in pre/post processor
 
     Arguments:
     session: randomly generated session id
