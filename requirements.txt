@@ -1,3 +1,6 @@
 urwid
 pyyaml
 jinja2
+bson
+requests_oauthlib
+ws4py
