@@ -132,6 +132,7 @@ def pollinate(session, tag, log):
     if not bundle_key:
         bundle_key = '-'
     agent_str = 'conjure/{}/{}/{}'.format(session, bundle_key, tag)
+
     def do_pollinate():
         try:
             cmd = ("sudo su - -c 'pollinate -q -r --curl-opts "
