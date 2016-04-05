@@ -4,6 +4,7 @@
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 from conjure.ui import ConjureUI
+from conjure.juju import Juju
 from conjure import async
 from conjure import __version__ as VERSION
 from conjure.controllers.welcome import WelcomeController
@@ -117,19 +118,36 @@ def parse_options(argv):
 
 
 def main():
+    try:
+        docs_url = "https://jujucharms.com/docs/stable/getting-started"
+        juju_version = Juju.version()
+        if int(juju_version[0]) < 2:
+            print(
+                "Only Juju v2 and above is supported, "
+                "your currently installed version is {}.\n\n"
+                "Please refer to {} for help on installing "
+                "the correct Juju.".format(juju_version, docs_url))
+            sys.exit(1)
+    except Exception as e:
+        print(e)
+        sys.exit(1)
+
     opts = parse_options(sys.argv[1:])
 
     if not opts.build_conf:
-        raise ApplicationException(
+        print(
             "A conjure config is required, see conjure-setup -h.")
+        sys.exit(1)
 
     if not path.exists(opts.build_conf):
-        raise ApplicationException("Unable to find {}".format(opts.build_conf))
+        print("Unable to find {}".format(opts.build_conf))
+        sys.exit(1)
 
     if not path.exists(opts.build_metadata):
-        raise ApplicationException("Unable to find {} metadata".format(
+        print("Unable to find {} metadata".format(
             opts.build_metadata
         ))
+        sys.exit(1)
 
     app = Application(opts)
     app.start()

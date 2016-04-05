@@ -344,3 +344,17 @@ class Juju:
         """
         cache_path = os.path.join(juju_path(), 'models/cache.yaml')
         return yaml.safe_load(open(cache_path))
+
+    @classmethod
+    def version(cls):
+        """ Returns version of Juju
+        """
+        sh = shell('juju version')
+        if sh.code > 0:
+            raise JujuNotFoundException(
+                "Unable to get Juju Version".format(sh.errors()))
+        out = sh.output()
+        if isinstance(out, list):
+            return out.pop()
+        else:
+            return out
