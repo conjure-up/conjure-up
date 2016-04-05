@@ -118,6 +118,8 @@ def parse_options(argv):
 
 
 def main():
+    opts = parse_options(sys.argv[1:])
+
     try:
         docs_url = "https://jujucharms.com/docs/stable/getting-started"
         juju_version = Juju.version()
@@ -131,8 +133,6 @@ def main():
     except Exception as e:
         print(e)
         sys.exit(1)
-
-    opts = parse_options(sys.argv[1:])
 
     if not opts.build_conf:
         print(
