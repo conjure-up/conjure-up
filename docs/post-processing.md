@@ -30,3 +30,11 @@ customize the charm being deployed.
 * `post.sh` - Perform post actions after the charm has been deployed. Useful for
   configuring things like a registering against Autopilot and returning a URL to
   the user for further installation.
+
+### Communicating with the UI
+
+We need a way to communicate messages back to the conjure status screen. Some ideas:
+
+* Redis as a pubsub
+* The post process scripts should be a python module that is imported via conjure to
+  provide access to the UI and its ability to display status messages.
