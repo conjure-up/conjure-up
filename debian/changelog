@@ -1,3 +1,9 @@
+conjure (0.0.7) UNRELEASED; urgency=medium
+
+  * Start next dev release.
+
+ -- Adam Stokes <adam.stokes@ubuntu.com>  Tue, 05 Apr 2016 11:36:50 -0400
+
 conjure (0.0.6) xenial; urgency=medium
 
   * Initial Release (LP: #1561037)
