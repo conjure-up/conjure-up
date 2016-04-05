@@ -107,8 +107,8 @@ class ServicesView(WidgetWrap):
         unit_w: UnitInfo widget
         unit: current unit for service
         """
-        unit_w.Machine.set_text(unit.get('Machine', '-'))
         try:
+            unit_w.Machine.set_text(unit.get('Machine', '-'))
             self.app.log.debug('agent status {} workload status {}'.format(
                 unit['AgentStatus']['Status'],
                 unit['WorkloadStatus']['Status']))
