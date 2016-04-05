@@ -18,16 +18,13 @@ that will contain each known charm as defined by an existing bundle. Beneath
 those charm directories will contain files to alter the state of deployment and
 customize the charm being deployed.
 
-* `pre.sh` - This is a special case where you will be deploying to a LXD
-  controller and need to do alterations to the controllers for things like
-  adding additional network interfaces for neutron, or loading specific kernel
-  modules, etc. Basic checks are in place to not run the lxd script on
-  controllers that aren't lxd, however, anything other than that is up to the
-  user. **Note**: this will apply to all containers.
+* `pre.sh` - Runs regardless, passing in the controller type. Useful if you need to
+apply an updated profile to the LXD type.
+
 * `post.sh` - Perform post actions after the charm(s) have been deployed. Useful for
-  configuring things like registering against Autopilot and returning a URL to
-  the user for further installation. The script can be re-run several times in
-  instances where services may not be fully up at the same time.
+configuring things like registering against Autopilot and returning a URL to
+the user for further installation. The script can be re-run several times in
+instances where services may not be fully up at the same time.
 
 The script can do things like the following (by no means limited to just these tasks):
 * Set config items via juju get/set
@@ -44,9 +41,15 @@ The output returned from the script should be in the format of:
 ```json
 {
     "message": "A success/fail message",
-    "returnCode": 127
+    "postStatus": "Unfinished",
+    "returnCode": $?
 }
 ```
+
+Definitions:
+* message: A typical string describing the outcome of the script
+* postStatus: A conjure specific return letting the queue know if the script needs to run again or has finished.
+* returnCode: Return code of the processes exit code from within the script
 
 ### Communicating with the UI
 
