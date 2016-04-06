@@ -1,11 +1,97 @@
 from conjure.ui.views.services import ServicesView
 from ubuntui.ev import EventLoop
+from conjure.juju import Juju
+from functools import partial
+from conjure import async
+from conjure import shell
+from conjure.models.bundle import BundleModel
+from conjure.utils import pollinate
+import os.path as path
 
 
 class FinishController:
 
     def __init__(self, app):
         self.app = app
+        self._post_exec_pollinate = False
+        self._pre_exec_pollinate = False
+
+    def handle_exception(self, exc):
+        pollinate(self.app.session_id, 'EX', self.app.log)
+        self.app.ui.show_exception_message(exc)
+
+    def handle_post_execption(self, exc):
+        """ If an exception occurs in the post processing,
+        log it but don't die
+        """
+        self.app.log.exception(exc)
+
+    def _pre_exec(self, *args):
+        """ Executes a bundles pre processing script if exists
+        """
+        self._pre_exec_sh = path.join('/usr/share/',
+                                      self.app.config['name'],
+                                      BundleModel.key(),
+                                      'pre.sh')
+        if not path.isfile(self._pre_exec_sh):
+            return
+        self.app.ui.set_footer('Running pre-processing tasks.')
+        if not self._pre_exec_pollinate:
+            pollinate(self.app.session_id, 'XA', self.app.log)
+            self._pre_exec_pollinate = True
+        cmd = ("bash {script}".format(script=self._pre_exec_sh))
+        future = async.submit(partial(shell, cmd), self.handle_exception)
+        future.add_done_callback(self._pre_exec_done)
+
+    def _pre_exec_done(self, future):
+        result = future.result()
+        if result['returnCode'] > 0:
+            raise Exception(
+                'There was an error during the pre processing phase.')
+        self._deploy_bundle()
+
+    def _deploy_bundle(self):
+        """ Performs the bootstrap in between processing scripts
+        """
+        self.app.ui.set_footer('Deploying bundle')
+        pollinate(self.app.session_id, 'DS', self.app.log)
+        future = async.submit(
+            partial(Juju.deploy_bundle, self.bundle), self.handle_exception)
+        future.add_done_callback(self._deploy_bundle_done)
+
+    def _deploy_bundle_done(self, future):
+        result = future.result()
+        if result['returnCode'] > 0:
+            raise Exception(
+                'There was an error during the post processing phase.')
+        EventLoop.set_alarm_in(1, self._post_exec)
+
+    def _post_exec(self, *args):
+        """ Executes a bundles post processing script if exists
+        """
+        self._post_exec_sh = path.join('/usr/share/',
+                                       self.app.config['name'],
+                                       BundleModel.key(),
+                                       'post.sh')
+
+        if not path.isfile(self._post_exec_sh):
+            return
+        self.app.ui.set_footer('Running post-processing tasks.')
+        if not self._post_exec_pollinate:
+            # We dont want to keep pollinating since this routine could
+            # run multiple times
+            pollinate(self.app.session_id, 'XB', self.app.log)
+            self._post_exec_pollinate = True
+        cmd = ("bash {script}".format(script=self._post_exec_sh))
+        future = async.submit(partial(shell, cmd), self.handle_post_execption)
+        future.add_done_callback(self._post_exec_done)
+
+    def _post_exec_done(self, future):
+        result = future.result()
+        if result['returnCode'] > 0:
+            self.app.log.error(
+                'There was an error during the post processing phase.')
+            EventLoop.set_alarm_in(1, self._post_exec)
 
     def refresh(self, *args):
         self.view.refresh_nodes()
@@ -21,4 +107,5 @@ class FinishController:
         self.app.ui.set_body(self.view)
         self.app.ui.set_subheader('Deploy Status - (Q)uit')
 
+        EventLoop.set_alarm_in(1, self._pre_exec)
         EventLoop.set_alarm_in(1, self.refresh)
