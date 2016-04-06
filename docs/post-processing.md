@@ -5,7 +5,7 @@ Add ability to customize charm deployments through a post processing mechanism.
 ### Directory Layout
 
 ```
-/usr/share/openstack/
+/usr/share/openstack/bundles/
    - landscape-dense-maas(bundle)
       - pre.sh
       - post.sh
@@ -41,14 +41,14 @@ The output returned from the script should be in the format of:
 ```json
 {
     "message": "A success/fail message",
-    "postStatus": "Unfinished",
+    "postComplete": true,
     "returnCode": $?
 }
 ```
 
 Definitions:
 * message: A typical string describing the outcome of the script
-* postStatus: A conjure specific return letting the queue know if the script needs to run again or has finished.
+* postComplete: A conjure specific return letting the queue know if the script needs to run again or has finished.
 * returnCode: Return code of the processes exit code from within the script
 
 ### Communicating with the UI
