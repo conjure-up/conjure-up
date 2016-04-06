@@ -27,6 +27,8 @@ class FakeMaasState:
     against a set of machines
     """
 
+    server_hostname = "fake.maas"
+
     def machines(self, state=None, constraints=None):
         fakepath = '/usr/share/bundle-placer/share'
         fn = os.path.join(fakepath, "maas-machines.json")
@@ -46,3 +48,6 @@ class FakeMaasState:
 
     def machines_summary(self):
         return "no summary for fake state"
+
+    def get_server_config(self, param):
+        return dict(maas_name='fake maas')

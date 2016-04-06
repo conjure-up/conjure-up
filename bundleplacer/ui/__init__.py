@@ -88,6 +88,9 @@ class PlacementView(WidgetWrap):
         else:
             tabloop = ['headercol1', 'col1', 'headercol2', 'col2', 'footer']
 
+        if not self.has_maas:
+            tabloop.remove('headercol1')
+
         def goto_header_col1():
             self.frame.focus_position = 'header'
             self.header_columns.focus_position = 0
