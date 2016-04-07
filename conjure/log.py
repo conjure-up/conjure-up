@@ -11,7 +11,7 @@ def setup_logging(app, debug=False):
         env = logging.INFO
     cmdslog.setLevel(env)
     cmdslog.setFormatter(logging.Formatter(
-        "%(name)s: [%(levelname)s]: %(message)s"))
+        "%(name)s: [%(levelname)s] %(message)s"))
 
     logger = logging.getLogger(app)
     logger.setLevel(env)

@@ -102,15 +102,19 @@ class FinishController:
         future.add_done_callback(self._post_exec_done)
 
     def _post_exec_done(self, future):
-        result = json.loads(future.result().decode('utf8'))
-        self.app.log.debug("post_exec_done: {}".format(result))
-        if result['returnCode'] > 0 or not result['postComplete']:
-            self.app.log.error(
-                'There was an error during the post processing '
-                'phase, retrying.')
-            EventLoop.set_alarm_in(1, self._post_exec)
-        else:
-            self.app.ui.set_footer('Post processing completed.')
+        try:
+            result = json.loads(future.result().decode('utf8'))
+            self.app.log.debug("post_exec_done: {}".format(result))
+            if result['returnCode'] > 0 or not result['postComplete']:
+                self.app.log.error(
+                    'There was an error during the post processing '
+                    'phase, retrying.')
+                EventLoop.set_alarm_in(1, self._post_exec)
+            else:
+                self.app.ui.set_footer('Post processing completed.')
+        except Exception as e:
+            self.app.log.error(e)
+            self.app.ui.show_exception_message(e)
 
     def refresh(self, *args):
         self.view.refresh_nodes()
