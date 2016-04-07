@@ -161,9 +161,11 @@ class PlacementView(WidgetWrap):
         return Pile(ws)
 
     def get_charmstore_header(self, charmstore_column):
+        series = self.placement_controller.bundle.series
         self.charm_search_widget = CharmStoreSearchWidget(self.do_add_charm,
                                                           charmstore_column,
-                                                          self.config)
+                                                          self.config,
+                                                          series)
         self.charm_search_header_pile = Pile([Divider(),
                                               Text(("body", "Add Charms"),
                                                    align='center'),

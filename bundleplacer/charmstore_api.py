@@ -30,6 +30,7 @@ class MetadataController:
         self.placement_controller = placement_controller
         self.config = config
         self.error_cb = error_cb
+        self.series = placement_controller.bundle.series
         self.charm_names = placement_controller.charm_names()
         # charm_name : charm_metadata full dict
         self.charm_info = {}
@@ -70,14 +71,16 @@ class MetadataController:
                                           self.handle_search_error)
 
     def _do_load(self, charm_names):
-        ids = "&".join(["id={}".format(n) for n in charm_names])
+        ids = "&".join(["id={}/{}".format(self.series, n)
+                        for n in charm_names])
         url = 'https://api.jujucharms.com/v4/meta/any?include=charm-metadata&'
         url += ids
         r = requests.get(url)
         metas = r.json()
         for charm_name, charm_dict in metas.items():
             md = charm_dict["Meta"]["charm-metadata"]
-            self.charm_info[charm_name] = charm_dict
+            charm_name_no_series = charm_name.split("/")[-1]
+            self.charm_info[charm_name_no_series] = charm_dict
             rd = md.get("Requires", {})
             pd = md.get("Provides", {})
             requires = []
@@ -86,16 +89,16 @@ class MetadataController:
                 iface = d["Interface"]
                 requires.append((relname, iface))
                 self.charms_requiring_iface[iface].append((relname,
-                                                           charm_name))
+                                                           charm_name_no_series))
 
             for relname, d in pd.items():
                 iface = d["Interface"]
                 provides.append((relname, iface))
                 self.charms_providing_iface[iface].append((relname,
-                                                           charm_name))
+                                                           charm_name_no_series))
 
-            self.iface_info[charm_name] = dict(requires=requires,
-                                               provides=provides)
+            self.iface_info[charm_name_no_series] = dict(requires=requires,
+                                                         provides=provides)
 
     def loaded(self):
         return self.metadata_future.done()
@@ -147,12 +150,14 @@ class CharmStoreAPI:
     _cache = {}
     _cachelock = RLock()
 
-    def __init__(self):
+    def __init__(self, series):
         self.baseurl = 'https://api.jujucharms.com/v4'
+        self.series = series
 
     def _do_remote_lookup(self, charm_name, metakey):
         url = (self.baseurl + '/meta/' +
-               'any?include=charm-metadata&id={}'.format(charm_name))
+               'any?include=charm-metadata&id={}/{}'.format(self.series,
+                                                            charm_name))
         r = requests.get(url)
         rj = r.json()
         if len(rj.items()) != 1:
@@ -211,7 +216,7 @@ class CharmStoreAPI:
             url = (self.baseurl +
                    "/search?text={}&autocomplete=1".format(substring) +
                    "&limit=20&include=charm-metadata&include=bundle-metadata")
-            charm_url = url + "&type=charm"
+            charm_url = url + "&type=charm&series={}".format(self.series)
             bundle_url = url + "&type=bundle"
             cr = requests.get(charm_url)
             crj = cr.json()

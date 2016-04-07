@@ -173,6 +173,10 @@ class Bundle:
     def machines(self):
         return self._bundle.get('machines', {})
 
+    @property
+    def series(self):
+        return self._bundle.get('series', 'trusty')
+
     def clear_machines_and_placement(self):
         self._bundle['machines'] = {}
         for sname, sd in self._bundle['services'].items():

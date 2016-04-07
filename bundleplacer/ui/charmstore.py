@@ -30,11 +30,11 @@ log = logging.getLogger('bundleplacer')
 
 class CharmStoreSearchWidget(WidgetWrap):
 
-    def __init__(self, add_cb, charmstore_column, config):
+    def __init__(self, add_cb, charmstore_column, config, series):
         self.add_cb = add_cb
         self.charmstore_column = charmstore_column
         self.config = config
-        self.api = CharmStoreAPI()
+        self.api = CharmStoreAPI(series=series)
         self.search_delay_alarm = None
         self.search_text = ""
         self._search_future = None
