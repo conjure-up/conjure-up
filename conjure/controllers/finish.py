@@ -3,10 +3,11 @@ from ubuntui.ev import EventLoop
 from conjure.juju import Juju
 from functools import partial
 from conjure import async
-from conjure import shell
 from conjure.models.bundle import BundleModel
 from conjure.utils import pollinate
 import os.path as path
+import json
+from subprocess import check_output
 
 
 class FinishController:
@@ -29,11 +30,15 @@ class FinishController:
     def _pre_exec(self, *args):
         """ Executes a bundles pre processing script if exists
         """
+        self.app.log.debug("pre_exec start: {}".format(args))
         self._pre_exec_sh = path.join('/usr/share/',
                                       self.app.config['name'],
+                                      'bundles',
                                       BundleModel.key(),
                                       'pre.sh')
         if not path.isfile(self._pre_exec_sh):
+            self.app.log.debug(
+                "Unable to find: {}, skipping".format(self._pre_exec_sh))
             return
         self.app.ui.set_footer('Running pre-processing tasks.')
         if not self._pre_exec_pollinate:
@@ -41,16 +46,18 @@ class FinishController:
             self._pre_exec_pollinate = True
         cmd = ("bash {script}".format(script=self._pre_exec_sh))
         self.app.log.debug("pre_exec running {}".format(cmd))
-        future = async.submit(partial(shell, cmd), self.handle_exception)
+        future = async.submit(partial(check_output, cmd, shell=True),
+                              self.handle_exception)
         future.add_done_callback(self._pre_exec_done)
 
     def _pre_exec_done(self, future):
-        result = future.result()
+        result = json.loads(future.result().decode('utf8'))
         self.app.log.debug("pre_exec_done: {}".format(result))
         if result['returnCode'] > 0:
             raise Exception(
                 'There was an error during the pre processing phase.')
-        self._deploy_bundle()
+        # self._deploy_bundle()
+        self._post_exec()
 
     def _deploy_bundle(self):
         """ Performs the bootstrap in between processing scripts
@@ -75,10 +82,13 @@ class FinishController:
         """
         self._post_exec_sh = path.join('/usr/share/',
                                        self.app.config['name'],
+                                       'bundles',
                                        BundleModel.key(),
                                        'post.sh')
 
         if not path.isfile(self._post_exec_sh):
+            self.app.log.debug(
+                "Unable to find: {}, skipping".format(self._post_exec_sh))
             return
         self.app.ui.set_footer('Running post-processing tasks.')
         if not self._post_exec_pollinate:
@@ -88,11 +98,12 @@ class FinishController:
             self._post_exec_pollinate = True
         cmd = ("bash {script}".format(script=self._post_exec_sh))
         self.app.log.debug("post_exec running: {}".format(cmd))
-        future = async.submit(partial(shell, cmd), self.handle_post_execption)
+        future = async.submit(partial(check_output, cmd, shell=True),
+                              self.handle_post_execption)
         future.add_done_callback(self._post_exec_done)
 
     def _post_exec_done(self, future):
-        result = future.result()
+        result = json.loads(future.result().decode('utf8'))
         self.app.log.debug("post_exec_done: {}".format(result))
         if result['returnCode'] > 0:
             self.app.log.error(

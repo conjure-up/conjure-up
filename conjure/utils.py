@@ -140,7 +140,7 @@ def pollinate(session, tag, log):
         try:
             cmd = ("sudo su - -c 'pollinate -q -r --curl-opts "
                    "\"-k --user-agent {}\"'".format(agent_str))
-            log.info("pollinate: {}".format(cmd))
+            log.debug("pollinate: {}".format(cmd))
             check_call(cmd, shell=True)
         except CalledProcessError as e:
             log.warning("Generating random seed failed: {}".format(e))
