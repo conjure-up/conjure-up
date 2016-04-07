@@ -99,13 +99,15 @@ def pollinate(session, tag, log):
     """ fetches random seed
 
     Tag definitions:
-        WS - welcome shown
-        BS - bundle selected
+        W001 - welcome shown
+        B001 - bundle selected
         CS - cloud selected
         CC - cloud creation started
         CA - cloud credentials added
-        JS - juju bootstrap started
-        JC - juju bootstrap completed
+        J001 - juju post-bootstrap started
+        J002 - juju post-bootstrap completed
+        J003 - juju bootstrap started
+        J004 - juju bootstrap completed
         CS - controller selected
         PM - placement/bundle editor shown (maas)
         PS - placement/bundle editor shown (other)
@@ -121,7 +123,8 @@ def pollinate(session, tag, log):
         EP - error in placement/bundle editor
         EB - error juju bootstrap
         ED - error deploying (unused)
-        EX - error in pre/post processor
+        E001 - error in post bootstrap phase
+        E002 - error in pre/post processor
 
     Arguments:
     session: randomly generated session id

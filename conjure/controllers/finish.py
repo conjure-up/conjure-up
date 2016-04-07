@@ -18,7 +18,7 @@ class FinishController:
         self._pre_exec_pollinate = False
 
     def handle_exception(self, exc):
-        pollinate(self.app.session_id, 'EX', self.app.log)
+        pollinate(self.app.session_id, 'E002', self.app.log)
         self.app.ui.show_exception_message(exc)
 
     def handle_post_execption(self, exc):
@@ -39,7 +39,7 @@ class FinishController:
         if not path.isfile(self._pre_exec_sh):
             self.app.log.debug(
                 "Unable to find: {}, skipping".format(self._pre_exec_sh))
-            return
+            self._deploy_bundle()
         self.app.ui.set_footer('Running pre-processing tasks.')
         if not self._pre_exec_pollinate:
             pollinate(self.app.session_id, 'XA', self.app.log)
@@ -56,8 +56,7 @@ class FinishController:
         if result['returnCode'] > 0:
             raise Exception(
                 'There was an error during the pre processing phase.')
-        # self._deploy_bundle()
-        self._post_exec()
+        self._deploy_bundle()
 
     def _deploy_bundle(self):
         """ Performs the bootstrap in between processing scripts
@@ -72,7 +71,7 @@ class FinishController:
     def _deploy_bundle_done(self, future):
         result = future.result()
         self.app.log.debug("deploy_bundle_done: {}".format(result))
-        if result['returnCode'] > 0:
+        if result.code > 0:
             raise Exception(
                 'There was an error during the post processing phase.')
         EventLoop.set_alarm_in(1, self._post_exec)
@@ -105,16 +104,25 @@ class FinishController:
     def _post_exec_done(self, future):
         result = json.loads(future.result().decode('utf8'))
         self.app.log.debug("post_exec_done: {}".format(result))
-        if result['returnCode'] > 0:
+        if result['returnCode'] > 0 or not result['postComplete']:
             self.app.log.error(
-                'There was an error during the post processing phase.')
+                'There was an error during the post processing '
+                'phase, retrying.')
             EventLoop.set_alarm_in(1, self._post_exec)
+        else:
+            self.app.ui.set_footer('Post processing completed.')
 
     def refresh(self, *args):
         self.view.refresh_nodes()
         EventLoop.set_alarm_in(1, self.refresh)
 
-    def render(self):
+    def render(self, bundle):
+        """ Render services status view
+
+        Arguments:
+        bundle: modified bundle to deploy
+        """
+        self.bundle = bundle
         self.view = ServicesView(self.app)
 
         self.app.ui.set_header(

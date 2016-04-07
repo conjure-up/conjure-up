@@ -17,7 +17,7 @@ class DeploySummaryController:
                 self.app.current_model
             )
         else:
-            self.app.controllers['finish'].render()
+            self.app.controllers['finish'].render(self.bundle)
 
     def render(self, bundle):
         self.bundle = bundle
