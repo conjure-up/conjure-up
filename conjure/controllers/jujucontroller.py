@@ -75,7 +75,7 @@ class JujuControllerController:
                                             'post-bootstrap.sh')
         if not path.isfile(self._post_bootstrap_sh):
             self.app.log.debug(
-                "Unable to find: {}, skipping".format(self._post_bootstra_sh))
+                "Unable to find: {}, skipping".format(self._post_bootstrap_sh))
             return
         self.app.ui.set_footer('Running post-bootstrap tasks.')
         pollinate(self.app.session_id, 'J001', self.app.log)
