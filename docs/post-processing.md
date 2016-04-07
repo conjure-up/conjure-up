@@ -8,6 +8,7 @@ Add ability to customize charm deployments through a post processing mechanism.
 /usr/share/openstack/bundles/
    - landscape-dense-maas(bundle)
       - pre.sh
+      - post-bootstrap.sh
       - post.sh
 ```
 
@@ -20,6 +21,8 @@ customize the charm being deployed.
 
 * `pre.sh` - Runs regardless, passing in the controller type. Useful if you need to
 apply an updated profile to the LXD type.
+
+* `post-bootstrap.sh` - Runs once a bootstrap has finished and before a deployment occurs.
 
 * `post.sh` - Perform post actions after the charm(s) have been deployed. Useful for
 configuring things like registering against Autopilot and returning a URL to

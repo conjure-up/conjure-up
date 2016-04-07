@@ -40,11 +40,13 @@ class FinishController:
             pollinate(self.app.session_id, 'XA', self.app.log)
             self._pre_exec_pollinate = True
         cmd = ("bash {script}".format(script=self._pre_exec_sh))
+        self.app.log.debug("pre_exec running {}".format(cmd))
         future = async.submit(partial(shell, cmd), self.handle_exception)
         future.add_done_callback(self._pre_exec_done)
 
     def _pre_exec_done(self, future):
         result = future.result()
+        self.app.log.debug("pre_exec_done: {}".format(result))
         if result['returnCode'] > 0:
             raise Exception(
                 'There was an error during the pre processing phase.')
@@ -53,6 +55,7 @@ class FinishController:
     def _deploy_bundle(self):
         """ Performs the bootstrap in between processing scripts
         """
+        self.app.log.debug("Deploying bundle")
         self.app.ui.set_footer('Deploying bundle')
         pollinate(self.app.session_id, 'DS', self.app.log)
         future = async.submit(
@@ -61,6 +64,7 @@ class FinishController:
 
     def _deploy_bundle_done(self, future):
         result = future.result()
+        self.app.log.debug("deploy_bundle_done: {}".format(result))
         if result['returnCode'] > 0:
             raise Exception(
                 'There was an error during the post processing phase.')
@@ -83,11 +87,13 @@ class FinishController:
             pollinate(self.app.session_id, 'XB', self.app.log)
             self._post_exec_pollinate = True
         cmd = ("bash {script}".format(script=self._post_exec_sh))
+        self.app.log.debug("post_exec running: {}".format(cmd))
         future = async.submit(partial(shell, cmd), self.handle_post_execption)
         future.add_done_callback(self._post_exec_done)
 
     def _post_exec_done(self, future):
         result = future.result()
+        self.app.log.debug("post_exec_done: {}".format(result))
         if result['returnCode'] > 0:
             self.app.log.error(
                 'There was an error during the post processing phase.')
