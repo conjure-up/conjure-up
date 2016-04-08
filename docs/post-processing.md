@@ -5,9 +5,10 @@ Add ability to customize charm deployments through a post processing mechanism.
 ### Directory Layout
 
 ```
-/usr/share/openstack/
+/usr/share/openstack/bundles/
    - landscape-dense-maas(bundle)
       - pre.sh
+      - post-bootstrap.sh
       - post.sh
 ```
 
@@ -20,6 +21,8 @@ customize the charm being deployed.
 
 * `pre.sh` - Runs regardless, passing in the controller type. Useful if you need to
 apply an updated profile to the LXD type.
+
+* `post-bootstrap.sh` - Runs once a bootstrap has finished and before a deployment occurs.
 
 * `post.sh` - Perform post actions after the charm(s) have been deployed. Useful for
 configuring things like registering against Autopilot and returning a URL to
@@ -41,16 +44,22 @@ The output returned from the script should be in the format of:
 ```json
 {
     "message": "A success/fail message",
-    "postStatus": "Unfinished",
+    "isComplete": true,
     "returnCode": $?
 }
 ```
 
 Definitions:
 * message: A typical string describing the outcome of the script
-* postStatus: A conjure specific return letting the queue know if the script needs to run again or has finished.
+* isComplete: A conjure specific return letting the queue know if the script needs to run again or has finished.
 * returnCode: Return code of the processes exit code from within the script
+
+### Exposed environment variables
+
+* *JUJU_PROVIDERTYPE*: stores the model's provider type (ie, lxd, maas, ec2)
+* *MAAS_SERVER*: If MAAS is chosen will contain the api address to the maas server
+* *MAAS_OAUTH*: MAAS apikey
 
 ### Communicating with the UI
 
-The UI will display any relevant messages from the return output of the `post.sh` script.
+The UI will display any relevant messages from the return output of the processing scripts.
