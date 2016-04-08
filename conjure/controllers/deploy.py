@@ -56,12 +56,12 @@ class DeployController:
             pollinate(self.app.session_id, 'PM', self.app.log)
             bootstrap_config = model_cache_controller_provider(
                 info['ServerUUID'])
+            maas_server = urlparse(bootstrap_config['maas-server'])
 
             # add maas creds to env
-            self.app.env['MAAS_SERVER'] = bootstrap_config['maas-server']
+            self.app.env['MAAS_SERVER'] = maas_server.hostname
             self.app.env['MAAS_OAUTH'] = bootstrap_config['maas-oauth']
 
-            maas_server = urlparse(bootstrap_config['maas-server'])
             creds = dict(
                 api_host=maas_server.hostname,
                 api_key=bootstrap_config['maas-oauth'])

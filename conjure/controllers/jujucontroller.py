@@ -58,7 +58,7 @@ class JujuControllerController:
         result = self._bootstrap_future.result()
         if result.code > 0:
             self.app.log.error(result.errors())
-            raise Exception(result.errors())
+            return self.handle_exception(Exception(result.errors()))
         self._bootstrap_future = None
         pollinate(self.app.session_id, 'J004', self.app.log)
         EventLoop.remove_alarms()
@@ -90,10 +90,10 @@ class JujuControllerController:
                                           cmd,
                                           shell=True,
                                           env=self.app.env),
-                                  self.handle_post_execption)
+                                  self.handle_exception)
             future.add_done_callback(self._post_bootstrap_done)
         except Exception as e:
-            self.handle_exception(e)
+            return self.handle_exception(e)
 
     def _post_bootstrap_done(self, future):
         result = json.loads(future.result().decode('utf8'))

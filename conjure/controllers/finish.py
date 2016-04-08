@@ -97,8 +97,6 @@ class FinishController:
                 "Unable to find: {}, skipping".format(self._post_exec_sh))
             return
 
-        self.app.ui.set_footer('Running post-processing tasks.')
-
         if not self._post_exec_pollinate:
             # We dont want to keep pollinating since this routine could
             # run multiple times
@@ -108,20 +106,18 @@ class FinishController:
         cmd = ("bash {script}".format(script=self._post_exec_sh))
 
         self.app.log.debug("post_exec running: {}".format(cmd))
-        try:
-            future = async.submit(partial(check_output,
-                                          cmd,
-                                          shell=True,
-                                          env=self.app.env),
-                                  self.handle_post_execption)
-            future.add_done_callback(self._post_exec_done)
-        except Exception as e:
-            self.handle_exception(e)
+        future = async.submit(partial(check_output,
+                                      cmd,
+                                      shell=True,
+                                      env=self.app.env),
+                              self.handle_post_execption)
+        future.add_done_callback(self._post_exec_done)
 
     def _post_exec_done(self, future):
         try:
             result = json.loads(future.result().decode('utf8'))
             self.app.log.debug("post_exec_done: {}".format(result))
+            self.app.ui.set_footer(result['message'])
             if result['returnCode'] > 0 or not result['isComplete']:
                 self.app.log.error(
                     'There was an error during the post processing '
