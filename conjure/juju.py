@@ -9,15 +9,6 @@ from macumba.v2 import JujuClient
 from macumba.errors import LoginError
 from functools import wraps, partial
 from conjure import async
-from subprocess import call
-
-
-def requires_login(f):
-    def _decorator(*args, **kwargs):
-        if not Juju.is_authenticated:
-            Juju.login()
-        return f(*args, **kwargs)
-    return wraps(f)(_decorator)
 
 
 class JujuNotFoundException(Exception):
@@ -38,6 +29,41 @@ class JujuModelNotFound(Exception):
 
 class JujuCloudNotFound(Exception):
     """ Unable to determine cloud """
+
+
+class JujuConfigNotFound(Exception):
+    """ Unable to load config file """
+
+
+# login decorator
+def requires_login(f):
+    def _decorator(*args, **kwargs):
+        if not Juju.is_authenticated:
+            Juju.login()
+        return f(*args, **kwargs)
+    return wraps(f)(_decorator)
+
+
+def read_config(name):
+    """ Reads a juju config file
+
+    Arguments:
+    name: filename without extension (ext defaults to yaml)
+
+    Returns:
+    dictionary of yaml object
+    """
+    abs_path = os.path.join(juju_path(), "{}.yaml".format(name))
+    if not os.path.isfile(abs_path):
+        raise JujuConfigNotFound("Cannot load {}".format(abs_path))
+    return yaml.safe_load(open(abs_path))
+
+
+def current_controller():
+    c_path = os.path.join(juju_path(), 'current-controller')
+    if not os.path.isfile(c_path):
+        return None
+    return open(c_path).read()
 
 
 class Juju:
@@ -134,8 +160,10 @@ class Juju:
             "Unable to locate credentials for: {}".format(user))
 
     @classmethod
-    def credentials(cls, secrets=False):
+    def credentials(cls, secrets=True):
         """ List credentials
+
+        This will fallback to reading the credentials file directly
 
         Arguments:
         secrets: True/False whether to show secrets (ie password)
@@ -148,8 +176,12 @@ class Juju:
             cmd += ' --show-secrets'
         sh = shell(cmd)
         if sh.code > 0:
-            raise JujuNotFoundException(
-                "Unable to list credentials: {}".format(sh.errors()))
+            try:
+                env = read_config('credentials')
+                return env['credentials']
+            except:
+                raise JujuNotFoundException(
+                    "Unable to list credentials: {}".format(sh.errors()))
         env = yaml.safe_load("\n".join(sh.output()))
         return env['credentials']
 
@@ -226,6 +258,17 @@ class Juju:
         if controllers and controller in controllers:
             return controllers[controller]
         return None
+
+    @classmethod
+    def controller_info(cls):
+        """ Returns information on current controller
+        """
+        sh = shell('juju show-controller --format yaml')
+        if sh.code > 0:
+            raise JujuNotFoundException(
+                "Unable to determine controller: {}".format(sh.errors()))
+        out = yaml.safe_load("\n".join(sh.output()))
+        return out
 
     @classmethod
     def controllers(cls):
@@ -334,16 +377,6 @@ class Juju:
     @classmethod
     def current_model(cls):
         return cls.models()['current-model']
-
-    @classmethod
-    def model_cache(cls):
-        """ Reads the model cache in ~/.local/share/juju/models/cache.yaml
-
-        This is currently necessary as there is no way to tell what provider
-        types are associated to a particular controller.
-        """
-        cache_path = os.path.join(juju_path(), 'models/cache.yaml')
-        return yaml.safe_load(open(cache_path))
 
     @classmethod
     def version(cls):

@@ -1,14 +1,13 @@
-from conjure.api.models import model_info, model_cache_controller_provider
+from conjure.api.models import model_info
 from conjure.charm import get_bundle
 from conjure.models.bundle import BundleModel
 from conjure.utils import pollinate
+from conjure.juju import Juju
 
 from bundleplacer.config import Config
 from bundleplacer.maas import connect_to_maas
 from bundleplacer.placerview import PlacerView
 from bundleplacer.controller import PlacementController, BundleWriter
-
-from urllib.parse import urlparse
 
 
 class DeployController:
@@ -55,22 +54,22 @@ class DeployController:
         if info['ProviderType'] == 'maas':
             pollinate(self.app.session_id, 'PM', self.app.log)
             try:
-                bootstrap_config = model_cache_controller_provider(
-                    info['ServerUUID'])
+                bootstrap_config = Juju.controller_info()
             except Exception as e:
                 msg = ("Unable to query cache file, trying "
                        "alternate api: {}".format(e))
                 self.app.log.error(msg)
                 return self.app.ui.show_exception_message(Exception(msg))
-            maas_server = urlparse(bootstrap_config['maas-server'])
 
+            maasoauth = Juju.credential(bootstrap_config['cloud-type'],
+                                        bootstrap_config['credential'])
             # add maas creds to env
-            self.app.env['MAAS_SERVER'] = maas_server.hostname
-            self.app.env['MAAS_OAUTH'] = bootstrap_config['maas-oauth']
+            self.app.env['MAAS_SERVER'] = bootstrap_config['region']
+            self.app.env['MAAS_OAUTH'] = maasoauth['maas-oauth']
 
             creds = dict(
-                api_host=maas_server.hostname,
-                api_key=bootstrap_config['maas-oauth'])
+                api_host=self.app.env['MAAS_SERVER'],
+                api_key=self.app.env['MAAS_OAUTH'])
             maas, maas_state = connect_to_maas(creds)
             self.placement_controller = PlacementController(
                 config=bundleplacer_cfg,

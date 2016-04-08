@@ -59,7 +59,7 @@ class NewCloudController:
         # FIXME: Handle these cases better
         if self.cloud == 'maas':
             self.cloud = '{}/{}'.format(self.cloud,
-                                        credentials['maas-server'].value)
+                                        credentials['@maas-server'].value)
         pollinate(self.app.session_id, 'CA', self.app.log)
         self.app.controllers['jujucontroller'].render(
             self.cloud, bootstrap=True)
