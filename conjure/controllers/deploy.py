@@ -2,7 +2,7 @@ from conjure.api.models import model_info
 from conjure.charm import get_bundle
 from conjure.models.bundle import BundleModel
 from conjure.utils import pollinate
-from conjure.juju import Juju
+from conjure.juju import Juju, current_controller
 
 from bundleplacer.config import Config
 from bundleplacer.maas import connect_to_maas
@@ -54,7 +54,10 @@ class DeployController:
         if info['ProviderType'] == 'maas':
             pollinate(self.app.session_id, 'PM', self.app.log)
             try:
-                bootstrap_config = Juju.controller_info()
+                controller_meta = Juju.controller_info()[current_controller()]
+                bootstrap_config = controller_meta['bootstrap-config']
+                self.app.log.debug(
+                    'bootstrap_config {}'.format(bootstrap_config))
             except Exception as e:
                 msg = ("Unable to query cache file, trying "
                        "alternate api: {}".format(e))

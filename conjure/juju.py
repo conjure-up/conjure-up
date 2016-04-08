@@ -63,7 +63,9 @@ def current_controller():
     c_path = os.path.join(juju_path(), 'current-controller')
     if not os.path.isfile(c_path):
         return None
-    return open(c_path).read()
+    with open(c_path) as fp:
+        out = fp.read().strip()
+        return out
 
 
 class Juju:
