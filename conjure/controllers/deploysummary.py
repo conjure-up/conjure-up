@@ -1,7 +1,4 @@
 from conjure.ui.views.deploy_summary import DeploySummaryView
-from conjure.juju import Juju
-from functools import partial
-from conjure.async import AsyncPool
 from conjure.utils import pollinate
 
 
@@ -10,7 +7,7 @@ class DeploySummaryController:
         self.app = app
 
     def finish(self, back=False):
-        """ Load the finish controller
+        """ Does the actual deployment and loads the summary controller
 
         Arguments:
         back: If true will go back to previous controller
@@ -20,11 +17,7 @@ class DeploySummaryController:
                 self.app.current_model
             )
         else:
-            AsyncPool.submit(
-                partial(Juju.deploy_bundle, self.bundle)
-            )
-            pollinate(self.app.session_id, 'DS', self.app.log)
-            self.app.controllers['finish'].render()
+            self.app.controllers['finish'].render(self.bundle)
 
     def render(self, bundle):
         self.bundle = bundle

@@ -5,9 +5,9 @@ List out the updated bundle in a cleaner view showing what
 charms and their relations will be done.
 """
 
-from urwid import WidgetWrap, Text, Pile, Columns, Filler
+from urwid import WidgetWrap, Text, Pile, Filler
 from ubuntui.widgets.buttons import PlainButton
-from ubuntui.widgets.text import Instruction, ColumnHeader
+from ubuntui.widgets.text import Instruction
 from ubuntui.widgets.hr import HR
 from ubuntui.utils import Color, Padding
 import yaml

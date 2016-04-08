@@ -99,13 +99,15 @@ def pollinate(session, tag, log):
     """ fetches random seed
 
     Tag definitions:
-        WS - welcome shown
-        BS - bundle selected
+        W001 - welcome shown
+        B001 - bundle selected
         CS - cloud selected
         CC - cloud creation started
         CA - cloud credentials added
-        JS - juju bootstrap started
-        JC - juju bootstrap completed
+        J001 - juju post-bootstrap started
+        J002 - juju post-bootstrap completed
+        J003 - juju bootstrap started
+        J004 - juju bootstrap completed
         CS - controller selected
         PM - placement/bundle editor shown (maas)
         PS - placement/bundle editor shown (other)
@@ -113,12 +115,16 @@ def pollinate(session, tag, log):
         SS - deploy summary shown
         DS - deploy started
         DC - deploy complete (currently unused)
+        XA - pre processing started
+        XB - post processing started
 
         UC - user cancelled
         EC - error getting credentials
         EP - error in placement/bundle editor
         EB - error juju bootstrap
         ED - error deploying (unused)
+        E001 - error in post bootstrap phase
+        E002 - error in pre/post processor
 
     Arguments:
     session: randomly generated session id
@@ -132,11 +138,12 @@ def pollinate(session, tag, log):
     if not bundle_key:
         bundle_key = '-'
     agent_str = 'conjure/{}/{}/{}'.format(session, bundle_key, tag)
+
     def do_pollinate():
         try:
             cmd = ("sudo su - -c 'pollinate -q -r --curl-opts "
                    "\"-k --user-agent {}\"'".format(agent_str))
-            log.info("pollinate: {}".format(cmd))
+            log.debug("pollinate: {}".format(cmd))
             check_call(cmd, shell=True)
         except CalledProcessError as e:
             log.warning("Generating random seed failed: {}".format(e))

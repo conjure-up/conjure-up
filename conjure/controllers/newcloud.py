@@ -17,10 +17,13 @@ class NewCloudController:
         """
         formatted = {}
         for k, v in creds.items():
-            # Not a widget but a private key
             if k.startswith('_'):
+                # Not a widget but a private key
                 k = k[1:]
                 formatted[k] = v
+            elif k.startswith('@'):
+                # A Widget, but not stored in credentials
+                continue
             else:
                 formatted[k] = v.value
         return formatted

@@ -1,8 +1,6 @@
 from conjure.api.models import model_info, model_cache_controller_provider
 from conjure.charm import get_bundle
 from conjure.models.bundle import BundleModel
-from conjure.shell import shell
-from conjure import template
 from conjure.utils import pollinate
 
 from bundleplacer.config import Config
@@ -11,7 +9,6 @@ from bundleplacer.placerview import PlacerView
 from bundleplacer.controller import PlacementController, BundleWriter
 
 from urllib.parse import urlparse
-import os.path as path
 
 
 class DeployController:
@@ -38,6 +35,11 @@ class DeployController:
     def render(self, model):
         self.app.current_model = model
         info = model_info(self.app.current_model)
+
+        # Set our provider type environment var so that it is
+        # exposed in future processing tasks
+        self.app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
+
         # Grab bundle and deploy or render placement if MAAS
         self.bundle = get_bundle(BundleModel.to_entity(), to_file=True)
         metadata_filename = self.app.config['metadata_filename']
@@ -52,9 +54,20 @@ class DeployController:
 
         if info['ProviderType'] == 'maas':
             pollinate(self.app.session_id, 'PM', self.app.log)
-            bootstrap_config = model_cache_controller_provider(
-                info['ServerUUID'])
+            try:
+                bootstrap_config = model_cache_controller_provider(
+                    info['ServerUUID'])
+            except Exception as e:
+                msg = ("Unable to query cache file, trying "
+                       "alternate api: {}".format(e))
+                self.app.log.error(msg)
+                return self.app.ui.show_exception_message(Exception(msg))
             maas_server = urlparse(bootstrap_config['maas-server'])
+
+            # add maas creds to env
+            self.app.env['MAAS_SERVER'] = maas_server.hostname
+            self.app.env['MAAS_OAUTH'] = bootstrap_config['maas-oauth']
+
             creds = dict(
                 api_host=maas_server.hostname,
                 api_key=bootstrap_config['maas-oauth'])
@@ -75,26 +88,6 @@ class DeployController:
             mainview.update()
         else:
             pollinate(self.app.session_id, 'PS', self.app.log)
-            # TODO: cleanup a bit
-            # FIXME: needs refinement.
-            if info['ProviderType'] == 'lxd':
-                # Process LXD pre setup scripts
-                topdir = path.join('/usr/share', self.app.config['name'])
-                lxd_profile = path.join(topdir, 'lxd-profile.yaml')
-                pre_sh = path.join(topdir, 'lxd.sh')
-                if path.isfile(pre_sh):
-                    if path.isfile(lxd_profile):
-                        tpl = template.load('lxd-profile.yaml', topdir)
-                        out_tpl = template.save(
-                            tpl, {'lxd_profile': "juju-{}".format(
-                                info['Name'])})
-                        cmd = ("bash {script} \"juju-{name}\" "
-                               "\"{filepath}\"".format(
-                                   name=info['Name'],
-                                   filepath=out_tpl,
-                                   script=pre_sh
-                               ))
-                        shell(cmd)
             self.placement_controller = PlacementController(
                 config=bundleplacer_cfg)
             mainview = PlacerView(self.placement_controller,

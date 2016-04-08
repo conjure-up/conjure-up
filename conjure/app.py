@@ -34,14 +34,23 @@ class ApplicationConfig:
     used throughout the lifetime of the application.
     """
     def __init__(self):
+        # Reference to entire UI
         self.ui = None
+        # Global config attr
         self.config = None
+        # CLI arguments
         self.argv = None
+        # List of all known controllers to be rendered
         self.controllers = None
+        # Current Juju model
         self.current_model = None
+        # Global session id
         self.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
                                     str(uuid.uuid4()))
+        # Logger
         self.log = None
+        # Environment to pass to processing tasks
+        self.env = os.environ.copy()
 
 
 class Application:
@@ -87,7 +96,7 @@ class Application:
         """ Initially load the welcome screen
         """
         if self.app.argv.status_only:
-            self.app.controllers['finish'].render()
+            self.app.controllers['finish'].render(bundle=None)
         else:
             self.app.controllers['welcome'].render()
 
