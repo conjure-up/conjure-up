@@ -136,5 +136,6 @@ class FinishController:
         self.app.ui.set_body(self.view)
         self.app.ui.set_subheader('Deploy Status - (Q)uit')
 
-        EventLoop.set_alarm_in(1, self._pre_exec)
+        if not self.app.argv.status_only:
+            EventLoop.set_alarm_in(1, self._pre_exec)
         EventLoop.set_alarm_in(1, self.refresh)
