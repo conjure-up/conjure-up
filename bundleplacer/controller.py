@@ -119,6 +119,7 @@ class PlacementController:
             self.maasinfo['server_name'] = sn
             self.maasinfo['server_hostname'] = self.maas_state.server_hostname
         self._machines = []
+        self._bundle_placeholders = []
         self.sub_placeholder = PlaceholderMachine('_subordinates',
                                                   'Subordinate Charms')
         self.def_placeholder = PlaceholderMachine('_default',
@@ -278,7 +279,8 @@ class PlacementController:
             ms = self._machines
 
         if include_placeholders:
-            return ms + [self.sub_placeholder, self.def_placeholder]
+            return ms + [self.sub_placeholder, self.def_placeholder] + \
+                self._bundle_placeholders
         else:
             return ms
 
@@ -325,7 +327,7 @@ class PlacementController:
         for mid, md in machines.items():
             pm = PlaceholderMachine(mid, "bundle-machine-" + mid,
                                     md.get('constraints', {}))
-            self._machines.append(pm)
+            self._bundle_placeholders.append(pm)
 
     def add_bundle_assignments(self, new_as):
         for sname, tostrs in new_as.items():
@@ -340,7 +342,7 @@ class PlacementController:
                     atype = label_to_atype([atype])[0]
                 else:
                     atype, mid = AssignmentType.DEFAULT, parts[0]
-                machine = next((m for m in self._machines if
+                machine = next((m for m in self.machines() if
                                 m.instance_id == mid), None)
                 if machine:
                     self.assign(machine, service, atype)

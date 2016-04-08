@@ -208,7 +208,7 @@ class CharmstoreColumn(WidgetWrap):
 
     def build_widgets(self):
         self.title = Text('')
-        self.pile = Pile([Divider()])
+        self.pile = Pile([self.title])
         return self.pile
 
     def clear_search_results(self):
@@ -257,15 +257,15 @@ class CharmstoreColumn(WidgetWrap):
             top_w.set_header("Charms")
 
         if self.state == CharmstoreColumnUIState.RELATED:
-            extra_widgets = []
             if self.loading:
-                self.title.set_text("Loading Recommended and Popular Charms…")
-                extra_widgets = [(self.title, opts)]
+                self.title.set_text("\nLoading Recommended "
+                                    "and Popular Charms…")
+            else:
+                self.title.set_text("")
 
-            extra_widgets += self._recommended_widgets
         else:
             if self.loading:
-                msg = "Searching for '{}'…\n".format(
+                msg = "\nSearching for '{}'…\n".format(
                     self.current_search_string)
                 self.title.set_text(msg)
             else:
@@ -275,17 +275,16 @@ class CharmstoreColumn(WidgetWrap):
                     advice = ""
                     if len(self.current_search_string) < 3:
                         advice = "Try a longer search string."
-                    msg = ("No charms found matching '{}' "
-                           "{}\n".format(self.current_search_string,
+                    msg = ("\nNo charms found matching '{}' "
+                           "{}".format(self.current_search_string,
                                          advice))
                 else:
-                    msg = ("Showing the top {} bundles and {} "
+                    msg = ("\nShowing the top {} bundles and {} "
                            "charms matching {}:"
-                           "\n".format(bn, cn, self.current_search_string))
+                           "".format(bn, cn, self.current_search_string))
             self.title.set_text(msg)
-            extra_widgets = [(self.title, opts)]
 
-        self.pile.contents[1:] = extra_widgets + bundle_widgets + charm_widgets
+        self.pile.contents[1:] = bundle_widgets + charm_widgets
 
     def add_results(self, bundle_results, charm_results):
         self._bundle_results += bundle_results
