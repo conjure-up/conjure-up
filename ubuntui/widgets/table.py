@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
-from urwid import (Columns, ListBox, Divider)
+from urwid import (Columns, ListBox)
+from ubuntui.widgets.hr import HR
 
 
 class Table:
@@ -17,7 +18,7 @@ class Table:
         headings: List of column text headings
         """
         if not self._is_header_set:
-            self.addRow(Columns(headings))
+            self.addRow(Columns(headings), False)
             self._is_header_set = True
 
     def addColumns(self, row_id, columns, force=False):
@@ -48,8 +49,7 @@ class Table:
         use_divider: use divider for row item
         """
         if use_divider:
-            self._rows.append(
-                Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}"))
+            self._rows.append(HR(0, 0))
         self._rows.append(item)
 
     def render(self):

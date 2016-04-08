@@ -126,7 +126,7 @@ class FinishController:
                 self.app.log.error(
                     'There was an error during the post processing '
                     'phase, retrying.')
-                EventLoop.set_alarm_in(1, self._post_exec)
+                EventLoop.set_alarm_in(5, self._post_exec)
             else:
                 EventLoop.remove_alarms()
                 self.app.ui.set_footer('Post processing completed.')

@@ -1,4 +1,3 @@
-import logging
 import random
 from urwid import (Text, WidgetWrap)
 from ubuntui.widgets.juju.service import ServiceWidget
@@ -7,24 +6,20 @@ from ubuntui.utils import Color
 from conjure.api.models import model_status
 
 
-log = logging.getLogger('services_status')
-
-
 class ServicesView(WidgetWrap):
 
     view_columns = [
         ('Icon', "", 2),
         ('Name', "Service", 0),
-        ('AgentStatus', "Status", 12),
-        ('PublicAddress', "IP", 16),
-        ('Machine', "Machine", 12),
+        ('AgentStatus', "Status", 20),
+        ('PublicAddress', "IP", 20),
+        ('Machine', "Machine", 20),
     ]
 
     def __init__(self, app):
         self.app = app
         self.deployed = {}
         self.unit_w = None
-        self.log_cache = None
         self.table = Table()
 
         headings = []
