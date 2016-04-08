@@ -114,7 +114,7 @@ def pollinate(session, tag, log):
         PC - placements committed
         SS - deploy summary shown
         DS - deploy started
-        DC - deploy complete (currently unused)
+        DC - deploy complete
         XA - pre processing started
         XB - post processing started
 
@@ -122,7 +122,7 @@ def pollinate(session, tag, log):
         EC - error getting credentials
         EP - error in placement/bundle editor
         EB - error juju bootstrap
-        ED - error deploying (unused)
+        ED - error deploying
         E001 - error in post bootstrap phase
         E002 - error in pre/post processor
 
