@@ -1,6 +1,34 @@
 from collections import OrderedDict
 from ubuntui.widgets.input import (StringEditor, YesNo, PasswordEditor)
 
+""" Defining the schema
+
+The schema contains attributes for rendering proper credentials for the
+different clouds. There are a few cases where additional attributes are
+required and some that are required aren't necessarily meant to be edited.
+
+The schema uses a simple single first value for describing the type of
+attribute it is. If there is no indicating first character it is considered
+public, editable, and viewable by the end user.
+
+The schema contains the following:
+
+- If a key starts with '_' it is private, not editable, but stored in
+  the credentials as is.
+- If a key starts with '@' it is public, editable, but _not_ stored in
+  the credentials file.
+- If the key does not start with any sigil it is public, editable, and
+  stored in the credentials file.
+
+Examples:
+
+('maas', OrderedDict([
+  ('@maas-server', StringEditor()) # Required input but not stored.
+  ('_auth-type', 'oauth1) # Required, but not editable and is stored.
+  ('maas-oauth', StringEditor()) # required, editable, and stored.
+])
+"""
+
 Schema = OrderedDict([
     ('aws', OrderedDict([
         ('_auth-type', 'access-key'),
@@ -22,7 +50,7 @@ Schema = OrderedDict([
     ])),
     ('maas', OrderedDict([
         ('_auth-type', 'oauth1'),
-        ('maas-server', StringEditor()),
+        ('@maas-server', StringEditor()),
         ('maas-oauth', StringEditor())
     ])),
     ('azure', OrderedDict([

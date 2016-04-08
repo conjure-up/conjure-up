@@ -45,9 +45,12 @@ class NewCloudView(WidgetWrap):
     def build_inputs(self):
         items = []
         for k in self.input_items.keys():
-            # Don't treat 'private' keys as input
             if k.startswith('_'):
+                # Don't treat 'private' keys as input
                 continue
+            if k.startswith('@'):
+                # Strip public, not storable attribute
+                k = k[1:]
             col = Columns(
                 [
                     ('weight', 0.5, Text(k, align='right')),

@@ -54,8 +54,14 @@ class DeployController:
 
         if info['ProviderType'] == 'maas':
             pollinate(self.app.session_id, 'PM', self.app.log)
-            bootstrap_config = model_cache_controller_provider(
-                info['ServerUUID'])
+            try:
+                bootstrap_config = model_cache_controller_provider(
+                    info['ServerUUID'])
+            except Exception as e:
+                msg = ("Unable to query cache file, trying "
+                       "alternate api: {}".format(e))
+                self.app.log.error(msg)
+                return self.app.ui.show_exception_message(Exception(msg))
             maas_server = urlparse(bootstrap_config['maas-server'])
 
             # add maas creds to env
