@@ -17,8 +17,8 @@ class FinishController:
         self._post_exec_pollinate = False
         self._pre_exec_pollinate = False
 
-    def handle_exception(self, exc):
-        pollinate(self.app.session_id, 'E002', self.app.log)
+    def handle_exception(self, tag, exc):
+        pollinate(self.app.session_id, tag, self.app.log)
         self.app.ui.show_exception_message(exc)
 
     def handle_post_execption(self, exc):
@@ -52,10 +52,11 @@ class FinishController:
                                           cmd,
                                           shell=True,
                                           env=self.app.env),
-                                  self.handle_exception)
+                                  partial(self.handle_exception,
+                                          "E002"))
             future.add_done_callback(self._pre_exec_done)
         except Exception as e:
-            self.handle_exception(e)
+            self.handle_exception("E002", e)
 
     def _pre_exec_done(self, future):
         result = json.loads(future.result().decode('utf8'))
@@ -72,15 +73,18 @@ class FinishController:
         self.app.ui.set_footer('Deploying bundle')
         pollinate(self.app.session_id, 'DS', self.app.log)
         future = async.submit(
-            partial(Juju.deploy_bundle, self.bundle), self.handle_exception)
+            partial(Juju.deploy_bundle, self.bundle),
+            partial(self.handle_exception, "ED"))
         future.add_done_callback(self._deploy_bundle_done)
 
     def _deploy_bundle_done(self, future):
         result = future.result()
         self.app.log.debug("deploy_bundle_done: {}".format(result))
         if result.code > 0:
-            raise Exception(
-                'There was an error during the post processing phase.')
+            self.handle_exception("ED", Exception(
+                'There was an error during the post processing phase.'))
+            return
+        pollinate(self.app.session_id, 'DC', self.app.log)
         EventLoop.set_alarm_in(1, self._post_exec)
 
     def _post_exec(self, *args):
@@ -128,7 +132,7 @@ class FinishController:
                 self.app.ui.set_footer('Post processing completed.')
         except Exception as e:
             self.app.log.error(e)
-            self.handle_exception(e)
+            self.handle_exception("E002", e)
 
     def refresh(self, *args):
         self.view.refresh_nodes()
