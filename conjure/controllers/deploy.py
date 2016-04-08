@@ -1,8 +1,6 @@
 from conjure.api.models import model_info, model_cache_controller_provider
 from conjure.charm import get_bundle
 from conjure.models.bundle import BundleModel
-from conjure.shell import shell
-from conjure import template
 from conjure.utils import pollinate
 
 from bundleplacer.config import Config
@@ -11,7 +9,6 @@ from bundleplacer.placerview import PlacerView
 from bundleplacer.controller import PlacementController, BundleWriter
 
 from urllib.parse import urlparse
-import os.path as path
 
 
 class DeployController:
@@ -38,6 +35,11 @@ class DeployController:
     def render(self, model):
         self.app.current_model = model
         info = model_info(self.app.current_model)
+
+        # Set our provider type environment var so that it is
+        # exposed in future processing tasks
+        self.app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
+
         # Grab bundle and deploy or render placement if MAAS
         self.bundle = get_bundle(BundleModel.to_entity(), to_file=True)
         metadata_filename = self.app.config['metadata_filename']
@@ -54,6 +56,11 @@ class DeployController:
             pollinate(self.app.session_id, 'PM', self.app.log)
             bootstrap_config = model_cache_controller_provider(
                 info['ServerUUID'])
+
+            # add maas creds to env
+            self.app.env['MAAS_SERVER'] = bootstrap_config['maas-server']
+            self.app.env['MAAS_OAUTH'] = bootstrap_config['maas-oauth']
+
             maas_server = urlparse(bootstrap_config['maas-server'])
             creds = dict(
                 api_host=maas_server.hostname,

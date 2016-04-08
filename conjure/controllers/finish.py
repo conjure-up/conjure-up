@@ -46,9 +46,16 @@ class FinishController:
             self._pre_exec_pollinate = True
         cmd = ("bash {script}".format(script=self._pre_exec_sh))
         self.app.log.debug("pre_exec running {}".format(cmd))
-        future = async.submit(partial(check_output, cmd, shell=True),
-                              self.handle_exception)
-        future.add_done_callback(self._pre_exec_done)
+
+        try:
+            future = async.submit(partial(check_output,
+                                          cmd,
+                                          shell=True,
+                                          env=self.app.env),
+                                  self.handle_exception)
+            future.add_done_callback(self._pre_exec_done)
+        except Exception as e:
+            self.handle_exception(e)
 
     def _pre_exec_done(self, future):
         result = json.loads(future.result().decode('utf8'))
@@ -89,32 +96,43 @@ class FinishController:
             self.app.log.debug(
                 "Unable to find: {}, skipping".format(self._post_exec_sh))
             return
+
         self.app.ui.set_footer('Running post-processing tasks.')
+
         if not self._post_exec_pollinate:
             # We dont want to keep pollinating since this routine could
             # run multiple times
             pollinate(self.app.session_id, 'XB', self.app.log)
             self._post_exec_pollinate = True
+
         cmd = ("bash {script}".format(script=self._post_exec_sh))
+
         self.app.log.debug("post_exec running: {}".format(cmd))
-        future = async.submit(partial(check_output, cmd, shell=True),
-                              self.handle_post_execption)
-        future.add_done_callback(self._post_exec_done)
+        try:
+            future = async.submit(partial(check_output,
+                                          cmd,
+                                          shell=True,
+                                          env=self.app.env),
+                                  self.handle_post_execption)
+            future.add_done_callback(self._post_exec_done)
+        except Exception as e:
+            self.handle_exception(e)
 
     def _post_exec_done(self, future):
         try:
             result = json.loads(future.result().decode('utf8'))
             self.app.log.debug("post_exec_done: {}".format(result))
-            if result['returnCode'] > 0 or not result['postComplete']:
+            if result['returnCode'] > 0 or not result['isComplete']:
                 self.app.log.error(
                     'There was an error during the post processing '
                     'phase, retrying.')
                 EventLoop.set_alarm_in(1, self._post_exec)
             else:
+                EventLoop.remove_alarms()
                 self.app.ui.set_footer('Post processing completed.')
         except Exception as e:
             self.app.log.error(e)
-            self.app.ui.show_exception_message(e)
+            self.handle_exception(e)
 
     def refresh(self, *args):
         self.view.refresh_nodes()

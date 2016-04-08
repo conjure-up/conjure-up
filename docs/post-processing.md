@@ -44,16 +44,22 @@ The output returned from the script should be in the format of:
 ```json
 {
     "message": "A success/fail message",
-    "postComplete": true,
+    "isComplete": true,
     "returnCode": $?
 }
 ```
 
 Definitions:
 * message: A typical string describing the outcome of the script
-* postComplete: A conjure specific return letting the queue know if the script needs to run again or has finished.
+* isComplete: A conjure specific return letting the queue know if the script needs to run again or has finished.
 * returnCode: Return code of the processes exit code from within the script
+
+### Exposed environment variables
+
+* *JUJU_PROVIDERTYPE*: stores the model's provider type (ie, lxd, maas, ec2)
+* *MAAS_SERVER*: If MAAS is chosen will contain the api address to the maas server
+* *MAAS_OAUTH*: MAAS apikey
 
 ### Communicating with the UI
 
-The UI will display any relevant messages from the return output of the `post.sh` script.
+The UI will display any relevant messages from the return output of the processing scripts.

@@ -78,12 +78,22 @@ class JujuControllerController:
                 "Unable to find: {}, skipping".format(self._post_bootstrap_sh))
             return
         self.app.ui.set_footer('Running post-bootstrap tasks.')
+
         pollinate(self.app.session_id, 'J001', self.app.log)
+
         cmd = ("bash {script}".format(script=self._post_bootstrap_sh))
+
         self.app.log.debug("post_bootstrap running: {}".format(cmd))
-        future = async.submit(partial(check_output, cmd, shell=True),
-                              self.handle_post_execption)
-        future.add_done_callback(self._post_bootstrap_done)
+
+        try:
+            future = async.submit(partial(check_output,
+                                          cmd,
+                                          shell=True,
+                                          env=self.app.env),
+                                  self.handle_post_execption)
+            future.add_done_callback(self._post_bootstrap_done)
+        except Exception as e:
+            self.handle_exception(e)
 
     def _post_bootstrap_done(self, future):
         result = json.loads(future.result().decode('utf8'))
