@@ -42,7 +42,6 @@ class ServicesView(WidgetWrap):
         for name, service in status['Services'].items():
             service_w = ServiceWidget(name, service)
             for unit in service_w.Units:
-                self.app.log.debug("{}".format(unit._name))
                 services_list = []
                 try:
                     unit_w = self.deployed[unit._name]
@@ -104,9 +103,6 @@ class ServicesView(WidgetWrap):
         """
         try:
             unit_w.Machine.set_text(unit.get('Machine', '-'))
-            self.app.log.debug('agent status {} workload status {}'.format(
-                unit['AgentStatus']['Status'],
-                unit['WorkloadStatus']['Status']))
             unit_w.PublicAddress.set_text(unit['PublicAddress'])
             unit_w.WorkloadInfo.set_text(unit['WorkloadStatus']['Info'])
             if unit['WorkloadStatus']['Status'] != 'unknown':

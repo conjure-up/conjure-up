@@ -69,7 +69,7 @@ class FinishController:
     def _deploy_bundle(self):
         """ Performs the bootstrap in between processing scripts
         """
-        self.app.log.debug("Deploying bundle")
+        self.app.log.debug("Deploying bundle: {}".format(self.bundle))
         self.app.ui.set_footer('Deploying bundle')
         pollinate(self.app.session_id, 'DS', self.app.log)
         future = async.submit(
