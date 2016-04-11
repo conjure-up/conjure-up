@@ -129,7 +129,6 @@ class FinishController:
                 EventLoop.set_alarm_in(5, self._post_exec)
             else:
                 EventLoop.remove_alarms()
-                self.app.ui.set_footer('Post processing completed.')
         except Exception as e:
             self.app.log.error(e)
             self.handle_exception("E002", e)
