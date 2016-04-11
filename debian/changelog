@@ -1,3 +1,9 @@
+conjure (0.0.8) UNRELEASED; urgency=medium
+
+  * Next dev release
+
+ -- Adam Stokes <adam.stokes@ubuntu.com>  Mon, 11 Apr 2016 14:34:31 -0400
+
 conjure (0.0.7) xenial-proposed; urgency=medium
 
   * pre, post-bootstrap, post execution hooks available per bundle

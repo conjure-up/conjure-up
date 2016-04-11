@@ -127,6 +127,12 @@ def parse_options(argv):
 
 
 def main():
+    if os.geteuid() == 0:
+        print("")
+        print("This should _not_ be run as root or with sudo.")
+        print("")
+        sys.exit(1)
+
     opts = parse_options(sys.argv[1:])
 
     try:
