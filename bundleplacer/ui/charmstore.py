@@ -227,7 +227,7 @@ class CharmstoreColumn(WidgetWrap):
 
     def update(self):
         opts = self.pile.options()
-
+        extra_widgets = []
         if self.metadata_controller.loaded():
             if len(self._recommended_widgets) == 0:
                 rec_dicts = [self.metadata_controller.get_charm_info(n)
@@ -262,7 +262,7 @@ class CharmstoreColumn(WidgetWrap):
                                     "and Popular Charms…")
             else:
                 self.title.set_text("")
-
+            extra_widgets = self._recommended_widgets
         else:
             if self.loading:
                 msg = "\nSearching for '{}'…\n".format(
@@ -284,7 +284,7 @@ class CharmstoreColumn(WidgetWrap):
                            "".format(bn, cn, self.current_search_string))
             self.title.set_text(msg)
 
-        self.pile.contents[1:] = bundle_widgets + charm_widgets
+        self.pile.contents[1:] = extra_widgets + bundle_widgets + charm_widgets
 
     def add_results(self, bundle_results, charm_results):
         self._bundle_results += bundle_results
