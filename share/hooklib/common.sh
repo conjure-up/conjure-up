@@ -35,7 +35,7 @@ agentStateUnit()
     juju status --format json | jq ".services[\"$1\"][\"units\"][\"$1/$2\"][\"workload-status\"][\"current\"]" 2> /dev/null
 }
 
-# Writes OpenStack RC configurations
+# Exports the variables required for communicating with your cloud.
 #
 # Arguments:
 # $1: username
@@ -45,13 +45,11 @@ agentStateUnit()
 # $5: region name
 configOpenrc()
 {
-    cat <<-EOF
-		export OS_USERNAME=$1
-		export OS_PASSWORD=$2
-		export OS_TENANT_NAME=$3
-		export OS_AUTH_URL=$4
-		export OS_REGION_NAME=$5
-		EOF
+    export OS_USERNAME=$1
+    export OS_PASSWORD=$2
+    export OS_TENANT_NAME=$3
+    export OS_AUTH_URL=$4
+    export OS_REGION_NAME=$5
 }
 
 # Get public address of unit
@@ -59,16 +57,22 @@ configOpenrc()
 # Arguments:
 # $1: service
 # $2: unit number
+#
+# Returns:
+# IP Address of unit
 unitAddress()
 {
     juju status --format json | jq ".services[\"$1\"][\"units\"][\"$1/$2\"][\"public-address\"]" 2> /dev/null
 }
 
-# Get machine id for unit
+# Get machine for unit, ie 0/lxc/1
 #
 # Arguments:
 # 1: service
 # 2: unit number
+#
+# Returns:
+# machine identifier
 unitMachine()
 {
     juju status --format json | jq ".services[\"$1\"][\"units\"][\"$1/$2\"][\"machine\"]" 2> /dev/null
