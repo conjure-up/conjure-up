@@ -4,8 +4,8 @@ Priority: extra
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: debhelper (>= 9),
                dh-python,
-               pep8,
                help2man,
+               pep8,
                pyflakes,
                python3-all,
                python3-bson,
@@ -25,8 +25,8 @@ Vcs-Git: https://github.com/Ubuntu-Solutions-Engineering/conjure.git
 
 Package: conjure
 Architecture: all
-Depends: juju (>= 2.0~),
-         rsyslog,
+Depends: jq,
+         juju (>= 2.0~),
          lxd,
          lxd-client,
          python3-bson,
@@ -36,6 +36,7 @@ Depends: juju (>= 2.0~),
          python3-urwid,
          python3-ws4py,
          python3-yaml,
+         rsyslog,
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}

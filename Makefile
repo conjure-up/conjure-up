@@ -37,11 +37,8 @@ deb-src: clean update_version
 deb-release:
 	@debuild -S -sd $(DPKGBUILDARGS)
 
-deb: clean update_version man-pages
+deb: clean update_version
 	@debuild -b $(DPKGBUILDARGS)
-
-man-pages:
-	@pandoc -s docs/conjure-setup.md -t man -o man/en/conjure-setup.1
 
 current_version:
 	@echo $(VERSION)
