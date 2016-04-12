@@ -6,6 +6,7 @@ from conjure import async
 from conjure.models.bundle import BundleModel
 from conjure.utils import pollinate
 import os.path as path
+import os
 import json
 from subprocess import check_output
 
@@ -36,20 +37,21 @@ class FinishController:
                                       'bundles',
                                       BundleModel.key(),
                                       'pre.sh')
-        if not path.isfile(self._pre_exec_sh):
+        if not path.isfile(self._pre_exec_sh) \
+           or not os.access(self._pre_exec_sh, os.X_OK):
             self.app.log.debug(
-                "Unable to find: {}, skipping".format(self._pre_exec_sh))
+                "Unable to execute: {}, skipping".format(self._pre_exec_sh))
             self._deploy_bundle()
         self.app.ui.set_footer('Running pre-processing tasks.')
         if not self._pre_exec_pollinate:
             pollinate(self.app.session_id, 'XA', self.app.log)
             self._pre_exec_pollinate = True
-        cmd = ("bash {script}".format(script=self._pre_exec_sh))
-        self.app.log.debug("pre_exec running {}".format(cmd))
+
+        self.app.log.debug("pre_exec running {}".format(self._pre_exec_sh))
 
         try:
             future = async.submit(partial(check_output,
-                                          cmd,
+                                          self._pre_exec_sh,
                                           shell=True,
                                           env=self.app.env),
                                   partial(self.handle_exception,
@@ -96,9 +98,10 @@ class FinishController:
                                        BundleModel.key(),
                                        'post.sh')
 
-        if not path.isfile(self._post_exec_sh):
+        if not path.isfile(self._post_exec_sh) \
+           or not os.access(self._post_exec_sh, os.X_OK):
             self.app.log.debug(
-                "Unable to find: {}, skipping".format(self._post_exec_sh))
+                "Unable to execute: {}, skipping".format(self._post_exec_sh))
             return
 
         if not self._post_exec_pollinate:
@@ -107,11 +110,9 @@ class FinishController:
             pollinate(self.app.session_id, 'XB', self.app.log)
             self._post_exec_pollinate = True
 
-        cmd = ("bash {script}".format(script=self._post_exec_sh))
-
-        self.app.log.debug("post_exec running: {}".format(cmd))
+        self.app.log.debug("post_exec running: {}".format(self._post_exec_sh))
         future = async.submit(partial(check_output,
-                                      cmd,
+                                      self._post_exec_sh,
                                       shell=True,
                                       env=self.app.env),
                               self.handle_post_execption)

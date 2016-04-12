@@ -6,6 +6,7 @@ from conjure.models.bundle import BundleModel
 from conjure import async
 from functools import partial
 import os.path as path
+import os
 from subprocess import check_output
 import json
 
@@ -73,21 +74,23 @@ class JujuControllerController:
                                             'bundles',
                                             BundleModel.key(),
                                             'post-bootstrap.sh')
-        if not path.isfile(self._post_bootstrap_sh):
+        if not path.isfile(self._post_bootstrap_sh) \
+           or not os.access(self._post_bootstrap_sh, os.X_OK):
             self.app.log.debug(
-                "Unable to find: {}, skipping".format(self._post_bootstrap_sh))
+                "Unable to execute: {}, skipping".format(
+                    self._post_bootstrap_sh))
             return
         self.app.ui.set_footer('Running post-bootstrap tasks.')
 
         pollinate(self.app.session_id, 'J001', self.app.log)
 
-        cmd = ("bash {script}".format(script=self._post_bootstrap_sh))
-
-        self.app.log.debug("post_bootstrap running: {}".format(cmd))
+        self.app.log.debug("post_bootstrap running: {}".format(
+            self._post_bootstrap_sh
+        ))
 
         try:
             future = async.submit(partial(check_output,
-                                          cmd,
+                                          self._post_bootstrap_sh,
                                           shell=True,
                                           env=self.app.env),
                                   self.handle_exception)
@@ -115,6 +118,10 @@ class JujuControllerController:
         """
 
         self.cloud = cloud
+
+        # Set provider type for post-bootstrap
+        self.app.env['JUJU_PROVIDERTYPE'] = self.cloud
+
         self.bootstrap = bootstrap
 
         if self.cloud and self.bootstrap:
