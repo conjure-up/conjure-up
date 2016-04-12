@@ -12,13 +12,6 @@ installation via `apt-get install` and an install wizard.
 
 It is included in the archive.
 
-## Wily and below
-
-Packages are currently built for *Trusty* and *Wily*.
-```
-$ sudo apt-add-repository ppa:conjure/ppa
-```
-
 ### Install the packages
 ```
 $ sudo apt-get update
