@@ -98,3 +98,14 @@ waitForService()
         done
     done
 }
+
+# Parses result into json output
+#
+# Arguments:
+# $1: return message
+# $2: return code
+# $3: true/false
+exposeResult()
+{
+    printf '{"message": "%s", "returnCode": %d, "isComplete": %s}' "$1" $2 "$3"
+}
