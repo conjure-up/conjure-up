@@ -88,9 +88,10 @@ class SimpleServiceWidget(WidgetWrap):
         if not self.display_controller.has_maas:
             return title_markup, info_markup
 
-        p = self.placement_controller.get_assignments(self.service)
+        pd = self.placement_controller.get_assignments(self.service)
+        nplaced = sum([len(pd[k]) for k in pd])
         nr = self.service.required_num_units()
-        info_str = "  ({} of {} placed)".format(len(p), nr)
+        info_str = "  ({} of {} placed)".format(nplaced, nr)
 
         info_markup.append(info_str)
 
