@@ -79,9 +79,9 @@ unitMachine()
 waitForMachine()
 {
     for machine; do
-	while [ "$(agentState $machine)" != started ]; do
-	    sleep 5
-	done
+        while [ "$(agentState $machine)" != started ]; do
+            sleep 5
+        done
     done
 }
 
@@ -93,8 +93,8 @@ waitForService()
 {
 
     for service; do
-	while [ "$(agentStateUnit "$service" 0)" != active ]; do
-	    sleep 5
-	done
+        while [ "$(agentStateUnit "$service" 0)" != active ]; do
+            sleep 5
+        done
     done
 }
