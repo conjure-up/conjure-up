@@ -99,13 +99,17 @@ class JujuControllerController:
             return self.handle_exception(e)
 
     def _post_bootstrap_done(self, future):
-        result = json.loads(future.result().decode('utf8'))
+        try:
+            result = json.loads(future.result().decode('utf8'))
+        except Exception as e:
+            self.handle_exception(e)
+
         self.app.log.debug("pre_bootstrap_done: {}".format(result))
         if result['returnCode'] > 0:
             pollinate(self.app.session_id, 'E001', self.app.log)
-            raise Exception(
+            return self.handle_exception(Exception(
                 'There was an error during the post '
-                'bootstrap processing phase: {}.'.format(result))
+                'bootstrap processing phase: {}.'.format(result)))
         pollinate(self.app.session_id, 'J002', self.app.log)
         self.app.controllers['deploy'].render(self.controller)
 

@@ -22,11 +22,19 @@ class FinishController:
         pollinate(self.app.session_id, tag, self.app.log)
         self.app.ui.show_exception_message(exc)
 
-    def handle_post_execption(self, exc):
+    def handle_post_exception(self, exc):
         """ If an exception occurs in the post processing,
         log it but don't die
         """
+        pollinate(self.app.session_id, 'E002', self.app.log)
         self.app.log.exception(exc)
+
+    def handle_pre_exception(self, exc):
+        """ If an exception occurs in the pre processing,
+        log it but don't die
+        """
+        pollinate(self.app.session_id, 'E003', self.app.log)
+        self.app.ui.show_exception_message(exc)
 
     def _pre_exec(self, *args):
         """ Executes a bundles pre processing script if exists
@@ -64,8 +72,8 @@ class FinishController:
         result = json.loads(future.result().decode('utf8'))
         self.app.log.debug("pre_exec_done: {}".format(result))
         if result['returnCode'] > 0:
-            raise Exception(
-                'There was an error during the pre processing phase.')
+            return self.handle_pre_exception(Exception(
+                'There was an error during the pre processing phase.'))
         self._deploy_bundle()
 
     def _deploy_bundle(self):
@@ -115,7 +123,7 @@ class FinishController:
                                       self._post_exec_sh,
                                       shell=True,
                                       env=self.app.env),
-                              self.handle_post_execption)
+                              self.handle_post_exception)
         future.add_done_callback(self._post_exec_done)
 
     def _post_exec_done(self, future):

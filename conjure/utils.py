@@ -124,7 +124,8 @@ def pollinate(session, tag, log):
         EB - error juju bootstrap
         ED - error deploying
         E001 - error in post bootstrap phase
-        E002 - error in pre/post processor
+        E002 - error in post processor
+        E003 - error in pre processor
 
     Arguments:
     session: randomly generated session id

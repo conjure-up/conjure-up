@@ -42,7 +42,29 @@ def label_to_atype(labels):
     return atypes
 
 
-class AssignmentType(Enum):
+class OrderedEnum(Enum):
+    def __ge__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value >= other.value
+        return NotImplemented
+
+    def __gt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value > other.value
+        return NotImplemented
+
+    def __le__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value <= other.value
+        return NotImplemented
+
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        return NotImplemented
+
+
+class AssignmentType(OrderedEnum):
     # both are equivalent to not specifying a type to juju:
     DEFAULT = 1
     BareMetal = 1

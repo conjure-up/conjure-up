@@ -5,7 +5,9 @@
 # Arguments:
 # $1: logger name, ie. openstack, bigdata
 debug() {
-    logger -t $1 "[DEBUG] "+ $*
+    name=$1
+    msg=$(echo $* | cut -d ' ' -f2-)
+    logger -t "$name" "[DEBUG] $msg"
 }
 
 # Gets current juju state for machine

@@ -21,6 +21,8 @@ from urwid import (AttrMap, Divider, Pile, WidgetWrap,
 
 from ubuntui.widgets.buttons import MenuSelectButton, PlainButton
 
+from bundleplacer.assignmenttype import AssignmentType
+
 
 class ServiceWidgetState(Enum):
     CHOOSING = 0
@@ -80,8 +82,10 @@ class SimpleServiceWidget(WidgetWrap):
                     " (subordinate)\n  " +
                     self.service.charm_source], []
 
+        nr = self.service.required_num_units()
+        pl = "s" if nr > 1 else ""
         title_markup = [self.service.service_name +
-                        "\n  " +
+                        "\n  {} unit{}: ".format(nr, pl) +
                         self.service.charm_source]
         info_markup = []
 
@@ -90,25 +94,35 @@ class SimpleServiceWidget(WidgetWrap):
 
         pd = self.placement_controller.get_assignments(self.service)
         nplaced = sum([len(pd[k]) for k in pd])
-        nr = self.service.required_num_units()
-        info_str = "  ({} of {} placed)".format(nplaced, nr)
 
-        info_markup.append(info_str)
+        if nr-nplaced > 0:
+            pl = ""
+            if nr-nplaced > 1:
+                pl = "s"
+            info_str = ("  {} unit{} will be auto-placed "
+                        "by Juju\n".format(nr-nplaced, pl))
+
+            info_markup.append(info_str)
 
         def string_for_placement_dict(d):
+            if self.display_controller.has_maas:
+                defstring = "Bare Metal (Default)"
+            else:
+                defstring = "LXD (Default)"
             s = []
-            for atype, ml in d.items():
-                n = len(ml)
-                s.append("    {} ({}): ".format(atype.name, n))
-                if len(ml) == 0:
-                    s.append("\N{DOTTED CIRCLE}")
+            for atype, ml in sorted(d.items()):
+                if atype == AssignmentType.DEFAULT:
+                    aname = defstring
                 else:
-                    s.append(", ".join([m.hostname for m in ml]))
-            if len(s) == 0:
-                return ["None"]
-            return s
+                    aname = atype.name
 
-        info_markup += ["    Assignments: "]
+                hostnames = [m.hostname for m in ml]
+                s.append("    {}: {}".format(aname,
+                                             ", ".join(hostnames)))
+            if len(s) == 0:
+                return []
+            return "\n".join(s)
+
         ad = self.placement_controller.get_assignments(self.service)
         info_markup += string_for_placement_dict(ad)
         return title_markup, info_markup
