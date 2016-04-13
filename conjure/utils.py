@@ -104,6 +104,8 @@ def pollinate(session, tag, log):
         CS - cloud selected
         CC - cloud creation started
         CA - cloud credentials added
+        L001 - LXD Setup started
+        L002 - LXD Setup completed
         J001 - juju post-bootstrap started
         J002 - juju post-bootstrap completed
         J003 - juju bootstrap started

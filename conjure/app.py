@@ -15,6 +15,7 @@ from conjure.controllers.cloud import CloudController
 from conjure.controllers.newcloud import NewCloudController
 from conjure.controllers.jujucontroller import JujuControllerController
 from conjure.controllers.bootstrapwait import BootstrapWaitController
+from conjure.controllers.lxdsetup import LXDSetupController
 from conjure.log import setup_logging
 import json
 import sys
@@ -77,6 +78,7 @@ class Application:
             'welcome': WelcomeController(self.app),
             'clouds': CloudController(self.app),
             'newcloud': NewCloudController(self.app),
+            'lxdsetup': LXDSetupController(self.app),
             'bootstrapwait': BootstrapWaitController(self.app),
             'deploy': DeployController(self.app),
             'deploysummary': DeploySummaryController(self.app),

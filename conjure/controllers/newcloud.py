@@ -56,7 +56,6 @@ class NewCloudController:
             cred_f.write(yaml.safe_dump(existing_creds,
                                         default_flow_style=False))
 
-        # FIXME: Handle these cases better
         if self.cloud == 'maas':
             self.cloud = '{}/{}'.format(self.cloud,
                                         credentials['@maas-server'].value)
@@ -70,8 +69,15 @@ class NewCloudController:
         Arguments:
         cloud: The cloud to create credentials for
         """
-        # if cloud is LXD bypass all this
+
+        # LXD is a special case as we want to make sure a bridge
+        # is configured. If not we'll bring up a new view to allow
+        # a user to configure a LXD bridge with suggested network
+        # information.
         if cloud == 'lxd':
+            if not path.isfile('/etc/default/lxd-bridge'):
+                return self.app.controllers['lxdsetup'].render()
+
             return self.app.controllers['jujucontroller'].render(
                 cloud='lxd', bootstrap=True)
 

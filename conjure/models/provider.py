@@ -23,8 +23,8 @@ The schema contains the following:
 Examples:
 
 ('maas', OrderedDict([
-  ('@maas-server', StringEditor()) # Required input but not stored.
-  ('_auth-type', 'oauth1) # Required, but not editable and is stored.
+  ('@maas-server', StringEditor()) # Required input not stored.
+  ('_auth-type', 'oauth1) # Required, not editable and is stored.
   ('maas-oauth', StringEditor()) # required, editable, and stored.
 ])
 """
