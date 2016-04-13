@@ -12,7 +12,7 @@ SCRIPTPATH=$(dirname $SCRIPT)
 # $1: logger name, ie. openstack, bigdata
 debug() {
     name=$1
-    msg=$(echo $* | cut -d ' ' -f2-)
+    msg=$(echo "$@" | cut -d ' ' -f2-)
     logger -t "$name" "[DEBUG] $msg"
 }
 
