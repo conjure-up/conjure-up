@@ -1,6 +1,7 @@
 from conjure.ui.views.newcloud import NewCloudView
 from conjure.models.provider import Schema
 from conjure.utils import juju_path, pollinate
+from configobj import ConfigObj
 import os.path as path
 import yaml
 
@@ -75,9 +76,17 @@ class NewCloudController:
         # a user to configure a LXD bridge with suggested network
         # information.
         if cloud == 'lxd':
-            if not path.isfile('/etc/default/lxd-bridge'):
+            if path.isfile('/etc/default/lxd-bridge'):
+                cfg = ConfigObj('/etc/default/lxd-bridge')
+            else:
+                cfg = ConfigObj()
+
+            ready = cfg.get('LXD_IPV4_ADDR', None)
+            if not ready:
                 return self.app.controllers['lxdsetup'].render()
 
+            self.app.log.debug("Found an IPv4 address ({}), "
+                               "assuming LXD is configured.".format(ready))
             return self.app.controllers['jujucontroller'].render(
                 cloud='lxd', bootstrap=True)
 
