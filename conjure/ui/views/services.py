@@ -64,7 +64,7 @@ class ServicesView(WidgetWrap):
                         unit._name,
                         [
                             ('fixed', 5, Text("")),
-                            Color.frame_subheader(
+                            Color.info_context(
                                 unit_w.WorkloadInfo)
                         ],
                         force=True)
