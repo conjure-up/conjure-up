@@ -16,11 +16,11 @@ class CloudController:
 
         if BundleModel.whitelist():
             whitelist = set(BundleModel.whitelist())
-            return list(clouds & whitelist)
+            return sorted(list(clouds & whitelist))
 
         elif BundleModel.blacklist():
             blacklist = set(BundleModel.blacklist())
-            return list(clouds ^ blacklist)
+            return sorted(list(clouds ^ blacklist))
 
         return sorted(list(clouds))
 
