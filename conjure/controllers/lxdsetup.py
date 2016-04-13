@@ -67,6 +67,9 @@ class LXDSetupController:
                 return self.app.ui.show_exception_message(
                     Exception("Problem saving config: {}".format(sh.errors())))
 
+        self.app.log.debug("Restarting lxd-bridge")
+        shell("sudo systemctl restart lxd-bridge.service")
+
         pollinate(self.app.session_id, 'L002', self.app.log)
         self.app.controllers['jujucontroller'].render(
             cloud='lxd', bootstrap=True)

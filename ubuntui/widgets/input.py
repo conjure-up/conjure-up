@@ -156,7 +156,7 @@ class Selector(WidgetWrap):
         """
         for i in self.group:
             if i.label == item:
-                item.set_state(state)
+                i.set_state(state)
 
 
 class YesNo(Selector):
