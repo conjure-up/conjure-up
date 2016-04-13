@@ -25,7 +25,7 @@ debug() {
 # machine status
 agentState()
 {
-    juju status --format json | jq ".machines[\"$1\"][\"juju-status\"][\"current\"]" 2> /dev/null
+    juju status --format json | jq ".machines[\"$1\"][\"juju-status\"][\"current\"]"
 }
 
 # Gets current workload state for service
@@ -38,7 +38,7 @@ agentState()
 # unit status
 agentStateUnit()
 {
-    juju status --format json | jq ".services[\"$1\"][\"units\"][\"$1/$2\"][\"workload-status\"][\"current\"]" 2> /dev/null
+    juju status --format json | jq ".services[\"$1\"][\"units\"][\"$1/$2\"][\"workload-status\"][\"current\"]"
 }
 
 # Exports the variables required for communicating with your cloud.
@@ -68,7 +68,7 @@ configOpenrc()
 # IP Address of unit
 unitAddress()
 {
-    juju status --format json | jq ".services[\"$1\"][\"units\"][\"$1/$2\"][\"public-address\"]" 2> /dev/null
+    juju status --format json | jq ".services[\"$1\"][\"units\"][\"$1/$2\"][\"public-address\"]"
 }
 
 # Get machine for unit, ie 0/lxc/1
@@ -81,7 +81,7 @@ unitAddress()
 # machine identifier
 unitMachine()
 {
-    juju status --format json | jq ".services[\"$1\"][\"units\"][\"$1/$2\"][\"machine\"]" 2> /dev/null
+    juju status --format json | jq ".services[\"$1\"][\"units\"][\"$1/$2\"][\"machine\"]"
 }
 
 # Waits for machine to start

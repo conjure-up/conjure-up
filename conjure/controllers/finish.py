@@ -89,10 +89,11 @@ class FinishController:
 
     def _deploy_bundle_done(self, future):
         result = future.result()
-        self.app.log.debug("deploy_bundle_done: {}".format(result))
+        self.app.log.debug("deploy_bundle_done: {}".format(result.output()))
         if result.code > 0:
             self.handle_exception("ED", Exception(
-                'There was an error during the post processing phase.'))
+                'There was an error deploying the bundle: {}.'.format(
+                    result.errors())))
             return
         pollinate(self.app.session_id, 'DC', self.app.log)
         EventLoop.set_alarm_in(1, self._post_exec)
