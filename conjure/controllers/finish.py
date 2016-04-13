@@ -138,7 +138,9 @@ class FinishController:
                     'phase, retrying.')
                 EventLoop.set_alarm_in(5, self._post_exec)
             else:
+                # Stop post processing loop and restart view refresh
                 EventLoop.remove_alarms()
+                EventLoop.set_alarm_in(1, self.refresh)
         except Exception as e:
             self.app.log.error(e)
             self.handle_exception("E002", e)
