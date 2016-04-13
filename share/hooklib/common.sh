@@ -25,7 +25,7 @@ debug() {
 # machine status
 agentState()
 {
-    juju status --format json | jq ".machines[\"$1\"][\"juju-status\"][\"current\"]"
+    juju status --format json | jq ".machines[\"$1\"][\"juju-status\"][\"current\"]" 2> /dev/null
 }
 
 # Gets current workload state for service
