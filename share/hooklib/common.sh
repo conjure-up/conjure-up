@@ -6,14 +6,21 @@ SCRIPT=$(realpath $0)
 # Directory housing script
 SCRIPTPATH=$(dirname $SCRIPT)
 
-# syslog debug logger
+# loggers
 #
 # Arguments:
 # $1: logger name, ie. openstack, bigdata
+# $@: rest of log message
 debug() {
     name=$1
-    msg=$(echo "$@" | cut -d ' ' -f2-)
-    logger -t "$name" "[DEBUG] $msg"
+    shift 1
+    logger -t "$name" "[DEBUG] $@"
+}
+
+info() {
+    name=$1
+    shift 1
+    logger -t "$name" "[INFO] $@"
 }
 
 # Gets current juju state for machine
