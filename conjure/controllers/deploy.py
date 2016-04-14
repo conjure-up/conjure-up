@@ -54,7 +54,7 @@ class DeployController:
         if info['ProviderType'] == 'maas':
             pollinate(self.app.session_id, 'PM', self.app.log)
             try:
-                controller_meta = Juju.controller_info()[current_controller()]
+                controller_meta = Juju.controller_info(current_controller())
                 bootstrap_config = controller_meta['bootstrap-config']
                 self.app.log.debug(
                     'bootstrap_config {}'.format(bootstrap_config))

@@ -37,7 +37,7 @@ class NewCloudController:
         back: if true loads previous controller
         """
         if back:
-            return self.app.controllers['clouds'].render()
+            return self.app.controllers['welcome'].render()
 
         cred_path = path.join(juju_path(), 'credentials.yaml')
         if path.isfile(cred_path):

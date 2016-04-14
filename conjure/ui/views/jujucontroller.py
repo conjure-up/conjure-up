@@ -5,6 +5,7 @@ from ubuntui.widgets.input import StringEditor
 from ubuntui.widgets.buttons import (cancel_btn, confirm_btn, PlainButton)
 from urwid import (WidgetWrap, Pile,
                    Text, Filler, Columns)
+from conjure.models.bundle import BundleModel
 
 
 class JujuControllerView(WidgetWrap):
@@ -97,12 +98,25 @@ class JujuControllerView(WidgetWrap):
                     )
                 )
             items.append(Padding.line_break(""))
-        items.append(Padding.center_50(
-            Color.body(
-                PlainButton(label="Select a new Cloud Provider",
-                            on_press=self.select_cloud),
-                focus_map='menu_button focus')
-        ))
+
+        # If the bundle only supports MAAS dont provide the option to connect
+        # to other public clouds.
+        if BundleModel.whitelist() and "maas" in BundleModel.whitelist():
+            items.append(Padding.line_break(""))
+            items.append(Padding.center_50(
+                Color.body(
+                    PlainButton(label="Connect to an existing MAAS",
+                                on_press=self.submit_new_maas),
+                    focus_map='menu_button focus')
+            ))
+        else:
+            items.append(Padding.center_50(
+                Color.body(
+                    PlainButton(label="Select a new Cloud Provider",
+                                on_press=self.select_cloud),
+                    focus_map='menu_button focus')
+            ))
+
         items.append(
             Padding.center_60(HR()))
         items.append(Padding.center_20(self._build_buttons()))
@@ -110,6 +124,9 @@ class JujuControllerView(WidgetWrap):
 
     def select_cloud(self, btn):
         return self.app.controllers['clouds'].render()
+
+    def submit_new_maas(self, btn):
+        return self.app.controllers['newcloud'].render("maas")
 
     def submit(self, result):
         self.cb(result.label)

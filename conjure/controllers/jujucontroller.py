@@ -35,6 +35,8 @@ class JujuControllerController:
         controller: Juju controller to deploy to
         back: if true returns to previous controller
         """
+        self.app.log.debug(
+            "jujucontroller - selected: {}".format(controller))
         self.controller = controller
 
         if back:
