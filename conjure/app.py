@@ -45,6 +45,8 @@ class ApplicationConfig:
         self.controllers = None
         # Current Juju model
         self.current_model = None
+        # Current controller
+        self.current_controller = None
         # Global session id
         self.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
                                     str(uuid.uuid4()))

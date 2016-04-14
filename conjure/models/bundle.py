@@ -13,7 +13,8 @@ class BundleModel:
         "location": None,
         "blacklist": [],
         "whitelist": [],
-        "recommendedCharms": []
+        "recommendedCharms": [],
+        "bootstrapSeries": None
     }
 
     @classmethod
@@ -28,6 +29,12 @@ class BundleModel:
         location can contain namespaced bundles
         """
         return cls.bundle.get('location', None)
+
+    @classmethod
+    def bootstrapSeries(cls):
+        """ Returns a defined bootstrap-series
+        """
+        return cls.bundle.get('bootstrapSeries', None)
 
     @classmethod
     def name(cls):

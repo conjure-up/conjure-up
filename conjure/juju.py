@@ -106,23 +106,34 @@ class Juju:
         cls.is_authenticated = True
 
     @classmethod
-    def bootstrap(cls, controller, cloud):
+    def bootstrap(cls, controller, cloud, series=None, log=None):
         """ Performs juju bootstrap
+
+        If not LXD pass along the newly defined credentials
 
         Arguments:
         controller: name of your controller
         cloud: name of local or public cloud to deploy to
+        series: define the bootstrap series defaults to xenial
+        log: application logger
         """
-        cmd = ("juju bootstrap {} {} --upload-tools ".format(
-            controller, cloud))
+        cmd = "juju bootstrap {} {} --upload-tools ".format(
+                  controller, cloud, series)
+        if series is not None:
+            cmd += "--bootstrap-series={} ".format(series)
+        if cloud != "lxd" and cloud != "localhost":
+            cmd += "--credential {}".format(controller)
+        if log:
+            log.debug("bootstrap cmd: {}".format(cmd))
         return shell(cmd)
 
     @classmethod
-    def bootstrap_async(cls, controller, cloud, exc_cb=None):
+    def bootstrap_async(cls, controller, cloud,
+                        series=None, log=None, exc_cb=None):
         """ Performs a bootstrap asynchronously
         """
         return async.submit(partial(cls.bootstrap, controller,
-                                    cloud), exc_cb)
+                                    cloud, series, log), exc_cb)
 
     @classmethod
     def log(cls, limit=1):

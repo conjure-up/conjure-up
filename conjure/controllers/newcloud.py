@@ -37,27 +37,37 @@ class NewCloudController:
         credentials: credentials to store for provider
         back: if true loads previous controller
         """
-        controller_name = petname.Name()
+        self.app.current_controller = petname.Name()
 
         if back:
             return self.app.controllers['welcome'].render()
 
         cred_path = path.join(juju_path(), 'credentials.yaml')
-        if path.isfile(cred_path):
+        if not path.isfile(cred_path):
+            existing_creds = {
+                    'credentials': {
+                        self.cloud: {
+                            self.app.current_controller: self._format_creds(
+                                credentials)
+                        }
+                    }
+                }
+
+        else:
             existing_creds = yaml.safe_load(open(cred_path))
 
             if self.cloud in existing_creds['credentials'].keys():
                 c = existing_creds['credentials'][self.cloud]
-                c[controller_name] = self._format_creds(
+                c[self.app.current_controller] = self._format_creds(
                     credentials)
-        else:
-            existing_creds = {
-                'credentials': {
-                    self.cloud: {
-                        controller_name: self._format_creds(credentials)
-                    }
+            else:
+                # Handle the case where path exists but an entry for the cloud
+                # has yet to be added.
+                existing_creds['credentials'][self.cloud] = {
+                    self.app.current_controller: self._format_creds(
+                        credentials)
                 }
-            }
+
         with open(cred_path, 'w') as cred_f:
             cred_f.write(yaml.safe_dump(existing_creds,
                                         default_flow_style=False))

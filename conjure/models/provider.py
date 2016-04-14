@@ -33,20 +33,17 @@ Schema = OrderedDict([
     ('aws', OrderedDict([
         ('_auth-type', 'access-key'),
         ('access-key', StringEditor()),
-        ('secret-key', StringEditor()),
-        ('region', StringEditor(default='us-east-1'))
+        ('secret-key', StringEditor())
     ])),
     ('aws-china', OrderedDict([
         ('_auth-type', 'access-key'),
         ('access-key', StringEditor()),
-        ('secret-key', StringEditor()),
-        ('region', StringEditor(default='cn-north-1'))
+        ('secret-key', StringEditor())
     ])),
     ('aws-gov', OrderedDict([
         ('_auth-type', 'access-key'),
         ('access-key', StringEditor()),
-        ('secret-key', StringEditor()),
-        ('region', StringEditor(default='us-gov-west-1'))
+        ('secret-key', StringEditor())
     ])),
     ('maas', OrderedDict([
         ('_auth-type', 'oauth1'),
@@ -54,6 +51,7 @@ Schema = OrderedDict([
         ('maas-oauth', StringEditor())
     ])),
     ('azure', OrderedDict([
+        ('_auth-type', 'userpass'),
         ('application-id', StringEditor()),
         ('subscription-id', StringEditor()),
         ('tenant-id', StringEditor()),
@@ -67,6 +65,7 @@ Schema = OrderedDict([
         ('controller-resource-group', StringEditor())
     ])),
     ('azure-china', OrderedDict([
+        ('_auth-type', 'userpass'),
         ('application-id', StringEditor()),
         ('subscription-id', StringEditor()),
         ('tenant-id', StringEditor()),
@@ -102,6 +101,7 @@ Schema = OrderedDict([
         ('algorithm', StringEditor(default='rsa-sha256'))
     ])),
     ('openstack', OrderedDict([
+        ('_auth-type', 'userpass'),
         ('username', StringEditor()),
         ('password', PasswordEditor()),
         ('tenant-name', StringEditor()),
@@ -115,6 +115,7 @@ Schema = OrderedDict([
         ('network', StringEditor())
     ])),
     ('rackspace', OrderedDict([
+        ('_auth-type', 'userpass'),
         ('username', StringEditor()),
         ('password', PasswordEditor()),
         ('tenant-name', StringEditor()),

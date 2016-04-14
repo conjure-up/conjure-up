@@ -10,7 +10,8 @@
     "bundles": [{
         "key": "apache-core-batch-processing",
         "name": "Apache MapReduce",
-        "summary": "MapReduce is a software framework for easily writing applications which process vast amounts of data in-parallel on large clusters of machines."
+        "summary": "MapReduce is a software framework for easily writing applications which process vast amounts of data in-parallel on large clusters of machines.",
+        "bootstrapSeries": "trusty"
     }, {
         "key": "apache-hadoop-spark",
         "name": "Apache Spark",
@@ -64,6 +65,7 @@
   * `whitelist`: **optional** Opposite of `blacklist` if defined will only show these providers and hide the others.
   * `recommendedCharms`: **optional** A list of of recommended charms that would be useful for the bundle.
   * `additionalQuestions`: **optional** List of additional questions a bundle would require for deployment.
+  * `bootstrapSeries`: **optional** Distro series of bootstrap controller
 * `bin`: Mostly used in packaging the application for telling conjure what script to execute.
 
 ## Additional Questions
