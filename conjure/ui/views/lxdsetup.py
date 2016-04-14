@@ -5,7 +5,7 @@ from ubuntui.widgets.hr import HR
 from urwid import (WidgetWrap, Pile, Text, Columns, Filler)
 from collections import OrderedDict
 from ubuntui.widgets.input import (StringEditor, YesNo)
-from subprocess import check_call
+import os
 
 # Network format
 #
@@ -70,7 +70,7 @@ class LXDSetupView(WidgetWrap):
             # Padding.center_60(Instruction(
             #     "Enter LXD information:")),
             Padding.center_60(Instruction(
-                "There is no LXD bridge found on this system"
+                "Please configure networking for LXD"
             )),
             Padding.center_60(HR()),
             Padding.center_60(self.build_info()),
@@ -102,12 +102,13 @@ class LXDSetupView(WidgetWrap):
 
     def build_info(self):
         items = [
-            Text("You will need to configure an LXD bridge before "
-                 "continuing."),
+            Text("There was no LXD bridge found on your system "
+                 "which usually means this is your first time running "
+                 "LXD."),
             Padding.line_break(""),
             Text("If you wish to do so now pressing confirm will drop you out "
-                 "of the installer and prompt you for further LXD "
-                 "configuration. Once complete the installer will "
+                 "of the installer and walk you through configuring your "
+                 "network for LXD. Once complete the installer will "
                  "start again from the beginning where you can choose "
                  "to deploy the bundle via LXD.")
         ]
@@ -140,5 +141,6 @@ class LXDSetupView(WidgetWrap):
 
     def submit(self, result):
         # self.cb(self.input_items)
-        check_call("/usr/share/conjure/run-lxd-config {}".format(
-            self.app.config["bin"]), shell=True)
+        os.execl("/usr/share/conjure/run-lxd-config",
+                 "/usr/share/conjure/run-lxd-config",
+                 self.app.config["bin"])

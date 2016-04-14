@@ -161,8 +161,7 @@ class FinishController:
         self.view = ServicesView(self.app)
 
         self.app.ui.set_header(
-            title="Status: {}".format(
-                self.app.config['summary'])
+            title=self.app.config['summary']
         )
         self.app.ui.set_body(self.view)
         self.app.ui.set_subheader(
