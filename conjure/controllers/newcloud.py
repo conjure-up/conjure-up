@@ -4,6 +4,7 @@ from conjure.utils import juju_path, pollinate
 from configobj import ConfigObj
 import os.path as path
 import yaml
+import petname
 
 
 class NewCloudController:
@@ -36,6 +37,8 @@ class NewCloudController:
         credentials: credentials to store for provider
         back: if true loads previous controller
         """
+        controller_name = petname.Name()
+
         if back:
             return self.app.controllers['welcome'].render()
 
@@ -45,12 +48,14 @@ class NewCloudController:
 
             if self.cloud in existing_creds['credentials'].keys():
                 c = existing_creds['credentials'][self.cloud]
-                c['conjure'] = self._format_creds(
+                c[controller_name] = self._format_creds(
                     credentials)
         else:
             existing_creds = {
                 'credentials': {
-                    self.cloud: {'conjure': self._format_creds(credentials)}
+                    self.cloud: {
+                        controller_name: self._format_creds(credentials)
+                    }
                 }
             }
         with open(cred_path, 'w') as cred_f:

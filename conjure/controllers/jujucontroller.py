@@ -9,6 +9,7 @@ import os.path as path
 import os
 from subprocess import check_output
 import json
+import petname
 
 
 class JujuControllerController:
@@ -44,7 +45,7 @@ class JujuControllerController:
 
         if self.bootstrap:
             self._bootstrap_future = Juju.bootstrap_async(
-                'conjure',
+                controller,
                 self.cloud,
                 exc_cb=self.handle_exception)
             self._bootstrap_future.add_done_callback(
@@ -81,7 +82,8 @@ class JujuControllerController:
             self.app.log.debug(
                 "Unable to execute: {}, skipping".format(
                     self._post_bootstrap_sh))
-            return
+            return self.app.controllers['deploy'].render(self.controller)
+
         self.app.ui.set_footer('Running post-bootstrap tasks.')
 
         pollinate(self.app.session_id, 'J001', self.app.log)
@@ -106,13 +108,14 @@ class JujuControllerController:
         except Exception as e:
             self.handle_exception(e)
 
-        self.app.log.debug("pre_bootstrap_done: {}".format(result))
+        self.app.log.debug("post_bootstrap_done: {}".format(result))
         if result['returnCode'] > 0:
             pollinate(self.app.session_id, 'E001', self.app.log)
             return self.handle_exception(Exception(
                 'There was an error during the post '
                 'bootstrap processing phase: {}.'.format(result)))
         pollinate(self.app.session_id, 'J002', self.app.log)
+        Juju.switch(self.controller)
         self.app.controllers['deploy'].render(self.controller)
 
     def render(self, cloud=None, bootstrap=None):
@@ -131,7 +134,7 @@ class JujuControllerController:
         self.bootstrap = bootstrap
 
         if self.cloud and self.bootstrap:
-            return self.finish('conjure:default')
+            return self.finish(petname.Name())
         else:
             controllers = Juju.controllers().keys()
             models = {}

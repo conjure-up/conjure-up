@@ -49,7 +49,7 @@ class FinishController:
            or not os.access(self._pre_exec_sh, os.X_OK):
             self.app.log.debug(
                 "Unable to execute: {}, skipping".format(self._pre_exec_sh))
-            self._deploy_bundle()
+            return self._deploy_bundle()
         self.app.ui.set_footer('Running pre-processing tasks.')
         if not self._pre_exec_pollinate:
             pollinate(self.app.session_id, 'XA', self.app.log)
