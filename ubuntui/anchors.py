@@ -63,7 +63,7 @@ class Footer(WidgetWrap):
     """
 
     def __init__(self, message="", completion=0):
-        message_widget = (Text(message))
+        message_widget = (Text(message, align="center"))
         status = [
             message_widget
         ]

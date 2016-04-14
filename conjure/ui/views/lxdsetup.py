@@ -5,6 +5,7 @@ from ubuntui.widgets.hr import HR
 from urwid import (WidgetWrap, Pile, Text, Columns, Filler)
 from collections import OrderedDict
 from ubuntui.widgets.input import (StringEditor, YesNo)
+from subprocess import check_call
 
 # Network format
 #
@@ -66,10 +67,13 @@ class LXDSetupView(WidgetWrap):
         self.input_items = NETWORK
         self.cb = cb
         _pile = [
+            # Padding.center_60(Instruction(
+            #     "Enter LXD information:")),
             Padding.center_60(Instruction(
-                "Enter LXD information:")),
+                "There is no LXD bridge found on this system"
+            )),
             Padding.center_60(HR()),
-            Padding.center_60(self.build_inputs()),
+            Padding.center_60(self.build_info()),
             Padding.line_break(""),
             Padding.center_20(self.buttons())
         ]
@@ -96,6 +100,19 @@ class LXDSetupView(WidgetWrap):
         ]
         return Pile(buttons)
 
+    def build_info(self):
+        items = [
+            Text("You will need to configure an LXD bridge before "
+                 "continuing."),
+            Padding.line_break(""),
+            Text("If you wish to do so now pressing confirm will drop you out "
+                 "of the installer and prompt you for further LXD "
+                 "configuration. Once complete the installer will "
+                 "start again from the beginning where you can choose "
+                 "to deploy the bundle via LXD.")
+        ]
+        return Pile(items)
+
     def build_inputs(self):
         items = []
         for k in self.input_items.keys():
@@ -120,4 +137,6 @@ class LXDSetupView(WidgetWrap):
         self.cb(back=True)
 
     def submit(self, result):
-        self.cb(self.input_items)
+        # self.cb(self.input_items)
+        check_call("/usr/share/conjure/run-lxd-config {}".format(
+            self.app.config["bin"]), shell=True)
