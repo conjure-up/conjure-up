@@ -65,7 +65,7 @@ class WelcomeView(WidgetWrap):
         return Pile(cols)
 
     def cancel(self, button):
-        pollinate(self.app.session_id, 'UC')
+        pollinate(self.app.session_id, 'UC', self.app.log)
         EventLoop.exit(0)
 
     def done(self, result):

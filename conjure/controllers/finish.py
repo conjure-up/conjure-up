@@ -50,7 +50,7 @@ class FinishController:
             self.app.log.debug(
                 "Unable to execute: {}, skipping".format(self._pre_exec_sh))
             return self._deploy_bundle()
-        self.app.ui.set_footer('Running pre-processing tasks.')
+        self.app.ui.set_footer('Running pre-processing tasks...')
         if not self._pre_exec_pollinate:
             pollinate(self.app.session_id, 'XA', self.app.log)
             self._pre_exec_pollinate = True
@@ -80,7 +80,7 @@ class FinishController:
         """ Performs the bootstrap in between processing scripts
         """
         self.app.log.debug("Deploying bundle: {}".format(self.bundle))
-        self.app.ui.set_footer('Deploying bundle')
+        self.app.ui.set_footer('Deploying bundle...')
         pollinate(self.app.session_id, 'DS', self.app.log)
         future = async.submit(
             partial(Juju.deploy_bundle, self.bundle),
@@ -95,6 +95,8 @@ class FinishController:
                 'There was an error deploying the bundle: {}.'.format(
                     result.errors())))
             return
+        self.app.ui.set_footer('Deploy completed, waiting for '
+                               'all services to be available.')
         pollinate(self.app.session_id, 'DC', self.app.log)
         EventLoop.set_alarm_in(1, self._post_exec)
 

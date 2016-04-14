@@ -55,16 +55,13 @@ class CloudView(WidgetWrap):
                 )
             ))
 
-        # If the bundle only supports MAAS dont provide the option to connect
-        # to other public clouds.
-        if BundleModel.whitelist() and "maas" in BundleModel.whitelist():
-            total_items.append(Padding.line_break(""))
-            total_items.append(Padding.center_50(
-                Color.body(
-                    PlainButton(label="Connect to an existing MAAS",
-                                on_press=self.submit_new_maas),
-                    focus_map='menu_button focus')
-            ))
+        total_items.append(Padding.line_break(""))
+        total_items.append(Padding.center_50(
+            Color.body(
+                PlainButton(label="Connect to an existing MAAS",
+                            on_press=self.submit_new_maas),
+                focus_map='menu_button focus')
+        ))
 
         total_items.append(
             Padding.center_60(HR()))

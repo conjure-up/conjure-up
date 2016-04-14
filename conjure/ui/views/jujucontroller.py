@@ -6,6 +6,7 @@ from ubuntui.widgets.buttons import (cancel_btn, confirm_btn, PlainButton)
 from urwid import (WidgetWrap, Pile,
                    Text, Filler, Columns)
 from conjure.models.bundle import BundleModel
+from conjure.api.controllers import cloud_type
 
 
 class JujuControllerView(WidgetWrap):
@@ -81,9 +82,10 @@ class JujuControllerView(WidgetWrap):
         ]
         for k in sorted(self.models.keys()):
             controller_name = k.split('local.').pop()
-
+            controller_type = cloud_type(controller_name)
             items.append(Padding.center_60(
-                Instruction("Model: {}".format(controller_name))))
+                Instruction("Model: {} ({})".format(controller_name,
+                                                    controller_type))))
             for m in self.models[k]['models']:
                 if m['name'] == 'admin':
                     continue
