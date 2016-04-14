@@ -114,6 +114,8 @@ class LXDSetupView(WidgetWrap):
         return Pile(items)
 
     def build_inputs(self):
+        # FIXME: Skip this for now as we're shelling out to
+        # dpkg-reconfigure lxd :\ yay and such.
         items = []
         for k in self.input_items.keys():
             widget, help_text = self.input_items[k]
