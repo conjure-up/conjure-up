@@ -262,15 +262,24 @@ class Juju:
         return None
 
     @classmethod
-    def controller_info(cls):
+    def controller_info(cls, name=None):
         """ Returns information on current controller
+
+        Arguments:
+        name: if set shows info controller, otherwise displays current.
         """
-        sh = shell('juju show-controller --format yaml')
+        cmd = 'juju show-controller --format yaml'
+        if name is not None:
+            cmd += ' {}'.format(name)
+        sh = shell(cmd)
         if sh.code > 0:
             raise JujuNotFoundException(
                 "Unable to determine controller: {}".format(sh.errors()))
         out = yaml.safe_load("\n".join(sh.output()))
-        return out
+        try:
+            return next(iter(out.values()))
+        except:
+            return out
 
     @classmethod
     def controllers(cls):
