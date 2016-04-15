@@ -95,8 +95,7 @@ class FinishController:
                 'There was an error deploying the bundle: {}.'.format(
                     result.errors())))
             return
-        self.app.ui.set_footer('Deploy completed, waiting for '
-                               'all services to be available.')
+        self.app.ui.set_footer('Deploy committed, waiting...')
         pollinate(self.app.session_id, 'DC', self.app.log)
         EventLoop.set_alarm_in(1, self._post_exec)
 
