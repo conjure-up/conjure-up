@@ -202,7 +202,7 @@ class CharmstoreColumn(WidgetWrap):
         self._related_charms = []
         self._bundle_results = []
         self._charm_results = []
-        self._recommended_widgets = []
+        self._recommended_charms = []
         self.loading = True
         self.update()
 
@@ -225,22 +225,34 @@ class CharmstoreColumn(WidgetWrap):
         self.loading = True
         self.update()
 
+    def remove_existing_charms(self, charms):
+        existing_charms = [s.charm_source.rsplit('-', 1)[0] for s in
+                           self.placement_controller.bundle.services]
+        return [c for c in charms
+                if c['Id'].rsplit('-', 1)[0]
+                not in existing_charms]
+
+    def get_filtered_recommendations(self):
+        opts = self.pile.options()
+        if len(self._recommended_charms) == 0:
+            self._recommended_charms = [
+                self.metadata_controller.get_charm_info(n)
+                for n in
+                self.metadata_controller.recommended_charm_names]
+        return [(CharmWidget(d, self.do_add_charm, recommended=True), opts)
+                for d in self.remove_existing_charms(self._recommended_charms)]
+
     def update(self):
         opts = self.pile.options()
         extra_widgets = []
+        recommended_widgets = []
         if self.metadata_controller.loaded():
-            if len(self._recommended_widgets) == 0:
-                rec_dicts = [self.metadata_controller.get_charm_info(n)
-                             for n in
-                             self.metadata_controller.recommended_charm_names]
-                self._recommended_widgets = [(CharmWidget(d, self.do_add_charm,
-                                                          recommended=True),
-                                              opts) for d in rec_dicts]
-                if len(self._recommended_widgets) > 0:
-                    top_w = self._recommended_widgets[0][0]
+            recommended_widgets = self.get_filtered_recommendations()
+            if len(recommended_widgets) > 0:
+                    top_w = recommended_widgets[0][0]
                     top_w.set_header("Recommended Charms")
-            else:
-                self.loading = False
+
+            self.loading = False
 
         bundle_widgets = [(BundleWidget(d, self.do_add_bundle),
                            opts) for d in self._bundle_results
@@ -249,8 +261,12 @@ class CharmstoreColumn(WidgetWrap):
             top_w = bundle_widgets[0][0]
             top_w.set_header("Bundles")
 
+        filtered_charm_results = self.remove_existing_charms(
+            self._charm_results)
+        filtered_charm_results = filtered_charm_results[:10]
+
         charm_widgets = [(CharmWidget(d, self.do_add_charm),
-                          opts) for d in self._charm_results
+                          opts) for d in filtered_charm_results
                          if 'charm-metadata' in d.get('Meta', {})]
         if len(charm_widgets) > 0:
             top_w = charm_widgets[0][0]
@@ -262,7 +278,7 @@ class CharmstoreColumn(WidgetWrap):
                                     "and Popular Charms…")
             else:
                 self.title.set_text("")
-            extra_widgets = self._recommended_widgets
+            extra_widgets = recommended_widgets
         else:
             if self.loading:
                 msg = "\nSearching for '{}'…\n".format(
@@ -270,14 +286,14 @@ class CharmstoreColumn(WidgetWrap):
                 self.title.set_text(msg)
             else:
                 bn = len(self._bundle_results)
-                cn = len(self._charm_results)
+                cn = len(filtered_charm_results)
                 if bn + cn == 0:
                     advice = ""
                     if len(self.current_search_string) < 3:
                         advice = "Try a longer search string."
                     msg = ("\nNo charms found matching '{}' "
                            "{}".format(self.current_search_string,
-                                         advice))
+                                       advice))
                 else:
                     msg = ("\nShowing the top {} bundles and {} "
                            "charms matching {}:"
@@ -289,13 +305,7 @@ class CharmstoreColumn(WidgetWrap):
     def add_results(self, bundle_results, charm_results):
         self._bundle_results += bundle_results
         self._bundle_results = self._bundle_results[:5]
-        existing_charms = [s.charm_source.rsplit('-', 1)[0] for s in
-                           self.placement_controller.bundle.services]
-        filtered_charm_results = [c for c in charm_results
-                                  if c['Id'].rsplit('-', 1)[0]
-                                  not in existing_charms]
-        self._charm_results += filtered_charm_results
-        self._charm_results = self._charm_results[:10]
+        self._charm_results += charm_results
 
     def focus_prev_or_top(self):
         if len(self.pile.contents) < 2:
@@ -309,6 +319,7 @@ class CharmstoreColumn(WidgetWrap):
     def do_add_charm(self, charm_name, charm_dict):
         self.placement_view.do_add_charm(charm_name,
                                          charm_dict)
+        self.update()
 
     def do_add_bundle(self, bundle_dict):
         self.placement_view.do_add_bundle(bundle_dict)

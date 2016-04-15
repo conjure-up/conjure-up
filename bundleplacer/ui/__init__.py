@@ -23,6 +23,7 @@ from urwid import (AttrMap, Columns, Divider, Filler, Overlay,
 from ubuntui.widgets.buttons import PlainButton, MenuSelectButton
 from ubuntui.views import InfoDialogWidget
 from ubuntui.widgets import MetaScroll
+from ubuntui.widgets.hr import HR
 
 from bundleplacer.charmstore_api import MetadataController
 from bundleplacer.ui.charmstore import CharmstoreColumn, CharmStoreSearchWidget
@@ -82,11 +83,7 @@ class PlacementView(WidgetWrap):
         self.footer_grid.focus_position = 1
 
     def handle_tab(self, backward):
-        if self.state == UIState.RELATION_EDITOR:
-            # Relation editor has no header col.
-            tabloop = ['headercol1', 'col1', 'col2', 'footer']
-        else:
-            tabloop = ['headercol1', 'col1', 'headercol2', 'col2', 'footer']
+        tabloop = ['headercol1', 'col1', 'headercol2', 'col2', 'footer']
 
         if not self.has_maas:
             tabloop.remove('headercol1')
@@ -208,10 +205,19 @@ class PlacementView(WidgetWrap):
         self.maastitle.set_text("Connected to MAAS {}".format(maasname))
 
     def get_relations_header(self):
+        b = PlainButton("Back to Charm Store",
+                        on_press=self.show_default_view)
+        self.rel_back_button = AttrMap(b, 'button_secondary',
+                                       'button_secondary focus')
+
+        self.relations_button_grid = GridFlow([self.rel_back_button],
+                                              36, 1, 0, 'center')
+
         return Pile([Divider(),
                      Text(('body', "Relation Editor"),
                           align='center'),
-                     Divider()])
+                     Divider(),
+                     self.relations_button_grid])
 
     def build_widgets(self):
 
@@ -262,7 +268,7 @@ class PlacementView(WidgetWrap):
                     'frame_footer',
                     'frame_footer')
 
-        self.frame = Frame(header=self.header_columns,
+        self.frame = Frame(header=Pile([self.header_columns, HR()]),
                            body=self.placement_edit_body,
                            footer=f)
         return self.frame
@@ -295,6 +301,8 @@ class PlacementView(WidgetWrap):
             self.machines_column.update()
         elif self.state == UIState.RELATION_EDITOR:
             self.relations_column.update()
+        else:
+            self.charmstore_column.update()
 
         unplaced = self.placement_controller.unassigned_undeployed_services()
         all = self.placement_controller.services()
@@ -389,7 +397,7 @@ class PlacementView(WidgetWrap):
         self.update()
         self.focus_machines_column()
 
-    def show_default_view(self):
+    def show_default_view(self, *args):
         self.state = UIState.CHARMSTORE_VIEW
         self.update()
 

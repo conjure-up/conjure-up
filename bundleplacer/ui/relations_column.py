@@ -83,7 +83,7 @@ class NoRelationWidget(WidgetWrap):
                          RelationType.Provides: RelationType.Requires}[reltype]
         self.source_relname = relname
         self.reltype = reltype
-        s = "({}: nothing {} {})".format(
+        s = "({}: nothing in bundle {} {})".format(
             relname, other_reltype.name.lower(), iface)
         super().__init__(AttrMap(MenuSelectButton(s), 'label',
                                  'button_secondary focus'))
@@ -142,7 +142,8 @@ class RelationsColumn(WidgetWrap):
         if len(self.relation_widgets) == 0:
             self.title.set_text(('body', "Loading Relations..."))
         else:
-            self.title.set_text(('body', "Select Relations:"))
+            self.title.set_text(('body', "Edit Relations: (Changes are "
+                                 "saved immediately)"))
 
         p = set(self.metadata_controller.get_provides(self.service.charm_name))
         r = set(self.metadata_controller.get_requires(self.service.charm_name))
