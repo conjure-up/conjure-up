@@ -83,8 +83,9 @@ class NoRelationWidget(WidgetWrap):
                          RelationType.Provides: RelationType.Requires}[reltype]
         self.source_relname = relname
         self.reltype = reltype
-        s = "({}: nothing in bundle {} {})".format(
-            relname, other_reltype.name.lower(), iface)
+        s = "({}: nothing in bundle {} {})".format(relname,
+                                                   other_reltype.name.lower(),
+                                                   iface)
         super().__init__(AttrMap(MenuSelectButton(s), 'label',
                                  'button_secondary focus'))
 

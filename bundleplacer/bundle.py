@@ -14,12 +14,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import os
 import yaml
 
 from bundleplacer.assignmenttype import AssignmentType, label_to_atype
 from bundleplacer.service import Service
 
 log = logging.getLogger('bundleplacer')
+
+
+DEFAULT_SERIES = 'trusty'
 
 
 class keydict(dict):
@@ -88,8 +92,14 @@ class Bundle:
         self.filename = filename
         self.metadatafilename = metadatafilename
         if self.filename:
-            with open(self.filename) as f:
-                self._bundle = yaml.load(f)
+            if os.path.exists(self.filename):
+                with open(self.filename) as f:
+                    self._bundle = yaml.load(f)
+            else:
+                self._bundle = dict(series=DEFAULT_SERIES,
+                                    services={},
+                                    machines={},
+                                    relations=[])
         else:
             self._bundle = bundle_data
         if metadatafilename:
@@ -175,7 +185,7 @@ class Bundle:
 
     @property
     def series(self):
-        return self._bundle.get('series', 'trusty')
+        return self._bundle.get('series', DEFAULT_SERIES)
 
     def clear_machines_and_placement(self):
         self._bundle['machines'] = {}

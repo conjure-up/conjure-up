@@ -16,6 +16,7 @@
 import argparse
 import logging
 import os
+import shutil
 import sys
 import urwid
 
@@ -39,18 +40,19 @@ class PlacerUI(urwid.Frame):
         super().__init__(body=placerview, header=Header(), footer=Footer())
 
 
-def parse_options(argv):
-    parser = argparse.ArgumentParser(description='Juju Bundle Placer',
-                                     prog='placer',
+def parse_options(argv, test_args):
+    parser = argparse.ArgumentParser(description='Juju Bundle Editor',
                                      argument_default=argparse.SUPPRESS)
     parser.add_argument("bundle_filename", metavar='bundle',
-                        help="Bundle file to edit")
-    parser.add_argument("--metadata", dest="metadata_filename",
-                        metavar='metadatafile',
-                        help="Optional metadata file describing constraints "
-                        "on services in bundle")
-    parser.add_argument("--fake-maas", dest="fake_maas",
-                        action="store_true", default=False)
+                        help="Bundle file to edit (or create)")
+    if test_args:
+        parser.add_argument("--metadata", dest="metadata_filename",
+                            metavar='metadatafile',
+                            help="Optional metadata"
+                            " file describing constraints "
+                            "on services in bundle")
+        parser.add_argument("--fake-maas", dest="fake_maas",
+                            action="store_true", default=False)
     parser.add_argument("--maas-ip", dest="maas_ip", default=None)
     parser.add_argument("--maas-cred", dest="maas_cred", default=None)
     parser.add_argument("-o", dest="out_filename", default=None)
@@ -58,7 +60,12 @@ def parse_options(argv):
 
 
 def main():
-    opts = parse_options(sys.argv[1:])
+    if os.getenv("BUNDLE_EDITOR_TESTING"):
+        test_args = True
+    else:
+        test_args = False
+
+    opts = parse_options(sys.argv[1:], test_args)
 
     config = Config('bundle-placer', opts.__dict__)
     config.save()
@@ -73,7 +80,7 @@ def main():
         creds = dict(api_host=opts.maas_ip,
                      api_key=opts.maas_cred)
         maas, maas_state = connect_to_maas(creds)
-    elif opts.fake_maas:
+    elif 'fake_maas' in opts and opts.fake_maas:
             maas = None
             maas_state = FakeMaasState()
     else:
@@ -91,8 +98,9 @@ def main():
         if opts.out_filename:
             outfn = opts.out_filename
         else:
-            path, ext = os.path.splitext(opts.bundle_filename)
-            outfn = "{}-out{}".format(path, ext)
+            outfn = opts.bundle_filename
+            if os.path.exists(outfn):
+                shutil.copy2(outfn, outfn+'~')
         bw.write_bundle(outfn)
         async.shutdown()
         raise urwid.ExitMainLoop()

@@ -60,22 +60,34 @@ class MetadataController:
         self.recommended_charm_names = bundle_dict.get('recommendedCharms',
                                                        [])
 
-    def load(self, charm_names):
+    def load(self, charm_names_or_sources):
+        if len(charm_names_or_sources) == 0:
+            return
+
         if self.metadata_future:
             # just wait for successive loads:
             self.metadata_future.result()
 
         with self.metadata_future_lock:
             self.metadata_future = submit(partial(self._do_load,
-                                                  charm_names),
+                                                  charm_names_or_sources),
                                           self.handle_search_error)
 
-    def _do_load(self, charm_names):
-        ids = "&".join(["id={}/{}".format(self.series, n)
-                        for n in charm_names])
+    def _do_load(self, charm_names_or_sources):
+        ids = []
+        for n in charm_names_or_sources:
+            if n.startswith('cs:'):
+                ids.append("id={}".format(n.rsplit("-", 1)[0]))
+            else:
+                # just the charm name:
+                ids.append("id={}/{}".format(self.series, n))
+        ids_str = "&".join(ids)
         url = 'https://api.jujucharms.com/v4/meta/any?include=charm-metadata&'
-        url += ids
+        url += ids_str
         r = requests.get(url)
+        if not r.ok:
+            raise Exception("metadata loading failed: charms={} url={}".format(
+                charm_names_or_sources, url))
         metas = r.json()
         for charm_name, charm_dict in metas.items():
             md = charm_dict["Meta"]["charm-metadata"]
@@ -101,6 +113,8 @@ class MetadataController:
                                                          provides=provides)
 
     def loaded(self):
+        if self.metadata_future is None:
+            return True
         return self.metadata_future.done()
 
     def add_charm(self, charm_name):

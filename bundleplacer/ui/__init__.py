@@ -346,7 +346,7 @@ class PlacementView(WidgetWrap):
                                                                  charm_dict)
         self.frame.focus_position = 'body'
         self.columns.focus_position = 0
-        self.relations_column.add_charm(charm_name)
+        self.metadata_controller.load([charm_dict['Id']])
         self.update()
         self.services_column.select_service(service_name)
 
@@ -355,9 +355,8 @@ class PlacementView(WidgetWrap):
         new_bundle = self.placement_controller.merge_bundle(bundle_dict)
         self.frame.focus_position = 'body'
         self.columns.focus_position = 0
-        charms = list(set([s.charm_name for s in new_bundle.services]))
-        for charm in charms:
-            self.relations_column.add_charm(charm)
+        charms = list(set([s.charm_source for s in new_bundle.services]))
+        self.metadata_controller.load(charms)
         self.update()
         first_service = new_bundle.services[0].service_name
         self.services_column.select_service(first_service)
