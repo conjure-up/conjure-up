@@ -60,5 +60,5 @@ target/
 .pybuild
 debian/conjure*debhelper
 debian/conjure*substvars
-debian/conjure/*
+debian/conjure-up/*
 debian/files

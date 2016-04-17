@@ -17,7 +17,6 @@ from conjure.controllers.jujucontroller import JujuControllerController
 from conjure.controllers.bootstrapwait import BootstrapWaitController
 from conjure.controllers.lxdsetup import LXDSetupController
 from conjure.log import setup_logging
-from conjure.shell import shell
 import json
 import sys
 import argparse
@@ -155,8 +154,8 @@ def main():
         print("Unable to find a Juju solution for {}".format(opts.spell))
         print("")
         yn = input("Would you like to install the solution "
-                   "before proceeding? [y/N] ")
-        if "y" in yn or "Y" in yn:
+                   "before proceeding? [Y/n] ")
+        if "y" in yn or "Y" in yn or not yn:
             os.execl("/usr/share/conjure/do-apt-install",
                      "/usr/share/conjure/do-apt-install",
                      opts.spell)
