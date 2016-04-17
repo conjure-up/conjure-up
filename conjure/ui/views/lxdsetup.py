@@ -141,6 +141,6 @@ class LXDSetupView(WidgetWrap):
 
     def submit(self, result):
         # self.cb(self.input_items)
-        os.execl("/usr/share/conjure/run-lxd-config",
-                 "/usr/share/conjure/run-lxd-config",
-                 self.app.config["bin"])
+        os.execl("/usr/share/conjure-up/run-lxd-config",
+                 "/usr/share/conjure-up/run-lxd-config",
+                 self.app.config["name"])

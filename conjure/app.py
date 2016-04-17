@@ -156,8 +156,8 @@ def main():
         yn = input("Would you like to install the solution "
                    "before proceeding? [Y/n] ")
         if "y" in yn or "Y" in yn or not yn:
-            os.execl("/usr/share/conjure/do-apt-install",
-                     "/usr/share/conjure/do-apt-install",
+            os.execl("/usr/share/conjure-up/do-apt-install",
+                     "/usr/share/conjure-up/do-apt-install",
                      opts.spell)
         else:
             sys.exit(1)
