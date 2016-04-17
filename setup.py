@@ -9,16 +9,16 @@ import bundleplacer  # noqa
 
 
 setuptools.setup(
-    name="conjure",
+    name="conjure-up",
     version=conjure.__version__,
     author="Adam Stokes",
     author_email="adam.stokes@ubuntu.com",
     description="Conjure for apt cloud packages",
-    url="https://github.com/ubuntu-solutions-engineering/conjure",
+    url="https://github.com/ubuntu-solutions-engineering/conjure-up",
     packages=setuptools.find_packages(),
     entry_points={
         "console_scripts": [
-            "conjure-setup = conjure.app:main"
+            "conjure-up = conjure.app:main"
         ]
     },
     install_requires=open('requirements.txt', 'r').readlines()

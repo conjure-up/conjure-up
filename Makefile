@@ -1,7 +1,7 @@
 #
 # Makefile for conjure
 #
-NAME = conjure
+NAME = conjure-up
 TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
 VERSION := $(shell ./tools/version)
@@ -23,8 +23,8 @@ clean:
 	@-debian/rules clean
 	@rm -rf docs/_build/*
 	@rm -rf mockcfgpath
-	@rm -rf ../conjure_*.deb ../cloud-*.deb ../conjure_*.tar.gz ../conjure_*.dsc ../conjure_*.changes \
-		../conjure_*.build ../conjure-*.deb ../conjure_*.upload
+	@rm -rf ../conjure-up_*.deb ../cloud-*.deb ../conjure-up_*.tar.gz ../conjure-up_*.dsc ../conjure-up_*.changes \
+		../conjure-up_*.build ../conjure-up-*.deb ../conjure-up_*.upload
 	@rm -rf cover
 	@rm -rf .coverage
 	@rm -rf .tox
@@ -51,10 +51,10 @@ git_rev:
 	@echo $(GIT_REV)
 
 pyflakes:
-	pyflakes conjure test bin
+	pyflakes conjure
 
 pep8:
-	pep8 conjure test bin
+	pep8 conjure
 
 # Indirection to allow 'make run' to build deb automatically, but
 # 'make sbuild; make run' will not invoke 'deb'.
@@ -63,8 +63,8 @@ pep8:
 
 .PHONY: install
 install: ../conjure*.deb
-	-dpkg -i ../conjure_*deb
-	-dpkg -i ../conjure-${type}*deb
+	-dpkg -i ../conjure-up_*deb
+	-dpkg -i ../conjure-up-${type}*deb
 	apt-get -yy install -f
 
 all: deb

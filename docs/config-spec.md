@@ -51,8 +51,7 @@
         "recommendedCharms": [
             "kibana"
         ]
-    }],
-    "bin":  "bigdata-install"
+    }]
 }
 ```
 
@@ -66,7 +65,6 @@
   * `recommendedCharms`: **optional** A list of of recommended charms that would be useful for the bundle.
   * `additionalQuestions`: **optional** List of additional questions a bundle would require for deployment.
   * `bootstrapSeries`: **optional** Distro series of bootstrap controller
-* `bin`: Mostly used in packaging the application for telling conjure what script to execute.
 
 ## Additional Questions
 

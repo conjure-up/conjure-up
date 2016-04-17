@@ -1,12 +1,12 @@
 #!/usr/bin/make -f
 
-PKGDIR=debian/conjure
+PKGDIR=debian/conjure-up
 
-export PYBUILD_NAME=conjure
-export PYBUILD_INSTALL_DIR=usr/share/conjure
-export PYBUILD_INSTALL_ARGS_python3=--install-lib=usr/share/conjure \
+export PYBUILD_NAME=conjure-up
+export PYBUILD_INSTALL_DIR=usr/share/conjure-up
+export PYBUILD_INSTALL_ARGS_python3=--install-lib=usr/share/conjure-up \
 	--install-data=usr/ \
-	--install-scripts=usr/share/conjure \
+	--install-scripts=usr/share/conjure-up \
 	--root=$(PKGDIR) \
 	--no-compile -O0
 
@@ -15,7 +15,7 @@ export PYBUILD_INSTALL_ARGS_python3=--install-lib=usr/share/conjure \
 
 override_dh_install:
 	mkdir -p $(PKGDIR)/usr/share/man/man1
-	help2man $(PKGDIR)/usr/share/conjure/conjure-setup -n "apt install juju bundles" --no-info -o $(PKGDIR)/usr/share/man/man1/conjure-setup.1
+	help2man $(PKGDIR)/usr/share/conjure-up/conjure-up -n "apt install juju bundles" --no-info -o $(PKGDIR)/usr/share/man/man1/conjure-up.1
 	dh_install
 
 override_dh_auto_test:

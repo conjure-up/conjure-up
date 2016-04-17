@@ -28,7 +28,7 @@ def print_version():
 
     @return: 0 on success 1 on failure
     """
-    pattern = 'conjure\s\(([a-zA-Z0-9\.~\-\+]+)\)\s'
+    pattern = 'conjure-up\s\(([a-zA-Z0-9\.~\-\+]+)\)\s'
     if not os.path.isfile('debian/changelog'):
         print("0.0.0")
         return 0

@@ -1,5 +1,5 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: conjure
+Upstream-Name: conjure-up
 Source: https://launchpad.net/conjure
 
 Files: *

@@ -17,6 +17,7 @@ from conjure.controllers.jujucontroller import JujuControllerController
 from conjure.controllers.bootstrapwait import BootstrapWaitController
 from conjure.controllers.lxdsetup import LXDSetupController
 from conjure.log import setup_logging
+from conjure.shell import shell
 import json
 import sys
 import argparse
@@ -57,21 +58,25 @@ class ApplicationConfig:
 
 
 class Application:
-    def __init__(self, argv):
+    def __init__(self, argv, pkg_config, metadata):
         """ init
 
         Arguments:
         argv: Options passed in from cli
+        pkg_config: path to solution config.json
+        metadata: path to solutions metadata.json
         """
         self.app = ApplicationConfig()
         self.app.argv = argv
+        self.metadata = metadata
+        self.pkg_config = pkg_config
         self.app.ui = ConjureUI()
 
-        with open(argv.build_conf) as json_f:
+        with open(self.pkg_config) as json_f:
             config = json.load(json_f)
 
-        with open(argv.build_metadata) as json_f:
-            config['metadata_filename'] = path.abspath(argv.build_metadata)
+        with open(self.metadata) as json_f:
+            config['metadata_filename'] = path.abspath(self.metadata)
             config['metadata'] = json.load(json_f)
 
         self.app.config = config
@@ -99,10 +104,7 @@ class Application:
     def _start(self, *args, **kwargs):
         """ Initially load the welcome screen
         """
-        if self.app.argv.status_only:
-            self.app.controllers['finish'].render(bundle=None)
-        else:
-            self.app.controllers['welcome'].render()
+        self.app.controllers['welcome'].render()
 
     def start(self):
         EventLoop.build_loop(self.app.ui, STYLES,
@@ -112,16 +114,9 @@ class Application:
 
 
 def parse_options(argv):
-    parser = argparse.ArgumentParser(prog="conjure-setup")
-    parser.add_argument('-c', '--config', dest='build_conf', metavar='CONFIG',
-                        help='Path to Conjure config')
-    parser.add_argument('-m', '--metadata', dest='build_metadata',
-                        metavar='METADATA',
-                        help='Path to bundle services metadata')
-    parser.add_argument('-s', '--status', action='store_true',
-                        dest='status_only',
-                        help='Only display the Status of '
-                        'existing deployed bundled.')
+    parser = argparse.ArgumentParser(prog="conjure-up")
+    parser.add_argument('spell', help="Specify the Juju solution to "
+                        "deploy, e.g. openstack")
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug',
                         help='Enable debug logging.')
@@ -153,20 +148,20 @@ def main():
         print(e)
         sys.exit(1)
 
-    if not opts.build_conf:
-        print(
-            "A conjure config is required, see conjure-setup -h.")
-        sys.exit(1)
+    metadata = path.join('/usr/share', opts.spell, 'metadata.json')
+    pkg_config = path.join('/usr/share', opts.spell, 'config.json')
 
-    if not path.exists(opts.build_conf):
-        print("Unable to find {}".format(opts.build_conf))
-        sys.exit(1)
+    if not path.exists(pkg_config) and not path.exists(metadata):
+        print("Unable to find a Juju solution for {}".format(opts.spell))
+        print("")
+        yn = input("Would you like to install the solution "
+                   "before proceeding? [y/N] ")
+        if "y" in yn or "Y" in yn:
+            os.execl("/usr/share/conjure/do-apt-install",
+                     "/usr/share/conjure/do-apt-install",
+                     opts.spell)
+        else:
+            sys.exit(1)
 
-    if not path.exists(opts.build_metadata):
-        print("Unable to find {} metadata".format(
-            opts.build_metadata
-        ))
-        sys.exit(1)
-
-    app = Application(opts)
+    app = Application(opts, pkg_config, metadata)
     app.start()

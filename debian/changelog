@@ -1,10 +1,10 @@
-conjure (0.0.9) UNRELEASED; urgency=medium
+conjure-up (0.1.0) UNRELEASED; urgency=medium
 
   * Next dev release
 
  -- Adam Stokes <adam.stokes@ubuntu.com>  Thu, 14 Apr 2016 16:03:54 -0400
 
-conjure (0.0.8) xenial-proposed; urgency=medium
+conjure-up (0.0.8) xenial-proposed; urgency=medium
 
   * Handle MAAS as a special builtin type rather than a public cloud
   * Support configuring LXD bridge for first run users
@@ -12,7 +12,7 @@ conjure (0.0.8) xenial-proposed; urgency=medium
 
  -- Adam Stokes <adam.stokes@ubuntu.com>  Mon, 11 Apr 2016 14:34:31 -0400
 
-conjure (0.0.7) xenial-proposed; urgency=medium
+conjure-up (0.0.7) xenial-proposed; urgency=medium
 
   * pre, post-bootstrap, post execution hooks available per bundle
   * Add additional user feedback in console UI
@@ -22,7 +22,7 @@ conjure (0.0.7) xenial-proposed; urgency=medium
 
  -- Adam Stokes <adam.stokes@ubuntu.com>  Mon, 11 Apr 2016 12:21:40 -0400
 
-conjure (0.0.6) xenial; urgency=medium
+conjure-up (0.0.6) xenial; urgency=medium
 
   * Initial Release (LP: #1561037)
   * d/control

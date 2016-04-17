@@ -1,4 +1,4 @@
-Source: conjure
+Source: conjure-up
 Section: admin
 Priority: extra
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
@@ -25,7 +25,7 @@ X-Python3-Version: >= 3.4
 Vcs-Browser: https://github.com/Ubuntu-Solutions-Engineering/conjure
 Vcs-Git: https://github.com/Ubuntu-Solutions-Engineering/conjure.git
 
-Package: conjure
+Package: conjure-up
 Architecture: all
 Depends: jq,
          juju (>= 2.0~),
@@ -44,6 +44,8 @@ Depends: jq,
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
+Breaks: conjure
+Replaces: conjure
 Description: Package runtime for apt-installable juju bundles
  This package provides Conjure, an interface to configuring apt-installable
  packages from the cloud. It utilizes apt, juju, and conjure's custom

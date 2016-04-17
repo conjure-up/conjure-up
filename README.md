@@ -1,4 +1,4 @@
-# conjure
+# conjure-up
 > Installing cloud packages like whoa.
 
 # what it is
@@ -14,13 +14,13 @@ It is included in the archive.
 
 ### Install the packages
 ```
-$ sudo apt-get update
-$ sudo apt-get install bigdata
+$ sudo apt update
+$ sudo apt install conjure-up
 ```
 
 ### Run the installer
 ```
-$ bigdata-install
+$ conjure-up openstack
 ```
 
 # license
