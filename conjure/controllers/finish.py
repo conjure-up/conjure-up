@@ -161,7 +161,7 @@ class FinishController:
 
         self.app.ui.set_header(
             title="Conjuring up {} thanks to Juju".format(
-                self.app.config['name'])
+                BundleModel.name())
         )
         self.app.ui.set_body(self.view)
         self.app.ui.set_subheader(
