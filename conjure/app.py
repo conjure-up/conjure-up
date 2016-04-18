@@ -73,6 +73,7 @@ class Application:
 
         with open(self.pkg_config) as json_f:
             config = json.load(json_f)
+            config['config_filename'] = self.pkg_config
 
         with open(self.metadata) as json_f:
             config['metadata_filename'] = path.abspath(self.metadata)

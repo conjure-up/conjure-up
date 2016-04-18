@@ -42,12 +42,13 @@ class DeployController:
         # Grab bundle and deploy or render placement if MAAS
         self.bundle = get_bundle(BundleModel.to_entity(), to_file=True)
         metadata_filename = self.app.config['metadata_filename']
+        config_filename = self.app.config['config_filename']
 
         bundleplacer_cfg = Config(
             'bundle-placer',
             {'bundle_filename': self.bundle,
              'metadata_filename': metadata_filename,
-             'config_filename': self.app.argv.build_conf,
+             'config_filename': config_filename,
              'bundle_key': BundleModel.key(),
              'provider_type': info['ProviderType']})
 
