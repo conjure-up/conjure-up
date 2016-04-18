@@ -117,7 +117,8 @@ class Juju:
         series: define the bootstrap series defaults to xenial
         log: application logger
         """
-        cmd = "juju bootstrap {} {} --upload-tools ".format(
+        cmd = "juju bootstrap {} {} --upload-tools " \
+              "--config image-stream=daily ".format(
                   controller, cloud, series)
         if series is not None:
             cmd += "--bootstrap-series={} ".format(series)

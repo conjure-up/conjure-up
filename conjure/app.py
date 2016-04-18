@@ -159,16 +159,9 @@ def main():
     pkg_config = path.join('/usr/share', opts.spell, 'config.json')
 
     if not path.exists(pkg_config) and not path.exists(metadata):
-        print("Unable to find a Juju solution for {}".format(opts.spell))
-        print("")
-        yn = input("Would you like to install the solution "
-                   "before proceeding? [Y/n] ")
-        if "y" in yn or "Y" in yn or not yn:
-            os.execl("/usr/share/conjure-up/do-apt-install",
-                     "/usr/share/conjure-up/do-apt-install",
-                     opts.spell)
-        else:
-            sys.exit(1)
+        os.execl("/usr/share/conjure-up/do-apt-install",
+                 "/usr/share/conjure-up/do-apt-install",
+                 opts.spell)
 
     app = Application(opts, pkg_config, metadata)
     app.start()

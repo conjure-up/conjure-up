@@ -160,7 +160,8 @@ class FinishController:
         self.view = ServicesView(self.app)
 
         self.app.ui.set_header(
-            title=self.app.config['summary']
+            title="Conjuring up {} thanks to Juju".format(
+                self.app.config['name'])
         )
         self.app.ui.set_body(self.view)
         self.app.ui.set_subheader(
