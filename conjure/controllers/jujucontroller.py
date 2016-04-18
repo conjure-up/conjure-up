@@ -118,6 +118,8 @@ class JujuControllerController:
                 'There was an error during the post '
                 'bootstrap processing phase: {}.'.format(result)))
         pollinate(self.app.session_id, 'J002', self.app.log)
+        self.app.log.debug("Switching to controller: {}".format(
+            self.app.current_controller))
         Juju.switch(self.app.current_controller)
         self.app.controllers['deploy'].render(self.app.current_controller)
 

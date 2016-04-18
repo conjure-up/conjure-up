@@ -104,7 +104,10 @@ class Application:
     def _start(self, *args, **kwargs):
         """ Initially load the welcome screen
         """
-        self.app.controllers['welcome'].render()
+        if self.app.argv.status_only:
+            self.app.controllers['finish'].render(bundle=None)
+        else:
+            self.app.controllers['welcome'].render()
 
     def start(self):
         EventLoop.build_loop(self.app.ui, STYLES,
@@ -120,6 +123,10 @@ def parse_options(argv):
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug',
                         help='Enable debug logging.')
+    parser.add_argument('-s', '--status', action='store_true',
+                        dest='status_only',
+                        help='Only display the Status of '
+                        'an existing model.')
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
     return parser.parse_args(argv)
