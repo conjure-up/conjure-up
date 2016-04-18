@@ -7,6 +7,7 @@ import yaml
 import requests
 import os.path as path
 from tempfile import NamedTemporaryFile
+import shutil
 from conjure.utils import spew
 
 cs = 'https://api.jujucharms.com/v4'
@@ -29,7 +30,10 @@ def get_bundle(bundle, to_file=False):
     """
     if path.isfile(bundle):
         if to_file:
-            return bundle
+            with NamedTemporaryFile(mode="w", encoding="utf-8",
+                                    delete=False) as tempf:
+                shutil.copyfile(bundle, tempf.name)
+            return tempf.name
         else:
             with open(bundle) as f:
                 return yaml.safe_load(f.read())
