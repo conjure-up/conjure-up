@@ -40,7 +40,11 @@ class DeployController:
         self.app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
 
         # Grab bundle and deploy or render placement if MAAS
-        self.bundle = get_bundle(BundleModel.to_entity(), to_file=True)
+        try:
+            self.bundle = get_bundle(BundleModel.to_entity(), to_file=True)
+        except Exception as e:
+            return self.app.ui.show_exception_message(e)
+
         metadata_filename = self.app.config['metadata_filename']
         config_filename = self.app.config['config_filename']
 
@@ -91,15 +95,22 @@ class DeployController:
             mainview.update()
         else:
             pollinate(self.app.session_id, 'PS', self.app.log)
-            self.placement_controller = PlacementController(
-                config=bundleplacer_cfg)
-            mainview = PlacerView(self.placement_controller,
-                                  bundleplacer_cfg,
-                                  self.finish)
+            try:
+                self.placement_controller = PlacementController(
+                    config=bundleplacer_cfg)
+                mainview = PlacerView(self.placement_controller,
+                                      bundleplacer_cfg,
+                                      self.finish)
+            except Exception as e:
+                return self.app.ui.show_exception_message(e)
+
             self.app.ui.set_header(
                 title=self.app.config['summary'],
                 excerpt=("Add additional charms and manage service relations")
             )
             self.app.ui.set_subheader("Bundle Editor")
             self.app.ui.set_body(mainview)
-            mainview.update()
+            try:
+                mainview.update()
+            except Exception as e:
+                return self.app.ui.show_exception_message(e)

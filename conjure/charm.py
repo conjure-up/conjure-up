@@ -20,13 +20,20 @@ def get_bundle(bundle, to_file=False):
     """ Attempts to grab the bundle.yaml
 
     Arguments:
-    bundle: name of bundle
+    bundle: name of bundle or absolute path to local bundle
     to_file: store to a temporary file
 
     Returns:
     Dictionary of bundle's yaml unless to_file is True,
     then returns the path to the downloaded bundle
     """
+    if path.isfile(bundle):
+        if to_file:
+            return bundle
+        else:
+            with open(bundle) as f:
+                return yaml.safe_load(f.read())
+
     bundle = path.join(cs, bundle, 'archive/bundle.yaml')
     req = requests.get(bundle)
     if not req.ok:
