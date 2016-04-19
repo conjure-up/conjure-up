@@ -18,12 +18,10 @@ import os
 import yaml
 
 from bundleplacer.assignmenttype import AssignmentType, label_to_atype
+from bundleplacer.consts import DEFAULT_SERIES
 from bundleplacer.service import Service
 
 log = logging.getLogger('bundleplacer')
-
-
-DEFAULT_SERIES = 'trusty'
 
 
 class keydict(dict):
@@ -224,7 +222,9 @@ class Bundle:
             if k in ['services', 'machines', 'relations']:
                 continue
             if self._bundle[k] != other_bundle._bundle[k]:
-                m = "Can't merge top level key {}".format(k)
+                m = ("Can't merge top level key '{}': "
+                     "{} vs {}".format(k, self._bundle[k],
+                                       other_bundle._bundle[k]))
                 raise BundleMergeException(m)
 
         service_renames = keydict()

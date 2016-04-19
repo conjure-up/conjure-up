@@ -23,7 +23,7 @@ from urwid import (AttrMap, Divider, connect_signal, Edit, Padding,
 from ubuntui.ev import EventLoop
 from ubuntui.widgets.buttons import MenuSelectButton
 
-from bundleplacer.charmstore_api import CharmStoreAPI
+from bundleplacer.charmstore_api import CharmStoreAPI, CharmStoreID
 
 log = logging.getLogger('bundleplacer')
 
@@ -226,19 +226,18 @@ class CharmstoreColumn(WidgetWrap):
         self.update()
 
     def remove_existing_charms(self, charms):
-        existing_charms = [s.charm_source.rsplit('-', 1)[0] for s in
+        existing_charms = [CharmStoreID(s.charm_source).as_str_without_rev()
+                           for s in
                            self.placement_controller.bundle.services]
         return [c for c in charms
-                if c['Id'].rsplit('-', 1)[0]
+                if CharmStoreID(c['Id']).as_str_without_rev()
                 not in existing_charms]
 
     def get_filtered_recommendations(self):
         opts = self.pile.options()
         if len(self._recommended_charms) == 0:
-            self._recommended_charms = [
-                self.metadata_controller.get_charm_info(n)
-                for n in
-                self.metadata_controller.recommended_charm_names]
+            mc = self.metadata_controller
+            self._recommended_charms = mc.get_recommended_charms()
         return [(CharmWidget(d, self.do_add_charm, recommended=True), opts)
                 for d in self.remove_existing_charms(self._recommended_charms)]
 
@@ -254,9 +253,12 @@ class CharmstoreColumn(WidgetWrap):
 
             self.loading = False
 
+        series = self.placement_controller.bundle.series
         bundle_widgets = [(BundleWidget(d, self.do_add_bundle),
                            opts) for d in self._bundle_results
-                          if 'bundle-metadata' in d.get('Meta', {})]
+                          if 'bundle-metadata' in d.get('Meta', {}) and
+                          d['Meta']['bundle-metadata']['Series'] == series]
+
         if len(bundle_widgets) > 0:
             top_w = bundle_widgets[0][0]
             top_w.set_header("Bundles")

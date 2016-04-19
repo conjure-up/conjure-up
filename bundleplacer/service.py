@@ -15,6 +15,7 @@
 
 import logging
 
+from bundleplacer.charmstore_api import CharmStoreID
 
 log = logging.getLogger('bundleplacer')
 
@@ -25,8 +26,9 @@ class Service:
                  allowed_assignment_types, num_units, options,
                  allow_multi_units, subordinate, required, relations):
         self.service_name = service_name
-        self.charm_name = '-'.join(charm_source.split('/')[-1].split('-')[:-1])
         self.charm_source = charm_source
+        self.csid = CharmStoreID(charm_source)
+        self.charm_name = self.csid.name
         self.summary_future = summary_future
         self._summary = "Loading summary…"
         self.constraints = constraints

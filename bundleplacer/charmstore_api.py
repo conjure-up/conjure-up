@@ -21,7 +21,68 @@ import requests
 from threading import RLock
 
 from bundleplacer.async import submit
+from bundleplacer.consts import DEFAULT_SERIES
 from bundleplacer.relationtype import RelationType
+
+
+class CharmStoreID:
+    def __init__(self, id_string):
+        if id_string.startswith("cs:"):
+            id_string = id_string[3:]
+        cs = id_string.split('/')
+        self.idtype = 'charm'
+        self.series = ""
+        self.owner = ""
+
+        if len(cs) == 1:
+            self.series = DEFAULT_SERIES
+            self.name, self.rev = self.parse_namerev(cs[0])
+
+        elif len(cs) == 2:
+            self.series = cs[0]
+            self.name, self.rev = self.parse_namerev(cs[1])
+
+        elif len(cs) == 3:
+            self.owner = cs[0]
+            if self.owner.startswith("~"):
+                self.owner = self.owner[1:]
+            self.series = cs[1]
+            self.name, self.rev = self.parse_namerev(cs[2])
+
+        if self.series == 'bundle':
+            self.idtype = 'bundle'
+
+    def parse_namerev(self, nr):
+        if '-' not in nr:
+            return nr, ""
+        name, rev = nr.rsplit('-', 1)
+        if not rev.isdecimal():
+            return nr, ""
+        return name, rev
+
+    def as_str_without_rev(self):
+        s = "cs:"
+        if self.owner != "":
+            s += "~" + self.owner + "/"
+        if self.series != "":
+            s += self.series + "/"
+        s += self.name
+        return s
+
+    def as_str(self):
+        s = self.as_str_without_rev()
+        if self.rev != "":
+            s += "-" + self.rev
+        return s
+
+    def __repr__(self):
+        l = ["name: {}".format(self.name),
+             "rev: {}".format(self.rev),
+             "type: {}".format(self.idtype),
+             "owner: {}".format(self.owner),
+             "series: {}".format(self.series)]
+
+        return "\n".join(l)
 
 
 class MetadataController:
@@ -31,7 +92,7 @@ class MetadataController:
         self.config = config
         self.error_cb = error_cb
         self.series = placement_controller.bundle.series
-        self.charm_names = placement_controller.charm_names()
+        self.charm_ids = placement_controller.charm_ids()
         # charm_name : charm_metadata full dict
         self.charm_info = {}
         # charm_name : requires/provides lists
@@ -41,7 +102,7 @@ class MetadataController:
         self.charms_providing_iface = defaultdict(list)
         self.charms_requiring_iface = defaultdict(list)
         self.get_recommended_charm_names()
-        self.load(self.charm_names + self.recommended_charm_names)
+        self.load(self.charm_ids + self.recommended_charm_names)
 
     def get_recommended_charm_names(self):
         if not self.config.getopt('config_filename'):
@@ -76,11 +137,8 @@ class MetadataController:
     def _do_load(self, charm_names_or_sources):
         ids = []
         for n in charm_names_or_sources:
-            if n.startswith('cs:'):
-                ids.append("id={}".format(n.rsplit("-", 1)[0]))
-            else:
-                # just the charm name:
-                ids.append("id={}/{}".format(self.series, n))
+            csid = CharmStoreID(n)
+            ids.append("id={}".format(csid.as_str_without_rev()))
         ids_str = "&".join(ids)
         url = 'https://api.jujucharms.com/v4/meta/any?include=charm-metadata&'
         url += ids_str
@@ -91,8 +149,11 @@ class MetadataController:
         metas = r.json()
         for charm_name, charm_dict in metas.items():
             md = charm_dict["Meta"]["charm-metadata"]
-            charm_name_no_series = charm_name.split("/")[-1]
-            self.charm_info[charm_name_no_series] = charm_dict
+            csid = CharmStoreID(charm_dict['Id'])
+            id_no_rev = csid.as_str_without_rev()
+            if id_no_rev in self.charm_info:
+                continue
+            self.charm_info[id_no_rev] = charm_dict
             rd = md.get("Requires", {})
             pd = md.get("Provides", {})
             requires = []
@@ -101,17 +162,23 @@ class MetadataController:
                 iface = d["Interface"]
                 requires.append((relname, iface))
                 self.charms_requiring_iface[iface].append((relname,
-                                                           charm_name_no_series))
+                                                           id_no_rev))
 
             for relname, d in pd.items():
                 iface = d["Interface"]
                 provides.append((relname, iface))
                 self.charms_providing_iface[iface].append((relname,
-                                                           charm_name_no_series))
+                                                           id_no_rev))
 
-            self.iface_info[charm_name_no_series] = dict(requires=requires,
-                                                         provides=provides)
+            self.iface_info[id_no_rev] = dict(requires=requires,
+                                              provides=provides)
 
+    def get_recommended_charms(self):
+        if not self.loaded():
+            return []
+        return [self.charm_info[CharmStoreID(n).as_str_without_rev()]
+                for n in self.recommended_charm_names]
+            
     def loaded(self):
         if self.metadata_future is None:
             return True
@@ -142,11 +209,10 @@ class MetadataController:
             cs = self.charms_requiring_iface[iface]
         else:
             cs = self.charms_providing_iface[iface]
-
-        for relname, charm_name in cs:
+        for relname, charm_id in cs:
             pc = self.placement_controller
             services += [(relname, s) for s in
-                         pc.services_with_charm(charm_name)]
+                         pc.services_with_charm_id(charm_id)]
 
         return services
 

@@ -140,4 +140,5 @@ waitForService()
 exposeResult()
 {
     printf '{"message": "%s", "returnCode": %d, "isComplete": %s}' "$1" $2 "$3"
+    exit 0
 }

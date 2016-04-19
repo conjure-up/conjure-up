@@ -122,12 +122,9 @@ class RelationsColumn(WidgetWrap):
     def refresh(self):
         self.set_service(self.service)
 
-    def add_charm(self, charm_name):
-        self.metadata_controller.add_charm(charm_name)
-
     def set_service(self, service):
         self.service = service
-        self.add_charm(service.charm_name)
+        self.metadata_controller.add_charm(service.csid.as_str_without_rev())
         self.pile.contents = self.pile.contents[:2]
         self.provides = set()
         self.requires = set()
@@ -146,8 +143,10 @@ class RelationsColumn(WidgetWrap):
             self.title.set_text(('body', "Edit Relations: (Changes are "
                                  "saved immediately)"))
 
-        p = set(self.metadata_controller.get_provides(self.service.charm_name))
-        r = set(self.metadata_controller.get_requires(self.service.charm_name))
+        p = set(self.metadata_controller.get_provides(
+            self.service.csid.as_str_without_rev()))
+        r = set(self.metadata_controller.get_requires(
+            self.service.csid.as_str_without_rev()))
         new_provides = p - self.provides
         self.provides.update(p)
         new_requires = r - self.requires

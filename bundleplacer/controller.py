@@ -24,6 +24,7 @@ from bundleplacer.state import ServiceState
 
 from bundleplacer.assignmenttype import AssignmentType, label_to_atype
 from bundleplacer.bundle import Bundle
+from bundleplacer.charmstore_api import CharmStoreID
 
 
 log = logging.getLogger('bundleplacer')
@@ -374,9 +375,19 @@ class PlacementController:
         return [s.charm_name for s in self.bundle.services
                 if s.charm_name not in seen and not seen.add(s.charm_name)]
 
-    def services_with_charm(self, charm_name):
-        return [s for s in self.bundle.services
-                if s.charm_name == charm_name]
+    def charm_ids(self):
+        seen = set()
+        return [s.charm_source for s in self.bundle.services
+                if s.charm_source not in seen and not seen.add(s.charm_source)]
+
+    def services_with_charm_id(self, charm_id):
+        l = []
+        csid = CharmStoreID(charm_id)
+        id_no_rev = csid.as_str_without_rev()
+        for service in self.bundle.services:
+            if service.csid.as_str_without_rev() == id_no_rev:
+                l.append(service)
+        return l
 
     @property
     def assigned_services(self):

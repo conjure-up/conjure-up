@@ -57,7 +57,7 @@ class ApplicationConfig:
         # Logger
         self.log = None
         # Environment to pass to processing tasks
-        self.env = os.environ.copy()
+        self.env = self.cache.get('env', os.environ.copy())
 
         # Is application deployment complete
         self.complete = self.cache.get('complete', False)
@@ -86,6 +86,7 @@ class ApplicationConfig:
                 json.dump({'config': self.config,
                            'current_model': self.current_model,
                            'current_controller': self.current_controller,
+                           'env': self.env,
                            'complete': self.complete,
                            'selected_bundle': BundleModel.bundle}, cache_fp)
         except Exception as e:
