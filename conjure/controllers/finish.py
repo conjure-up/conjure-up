@@ -174,9 +174,19 @@ class FinishController:
         self.bundle = bundle
         self.view = ServicesView(self.app)
 
+        try:
+            bundle_name = self.app.cache['selected_bundle']['name']
+        except:
+            bundle_name = BundleModel.name()
+            if bundle_name is None:
+                self.app.log.debug(
+                    "Could not determine bundle used, "
+                    "setting default bundle name")
+                bundle_name = "a bundle"
+
         self.app.ui.set_header(
             title="Conjuring up {} thanks to Juju".format(
-                BundleModel.name())
+                bundle_name)
         )
         self.app.ui.set_body(self.view)
         self.app.ui.set_subheader(
