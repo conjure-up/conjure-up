@@ -55,6 +55,9 @@ class ApplicationConfig:
         # Environment to pass to processing tasks
         self.env = os.environ.copy()
 
+        # Is deploy complete
+        self.complete = False
+
 
 class Application:
     def __init__(self, argv, pkg_config, metadata):

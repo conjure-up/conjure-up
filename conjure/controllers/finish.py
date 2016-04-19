@@ -170,4 +170,6 @@ class FinishController:
         if not self.app.argv.status_only:
             self.app.log.debug("No --status-only pass, running pre_exec")
             EventLoop.set_alarm_in(1, self._pre_exec)
+        else:
+            self.app.ui.set_footer('')
         EventLoop.set_alarm_in(1, self.refresh)
