@@ -88,7 +88,7 @@ unitAddress()
 # String of status
 unitStatus()
 {
-    juju status --format json | jq -r ".services[\"$1\"][\"units\"][\"$1/$2\"][\"juju-status\"][\"current\"]"
+    juju status --format json | jq -r ".services[\"$1\"][\"units\"][\"$1/$2\"][\"workload-status\"][\"current\"]"
 }
 
 # Get machine for unit, ie 0/lxc/1
