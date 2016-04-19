@@ -75,7 +75,20 @@ configOpenrc()
 # IP Address of unit
 unitAddress()
 {
-    juju status --format json | jq ".services[\"$1\"][\"units\"][\"$1/$2\"][\"public-address\"]"
+    juju status --format json | jq -r ".services[\"$1\"][\"units\"][\"$1/$2\"][\"public-address\"]"
+}
+
+# Get status of unit
+#
+# Arguments:
+# $1: service
+# $2: unit number
+#
+# Returns:
+# String of status
+unitStatus()
+{
+    juju status --format json | jq -r ".services[\"$1\"][\"units\"][\"$1/$2\"][\"juju-status\"][\"current\"]"
 }
 
 # Get machine for unit, ie 0/lxc/1
@@ -88,7 +101,7 @@ unitAddress()
 # machine identifier
 unitMachine()
 {
-    juju status --format json | jq ".services[\"$1\"][\"units\"][\"$1/$2\"][\"machine\"]"
+    juju status --format json | jq -r ".services[\"$1\"][\"units\"][\"$1/$2\"][\"machine\"]"
 }
 
 # Waits for machine to start
