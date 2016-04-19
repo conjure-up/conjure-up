@@ -39,7 +39,7 @@ class ServicesView(WidgetWrap):
         """ Adds services to the view if they don't already exist
         """
         status = model_status()
-        for name, service in status['Services'].items():
+        for name, service in sorted(status['Services'].items()):
             service_w = ServiceWidget(name, service)
             for unit in service_w.Units:
                 services_list = []
