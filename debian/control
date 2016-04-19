@@ -44,8 +44,9 @@ Depends: jq,
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
-Breaks: conjure (<< 0.0.8)
-Replaces: conjure (<< 0.0.8)
+Conflicts: conjure
+Replaces: conjure
+Provides: conjure
 Description: Package runtime for apt-installable juju bundles
  This package provides Conjure, an interface to configuring apt-installable
  packages from the cloud. It utilizes apt, juju, and conjure's custom
