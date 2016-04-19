@@ -40,10 +40,16 @@ class FinishController:
         """ Executes a bundles pre processing script if exists
         """
         self.app.log.debug("pre_exec start: {}".format(args))
+
+        try:
+            bundle_key = self.app.cache['selected_bundle']['key']
+        except:
+            bundle_key = BundleModel.key()
+
         self._pre_exec_sh = path.join('/usr/share/',
                                       self.app.config['name'],
                                       'bundles',
-                                      BundleModel.key(),
+                                      bundle_key,
                                       'pre.sh')
         if not path.isfile(self._pre_exec_sh) \
            or not os.access(self._pre_exec_sh, os.X_OK):
@@ -102,10 +108,19 @@ class FinishController:
     def _post_exec(self, *args):
         """ Executes a bundles post processing script if exists
         """
+        try:
+            bundle_key = self.app.cache['selected_bundle']['key']
+        except:
+            bundle_key = BundleModel.key()
+            if bundle_key is None:
+                self.app.log.debug(
+                    "Could not determine bundle used, skipping post_exec")
+                EventLoop.set_alarm_in(1, self.refresh)
+                return
         self._post_exec_sh = path.join('/usr/share/',
                                        self.app.config['name'],
                                        'bundles',
-                                       BundleModel.key(),
+                                       bundle_key,
                                        'post.sh')
 
         if not path.isfile(self._post_exec_sh) \
@@ -171,5 +186,7 @@ class FinishController:
             self.app.log.debug("No --status-only pass, running pre_exec")
             EventLoop.set_alarm_in(1, self._pre_exec)
         else:
+            # Re-run post processor if loading the status screen
+            EventLoop.set_alarm_in(1, self._post_exec)
             self.app.ui.set_footer('')
         EventLoop.set_alarm_in(1, self.refresh)

@@ -17,7 +17,7 @@ class DeploySummaryController:
                 self.app.current_model
             )
         else:
-            # TODO: save cache
+            self.app.save()
             self.app.controllers['finish'].render(self.bundle)
 
     def render(self, bundle):

@@ -7,6 +7,7 @@ from conjure.ui import ConjureUI
 from conjure.juju import Juju
 from conjure import async
 from conjure import __version__ as VERSION
+from conjure.models.bundle import BundleModel
 from conjure.controllers.welcome import WelcomeController
 from conjure.controllers.finish import FinishController
 from conjure.controllers.deploysummary import DeploySummaryController
@@ -35,18 +36,21 @@ class ApplicationConfig:
     used throughout the lifetime of the application.
     """
     def __init__(self):
+        # Try to load cache file
+        self.cache = self.load()
         # Reference to entire UI
         self.ui = None
         # Global config attr
-        self.config = None
+        self.config = self.cache.get('config', None)
         # CLI arguments
         self.argv = None
         # List of all known controllers to be rendered
         self.controllers = None
         # Current Juju model
-        self.current_model = None
+        self.current_model = self.cache.get('current_model', None)
         # Current controller
-        self.current_controller = None
+        self.current_controller = self.cache.get('current_controller',
+                                                 None)
         # Global session id
         self.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
                                     str(uuid.uuid4()))
@@ -55,8 +59,56 @@ class ApplicationConfig:
         # Environment to pass to processing tasks
         self.env = os.environ.copy()
 
-        # Is deploy complete
-        self.complete = False
+        # Is application deployment complete
+        self.complete = self.cache.get('complete', False)
+
+    def save(self):
+        """ Create a cache of the current deployment containing the following
+
+        Bundle key, deploy status, juju controller
+        """
+        cache_home_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
+            os.path.expanduser('~'),
+            '.cache'))
+        try:
+            cache_deploy_dir = os.path.join(cache_home_dir,
+                                            Juju.current_controller(),
+                                            Juju.current_model())
+        except Exception as e:
+            return self.ui.show_exception_message(e)
+
+        if not os.path.isdir(cache_deploy_dir):
+            os.makedirs(cache_deploy_dir)
+
+        try:
+            cache_file = os.path.join(cache_deploy_dir, 'cache.json')
+            with open(cache_file, 'w') as cache_fp:
+                json.dump({'config': self.config,
+                           'current_model': self.current_model,
+                           'current_controller': self.current_controller,
+                           'complete': self.complete,
+                           'selected_bundle': BundleModel.bundle}, cache_fp)
+        except Exception as e:
+            return self.ui.show_exception_message(e)
+
+    def load(self):
+        """ loads cache if applicable
+        """
+        cache_home_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
+            os.path.expanduser('~'),
+            '.cache'))
+        try:
+            cache_deploy_dir = os.path.join(cache_home_dir,
+                                            Juju.current_controller(),
+                                            Juju.current_model())
+        except:
+            return {}
+
+        cache_file = os.path.join(cache_deploy_dir, 'cache.json')
+        if path.isfile(cache_file):
+            with open(cache_file) as cache_fp:
+                return json.load(cache_fp)
+        return {}
 
 
 class Application:
@@ -69,11 +121,8 @@ class Application:
         metadata: path to solutions metadata.json
         """
         self.app = ApplicationConfig()
-        self.app.argv = argv
         self.metadata = metadata
         self.pkg_config = pkg_config
-        self.app.ui = ConjureUI()
-
         with open(self.pkg_config) as json_f:
             config = json.load(json_f)
             config['config_filename'] = self.pkg_config
@@ -83,6 +132,8 @@ class Application:
             config['metadata'] = json.load(json_f)
 
         self.app.config = config
+        self.app.argv = argv
+        self.app.ui = ConjureUI()
 
         self.app.controllers = {
             'welcome': WelcomeController(self.app),
