@@ -1,7 +1,14 @@
-conjure-up (0.1.0) UNRELEASED; urgency=medium
+conjure-up (0.1.0) xenial-proposed; urgency=medium
 
-  * Next dev release
-  * Name change
+  * Change name from conjure to conjure-up
+  * Use daily stream for importing LXD images in Juju
+  * Update bundle editor to include better navigation between
+    relation editing and charm addition
+  * Bundle editor will not show recommendedCharms if charm exists
+    in current bundle.
+  * Facilitates configuring LXD bridge through its dpkg-reconfigure lxd
+    mechanism and handles bringing up lxdbr0 for Juju to consume
+  * Implemented caching for application config for subsequent status runs
 
  -- Adam Stokes <adam.stokes@ubuntu.com>  Thu, 14 Apr 2016 16:03:54 -0400
 
