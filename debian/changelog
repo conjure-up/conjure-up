@@ -2,6 +2,8 @@ conjure-up (0.1.1) UNRELEASED; urgency=medium
 
   * Next dev release
 
+ -- Michael McCracken <mike.mccracken@canonical.com>  Wed, 20 Apr 2016 13:50:00 -0700
+
 conjure-up (0.1.0) xenial-proposed; urgency=medium
 
   * Change name from conjure to conjure-up
