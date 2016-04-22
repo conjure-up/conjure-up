@@ -145,7 +145,14 @@ class FinishController:
 
     def _post_exec_done(self, future):
         try:
-            result = json.loads(future.result().decode('utf8'))
+            fr = future.result().decode('utf8')
+            try:
+                result = json.loads(fr)
+            except json.decoder.JSONDecodeError:
+                result = dict(returnCode=1, fr=fr,
+                              jsonError=True,
+                              message="Retrying post-processing.")
+
             self.app.log.debug("post_exec_done: {}".format(result))
             self.app.ui.set_footer(result['message'])
             if result['returnCode'] > 0 or not result['isComplete']:
