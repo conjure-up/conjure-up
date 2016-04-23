@@ -8,7 +8,7 @@ from conjure.utils import pollinate
 import os.path as path
 import os
 import json
-from subprocess import check_output
+from subprocess import run, PIPE
 
 
 class FinishController:
@@ -64,9 +64,11 @@ class FinishController:
         self.app.log.debug("pre_exec running {}".format(self._pre_exec_sh))
 
         try:
-            future = async.submit(partial(check_output,
+            future = async.submit(partial(run,
                                           self._pre_exec_sh,
                                           shell=True,
+                                          stderr=PIPE,
+                                          stdout=PIPE,
                                           env=self.app.env),
                                   partial(self.handle_exception,
                                           "E002"))
@@ -75,8 +77,10 @@ class FinishController:
             self.handle_exception("E002", e)
 
     def _pre_exec_done(self, future):
-        result = json.loads(future.result().decode('utf8'))
+        fr = future.result()
+        result = json.loads(fr.stdout.decode('utf8'))
         self.app.log.debug("pre_exec_done: {}".format(result))
+        self.app.log.warning(fr.stderr.decode())
         if result['returnCode'] > 0:
             return self.handle_pre_exception(Exception(
                 'There was an error during the pre processing phase.'))
@@ -136,24 +140,27 @@ class FinishController:
             self._post_exec_pollinate = True
 
         self.app.log.debug("post_exec running: {}".format(self._post_exec_sh))
-        future = async.submit(partial(check_output,
+        future = async.submit(partial(run,
                                       self._post_exec_sh,
                                       shell=True,
+                                      stderr=PIPE,
+                                      stdout=PIPE,
                                       env=self.app.env),
                               self.handle_post_exception)
         future.add_done_callback(self._post_exec_done)
 
     def _post_exec_done(self, future):
         try:
-            fr = future.result().decode('utf8')
+            fr = future.result()
             try:
-                result = json.loads(fr)
+                result = json.loads(fr.stdout.decode())
             except json.decoder.JSONDecodeError:
                 result = dict(returnCode=1, fr=fr,
                               jsonError=True,
                               message="Retrying post-processing.")
 
             self.app.log.debug("post_exec_done: {}".format(result))
+            self.app.log.warning(fr.stderr.decode())
             self.app.ui.set_footer(result['message'])
             if result['returnCode'] > 0 or not result['isComplete']:
                 self.app.log.error(
