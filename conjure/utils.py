@@ -145,7 +145,8 @@ def pollinate(session, tag, log):
     def do_pollinate():
         try:
             cmd = ("sudo su - -c 'pollinate -q -r --curl-opts "
-                   "\"-k --user-agent {}\"'".format(agent_str))
+                   "\"-k --user-agent {}\"' > /dev/null 2>&1".format(
+                       agent_str))
             log.debug("pollinate: {}".format(cmd))
             check_call(cmd, shell=True)
         except CalledProcessError as e:
