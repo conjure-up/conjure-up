@@ -1,6 +1,6 @@
-conjure-up (0.1.1) UNRELEASED; urgency=medium
+conjure-up (0.1.1) xenial-proposed; urgency=medium
 
-  * Next dev release
+  * Retry on JSON errors (LP: #1575377)
 
  -- Michael McCracken <mike.mccracken@canonical.com>  Wed, 20 Apr 2016 13:50:00 -0700
 
