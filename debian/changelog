@@ -1,6 +1,6 @@
-conjure-up (0.1.1) UNRELEASED; urgency=medium
+conjure-up (0.2.0) UNRELEASED; urgency=medium
 
-  * Next dev release
+  * Allow charm config options in bundle to be modified
 
  -- Michael McCracken <mike.mccracken@canonical.com>  Wed, 20 Apr 2016 13:50:00 -0700
 
