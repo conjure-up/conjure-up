@@ -165,6 +165,11 @@ class Bundle:
                 return x
         return None
 
+    def set_option(self, service_name, opname, value):
+        sd = self._bundle['services'][service_name]
+        opts = sd.setdefault('options', {})
+        opts[opname] = value
+
     @property
     def services(self):
         services = []
@@ -229,9 +234,12 @@ class Bundle:
 
         service_renames = keydict()
         for sname, sd in other_bundle._bundle['services'].items():
-            if sname in self._bundle['services']:
-                newname = sname + "-1"
-                service_renames[sname] = newname
+            newname = sname
+            idx = 1
+            while newname in self._bundle['services']:
+                newname = sname + "-{}".format(idx)
+                idx += 1
+            service_renames[sname] = newname
 
         # generate machine renames and merge machines
         machine_renames = keydict()
@@ -253,7 +261,7 @@ class Bundle:
             else:
                 return rd[parts[0]]
 
-        for (or1, or2) in other_bundle._bundle['relations']:
+        for (or1, or2) in other_bundle._bundle.get('relations', []):
             nr1 = rename_relation(or1, service_renames)
             nr2 = rename_relation(or2, service_renames)
             if [nr1, nr2] in self._bundle['relations'] or\

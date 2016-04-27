@@ -141,6 +141,7 @@ class MetadataController:
             ids.append("id={}".format(csid.as_str_without_rev()))
         ids_str = "&".join(ids)
         url = 'https://api.jujucharms.com/v4/meta/any?include=charm-metadata&'
+        url += 'include=charm-config&'
         url += ids_str
         r = requests.get(url)
         if not r.ok:
@@ -215,6 +216,11 @@ class MetadataController:
                          pc.services_with_charm_id(charm_id)]
 
         return services
+
+    def get_options(self, charm_name):
+        if not self.loaded():
+            return {}
+        return self.charm_info[charm_name]['Meta']['charm-config']['Options']
 
     def handle_search_error(self, e):
         self.error_cb(e)

@@ -31,6 +31,7 @@ from bundleplacer.ui.filter_box import FilterBox
 from bundleplacer.ui.services_column import ServicesColumn
 from bundleplacer.ui.machines_column import MachinesColumn
 from bundleplacer.ui.relations_column import RelationsColumn
+from bundleplacer.ui.options_column import OptionsColumn
 
 log = logging.getLogger('bundleplacer')
 
@@ -42,6 +43,7 @@ class UIState(Enum):
     PLACEMENT_EDITOR = 0
     RELATION_EDITOR = 1
     CHARMSTORE_VIEW = 2         # This is the default
+    OPTIONS_EDITOR = 3
 
 
 class PlacementView(WidgetWrap):
@@ -106,6 +108,8 @@ class PlacementView(WidgetWrap):
                 self.focus_machines_column()
             elif self.state == UIState.RELATION_EDITOR:
                 self.focus_relations_column()
+            elif self.state == UIState.OPTIONS_EDITOR:
+                self.focus_options_column()
             else:
                 self.focus_charmstore_column()
 
@@ -204,20 +208,26 @@ class PlacementView(WidgetWrap):
                                       maasinfo['server_hostname'])
         self.maastitle.set_text("Connected to MAAS {}".format(maasname))
 
-    def get_relations_header(self):
+    def _simple_header_widgets(self, title):
         b = PlainButton("Back to Charm Store",
                         on_press=self.show_default_view)
-        self.rel_back_button = AttrMap(b, 'button_secondary',
-                                       'button_secondary focus')
+        self.back_to_mainview_button = AttrMap(b, 'button_secondary',
+                                               'button_secondary focus')
+        button_grid = GridFlow([self.back_to_mainview_button],
+                               36, 1, 0, 'center')
 
-        self.relations_button_grid = GridFlow([self.rel_back_button],
-                                              36, 1, 0, 'center')
+        return [Divider(),
+                Text(('body', title), align='center'),
+                Divider(), button_grid]
 
-        return Pile([Divider(),
-                     Text(('body', "Relation Editor"),
-                          align='center'),
-                     Divider(),
-                     self.relations_button_grid])
+    def get_relations_header(self):
+        return Pile(self._simple_header_widgets("Relation Editor"))
+
+    def get_options_header(self, options_column):
+        simple_widgets = self._simple_header_widgets("Options Editor")
+        fb = FilterBox(options_column.handle_filter_change,
+                       info_text="Filter by option name")
+        return Pile(simple_widgets + [fb])
 
     def build_widgets(self):
 
@@ -236,12 +246,17 @@ class PlacementView(WidgetWrap):
                                                   self.placement_controller,
                                                   self,
                                                   self.metadata_controller)
+        self.options_column = OptionsColumn(self.display_controller,
+                                            self.placement_controller,
+                                            self,
+                                            self.metadata_controller)
 
         self.machines_header = self.get_machines_header(self.machines_column)
         self.relations_header = self.get_relations_header()
         self.services_header = self.get_services_header()
         self.charmstore_header = self.get_charmstore_header(
             self.charmstore_column)
+        self.options_header = self.get_options_header(self.options_column)
 
         cs = [self.services_header, self.charmstore_header]
 
@@ -292,6 +307,10 @@ class PlacementView(WidgetWrap):
                 self.header_columns.contents[-1] = (self.charmstore_header,
                                                     h_opts)
                 self.columns.contents[-1] = (self.charmstore_column, h_opts)
+            elif self.state == UIState.OPTIONS_EDITOR:
+                self.header_columns.contents[-1] = (self.options_header,
+                                                    h_opts)
+                self.columns.contents[-1] = (self.options_column, h_opts)
 
             self.prev_state = self.state
 
@@ -301,6 +320,8 @@ class PlacementView(WidgetWrap):
             self.machines_column.update()
         elif self.state == UIState.RELATION_EDITOR:
             self.relations_column.update()
+        elif self.state == UIState.OPTIONS_EDITOR:
+            self.options_column.update()
         else:
             self.charmstore_column.update()
 
@@ -387,6 +408,10 @@ class PlacementView(WidgetWrap):
         self.columns.focus_position = 1
         self.relations_column.focus_prev_or_top()
 
+    def focus_options_column(self):
+        self.columns.focus_position = 1
+        self.options_column.focus_prev_or_top()
+
     def focus_charmstore_column(self):
         self.columns.focus_position = 1
         self.charmstore_column.focus_prev_or_top()
@@ -405,6 +430,12 @@ class PlacementView(WidgetWrap):
         self.relations_column.set_service(service)
         self.update()
         self.focus_relations_column()
+
+    def edit_options(self, service):
+        self.state = UIState.OPTIONS_EDITOR
+        self.options_column.set_service(service)
+        self.update()
+        self.focus_options_column()
 
     def do_deploy(self, sender):
         self.do_deploy_cb()

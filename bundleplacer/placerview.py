@@ -90,5 +90,9 @@ class PlacerView(WidgetWrap):
         assert self.selected_service is not None
         self.pv.edit_relations(self.selected_service)
 
+    def edit_options(self):
+        assert self.selected_service is not None
+        self.pv.edit_options(self.selected_service)
+
     def clear_selections(self):
         self.pv.clear_selections()

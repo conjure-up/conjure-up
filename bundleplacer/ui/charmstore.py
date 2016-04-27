@@ -257,6 +257,7 @@ class CharmstoreColumn(WidgetWrap):
         bundle_widgets = [(BundleWidget(d, self.do_add_bundle),
                            opts) for d in self._bundle_results
                           if 'bundle-metadata' in d.get('Meta', {}) and
+                          'Series' in d['Meta']['bundle-metadata'] and
                           d['Meta']['bundle-metadata']['Series'] == series]
 
         if len(bundle_widgets) > 0:

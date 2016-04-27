@@ -166,8 +166,10 @@ class SimpleServiceWidget(WidgetWrap):
         if self.display_controller.has_maas:
             all_actions = [('Choose Placement',
                             self.handle_placement_button_pressed)]
-        all_actions.append(('Edit Relations',
-                            self.handle_relation_button_pressed))
+        all_actions += [('Edit Relations',
+                         self.handle_relation_button_pressed),
+                        ('Edit Options',
+                         self.handle_options_button_pressed)]
 
         self.action_buttons = [AttrMap(PlainButton(label, on_press=func),
                                        'button_secondary',
@@ -212,4 +214,10 @@ class SimpleServiceWidget(WidgetWrap):
         self.state = ServiceWidgetState.SELECTED
         self.update()
         self.display_controller.edit_relations()
+        self.pile.focus_position = 0
+
+    def handle_options_button_pressed(self, sender):
+        self.state = ServiceWidgetState.SELECTED
+        self.update()
+        self.display_controller.edit_options()
         self.pile.focus_position = 0
