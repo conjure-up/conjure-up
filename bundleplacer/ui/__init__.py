@@ -15,6 +15,7 @@
 
 from enum import Enum
 import logging
+from operator import attrgetter
 from subprocess import Popen, PIPE, TimeoutExpired
 
 from urwid import (AttrMap, Columns, Divider, Filler, Overlay,
@@ -32,6 +33,8 @@ from bundleplacer.ui.services_column import ServicesColumn
 from bundleplacer.ui.machines_column import MachinesColumn
 from bundleplacer.ui.relations_column import RelationsColumn
 from bundleplacer.ui.options_column import OptionsColumn
+from bundleplacer.grapher import graph_for_bundle
+
 
 log = logging.getLogger('bundleplacer')
 
@@ -68,6 +71,8 @@ class PlacementView(WidgetWrap):
         self.state = initial_state
         self.has_maas = has_maas
         self.prev_state = None
+        self.showing_overlay = False
+        self.showing_graph_split = False
         self.metadata_controller = MetadataController(placement_controller,
                                                       config)
         w = self.build_widgets()
@@ -140,8 +145,27 @@ class PlacementView(WidgetWrap):
         if key in ['tab', 'shift tab']:
             self.handle_tab('shift' in key)
             return key
+
+        unhandled_key = self._w.keypress(size, key)
+        if unhandled_key is None:
+            return None
+        elif unhandled_key in ['g']:
+            if self.showing_overlay:
+                return
+            w = InfoDialogWidget(self.bundle_graph_text.text,
+                                 self.remove_overlay)
+            self.update()
+            self.show_overlay(w)
+        elif unhandled_key in ['G']:
+            self.showing_graph_split = not self.showing_graph_split
+            if self.showing_graph_split:
+                opts = self.placement_edit_body_pile.options()
+                self.placement_edit_body_pile.contents.insert(
+                    0, (self.bundle_graph_widget, opts))
+            else:
+                self.placement_edit_body_pile.contents.pop(0)
         else:
-            return self._w.keypress(size, key)
+            return unhandled_key
 
     def get_services_header(self):
         b = PlainButton("Clear All Placements",
@@ -268,10 +292,15 @@ class PlacementView(WidgetWrap):
         self.deploy_button = MenuSelectButton("\nCommit\n",
                                               on_press=self.do_deploy)
         self.deploy_button_label = Text("Some charms use default")
-        self.placement_edit_body = Filler(Padding(self.columns,
-                                                  align='center',
-                                                  width=('relative', 95)),
+        self.placement_edit_body_pile = Pile([self.columns])
+        self.placement_edit_body = Filler(Padding(
+            self.placement_edit_body_pile,
+            align='center',
+            width=('relative', 95)),
                                           valign='top')
+        self.bundle_graph_text = Text("No graph to display yet.")
+        self.bundle_graph_widget = Padding(self.bundle_graph_text,
+                                           'center', 'pack')
         b = AttrMap(self.deploy_button,
                     'frame_header',
                     'button_primary focus')
@@ -337,6 +366,13 @@ class PlacementView(WidgetWrap):
             dmsg = ""
         self.deploy_button_label.set_text(dmsg)
 
+        if self.showing_graph_split:
+            bundle = self.placement_controller.bundle
+            gtext = graph_for_bundle(bundle, self.metadata_controller)
+            if gtext == "":
+                gtext = "No graph to display yet."
+            self.bundle_graph_text.set_text(gtext)
+
     def browse_maas(self, sender):
 
         bc = self.config.juju_env['bootstrap-config']
@@ -373,13 +409,16 @@ class PlacementView(WidgetWrap):
 
     def do_add_bundle(self, bundle_dict):
         assert(self.state == UIState.CHARMSTORE_VIEW)
-        new_bundle = self.placement_controller.merge_bundle(bundle_dict)
+        _, new_services, _ = self.placement_controller.merge_bundle(
+            bundle_dict)
         self.frame.focus_position = 'body'
         self.columns.focus_position = 0
-        charms = list(set([s.charm_source for s in new_bundle.services]))
+        charms = list(set([s.charm_source for s in new_services]))
         self.metadata_controller.load(charms)
         self.update()
-        first_service = new_bundle.services[0].service_name
+        ss = sorted(new_services,
+                    key=attrgetter('service_name'))
+        first_service = ss[0].service_name
         self.services_column.select_service(first_service)
 
     def do_clear_machine(self, sender, machine):
@@ -441,7 +480,8 @@ class PlacementView(WidgetWrap):
         self.do_deploy_cb()
 
     def show_overlay(self, overlay_widget):
-        self.orig_w = self._w
+        if not self.showing_overlay:
+            self.orig_w = self._w
         self._w = Overlay(top_w=overlay_widget,
                           bottom_w=self._w,
                           align='center',
@@ -449,8 +489,10 @@ class PlacementView(WidgetWrap):
                           min_width=80,
                           valign='middle',
                           height='pack')
+        self.showing_overlay = True
 
     def remove_overlay(self, overlay_widget):
         # urwid note: we could also get orig_w as
         # self._w.contents[0][0], but this is clearer:
         self._w = self.orig_w
+        self.showing_overlay = False

@@ -305,7 +305,8 @@ class PlacementController:
     def add_new_service(self, charm_name, charm_dict, service_name=None):
         """adds a service with the default name of 'charm_name' or
         'charm_name-1', etc"""
-        self.bundle.add_new_service(charm_name, charm_dict, service_name)
+        return self.bundle.add_new_service(charm_name, charm_dict,
+                                           service_name)
 
     def set_option(self, service_name, opname, value):
         self.bundle.set_option(service_name, opname, value)
@@ -325,7 +326,7 @@ class PlacementController:
         self.add_bundle_machines(new_machines)
         self.add_bundle_assignments(new_assignments)
         self.add_subordinates(new_services)
-        return new_bundle
+        return new_machines, new_services, new_assignments
 
     def add_bundle_machines(self, machines):
         for mid, md in machines.items():

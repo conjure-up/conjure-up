@@ -129,6 +129,7 @@ class Bundle:
         new_dict = {'charm': charm_dict['Id'],
                     'num_units': 1}
         self._bundle['services'][service_name] = new_dict
+        return service_name
 
     def remove_service(self, service_name):
         if service_name in self._bundle['services']:
