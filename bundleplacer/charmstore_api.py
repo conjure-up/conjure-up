@@ -121,7 +121,7 @@ class MetadataController:
         self.recommended_charm_names = bundle_dict.get('recommendedCharms',
                                                        [])
 
-    def load(self, charm_names_or_sources):
+    def load(self, charm_names_or_sources, done_cb=None):
         if len(charm_names_or_sources) == 0:
             return
 
@@ -133,6 +133,8 @@ class MetadataController:
             self.metadata_future = submit(partial(self._do_load,
                                                   charm_names_or_sources),
                                           self.handle_search_error)
+            if done_cb:
+                self.metadata_future.add_done_callback(done_cb)
 
     def _do_load(self, charm_names_or_sources):
         ids = []

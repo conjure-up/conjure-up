@@ -34,7 +34,7 @@ from bundleplacer.ui.machines_column import MachinesColumn
 from bundleplacer.ui.relations_column import RelationsColumn
 from bundleplacer.ui.options_column import OptionsColumn
 from bundleplacer.grapher import graph_for_bundle
-
+from bundleplacer.charmstore_api import CharmStoreID
 
 log = logging.getLogger('bundleplacer')
 
@@ -399,13 +399,22 @@ class PlacementView(WidgetWrap):
 
         """
         assert(self.state == UIState.CHARMSTORE_VIEW)
-        service_name = self.placement_controller.add_new_service(charm_name,
-                                                                 charm_dict)
-        self.frame.focus_position = 'body'
-        self.columns.focus_position = 0
-        self.metadata_controller.load([charm_dict['Id']])
-        self.update()
-        self.services_column.select_service(service_name)
+
+        def done_cb(f):
+            csid = CharmStoreID(charm_dict['Id'])
+            id_no_rev = csid.as_str_without_rev()
+            info = self.metadata_controller.get_charm_info(id_no_rev)
+            is_subordinate = info["Meta"]["charm-metadata"].get(
+                "Subordinate", False)
+            service_name = self.placement_controller.add_new_service(
+                charm_name, charm_dict, is_subordinate=is_subordinate)
+            self.frame.focus_position = 'body'
+            self.columns.focus_position = 0
+            self.update()
+            self.services_column.select_service(service_name)
+
+        # TODO MMCC: need a 'loading' indicator to start here
+        self.metadata_controller.load([charm_dict['Id']], done_cb)
 
     def do_add_bundle(self, bundle_dict):
         assert(self.state == UIState.CHARMSTORE_VIEW)

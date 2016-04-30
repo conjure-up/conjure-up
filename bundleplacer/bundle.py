@@ -118,7 +118,8 @@ class Bundle:
         if 'services' not in self._bundle.keys():
             raise Exception("Invalid Bundle.")
 
-    def add_new_service(self, charm_name, charm_dict, service_name=None):
+    def add_new_service(self, charm_name, charm_dict, service_name=None,
+                        is_subordinate=False):
         if service_name is None:
             i = 1
             service_name = charm_name
@@ -127,7 +128,7 @@ class Bundle:
                 i += 1
 
         new_dict = {'charm': charm_dict['Id'],
-                    'num_units': 1}
+                    'num_units': 0 if is_subordinate else 1}
         self._bundle['services'][service_name] = new_dict
         return service_name
 
@@ -140,6 +141,12 @@ class Bundle:
             s2 = r2.split(':')[0]
             if s1 == service_name or s2 == service_name:
                 self._bundle['relations'].remove([r1, r2])
+
+    def scale_service(self, service_name, amount):
+        sd = self._bundle['services'][service_name]
+        new = sd.get('num_units', 0) + amount
+        if new > 0:
+            sd['num_units'] = new
 
     def add_relation(self, s1_name, s1_rel, s2_name, s2_rel):
         r = ["{}:{}".format(s1_name, s1_rel),

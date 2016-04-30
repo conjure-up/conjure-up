@@ -302,11 +302,13 @@ class PlacementController:
                     ms.append(m)
         return ms
 
-    def add_new_service(self, charm_name, charm_dict, service_name=None):
+    def add_new_service(self, charm_name, charm_dict,
+                        service_name=None, is_subordinate=False):
         """adds a service with the default name of 'charm_name' or
         'charm_name-1', etc"""
         return self.bundle.add_new_service(charm_name, charm_dict,
-                                           service_name)
+                                           service_name,
+                                           is_subordinate=is_subordinate)
 
     def set_option(self, service_name, opname, value):
         self.bundle.set_option(service_name, opname, value)
@@ -361,6 +363,9 @@ class PlacementController:
 
     def remove_service(self, service_name):
         self.bundle.remove_service(service_name)
+
+    def scale_service(self, service_name, amount):
+        self.bundle.scale_service(service_name, amount)
 
     def toggle_relation(self, s1_name, s1_rel, s2_name, s2_rel):
         if self.bundle.is_related(s1_name, s1_rel, s2_name, s2_rel):

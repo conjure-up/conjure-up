@@ -80,6 +80,11 @@ class PlacerView(WidgetWrap):
         self.placement_controller.remove_service(service.service_name)
         self.pv.update()
 
+    def scale_service(self, service, amount):
+        self.placement_controller.scale_service(service.service_name,
+                                                amount)
+        self.pv.update()
+
     def show_default_view(self):
         self.pv.show_default_view()
 

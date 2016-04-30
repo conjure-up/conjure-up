@@ -148,6 +148,10 @@ class SimpleServiceWidget(WidgetWrap):
                               (Divider(), self.pile.options())]
 
     def update(self):
+        self.service = next((s for s in
+                             self.placement_controller.bundle.services
+                             if s.service_name == self.service.service_name),
+                            self.service)
         self.update_action_buttons()
 
         if self.state == ServiceWidgetState.CHOOSING:
@@ -158,6 +162,12 @@ class SimpleServiceWidget(WidgetWrap):
     def keypress(self, size, key):
         if key == 'backspace':
             self.display_controller.remove_service(self.service)
+        elif key == '+':
+            if not self.service.subordinate:
+                self.display_controller.scale_service(self.service, 1)
+        elif key == '-':
+            if not self.service.subordinate:
+                self.display_controller.scale_service(self.service, -1)
 
         return super().keypress(size, key)
 
