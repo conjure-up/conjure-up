@@ -87,8 +87,12 @@ def main():
         maas = None
         maas_state = None
 
-    placement_controller = PlacementController(config=config,
-                                               maas_state=maas_state)
+    try:
+        placement_controller = PlacementController(config=config,
+                                                   maas_state=maas_state)
+    except Exception as e:
+        print("Error: " + e.args[0])
+        return
 
     def cb():
         if maas:

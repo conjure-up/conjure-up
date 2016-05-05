@@ -17,6 +17,7 @@ from enum import Enum
 from urwid import (CheckBox, connect_signal, Divider, Edit, GridFlow,
                    IntEdit, Pile, Text, WidgetWrap)
 from ubuntui.widgets.buttons import PlainButton
+from ubuntui.widgets.input import StringEditor
 import logging
 
 log = logging.getLogger('bundleplacer')
@@ -26,6 +27,17 @@ class OptionType(Enum):
     BOOLEAN = 0
     STRING = 1
     INT = 2
+
+
+def strip_solo_dots(s):
+    ls = s.split("\n")
+    rl = []
+    for l in ls:
+        if l == ".":
+            rl.append("")
+        else:
+            rl.append(l)
+    return "\n".join(rl)
 
 
 class OptionWidget(WidgetWrap):
@@ -39,8 +51,6 @@ class OptionWidget(WidgetWrap):
         self.current_value = current_value or default
         w = self.build_widgets()
         self.value_changed_callback = value_changed_callback
-        connect_signal(self.control, 'change',
-                       self.handle_value_changed)
         super().__init__(w)
         self.update()
 
@@ -48,9 +58,10 @@ class OptionWidget(WidgetWrap):
         return True
 
     def build_widgets(self):
-        desc_text = Text([("info_minor", self.name),
-                          "\n",
-                          self.description])
+        title_text = Text([("body", self.name)],
+                          align="center")
+
+        desc_text = Text(["\n", strip_solo_dots(self.description)])
 
         self.reset_button = PlainButton("Reset to Default", self.do_reset)
         if self.optype == OptionType.BOOLEAN:
@@ -61,15 +72,23 @@ class OptionWidget(WidgetWrap):
                                    default=self.current_value)
         elif self.optype == OptionType.STRING:
             edit_text = self.current_value or ""
-            self.control = Edit(caption="{}: ".format(self.name),
-                                edit_text=edit_text)
+            self.control = StringEditor(
+                caption="{}: ".format(self.name),
+                edit_text=edit_text)
         else:
             raise Exception("Unknown option type")
+
+        if self.optype == OptionType.STRING:
+            connect_signal(self.control._edit, 'change',
+                           self.handle_value_changed)
+        else:
+            connect_signal(self.control, 'change',
+                           self.handle_value_changed)
 
         button_grid = GridFlow([self.reset_button],
                                36, 1, 0, 'right')
 
-        return Pile([Divider(), desc_text, self.control,
+        return Pile([Divider(), title_text, desc_text, self.control,
                      button_grid])
 
     def handle_value_changed(self, sender, value):
@@ -85,12 +104,14 @@ class OptionWidget(WidgetWrap):
     def do_reset(self, sender):
         self.current_value = str(self.default)
         if self.optype == OptionType.BOOLEAN:
-            self.control.state = bool(self.current_value)
-
-        elif (self.optype == OptionType.INT or
-              self.optype == OptionType.STRING):
+            newstate = True if self.current_value == "True" else False
+            self.control.state = newstate
+        elif self.optype == OptionType.INT:
             edit_text = self.current_value or ""
             self.control.set_edit_text(edit_text)
+        elif self.optype == OptionType.STRING:
+            edit_text = self.current_value or ""
+            self.control.value = edit_text
 
     def update(self):
         pass
@@ -136,7 +157,12 @@ class OptionsColumn(WidgetWrap):
             self.service.service_name)))
 
         if len(self.option_widgets) == 0:
-            self.title.set_text(('body', "Loading Options..."))
+            if self.filter_string != "":
+                self.title.set_text(
+                    ('body',
+                     "No options match '{}'".format(self.filter_string)))
+            else:
+                self.title.set_text(('body', "Loading Options..."))
         else:
             self.title.set_text(('body', "Edit Options: (Changes are "
                                  "saved immediately)"))

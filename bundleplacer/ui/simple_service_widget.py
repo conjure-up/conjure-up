@@ -65,10 +65,7 @@ class SimpleServiceWidget(WidgetWrap):
 
     def build_widgets(self):
 
-        if self.service.subordinate:
-            self.button = MenuSelectButton("I AM A SUBORDINATE SERVICE")
-        else:
-            self.button = MenuSelectButton("I AM A SERVICE", self.do_select)
+        self.button = MenuSelectButton("I AM A SERVICE", self.do_select)
 
         self.action_button_cols = Columns([], dividechars=1)
         self.action_buttons = []

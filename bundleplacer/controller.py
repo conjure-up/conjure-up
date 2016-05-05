@@ -875,7 +875,7 @@ class BundleWriter:
                 continue
 
             if iid not in existing_ids:
-                machine_id = len(machines) + 1
+                machine_id = "{}".format(len(machines) + 1)
                 iid_map[iid] = machine_id
                 machines[machine_id] = self._dict_for_machine(iid)
 

@@ -20,7 +20,7 @@ import bson
 from requests_oauthlib import OAuth1
 import requests
 import json
-from urllib.parse import urlsplit
+from six.moves.urllib.parse import urlsplit
 
 
 class MaasClient:

@@ -28,6 +28,8 @@ class keydict(dict):
     def __missing__(self, key):
         return key
 
+class BundleFormatError(Exception):
+    "Used to notify user about a bundle that can't be read."
 
 def create_service(servicename, service_dict, servicemeta, relations):
 
@@ -45,6 +47,12 @@ def create_service(servicename, service_dict, servicemeta, relations):
     # is_subordinate = 'to' not in service_dict.keys()
 
     is_subordinate = service_dict.get('num_units', 0) == 0
+
+    if 'charm' not in service_dict:
+        m = "Service '{}' has no 'charm' key.".format(servicename)
+        if 'branch' in service_dict:
+            m += " 'branch' key is not supported."
+        raise BundleFormatError(m)
 
     charm_name = service_dict['charm'].split('/')[-1]
     charm_name = '-'.join(charm_name.split('-')[:-1])

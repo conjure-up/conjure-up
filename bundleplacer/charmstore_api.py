@@ -172,7 +172,9 @@ class MetadataController:
                 provides.append((relname, iface))
                 self.charms_providing_iface[iface].append((relname,
                                                            id_no_rev))
-
+            provides.append(('juju-info', 'juju-info'))
+            self.charms_providing_iface['juju-info'].append(('juju-info',
+                                                             id_no_rev))
             self.iface_info[id_no_rev] = dict(requires=requires,
                                               provides=provides)
 
