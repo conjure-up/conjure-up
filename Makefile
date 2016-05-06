@@ -21,6 +21,9 @@ update_version: git-sync-requirements
 
 clean:
 	@-debian/rules clean
+	@rm -rf *egg*
+	@rm -rf site.py
+	@rm -rf easy-install*
 	@rm -rf docs/_build/*
 	@rm -rf mockcfgpath
 	@rm -rf ../conjure-up_*.deb ../cloud-*.deb ../conjure-up_*.tar.gz ../conjure-up_*.dsc ../conjure-up_*.changes \
@@ -28,6 +31,7 @@ clean:
 	@rm -rf cover
 	@rm -rf .coverage
 	@rm -rf .tox
+	@rm -rf conjure-up
 	@rm -rf dist
 
 DPKGBUILDARGS = -us -uc -i'.git.*|.tox|.bzr.*|.editorconfig|.travis-yaml|macumba\/debian|maasclient\/debian'
@@ -55,6 +59,9 @@ pyflakes:
 
 pep8:
 	pep8 conjure
+
+dev: clean
+	PYTHONPATH=`pwd` python3 setup.py develop --install-dir=`pwd`
 
 # Indirection to allow 'make run' to build deb automatically, but
 # 'make sbuild; make run' will not invoke 'deb'.
