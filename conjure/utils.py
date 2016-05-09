@@ -137,10 +137,7 @@ def pollinate(session, tag, log):
     if not os.path.isfile('/usr/bin/pollinate'):
         log.warning("pollinate binary not found")
         return
-    bundle_key = BundleModel.key()
-    if not bundle_key:
-        bundle_key = '-'
-    agent_str = 'conjure/{}/{}/{}'.format(session, bundle_key, tag)
+    agent_str = 'conjure/{}/{}'.format(session, tag)
 
     def do_pollinate():
         try:

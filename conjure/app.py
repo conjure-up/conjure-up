@@ -35,7 +35,7 @@ class ApplicationConfig:
     """ Application config encapsulating common attributes
     used throughout the lifetime of the application.
     """
-    def __init__(self):
+    def __init__(self, argv):
         # Try to load cache file
         self.cache = self.load()
         # Reference to entire UI
@@ -43,7 +43,7 @@ class ApplicationConfig:
         # Global config attr
         self.config = self.cache.get('config', None)
         # CLI arguments
-        self.argv = None
+        self.argv = argv
         # List of all known controllers to be rendered
         self.controllers = None
         # Current Juju model
@@ -53,7 +53,9 @@ class ApplicationConfig:
                                                  None)
         # Global session id
         self.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
-                                    str(uuid.uuid4()))
+                                    '{}/{}'.format(
+                                        self.argv.spell,
+                                        str(uuid.uuid4())))
         # Logger
         self.log = None
         # Environment to pass to processing tasks
@@ -121,7 +123,7 @@ class Application:
         pkg_config: path to solution config.json
         metadata: path to solutions metadata.json
         """
-        self.app = ApplicationConfig()
+        self.app = ApplicationConfig(argv)
         self.metadata = metadata
         self.pkg_config = pkg_config
         with open(self.pkg_config) as json_f:
@@ -133,7 +135,6 @@ class Application:
             config['metadata'] = json.load(json_f)
 
         self.app.config = config
-        self.app.argv = argv
         self.app.ui = ConjureUI()
 
         self.app.controllers = {
@@ -173,15 +174,16 @@ class Application:
 
 def parse_options(argv):
     parser = argparse.ArgumentParser(prog="conjure-up")
-    parser.add_argument('spell', help="Specify the Juju solution to "
-                        "deploy, e.g. openstack")
+    parser.add_argument('spell', help="Specify the solution to "
+                        "conjure, e.g. openstack")
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug',
                         help='Enable debug logging.')
+    parser.add_argument('-y', action='store_true',
+                        help='Do not prompt during conjuring')
     parser.add_argument('-s', '--status', action='store_true',
                         dest='status_only',
-                        help='Only display the Status of '
-                        'an existing model.')
+                        help='Display the summary of the conjuring')
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
     return parser.parse_args(argv)
