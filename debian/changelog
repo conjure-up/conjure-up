@@ -1,4 +1,10 @@
-conjure-up (0.2.0) UNRELEASED; urgency=medium
+conjure-up (2.0.0) UNRELEASED; urgency=medium
+
+  * Start 2.0 release
+
+ -- Adam Stokes <adam.stokes@ubuntu.com>  Mon, 09 May 2016 11:24:32 -0500
+
+conjure-up (1.0.0) UNRELEASED; urgency=medium
 
   * Allow charm config options in bundle to be modified
 
