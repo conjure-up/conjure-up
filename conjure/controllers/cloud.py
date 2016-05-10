@@ -2,10 +2,21 @@ from conjure.ui.views.cloud import CloudView
 from conjure.juju import Juju
 from conjure.models.bundle import BundleModel
 from conjure.utils import pollinate
+from conjure.controllers.policy import ControllerPolicy
 
 
-class CloudController:
+class TUI(ControllerPolicy):
+    def __init__(self, app):
+        self.app = app
 
+    def finish(self):
+        self.app.log.debug("TUI finish")
+
+    def render(self):
+        self.app.log.debug("TUI cloud render")
+
+
+class GUI(ControllerPolicy):
     def __init__(self, app):
         self.app = app
 
@@ -53,3 +64,11 @@ class CloudController:
             excerpt=self.excerpt
         )
         self.app.ui.set_body(self.view)
+
+
+class CloudController:
+    def __new__(cls, app):
+        if app.argv.headless:
+            return TUI(app)
+        else:
+            return GUI(app)

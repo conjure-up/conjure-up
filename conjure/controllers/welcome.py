@@ -2,9 +2,22 @@ from conjure.ui.views.welcome import WelcomeView
 from conjure.models.bundle import BundleModel
 from conjure.juju import Juju
 from conjure.utils import pollinate
+from conjure.controllers.policy import ControllerPolicy
 
 
-class WelcomeController:
+class TUI(ControllerPolicy):
+    def __init__(self, app):
+        self.app = app
+
+    def finish(self):
+        self.app.log.debug("TUI finish")
+        self.app.controllers['clouds'].render()
+
+    def render(self):
+        self.app.log.debug("TUI render")
+        self.finish()
+
+class GUI(ControllerPolicy):
     def __init__(self, app):
         self.app = app
         self.view = WelcomeView(self.app, self.finish)
@@ -31,6 +44,7 @@ class WelcomeController:
             self.app.controllers['jujucontroller'].render()
 
     def render(self):
+        self.app.log.debug("Rendering GUI controller for Welcome")
         pollinate(self.app.session_id, 'W001', self.app.log)
         config = self.app.config
         self.app.ui.set_header(
@@ -38,3 +52,11 @@ class WelcomeController:
             excerpt=config['excerpt'],
         )
         self.app.ui.set_body(self.view)
+
+
+class WelcomeController:
+    def __new__(cls, app):
+        if app.argv.headless:
+            return TUI(app)
+        else:
+            return GUI(app)

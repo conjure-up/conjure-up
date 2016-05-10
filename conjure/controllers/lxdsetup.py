@@ -2,12 +2,21 @@ from conjure.ui.views.lxdsetup import LXDSetupView
 from conjure.utils import pollinate, spew
 from conjure.shell import shell
 from tempfile import NamedTemporaryFile
+from conjure.controllers.policy import ControllerPolicy
 
 
-class LXDSetupController:
-    """ Renders a LXD bridge configuration view
-    """
+class TUI(ControllerPolicy):
+    def __init__(self, app):
+        self.app = app
 
+    def finish(self):
+        self.app.log.debug("TUI finish")
+
+    def render(self):
+        self.app.log.debug("TUI render")
+
+
+class GUI(ControllerPolicy):
     def __init__(self, app):
         self.app = app
 
@@ -85,3 +94,13 @@ class LXDSetupController:
             title="Setup LXD Bridge",
         )
         self.app.ui.set_body(self.view)
+
+
+class LXDSetupController:
+    """ Renders a LXD bridge configuration view
+    """
+    def __new__(cls, app):
+        if app.argv.headless:
+            return TUI(app)
+        else:
+            return GUI(app)

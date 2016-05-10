@@ -3,6 +3,7 @@ from conjure.charm import get_bundle
 from conjure.models.bundle import BundleModel
 from conjure.utils import pollinate
 from conjure.juju import Juju, current_controller
+from conjure.controllers.policy import ControllerPolicy
 
 from bundleplacer.config import Config
 from bundleplacer.maas import connect_to_maas
@@ -10,8 +11,18 @@ from bundleplacer.placerview import PlacerView
 from bundleplacer.controller import PlacementController, BundleWriter
 
 
-class DeployController:
+class TUI(ControllerPolicy):
+    def __init__(self, app):
+        self.app = app
 
+    def finish(self):
+        self.app.log.debug("TUI finish")
+
+    def render(self):
+        self.app.log.debug("TUI render")
+
+
+class GUI(ControllerPolicy):
     def __init__(self, app):
         self.app = app
         self.placement_controller = None
@@ -114,3 +125,11 @@ class DeployController:
                 mainview.update()
             except Exception as e:
                 return self.app.ui.show_exception_message(e)
+
+
+class DeployController:
+    def __new__(cls, app):
+        if app.argv.headless:
+            return TUI(app)
+        else:
+            return GUI(app)

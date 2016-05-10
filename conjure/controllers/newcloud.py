@@ -5,12 +5,21 @@ from configobj import ConfigObj
 import os.path as path
 import yaml
 import petname
+from conjure.controllers.policy import ControllerPolicy
 
 
-class NewCloudController:
-    """ Renders an input view for defining selected clouds credentials
-    """
+class TUI(ControllerPolicy):
+    def __init__(self, app):
+        self.app = app
 
+    def finish(self):
+        self.app.log.debug("TUI finish")
+
+    def render(self):
+        self.app.log.debug("TUI render")
+
+
+class GUI(ControllerPolicy):
     def __init__(self, app):
         self.app = app
 
@@ -122,3 +131,13 @@ class NewCloudController:
             title="New cloud setup",
         )
         self.app.ui.set_body(self.view)
+
+
+class NewCloudController:
+    """ Renders an input view for defining selected clouds credentials
+    """
+    def __new__(cls, app):
+        if app.argv.headless:
+            return TUI(app)
+        else:
+            return GUI(app)

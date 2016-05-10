@@ -166,10 +166,13 @@ class Application:
             self.app.controllers['welcome'].render()
 
     def start(self):
-        EventLoop.build_loop(self.app.ui, STYLES,
-                             unhandled_input=self.unhandled_input)
-        EventLoop.set_alarm_in(0.05, self._start)
-        EventLoop.run()
+        if self.app.argv.headless:
+            self._start()
+        else:
+            EventLoop.build_loop(self.app.ui, STYLES,
+                                 unhandled_input=self.unhandled_input)
+            EventLoop.set_alarm_in(0.05, self._start)
+            EventLoop.run()
 
 
 def parse_options(argv):
@@ -179,8 +182,8 @@ def parse_options(argv):
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug',
                         help='Enable debug logging.')
-    parser.add_argument('-y', action='store_true',
-                        help='Do not prompt during conjuring')
+    parser.add_argument('-y', action='store_true', dest='headless',
+                        help='Do not prompt during conjuring', default=False)
     parser.add_argument('-s', '--status', action='store_true',
                         dest='status_only',
                         help='Display the summary of the conjuring')
