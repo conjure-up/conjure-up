@@ -1,9 +1,8 @@
 from conjure.ui.views.deploy_summary import DeploySummaryView
 from conjure.utils import pollinate
-from conjure.controllers.policy import ControllerPolicy
 
 
-class TUI(ControllerPolicy):
+class TUI:
     def __init__(self, app):
         self.app = app
 
@@ -14,7 +13,7 @@ class TUI(ControllerPolicy):
         self.app.log.debug("TUI render")
 
 
-class GUI(ControllerPolicy):
+class GUI:
     def __init__(self, app):
         self.app = app
 
@@ -48,9 +47,8 @@ class GUI(ControllerPolicy):
         pollinate(self.app.session_id, 'SS', self.app.log)
 
 
-class DeploySummaryController:
-    def __new__(cls, app):
-        if app.argv.headless:
-            return TUI(app)
-        else:
-            return GUI(app)
+def load_deploysummary_controller(app):
+    if app.argv.headless:
+        return TUI(app)
+    else:
+        return GUI(app)

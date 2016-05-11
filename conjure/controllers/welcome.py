@@ -2,10 +2,9 @@ from conjure.ui.views.welcome import WelcomeView
 from conjure.models.bundle import BundleModel
 from conjure.juju import Juju
 from conjure.utils import pollinate
-from conjure.controllers.policy import ControllerPolicy
 
 
-class TUI(ControllerPolicy):
+class TUI:
     def __init__(self, app):
         self.app = app
 
@@ -17,7 +16,8 @@ class TUI(ControllerPolicy):
         self.app.log.debug("TUI render")
         self.finish()
 
-class GUI(ControllerPolicy):
+
+class GUI:
     def __init__(self, app):
         self.app = app
         self.view = WelcomeView(self.app, self.finish)
@@ -54,9 +54,8 @@ class GUI(ControllerPolicy):
         self.app.ui.set_body(self.view)
 
 
-class WelcomeController:
-    def __new__(cls, app):
-        if app.argv.headless:
-            return TUI(app)
-        else:
-            return GUI(app)
+def load_welcome_controller(app):
+    if app.argv.headless:
+        return TUI(app)
+    else:
+        return GUI(app)

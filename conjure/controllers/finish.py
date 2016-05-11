@@ -9,10 +9,9 @@ import os.path as path
 import os
 import json
 from subprocess import run, PIPE
-from conjure.controllers.policy import ControllerPolicy
 
 
-class TUI(ControllerPolicy):
+class TUI:
     def __init__(self, app):
         self.app = app
 
@@ -23,7 +22,7 @@ class TUI(ControllerPolicy):
         self.app.log.debug("TUI render")
 
 
-class GUI(ControllerPolicy):
+class GUI:
     def __init__(self, app):
         self.app = app
 
@@ -231,9 +230,8 @@ class GUI(ControllerPolicy):
         EventLoop.set_alarm_in(1, self.refresh)
 
 
-class FinishController:
-    def __new__(cls, app):
-        if app.argv.headless:
-            return TUI(app)
-        else:
-            return GUI(app)
+def load_finish_controller(app):
+    if app.argv.headless:
+        return TUI(app)
+    else:
+        return GUI(app)

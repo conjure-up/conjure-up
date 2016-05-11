@@ -10,10 +10,9 @@ import os
 from subprocess import check_output
 import json
 import petname
-from conjure.controllers.policy import ControllerPolicy
 
 
-class TUI(ControllerPolicy):
+class TUI:
     def __init__(self, app):
         self.app = app
 
@@ -24,7 +23,7 @@ class TUI(ControllerPolicy):
         self.app.log.debug("TUI render")
 
 
-class GUI(ControllerPolicy):
+class GUI:
     def __init__(self, app):
         self.app = app
         self.cloud = None
@@ -169,9 +168,8 @@ class GUI(ControllerPolicy):
         self.app.ui.set_body(self.view)
 
 
-class JujuControllerController:
-    def __new__(cls, app):
-        if app.argv.headless:
-            return TUI(app)
-        else:
-            return GUI(app)
+def load_jujucontroller_controller(app):
+    if app.argv.headless:
+        return TUI(app)
+    else:
+        return GUI(app)
