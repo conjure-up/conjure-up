@@ -134,15 +134,13 @@ def pollinate(session, tag, log):
     tag: custom tag
     log: logger
     """
-    if not os.path.isfile('/usr/bin/pollinate'):
-        log.warning("pollinate binary not found")
-        return
     agent_str = 'conjure/{}/{}'.format(session, tag)
 
     def do_pollinate():
         try:
-            cmd = ("sudo su - -c 'pollinate -q -r --curl-opts "
-                   "\"-k --user-agent {}\"' > /dev/null 2>&1".format(
+            cmd = ("curl -A {} --connect-timeout 3 --max-time 3 "
+                   "--data /dev/null https://entropy.ubuntu.com "
+                   "> /dev/null 2>&1".format(
                        agent_str))
             log.debug("pollinate: {}".format(cmd))
             check_call(cmd, shell=True)
