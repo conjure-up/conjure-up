@@ -49,18 +49,21 @@ def get_remote_url(path):
     Returns:
     The remote url if exists otherwise None.
     """
-    if path.endswith(".zip"):
-        if os.path.isfile(path):
-            # Path is a local bundle just return it
-            return path
-        elif path.startswith("http") and remote_exists(path):
+    if path.startswith("http") and path.endswith(".zip"):
+        if remote_exists(path):
             # Path is a full URL to an archived zip
             return path
+
+    if path.startswith("~"):
+        namespace, bundle = path.split("/")
+        url = ("https://api.jujucharms.com/charmstore/v5"
+               "/{}/bundle/{}/archive".format(namespace, bundle))
+        return url
 
     remotes = [
         "https://github.com/{}/archive/master.zip".format(path),
         "https://bitbucket.org/{}/get/master.zip".format(path),
-        "https://api.jujucharms.com/charmstore/v5/{}/archive".format(path)
+        "https://api.jujucharms.com/charmstore/v5/{}/archive".format(path),
     ]
     for r in remotes:
         if remote_exists(r):

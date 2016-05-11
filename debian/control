@@ -18,7 +18,6 @@ Build-Depends: debhelper (>= 9),
                python3-setuptools,
                python3-urwid,
                python3-ws4py,
-               python3-toml,
                python3-yaml
 Standards-Version: 3.9.7
 Homepage: https://github.com/Ubuntu-Solutions-Engineering/conjure
@@ -28,7 +27,8 @@ Vcs-Git: https://github.com/Ubuntu-Solutions-Engineering/conjure.git
 
 Package: conjure-up
 Architecture: all
-Depends: jq,
+Depends: bsdtar,
+         jq,
          juju (>= 2.0~),
          lxd,
          lxd-client,
@@ -42,8 +42,6 @@ Depends: jq,
          python3-urwid,
          python3-ws4py,
          python3-yaml,
-         python3-toml,
-         bsdtar,
          rsyslog,
          ${misc:Depends},
          ${python3:Depends},

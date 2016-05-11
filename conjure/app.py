@@ -19,8 +19,8 @@ from conjure.controllers.jujucontroller import load_jujucontroller_controller
 from conjure.controllers.bootstrapwait import load_bootstrapwait_controller
 from conjure.controllers.lxdsetup import load_lxdsetup_controller
 from conjure.log import setup_logging
+from configobj import ConfigObj
 import json
-import toml
 import sys
 import argparse
 import os
@@ -211,18 +211,17 @@ def main():
         print(e)
         sys.exit(1)
 
-    with open('/etc/conjure.toml') as fp:
-        global_conf = toml.loads(fp.read())
+    global_conf = ConfigObj('/etc/conjure-up.conf')
 
     if spell in global_conf['curated_spells']:
-        metadata = path.join('/usr/share', spell, 'metadata.toml')
+        metadata = path.join('/usr/share', spell, 'metadata.json')
 
         if not path.exists(metadata):
             os.execl("/usr/share/conjure-up/do-apt-install",
                      "/usr/share/conjure-up/do-apt-install",
                      spell)
         with open(metadata) as fp:
-            metadata = toml.loads(fp.read())
+            metadata = json.load(fp)
 
     else:
         # Check cache dir for spells
@@ -230,21 +229,20 @@ def main():
             os.path.expanduser('~'),
             '.cache/conjure-up', spell))
 
-        if not path.isdir(spell_dir):
-            os.makedirs(spell_dir)
-
-        metadata = os.path.join(spell_dir, 'craft/metadata.toml')
+        metadata = os.path.join(spell_dir, 'craft/metadata.json')
         if not path.exists(metadata):
             remote = get_remote_url(opts.spell)
             if remote is not None:
-                print("Downloading spell from: {}".format(remote))
+                if not path.isdir(spell_dir):
+                    os.makedirs(spell_dir)
+                print("Downloading spell: {}".format(spell))
                 download(remote, spell_dir)
             else:
                 print("Could not find spell: {}".format(spell))
                 sys.exit(1)
         else:
             with open(metadata) as fp:
-                metadata = toml.loads(fp.read())
+                metadata = json.load(fp)
 
     app = Application(opts, spell, metadata)
     app.start()
