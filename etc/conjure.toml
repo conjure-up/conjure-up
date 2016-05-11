@@ -1,0 +1,2 @@
+# List of spells available from the Ubuntu archive
+curated_spells = ["openstack", "bigdata"]

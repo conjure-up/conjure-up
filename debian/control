@@ -18,6 +18,7 @@ Build-Depends: debhelper (>= 9),
                python3-setuptools,
                python3-urwid,
                python3-ws4py,
+               python3-toml,
                python3-yaml
 Standards-Version: 3.9.7
 Homepage: https://github.com/Ubuntu-Solutions-Engineering/conjure
@@ -41,6 +42,8 @@ Depends: jq,
          python3-urwid,
          python3-ws4py,
          python3-yaml,
+         python3-toml,
+         bsdtar,
          rsyslog,
          ${misc:Depends},
          ${python3:Depends},

@@ -7,6 +7,7 @@ from conjure.ui import ConjureUI
 from conjure.juju import Juju
 from conjure import async
 from conjure import __version__ as VERSION
+from conjure.download import download, get_remote_url
 from conjure.models.bundle import BundleModel
 from conjure.controllers.welcome import WelcomeController
 from conjure.controllers.finish import FinishController
@@ -19,6 +20,7 @@ from conjure.controllers.bootstrapwait import BootstrapWaitController
 from conjure.controllers.lxdsetup import LXDSetupController
 from conjure.log import setup_logging
 import json
+import toml
 import sys
 import argparse
 import os
@@ -52,11 +54,8 @@ class ApplicationConfig:
         self.current_controller = self.cache.get('current_controller',
                                                  None)
         # Global session id
-        self.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
-                                    '{}/{}'.format(
-                                        self.argv.spell,
-                                        str(uuid.uuid4())))
-        # Logger
+        self.session_id = None
+        # logger
         self.log = None
         # Environment to pass to processing tasks
         self.env = self.cache.get('env', os.environ.copy())
@@ -115,26 +114,19 @@ class ApplicationConfig:
 
 
 class Application:
-    def __init__(self, argv, pkg_config, metadata):
+    def __init__(self, argv, spell, metadata):
         """ init
 
         Arguments:
         argv: Options passed in from cli
-        pkg_config: path to solution config.json
         metadata: path to solutions metadata.json
         """
         self.app = ApplicationConfig(argv)
-        self.metadata = metadata
-        self.pkg_config = pkg_config
-        with open(self.pkg_config) as json_f:
-            config = json.load(json_f)
-            config['config_filename'] = self.pkg_config
-
-        with open(self.metadata) as json_f:
-            config['metadata_filename'] = path.abspath(self.metadata)
-            config['metadata'] = json.load(json_f)
-
-        self.app.config = config
+        self.app.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
+                                        '{}/{}'.format(
+                                            spell,
+                                            str(uuid.uuid4())))
+        self.app.config = {'metadata': metadata, 'spell': spell}
         self.app.ui = ConjureUI()
 
         self.app.controllers = {
@@ -149,7 +141,7 @@ class Application:
             'finish': FinishController(self.app)
         }
 
-        self.app.log = setup_logging(self.app.config['name'],
+        self.app.log = setup_logging(spell,
                                      self.app.argv.debug)
 
     def unhandled_input(self, key):
@@ -191,6 +183,10 @@ def parse_options(argv):
 
 def main():
     opts = parse_options(sys.argv[1:])
+    if "/" in opts.spell:
+        spell = opts.spell.split("/")[-1]
+    else:
+        spell = opts.spell
 
     if os.geteuid() == 0:
         print("")
@@ -212,13 +208,40 @@ def main():
         print(e)
         sys.exit(1)
 
-    metadata = path.join('/usr/share', opts.spell, 'metadata.json')
-    pkg_config = path.join('/usr/share', opts.spell, 'config.json')
+    with open('/etc/conjure.toml') as fp:
+        global_conf = toml.loads(fp.read())
 
-    if not path.exists(pkg_config) and not path.exists(metadata):
-        os.execl("/usr/share/conjure-up/do-apt-install",
-                 "/usr/share/conjure-up/do-apt-install",
-                 opts.spell)
+    if spell in global_conf['curated_spells']:
+        metadata = path.join('/usr/share', spell, 'metadata.toml')
 
-    app = Application(opts, pkg_config, metadata)
+        if not path.exists(metadata):
+            os.execl("/usr/share/conjure-up/do-apt-install",
+                     "/usr/share/conjure-up/do-apt-install",
+                     spell)
+        with open(metadata) as fp:
+            metadata = toml.loads(fp.read())
+
+    else:
+        # Check cache dir for spells
+        spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
+            os.path.expanduser('~'),
+            '.cache/conjure-up', spell))
+
+        if not path.isdir(spell_dir):
+            os.makedirs(spell_dir)
+
+        metadata = os.path.join(spell_dir, 'craft/metadata.toml')
+        if not path.exists(metadata):
+            remote = get_remote_url(opts.spell)
+            if remote is not None:
+                print("Downloading spell from: {}".format(remote))
+                download(remote, spell_dir)
+            else:
+                print("Could not find spell: {}".format(spell))
+                sys.exit(1)
+        else:
+            with open(metadata) as fp:
+                metadata = toml.loads(fp.read())
+
+    app = Application(opts, spell, metadata)
     app.start()
