@@ -1,7 +1,6 @@
 import shutil
 import os
 from subprocess import check_call, CalledProcessError
-from conjure.models.bundle import BundleModel
 from conjure.async import submit
 
 

@@ -4,7 +4,6 @@ from ubuntui.utils import Color, Padding
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.text import Instruction
 from ubuntui.widgets.buttons import cancel_btn, menu_btn, PlainButton
-from conjure.models.bundle import BundleModel
 
 
 class CloudView(WidgetWrap):
