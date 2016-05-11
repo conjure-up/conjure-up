@@ -67,10 +67,21 @@ class DeployController:
         self.app.metadata_controller = MetadataController(
             self.placement_controller, bundleplacer_cfg)
 
-        dwv = ServiceWalkthroughView(self.app,
-                                     self.placement_controller,
-                                     self.finish)
+        self.walkthrough_view = ServiceWalkthroughView(
+            self.app, self, self.placement_controller)
         
         self.app.ui.set_subheader("Service Walkthrough")
-        self.app.ui.set_body(dwv)
-        dwv.update()
+        self.app.ui.set_body(self.walkthrough_view)
+        self.walkthrough_view.update()
+
+    def handle_service_scale_change(self, service, value):
+        ""
+        self.walkthrough_view.handle_service_scale_change(service, value)
+
+    def handle_service_ctype_change(self, service, value):
+        ""
+        self.walkthrough_view.handle_service_ctype_change(service, value)
+
+    def handle_service_deploy(self, service):
+        "TODO: deploy one at a time eventually"
+        self.walkthrough_view.handle_service_deploy(service)
