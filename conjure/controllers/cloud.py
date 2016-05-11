@@ -4,8 +4,18 @@ from conjure.models.bundle import BundleModel
 from conjure.utils import pollinate
 
 
-class CloudController:
+class TUI:
+    def __init__(self, app):
+        self.app = app
 
+    def finish(self):
+        self.app.log.debug("TUI finish")
+
+    def render(self):
+        self.app.log.debug("TUI cloud render")
+
+
+class GUI:
     def __init__(self, app):
         self.app = app
 
@@ -53,3 +63,10 @@ class CloudController:
             excerpt=self.excerpt
         )
         self.app.ui.set_body(self.view)
+
+
+def load_cloud_controller(app):
+    if app.argv.headless:
+        return TUI(app)
+    else:
+        return GUI(app)

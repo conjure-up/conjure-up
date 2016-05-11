@@ -10,8 +10,18 @@ from bundleplacer.placerview import PlacerView
 from bundleplacer.controller import PlacementController, BundleWriter
 
 
-class DeployController:
+class TUI:
+    def __init__(self, app):
+        self.app = app
 
+    def finish(self):
+        self.app.log.debug("TUI finish")
+
+    def render(self):
+        self.app.log.debug("TUI render")
+
+
+class GUI:
     def __init__(self, app):
         self.app = app
         self.placement_controller = None
@@ -114,3 +124,10 @@ class DeployController:
                 mainview.update()
             except Exception as e:
                 return self.app.ui.show_exception_message(e)
+
+
+def load_deploy_controller(app):
+    if app.argv.headless:
+        return TUI(app)
+    else:
+        return GUI(app)

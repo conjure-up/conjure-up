@@ -12,13 +12,19 @@ import json
 import petname
 
 
-class JujuControllerController:
+class TUI:
     def __init__(self, app):
-        """ init
+        self.app = app
 
-        Arguments:
-        app: common dictionary for conjure
-        """
+    def finish(self):
+        self.app.log.debug("TUI finish")
+
+    def render(self):
+        self.app.log.debug("TUI render")
+
+
+class GUI:
+    def __init__(self, app):
         self.app = app
         self.cloud = None
         self.bootstrap = None
@@ -160,3 +166,10 @@ class JujuControllerController:
             title="Juju Model",
         )
         self.app.ui.set_body(self.view)
+
+
+def load_jujucontroller_controller(app):
+    if app.argv.headless:
+        return TUI(app)
+    else:
+        return GUI(app)

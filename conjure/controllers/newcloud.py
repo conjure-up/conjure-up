@@ -7,10 +7,18 @@ import yaml
 import petname
 
 
-class NewCloudController:
-    """ Renders an input view for defining selected clouds credentials
-    """
+class TUI:
+    def __init__(self, app):
+        self.app = app
 
+    def finish(self):
+        self.app.log.debug("TUI finish")
+
+    def render(self):
+        self.app.log.debug("TUI render")
+
+
+class GUI:
     def __init__(self, app):
         self.app = app
 
@@ -122,3 +130,10 @@ class NewCloudController:
             title="New cloud setup",
         )
         self.app.ui.set_body(self.view)
+
+
+def load_newcloud_controller(app):
+    if app.argv.headless:
+        return TUI(app)
+    else:
+        return GUI(app)

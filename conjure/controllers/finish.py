@@ -11,12 +11,26 @@ import json
 from subprocess import run, PIPE
 
 
-class FinishController:
-
+class TUI:
     def __init__(self, app):
         self.app = app
+
+    def finish(self):
+        self.app.log.debug("TUI finish")
+
+    def render(self):
+        self.app.log.debug("TUI render")
+
+
+class GUI:
+    def __init__(self, app):
+        self.app = app
+
         self._post_exec_pollinate = False
         self._pre_exec_pollinate = False
+
+    def finish(self):
+        pass
 
     def handle_exception(self, tag, exc):
         pollinate(self.app.session_id, tag, self.app.log)
@@ -214,3 +228,10 @@ class FinishController:
             EventLoop.set_alarm_in(1, self._post_exec)
             self.app.ui.set_footer('')
         EventLoop.set_alarm_in(1, self.refresh)
+
+
+def load_finish_controller(app):
+    if app.argv.headless:
+        return TUI(app)
+    else:
+        return GUI(app)

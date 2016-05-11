@@ -8,15 +8,15 @@ from conjure.juju import Juju
 from conjure import async
 from conjure import __version__ as VERSION
 from conjure.models.bundle import BundleModel
-from conjure.controllers.welcome import WelcomeController
-from conjure.controllers.finish import FinishController
-from conjure.controllers.deploysummary import DeploySummaryController
-from conjure.controllers.deploy import DeployController
-from conjure.controllers.cloud import CloudController
-from conjure.controllers.newcloud import NewCloudController
-from conjure.controllers.jujucontroller import JujuControllerController
-from conjure.controllers.bootstrapwait import BootstrapWaitController
-from conjure.controllers.lxdsetup import LXDSetupController
+from conjure.controllers.welcome import load_welcome_controller
+from conjure.controllers.finish import load_finish_controller
+from conjure.controllers.deploysummary import load_deploysummary_controller
+from conjure.controllers.deploy import load_deploy_controller
+from conjure.controllers.cloud import load_cloud_controller
+from conjure.controllers.newcloud import load_newcloud_controller
+from conjure.controllers.jujucontroller import load_jujucontroller_controller
+from conjure.controllers.bootstrapwait import load_bootstrapwait_controller
+from conjure.controllers.lxdsetup import load_lxdsetup_controller
 from conjure.log import setup_logging
 import json
 import sys
@@ -138,15 +138,15 @@ class Application:
         self.app.ui = ConjureUI()
 
         self.app.controllers = {
-            'welcome': WelcomeController(self.app),
-            'clouds': CloudController(self.app),
-            'newcloud': NewCloudController(self.app),
-            'lxdsetup': LXDSetupController(self.app),
-            'bootstrapwait': BootstrapWaitController(self.app),
-            'deploy': DeployController(self.app),
-            'deploysummary': DeploySummaryController(self.app),
-            'jujucontroller': JujuControllerController(self.app),
-            'finish': FinishController(self.app)
+            'welcome': load_welcome_controller(self.app),
+            'clouds': load_cloud_controller(self.app),
+            'newcloud': load_newcloud_controller(self.app),
+            'lxdsetup': load_lxdsetup_controller(self.app),
+            'bootstrapwait': load_bootstrapwait_controller(self.app),
+            'deploy': load_deploy_controller(self.app),
+            'deploysummary': load_deploysummary_controller(self.app),
+            'jujucontroller': load_jujucontroller_controller(self.app),
+            'finish': load_finish_controller(self.app)
         }
 
         self.app.log = setup_logging(self.app.config['name'],
@@ -166,10 +166,13 @@ class Application:
             self.app.controllers['welcome'].render()
 
     def start(self):
-        EventLoop.build_loop(self.app.ui, STYLES,
-                             unhandled_input=self.unhandled_input)
-        EventLoop.set_alarm_in(0.05, self._start)
-        EventLoop.run()
+        if self.app.argv.headless:
+            self._start()
+        else:
+            EventLoop.build_loop(self.app.ui, STYLES,
+                                 unhandled_input=self.unhandled_input)
+            EventLoop.set_alarm_in(0.05, self._start)
+            EventLoop.run()
 
 
 def parse_options(argv):
@@ -179,8 +182,8 @@ def parse_options(argv):
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug',
                         help='Enable debug logging.')
-    parser.add_argument('-y', action='store_true',
-                        help='Do not prompt during conjuring')
+    parser.add_argument('-y', action='store_true', dest='headless',
+                        help='Do not prompt during conjuring', default=False)
     parser.add_argument('-s', '--status', action='store_true',
                         dest='status_only',
                         help='Display the summary of the conjuring')
