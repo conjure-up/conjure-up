@@ -34,9 +34,10 @@ class ServiceWalkthroughView(WidgetWrap):
                 Instruction(
                     "Services")),
             Padding.center_90(HR()),
-            Padding.center_90(self.continue_button),
-            Padding.center_90(Pile(self.walkthrough_widgets)),
-        ]
+            Padding.center_90(self.continue_button)] + \
+            [Padding.center_70(w) for w in
+             self.walkthrough_widgets]
+
         return Filler(Pile(_pile), valign="top")
 
     def build_walkthrough_widgets(self):
