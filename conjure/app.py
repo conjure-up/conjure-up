@@ -229,7 +229,7 @@ def main():
             os.path.expanduser('~'),
             '.cache/conjure-up', spell))
 
-        metadata = os.path.join(spell_dir, 'craft/metadata.json')
+        metadata = os.path.join(spell_dir, 'conjure/metadata.json')
         if not path.exists(metadata):
             remote = get_remote_url(opts.spell)
             if remote is not None:
