@@ -1,5 +1,6 @@
 import shutil
 import os
+from termcolor import colored
 from subprocess import check_call, CalledProcessError
 from conjure.async import submit
 
@@ -8,6 +9,16 @@ class UtilsException(Exception):
     """ Error in utils
     """
     pass
+
+
+def info(msg):
+    prefix = colored('[info]', 'green', attrs=['bold'])
+    print("{} {}".format(prefix, msg))
+
+
+def warning(msg):
+    prefix = colored('[warning]', 'red', attrs=['bold'])
+    print("{} {}".format(prefix, msg))
 
 
 def install_home():

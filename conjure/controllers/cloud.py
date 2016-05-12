@@ -1,6 +1,6 @@
 from conjure.ui.views.cloud import CloudView
 from conjure.juju import Juju
-from conjure.utils import pollinate
+from conjure.utils import pollinate, info, warning
 import sys
 
 
@@ -13,9 +13,9 @@ class TUI:
 
     def render(self):
         if self.app.argv.cloud not in Juju.clouds().keys():
-            print("Unknown Public Cloud: {}".format(self.app.argv.cloud))
+            warning("Unknown Cloud: {}".format(self.app.argv.cloud))
             sys.exit(1)
-        print(
+        info(
             "Deploying to: {}".format(self.app.argv.cloud))
 
 

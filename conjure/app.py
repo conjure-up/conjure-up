@@ -6,6 +6,7 @@ from ubuntui.palette import STYLES
 from conjure.ui import ConjureUI
 from conjure.juju import Juju
 from conjure import async
+from conjure import utils
 from conjure import __version__ as VERSION
 from conjure.download import download, get_remote_url
 from conjure.models.bundle import BundleModel
@@ -129,7 +130,7 @@ class Application:
         self.app.log = setup_logging(spell,
                                      self.app.argv.debug)
 
-        if self.app.argv.cloud:
+        if hasattr(self.app.argv, 'cloud'):
             self.app.headless = True
 
         self.app.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
@@ -203,23 +204,23 @@ def main():
         spell = opts.spell
 
     if os.geteuid() == 0:
-        print("")
-        print("This should _not_ be run as root or with sudo.")
-        print("")
+        utils.info("")
+        utils.info("This should _not_ be run as root or with sudo.")
+        utils.info("")
         sys.exit(1)
 
     try:
         docs_url = "https://jujucharms.com/docs/stable/getting-started"
         juju_version = Juju.version()
         if int(juju_version[0]) < 2:
-            print(
+            utils.warning(
                 "Only Juju v2 and above is supported, "
                 "your currently installed version is {}.\n\n"
                 "Please refer to {} for help on installing "
                 "the correct Juju.".format(juju_version, docs_url))
             sys.exit(1)
     except Exception as e:
-        print(e)
+        utils.warning(e)
         sys.exit(1)
 
     global_conf = ConfigObj('/etc/conjure-up.conf')
@@ -246,10 +247,10 @@ def main():
             if remote is not None:
                 if not path.isdir(spell_dir):
                     os.makedirs(spell_dir)
-                print("Downloading spell: {}".format(spell))
+                utils.info("Downloading spell: {}".format(spell))
                 download(remote, spell_dir)
             else:
-                print("Could not find spell: {}".format(spell))
+                utils.warning("Could not find spell: {}".format(spell))
                 sys.exit(1)
         else:
             with open(metadata_path) as fp:
