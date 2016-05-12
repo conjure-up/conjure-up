@@ -231,7 +231,7 @@ class GUI:
 
 
 def load_finish_controller(app):
-    if app.argv.headless:
+    if app.headless:
         return TUI(app)
     else:
         return GUI(app)

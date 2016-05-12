@@ -3,8 +3,13 @@
 
 # what it is
 
-This is the runtime application for processing juju bundles/charms for easier
-installation via `apt-get install` and an install wizard.
+Ever wanted to get started with Kubernetes, Deep Learning, Big Data but didn't want
+to go through pages and pages of "Getting Started" documentation?
+
+Then **conjure-up** is for you!
+
+This is the runtime application for processing spells to get those **big software**
+solutions up and going with as little hindrance as possible.
 
 # how to use
 
@@ -18,9 +23,27 @@ $ sudo apt update
 $ sudo apt install conjure-up
 ```
 
-### Run the installer
+### Run the installer interactively
+
+You may want to learn a little bit about what you're installing, right? This
+method provides you with a tutorial like approach without being overburdening.
+
+You can read through descriptions of the software along with ability to set a
+few config options before deploying. Or, just hold down the enter button and
+it'll choose sensible defaults for you.
+
 ```
 $ conjure-up openstack
+```
+
+### Run the installer non-interactively (headless mode)
+
+Already been through the guided tour? Not keen on holding down the enter button
+on your keyboard? Not a problem, easily get your **big software** up and running
+with all the sensible defaults in place.
+
+```
+$ conjure-up bigdata to azure
 ```
 
 # license

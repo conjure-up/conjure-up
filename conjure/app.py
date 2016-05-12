@@ -9,7 +9,7 @@ from conjure import async
 from conjure import __version__ as VERSION
 from conjure.download import download, get_remote_url
 from conjure.models.bundle import BundleModel
-from conjure.controllers.welcome import load_welcome_controller
+from conjure.controllers.variant import load_variant_controller
 from conjure.controllers.finish import load_finish_controller
 from conjure.controllers.deploysummary import load_deploysummary_controller
 from conjure.controllers.deploy import load_deploy_controller
@@ -62,6 +62,9 @@ class ApplicationConfig:
 
         # Is application deployment complete
         self.complete = self.cache.get('complete', False)
+
+        # This is a headless install
+        self.headless = False
 
     def save(self):
         """ Create a cache of the current deployment containing the following
@@ -122,16 +125,24 @@ class Application:
         metadata: path to solutions metadata.json
         """
         self.app = ApplicationConfig(argv)
+
+        self.app.log = setup_logging(spell,
+                                     self.app.argv.debug)
+
+        if self.app.argv.cloud:
+            self.app.headless = True
+
         self.app.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
                                         '{}/{}'.format(
                                             spell,
                                             str(uuid.uuid4())))
-        self.app.config = {'metadata': metadata, 'spell': spell}
+        self.app.config = {'metadata': metadata,
+                           'spell': spell}
         self.app.ui = ConjureUI()
 
         self.app.controllers = {
-            'welcome': load_welcome_controller(self.app),
             'clouds': load_cloud_controller(self.app),
+            'welcome': load_variant_controller(self.app),
             'newcloud': load_newcloud_controller(self.app),
             'lxdsetup': load_lxdsetup_controller(self.app),
             'bootstrapwait': load_bootstrapwait_controller(self.app),
@@ -140,9 +151,6 @@ class Application:
             'jujucontroller': load_jujucontroller_controller(self.app),
             'finish': load_finish_controller(self.app)
         }
-
-        self.app.log = setup_logging(spell,
-                                     self.app.argv.debug)
 
     def unhandled_input(self, key):
         if key in ['q', 'Q']:
@@ -155,10 +163,10 @@ class Application:
         if self.app.argv.status_only:
             self.app.controllers['finish'].render(bundle=None)
         else:
-            self.app.controllers['welcome'].render()
+            self.app.controllers['clouds'].render()
 
     def start(self):
-        if self.app.argv.headless:
+        if self.app.headless:
             self._start()
         else:
             EventLoop.build_loop(self.app.ui, STYLES,
@@ -174,13 +182,16 @@ def parse_options(argv):
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug',
                         help='Enable debug logging.')
-    parser.add_argument('-y', action='store_true', dest='headless',
-                        help='Do not prompt during conjuring', default=False)
     parser.add_argument('-s', '--status', action='store_true',
                         dest='status_only',
                         help='Display the summary of the conjuring')
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
+
+    subparsers = parser.add_subparsers(help='sub-command help')
+    parse_to = subparsers.add_parser('to',
+                                     help='Indicate which cloud to deploy to')
+    parse_to.add_argument('cloud', help='Name of a public cloud')
     return parser.parse_args(argv)
 
 
@@ -229,8 +240,8 @@ def main():
             os.path.expanduser('~'),
             '.cache/conjure-up', spell))
 
-        metadata = os.path.join(spell_dir, 'conjure/metadata.json')
-        if not path.exists(metadata):
+        metadata_path = os.path.join(spell_dir, 'conjure/metadata.json')
+        if not path.exists(metadata_path):
             remote = get_remote_url(opts.spell)
             if remote is not None:
                 if not path.isdir(spell_dir):
@@ -241,7 +252,7 @@ def main():
                 print("Could not find spell: {}".format(spell))
                 sys.exit(1)
         else:
-            with open(metadata) as fp:
+            with open(metadata_path) as fp:
                 metadata = json.load(fp)
 
     app = Application(opts, spell, metadata)

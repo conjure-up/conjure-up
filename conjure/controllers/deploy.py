@@ -127,7 +127,7 @@ class GUI:
 
 
 def load_deploy_controller(app):
-    if app.argv.headless:
+    if app.headless:
         return TUI(app)
     else:
         return GUI(app)

@@ -133,7 +133,7 @@ class GUI:
 
 
 def load_newcloud_controller(app):
-    if app.argv.headless:
+    if app.headless:
         return TUI(app)
     else:
         return GUI(app)

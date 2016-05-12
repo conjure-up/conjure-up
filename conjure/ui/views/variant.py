@@ -8,7 +8,7 @@ from ubuntui.ev import EventLoop
 from conjure.utils import pollinate
 
 
-class WelcomeView(WidgetWrap):
+class VariantView(WidgetWrap):
     def __init__(self, app, cb):
         self.app = app
         self.cb = cb

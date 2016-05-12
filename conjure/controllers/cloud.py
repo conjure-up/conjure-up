@@ -1,7 +1,7 @@
 from conjure.ui.views.cloud import CloudView
 from conjure.juju import Juju
-from conjure.models.bundle import BundleModel
 from conjure.utils import pollinate
+import sys
 
 
 class TUI:
@@ -12,7 +12,11 @@ class TUI:
         self.app.log.debug("TUI finish")
 
     def render(self):
-        self.app.log.debug("TUI cloud render")
+        if self.app.argv.cloud not in Juju.clouds().keys():
+            print("Unknown Public Cloud: {}".format(self.app.argv.cloud))
+            sys.exit(1)
+        print(
+            "Deploying to: {}".format(self.app.argv.cloud))
 
 
 class GUI:
@@ -24,12 +28,12 @@ class GUI:
         """
         clouds = set(Juju.clouds().keys())
 
-        if BundleModel.whitelist():
-            whitelist = set(BundleModel.whitelist())
+        if 'cloud_whitelist' in self.app.config['metadata']:
+            whitelist = set(self.app.config['metadata']['cloud_whitelist'])
             return sorted(list(clouds & whitelist))
 
-        elif BundleModel.blacklist():
-            blacklist = set(BundleModel.blacklist())
+        elif 'cloud_blacklist' in self.app.config['metadata']:
+            blacklist = set(self.app.config['metadata']['cloud_blacklist'])
             return sorted(list(clouds ^ blacklist))
 
         return sorted(list(clouds))
@@ -66,7 +70,7 @@ class GUI:
 
 
 def load_cloud_controller(app):
-    if app.argv.headless:
+    if app.headless:
         return TUI(app)
     else:
         return GUI(app)
