@@ -43,7 +43,7 @@ on your keyboard? Not a problem, easily get your **big software** up and running
 with all the sensible defaults in place.
 
 ```
-$ conjure-up bigdata to azure
+$ conjure-up ~containers/observable-kubernetes to azure
 ```
 
 # license
