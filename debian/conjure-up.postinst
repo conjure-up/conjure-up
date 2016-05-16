@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+if [ ! -d /var/log/conjure-up ]; then
+        mkdir /var/log/conjure-up
+fi
+chown syslog:syslog /var/log/conjure-up
+
+ln -sf /usr/share/conjure-up/conjure-up-rsyslog.conf /etc/rsyslog.d/99-conjure-up.conf
+
+invoke-rc.d rsyslog restart
+
+#DEBHELPER#

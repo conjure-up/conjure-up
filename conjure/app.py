@@ -127,7 +127,7 @@ class Application:
         """
         self.app = ApplicationConfig(argv)
 
-        self.app.log = setup_logging(spell,
+        self.app.log = setup_logging("conjure-up/{}".format(spell),
                                      self.app.argv.debug)
 
         if hasattr(self.app.argv, 'cloud'):

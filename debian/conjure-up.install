@@ -1,2 +1,3 @@
+conjure-up-rsyslog.conf        usr/share/conjure-up
 etc/*
 share/*                        usr/share/conjure-up/.

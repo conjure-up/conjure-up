@@ -99,6 +99,7 @@ class MetadataController:
         self.iface_info = {}
         self.metadata_future = None
         self.metadata_future_lock = RLock()
+        self.info_callbacks = []
         self.charms_providing_iface = defaultdict(list)
         self.charms_requiring_iface = defaultdict(list)
         self.get_recommended_charm_names()
@@ -135,6 +136,7 @@ class MetadataController:
                                           self.handle_search_error)
             if done_cb:
                 self.metadata_future.add_done_callback(done_cb)
+            self.metadata_future.add_done_callback(self.handle_load_done)
 
     def _do_load(self, charm_names_or_sources):
         ids = []
@@ -189,6 +191,13 @@ class MetadataController:
             return True
         return self.metadata_future.done()
 
+    def handle_load_done(self, future):
+        for charm_name, cb in self.info_callbacks:
+            try:
+                cb(self.charm_info[charm_name])
+            except:
+                pass
+
     def add_charm(self, charm_name):
         if charm_name not in self.charm_info:
             self.load([charm_name])
@@ -203,8 +212,9 @@ class MetadataController:
             return []
         return self.iface_info[charm_name]['requires']
 
-    def get_charm_info(self, charm_name):
+    def get_charm_info(self, charm_name, cb):
         if not self.loaded():
+            self.info_callbacks.append((charm_name, cb))
             return None
         return self.charm_info[charm_name]
 
