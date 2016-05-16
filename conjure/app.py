@@ -143,7 +143,7 @@ class Application:
 
         self.app.controllers = {
             'clouds': load_cloud_controller(self.app),
-            'welcome': load_variant_controller(self.app),
+            'variants': load_variant_controller(self.app),
             'newcloud': load_newcloud_controller(self.app),
             'lxdsetup': load_lxdsetup_controller(self.app),
             'bootstrapwait': load_bootstrapwait_controller(self.app),
@@ -159,9 +159,9 @@ class Application:
             EventLoop.exit(0)
 
     def _start(self, *args, **kwargs):
-        """ Initially load the welcome screen
+        """ Initially load cloud selection screen
         """
-        if self.app.argv.status_only:
+        if self.app.complete:
             self.app.controllers['finish'].render(bundle=None)
         else:
             self.app.controllers['clouds'].render()
@@ -225,18 +225,21 @@ def main():
 
     global_conf_file = '/etc/conjure-up.conf'
     if not os.path.exists(global_conf_file):
-        global_conf_file = os.path.join(os.path.dirname(sys.argv[0]), 'etc', 'conjure-up.conf')
+        global_conf_file = os.path.join(
+            os.path.dirname(sys.argv[0]), 'etc', 'conjure-up.conf')
     global_conf = ConfigObj(global_conf_file)
 
+    metadata = {'spell-dir': None}
     if spell in global_conf['curated_spells']:
-        metadata = path.join('/usr/share', spell, 'metadata.json')
+        metadata_path = path.join('/usr/share', spell, 'metadata.json')
+        metadata['spell-dir'] = os.path.dirname(metadata_path)
 
-        if not path.exists(metadata):
+        if not path.exists(metadata_path):
             os.execl("/usr/share/conjure-up/do-apt-install",
                      "/usr/share/conjure-up/do-apt-install",
                      spell)
-        with open(metadata) as fp:
-            metadata = json.load(fp)
+        with open(metadata_path) as fp:
+            metadata.update(json.load(fp))
 
     else:
         # Check cache dir for spells
@@ -245,6 +248,7 @@ def main():
             '.cache/conjure-up', spell))
 
         metadata_path = os.path.join(spell_dir, 'conjure/metadata.json')
+        metadata['spell-dir'] = os.path.dirname(metadata_path)
         if not path.exists(metadata_path):
             remote = get_remote_url(opts.spell)
             if remote is not None:
@@ -257,7 +261,7 @@ def main():
                 sys.exit(1)
         else:
             with open(metadata_path) as fp:
-                metadata = json.load(fp)
+                metadata.update(json.load(fp))
 
     app = Application(opts, spell, metadata)
     app.start()
