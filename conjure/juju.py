@@ -109,7 +109,7 @@ def bootstrap(controller, cloud, series="xenial", log=None):
     """
     cmd = "juju bootstrap {} {} --upload-tools " \
           "--config image-stream=daily ".format(
-              controller, cloud, series)
+              controller, cloud)
     cmd += "--bootstrap-series={} ".format(series)
     if cloud != "localhost":
         cmd += "--credential {}".format(controller)
