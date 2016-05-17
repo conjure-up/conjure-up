@@ -2,6 +2,7 @@
 """
 from conjure import async
 from conjure.utils import juju_path
+from conjure.app_config import app
 from functools import wraps, partial
 from macumba.errors import LoginError
 from macumba.v2 import JujuClient
@@ -96,7 +97,7 @@ def login(force=False):
     this.IS_AUTHENTICATED = True  # noqa
 
 
-def bootstrap(controller, cloud, series="xenial", log=None):
+def bootstrap(controller, cloud, series="xenial"):
     """ Performs juju bootstrap
 
     If not LXD pass along the newly defined credentials
@@ -113,17 +114,18 @@ def bootstrap(controller, cloud, series="xenial", log=None):
     cmd += "--bootstrap-series={} ".format(series)
     if cloud != "localhost":
         cmd += "--credential {}".format(controller)
-    if log:
-        log.debug("bootstrap cmd: {}".format(cmd))
-    return run(cmd)
+    app.log.debug("bootstrap cmd: {}".format(cmd))
+    try:
+        run(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+    except CalledProcessError:
+        raise Exception("Unable to bootstrap.")
 
 
-def bootstrap_async(controller, cloud,
-                    series="xenial", log=None, exc_cb=None):
+def bootstrap_async(controller, cloud, exc_cb=None):
     """ Performs a bootstrap asynchronously
     """
     return async.submit(partial(bootstrap, controller,
-                                cloud, series, log), exc_cb)
+                                cloud), exc_cb)
 
 
 def available():

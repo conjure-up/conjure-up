@@ -1,7 +1,6 @@
 from conjure import async
 from conjure import juju
 from conjure.app_config import app
-from conjure.models.bundle import BundleModel
 from conjure.ui.views.jujucontroller import JujuControllerView
 from conjure import utils
 from conjure import controllers
@@ -99,13 +98,11 @@ def finish(controller=None, back=False):
         future = juju.bootstrap_async(
             controller=app.current_controller,
             cloud=this.cloud,
-            series=BundleModel.bootstrapSeries(),
-            exc_cb=__handle_exception,
-            log=app.log)
+            exc_cb=__handle_exception)
         future.add_done_callback(
             __handle_bootstrap_done)
 
-        controllers.use('bootstrapwait').render()
+        controllers.use('bootstrap').render()
         utils.pollinate(app.session_id, 'J003')
 
     else:
@@ -125,7 +122,7 @@ def render(cloud=None, bootstrap=None):
     # Set provider type for post-bootstrap
     app.env['JUJU_PROVIDERTYPE'] = this.cloud
 
-    bootstrap = bootstrap
+    this.bootstrap = bootstrap
 
     if this.cloud and bootstrap:
         if app.current_controller is not None:
