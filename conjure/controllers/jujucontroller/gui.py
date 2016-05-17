@@ -27,9 +27,9 @@ def __handle_exception(exc):
 def __handle_bootstrap_done(future):
     app.log.debug("handle bootstrap")
     result = future.result()
-    if result.code > 0:
-        app.log.error(result.errors())
-        return __handle_exception(Exception(result.errors()))
+    if result.returncode > 0:
+        app.log.error(result.stderr.decode())
+        return __handle_exception(Exception(result.stderr.decode()))
     utils.pollinate(app.session_id, 'J004')
     EventLoop.remove_alarms()
     juju.switch(app.current_controller)
