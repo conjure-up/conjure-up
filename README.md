@@ -17,6 +17,14 @@ solutions up and going with as little hindrance as possible.
 
 It is included in the archive.
 
+## Bleeding edge
+
+Brave? Try the bleeding edge version and file bugs to keep us honest.
+
+```
+$ sudo apt-add-repository ppa:conjure/next
+```
+
 ### Install the packages
 ```
 $ sudo apt update
