@@ -1,6 +1,6 @@
 """ Interfaces to Juju Controllers """
 
-from conjure.juju import Juju
+from conjure import juju
 
 
 def cloud_type(controller):
@@ -12,7 +12,7 @@ def cloud_type(controller):
     Returns:
     String of the cloud-type
     """
-    info = Juju.controller_info(controller)
+    info = juju.get_controller_info(controller)
     bootstrap_config = info.get('bootstrap-config', {})
     cloud_type = bootstrap_config.get('cloud-type', None)
     return cloud_type

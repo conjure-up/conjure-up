@@ -1,10 +1,6 @@
 from subprocess import run, CalledProcessError
 
 
-class DownloadException(Exception):
-    pass
-
-
 def remote_exists(path):
     """ Verifies remote url archive exists
     """
@@ -28,7 +24,7 @@ def download(src, dst):
         run("wget -qO- {} | bsdtar -xf - -s'|[^/]*/||' -C {}".format(
             src, dst), shell=True, check=True)
     except CalledProcessError as e:
-        raise DownloadException("Unable to download {}: {}".format(src, e))
+        raise Exception("Unable to download {}: {}".format(src, e))
 
 
 def get_remote_url(path):

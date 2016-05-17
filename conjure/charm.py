@@ -1,7 +1,7 @@
 """ Charm utilities
 
 Api for the charmstore:
-https://github.com/juju/charmstore/blob/v4/docs/API.md
+https://github.com/juju/charmstore/blob/v5/docs/API.md
 """
 import yaml
 import requests
@@ -10,11 +10,7 @@ from tempfile import NamedTemporaryFile
 import shutil
 from conjure.utils import spew
 
-cs = 'https://api.jujucharms.com/v4'
-
-
-class CharmStoreException(Exception):
-    """ CharmStore exception """
+cs = 'https://api.jujucharms.com/v5'
 
 
 def get_bundle(bundle, to_file=False):
@@ -41,7 +37,7 @@ def get_bundle(bundle, to_file=False):
     bundle = path.join(cs, bundle, 'archive/bundle.yaml')
     req = requests.get(bundle)
     if not req.ok:
-        raise CharmStoreException("Problem getting bundle: {}".format(req))
+        raise Exception("Problem getting bundle: {}".format(req))
     if to_file:
         with NamedTemporaryFile(mode="w", encoding="utf-8",
                                 delete=False) as tempf:

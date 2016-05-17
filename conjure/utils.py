@@ -3,12 +3,7 @@ import os
 from termcolor import colored
 from subprocess import check_call, CalledProcessError
 from conjure.async import submit
-
-
-class UtilsException(Exception):
-    """ Error in utils
-    """
-    pass
+from conjure.app_config import app
 
 
 def info(msg):
@@ -63,7 +58,7 @@ def chown(path, user, group=None, recursive=False):
                 for item in files:
                     shutil.chown(os.path.join(root, item), user, group)
     except OSError as e:
-        raise UtilsException(e)
+        raise e
 
 
 def spew(path, data, owner=None):
@@ -79,7 +74,7 @@ def spew(path, data, owner=None):
         try:
             chown(path, owner)
         except:
-            raise UtilsException(
+            raise Exception(
                 "Unable to set ownership of {}".format(path))
 
 
@@ -99,13 +94,13 @@ def slurp(path):
 def install_user():
     """ returns sudo user
     """
-    user = os.getenv('SUDO_USER', None)
-    if not user:
-        user = os.getenv('USER', 'root')
+    user = os.getenv('USER', None)
+    if user is None:
+        raise Exception("Unable to determine current user.")
     return user
 
 
-def pollinate(session, tag, log):
+def pollinate(session, tag):
     """ fetches random seed
 
     Tag definitions:
@@ -142,7 +137,6 @@ def pollinate(session, tag, log):
     Arguments:
     session: randomly generated session id
     tag: custom tag
-    log: logger
     """
     agent_str = 'conjure/{}/{}'.format(session, tag)
 
@@ -152,8 +146,8 @@ def pollinate(session, tag, log):
                    "--data /dev/null https://entropy.ubuntu.com "
                    "> /dev/null 2>&1".format(
                        agent_str))
-            log.debug("pollinate: {}".format(cmd))
+            app.log.debug("pollinate: {}".format(cmd))
             check_call(cmd, shell=True)
         except CalledProcessError as e:
-            log.warning("Generating random seed failed: {}".format(e))
+            app.log.warning("Generating random seed failed: {}".format(e))
     submit(do_pollinate, lambda _: None)
