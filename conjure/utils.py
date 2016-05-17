@@ -4,6 +4,21 @@ from termcolor import colored
 from subprocess import check_call, CalledProcessError
 from conjure.async import submit
 from conjure.app_config import app
+from configobj import ConfigObj
+
+
+def check_bridge_exists():
+    """ Checks that an LXD network bridge exists
+    """
+    if os.path.isfile('/etc/default/lxd-bridge'):
+        cfg = ConfigObj('/etc/default/lxd-bridge')
+    else:
+        cfg = ConfigObj()
+
+    ready = cfg.get('LXD_IPV4_ADDR', None)
+    if not ready:
+        return False
+    return True
 
 
 def info(msg):

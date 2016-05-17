@@ -14,4 +14,5 @@ def render():
         utils.warning("Unknown Cloud: {}".format(app.argv.cloud))
         sys.exit(1)
     utils.info(
-        "Deploying to: {}".format(app.argv.cloud))
+        "Deploying to {}".format(app.argv.cloud))
+    finish()

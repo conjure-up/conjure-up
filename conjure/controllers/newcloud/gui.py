@@ -8,8 +8,6 @@ import yaml
 import petname
 import sys
 
-from .common import check_bridge_exists
-
 this = sys.modules[__name__]
 this.cloud = None
 
@@ -93,7 +91,7 @@ def render(cloud):
     # a user to configure a LXD bridge with suggested network
     # information.
     if cloud == 'localhost':
-        if not check_bridge_exists():
+        if not utils.check_bridge_exists():
             return controllers.use('lxdsetup').render()
 
         app.log.debug("Found an IPv4 address, "
