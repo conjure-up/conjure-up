@@ -7,7 +7,6 @@ from functools import wraps, partial
 from macumba.errors import LoginError
 from macumba.v2 import JujuClient
 from subprocess import run, PIPE, DEVNULL, CalledProcessError
-import json
 import os
 import sys
 import yaml

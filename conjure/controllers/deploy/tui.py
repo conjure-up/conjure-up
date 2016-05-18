@@ -1,7 +1,7 @@
-from conjure.api.models import model_info
-from conjure import utils
-from conjure.app_config import app
 from conjure import controllers
+from conjure import utils
+from conjure.api.models import model_info
+from conjure.app_config import app
 
 
 def finish():

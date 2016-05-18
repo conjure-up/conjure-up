@@ -3,7 +3,7 @@ from urwid import (WidgetWrap, Pile,
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.text import Instruction
-from ubuntui.widgets.buttons import cancel_btn, menu_btn, PlainButton
+from ubuntui.widgets.buttons import cancel_btn, menu_btn
 
 
 class CloudView(WidgetWrap):
@@ -54,14 +54,6 @@ class CloudView(WidgetWrap):
                 )
             ))
 
-        total_items.append(Padding.line_break(""))
-        total_items.append(Padding.center_50(
-            Color.body(
-                PlainButton(label="Connect to an existing MAAS",
-                            on_press=self.submit_new_maas),
-                focus_map='menu_button focus')
-        ))
-
         total_items.append(
             Padding.center_60(HR()))
         total_items.append(Padding.center_20(self._build_buttons()))
@@ -69,9 +61,6 @@ class CloudView(WidgetWrap):
 
     def submit(self, result):
         self.cb(result.label, create_cloud=True)
-
-    def submit_new_maas(self, btn):
-        return self.app.controllers['newcloud'].render("maas")
 
     def cancel(self, btn):
         self.cb(back=True)
