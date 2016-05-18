@@ -1,4 +1,5 @@
 from subprocess import run, CalledProcessError
+import tempfile
 
 
 def remote_exists(path):
@@ -21,8 +22,12 @@ def download(src, dst):
          exist.
     """
     try:
-        run("wget -qO- {} | bsdtar -xf - -s'|[^/]*/||' -C {}".format(
-            src, dst), shell=True, check=True)
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            run("wget -qO {}/temp.zip {}".format(tmpdirname, src),
+                shell=True,
+                check=True)
+            run("bsdtar -xf {}/temp.zip -s'|[^/]*/||' -C {}".format(
+                tmpdirname, dst), shell=True, check=True)
     except CalledProcessError as e:
         raise Exception("Unable to download {}: {}".format(src, e))
 

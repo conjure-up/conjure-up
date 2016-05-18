@@ -135,7 +135,6 @@ def main():
             if remote is not None:
                 if not path.isdir(spell_dir):
                     os.makedirs(spell_dir)
-                utils.info("Downloading spell: {}".format(spell))
                 download(remote, spell_dir)
             else:
                 utils.warning("Could not find spell: {}".format(spell))
@@ -153,6 +152,7 @@ def main():
     app.env = os.environ.copy()
 
     if app.headless:
+        app.env['CONJURE_UP_HEADLESS'] = "1"
         _start()
     else:
         EventLoop.build_loop(app.ui, STYLES,

@@ -14,13 +14,13 @@ SCRIPTPATH=$(dirname $SCRIPT)
 debug() {
     name=$1
     shift 1
-    logger -t "$name" "[DEBUG] $@"
+    logger -t "conjure-up/$name" "[DEBUG] $@"
 }
 
 info() {
     name=$1
     shift 1
-    logger -t "$name" "[INFO] $@"
+    logger -t "conjure-up/$name" "[INFO] $@"
 }
 
 # Gets current juju state for machine
