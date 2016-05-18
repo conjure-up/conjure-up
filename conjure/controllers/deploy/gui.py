@@ -28,7 +28,7 @@ def finish(back=False):
     bw = BundleWriter(this.placement_controller)
     bw.write_bundle(this.bundle_filename)
     pollinate(app.session_id, 'PC')
-    controllers.use('deploysummary').render(this.bundle_filename)
+    controllers.use('summary').render(this.bundle_filename)
 
 
 def render(model):

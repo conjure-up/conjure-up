@@ -111,6 +111,8 @@ def bootstrap(controller, cloud, series="xenial"):
     cmd = "juju bootstrap {} {} --upload-tools " \
           "--config image-stream=daily ".format(
               controller, cloud)
+    cmd += "--config enable-os-refresh-update=false "
+    cmd += "--config enable-os-upgrade=false "
     cmd += "--bootstrap-series={} ".format(series)
     if cloud != "localhost":
         cmd += "--credential {}".format(controller)
@@ -135,7 +137,8 @@ def available():
     True/False if juju status was successful and a environment is found
     """
     try:
-        run('juju status', shell=True, check=True, stderr=DEVNULL)
+        run('juju status', shell=True,
+            check=True, stderr=DEVNULL, stdout=DEVNULL)
     except CalledProcessError:
         return False
     return True
@@ -228,12 +231,14 @@ def switch(model):
     model: Model to select
 
     Returns:
-    False if failed to switch to Juju Model.
+    Raises exception if failed to switch models.
     """
-    ret = 0 == run('juju switch {}'.format(model), shell=True).returncode
-    if ret:
+    try:
+        run('juju switch {}'.format(model),
+            shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)
         login(True)
-    return ret
+    except CalledProcessError as e:
+        raise LookupError("Unable to switch models: {}".format(e))
 
 
 def deploy(bundle):
@@ -276,12 +281,12 @@ def get_controllers():
     Returns:
     List of known controllers
     """
-    sh = run('juju list-controllers --format json',
+    sh = run('juju list-controllers --format yaml',
              shell=True, stdout=PIPE, stderr=PIPE)
     if sh.returncode > 0:
         raise LookupError(
-            "Unable to list controllers: {}".format(sh.stder))
-    env = json.loads(sh.stdout.decode('utf8')[0])
+            "Unable to list controllers: {}".format(sh.stderr.decode('utf8')))
+    env = yaml.safe_load(sh.stdout.decode('utf8'))
     return env['controllers']
 
 
