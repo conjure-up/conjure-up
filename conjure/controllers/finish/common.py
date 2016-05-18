@@ -17,6 +17,7 @@ def parse_description(step):
                 return line.split(":")[1].strip()
             except:
                 return "Unknown Description, please check your step file"
+    return "Unknown Description, please check your step file"
 
 
 def run_script(path):

@@ -47,13 +47,13 @@ def render():
     # post step processing
     steps = sorted(glob(os.path.join(bundle_scripts, '*.sh')))
     for step in steps:
-        if step == "00_pre.sh" or step == "00_post-bootstrap.sh":
+        if "00_pre.sh" in step or "00_post-bootstrap.sh" in step:
             app.log.debug("Skipping pre and post-bootstrap steps.")
             continue
 
         if os.access(step, os.X_OK):
             utils.info(
-                "Running step: {}".format(common.parse_description(step)))
+                "Running {}".format(common.parse_description(step)))
         try:
             sh = common.run_script(step)
             result = json.loads(sh.stdout.decode('utf8'))
