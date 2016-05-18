@@ -26,8 +26,13 @@ def info(msg):
     print("{} {}".format(prefix, msg))
 
 
+def error(msg):
+    prefix = colored('[error]', 'red', attrs=['bold'])
+    print("{} {}".format(prefix, msg))
+
+
 def warning(msg):
-    prefix = colored('[warning]', 'red', attrs=['bold'])
+    prefix = colored('[warning]', 'yellow', attrs=['bold'])
     print("{} {}".format(prefix, msg))
 
 

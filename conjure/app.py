@@ -109,8 +109,10 @@ def main():
 
     metadata = {'spell-dir': None}
     if spell in global_conf['curated_spells']:
-        metadata_path = path.join('/usr/share', spell, 'metadata.json')
-        metadata['spell-dir'] = os.path.dirname(metadata_path)
+        metadata_path = path.join('/usr/share',
+                                  spell,
+                                  'conjure/metadata.json')
+        metadata['spell-dir'] = path.join('/usr/share', spell)
 
         if not path.exists(metadata_path):
             os.execl("/usr/share/conjure-up/do-apt-install",
@@ -125,8 +127,9 @@ def main():
             os.path.expanduser('~'),
             '.cache/conjure-up', spell))
 
-        metadata_path = os.path.join(spell_dir, 'conjure/metadata.json')
-        metadata['spell-dir'] = os.path.dirname(metadata_path)
+        metadata_path = path.join(spell_dir,
+                                  'conjure/metadata.json')
+        metadata['spell-dir'] = spell_dir
         if not path.exists(metadata_path):
             remote = get_remote_url(opts.spell)
             if remote is not None:

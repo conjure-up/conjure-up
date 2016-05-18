@@ -4,19 +4,22 @@ from conjure import juju
 from functools import partial
 from conjure import async
 from conjure.app_config import app
-from conjure.models.bundle import BundleModel
 from conjure import utils
+from .common import run_script
 import os.path as path
 import os
 import json
 import sys
-from subprocess import run, PIPE
 
 
 this = sys.modules[__name__]
 this.post_exec_pollinate = False
 this.pre_exec_pollinate = False
-this.bundle = None
+this.bundle = path.join(
+    app.config['metadata']['spell-dir'], 'bundle.yaml')
+this.bundle_scripts = path.join(
+    app.config['metadata']['spell-dir'], 'conjure/scripts'
+)
 
 
 def finish():
@@ -49,16 +52,7 @@ def __pre_exec(*args):
     """
     app.log.debug("pre_exec start: {}".format(args))
 
-    try:
-        bundle_key = app.cache['selected_bundle']['key']
-    except:
-        bundle_key = BundleModel.key()
-
-    _pre_exec_sh = path.join('/usr/share/',
-                             app.config['name'],
-                             'bundles',
-                             bundle_key,
-                             'pre.sh')
+    _pre_exec_sh = path.join(this.bundle_scripts, 'pre.sh')
     if not path.isfile(_pre_exec_sh) \
        or not os.access(_pre_exec_sh, os.X_OK):
         app.log.debug(
@@ -72,12 +66,8 @@ def __pre_exec(*args):
     app.log.debug("pre_exec running {}".format(_pre_exec_sh))
 
     try:
-        future = async.submit(partial(run,
-                                      _pre_exec_sh,
-                                      shell=True,
-                                      stderr=PIPE,
-                                      stdout=PIPE,
-                                      env=app.env),
+        future = async.submit(partial(run_script,
+                                      _pre_exec_sh),
                               partial(__handle_exception,
                                       "E002"))
         future.add_done_callback(__pre_exec_done)
@@ -103,7 +93,7 @@ def __deploy_bundle():
     app.ui.set_footer('Deploying bundle...')
     utils.pollinate(app.session_id, 'DS')
     future = async.submit(
-        partial(juju.deploy_bundle, this.bundle),
+        partial(juju.deploy, this.bundle),
         partial(__handle_exception, "ED"))
     future.add_done_callback(__deploy_bundle_done)
 
@@ -124,20 +114,7 @@ def __deploy_bundle_done(future):
 def __post_exec(*args):
     """ Executes a bundles post processing script if exists
     """
-    try:
-        bundle_key = app.cache['selected_bundle']['key']
-    except:
-        bundle_key = BundleModel.key()
-        if bundle_key is None:
-            app.log.debug(
-                "Could not determine bundle used, skipping post_exec")
-            EventLoop.set_alarm_in(1, __refresh)
-            return
-    _post_exec_sh = path.join('/usr/share/',
-                              app.config['name'],
-                              'bundles',
-                              bundle_key,
-                              'post.sh')
+    _post_exec_sh = path.join(this.bundle_scripts, 'post.sh')
 
     if not path.isfile(_post_exec_sh) \
        or not os.access(_post_exec_sh, os.X_OK):
@@ -152,12 +129,8 @@ def __post_exec(*args):
         this.post_exec_pollinate = True
 
     app.log.debug("post_exec running: {}".format(_post_exec_sh))
-    future = async.submit(partial(run,
-                                  _post_exec_sh,
-                                  shell=True,
-                                  stderr=PIPE,
-                                  stdout=PIPE,
-                                  env=app.env),
+    future = async.submit(partial(run_script,
+                                  _post_exec_sh),
                           __handle_post_exception)
     future.add_done_callback(__post_exec_done)
 
@@ -194,13 +167,9 @@ def __refresh(*args):
     EventLoop.set_alarm_in(1, __refresh)
 
 
-def render(bundle):
+def render():
     """ Render services status view
-
-    Arguments:
-    bundle: modified bundle to deploy
     """
-    this.bundle = bundle
     view = ServicesView(app)
 
     app.ui.set_header(

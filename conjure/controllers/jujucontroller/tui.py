@@ -10,7 +10,6 @@ import sys
 
 
 def finish():
-    utils.info("Bootstrap complete")
     controllers.use('deploy').render(app.current_controller)
 
 
@@ -23,7 +22,7 @@ def render(cloud):
                      back)
 
     if not juju.available():
-        utils.info("Bootstrapping controller, please wait.")
+        utils.info("Creating environment, please wait.")
         app.current_controller = petname.Name()
         juju.bootstrap(controller=app.current_controller,
                        cloud=cloud)
@@ -36,7 +35,7 @@ def render(cloud):
     if os.path.isfile(post_bootstrap_sh) \
        and os.access(post_bootstrap_sh, os.X_OK):
         utils.pollinate(app.session_id, 'J001')
-        utils.info("Running post bootstrap tasks")
+        utils.info("Running additional environment tasks.")
         try:
             sh = run(post_bootstrap_sh, shell=True, stdout=PIPE, stderr=PIPE)
             result = json.loads(sh.output.decode('utf8'))
