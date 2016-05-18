@@ -120,7 +120,8 @@ def main():
                      spell)
         with open(metadata_path) as fp:
             metadata.update(json.load(fp))
-
+    # TODO: Add charmstore query here as the second place to look for
+    # spells.
     else:
         # Check cache dir for spells
         spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
@@ -130,18 +131,17 @@ def main():
         metadata_path = path.join(spell_dir,
                                   'conjure/metadata.json')
         metadata['spell-dir'] = spell_dir
-        if not path.exists(metadata_path):
-            remote = get_remote_url(opts.spell)
-            if remote is not None:
-                if not path.isdir(spell_dir):
-                    os.makedirs(spell_dir)
-                download(remote, spell_dir)
-            else:
-                utils.warning("Could not find spell: {}".format(spell))
-                sys.exit(1)
+        remote = get_remote_url(opts.spell)
+        if remote is not None:
+            if not path.isdir(spell_dir):
+                os.makedirs(spell_dir)
+            download(remote, spell_dir)
         else:
-            with open(metadata_path) as fp:
-                metadata.update(json.load(fp))
+            utils.warning("Could not find spell: {}".format(spell))
+            sys.exit(1)
+
+        with open(metadata_path) as fp:
+            metadata.update(json.load(fp))
 
     if hasattr(app.argv, 'cloud'):
         app.headless = True
@@ -150,6 +150,7 @@ def main():
     app.config = {'metadata': metadata,
                   'spell': spell}
     app.env = os.environ.copy()
+    app.env['CONJURE_UP_SPELL'] = spell
 
     if app.headless:
         app.env['CONJURE_UP_HEADLESS'] = "1"

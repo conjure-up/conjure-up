@@ -39,7 +39,7 @@ def finish(credentials=None, back=False):
     app.current_controller = petname.Name()
 
     if back:
-        return controllers.use('welcome').render()
+        return controllers.use('clouds').render()
 
     cred_path = path.join(utils.juju_path(), 'credentials.yaml')
     if not path.isfile(cred_path):

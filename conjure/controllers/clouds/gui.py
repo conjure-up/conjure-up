@@ -36,7 +36,10 @@ def finish(cloud=None, create_cloud=False):
 
 def render():
     clouds = __list_clouds()
-    excerpt = ("Please select from a list of available clouds")
+    if 'description' in app.config['metadata']:
+        excerpt = app.config['metadata']['description']
+    else:
+        excerpt = ("Please select from a list of available clouds")
     view = CloudView(app,
                      clouds,
                      finish)

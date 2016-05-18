@@ -23,12 +23,11 @@ def finish(back=False):
     back: if true returns to previous controller
     """
     if back:
-        return controllers.use('jujucontroller')
+        return controllers.use('jujucontroller').render()
 
     bw = BundleWriter(this.placement_controller)
     bw.write_bundle(this.bundle_filename)
     pollinate(app.session_id, 'PC')
-    controllers.use('summary').render(this.bundle_filename)
 
 
 def render(model):

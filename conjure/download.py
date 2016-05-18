@@ -47,7 +47,7 @@ def get_remote_url(path):
     GitHub for that spell and download appropriately.
 
     Returns:
-    The remote url if exists otherwise None.
+    The url if exists otherwise None.
     """
     if path.startswith("http") and path.endswith(".zip"):
         if remote_exists(path):
