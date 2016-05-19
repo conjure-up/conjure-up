@@ -5,3 +5,4 @@ requests_oauthlib
 ws4py
 nose
 tox
+configobj

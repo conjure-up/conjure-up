@@ -66,3 +66,7 @@ conjure-up
 conjure-up.egg-link
 easy-install.pth
 site.py
+tox
+tox-quickstart
+nosetests*
+virtualenv
