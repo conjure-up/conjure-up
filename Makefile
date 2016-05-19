@@ -33,6 +33,7 @@ clean:
 	@rm -rf .tox
 	@rm -rf conjure-up
 	@rm -rf dist
+	@rm -rf conjure-dev
 
 .PHONY: test
 test:
@@ -65,7 +66,8 @@ pep8:
 	pep8 conjure
 
 dev: clean
-	PYTHONPATH=`pwd` python3 setup.py develop --install-dir=`pwd`
+	tox -e conjure-dev
+	@echo "Run 'source conjure-dev/bin/activate' to enter the dev venv"
 
 # Indirection to allow 'make run' to build deb automatically, but
 # 'make sbuild; make run' will not invoke 'deb'.
