@@ -6,3 +6,6 @@ ws4py
 nose
 tox
 configobj
+bson
+termcolor
+petname
