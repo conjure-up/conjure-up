@@ -17,6 +17,7 @@ from conjure.ui.widgets.service_walkthrough_widget import (
 
 import q
 
+
 class ServiceWalkthroughView(WidgetWrap):
     def __init__(self, app, deploy_controller,
                  placement_controller):
@@ -59,13 +60,13 @@ class ServiceWalkthroughView(WidgetWrap):
         cw = self.walkthrough_widgets[self.current_widget_idx]
         cw.set_selected(True)
         cw.update()
-        
+
         if prev_idx:
             pw = self.walkthrough_widgets[prev_idx]
             pw.set_selected(False)
             pw.update()
         return True
-        
+
     def handle_done(self, button):
         self.deploy_controller.finish()
 
@@ -80,4 +81,3 @@ class ServiceWalkthroughView(WidgetWrap):
         if not self.select_widget_at(self.current_widget_idx,
                                      self.current_widget_idx - 1):
             self.pile.selected_index = 2
-

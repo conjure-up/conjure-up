@@ -1,0 +1,18 @@
+language: python
+sudo: false
+python:
+  - "3.5"
+notifications:
+  email: false
+  irc:
+    channels:
+      - "chat.freenode.net#ubuntu-solutions"
+    use_notice: true
+    skip_join: true
+    on_failure: change
+    on_success: never
+install:
+  - travis_retry pip install tox
+script:
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then travis_retry tox -e py35; fi
+  - travis_retry tox -e flake

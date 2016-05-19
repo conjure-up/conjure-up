@@ -2,12 +2,14 @@
 """
 import logging
 
+import q
+
 from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.input import IntegerEditor
 from urwid import connect_signal, Divider, WidgetWrap, Text, Padding, Pile
 
 log = logging.getLogger('service_walkthrough')
-import q
+
 
 class ServiceWalkthroughWidget(WidgetWrap):
     def __init__(self, service, metadata_controller,
@@ -22,7 +24,7 @@ class ServiceWalkthroughWidget(WidgetWrap):
 
     def selectable(self):
         return True
-        
+
     def build_widgets(self):
         self.title = Text(self.service.service_name)
         self.description_w = Text("Description Loading…")
@@ -41,20 +43,22 @@ class ServiceWalkthroughWidget(WidgetWrap):
         return self.pile
 
     def handle_info_updated(self, new_info):
-        self.description_w.set_text(new_info["Meta"]["charm-metadata"]["Summary"])
+        self.description_w.set_text(
+            new_info["Meta"]["charm-metadata"]["Summary"])
         self.update()
 
     def _set_pile(self, ws):
         opts = self.pile.options()
         self.pile.contents[2:-1] = [(w, opts) for w in ws]
-        
+
     def update_deployed(self):
         self._set_pile([])
 
     def update_selected_undeployed(self):
         self._set_pile([Padding(self.scale_edit, align='right', width='pack'),
-                        Padding(self.continue_button, align='right', width='pack')])
-        
+                        Padding(self.continue_button,
+                                align='right', width='pack')])
+
     def update(self):
         if self.is_deployed:
             self.update_deployed()
@@ -74,7 +78,7 @@ class ServiceWalkthroughWidget(WidgetWrap):
 
         q.q(self.pile.selected_index)
         q.q(self.pile.contents)
-        
+
     def handle_scale_changed(self, sender, value):
         self.deploy_controller.handle_service_scale_change(self.service, value)
 
