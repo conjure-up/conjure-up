@@ -34,6 +34,10 @@ clean:
 	@rm -rf conjure-up
 	@rm -rf dist
 
+.PHONY: test
+test:
+	@tox
+
 DPKGBUILDARGS = -us -uc -i'.git.*|.tox|.bzr.*|.editorconfig|.travis-yaml|macumba\/debian|maasclient\/debian'
 deb-src: clean update_version
 	@debuild -S -sa $(DPKGBUILDARGS)

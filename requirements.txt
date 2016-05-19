@@ -3,3 +3,5 @@ pyyaml
 jinja2
 requests_oauthlib
 ws4py
+nose
+tox
