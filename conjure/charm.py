@@ -60,6 +60,10 @@ def get_bundle(bundle, to_file=False):
 def search(tags, promulgated=True):
     """ Search charmstore by tag(s)
 
+    Usage:
+    https://api.jujucharms.com/charmstore/v5/search?tags=conjure-openstack
+    &include=id&include=extra-info&type=bundle
+
     Arguments:
     tags: single or list of tags to search for
     promulgated: search only blessed bundles
@@ -71,7 +75,7 @@ def search(tags, promulgated=True):
     query_str = "&tags=".join(tags)
     if promulgated:
         query_str += "&promulgated=1"
-    query_str += "&include=id"
+    query_str += "&include=id&include=extra-info&type=bundle"
     query = path.join(cs, 'search?tags={}'.format(query_str))
     req = requests.get(query)
     if not req.ok:

@@ -129,7 +129,7 @@ def render(cloud):
 
         app.log.debug("Found an IPv4 address, "
                       "assuming LXD is configured.")
-        controllers.use('variants').render()
+        return controllers.use('variants').render()
     try:
         creds = Schema[cloud]
     except KeyError as e:

@@ -61,9 +61,10 @@ class VariantView(WidgetWrap):
                             menu_btn(label=name,
                                      on_press=self.done),
                             focus_map="menu_button focus")),
-                        ("weight", 0.3, Text(bundle.get('description',
-                                                        'Needs a description'),
-                                             align="left"))
+                        ("weight", 0.3, Text(
+                            metadata.get('description',
+                                         'Needs a description'),
+                            align="left"))
                     ],
                     dividechars=1
                 )

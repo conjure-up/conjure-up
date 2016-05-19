@@ -143,4 +143,4 @@ class LXDSetupView(WidgetWrap):
         # self.cb(self.input_items)
         os.execl("/usr/share/conjure-up/run-lxd-config",
                  "/usr/share/conjure-up/run-lxd-config",
-                 self.app.config["name"])
+                 self.app.config['spell'])

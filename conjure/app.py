@@ -110,7 +110,7 @@ def main():
     # Bind UI
     app.ui = ConjureUI()
 
-    metadata = {'spell-dir': None, 'metadata': None}
+    metadata = {'spell-dir': None, 'metadata': {}}
     if spell in global_conf['curated_spells']:
         endpoint_type = "deb"
         metadata_path = path.join('/usr/share',
@@ -135,6 +135,8 @@ def main():
         if is_charmstore_keyword['Total'] == 0:
             utils.warning('Could not find spell in charmstore.')
             sys.exit(1)
+        app.config = {'metadata': None,
+                      'spell': spell}
 
     else:
         # Check cache dir for spells

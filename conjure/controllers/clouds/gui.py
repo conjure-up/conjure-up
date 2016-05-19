@@ -21,25 +21,21 @@ def __list_clouds():
     return sorted(list(clouds))
 
 
-def finish(cloud=None, create_cloud=False):
+def finish(cloud=None):
     """ Load the Model controller passing along the selected cloud.
 
     Arguments:
     cloud: Cloud to create the controller/model on.
-    create_cloud: True/False, if true display create cloud interface
     """
     utils.pollinate(app.session_id, 'CS')
-
-    if create_cloud:
-        return controllers.use('newcloud').render(cloud)
+    return controllers.use('newcloud').render(cloud)
 
 
 def render():
     clouds = __list_clouds()
-    if 'description' in app.config['metadata']:
-        excerpt = app.config['metadata']['description']
-    else:
-        excerpt = ("Please select from a list of available clouds")
+    excerpt = app.config['metadata'].get(
+        'description',
+        "Please select from a list of available clouds")
     view = CloudView(app,
                      clouds,
                      finish)
