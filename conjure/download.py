@@ -1,6 +1,32 @@
 from subprocess import run, CalledProcessError
 import tempfile
+import os
 from conjure.app_config import app
+
+
+def fetcher(spell):
+    """ Returns endpoint type
+
+    Arguments:
+    spell: full spell indentifier
+
+    Types:
+    charmstore-direct: Pulling a single bundle from cs
+    charmstore: Querying a keyword/tag in charmstore
+    direct: Pulling from a remote webserver
+    vcs: Pulling from a remote Vcs like github
+    deb: This spell was accessed from one of our official deb packages
+
+    Returns:
+    Endpoint type
+    """
+    if spell.startswith('~'):
+        return "charmstore-direct"
+    if "/" in spell:
+        return "vcs"
+    if spell.startswith('http'):
+        return "direct"
+    return "charmstore"
 
 
 def remote_exists(path):
@@ -25,6 +51,8 @@ def download(src, dst, purge_top_level=True):
                      during unzip.
     """
     try:
+        if not os.path.isdir(dst):
+            os.makedirs(dst)
         with tempfile.TemporaryDirectory() as tmpdirname:
             run("wget -qO {}/temp.zip {}".format(tmpdirname, src),
                 shell=True,
@@ -53,39 +81,26 @@ def get_remote_url(path):
     Using something like 'ubuntu-solutions-engineering/kubernetes' will check
     GitHub for that spell and download appropriately.
 
-    This also gives us the type of the endpoint so we can make further
-    descisions. For example, pulling zip's from the charmstore does not
-    put all the files inside a top level directory so there is no need
-    to run bsdtar with the directory replacement.
-
-    Those types are as follows:
-    direct: zip on a webserver somewhere
-    vcs: in github or bitbucket (these archives do the same thing with
-                                 toplevel directory)
-    charmstore: bundle from the jujucharms.com
-
     Returns:
-    The type and url if exists otherwise None.
+    The url if exists otherwise None.
     """
     if path.startswith("http") and path.endswith(".zip"):
         if remote_exists(path):
             # Path is a full URL to an archived zip
-            return ('direct', path)
+            return path
 
     if path.startswith("~"):
         namespace, bundle = path.split("/")
         url = ("https://api.jujucharms.com/charmstore/v5"
                "/{}/bundle/{}/archive".format(namespace, bundle))
-        return ('charmstore', url)
+        return url
 
     remotes = [
-        ('vcs', "https://github.com/{}/archive/master.zip".format(path)),
-        ('vcs', "https://bitbucket.org/{}/get/master.zip".format(path)),
-        ('charmstore',
-         "https://api.jujucharms.com/charmstore/v5/{}/archive".format(path)),
+        "https://github.com/{}/archive/master.zip".format(path),
+        "https://bitbucket.org/{}/get/master.zip".format(path),
+        "https://api.jujucharms.com/charmstore/v5/{}/archive".format(path),
     ]
     for r in remotes:
-        endpoint_type, url = r
-        if remote_exists(url):
+        if remote_exists(r):
             return r
     return None

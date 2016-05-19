@@ -45,3 +45,25 @@ def get_bundle(bundle, to_file=False):
             return tempf.name
     else:
         return yaml.safe_load(req.text)
+
+
+def search(tags, promulgated=True):
+    """ Search charmstore by tag(s)
+
+    Arguments:
+    tags: single or list of tags to search for
+    promulgated: search only blessed bundles
+    """
+    if not isinstance(tags, list):
+        tags = [tags]
+
+    tags = ["conjure-{}".format(t) for t in tags]
+    query_str = "&tags=".join(tags)
+    if promulgated:
+        query_str += "&promulgated=1"
+    query = path.join(cs, 'search?tags={}'.format(query_str))
+    req = requests.get(query)
+    if not req.ok:
+        raise Exception(
+            "Problem getting tagged bundles: {}".format(req))
+    return req.json()

@@ -7,8 +7,9 @@ from conjure import async
 from conjure import controllers
 from conjure import juju
 from conjure import utils
+from conjure import charm
 from conjure.app_config import app
-from conjure.download import download, get_remote_url
+from conjure.download import download, get_remote_url, fetcher
 from conjure.log import setup_logging
 from conjure.ui import ConjureUI
 from ubuntui.ev import EventLoop
@@ -81,6 +82,8 @@ def main():
     else:
         spell = opts.spell
 
+    endpoint_type = fetcher(opts.spell)
+
     if os.geteuid() == 0:
         utils.info("")
         utils.info("This should _not_ be run as root or with sudo.")
@@ -107,21 +110,32 @@ def main():
     # Bind UI
     app.ui = ConjureUI()
 
-    metadata = {'spell-dir': None}
+    metadata = {'spell-dir': None, 'metadata': None}
     if spell in global_conf['curated_spells']:
+        endpoint_type = "deb"
         metadata_path = path.join('/usr/share',
                                   spell,
                                   'conjure/metadata.json')
         metadata['spell-dir'] = path.join('/usr/share', spell)
-
         if not path.exists(metadata_path):
             os.execl("/usr/share/conjure-up/do-apt-install",
                      "/usr/share/conjure-up/do-apt-install",
                      spell)
+
         with open(metadata_path) as fp:
             metadata.update(json.load(fp))
-    # TODO: Add charmstore query here as the second place to look for
-    # spells.
+
+        app.config = {'metadata': metadata,
+                      'spell': spell}
+
+    elif endpoint_type == "charmstore":
+        # We process multiple bundles here with our keyword search
+        is_charmstore_keyword = charm.search(spell, global_conf['blessed'])
+        # Check charmstore
+        if is_charmstore_keyword['Total'] == 0:
+            utils.warning('Could not find spell in charmstore.')
+            sys.exit(1)
+
     else:
         # Check cache dir for spells
         spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
@@ -131,12 +145,11 @@ def main():
         metadata_path = path.join(spell_dir,
                                   'conjure/metadata.json')
         metadata['spell-dir'] = spell_dir
-        endpoint_type, remote = get_remote_url(opts.spell)
+        remote = get_remote_url(opts.spell)
         purge_top_level = True
         if remote is not None:
-            if not path.isdir(spell_dir):
-                os.makedirs(spell_dir)
-            if endpoint_type == "charmstore":
+            if endpoint_type == "charmstore" or \
+               endpoint_type == "charmstore-direct":
                 purge_top_level = False
             download(remote, spell_dir, purge_top_level)
         else:
@@ -146,12 +159,19 @@ def main():
         with open(metadata_path) as fp:
             metadata.update(json.load(fp))
 
-    if hasattr(app.argv, 'cloud'):
-        app.headless = True
-        app.ui = None
+        app.config = {'metadata': metadata,
+                      'spell': spell}
 
-    app.config = {'metadata': metadata,
-                  'spell': spell}
+    if hasattr(app.argv, 'cloud'):
+        if endpoint_type not in ["charmstore", "deb"]:
+            print(endpoint_type)
+            app.headless = True
+            app.ui = None
+        else:
+            utils.warning("Unable run a keyword search in headless mode, "
+                          "please provide a single bundle path.")
+            sys.exit(1)
+
     app.env = os.environ.copy()
     app.env['CONJURE_UP_SPELL'] = spell
 
