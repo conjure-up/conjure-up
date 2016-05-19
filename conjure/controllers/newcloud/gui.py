@@ -97,9 +97,6 @@ def finish(credentials=None, back=False):
     if app.current_controller is None:
         app.current_controller = petname.Name()
 
-    # Set provider type for post-bootstrap
-    app.env['JUJU_PROVIDERTYPE'] = this.cloud
-
     app.log.debug("Performing bootstrap: {} {}".format(
         app.current_controller, this.cloud))
     # future = juju.bootstrap_async(
@@ -119,24 +116,38 @@ def render(cloud):
     cloud: The cloud to create credentials for
     """
 
+    this.cloud = cloud
+    app.env['JUJU_PROVIDERTYPE'] = this.cloud
+
     # LXD is a special case as we want to make sure a bridge
     # is configured. If not we'll bring up a new view to allow
     # a user to configure a LXD bridge with suggested network
     # information.
-    if cloud == 'localhost':
+
+    if this.cloud == 'localhost':
         if not utils.check_bridge_exists():
             return controllers.use('lxdsetup').render()
 
         app.log.debug("Found an IPv4 address, "
                       "assuming LXD is configured.")
+
+        if app.current_controller is None:
+            app.current_controller = petname.Name()
+
+        future = juju.bootstrap_async(
+            controller=app.current_controller,
+            cloud=this.cloud,
+            exc_cb=__handle_exception)
+        future.add_done_callback(
+            __handle_bootstrap_done)
+
         return controllers.use('variants').render()
     try:
-        creds = Schema[cloud]
+        creds = Schema[this.cloud]
     except KeyError as e:
         utils.pollinate(app.session_id, 'EC')
         return app.ui.show_exception_message(e)
 
-    this.cloud = cloud
     view = NewCloudView(app,
                         this.cloud,
                         creds,
