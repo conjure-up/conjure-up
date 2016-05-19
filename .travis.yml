@@ -16,4 +16,3 @@ install:
 script:
   - if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then travis_retry tox -e py35; fi
   - travis_retry tox -e flake
-  - travis_retry tox -e pep8
