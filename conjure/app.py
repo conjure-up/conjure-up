@@ -113,17 +113,10 @@ def main():
     metadata = {'spell-dir': None, 'metadata': {}}
     if spell in global_conf['curated_spells']:
         endpoint_type = "deb"
-        metadata_path = path.join('/usr/share',
-                                  spell,
-                                  'conjure/metadata.json')
-        metadata['spell-dir'] = path.join('/usr/share', spell)
-        if not path.exists(metadata_path):
+        if not utils.check_deb_installed(spell):
             os.execl("/usr/share/conjure-up/do-apt-install",
                      "/usr/share/conjure-up/do-apt-install",
                      spell)
-
-        with open(metadata_path) as fp:
-            metadata.update(json.load(fp))
 
         app.config = {'metadata': metadata,
                       'spell': spell}

@@ -1,7 +1,7 @@
 import shutil
 import os
 from termcolor import colored
-from subprocess import check_call, CalledProcessError
+from subprocess import run, check_call, CalledProcessError, DEVNULL
 from conjure.async import submit
 from conjure.app_config import app
 from configobj import ConfigObj
@@ -17,6 +17,17 @@ def check_bridge_exists():
 
     ready = cfg.get('LXD_IPV4_ADDR', None)
     if not ready:
+        return False
+    return True
+
+
+def check_deb_installed(pkg):
+    """ Checks if a debian package is installed
+    """
+    try:
+        run('dpkg-query -W {}'.format(pkg),
+            shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)
+    except CalledProcessError:
         return False
     return True
 
