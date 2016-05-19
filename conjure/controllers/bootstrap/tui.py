@@ -1,4 +1,3 @@
-from conjure.app_config import app
 
 
 def finish():

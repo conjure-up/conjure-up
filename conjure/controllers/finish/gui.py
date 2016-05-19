@@ -10,8 +10,6 @@ import os.path as path
 import os
 import json
 import sys
-from glob import glob
-from subprocess import CalledProcessError
 
 
 this = sys.modules[__name__]
