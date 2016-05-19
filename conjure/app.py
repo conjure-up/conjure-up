@@ -131,11 +131,14 @@ def main():
         metadata_path = path.join(spell_dir,
                                   'conjure/metadata.json')
         metadata['spell-dir'] = spell_dir
-        remote = get_remote_url(opts.spell)
+        endpoint_type, remote = get_remote_url(opts.spell)
+        purge_top_level = True
         if remote is not None:
             if not path.isdir(spell_dir):
                 os.makedirs(spell_dir)
-            download(remote, spell_dir)
+            if endpoint_type == "charmstore":
+                purge_top_level = False
+            download(remote, spell_dir, purge_top_level)
         else:
             utils.warning("Could not find spell: {}".format(spell))
             sys.exit(1)
