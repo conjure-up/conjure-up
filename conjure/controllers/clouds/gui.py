@@ -28,10 +28,10 @@ def finish(cloud=None, create_cloud=False):
     cloud: Cloud to create the controller/model on.
     create_cloud: True/False, if true display create cloud interface
     """
+    utils.pollinate(app.session_id, 'CS')
+
     if create_cloud:
         return controllers.use('newcloud').render(cloud)
-
-    utils.pollinate(app.session_id, 'CS')
 
 
 def render():

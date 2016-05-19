@@ -1,8 +1,16 @@
 from conjure.ui.views.variant import VariantView
-from conjure.models.bundle import BundleModel
-from conjure import juju
 from conjure import utils
+from conjure import charm
 from conjure.app_config import app
+
+
+def __get_bundles():
+    """ Grabs a list of bundles matching our spell
+    """
+    # TODO: Remove false once bundles are promulgated
+    res = charm.search(app.config['spell'], False)
+    if res['Total'] > 0:
+        return res['Results']
 
 
 def finish(name):
@@ -15,13 +23,11 @@ def finish(name):
 
 
 def render():
-    pass
-    # self.view = VariantView(self.app, self.finish)
-    # self.app.log.debug("Rendering GUI controller for Variant")
-    # pollinate(self.app.session_id, 'W001', self.app.log)
-    # config = self.app.config
-    # self.app.ui.set_header(
-    #     title=config['summary'],
-    #     excerpt=config['excerpt'],
-    # )
-    # self.app.ui.set_body(self.view)
+    view = VariantView(app, __get_bundles(), finish)
+    app.log.debug("Rendering GUI controller for Variant")
+    utils.pollinate(app.session_id, 'W001')
+    app.ui.set_header(
+        title='Select Solution',
+        excerpt='Please select which solution to deploy',
+    )
+    app.ui.set_body(view)

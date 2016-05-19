@@ -13,6 +13,16 @@ from conjure.utils import spew
 cs = 'https://api.jujucharms.com/v5'
 
 
+def get_file(bundle, dst):
+    """ Pulls a single file from the charmstore
+    """
+    bundle = path.join(cs, bundle, 'archive', dst)
+    req = requests.get(bundle)
+    if not req.ok:
+        raise Exception("Could not query file in charmstore: {}".format(req))
+    return req.json()
+
+
 def get_bundle(bundle, to_file=False):
     """ Attempts to grab the bundle.yaml
 
@@ -61,6 +71,7 @@ def search(tags, promulgated=True):
     query_str = "&tags=".join(tags)
     if promulgated:
         query_str += "&promulgated=1"
+    query_str += "&include=id"
     query = path.join(cs, 'search?tags={}'.format(query_str))
     req = requests.get(query)
     if not req.ok:

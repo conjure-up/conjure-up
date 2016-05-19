@@ -2,11 +2,13 @@ from conjure.ui.views.newcloud import NewCloudView
 from conjure.models.provider import Schema
 from conjure import utils
 from conjure import controllers
+from conjure import juju
 from conjure.app_config import app
 import os.path as path
 import yaml
 import petname
 import sys
+from ubuntui.ev import EventLoop
 
 this = sys.modules[__name__]
 this.cloud = None
@@ -27,6 +29,22 @@ def __format_creds(creds):
         else:
             formatted[k] = v.value
     return formatted
+
+
+def __handle_exception(exc):
+    utils.pollinate(app.session_id, 'EB')
+    return app.ui.show_exception_message(exc)
+
+
+def __handle_bootstrap_done(future):
+    app.log.debug("handle bootstrap")
+    result = future.result()
+    if result.returncode > 0:
+        app.log.error(result.stderr.decode())
+        return __handle_exception(Exception(result.stderr.decode()))
+    utils.pollinate(app.session_id, 'J004')
+    EventLoop.remove_alarms()
+    juju.switch(app.current_controller)
 
 
 def finish(credentials=None, back=False):
@@ -75,8 +93,23 @@ def finish(credentials=None, back=False):
         this.cloud = '{}/{}'.format(this.cloud,
                                     credentials['@maas-server'].value)
     utils.pollinate(app.session_id, 'CA')
-    controllers.use('jujucontroller').render(
-        this.cloud, bootstrap=True)
+
+    if app.current_controller is None:
+        app.current_controller = petname.Name()
+
+    # Set provider type for post-bootstrap
+    app.env['JUJU_PROVIDERTYPE'] = this.cloud
+
+    app.log.debug("Performing bootstrap: {} {}".format(
+        app.current_controller, this.cloud))
+    # future = juju.bootstrap_async(
+    #     controller=app.current_controller,
+    #     cloud=this.cloud,
+    #     exc_cb=__handle_exception)
+    # future.add_done_callback(
+    #     __handle_bootstrap_done)
+
+    controllers.use('variants').render()
 
 
 def render(cloud):
@@ -96,9 +129,7 @@ def render(cloud):
 
         app.log.debug("Found an IPv4 address, "
                       "assuming LXD is configured.")
-        return controllers.use('jujucontroller').render(
-            cloud='localhost', bootstrap=True)
-
+        controllers.use('variants').render()
     try:
         creds = Schema[cloud]
     except KeyError as e:

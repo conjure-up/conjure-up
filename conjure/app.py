@@ -164,12 +164,11 @@ def main():
 
     if hasattr(app.argv, 'cloud'):
         if endpoint_type not in ["charmstore", "deb"]:
-            print(endpoint_type)
             app.headless = True
             app.ui = None
         else:
-            utils.warning("Unable run a keyword search in headless mode, "
-                          "please provide a single bundle path.")
+            utils.error("Unable run a keyword search in headless mode, "
+                        "please provide a single bundle path.")
             sys.exit(1)
 
     app.env = os.environ.copy()
