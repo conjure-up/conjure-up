@@ -9,6 +9,9 @@ import os.path as path
 from tempfile import NamedTemporaryFile
 import shutil
 from conjure.utils import spew
+from conjure.app_config import app
+from subprocess import run, CalledProcessError, DEVNULL
+import json
 
 cs = 'https://api.jujucharms.com/v5'
 
@@ -62,7 +65,7 @@ def search(tags, promulgated=True):
 
     Usage:
     https://api.jujucharms.com/charmstore/v5/search?tags=conjure-openstack
-    &include=id&include=extra-info&type=bundle
+    &include=id&include=extra-info/conjure&type=bundel
 
     Arguments:
     tags: single or list of tags to search for
@@ -75,10 +78,26 @@ def search(tags, promulgated=True):
     query_str = "&tags=".join(tags)
     if promulgated:
         query_str += "&promulgated=1"
-    query_str += "&include=id&include=extra-info&type=bundle"
+    query_str += "&include=id&include=extra-info/conjure&type=bundle"
     query = path.join(cs, 'search?tags={}'.format(query_str))
     req = requests.get(query)
     if not req.ok:
         raise Exception(
             "Problem getting tagged bundles: {}".format(req))
     return req.json()
+
+
+def set_metadata(bundle_path, data):
+    """ Sets the proper extra-info metadata for a conjure-enabled
+    bundle.
+
+    Arguments:
+    bundle_path: remote path to bundle
+    data: dictionary of fields
+    """
+    try:
+        cmd = ("charm set {} conjure:='{}'".format(bundle_path,
+                                                   json.dumps(data)))
+        run(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+    except CalledProcessError as e:
+        app.log.warning("Could not set metadata: {}".format(e))
