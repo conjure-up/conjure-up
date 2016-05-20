@@ -20,6 +20,5 @@ setuptools.setup(
         "console_scripts": [
             "conjure-up = conjure.app:main"
         ]
-    },
-    install_requires=open('requirements.txt', 'r').readlines()
+    }
 )
