@@ -183,7 +183,7 @@ def main():
                       'spell': spell}
 
     if hasattr(app.argv, 'cloud'):
-        if app.fetcher not in ["charmstore", "deb"]:
+        if app.fetcher != "charmstore":
             app.headless = True
             app.ui = None
         else:
