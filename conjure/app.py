@@ -104,7 +104,7 @@ def main():
     global_conf_file = '/etc/conjure-up.conf'
     if not os.path.exists(global_conf_file):
         global_conf_file = os.path.join(
-            os.path.dirname(sys.argv[0]), 'etc', 'conjure-up.conf')
+            os.path.dirname(__file__), '..', 'etc', 'conjure-up.conf')
     global_conf = ConfigObj(global_conf_file)
 
     # Bind UI
