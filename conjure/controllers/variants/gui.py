@@ -27,7 +27,6 @@ def render():
     app.log.debug("Rendering GUI controller for Variant")
     utils.pollinate(app.session_id, 'W001')
     app.ui.set_header(
-        title='Select Solution',
-        excerpt='Please select which solution to deploy',
+        title='Spells'
     )
     app.ui.set_body(view)

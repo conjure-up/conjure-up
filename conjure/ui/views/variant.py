@@ -6,7 +6,6 @@ from ubuntui.widgets.buttons import (cancel_btn, menu_btn)
 from ubuntui.utils import Color, Padding
 from ubuntui.ev import EventLoop
 from conjure.utils import pollinate
-from conjure import charm
 
 
 class VariantView(WidgetWrap):
@@ -17,7 +16,7 @@ class VariantView(WidgetWrap):
         self.current_focus = 2
         _pile = [
             Padding.center_90(
-                Color.info_context(Text("Choose a solution to get started:"))),
+                Color.info_context(Text("Please choose a spell to conjure:"))),
             Padding.center_90(HR()),
             Padding.center_90(self.build_menuable_items()),
             Padding.line_break(""),
@@ -50,10 +49,10 @@ class VariantView(WidgetWrap):
         bundles = self.bundles
         cols = []
         for bundle in bundles:
-            bundle_path = bundle['Id'][3:]
-            metadata = charm.get_file(bundle_path, 'conjure/metadata.json')
-            name = metadata.get('friendly-name',
-                                bundle['Meta']['id']['Name'])
+            bundle_metadata = bundle['Meta']['bundle-metadata']
+            conjure_data = bundle['Meta']['extra-info/conjure']
+            name = conjure_data.get('friendly-name',
+                                    bundle['Meta']['id']['Name'])
             cols.append(
                 Columns(
                     [
@@ -62,8 +61,8 @@ class VariantView(WidgetWrap):
                                      on_press=self.done),
                             focus_map="menu_button focus")),
                         ("weight", 0.3, Text(
-                            metadata.get('description',
-                                         'Needs a description'),
+                            bundle_metadata.get('Description',
+                                                'Needs a description'),
                             align="left"))
                     ],
                     dividechars=1
