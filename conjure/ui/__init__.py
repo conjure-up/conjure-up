@@ -1,6 +1,7 @@
 from ubuntui.frame import Frame  # noqa
 from ubuntui.views import ErrorView
 from conjure import async
+from conjure.app_config import app
 from ubuntui.ev import EventLoop
 import errno
 
@@ -15,6 +16,7 @@ class ConjureUI(Frame):
         else:
             self.frame.body = ErrorView(ex.args[0])
 
+        app.log.exception("Showing dialog for exception:")
         EventLoop.remove_alarms()
 
     def show_error_message(self, msg):
