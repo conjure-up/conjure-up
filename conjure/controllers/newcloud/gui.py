@@ -47,6 +47,39 @@ def __handle_bootstrap_done(future):
     juju.switch(app.current_controller)
 
 
+def __do_bootstrap(credential=None):
+    """ We call this in two seperate places so add this for clarity
+    """
+    app.log.debug("Performing bootstrap: {} {}".format(
+        app.current_controller, this.cloud))
+
+    future = juju.bootstrap_async(
+        controller=app.current_controller,
+        cloud=this.cloud,
+        credential=credential,
+        exc_cb=__handle_exception)
+    future.add_done_callback(
+        __handle_bootstrap_done)
+
+
+def __do_creds_exist():
+    """ Check if credentials for existing cloud already exists so
+    we can bypass the cloud config view and go straight to bootstrapping
+    """
+    cred_path = path.join(utils.juju_path(), 'credentials.yaml')
+    if not path.isfile(cred_path):
+        return False
+
+    existing_creds = yaml.safe_load(open(cred_path))
+    if 'credentials' not in existing_creds:
+        return False
+
+    if this.cloud not in existing_creds['credentials'].keys():
+        return False
+
+    return True
+
+
 def finish(credentials=None, back=False):
     """ Load the Model controller passing along the selected cloud.
 
@@ -54,36 +87,26 @@ def finish(credentials=None, back=False):
     credentials: credentials to store for provider
     back: if true loads previous controller
     """
-    app.current_controller = petname.Name()
-
     if back:
         return controllers.use('clouds').render()
 
     cred_path = path.join(utils.juju_path(), 'credentials.yaml')
-    if not path.isfile(cred_path):
-        existing_creds = {
-                'credentials': {
-                    this.cloud: {
-                        app.current_controller: __format_creds(
-                            credentials)
-                    }
-                }
-            }
-
-    else:
+    try:
         existing_creds = yaml.safe_load(open(cred_path))
+    except:
+        existing_creds = {'credentials': {}}
 
-        if this.cloud in existing_creds['credentials'].keys():
-            c = existing_creds['credentials'][this.cloud]
-            c[app.current_controller] = __format_creds(
+    if this.cloud in existing_creds['credentials'].keys():
+        c = existing_creds['credentials'][this.cloud]
+        c[app.current_controller] = __format_creds(
+            credentials)
+    else:
+        # Handle the case where path exists but an entry for the cloud
+        # has yet to be added.
+        existing_creds['credentials'][this.cloud] = {
+            app.current_controller: __format_creds(
                 credentials)
-        else:
-            # Handle the case where path exists but an entry for the cloud
-            # has yet to be added.
-            existing_creds['credentials'][this.cloud] = {
-                app.current_controller: __format_creds(
-                    credentials)
-            }
+        }
 
     with open(cred_path, 'w') as cred_f:
         cred_f.write(yaml.safe_dump(existing_creds,
@@ -94,19 +117,8 @@ def finish(credentials=None, back=False):
                                     credentials['@maas-server'].value)
     utils.pollinate(app.session_id, 'CA')
 
-    if app.current_controller is None:
-        app.current_controller = petname.Name()
-
-    app.log.debug("Performing bootstrap: {} {}".format(
-        app.current_controller, this.cloud))
-    # future = juju.bootstrap_async(
-    #     controller=app.current_controller,
-    #     cloud=this.cloud,
-    #     exc_cb=__handle_exception)
-    # future.add_done_callback(
-    #     __handle_bootstrap_done)
-
-    controllers.use('variants').render()
+    __do_bootstrap()
+    return controllers.use('variants').render()
 
 
 def render(cloud):
@@ -117,6 +129,9 @@ def render(cloud):
     """
 
     this.cloud = cloud
+    if app.current_controller is None:
+        app.current_controller = petname.Name()
+
     app.env['JUJU_PROVIDERTYPE'] = this.cloud
 
     # LXD is a special case as we want to make sure a bridge
@@ -131,17 +146,19 @@ def render(cloud):
         app.log.debug("Found an IPv4 address, "
                       "assuming LXD is configured.")
 
-        if app.current_controller is None:
-            app.current_controller = petname.Name()
-
-        future = juju.bootstrap_async(
-            controller=app.current_controller,
-            cloud=this.cloud,
-            exc_cb=__handle_exception)
-        future.add_done_callback(
-            __handle_bootstrap_done)
-
+        __do_bootstrap()
         return controllers.use('variants').render()
+
+    # bootstrap if existing credentials are found for cloud
+    if __do_creds_exist():
+        try:
+            creds = juju.get_credential(this.cloud, app.current_controller)
+        except:
+            creds = juju.get_credentials()
+        __do_bootstrap(list(creds[this.cloud].keys())[0])
+        return controllers.use('variants').render()
+
+    # show credentials editor otherwise
     try:
         creds = Schema[this.cloud]
     except KeyError as e:

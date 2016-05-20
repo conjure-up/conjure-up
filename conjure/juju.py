@@ -96,7 +96,7 @@ def login(force=False):
     this.IS_AUTHENTICATED = True  # noqa
 
 
-def bootstrap(controller, cloud, series="xenial"):
+def bootstrap(controller, cloud, series="xenial", credential=None):
     """ Performs juju bootstrap
 
     If not LXD pass along the newly defined credentials
@@ -106,6 +106,7 @@ def bootstrap(controller, cloud, series="xenial"):
     cloud: name of local or public cloud to deploy to
     series: define the bootstrap series defaults to xenial
     log: application logger
+    credential: credentials key
     """
     cmd = "juju bootstrap {} {} --upload-tools " \
           "--config image-stream=daily ".format(
@@ -114,19 +115,21 @@ def bootstrap(controller, cloud, series="xenial"):
     cmd += "--config enable-os-upgrade=false "
     cmd += "--bootstrap-series={} ".format(series)
     if cloud != "localhost":
-        cmd += "--credential {}".format(controller)
+        cmd += "--credential {}".format(credential)
     app.log.debug("bootstrap cmd: {}".format(cmd))
     try:
-        run(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+        return run(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
     except CalledProcessError:
         raise Exception("Unable to bootstrap.")
 
 
-def bootstrap_async(controller, cloud, exc_cb=None):
+def bootstrap_async(controller, cloud, credential=None, exc_cb=None):
     """ Performs a bootstrap asynchronously
     """
-    return async.submit(partial(bootstrap, controller,
-                                cloud), exc_cb)
+    return async.submit(partial(bootstrap,
+                                controller=controller,
+                                cloud=cloud,
+                                credential=credential), exc_cb)
 
 
 def available():
