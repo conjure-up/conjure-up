@@ -101,6 +101,7 @@ def get_remote_url(path):
         "https://api.jujucharms.com/charmstore/v5/{}/archive".format(path),
     ]
     for r in remotes:
+        app.log.debug("Checking remote URL: {}".format(r))
         if remote_exists(r):
             return r
     return None

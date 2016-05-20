@@ -1,0 +1,3 @@
+# basic keyword definitions
+openstack: |
+  Juju makes it easy to deploy OpenStack at scale. Quickly and reliably build an enterprise-scale cloud run on Ubuntu - the most popular operating system for OpenStack.

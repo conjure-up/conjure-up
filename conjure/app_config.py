@@ -11,6 +11,9 @@ app = SimpleNamespace(
     # Contains metadata and spell name
     config=None,
 
+    # List of multiple bundles, usually from a charmstore search
+    bundles=None,
+
     # cli opts
     argv=None,
 

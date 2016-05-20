@@ -5,7 +5,8 @@ requests_oauthlib
 ws4py
 nose
 tox
-configobj
 bson
 termcolor
 petname
+six
+configobj

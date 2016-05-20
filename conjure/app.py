@@ -1,7 +1,6 @@
 """ Application entrypoint
 """
 
-from configobj import ConfigObj
 from conjure import __version__ as VERSION
 from conjure import async
 from conjure import controllers
@@ -20,6 +19,7 @@ import os
 import os.path as path
 import sys
 import uuid
+import yaml
 
 
 def parse_options(argv):
@@ -75,6 +75,28 @@ def has_valid_juju():
         sys.exit(1)
 
 
+def install_curated_spell(spell):
+    """ Installs the debian package associated with curated spell
+    """
+    if not utils.check_deb_installed(spell):
+        os.execl("/usr/share/conjure-up/do-apt-install",
+                 "/usr/share/conjure-up/do-apt-install",
+                 spell)
+
+
+def load_charmstore_results(spell, blessed):
+    """ Loads results from charmstore
+    """
+    # We process multiple bundles here with our keyword search
+    charmstore_results = charm.search(spell, blessed)
+    # Check charmstore
+    if charmstore_results['Total'] == 0:
+        utils.warning('Could not find spell in charmstore.')
+        sys.exit(1)
+
+    return charmstore_results['Results']
+
+
 def main():
     opts = parse_options(sys.argv[1:])
     if "/" in opts.spell:
@@ -82,7 +104,7 @@ def main():
     else:
         spell = opts.spell
 
-    endpoint_type = fetcher(opts.spell)
+    app.fetcher = fetcher(opts.spell)
 
     if os.geteuid() == 0:
         utils.info("")
@@ -105,46 +127,48 @@ def main():
     if not os.path.exists(global_conf_file):
         global_conf_file = os.path.join(
             os.path.dirname(__file__), '..', 'etc', 'conjure-up.conf')
-    global_conf = ConfigObj(global_conf_file)
+    with open(global_conf_file) as fp:
+        global_conf = yaml.safe_load(fp.read())
 
     # Bind UI
     app.ui = ConjureUI()
 
-    metadata = {'spell-dir': None, 'metadata': {}}
     if spell in global_conf['curated_spells']:
-        endpoint_type = "deb"
-        if not utils.check_deb_installed(spell):
-            os.execl("/usr/share/conjure-up/do-apt-install",
-                     "/usr/share/conjure-up/do-apt-install",
-                     spell)
+        install_curated_spell(spell)
 
-        app.config = {'metadata': metadata,
-                      'spell': spell}
+    spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
+        os.path.expanduser('~'),
+        '.cache/conjure-up'))
 
-    elif endpoint_type == "charmstore":
-        # We process multiple bundles here with our keyword search
-        is_charmstore_keyword = charm.search(spell, global_conf['blessed'])
-        # Check charmstore
-        if is_charmstore_keyword['Total'] == 0:
-            utils.warning('Could not find spell in charmstore.')
-            sys.exit(1)
+    if app.fetcher == "charmstore":
+        app.bundles = load_charmstore_results(spell, global_conf['blessed'])
         app.config = {'metadata': None,
+                      'spell-dir': spell_dir,
                       'spell': spell}
+
+        # Set a general description of spell
+        if path.isfile('/usr/share/conjure-up/keyword-definitions.yaml'):
+            with open('/usr/share/conjure-up/keyword-definitions.yaml') as fp:
+                definitions = yaml.safe_load(fp.read())
+        try:
+            app.config['description'] = definitions[spell]
+        except:
+            utils.warning(
+                "Failed to find a description for spell: {}, "
+                "and is a bug that should be filed.".format(spell))
 
     else:
         # Check cache dir for spells
-        spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
-            os.path.expanduser('~'),
-            '.cache/conjure-up', spell))
+        spell_dir = path.join(spell_dir, spell)
 
         metadata_path = path.join(spell_dir,
                                   'conjure/metadata.json')
-        metadata['spell-dir'] = spell_dir
+
         remote = get_remote_url(opts.spell)
         purge_top_level = True
         if remote is not None:
-            if endpoint_type == "charmstore" or \
-               endpoint_type == "charmstore-direct":
+            if app.fetcher == "charmstore" or \
+               app.fetcher == "charmstore-direct":
                 purge_top_level = False
             download(remote, spell_dir, purge_top_level)
         else:
@@ -152,13 +176,14 @@ def main():
             sys.exit(1)
 
         with open(metadata_path) as fp:
-            metadata.update(json.load(fp))
+            metadata = json.load(fp)
 
         app.config = {'metadata': metadata,
+                      'spell-dir': spell_dir,
                       'spell': spell}
 
     if hasattr(app.argv, 'cloud'):
-        if endpoint_type not in ["charmstore", "deb"]:
+        if app.fetcher not in ["charmstore", "deb"]:
             app.headless = True
             app.ui = None
         else:

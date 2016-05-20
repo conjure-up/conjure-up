@@ -78,7 +78,10 @@ def search(tags, promulgated=True):
     query_str = "&tags=".join(tags)
     if promulgated:
         query_str += "&promulgated=1"
-    query_str += "&include=id&include=extra-info/conjure&type=bundle"
+    query_str += "&include=bundle-metadata"
+    query_str += "&include=id"
+    query_str += "&include=extra-info/conjure"
+    query_str += "&type=bundle"
     query = path.join(cs, 'search?tags={}'.format(query_str))
     req = requests.get(query)
     if not req.ok:
