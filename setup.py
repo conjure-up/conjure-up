@@ -18,7 +18,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={
         "console_scripts": [
-            "conjure-up = conjure.app:main"
+            "conjure-up = conjure.app:main",
+            "conjure-craft = conjure.craft:main"
         ]
     }
 )

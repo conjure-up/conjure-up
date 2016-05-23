@@ -1,0 +1,4 @@
+{
+    "friendly-name": "Your spell title here",
+    "cloud-whitelist": ["aws", "azure"]
+}

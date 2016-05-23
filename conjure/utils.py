@@ -1,5 +1,6 @@
 import shutil
 import os
+import yaml
 from termcolor import colored
 from subprocess import run, check_call, CalledProcessError, DEVNULL
 from conjure.async import submit
@@ -182,3 +183,20 @@ def pollinate(session, tag):
         except CalledProcessError as e:
             app.log.warning("Generating random seed failed: {}".format(e))
     submit(do_pollinate, lambda _: None)
+
+
+def load_global_conf():
+    """ loads global configuration
+
+    Returns:
+    dictionary of config items
+    """
+    global_conf_file = '/etc/conjure-up.conf'
+    if not os.path.exists(global_conf_file):
+        global_conf_file = os.path.join(
+            os.path.dirname(__file__), '..', 'etc', 'conjure-up.conf')
+    try:
+        with open(global_conf_file) as fp:
+            return yaml.safe_load(fp.read())
+    except:
+        return {}
