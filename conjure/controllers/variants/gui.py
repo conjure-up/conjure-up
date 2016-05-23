@@ -3,6 +3,10 @@ from conjure import utils
 from conjure import charm
 from conjure import controllers
 from conjure.app_config import app
+from conjure.download import download, get_remote_url
+import sys
+import json
+import os.path as path
 
 
 def __get_bundles():
@@ -14,13 +18,40 @@ def __get_bundles():
         return res['Results']
 
 
-def finish(name):
-    """ Finalizes welcome controller
+def finish(spell):
+    """ Finalizes and downloads chosen variant
 
     Arguments:
-    name: name of charm/bundle to use
+    spell: name of charm/bundle to use
     """
+    app.log.debug("Chosen spell: {}".format(spell))
     utils.pollinate(app.session_id, 'B001')
+
+    # Check cache dir for spells
+    spell_dir = path.join(app.config['spell-dir'],
+                          path.basename(spell))
+
+    metadata_path = path.join(spell_dir,
+                              'conjure/metadata.json')
+
+    remote = get_remote_url(spell)
+    purge_top_level = True
+    if remote is not None:
+        if app.fetcher == "charmstore" or \
+           app.fetcher == "charmstore-direct":
+            purge_top_level = False
+        download(remote, spell_dir, purge_top_level)
+    else:
+        utils.warning("Could not find spell: {}".format(spell))
+        sys.exit(1)
+
+    with open(metadata_path) as fp:
+        metadata = json.load(fp)
+
+    app.config = {'metadata': metadata,
+                  'spell-dir': spell_dir,
+                  'spell': spell}
+
     return controllers.use('deploy').render(app.current_controller)
 
 

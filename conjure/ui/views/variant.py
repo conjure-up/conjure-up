@@ -13,6 +13,7 @@ class VariantView(WidgetWrap):
         self.app = app
         self.bundles = bundles
         self.cb = cb
+        self.fname_id_map = {}
         self.current_focus = 2
         _pile = [
             Padding.center_90(
@@ -53,6 +54,7 @@ class VariantView(WidgetWrap):
             conjure_data = bundle['Meta']['extra-info/conjure']
             name = conjure_data.get('friendly-name',
                                     bundle['Meta']['id']['Name'])
+            self.fname_id_map[name] = bundle['Meta']['id']['Id']
             cols.append(
                 Columns(
                     [
@@ -76,4 +78,4 @@ class VariantView(WidgetWrap):
         EventLoop.exit(0)
 
     def done(self, result):
-        self.cb(result.label)
+        self.cb(self.fname_id_map[result.label])

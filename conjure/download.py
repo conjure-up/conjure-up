@@ -95,6 +95,11 @@ def get_remote_url(path):
                "/{}/bundle/{}/archive".format(namespace, bundle))
         return url
 
+    if path.startswith("cs:"):
+        url = ("https://api.jujucharms.com/charmstore/v5"
+               "/{}/archive".format(path[3:]))
+        return url
+
     remotes = [
         "https://github.com/{}/archive/master.zip".format(path),
         "https://bitbucket.org/{}/get/master.zip".format(path),

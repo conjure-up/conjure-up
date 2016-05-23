@@ -5,7 +5,6 @@ from conjure import controllers
 from conjure.api.models import model_info
 from conjure.app_config import app
 from conjure.charm import get_bundle
-from conjure.models.bundle import BundleModel
 from conjure.ui.views.service_walkthrough import ServiceWalkthroughView
 from conjure.utils import pollinate
 import sys
@@ -38,22 +37,11 @@ def render(model):
     # exposed in future processing tasks
     app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
 
-    # Grab bundle and deploy or render placement if MAAS
-    try:
-        this.bundle_filename = get_bundle(BundleModel.to_entity(),
-                                          to_file=True)
-    except Exception as e:
-        return app.ui.show_exception_message(e)
-
-    metadata_filename = app.config['metadata_filename']
-    config_filename = app.config['config_filename']
-
     bundleplacer_cfg = Config(
         'bundle-placer',
         {'bundle_filename': this.bundle_filename,
-         'metadata_filename': metadata_filename,
-         'config_filename': config_filename,
-         'bundle_key': BundleModel.key(),
+         # 'metadata_filename': metadata_filename,
+         'bundle_key': None,
          'provider_type': info['ProviderType']})
 
     this.placement_controller = PlacementController(
