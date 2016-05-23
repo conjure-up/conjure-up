@@ -118,7 +118,7 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
         cmd += "--credential {}".format(credential)
     app.log.debug("bootstrap cmd: {}".format(cmd))
     try:
-        return run(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+        return run(cmd, shell=True, stdout=DEVNULL, stderr=PIPE)
     except CalledProcessError:
         raise Exception("Unable to bootstrap.")
 
