@@ -15,8 +15,6 @@ from conjure.ui.widgets.service_walkthrough_widget import (
     ServiceWalkthroughWidget
 )
 
-import q
-
 
 class ServiceWalkthroughView(WidgetWrap):
     def __init__(self, app, deploy_controller,
@@ -55,7 +53,6 @@ class ServiceWalkthroughView(WidgetWrap):
     def select_widget_at(self, idx, prev_idx=None):
         if idx >= len(self.walkthrough_widgets):
             return False
-        q.q(idx, prev_idx)
         self.pile.selected_index = self.current_widget_idx
         cw = self.walkthrough_widgets[self.current_widget_idx]
         cw.set_selected(True)

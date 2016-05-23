@@ -1,14 +1,8 @@
 """ Service walkthrough widget
 """
-import logging
-
-import q
-
 from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.input import IntegerEditor
 from urwid import connect_signal, Divider, WidgetWrap, Text, Padding, Pile
-
-log = logging.getLogger('service_walkthrough')
 
 
 class ServiceWalkthroughWidget(WidgetWrap):
@@ -67,7 +61,6 @@ class ServiceWalkthroughWidget(WidgetWrap):
         else:
             self._set_pile([])
 
-    @q.t
     def set_selected(self, now_selected):
         if self.is_deployed:
             return
@@ -75,9 +68,6 @@ class ServiceWalkthroughWidget(WidgetWrap):
         if now_selected:
             self.update_selected_undeployed()
             self.pile.selected_index = 4
-
-        q.q(self.pile.selected_index)
-        q.q(self.pile.contents)
 
     def handle_scale_changed(self, sender, value):
         self.deploy_controller.handle_service_scale_change(self.service, value)
