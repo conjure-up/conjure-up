@@ -40,10 +40,10 @@ def __post_bootstrap_exec():
     """ Executes post-bootstrap.sh if exists
     """
     _post_bootstrap_sh = path.join(app.config['metadata']['spell-dir'],
-                                   'scripts/post-bootstrap.sh')
+                                   'steps/00_post-bootstrap.sh')
     if path.isfile(_post_bootstrap_sh) \
        and os.access(_post_bootstrap_sh, os.X_OK):
-        app.ui.set_footer('Running post-bootstrap tasks.')
+        app.ui.set_footer('Running additional environment tasks.')
         utils.pollinate(app.session_id, 'J001')
         app.log.debug("post_bootstrap running: {}".format(
             _post_bootstrap_sh

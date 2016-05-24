@@ -4,10 +4,10 @@ from bundleplacer.controller import PlacementController, BundleWriter
 from conjure import controllers
 from conjure.api.models import model_info
 from conjure.app_config import app
-from conjure.charm import get_bundle
 from conjure.ui.views.service_walkthrough import ServiceWalkthroughView
 from conjure.utils import pollinate
 import sys
+import os.path as path
 
 this = sys.modules[__name__]
 this.placement_controller = None
@@ -39,7 +39,7 @@ def render(model):
 
     bundleplacer_cfg = Config(
         'bundle-placer',
-        {'bundle_filename': this.bundle_filename,
+        {'bundle_filename': path.join(app.config['spell-dir'], 'bundle.yaml'),
          # 'metadata_filename': metadata_filename,
          'bundle_key': None,
          'provider_type': info['ProviderType']})
@@ -52,7 +52,7 @@ def render(model):
         this.placement_controller, bundleplacer_cfg)
 
     this.walkthrough_view = ServiceWalkthroughView(
-        app, this.placement_controller)
+        app, this, this.placement_controller)
 
     app.ui.set_subheader("Service Walkthrough")
     app.ui.set_body(this.walkthrough_view)
