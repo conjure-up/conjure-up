@@ -385,7 +385,10 @@ def get_models():
 
 
 def get_current_model():
-    return get_models()['current-model']
+    try:
+        return get_models()['current-model']
+    except:
+        return None
 
 
 def version():

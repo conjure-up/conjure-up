@@ -146,7 +146,11 @@ def render(cloud):
         app.log.debug("Found an IPv4 address, "
                       "assuming LXD is configured.")
 
-        __do_bootstrap()
+        cloud_type = 'lxd'
+        if juju.get_current_model():
+            if not juju.get_model(juju.get_current_model())['type'] \
+               == cloud_type:
+                __do_bootstrap()
         return controllers.use('variants').render()
 
     # bootstrap if existing credentials are found for cloud
@@ -155,7 +159,10 @@ def render(cloud):
             creds = juju.get_credential(this.cloud, app.current_controller)
         except:
             creds = juju.get_credentials()
-        __do_bootstrap(list(creds[this.cloud].keys())[0])
+        if juju.get_current_model():
+            if not juju.get_model(juju.get_current_model())['type'] \
+               == juju.get_cloud(this.cloud)['type']:
+                __do_bootstrap(list(creds[this.cloud].keys())[0])
         return controllers.use('variants').render()
 
     # show credentials editor otherwise
