@@ -147,7 +147,7 @@ class JujuControllerController:
             return self.handle_exception(Exception(
                 "Unable to determine a controller to bootstrap"))
         else:
-            controllers = Juju.controllers().keys()
+            controllers = Juju.controllers()['controllers'].keys()
             models = {}
             for c in controllers:
                 Juju.switch(c)

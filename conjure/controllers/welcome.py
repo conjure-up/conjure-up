@@ -25,7 +25,7 @@ class WelcomeController:
 
         BundleModel.bundle = deploy_key
         pollinate(self.app.session_id, 'B001', self.app.log)
-        if Juju.controllers() is None:
+        if Juju.controllers()['controllers'] is None:
             self.app.controllers['clouds'].render()
         else:
             self.app.controllers['jujucontroller'].render()

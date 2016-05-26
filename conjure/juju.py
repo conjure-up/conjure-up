@@ -255,11 +255,8 @@ class Juju:
     def current_controller(cls):
         """ Grabs the current default controller
         """
-        env = os.path.join(juju_path(), 'current-controller')
-        if not os.path.isfile(env):
-            return None
-        with open(env) as fp:
-            return fp.read().strip()
+        controllers = cls.controllers()
+        return controllers.get('current-controller', None)
 
     @classmethod
     def controller(cls, controller):
@@ -269,8 +266,8 @@ class Juju:
         controller: controller id
         """
         controllers = cls.controllers()
-        if controllers and controller in controllers:
-            return controllers[controller]
+        if controllers and controller in controllers['controllers']:
+            return controllers['controllers'][controller]
         return None
 
     @classmethod
@@ -305,7 +302,7 @@ class Juju:
             raise JujuNotFoundException(
                 "Unable to list controllers: {}".format(sh.errors()))
         env = json.loads(sh.output()[0])
-        return env['controllers']
+        return env
 
     @classmethod
     def account(cls, controller):

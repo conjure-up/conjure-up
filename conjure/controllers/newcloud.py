@@ -90,7 +90,7 @@ class NewCloudController:
         # is configured. If not we'll bring up a new view to allow
         # a user to configure a LXD bridge with suggested network
         # information.
-        if cloud == 'lxd':
+        if cloud == 'lxd' or cloud == 'localhost':
             if path.isfile('/etc/default/lxd-bridge'):
                 cfg = ConfigObj('/etc/default/lxd-bridge')
             else:

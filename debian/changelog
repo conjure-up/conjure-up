@@ -1,3 +1,10 @@
+conjure-up (0.1.2) xenial-proposed; urgency=medium
+
+  * Fix 'creds' KeyError traceback on cloud selection (LP: #1586131)
+  * Support Juju beta7
+
+ -- Adam Stokes <adam.stokes@ubuntu.com>  Thu, 26 May 2016 14:47:10 -0400
+
 conjure-up (0.1.1) xenial-proposed; urgency=medium
 
   * Retry on JSON errors (LP: #1575377)
