@@ -3,15 +3,15 @@
 Api for the charmstore:
 https://github.com/juju/charmstore/blob/v5/docs/API.md
 """
-import yaml
-import requests
-import os.path as path
-from tempfile import NamedTemporaryFile
-import shutil
-from conjure.utils import spew
 from conjure.app_config import app
+from conjure.utils import spew
 from subprocess import run, CalledProcessError, DEVNULL
+from tempfile import NamedTemporaryFile
 import json
+import os.path as path
+import requests
+import shutil
+import yaml
 
 cs = 'https://api.jujucharms.com/v5'
 
