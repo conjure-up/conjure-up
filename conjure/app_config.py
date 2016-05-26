@@ -14,6 +14,9 @@ app = SimpleNamespace(
     # List of multiple bundles, usually from a charmstore search
     bundles=None,
 
+    # Selected bundle from a Variant view
+    current_bundle=None,
+
     # cli opts
     argv=None,
 

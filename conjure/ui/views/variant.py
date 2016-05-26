@@ -6,12 +6,11 @@ from ubuntui.widgets.buttons import (cancel_btn, menu_btn)
 from ubuntui.utils import Color, Padding
 from ubuntui.ev import EventLoop
 from conjure.utils import pollinate
+from conjure.app_config import app
 
 
 class VariantView(WidgetWrap):
-    def __init__(self, app, bundles, cb):
-        self.app = app
-        self.bundles = bundles
+    def __init__(self, cb):
         self.cb = cb
         self.fname_id_map = {}
         self.current_focus = 2
@@ -47,14 +46,13 @@ class VariantView(WidgetWrap):
     def build_menuable_items(self):
         """ Builds a list of bundles available to install
         """
-        bundles = self.bundles
         cols = []
-        for bundle in bundles:
+        for bundle in app.bundles:
             bundle_metadata = bundle['Meta']['bundle-metadata']
             conjure_data = bundle['Meta']['extra-info/conjure']
             name = conjure_data.get('friendly-name',
                                     bundle['Meta']['id']['Name'])
-            self.fname_id_map[name] = bundle['Meta']['id']['Id']
+            self.fname_id_map[name] = bundle
             cols.append(
                 Columns(
                     [
@@ -74,7 +72,7 @@ class VariantView(WidgetWrap):
         return Pile(cols)
 
     def cancel(self, button):
-        pollinate(self.app.session_id, 'UC')
+        pollinate(app.session_id, 'UC')
         EventLoop.exit(0)
 
     def done(self, result):

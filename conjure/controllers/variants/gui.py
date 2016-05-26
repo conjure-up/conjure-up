@@ -1,6 +1,5 @@
 from conjure.ui.views.variant import VariantView
 from conjure import utils
-from conjure import charm
 from conjure import controllers
 from conjure.app_config import app
 from conjure.download import download, get_remote_url
@@ -9,32 +8,27 @@ import json
 import os.path as path
 
 
-def __get_bundles():
-    """ Grabs a list of bundles matching our spell
-    """
-    # TODO: Remove false once bundles are promulgated
-    res = charm.search(app.config['spell'], False)
-    if res['Total'] > 0:
-        return res['Results']
-
-
 def finish(spell):
     """ Finalizes and downloads chosen variant
 
     Arguments:
-    spell: name of charm/bundle to use
+    spell: dictionary of charm/bundle to use
     """
-    app.log.debug("Chosen spell: {}".format(spell))
-    utils.pollinate(app.session_id, 'B001')
+    app.current_bundle = spell['Meta']['bundle-metadata']
+
+    spell_name = spell['Meta']['id']['Name']
 
     # Check cache dir for spells
     spell_dir = path.join(app.config['spell-dir'],
-                          path.basename(spell))
+                          spell_name)
+
+    app.log.debug("Chosen spell: {}".format(spell_name))
+    utils.pollinate(app.session_id, 'B001')
 
     metadata_path = path.join(spell_dir,
                               'conjure/metadata.json')
 
-    remote = get_remote_url(spell)
+    remote = get_remote_url(spell['Id'])
     purge_top_level = True
     if remote is not None:
         if app.fetcher == "charmstore" or \
@@ -50,13 +44,13 @@ def finish(spell):
 
     app.config = {'metadata': metadata,
                   'spell-dir': spell_dir,
-                  'spell': spell}
+                  'spell': spell_name}
 
     return controllers.use('deploy').render(app.current_controller)
 
 
 def render():
-    view = VariantView(app, __get_bundles(), finish)
+    view = VariantView(finish)
     app.log.debug("Rendering GUI controller for Variant")
     utils.pollinate(app.session_id, 'W001')
     app.ui.set_header(
