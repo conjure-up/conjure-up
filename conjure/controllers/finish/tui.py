@@ -53,7 +53,7 @@ def render():
 
         if os.access(step, os.X_OK):
             utils.info(
-                "Running {}".format(common.parse_description(step)))
+                "Running: {}".format(common.parse_description(step)))
         try:
             sh = common.run_script(step)
             result = json.loads(sh.stdout.decode('utf8'))

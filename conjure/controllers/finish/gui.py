@@ -6,6 +6,7 @@ from conjure import async
 from conjure.app_config import app
 from conjure import utils
 from . import common
+from glob import glob
 import os.path as path
 import os
 import json
@@ -16,9 +17,9 @@ this = sys.modules[__name__]
 this.post_exec_pollinate = False
 this.pre_exec_pollinate = False
 this.bundle = path.join(
-    app.config['metadata']['spell-dir'], 'bundle.yaml')
+    app.config['spell-dir'], 'bundle.yaml')
 this.bundle_scripts = path.join(
-    app.config['metadata']['spell-dir'], 'conjure/steps'
+    app.config['spell-dir'], 'conjure/steps'
 )
 
 
@@ -115,37 +116,26 @@ def __post_exec(*args):
     """ Executes a bundles post processing script if exists
     """
 
-    # post step processing
-    # steps = sorted(glob(os.path.join(this.bundle_scripts, '*.sh')))
-    # for step in steps:
-    #     if "00_pre.sh" in step or "00_post-bootstrap.sh" in step:
-    #         app.log.debug("Skipping pre and post-bootstrap steps.")
-    #         continue
-
-    #     if os.access(step, os.X_OK):
-    #         utils.info(
-    #             "Running {}".format(common.parse_description(step)))
-    #     try:
-    #         sh = common.run_script(step)
-    #         result = json.loads(sh.stdout.decode('utf8'))
-    #         app.log.debug("post execution done: {}".format(result))
-    #     except CalledProcessError as e:
-    #         utils.warning(
-    #             "Failure in step: {}".format(e))
-    #         sys.exit(1)
-    # _post_exec_sh = path.join(this.bundle_scripts, 'post.sh')
-
     if not this.post_exec_pollinate:
         # We dont want to keep pollinating since this routine could
         # run multiple times
         utils.pollinate(app.session_id, 'XB')
         this.post_exec_pollinate = True
 
-    # app.log.debug("post_exec running: {}".format(_post_exec_sh))
-    # future = async.submit(partial(common.run_script,
-    #                               _post_exec_sh),
-    #                       __handle_post_exception)
-    # future.add_done_callback(__post_exec_done)
+    # post step processing
+    steps = sorted(glob(os.path.join(this.bundle_scripts, '*.sh')))
+    for step in steps:
+        if "00_pre.sh" in step or "00_post-bootstrap.sh" in step:
+            app.log.debug("Skipping pre and post-bootstrap steps.")
+            continue
+
+        if os.access(step, os.X_OK):
+            app.ui.set_footer(
+                "Running {}".format(common.parse_description(step)))
+        future = async.submit(partial(common.run_script,
+                                      step),
+                              __handle_post_exception)
+        future.add_done_callback(__post_exec_done)
 
 
 def __post_exec_done(future):

@@ -65,7 +65,7 @@ def search(tags, promulgated=True):
 
     Usage:
     https://api.jujucharms.com/charmstore/v5/search?tags=conjure-openstack
-    &include=id&include=extra-info/conjure&type=bundel
+    &include=id&include=extra-info/conjure&type=bundle
 
     Arguments:
     tags: single or list of tags to search for
