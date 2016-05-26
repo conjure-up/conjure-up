@@ -30,7 +30,7 @@ def render(cloud):
     else:
         app.current_controller = juju.get_current_controller()
 
-    post_bootstrap_sh = os.path.join(app.config['metadata']['spell-dir'],
+    post_bootstrap_sh = os.path.join(app.config['spell-dir'],
                                      'steps/00_post-bootstrap.sh')
     if os.path.isfile(post_bootstrap_sh) \
        and os.access(post_bootstrap_sh, os.X_OK):

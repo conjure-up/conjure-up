@@ -16,9 +16,9 @@ def finish():
 
 def render():
     bundle = os.path.join(
-        app.config['metadata']['spell-dir'], 'bundle.yaml')
+        app.config['spell-dir'], 'bundle.yaml')
     bundle_scripts = os.path.join(
-        app.config['metadata']['spell-dir'], 'conjure/steps'
+        app.config['spell-dir'], 'conjure/steps'
     )
 
     pre_exec_sh = os.path.join(bundle_scripts, '00_pre.sh')
