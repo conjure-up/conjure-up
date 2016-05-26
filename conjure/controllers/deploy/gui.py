@@ -2,7 +2,6 @@ from bundleplacer.charmstore_api import MetadataController
 from bundleplacer.config import Config
 from bundleplacer.controller import PlacementController, BundleWriter
 from conjure import controllers
-from conjure.api.models import model_info
 from conjure.app_config import app
 from conjure.ui.views.service_walkthrough import ServiceWalkthroughView
 from conjure.utils import pollinate
@@ -31,18 +30,16 @@ def finish(back=False):
 
 def render(model):
     app.current_model = model
-    info = model_info(app.current_model)
-
-    # Set our provider type environment var so that it is
-    # exposed in future processing tasks
-    app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
 
     bundleplacer_cfg = Config(
         'bundle-placer',
-        {'bundle_filename': path.join(app.config['spell-dir'], 'bundle.yaml'),
-         # 'metadata_filename': metadata_filename,
-         'bundle_key': None,
-         'provider_type': info['ProviderType']})
+        {
+            'bundle_filename': path.join(app.config['spell-dir'],
+                                         'bundle.yaml'),
+            # 'metadata_filename': metadata_filename,
+            'bundle_key': None,
+            # 'provider_type': info['ProviderType']
+        })
 
     this.placement_controller = PlacementController(
         maas_state=None,

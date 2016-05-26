@@ -2,6 +2,7 @@ from . import common
 from conjure.app_config import app
 from conjure import utils
 from conjure import juju
+from conjure.api.models import model_info
 from subprocess import CalledProcessError
 import json
 import os
@@ -15,6 +16,11 @@ def finish():
 
 
 def render():
+    info = model_info(app.current_model)
+    # Set our provider type environment var so that it is
+    # exposed in future processing tasks
+    app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
+
     bundle = os.path.join(
         app.config['spell-dir'], 'bundle.yaml')
     bundle_scripts = os.path.join(

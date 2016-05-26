@@ -5,6 +5,7 @@ from functools import partial
 from conjure import async
 from conjure.app_config import app
 from conjure import utils
+from conjure.api.models import model_info
 from . import common
 from glob import glob
 import os.path as path
@@ -173,6 +174,11 @@ def __refresh(*args):
 def render():
     """ Render services status view
     """
+    info = model_info(app.current_model)
+    # Set our provider type environment var so that it is
+    # exposed in future processing tasks
+    app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
+
     view = ServicesView(app)
 
     app.ui.set_header(
