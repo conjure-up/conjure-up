@@ -4,7 +4,7 @@ conjure-up (0.2.1) yakkety; urgency=medium
   * Support Juju beta7
   * Retry on JSON errors (LP: #1575377)
 
- -- Michael McCracken <mike.mccracken@canonical.com>  Wed, 20 Apr 2016 13:50:00 -0700
+ -- Adam Stokes <adam.stokes@ubuntu.com>  Fri, 27 May 2016 08:34:40 -0400
 
 conjure-up (0.2.0) yakkety; urgency=medium
 
