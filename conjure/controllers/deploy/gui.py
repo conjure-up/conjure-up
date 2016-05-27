@@ -28,8 +28,7 @@ def finish(back=False):
     pollinate(app.session_id, 'PC')
 
 
-def render(model):
-    app.current_model = model
+def render(controller):
 
     bundleplacer_cfg = Config(
         'bundle-placer',
