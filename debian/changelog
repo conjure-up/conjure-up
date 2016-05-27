@@ -1,13 +1,15 @@
-conjure-up (0.1.2) xenial-proposed; urgency=medium
+conjure-up (0.2.1) yakkety; urgency=medium
 
   * Fix 'creds' KeyError traceback on cloud selection (LP: #1586131)
   * Support Juju beta7
-
- -- Adam Stokes <adam.stokes@ubuntu.com>  Thu, 26 May 2016 14:47:10 -0400
-
-conjure-up (0.1.1) xenial-proposed; urgency=medium
-
   * Retry on JSON errors (LP: #1575377)
+
+ -- Michael McCracken <mike.mccracken@canonical.com>  Wed, 20 Apr 2016 13:50:00 -0700
+
+conjure-up (0.2.0) yakkety; urgency=medium
+
+  * Allow charm config options in bundle to be modified
+  * Retry processing on empty JSON results
 
  -- Michael McCracken <mike.mccracken@canonical.com>  Wed, 20 Apr 2016 13:50:00 -0700
 
