@@ -23,6 +23,12 @@ info() {
     logger -t "conjure-up/$name" "[INFO] $@"
 }
 
+log() {
+    if [ $CONJURE_UP_HEADLESS ]; then
+        echo -e "\e[32m\e[1m[ info ]\e[0m $@]"
+    fi
+}
+
 # Gets current juju state for machine
 #
 # Arguments:
