@@ -4,77 +4,77 @@ List out the updated bundle in a cleaner view showing what
 charms and their relations will be done.
 """
 
-from urwid import WidgetWrap, Pile, Filler
+from urwid import (connect_signal, Divider, Filler, WidgetWrap, Pile,
+                   Text, Padding)
 from ubuntui.widgets.buttons import PlainButton
-from ubuntui.widgets.text import Instruction
-from ubuntui.widgets.hr import HR
-from ubuntui.utils import Padding
-from ubuntui.ev import EventLoop
-
-from conjure.ui.widgets.service_walkthrough_widget import (
-    ServiceWalkthroughWidget
-)
+from ubuntui.widgets.input import IntegerEditor
 
 
 class ServiceWalkthroughView(WidgetWrap):
-    def __init__(self, app, deploy_controller,
-                 placement_controller):
-        self.app = app
-        self.deploy_controller = deploy_controller
-        self.placement_controller = placement_controller
-        self.walkthrough_widgets = []
-        self.current_widget_idx = 0
+    def __init__(self, service, idx, n_total, metadata_controller, callback):
+        self.callback = callback
+        self.service = service
+        self.idx = idx
+        self.n_total = n_total
+        self.n_remaining = n_total - idx - 1
+        self.metadata_controller = metadata_controller
         w = self.build_widgets()
         super().__init__(w)
 
-    def build_widgets(self):
-        self.continue_button = PlainButton("Accept defaults and continue",
-                                           self.handle_done)
-        self.walkthrough_widgets = [ServiceWalkthroughWidget(
-            s, self.app.metadata_controller, self.deploy_controller)
-                                for s in self.placement_controller.services()]
-        pile_ws = [
-            Padding.center_90(
-                Instruction(
-                    "Services Walkthrough")),
-            Padding.center_90(HR()),
-            Padding.center_50(self.continue_button)] + \
-            [Padding.center_70(w) for w in
-             self.walkthrough_widgets]
-        self.pile = Pile(pile_ws)
-        self.select_widget_at(self.current_widget_idx)
-        return Filler(self.pile, valign="top")
-
-    def update(self, *args, **kwargs):
-        for w in self.walkthrough_widgets:
-            w.update()
-        EventLoop.set_alarm_in(1, self.update)
-
-    def select_widget_at(self, idx, prev_idx=None):
-        if idx >= len(self.walkthrough_widgets):
-            return False
-        self.pile.selected_index = self.current_widget_idx
-        cw = self.walkthrough_widgets[self.current_widget_idx]
-        cw.set_selected(True)
-        cw.update()
-
-        if prev_idx:
-            pw = self.walkthrough_widgets[prev_idx]
-            pw.set_selected(False)
-            pw.update()
+    def selectable(self):
         return True
 
-    def handle_done(self, button):
-        self.deploy_controller.finish()
+    def build_widgets(self):
+        self.description_w = Text("Description Loading…")
+        self.metadata_controller.get_charm_info(
+            self.service.csid.as_str_without_rev(),
+            self.handle_info_updated)
+        self.readme_w = Text("README Loading…")
 
-    def handle_service_scale_change(self, service, value):
-        pass
+        self.metadata_controller.get_readme(
+            self.service.csid.as_seriesname(),
+            self.handle_readme_updated)
+        self.scale_edit = IntegerEditor(caption="Units: ", default=1)
+        connect_signal(self.scale_edit._edit, 'change',
+                       self.handle_scale_changed)
+        self.continue_button = PlainButton("Deploy and Configure Next Service",
+                                           self.do_deploy)
+        self.skip_rest_button = PlainButton(
+            "Deploy all {} Remaining Services with Bundle Defaults".format(
+                self.n_remaining),
+            self.do_skip_rest
+        )
+        ws = [Text("{}/{}: {}".format(self.idx+1, self.n_total,
+                                      self.service.service_name)),
+              Padding(self.description_w, left=2),
+              Divider(),
+              Padding(self.readme_w, left=2),
+              Divider(),
+              Padding(self.scale_edit, align='right'),
+              Padding(self.continue_button,
+                      align='right', width=70),
+              Padding(self.skip_rest_button,
+                      align='right', width=70)]
 
-    def handle_service_ctype_change(self, service, value):
-        pass
+        self.pile = Pile(ws)
+        return Padding(Filler(self.pile, valign="middle"),
+                       align="center", width=('relative', 60))
 
-    def handle_service_deploy(self, service):
-        self.current_widget_idx += 1
-        if not self.select_widget_at(self.current_widget_idx,
-                                     self.current_widget_idx - 1):
-            self.pile.selected_index = 2
+    def handle_info_updated(self, new_info):
+        self.description_w.set_text(
+            new_info["Meta"]["charm-metadata"]["Summary"])
+        # TODO MMCC save metadata and use options here
+
+    def handle_readme_updated(self, readme_text_f):
+        self.readme_w.set_text(readme_text_f.result())
+
+    def handle_scale_changed(self, widget, newvalstr):
+        if newvalstr == '':
+            return
+        self.service.num_units = int(newvalstr)
+
+    def do_deploy(self, arg):
+        self.callback(service=self.service)
+
+    def do_skip_rest(self, arg):
+        self.callback(service=None)

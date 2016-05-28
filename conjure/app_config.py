@@ -32,6 +32,9 @@ app = SimpleNamespace(
     # Application logger
     log=None,
 
+    # Charm store metadata API client
+    metadata_controller=None,
+
     # Application environment passed to processing steps
     env=None,
 

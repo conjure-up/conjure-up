@@ -1,70 +1,72 @@
+import sys
+from operator import attrgetter
+import os.path as path
+
+
 from bundleplacer.charmstore_api import MetadataController
 from bundleplacer.config import Config
-from bundleplacer.controller import PlacementController, BundleWriter
+from bundleplacer.bundle import Bundle
 from conjure import controllers
 from conjure.app_config import app
 from conjure.ui.views.service_walkthrough import ServiceWalkthroughView
 from conjure.utils import pollinate
-import sys
-import os.path as path
 
 this = sys.modules[__name__]
-this.placement_controller = None
 this.bundle_filename = None
-this.walkthrough_view = None
+this.bundle = None
+this.svc_idx = 0
 
 
-def finish(back=False):
-    """ handles deployment
+def finish(back=False, service=None):
+    """handles deployment
 
     Arguments:
     back: if true returns to previous controller
+
+    service: a dict for the service that was just configured. finish
+    will deploy it and call render() again to display the next one.
+
+    if service is None, continues to next controller
+
     """
     if back:
         return controllers.use('jujucontroller').render()
 
-    bw = BundleWriter(this.placement_controller)
-    bw.write_bundle(this.bundle_filename)
+    if service:
+        # TODO do deploy of service
+        this.svc_idx += 1
+        return render()
+    else:
+        return controllers.use('finish').render()
+    
     pollinate(app.session_id, 'PC')
 
 
-def render(controller):
+def render():
+    this.bundle_filename = path.join(app.config['spell-dir'], 'bundle.yaml')
 
     bundleplacer_cfg = Config(
         'bundle-placer',
         {
-            'bundle_filename': path.join(app.config['spell-dir'],
-                                         'bundle.yaml'),
-            # 'metadata_filename': metadata_filename,
+            'bundle_filename': this.bundle_filename,
             'bundle_key': None,
-            # 'provider_type': info['ProviderType']
         })
 
-    this.placement_controller = PlacementController(
-        maas_state=None,
-        config=bundleplacer_cfg)
+    if not this.bundle:
+        this.bundle = Bundle(filename=this.bundle_filename)
+    
+    if not app.metadata_controller:
+        app.metadata_controller = MetadataController(this.bundle,
+                                                     bundleplacer_cfg)
+    n_total = len(this.bundle.services)
+    if this.svc_idx >= n_total:
+        finish(service=None)
+    services = sorted(this.bundle.services, key=attrgetter('service_name'))
+    service = services[this.svc_idx]
 
-    app.metadata_controller = MetadataController(
-        this.placement_controller, bundleplacer_cfg)
+    wv = ServiceWalkthroughView(service, this.svc_idx, n_total,
+                                app.metadata_controller, finish)
 
-    this.walkthrough_view = ServiceWalkthroughView(
-        app, this, this.placement_controller)
+    app.ui.set_subheader("Review and Configure Services")
+    app.ui.set_body(wv)
 
-    app.ui.set_subheader("Service Walkthrough")
-    app.ui.set_body(this.walkthrough_view)
-    this.walkthrough_view.update()
-
-
-def __handle_service_scale_change(service, value):
-    ""
-    this.walkthrough_view.handle_service_scale_change(service, value)
-
-
-def __handle_service_ctype_change(service, value):
-    ""
-    this.walkthrough_view.handle_service_ctype_change(service, value)
-
-
-def __handle_service_deploy(service):
-    "TODO: deploy one at a time eventually"
-    this.walkthrough_view.handle_service_deploy(service)

@@ -13,6 +13,7 @@ import os.path as path
 import petname
 import sys
 
+
 this = sys.modules[__name__]
 this.cloud = None
 this.bootstrap = None
@@ -75,7 +76,7 @@ def __post_bootstrap_done(future):
     app.log.debug("Switching to controller: {}".format(
         app.current_controller))
     juju.switch(app.current_controller)
-    controllers.use('deploy').render(app.current_controller)
+    controllers.use('deploy').render()
 
 
 def finish(controller=None, back=False):
@@ -106,7 +107,7 @@ def finish(controller=None, back=False):
         utils.pollinate(app.session_id, 'J003')
 
     else:
-        controllers.use('deploy').render(app.current_controller)
+        controllers.use('deploy').render()
 
 
 def render(cloud=None, bootstrap=None):
