@@ -20,6 +20,7 @@ import yaml
 from bundleplacer.assignmenttype import AssignmentType, label_to_atype
 from bundleplacer.consts import DEFAULT_SERIES
 from bundleplacer.service import Service
+from bundleplacer.charmstore_api import CharmStoreID
 
 log = logging.getLogger('bundleplacer')
 
@@ -197,6 +198,21 @@ class Bundle:
             services.append(create_service(servicename, sd,
                                            sm, relations))
         return services
+
+    @property
+    def charm_ids(self):
+        seen = set()
+        return [s.charm_source for s in self.services
+                if s.charm_source not in seen and not seen.add(s.charm_source)]
+
+    def services_with_charm_id(self, charm_id):
+        l = []
+        csid = CharmStoreID(charm_id)
+        id_no_rev = csid.as_str_without_rev()
+        for service in self.services:
+            if service.csid.as_str_without_rev() == id_no_rev:
+                l.append(service)
+        return l
 
     @property
     def machines(self):

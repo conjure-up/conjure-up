@@ -87,12 +87,12 @@ class CharmStoreID:
 
 class MetadataController:
 
-    def __init__(self, placement_controller, config, error_cb=None):
-        self.placement_controller = placement_controller
+    def __init__(self, bundle, config, error_cb=None):
+        self.bundle = bundle
         self.config = config
         self.error_cb = error_cb
-        self.series = placement_controller.bundle.series
-        self.charm_ids = placement_controller.charm_ids()
+        self.series = bundle.series
+        self.charm_ids = bundle.charm_ids
         # charm_name : charm_metadata full dict
         self.charm_info = {}
         # charm_name : requires/provides lists
@@ -225,9 +225,8 @@ class MetadataController:
         else:
             cs = self.charms_providing_iface[iface]
         for relname, charm_id in cs:
-            pc = self.placement_controller
             services += [(relname, s) for s in
-                         pc.services_with_charm_id(charm_id)]
+                         self.bundle.services_with_charm_id(charm_id)]
 
         return services
 

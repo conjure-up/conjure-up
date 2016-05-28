@@ -74,8 +74,8 @@ class PlacementView(WidgetWrap):
         self.showing_overlay = False
         self.showing_graph_split = False
         self.show_scc_graph = False
-        self.metadata_controller = MetadataController(placement_controller,
-                                                      config)
+        self.bundle = placement_controller.bundle
+        self.metadata_controller = MetadataController(self.bundle, config)
         w = self.build_widgets()
         super().__init__(w)
         self.reset_selections(top=True)  # calls self.update

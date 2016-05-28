@@ -384,20 +384,6 @@ class PlacementController:
         return [s.charm_name for s in self.bundle.services
                 if s.charm_name not in seen and not seen.add(s.charm_name)]
 
-    def charm_ids(self):
-        seen = set()
-        return [s.charm_source for s in self.bundle.services
-                if s.charm_source not in seen and not seen.add(s.charm_source)]
-
-    def services_with_charm_id(self, charm_id):
-        l = []
-        csid = CharmStoreID(charm_id)
-        id_no_rev = csid.as_str_without_rev()
-        for service in self.bundle.services:
-            if service.csid.as_str_without_rev() == id_no_rev:
-                l.append(service)
-        return l
-
     @property
     def assigned_services(self):
         """Returns a deduplicated list of all services that have a placement
