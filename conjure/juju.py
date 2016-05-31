@@ -369,6 +369,16 @@ def get_model(name):
         "Unable to find model: {}".format(name))
 
 
+def add_model(name):
+    """ Adds a model to current controller
+    """
+    sh = run('juju add-mode {}'.format(name),
+             shell=True, stdout=DEVNULL, stderr=PIPE)
+    if sh.returncode > 0:
+        raise Exception(
+            "Unable to create model: {}".format(sh.stderr.decode('utf8')))
+
+
 def get_models():
     """ List available models
 

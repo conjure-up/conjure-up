@@ -46,7 +46,7 @@ def finish(spell):
                   'spell-dir': spell_dir,
                   'spell': spell_name}
 
-    return controllers.use('deploy').render(app.current_controller)
+    return controllers.use('deploy').render()
 
 
 def render():
