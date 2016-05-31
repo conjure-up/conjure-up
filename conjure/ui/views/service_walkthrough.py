@@ -20,6 +20,7 @@ class ServiceWalkthroughView(WidgetWrap):
         self.metadata_controller = metadata_controller
         w = self.build_widgets()
         super().__init__(w)
+        self.pile.focus_position = 6
 
     def selectable(self):
         return True
@@ -51,7 +52,7 @@ class ServiceWalkthroughView(WidgetWrap):
               Padding(self.description_w, left=2),
               Divider(),
               Padding(self.readme_w, left=2),
-              Divider(),
+              Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}"),
               Padding(self.scale_edit, align='right'),
               Padding(self.continue_button,
                       align='right', width=70),
