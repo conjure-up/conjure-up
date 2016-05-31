@@ -3,11 +3,17 @@ from conjure.models.provider import Schema
 from conjure import utils
 from conjure import controllers
 from conjure import juju
+from conjure import async
 from conjure.app_config import app
 import os.path as path
 import yaml
 import petname
 import sys
+import json
+import os
+from functools import partial
+from subprocess import check_output
+
 from ubuntui.ev import EventLoop
 
 this = sys.modules[__name__]
@@ -45,6 +51,7 @@ def __handle_bootstrap_done(future):
     utils.pollinate(app.session_id, 'J004')
     EventLoop.remove_alarms()
     juju.switch(app.current_controller)
+    __post_bootstrap_exec()
 
 
 def __do_bootstrap(credential=None):
@@ -62,6 +69,51 @@ def __do_bootstrap(credential=None):
         __handle_bootstrap_done)
 
 
+def __post_bootstrap_exec():
+    """ Executes post-bootstrap.sh if exists
+    """
+    # Set provider type for post-bootstrap
+    app.env['JUJU_PROVIDERTYPE'] = this.cloud
+
+    _post_bootstrap_sh = path.join(app.config['metadata']['spell-dir'],
+                                   'steps/00_post-bootstrap.sh')
+    if path.isfile(_post_bootstrap_sh) \
+       and os.access(_post_bootstrap_sh, os.X_OK):
+        app.ui.set_footer('Running additional environment tasks.')
+        utils.pollinate(app.session_id, 'J001')
+        app.log.debug("post_bootstrap running: {}".format(
+            _post_bootstrap_sh
+        ))
+        try:
+            future = async.submit(partial(check_output,
+                                          _post_bootstrap_sh,
+                                          shell=True,
+                                          env=app.env),
+                                  __handle_exception)
+            future.add_done_callback(__post_bootstrap_done)
+        except Exception as e:
+            return __handle_exception(e)
+
+
+def __post_bootstrap_done(future):
+    try:
+        result = json.loads(future.result().decode('utf8'))
+    except Exception as e:
+        return __handle_exception(e)
+
+    app.log.debug("post_bootstrap_done: {}".format(result))
+    if result['returnCode'] > 0:
+        utils.pollinate(app.session_id, 'E001')
+        return __handle_exception(Exception(
+            'There was an error during the post '
+            'bootstrap processing phase: {}.'.format(result)))
+    utils.pollinate(app.session_id, 'J002')
+    app.log.debug("Switching to controller: {}".format(
+        app.current_controller))
+    juju.switch(app.current_controller)
+    controllers.use('deploy').render(app.current_controller)
+
+
 def __do_creds_exist():
     """ Check if credentials for existing cloud already exists so
     we can bypass the cloud config view and go straight to bootstrapping
@@ -76,7 +128,6 @@ def __do_creds_exist():
 
     if this.cloud not in existing_creds['credentials'].keys():
         return False
-
     return True
 
 
