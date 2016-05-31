@@ -10,7 +10,7 @@ import sys
 
 
 def finish():
-    controllers.use('deploy').render(app.current_controller)
+    controllers.use('deploy').render()
 
 
 def render(cloud):
