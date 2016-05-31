@@ -66,7 +66,18 @@ class ServiceWalkthroughView(WidgetWrap):
         # TODO MMCC save metadata and use options here
 
     def handle_readme_updated(self, readme_text_f):
-        self.readme_w.set_text(readme_text_f.result())
+        rls = readme_text_f.result().splitlines()
+        rls = [l for l in rls if not l.startswith("#")]
+        nrls = []
+        for i in range(len(rls)):
+            if len(nrls) == 20:
+                break
+            if i+1 == len(rls):
+                break
+            if rls[i].startswith("+") or rls[i+1].startswith("="):
+                continue
+            nrls.append(rls[i])
+        self.readme_w.set_text("\n".join(nrls))
 
     def handle_scale_changed(self, widget, newvalstr):
         if newvalstr == '':
