@@ -26,9 +26,11 @@ class ServiceWalkthroughView(WidgetWrap):
 
     def build_widgets(self):
         self.description_w = Text("Description Loading…")
-        self.metadata_controller.get_charm_info(
+        info = self.metadata_controller.get_charm_info(
             self.service.csid.as_str_without_rev(),
             self.handle_info_updated)
+        if info:
+            self.handle_info_updated(info)
         self.readme_w = Text("README Loading…")
 
         self.metadata_controller.get_readme(
