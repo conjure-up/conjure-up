@@ -38,7 +38,7 @@ def finish(back=False, service=None):
         return render()
     else:
         return controllers.use('finish').render()
-    
+
     pollinate(app.session_id, 'PC')
 
 
@@ -54,7 +54,7 @@ def render():
 
     if not this.bundle:
         this.bundle = Bundle(filename=this.bundle_filename)
-    
+
     if not app.metadata_controller:
         app.metadata_controller = MetadataController(this.bundle,
                                                      bundleplacer_cfg)
@@ -69,4 +69,3 @@ def render():
 
     app.ui.set_subheader("Review and Configure Services")
     app.ui.set_body(wv)
-
