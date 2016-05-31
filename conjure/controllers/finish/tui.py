@@ -1,15 +1,15 @@
 from . import common
-from conjure.app_config import app
-from conjure import utils
+from collections import deque
 from conjure import juju
+from conjure import utils
 from conjure.api.models import model_info
+from conjure.app_config import app
+from glob import glob
 from subprocess import CalledProcessError
 import json
 import os
 import sys
 import time
-from collections import deque
-from glob import glob
 
 
 def finish():
