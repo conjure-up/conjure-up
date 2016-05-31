@@ -11,7 +11,10 @@ def finish():
 
 def render():
     if app.argv.cloud not in juju.get_clouds().keys():
-        utils.warning("Unknown Cloud: {}".format(app.argv.cloud))
+        formatted_clouds = ", ".join(juju.get_clouds().keys())
+        utils.warning("Unknown Cloud: {}, please choose "
+                      "from one of the following: {}".format(app.argv.cloud,
+                                                             formatted_clouds))
         sys.exit(1)
     utils.info(
         "Summoning {} to {}".format(app.argv.spell, app.argv.cloud))
