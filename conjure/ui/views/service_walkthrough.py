@@ -87,13 +87,24 @@ class ServiceWalkthroughView(WidgetWrap):
         rls = [l for l in rls if not l.startswith("#")]
         nrls = []
         for i in range(len(rls)):
-            if len(nrls) == 20:
-                break
             if i+1 == len(rls):
                 break
-            if rls[i].startswith("+") or rls[i+1].startswith("="):
-                continue
+            if len(rls[i]) > 0:
+                if rls[i][0] in ['-', '#', '=']:
+                    continue
+            if len(rls[i+1]) > 0:
+                if rls[i+1][0] in ['-', '=']:
+                    continue
             nrls.append(rls[i])
+        if nrls[0] == '':
+            nrls = nrls[1:]
+        # split after two paragraphs:
+        firstparidx = nrls.index('')
+        try:
+            splitidx = nrls.index('', firstparidx + 1)
+        except:
+            splitidx = firstparidx
+        nrls = nrls[:splitidx]
         self.readme_w.set_text("\n".join(nrls))
 
     def handle_scale_changed(self, widget, newvalstr):
