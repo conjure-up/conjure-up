@@ -37,7 +37,7 @@ def finish(back=False, service=None):
         this.svc_idx += 1
         return render()
     else:
-        return controllers.use('finish').render()
+        return controllers.use('steps').render()
 
     pollinate(app.session_id, 'PC')
 
