@@ -11,7 +11,7 @@ def finish():
     back: if true returns to previous controller
     """
     utils.pollinate(app.session_id, 'PC')
-    controllers.use('finish').render()
+    controllers.use('steps').render()
 
 
 def render():
