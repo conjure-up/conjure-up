@@ -4,10 +4,12 @@ List out the updated bundle in a cleaner view showing what
 charms and their relations will be done.
 """
 
-from urwid import (connect_signal, Divider, Filler, WidgetWrap, Pile,
-                   Text, Padding)
+from urwid import (connect_signal, Filler, WidgetWrap, Pile,
+                   Text, Columns)
 from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.input import IntegerEditor
+from ubuntui.widgets.hr import HR
+from ubuntui.utils import Color, Padding
 
 
 class ServiceWalkthroughView(WidgetWrap):
@@ -20,7 +22,7 @@ class ServiceWalkthroughView(WidgetWrap):
         self.metadata_controller = metadata_controller
         w = self.build_widgets()
         super().__init__(w)
-        self.pile.focus_position = 6
+        self.pile.focus_position = 7
 
     def selectable(self):
         return True
@@ -37,7 +39,7 @@ class ServiceWalkthroughView(WidgetWrap):
         self.metadata_controller.get_readme(
             self.service.csid.as_seriesname(),
             self.handle_readme_updated)
-        self.scale_edit = IntegerEditor(caption="Units: ", default=1)
+        self.scale_edit = IntegerEditor(default=1)
         connect_signal(self.scale_edit._edit, 'change',
                        self.handle_scale_changed)
         self.continue_button = PlainButton("Deploy and Configure Next Service",
@@ -47,21 +49,31 @@ class ServiceWalkthroughView(WidgetWrap):
                 self.n_remaining),
             self.do_skip_rest
         )
+        col = Columns(
+            [
+                (6, Text('Units:', align='right')),
+                (15,
+                 Color.string_input(self.scale_edit,
+                                    focus_map='string_input focus'))
+            ], dividechars=1
+        )
         ws = [Text("{}/{}: {}".format(self.idx+1, self.n_total,
                                       self.service.service_name)),
-              Padding(self.description_w, left=2),
-              Divider(),
-              Padding(self.readme_w, left=2),
-              Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}"),
-              Padding(self.scale_edit, align='right'),
-              Padding(self.continue_button,
-                      align='right', width=70),
-              Padding(self.skip_rest_button,
-                      align='right', width=70)]
+              Padding.center(self.description_w, left=2),
+              Padding.line_break(""),
+              Padding.center(self.readme_w, left=2),
+              Padding.center(HR()),
+              Padding.left(col, left=1),
+              Padding.line_break(""),
+              Padding.right_50(
+                  Color.button_primary(self.continue_button,
+                                       focus_map='button_primary focus')),
+              Padding.right_50(
+                  Color.button_secondary(self.skip_rest_button,
+                                         focus_map='button_secondary focus'))]
 
         self.pile = Pile(ws)
-        return Padding(Filler(self.pile, valign="middle"),
-                       align="center", width=('relative', 60))
+        return Padding.center_90(Filler(self.pile, valign="middle"))
 
     def handle_info_updated(self, new_info):
         self.description_w.set_text(
