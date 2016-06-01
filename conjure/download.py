@@ -20,7 +20,7 @@ def fetcher(spell):
     Returns:
     Endpoint type
     """
-    if spell.startswith('~'):
+    if spell.startswith('~') or spell.startswith('cs:~'):
         return "charmstore-direct"
     if "/" in spell:
         return "vcs"

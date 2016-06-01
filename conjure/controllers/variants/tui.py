@@ -3,7 +3,7 @@ from conjure import controllers
 from conjure.app_config import app
 
 
-def finish(name):
+def finish():
     """ Finalizes welcome controller
 
     Arguments:
