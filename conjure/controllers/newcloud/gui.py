@@ -50,6 +50,7 @@ def __handle_bootstrap_done(future):
         return __handle_exception(Exception(result.stderr.decode()))
     utils.pollinate(app.session_id, 'J004')
     EventLoop.remove_alarms()
+    app.ui.set_footer('Bootstrap complete...')
     juju.switch(app.current_controller)
     __post_bootstrap_exec()
 
@@ -59,6 +60,8 @@ def __do_bootstrap(credential=None):
     """
     app.log.debug("Performing bootstrap: {} {}".format(
         app.current_controller, this.cloud))
+
+    app.ui.set_footer('Bootstrapping environment in the background...')
 
     future = juju.bootstrap_async(
         controller=app.current_controller,
@@ -79,7 +82,7 @@ def __post_bootstrap_exec():
                                    'steps/00_post-bootstrap.sh')
     if path.isfile(_post_bootstrap_sh) \
        and os.access(_post_bootstrap_sh, os.X_OK):
-        app.ui.set_footer('Running additional environment tasks.')
+        app.ui.set_footer('Running additional environment tasks...')
         utils.pollinate(app.session_id, 'J001')
         app.log.debug("post_bootstrap running: {}".format(
             _post_bootstrap_sh
@@ -108,6 +111,7 @@ def __post_bootstrap_done(future):
             'There was an error during the post '
             'bootstrap processing phase: {}.'.format(result)))
     utils.pollinate(app.session_id, 'J002')
+    app.ui.set_footer('')
     app.log.debug("Switching to controller: {}".format(
         app.current_controller))
     juju.switch(app.current_controller)
