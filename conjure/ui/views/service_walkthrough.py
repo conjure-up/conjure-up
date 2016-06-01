@@ -11,6 +11,8 @@ from ubuntui.widgets.input import IntegerEditor
 from ubuntui.widgets.hr import HR
 from ubuntui.utils import Color, Padding
 
+from bundleplacer.ui.options_column import OptionWidget
+
 
 class ServiceWalkthroughView(WidgetWrap):
     def __init__(self, service, idx, n_total, metadata_controller, callback):
@@ -22,6 +24,7 @@ class ServiceWalkthroughView(WidgetWrap):
         self.metadata_controller = metadata_controller
         w = self.build_widgets()
         super().__init__(w)
+        self.get_async_info()
         self.pile.focus_position = 8
 
     def selectable(self):
@@ -29,16 +32,7 @@ class ServiceWalkthroughView(WidgetWrap):
 
     def build_widgets(self):
         self.description_w = Text("Description Loading…")
-        info = self.metadata_controller.get_charm_info(
-            self.service.csid.as_str_without_rev(),
-            self.handle_info_updated)
-        if info:
-            self.handle_info_updated(info)
         self.readme_w = Text("README Loading…")
-
-        self.metadata_controller.get_readme(
-            self.service.csid.as_seriesname(),
-            self.handle_readme_updated)
         self.scale_edit = IntegerEditor(default=1)
         connect_signal(self.scale_edit._edit, 'change',
                        self.handle_scale_changed)
@@ -77,10 +71,39 @@ class ServiceWalkthroughView(WidgetWrap):
         self.pile = Pile(ws)
         return Padding.center_90(Filler(self.pile, valign="top"))
 
+    def get_async_info(self):
+        info = self.metadata_controller.get_charm_info(
+            self.service.csid.as_str_without_rev(),
+            self.handle_info_updated)
+        if info:
+            self.handle_info_updated(info)
+
+        self.metadata_controller.get_readme(
+            self.service.csid.as_seriesname(),
+            self.handle_readme_updated)
+
     def handle_info_updated(self, new_info):
         self.description_w.set_text(
             new_info["Meta"]["charm-metadata"]["Summary"])
-        # TODO MMCC save metadata and use options here
+        service_id = self.service.csid.as_str_without_rev()
+        options = self.metadata_controller.get_options(service_id)
+        for opname, opdict in sorted(options.items()):
+            self.add_option_widget(opname, opdict)
+
+    def add_option_widget(self, opname, opdict):
+        cv = self.service.options.get(opname, None)
+        ow = OptionWidget(opname,
+                          opdict['Type'],
+                          opdict['Description'],
+                          opdict['Default'],
+                          current_value=cv,
+                          value_changed_callback=self.handle_edit)
+
+        self.pile.contents.insert(7, (ow, self.pile.options()))
+        return ow
+
+    def handle_edit(self, opname, value):
+        self.service.options[opname] = value
 
     def handle_readme_updated(self, readme_text_f):
         rls = readme_text_f.result().splitlines()
