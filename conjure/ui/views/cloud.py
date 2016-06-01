@@ -3,7 +3,7 @@ from urwid import (WidgetWrap, Pile,
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.text import Instruction
-from ubuntui.widgets.buttons import cancel_btn, menu_btn
+from ubuntui.widgets.buttons import quit_btn, menu_btn
 
 
 class CloudView(WidgetWrap):
@@ -28,7 +28,7 @@ class CloudView(WidgetWrap):
             self._w.body.focus_position = 2
 
     def _build_buttons(self):
-        cancel = cancel_btn(on_press=self.cancel)
+        cancel = quit_btn(on_press=self.cancel)
         buttons = [
             Padding.line_break(""),
             Color.button_secondary(cancel,
@@ -38,7 +38,7 @@ class CloudView(WidgetWrap):
 
     def _build_widget(self):
         total_items = [
-            Padding.center_60(Instruction("Clouds")),
+            Padding.center_60(Instruction("Choose a Cloud")),
             Padding.center_60(HR())
         ]
         for item in self.clouds:
@@ -57,7 +57,7 @@ class CloudView(WidgetWrap):
         total_items.append(
             Padding.center_60(HR()))
         total_items.append(Padding.center_20(self._build_buttons()))
-        return Filler(Pile(total_items), valign='middle')
+        return Filler(Pile(total_items), valign='top')
 
     def submit(self, result):
         self.cb(result.label)

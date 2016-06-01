@@ -20,14 +20,17 @@ class Header(WidgetWrap):
         self._subheader = Text(subheader, align='center')
         widgets = []
         if self._title is not None:
-            widgets.append(Color.frame_header(Text(self._title.upper())))
+            widgets.append(Color.frame_header(Padding.line_break("")))
+            widgets.append(Color.frame_header(
+                Padding.left(Text(self._title.upper()), left=2)))
+            widgets.append(Color.frame_header(Padding.line_break("")))
         widgets.append(Color.frame_subheader(self._subheader))
         if self._excerpt is not None:
             widgets.append(Text(""))
             widgets.append(
                 Padding.center_90(
                     Text(("body", self._excerpt))))
-            widgets.append(Text(""))
+        widgets.append(Text(""))
         super().__init__(Pile(widgets))
 
     @property

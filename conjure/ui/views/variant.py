@@ -1,8 +1,7 @@
 from __future__ import unicode_literals
 from urwid import (WidgetWrap, Text, Pile,
                    Columns, Filler)
-from ubuntui.widgets.hr import HR
-from ubuntui.widgets.buttons import (cancel_btn, menu_btn)
+from ubuntui.widgets.buttons import (quit_btn, menu_btn)
 from ubuntui.utils import Color, Padding
 from ubuntui.ev import EventLoop
 from conjure.utils import pollinate
@@ -15,9 +14,7 @@ class VariantView(WidgetWrap):
         self.fname_id_map = {}
         self.current_focus = 2
         _pile = [
-            Padding.center_90(
-                Color.info_context(Text("Please choose a spell to conjure:"))),
-            Padding.center_90(HR()),
+            Padding.line_break(""),
             Padding.center_90(self.build_menuable_items()),
             Padding.line_break(""),
             Padding.center_20(self.buttons())
@@ -36,7 +33,7 @@ class VariantView(WidgetWrap):
         return super().keypress(size, key)
 
     def buttons(self):
-        cancel = cancel_btn(on_press=self.cancel)
+        cancel = quit_btn(on_press=self.cancel)
 
         buttons = [
             Color.button_secondary(cancel, focus_map='button_secondary focus')
