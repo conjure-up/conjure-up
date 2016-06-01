@@ -103,11 +103,11 @@ def __deploy_bundle():
 
 def __deploy_bundle_done(future):
     result = future.result()
-    app.log.debug("deploy_bundle_done: {}".format(result.output()))
-    if result.code > 0:
+    app.log.debug("deploy_bundle_done: {}".format(result))
+    if result.returncode > 0:
         __handle_exception("ED", Exception(
             'There was an error deploying the bundle: {}.'.format(
-                result.errors())))
+                result.stderr.decode('utf8'))))
         return
     app.ui.set_footer('Deploy committed, waiting...')
     utils.pollinate(app.session_id, 'DC')
