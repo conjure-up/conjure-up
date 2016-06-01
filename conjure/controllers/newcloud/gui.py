@@ -200,15 +200,10 @@ def render(cloud):
 
     # bootstrap if existing credentials are found for cloud
     if __do_creds_exist():
-        try:
-            creds = juju.get_credential(this.cloud, app.current_controller)
-        except:
-            creds = juju.get_credentials()
-        if juju.get_current_model():
-            if not juju.get_model(juju.get_current_model())['type'] \
-               == juju.get_cloud(this.cloud)['type']:
-                __do_bootstrap(list(creds[this.cloud].keys())[0])
-        return controllers.use('variants').render()
+        creds = juju.get_credentials()[this.cloud]
+        if len(creds.keys()) > 0:
+            __do_bootstrap(list(creds.keys())[0])
+            return controllers.use('variants').render()
 
     # show credentials editor otherwise
     try:
