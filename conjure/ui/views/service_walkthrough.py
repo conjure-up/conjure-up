@@ -22,7 +22,7 @@ class ServiceWalkthroughView(WidgetWrap):
         self.metadata_controller = metadata_controller
         w = self.build_widgets()
         super().__init__(w)
-        self.pile.focus_position = 7
+        self.pile.focus_position = 8
 
     def selectable(self):
         return True
@@ -42,10 +42,11 @@ class ServiceWalkthroughView(WidgetWrap):
         self.scale_edit = IntegerEditor(default=1)
         connect_signal(self.scale_edit._edit, 'change',
                        self.handle_scale_changed)
-        self.continue_button = PlainButton("Deploy and Configure Next Service",
-                                           self.do_deploy)
+        self.continue_button = PlainButton(
+            "Deploy and Configure Next Application",
+            self.do_deploy)
         self.skip_rest_button = PlainButton(
-            "Deploy all {} Remaining Services with Bundle Defaults".format(
+            "Deploy all {} Remaining Applications with Bundle Defaults".format(
                 self.n_remaining),
             self.do_skip_rest
         )
@@ -57,8 +58,9 @@ class ServiceWalkthroughView(WidgetWrap):
                                     focus_map='string_input focus'))
             ], dividechars=1
         )
-        ws = [Text("{}/{}: {}".format(self.idx+1, self.n_total,
-                                      self.service.service_name)),
+        ws = [Text("{} of {}: {}".format(self.idx+1, self.n_total,
+                                         self.service.service_name.upper())),
+              Padding.center(HR()),
               Padding.center(self.description_w, left=2),
               Padding.line_break(""),
               Padding.center(self.readme_w, left=2),
@@ -73,7 +75,7 @@ class ServiceWalkthroughView(WidgetWrap):
                                          focus_map='button_secondary focus'))]
 
         self.pile = Pile(ws)
-        return Padding.center_90(Filler(self.pile, valign="middle"))
+        return Padding.center_90(Filler(self.pile, valign="top"))
 
     def handle_info_updated(self, new_info):
         self.description_w.set_text(

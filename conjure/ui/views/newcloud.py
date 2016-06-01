@@ -1,4 +1,4 @@
-from ubuntui.widgets.buttons import (confirm_btn, cancel_btn)
+from ubuntui.widgets.buttons import (confirm_btn, back_btn)
 from ubuntui.widgets.text import Instruction
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.hr import HR
@@ -19,7 +19,7 @@ class NewCloudView(WidgetWrap):
             Padding.line_break(""),
             Padding.center_20(self.buttons())
         ]
-        super().__init__(Filler(Pile(_pile), valign="middle"))
+        super().__init__(Filler(Pile(_pile), valign="top"))
 
     def _swap_focus(self):
         if self._w.body.focus_position == 2:
@@ -33,8 +33,8 @@ class NewCloudView(WidgetWrap):
         return super().keypress(size, key)
 
     def buttons(self):
-        confirm = confirm_btn(on_press=self.submit)
-        cancel = cancel_btn(on_press=self.cancel)
+        confirm = confirm_btn(on_press=self.submit, label="Add credential")
+        cancel = back_btn(on_press=self.cancel)
 
         buttons = [
             Color.button_primary(confirm, focus_map='button_primary focus'),

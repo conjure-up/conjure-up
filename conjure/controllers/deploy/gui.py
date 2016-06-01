@@ -62,5 +62,5 @@ def render():
     wv = ServiceWalkthroughView(service, this.svc_idx, n_total,
                                 app.metadata_controller, finish)
 
-    app.ui.set_subheader("Review and Configure Services")
+    app.ui.set_header("Review and Configure Applications")
     app.ui.set_body(wv)

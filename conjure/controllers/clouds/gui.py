@@ -35,7 +35,7 @@ def render():
                      finish)
 
     app.ui.set_header(
-        title="Choose a Public Cloud",
+        title="Choose a Cloud",
         excerpt=excerpt
     )
     app.ui.set_body(view)

@@ -54,6 +54,6 @@ def render():
     app.log.debug("Rendering GUI controller for Variant")
     utils.pollinate(app.session_id, 'W001')
     app.ui.set_header(
-        title='Spells'
+        title='Please choose a spell to conjure'
     )
     app.ui.set_body(view)
