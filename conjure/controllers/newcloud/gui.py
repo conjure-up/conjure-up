@@ -75,7 +75,7 @@ def __post_bootstrap_exec():
     # Set provider type for post-bootstrap
     app.env['JUJU_PROVIDERTYPE'] = this.cloud
 
-    _post_bootstrap_sh = path.join(app.config['metadata']['spell-dir'],
+    _post_bootstrap_sh = path.join(app.config['spell-dir'],
                                    'steps/00_post-bootstrap.sh')
     if path.isfile(_post_bootstrap_sh) \
        and os.access(_post_bootstrap_sh, os.X_OK):

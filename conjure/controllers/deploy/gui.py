@@ -17,21 +17,16 @@ this.bundle = None
 this.svc_idx = 0
 
 
-def finish(back=False, service=None):
+def finish(service=None):
     """handles deployment
 
     Arguments:
-    back: if true returns to previous controller
-
     service: a dict for the service that was just configured. finish
     will deploy it and call render() again to display the next one.
 
     if service is None, continues to next controller
 
     """
-    if back:
-        return controllers.use('jujucontroller').render()
-
     if service:
         # TODO do deploy of service
         this.svc_idx += 1

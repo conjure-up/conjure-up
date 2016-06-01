@@ -69,6 +69,9 @@ class Padding:
     """
     line_break = partialmethod(Text)
     hr = partialmethod(Divider, "\N{BOX DRAWINGS LIGHT HORIZONTAL}", 1, 1)
+    center = partialmethod(_Padding, align='center')
+    left = partialmethod(_Padding, align='left')
+    right = partialmethod(_Padding, align='right')
 
 
 def apply_style_map(cls):
