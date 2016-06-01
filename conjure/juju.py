@@ -251,8 +251,8 @@ def deploy(bundle):
             charmstore path.
     """
     try:
-        run('juju deploy {}'.format(bundle), shell=True, check=True,
-            stdout=DEVNULL, stderr=DEVNULL)
+        return run('juju deploy {}'.format(bundle), shell=True,
+                   stdout=DEVNULL, stderr=PIPE)
     except CalledProcessError as e:
         raise e
 

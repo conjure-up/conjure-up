@@ -15,6 +15,7 @@ import sys
 
 
 this = sys.modules[__name__]
+this.view = None
 this.post_exec_pollinate = False
 this.pre_exec_pollinate = False
 this.bundle = path.join(
@@ -102,11 +103,11 @@ def __deploy_bundle():
 
 def __deploy_bundle_done(future):
     result = future.result()
-    app.log.debug("deploy_bundle_done: {}".format(result.output()))
-    if result.code > 0:
+    app.log.debug("deploy_bundle_done: {}".format(result))
+    if result.returncode > 0:
         __handle_exception("ED", Exception(
             'There was an error deploying the bundle: {}.'.format(
-                result.errors())))
+                result.stderr.decode('utf8'))))
         return
     app.ui.set_footer('Deploy committed, waiting...')
     utils.pollinate(app.session_id, 'DC')
@@ -179,13 +180,13 @@ def __refresh(*args):
 def render():
     """ Render services status view
     """
-    view = ServicesView(app)
+    this.view = ServicesView(app)
 
     app.ui.set_header(
         title="Conjuring up {} thanks to Juju".format(
             app.config['spell'])
     )
-    app.ui.set_body(view)
+    app.ui.set_body(this.view)
     app.ui.set_subheader(
         'Deploy Status - (Q)uit || UP/DOWN to Scroll')
 
