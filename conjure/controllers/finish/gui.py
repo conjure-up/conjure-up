@@ -117,6 +117,11 @@ def __post_exec(*args):
     """ Executes a bundles post processing script if exists
     """
 
+    info = model_info(app.current_model)
+    # Set our provider type environment var so that it is
+    # exposed in future processing tasks
+    app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
+
     if not this.post_exec_pollinate:
         # We dont want to keep pollinating since this routine could
         # run multiple times
@@ -174,11 +179,6 @@ def __refresh(*args):
 def render():
     """ Render services status view
     """
-    info = model_info(app.current_model)
-    # Set our provider type environment var so that it is
-    # exposed in future processing tasks
-    app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
-
     view = ServicesView(app)
 
     app.ui.set_header(
