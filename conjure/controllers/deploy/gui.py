@@ -56,6 +56,7 @@ def render():
     n_total = len(this.bundle.services)
     if this.svc_idx >= n_total:
         finish(service=None)
+        return
     services = sorted(this.bundle.services, key=attrgetter('service_name'))
     service = services[this.svc_idx]
 
