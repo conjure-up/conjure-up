@@ -101,6 +101,7 @@ def set_metadata(bundle_path, data):
     try:
         cmd = ("charm set {} conjure:='{}'".format(bundle_path,
                                                    json.dumps(data)))
+        app.log.debug(cmd)
         run(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
     except CalledProcessError as e:
         app.log.warning("Could not set metadata: {}".format(e))
