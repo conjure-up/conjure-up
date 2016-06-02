@@ -173,7 +173,10 @@ def finish(credentials=None, back=False):
     utils.pollinate(app.session_id, 'CA')
 
     __do_bootstrap()
-    return controllers.use('variants').render()
+    if app.fetcher != "charmstore-search":
+        return controllers.use('deploy').render()
+    else:
+        return controllers.use('variants').render()
 
 
 def render(cloud):
@@ -200,7 +203,7 @@ def render(cloud):
                       "assuming LXD is configured.")
 
         __do_bootstrap()
-        if app.fetcher != 'charmstore':
+        if app.fetcher != 'charmstore-search':
             return controllers.use('deploy').render()
         else:
             return controllers.use('variants').render()
@@ -210,7 +213,7 @@ def render(cloud):
         creds = juju.get_credentials()[this.cloud]
         if len(creds.keys()) > 0:
             __do_bootstrap(list(creds.keys())[0])
-            if app.fetcher != 'charmstore':
+            if app.fetcher != 'charmstore-search':
                 return controllers.use('deploy').render()
             else:
                 return controllers.use('variants').render()
