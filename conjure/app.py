@@ -182,11 +182,15 @@ def main():
                       'spell-dir': spell_dir,
                       'spell': spell}
 
-    if app.fetcher != "charmstore" and not hasattr(app.argv, 'cloud'):
-        utils.error(
-            "Unable to determine cloud to deploy to, please "
-            "use the format: conjure-up {} to <cloud>".format(opts.spell))
-        sys.exit(1)
+        # Need to provide app.bundles dictionary even for single
+        # spells in the GUI
+        app.bundles = [
+            {
+                'Meta': {
+                    'extra-info/conjure': metadata
+                }
+            }
+        ]
 
     if hasattr(app.argv, 'cloud'):
         if app.fetcher != "charmstore":

@@ -200,14 +200,20 @@ def render(cloud):
                       "assuming LXD is configured.")
 
         __do_bootstrap()
-        return controllers.use('variants').render()
+        if app.fetcher != 'charmstore':
+            return controllers.use('deploy').render()
+        else:
+            return controllers.use('variants').render()
 
     # bootstrap if existing credentials are found for cloud
     if __do_creds_exist():
         creds = juju.get_credentials()[this.cloud]
         if len(creds.keys()) > 0:
             __do_bootstrap(list(creds.keys())[0])
-            return controllers.use('variants').render()
+            if app.fetcher != 'charmstore':
+                return controllers.use('deploy').render()
+            else:
+                return controllers.use('variants').render()
 
     # show credentials editor otherwise
     try:
