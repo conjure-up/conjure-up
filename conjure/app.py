@@ -140,7 +140,7 @@ def main():
         os.path.expanduser('~'),
         '.cache/conjure-up'))
 
-    if app.fetcher == "charmstore":
+    if app.fetcher == "charmstore-search":
         app.bundles = load_charmstore_results(spell, global_conf['blessed'])
         app.config = {'metadata': None,
                       'spell-dir': spell_dir,
@@ -167,7 +167,7 @@ def main():
         remote = get_remote_url(opts.spell)
         purge_top_level = True
         if remote is not None:
-            if app.fetcher == "charmstore" or \
+            if app.fetcher == "charmstore-search" or \
                app.fetcher == "charmstore-direct":
                 purge_top_level = False
             download(remote, spell_dir, purge_top_level)
@@ -193,7 +193,7 @@ def main():
         ]
 
     if hasattr(app.argv, 'cloud'):
-        if app.fetcher != "charmstore":
+        if app.fetcher != "charmstore-search":
             app.headless = True
             app.ui = None
         else:

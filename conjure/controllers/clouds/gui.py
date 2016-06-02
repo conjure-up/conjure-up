@@ -24,7 +24,7 @@ def finish(cloud):
 
         # Go through the rest of the gui since we already provide a direct
         # spell path
-        if app.fetcher != 'charmstore':
+        if app.fetcher != 'charmstore-search':
             return controllers.use('deploy').render()
         return controllers.use('variants').render()
     return controllers.use('newcloud').render(cloud)

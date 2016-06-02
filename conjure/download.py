@@ -12,7 +12,7 @@ def fetcher(spell):
 
     Types:
     charmstore-direct: Pulling a single bundle from cs
-    charmstore: Querying a keyword/tag in charmstore
+    charmstore-search: Querying a keyword/tag in charmstore
     direct: Pulling from a remote webserver
     vcs: Pulling from a remote Vcs like github
     deb: This spell was accessed from one of our official deb packages
@@ -26,7 +26,7 @@ def fetcher(spell):
         return "vcs"
     if spell.startswith('http'):
         return "direct"
-    return "charmstore"
+    return "charmstore-search"
 
 
 def remote_exists(path):

@@ -31,7 +31,7 @@ def finish(spell):
     remote = get_remote_url(spell['Id'])
     purge_top_level = True
     if remote is not None:
-        if app.fetcher == "charmstore" or \
+        if app.fetcher == "charmstore-search" or \
            app.fetcher == "charmstore-direct":
             purge_top_level = False
         download(remote, spell_dir, purge_top_level)
