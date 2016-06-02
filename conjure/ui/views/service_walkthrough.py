@@ -6,12 +6,17 @@ charms and their relations will be done.
 
 from urwid import (connect_signal, Filler, WidgetWrap, Pile,
                    Text, Columns)
+
+from conjure.app_config import app
+from conjure.ui.widgets.option_widget import OptionWidget
 from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.input import IntegerEditor
 from ubuntui.widgets.hr import HR
 from ubuntui.utils import Color, Padding
 
-from bundleplacer.ui.options_column import OptionWidget
+import logging
+
+log = logging.getLogger('conjure')
 
 
 class ServiceWalkthroughView(WidgetWrap):
@@ -85,9 +90,25 @@ class ServiceWalkthroughView(WidgetWrap):
     def handle_info_updated(self, new_info):
         self.description_w.set_text(
             new_info["Meta"]["charm-metadata"]["Summary"])
+        self.add_options()
+
+    def add_options(self):
         service_id = self.service.csid.as_str_without_rev()
         options = self.metadata_controller.get_options(service_id)
-        for opname, opdict in sorted(options.items()):
+        metadata = app.config.get('metadata', None)
+        if metadata is None:
+            return
+
+        options_whitelist = metadata.get('options-whitelist', None)
+        if options_whitelist is None:
+            return
+
+        svc_opts_whitelist = options_whitelist.get(self.service.service_name,
+                                                   [])
+        hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
+        log.info("Hiding options not in the whitelist: {}".format(hidden))
+        for opname in svc_opts_whitelist:
+            opdict = options[opname]
             self.add_option_widget(opname, opdict)
 
     def add_option_widget(self, opname, opdict):
