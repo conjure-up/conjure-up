@@ -4,6 +4,7 @@ from ubuntui.utils import Color, Padding
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.text import Instruction
 from ubuntui.widgets.buttons import quit_btn, menu_btn
+from ubuntui.ev import EventLoop
 
 
 class CloudView(WidgetWrap):
@@ -63,4 +64,4 @@ class CloudView(WidgetWrap):
         self.cb(result.label)
 
     def cancel(self, btn):
-        self.cb(back=True)
+        EventLoop.exit(0)
