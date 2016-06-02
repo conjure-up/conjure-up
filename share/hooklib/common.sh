@@ -12,14 +12,12 @@ SCRIPTPATH=$(dirname $SCRIPT)
 # $1: logger name, ie. openstack, bigdata
 # $@: rest of log message
 debug() {
-    name=$1
-    shift 1
+    name=$CONJURE_SPELL
     logger -t "conjure-up/$name" "[DEBUG] $@"
 }
 
 info() {
-    name=$1
-    shift 1
+    name=$CONJURE_SPELL
     logger -t "conjure-up/$name" "[INFO] $@"
 }
 

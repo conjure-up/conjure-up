@@ -48,7 +48,7 @@ class Table:
         item: Widget to add to listbox
         use_divider: use divider for row item
         """
-        if use_divider:
+        if use_divider and len(self._rows) != 0:
             self._rows.append(HR(0, 0))
         self._rows.append(item)
 

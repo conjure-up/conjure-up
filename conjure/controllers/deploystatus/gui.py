@@ -5,11 +5,14 @@ from functools import partial
 from conjure import async
 from conjure.app_config import app
 from conjure import utils
+from conjure import controllers
+from conjure.api.models import model_info
 from . import common
 import os.path as path
 import os
 import json
 import sys
+import time
 
 
 this = sys.modules[__name__]
@@ -24,7 +27,13 @@ this.bundle_scripts = path.join(
 
 
 def finish():
-    pass
+    try:
+        while not common.check_statuses():
+            app.log.debug('waiting for services to start')
+            time.sleep(10)
+        return controllers.use('steps').render()
+    except Exception as e:
+        return __handle_exception('ED', e)
 
 
 def __handle_exception(tag, exc):
@@ -51,7 +60,15 @@ def __handle_pre_exception(exc):
 def __pre_exec(*args):
     """ Executes a bundles pre processing script if exists
     """
-    app.log.debug("pre_exec start: {}".format(args))
+    info = model_info(app.current_model)
+    # Set our provider type environment var so that it is
+    # exposed in future processing tasks
+    app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
+    app.env['CONJURE_SPELL'] = app.config['spell']
+    app.log.debug(
+        "pre_exec start: {}/provider-type:{}".format(
+            app.env['CONJURE_SPELL'],
+            app.env['JUJU_PROVIDERTYPE']))
 
     _pre_exec_sh = path.join(this.bundle_scripts, '00_pre.sh')
     if not path.isfile(_pre_exec_sh) \
@@ -109,8 +126,7 @@ def __deploy_bundle_done(future):
         return
     app.ui.set_footer('Deploy committed, waiting...')
     utils.pollinate(app.session_id, 'DC')
-    # TODO: add some sort of check or a best guess when all applications
-    # are in a active/idle (ready state)
+    finish()
 
 
 def __refresh(*args):
