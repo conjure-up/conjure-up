@@ -46,9 +46,12 @@ class VariantView(WidgetWrap):
         cols = []
         for bundle in app.bundles:
             bundle_metadata = bundle['Meta']['bundle-metadata']
-            conjure_data = bundle['Meta']['extra-info/conjure']
-            name = conjure_data.get('friendly-name',
-                                    bundle['Meta']['id']['Name'])
+            try:
+                conjure_data = bundle['Meta']['extra-info/conjure']
+                name = conjure_data.get('friendly-name',
+                                        bundle['Meta']['id']['Name'])
+            except KeyError:
+                name = bundle['Meta']['id']['Name']
             self.fname_id_map[name] = bundle
             cols.append(
                 Columns(
