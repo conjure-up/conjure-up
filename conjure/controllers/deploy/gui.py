@@ -32,7 +32,7 @@ def finish(service=None):
         this.svc_idx += 1
         return render()
     else:
-        return controllers.use('steps').render()
+        return controllers.use('deploystatus').render()
 
     pollinate(app.session_id, 'PC')
 

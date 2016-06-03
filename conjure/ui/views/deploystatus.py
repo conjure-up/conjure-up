@@ -31,7 +31,7 @@ class DeployStatusView(WidgetWrap):
                     self.table.addColumns(
                         unit._name,
                         [
-                            ('fixed', 2, getattr(unit_w, 'Icon')),
+                            ('fixed', 3, getattr(unit_w, 'Icon')),
                             ('fixed', 20, getattr(unit_w, 'Name')),
                             ('fixed', 20, getattr(unit_w, 'AgentStatus'))
                         ]

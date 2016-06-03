@@ -182,7 +182,8 @@ def pollinate(session, tag):
             check_call(cmd, shell=True)
         except CalledProcessError as e:
             app.log.warning("Generating random seed failed: {}".format(e))
-    submit(do_pollinate, lambda _: None)
+    if not app.argv.debug:
+        submit(do_pollinate, lambda _: None)
 
 
 def load_global_conf():
