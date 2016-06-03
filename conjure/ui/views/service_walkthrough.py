@@ -30,7 +30,7 @@ class ServiceWalkthroughView(WidgetWrap):
         w = self.build_widgets()
         super().__init__(w)
         self.get_async_info()
-        self.pile.focus_position = 8
+        self.pile.focus_position = len(self.pile.contents) - 2
 
     def selectable(self):
         return True
