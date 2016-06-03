@@ -32,7 +32,7 @@ class DeployStatusView(WidgetWrap):
                         unit._name,
                         [
                             ('fixed', 3, getattr(unit_w, 'Icon')),
-                            ('fixed', 20, getattr(unit_w, 'Name')),
+                            ('fixed', 50, getattr(unit_w, 'Name')),
                             ('fixed', 20, getattr(unit_w, 'AgentStatus'))
                         ]
                     )
