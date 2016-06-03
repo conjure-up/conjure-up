@@ -69,7 +69,7 @@ def finish(lxdnetwork=None, back=False):
     run("sudo systemctl restart lxd-bridge.service", shell=True)
 
     utils.pollinate(app.session_id, 'L002')
-    controllers.use('jujucontroller').render(
+    controllers.use('newcloud').render(
         cloud='localhost', bootstrap=True)
 
 
