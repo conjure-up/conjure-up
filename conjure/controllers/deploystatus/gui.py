@@ -12,12 +12,10 @@ import os.path as path
 import os
 import json
 import sys
-import time
 
 
 this = sys.modules[__name__]
 this.view = None
-this.post_exec_pollinate = False
 this.pre_exec_pollinate = False
 this.bundle = path.join(
     app.config['spell-dir'], 'bundle.yaml')
@@ -26,27 +24,22 @@ this.bundle_scripts = path.join(
 )
 
 
+def __fatal(error):
+    return __handle_exception('ED', Exception(error))
+
+
 def finish():
-    try:
-        while not common.check_statuses():
-            app.log.debug('waiting for services to start')
-            time.sleep(10)
-        return controllers.use('steps').render()
-    except Exception as e:
-        return __handle_exception('ED', e)
+    deploy_done_sh = os.path.join(this.bundle_scripts,
+                                  '00_deploy-done.sh')
+    common.wait_for_applications(deploy_done_sh,
+                                 __fatal,
+                                 app.ui.set_footer)
+    return controllers.use('steps').render()
 
 
 def __handle_exception(tag, exc):
     utils.pollinate(app.session_id, tag)
     app.ui.show_exception_message(exc)
-
-
-def __handle_post_exception(exc):
-    """ If an exception occurs in the post processing,
-    log it but don't die
-    """
-    utils.pollinate(app.session_id, 'E002')
-    app.log.exception(exc)
 
 
 def __handle_pre_exception(exc):
@@ -144,7 +137,7 @@ def render():
     except KeyError:
         name = app.config['spell']
     app.ui.set_header(
-        title="Conjuring up {} thanks to Juju".format(
+        title="Conjuring up {}".format(
             name)
     )
     app.ui.set_body(this.view)

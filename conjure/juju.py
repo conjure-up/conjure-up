@@ -47,11 +47,10 @@ def read_config(name):
 def get_current_controller():
     """ Grabs the current default controller
     """
-    env = os.path.join(juju_path(), 'current-controller')
-    if not os.path.isfile(env):
+    try:
+        return get_controllers()['current-controller']
+    except KeyError:
         return None
-    with open(env) as fp:
-        return fp.read().strip()
 
 
 def get_controller(id):
@@ -60,8 +59,9 @@ def get_controller(id):
     Arguments:
     id: controller id
     """
-    if get_controllers() and id in get_controllers():
-        return get_controllers()[id]
+    if 'controllers' in get_controllers() \
+       and id in get_controllers()['controllers']:
+        return get_controllers()['controllers'][id]
     return None
 
 
@@ -290,7 +290,7 @@ def get_controllers():
         raise LookupError(
             "Unable to list controllers: {}".format(sh.stderr.decode('utf8')))
     env = yaml.safe_load(sh.stdout.decode('utf8'))
-    return env['controllers']
+    return env
 
 
 def get_account(controller):

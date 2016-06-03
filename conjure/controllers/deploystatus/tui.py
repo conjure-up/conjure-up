@@ -10,7 +10,26 @@ import os
 import sys
 
 
+this = sys.modules[__name__]
+this.bundle = os.path.join(
+    app.config['spell-dir'], 'bundle.yaml')
+this.bundle_scripts = os.path.join(
+    app.config['spell-dir'], 'conjure/steps'
+)
+
+
+def __fatal(error):
+    utils.error(error)
+    sys.exit(1)
+
+
 def finish():
+    deploy_done_sh = os.path.join(this.bundle_scripts,
+                                  '00_deploy-done.sh')
+    common.wait_for_applications(deploy_done_sh,
+                                 __fatal,
+                                 utils.info)
+
     return controllers.use('steps').render()
 
 
@@ -20,13 +39,7 @@ def render():
     # exposed in future processing tasks
     app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
 
-    bundle = os.path.join(
-        app.config['spell-dir'], 'bundle.yaml')
-    bundle_scripts = os.path.join(
-        app.config['spell-dir'], 'conjure/steps'
-    )
-
-    pre_exec_sh = os.path.join(bundle_scripts, '00_pre.sh')
+    pre_exec_sh = os.path.join(this.bundle_scripts, '00_pre.sh')
 
     # Pre processing
     if os.path.isfile(pre_exec_sh) \
@@ -48,7 +61,7 @@ def render():
     # juju deploy
     try:
         utils.info("Deploying charms")
-        juju.deploy(bundle)
+        juju.deploy(this.bundle)
     except Exception as e:
         utils.error("Problem with deployment: {}".format(e))
         sys.exit(1)
