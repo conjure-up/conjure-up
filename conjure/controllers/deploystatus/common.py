@@ -1,23 +1,42 @@
 from subprocess import run, PIPE
 from conjure.app_config import app
-from collections import Counter
-from conjure.api import application
+from subprocess import CalledProcessError
+import json
+import os
+import time
 
 
-def check_statuses():
-    """ verify no errors happen and wait for services to be ready
+def wait_for_applications(script, error_cb, msg_cb):
+    """ Processes a 00_deploy-done.sh to verify if applications are available
+
+    Arguments:
+    script: script to run (00_deploy-done.sh)
+    error_cb: error handle callback
+    msg_cb: message callback
     """
-    statuses = application.get_workload_statuses()
-    statuses_threshold = len(statuses) / 2
-    counts = Counter(statuses)
-    if 'error' in statuses:
-        raise Exception(
-            'There is an error in one of the charms. Please consult that '
-            'charms documentation.')
-    # If more than half are active move on to the processing
-    if counts['active'] > statuses_threshold:
-        return True
-    return False
+    if os.path.isfile(script) \
+       and os.access(script, os.X_OK):
+        msg_cb("Waiting for applications to start")
+        try:
+            rerun = True
+            count = 0
+            while rerun:
+                sh = run_script(script)
+                result = json.loads(sh.stdout.decode('utf8'))
+                if result['returnCode'] > 0:
+                    app.log.error(
+                        "Failure in deploy done: {}".format(result['message']))
+                    return error_cb(result['message'])
+                if not result['isComplete']:
+                    time.sleep(5)
+                    if count == 0:
+                        msg_cb("{}, please wait".format(
+                            result['message']))
+                        count += 1
+                    continue
+                rerun = False
+        except CalledProcessError as e:
+            return error_cb(e)
 
 
 def run_script(path):

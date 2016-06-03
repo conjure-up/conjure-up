@@ -61,7 +61,7 @@ def controller_provides_ctype(cloud):
     if not juju.available():
         return None
     cloud_type = juju.get_cloud(cloud)['type']
-    for c in juju.get_controllers().keys():
+    for c in juju.get_controllers()['controllers'].keys():
         juju.switch(c)
         loaded_cloud_type = juju.get_model(juju.get_current_model())['type']
         if cloud_type == loaded_cloud_type:

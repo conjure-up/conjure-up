@@ -24,8 +24,10 @@ def render():
     steps = sorted(glob(os.path.join(bundle_scripts, '*.sh')))
     steps_queue = deque()
     for step in steps:
-        if "00_pre.sh" in step or "00_post-bootstrap.sh" in step:
-            app.log.debug("Skipping pre and post-bootstrap steps.")
+        if "00_pre.sh" in step \
+           or "00_post-bootstrap.sh" in step \
+           or "00_deploy-done.sh" in step:
+            app.log.debug("Skipping non steps.")
             continue
 
         if os.access(step, os.X_OK):

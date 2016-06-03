@@ -66,8 +66,9 @@ def __post_exec(*args):
     while this.steps:
         this.current_step = this.steps.popleft()
         if "00_pre.sh" in this.current_step \
-           or "00_post-bootstrap.sh" in this.current_step:
-            app.log.debug("Skipping pre and post-bootstrap steps.")
+           or "00_post-bootstrap.sh" in this.current_step \
+           or "00_deploy-done.sh" in this.current_step:
+            app.log.debug("Skipping non steps.")
             continue
 
         if os.access(this.current_step, os.X_OK):
