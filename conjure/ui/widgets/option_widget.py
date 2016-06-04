@@ -14,11 +14,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from enum import Enum
-from urwid import (CheckBox, Columns, connect_signal, Divider, GridFlow,
+from urwid import (CheckBox, Columns, connect_signal, GridFlow,
                    IntEdit, Pile, Text, WidgetWrap)
 from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.input import StringEditor
-from ubuntui.widgets.hr import HR
 from ubuntui.utils import Color, Padding
 import logging
 
@@ -75,7 +74,6 @@ class OptionWidget(WidgetWrap):
             self.control = StringEditor(edit_text=edit_text)
             self.wrapped_control = Color.string_input(
                 self.control, focus_map='string_input focus')
-            
         else:
             raise Exception("Unknown option type")
 
