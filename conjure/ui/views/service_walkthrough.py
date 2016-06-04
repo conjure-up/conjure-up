@@ -90,6 +90,7 @@ class ServiceWalkthroughView(WidgetWrap):
     def handle_info_updated(self, new_info):
         self.description_w.set_text(
             new_info["Meta"]["charm-metadata"]["Summary"])
+        self._invalidate()
         self.add_options()
 
     def add_options(self):
@@ -121,6 +122,7 @@ class ServiceWalkthroughView(WidgetWrap):
                           value_changed_callback=self.handle_edit)
 
         self.pile.contents.insert(7, (ow, self.pile.options()))
+        self._invalidate()
         return ow
 
     def handle_edit(self, opname, value):
@@ -150,6 +152,7 @@ class ServiceWalkthroughView(WidgetWrap):
             splitidx = firstparidx
         nrls = nrls[:splitidx]
         self.readme_w.set_text("\n".join(nrls))
+        self._invalidate()
 
     def handle_scale_changed(self, widget, newvalstr):
         if newvalstr == '':
