@@ -122,7 +122,8 @@ def render():
     steps_dict = {}
     for step in this.steps:
         if "00_pre.sh" in step \
-           or "00_post-bootstrap.sh" in step:
+           or "00_post-bootstrap.sh" in step \
+           or "00_deploy-done.sh" in step:
             continue
         steps_dict[step] = step
     this.view = StepsView(app, steps_dict)
