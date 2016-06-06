@@ -100,6 +100,7 @@ def __pre_exec_done(future):
 def __deploy_bundle():
     """ Performs the bootstrap in between processing scripts
     """
+    juju.switch(juju.get_current_model())
     app.log.debug("Deploying bundle: {}".format(this.bundle))
     app.ui.set_footer('Deploying bundle...')
     utils.pollinate(app.session_id, 'DS')
