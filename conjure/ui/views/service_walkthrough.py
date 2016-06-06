@@ -9,6 +9,7 @@ from urwid import (connect_signal, Filler, WidgetWrap, Pile,
 
 from conjure.app_config import app
 from conjure.ui.widgets.option_widget import OptionWidget
+from ubuntui.ev import EventLoop
 from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.input import IntegerEditor
 from ubuntui.widgets.hr import HR
@@ -88,6 +89,11 @@ class ServiceWalkthroughView(WidgetWrap):
             self.handle_readme_updated)
 
     def handle_info_updated(self, new_info):
+        EventLoop.loop.event_loop._loop.call_soon_threadsafe(
+            self._update_info_on_main_thread,
+            new_info)
+
+    def _update_info_on_main_thread(self, new_info):
         self.description_w.set_text(
             new_info["Meta"]["charm-metadata"]["Summary"])
         self._invalidate()
@@ -129,6 +135,11 @@ class ServiceWalkthroughView(WidgetWrap):
         self.service.options[opname] = value
 
     def handle_readme_updated(self, readme_text_f):
+        EventLoop.loop.event_loop._loop.call_soon_threadsafe(
+            self._update_readme_on_main_thread,
+            readme_text_f)
+
+    def _update_readme_on_main_thread(self, readme_text_f):
         rls = readme_text_f.result().splitlines()
         rls = [l for l in rls if not l.startswith("#")]
         nrls = []
@@ -160,7 +171,7 @@ class ServiceWalkthroughView(WidgetWrap):
         self.service.num_units = int(newvalstr)
 
     def do_deploy(self, arg):
-        self.callback(service=self.service)
+        self.callback(single_service=self.service)
 
     def do_skip_rest(self, arg):
-        self.callback(service=None)
+        self.callback(single_service=None)

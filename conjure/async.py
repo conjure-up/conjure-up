@@ -4,6 +4,7 @@ work.
 """
 
 import logging
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 import time
@@ -13,14 +14,14 @@ log = logging.getLogger("async")
 class ThreadCancelledException(Exception):
     """Exception meaning intentional cancellation"""
 
-AsyncPool = ThreadPoolExecutor(1)
-log.debug('AsyncPool={}'.format(AsyncPool))
-
 
 ShutdownEvent = Event()
 
+_queues = defaultdict(lambda: ThreadPoolExecutor(1))
+DEFAULT_QUEUE = "DEFAULT"
 
-def submit(func, exc_callback):
+
+def submit(func, exc_callback, queue_name="DEFAULT"):
     def cb(cb_f):
         e = cb_f.exception()
         if e:
@@ -28,14 +29,15 @@ def submit(func, exc_callback):
     if ShutdownEvent.is_set():
         log.debug("ignoring async.submit due to impending shutdown.")
         return
-    f = AsyncPool.submit(func)
+    f = _queues[queue_name].submit(func)
     f.add_done_callback(cb)
     return f
 
 
 def shutdown():
     ShutdownEvent.set()
-    AsyncPool.shutdown(wait=False)
+    for queue in _queues.values():
+        queue.shutdown(wait=False)
 
 
 def sleep_until(s):

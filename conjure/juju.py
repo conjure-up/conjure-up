@@ -4,13 +4,15 @@ from conjure import async
 from conjure.utils import juju_path
 from conjure.app_config import app
 from functools import wraps, partial
-from macumba.errors import LoginError
+import macumba
 from macumba.v2 import JujuClient
 from subprocess import run, PIPE, DEVNULL, CalledProcessError
 import os
 import sys
 import yaml
 
+
+JUJU_ASYNC_QUEUE = "juju-async-queue"
 
 this = sys.modules[__name__]
 
@@ -75,7 +77,7 @@ def login(force=False):
         return
 
     if not get_current_controller():
-        raise LoginError("Unable to determine current controller")
+        raise Exception("Unable to determine current controller")
 
     env = get_controller(get_current_controller())
     account = get_account(get_current_controller())
@@ -91,7 +93,7 @@ def login(force=False):
         password=password)
     try:
         this.CLIENT.login()
-    except LoginError as e:
+    except macumba.errors.LoginError as e:
         raise e
     this.IS_AUTHENTICATED = True  # noqa
 
@@ -129,7 +131,8 @@ def bootstrap_async(controller, cloud, credential=None, exc_cb=None):
     return async.submit(partial(bootstrap,
                                 controller=controller,
                                 cloud=cloud,
-                                credential=credential), exc_cb)
+                                credential=credential), exc_cb,
+                        queue_name=JUJU_ASYNC_QUEUE)
 
 
 def available():
@@ -256,6 +259,53 @@ def deploy(bundle):
                    stdout=DEVNULL, stderr=PIPE)
     except CalledProcessError as e:
         raise e
+
+
+def deploy_service(service, exc_cb=None):
+    """ Juju deploy service
+
+    Arguments:
+    service: dictionary representing service to deploy
+    """
+
+    @requires_login
+    def do_deploy():
+        params = {"Services": [service.as_deployargs()]}
+        try:
+            return this.CLIENT.Service(request="Deploy",
+                                       params=params)
+        except Exception as e:
+            if exc_cb:
+                exc_cb(e)
+
+    return async.submit(do_deploy,
+                        exc_cb,
+                        queue_name=JUJU_ASYNC_QUEUE)
+
+
+def set_relations(services, exc_cb=None):
+    """ Juju set relations
+
+    Arguments:
+    services: list of services with relations to set
+    """
+
+    @requires_login
+    def do_add_all():
+        for service in services:
+            for a, b in service.relations:
+                params = {"Endpoints": [a, b]}
+                try:
+                    this.CLIENT.Service(request="AddRelation",
+                                        params=params)
+                except Exception as e:
+                    if exc_cb:
+                        exc_cb(e)
+                    return
+
+    return async.submit(do_add_all,
+                        exc_cb,
+                        queue_name=JUJU_ASYNC_QUEUE)
 
 
 def get_controller_info(name=None):
