@@ -236,6 +236,7 @@ def switch(model):
     Raises exception if failed to switch models.
     """
     try:
+        app.log.debug('switching to juju model: {}'.format(model))
         run('juju switch {}'.format(model),
             shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)
         login(True)
