@@ -1,6 +1,7 @@
 from . import common
 from collections import deque
 from conjure import utils
+from conjure import controllers
 from conjure.app_config import app
 from glob import glob
 import json
@@ -8,11 +9,12 @@ import os
 import sys
 import time
 
+this = sys.modules[__name__]
+this.results = []
+
 
 def finish():
-    # return controllers.use('summary').render()
-    utils.info("Finished.")
-    sys.exit(0)
+    return controllers.use('summary').render(this.results)
 
 
 def render():
@@ -54,6 +56,7 @@ def render():
             is_requeued = True
             continue
         utils.info(result['message'])
+        this.results.append(result['message'])
         is_requeued = False
         app.log.debug("post execution done: {}".format(result))
     finish()

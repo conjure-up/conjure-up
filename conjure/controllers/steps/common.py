@@ -14,8 +14,11 @@ def __readlines_key(key, data):
             try:
                 return line.split(":")[1].strip()
             except:
-                return "Unknown Description, please check your step file"
-    return "Unknown Description, please check your step file"
+                pass
+    app.log.debug("Unknown Description/Title, "
+                  "please check your step file: {}".format(
+                      key))
+    return ""
 
 
 def parse_description(step):
@@ -24,6 +27,7 @@ def parse_description(step):
     Arguments:
     step: path to step file
     """
+    app.log.debug("parse_title: {}".format(step))
     with open(step) as fd:
         lines = fd.readlines()
 
@@ -36,6 +40,7 @@ def parse_title(step):
     Arguments:
     step: path to step file
     """
+    app.log.debug("parse_title: {}".format(step))
     with open(step) as fd:
         lines = fd.readlines()
 
