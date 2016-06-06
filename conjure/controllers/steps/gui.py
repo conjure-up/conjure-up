@@ -4,7 +4,7 @@ from functools import partial
 from conjure import async
 from conjure.app_config import app
 from conjure import utils
-# from conjure import controllers
+from conjure import controllers
 from conjure.api.models import model_info
 from . import common
 from glob import glob
@@ -25,12 +25,11 @@ this.bundle_scripts = path.join(
 )
 this.steps = deque(sorted(glob(os.path.join(this.bundle_scripts, '*.sh'))))
 this.current_step = None
+this.results = []
 
 
 def finish():
-    # FIXME
-    # return controllers.use('summary').render()
-    pass
+    return controllers.use('summary').render(this.results)
 
 
 def __handle_exception(tag, exc):
@@ -68,7 +67,7 @@ def __post_exec(*args):
         if "00_pre.sh" in this.current_step \
            or "00_post-bootstrap.sh" in this.current_step \
            or "00_deploy-done.sh" in this.current_step:
-            app.log.debug("Skipping non steps.")
+            app.log.debug("Skipping non steps: {}".format(this.current_step))
             continue
 
         if os.access(this.current_step, os.X_OK):
@@ -94,7 +93,7 @@ def __post_exec_done(future):
         app.log.warning(fr.stderr.decode())
 
         this.view.update_step_message(this.current_step, result['message'])
-        if result['returnCode'] > 0:
+        if result['returnCode'] > 0 or fr.returncode > 0:
             app.log.error(
                 'There was an error during the post processing '
                 'phase.')
@@ -105,9 +104,13 @@ def __post_exec_done(future):
             this.view.update_icon_state(this.current_step, 'waiting')
             EventLoop.set_alarm_in(1, __post_exec)
         else:
-            # nothing left to process, proceed
-            EventLoop.remove_alarms()
-            finish()
+            this.view.update_icon_state(this.current_step, 'active')
+            this.results.append(result['message'])
+
+            if not this.steps:
+                EventLoop.remove_alarms()
+                finish()
+            EventLoop.set_alarm_in(1, __post_exec)
     except Exception as e:
         app.log.error(e)
         __handle_exception("E002", e)
