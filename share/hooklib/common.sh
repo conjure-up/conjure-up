@@ -68,7 +68,7 @@ import yaml
 leader_yaml=yaml.load(sys.stdin)
 for leader in leader_yaml:
     if leader['Stdout'].strip() == 'True':
-        return leader['UnitId']
+        print(leader['UnitId'])
 "
 
     juju run --service $1 is-leader --format yaml | env python3 -c "$py_script"
@@ -167,4 +167,32 @@ exposeResult()
 {
     printf '{"message": "%s", "returnCode": %d, "isComplete": %s}' "$1" $2 "$3"
     exit 0
+}
+
+# Checks an array of applications for an error flag
+#
+# Arguments:
+# $1: array of services
+checkUnitsForErrors() {
+    for i in "${$1[@]}"
+    do
+        if [ $(unitStatus $i 0) = "error" ]; then
+            debug "$i, gave a charm error."
+            exposeResult "Error with $i, please check juju status" 1 "false"
+        fi
+    done
+}
+
+# Checks an array of applications for an active flag
+#
+# Arguments:
+# $1: array of services
+checkUnitsForActive() {
+    for i in "${$1[@]}"
+    do
+        debug "Checking agent state of $i: $(unitStatus $i 0)"
+        if [ $(unitStatus $i 0) != "active" ]; then
+            exposeResult "$i not quite ready yet" 0 "false"
+        fi
+    done
 }
