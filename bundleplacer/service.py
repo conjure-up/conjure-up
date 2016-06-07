@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import yaml
 
 from bundleplacer.charmstore_api import CharmStoreID
 
@@ -24,7 +25,8 @@ class Service:
     def __init__(self, service_name, charm_source, summary_future,
                  constraints, depends, conflicts,
                  allowed_assignment_types, num_units, options,
-                 allow_multi_units, subordinate, required, relations):
+                 allow_multi_units, subordinate, required, relations,
+                 placement_spec):
         self.service_name = service_name
         self.charm_source = charm_source
         self.csid = CharmStoreID(charm_source)
@@ -42,6 +44,7 @@ class Service:
         self.is_core = required
         self.isolate = True if not subordinate else False
         self.relations = relations
+        self.placement_spec = placement_spec
 
     @property
     def summary(self):
@@ -53,6 +56,32 @@ class Service:
     def display_name(self):
         return "{} ({})".format(self.service_name,
                                 self.charm_source)
+
+    def _prepare_placement(self, placement):
+        if ':' in placement:
+            scope, directive = placement.split(':')
+        else:
+            # Assume that the placement is to a machine number
+            scope = '#'
+            directive = placement
+        return {
+            "Scope": scope,
+            "Directive": str(directive)
+        }
+
+    def as_deployargs(self):
+        rd = {"CharmUrl": self.charm_source,
+              "ServiceName": self.service_name,
+              "NumUnits": self.num_units,
+              "Constraints": self.constraints}
+        if len(self.options) > 0:
+            optsyaml = yaml.dump(self.options, default_flow_style=False)
+            rd["ConfigYAML"] = optsyaml
+        if self.placement_spec:
+            specs = [self._prepare_placement(self.placement_spec)]
+            rd["Placement"] = yaml.dump(specs, default_flow_style=False)
+
+        return rd
 
     def required_num_units(self):
         return self.num_units
