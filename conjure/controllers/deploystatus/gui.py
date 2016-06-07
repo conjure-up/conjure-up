@@ -3,6 +3,8 @@ from ubuntui.ev import EventLoop
 from conjure.app_config import app
 from conjure import utils
 from conjure import controllers
+from conjure import async
+from functools import partial
 from . import common
 import os.path as path
 import os
@@ -23,18 +25,25 @@ def __fatal(error):
     return __handle_exception('ED', Exception(error))
 
 
-def finish():
-    deploy_done_sh = os.path.join(this.bundle_scripts,
-                                  '00_deploy-done.sh')
-    common.wait_for_applications(deploy_done_sh,
-                                 __fatal,
-                                 app.ui.set_footer)
-    return controllers.use('steps').render()
-
-
 def __handle_exception(tag, exc):
     utils.pollinate(app.session_id, tag)
     app.ui.show_exception_message(exc)
+
+
+def __wait_for_applications(*args):
+    deploy_done_sh = os.path.join(this.bundle_scripts,
+                                  '00_deploy-done.sh')
+
+    future = async.submit(partial(common.wait_for_applications,
+                                  deploy_done_sh,
+                                  __fatal,
+                                  app.ui.set_footer),
+                          partial(__handle_exception, 'ED'))
+    future.add_done_callback(finish)
+
+
+def finish(future):
+    return controllers.use('steps').render()
 
 
 def __refresh(*args):
@@ -57,4 +66,4 @@ def render():
     )
     app.ui.set_body(this.view)
     EventLoop.set_alarm_in(1, __refresh)
-    finish()
+    __wait_for_applications()
