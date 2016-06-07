@@ -193,7 +193,7 @@ checkUnitsForActive() {
     for i in "${services[@]}"
     do
         debug "Checking agent state of $i: $(unitStatus $i 0)"
-        if [ $(unitStatus $i 0) != "active" ] && [ $(unitStatus $i 0) != "unknown" ]; then
+        if [ $(unitStatus $i 0) != "active" ]; then
             exposeResult "$i not quite ready yet" 0 "false"
         fi
     done
