@@ -21,6 +21,7 @@ def finish(cloud):
         # If a cloud exists create a new model for current deployment
         app.current_model = petname.Name()
         juju.add_model(app.current_model)
+        juju.switch(app.current_model)
 
         # Go through the rest of the gui since we already provide a direct
         # spell path

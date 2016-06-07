@@ -34,6 +34,7 @@ def wait_for_applications(script, error_cb, msg_cb):
                             result['message']))
                         count += 1
                     continue
+                count = 0
                 rerun = False
         except CalledProcessError as e:
             return error_cb(e)

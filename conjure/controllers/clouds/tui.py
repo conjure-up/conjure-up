@@ -23,6 +23,7 @@ def finish():
         juju.switch(have_existing_controller)
         app.current_model = petname.Name()
         juju.add_model(app.current_model)
+        juju.switch(app.current_model)
         return controllers.use('variants').render()
     return controllers.use('newcloud').render(app.argv.cloud)
 
