@@ -1,21 +1,21 @@
 from . import common
-from conjure.ui.views.newcloud import NewCloudView
-from conjure.models.provider import Schema
-from conjure import utils
+from conjure import async
 from conjure import controllers
 from conjure import juju
-from conjure import async
+from conjure import utils
+from conjure.api.models import model_info
 from conjure.app_config import app
-import os.path as path
-import yaml
-import petname
-import sys
-import json
-import os
+from conjure.models.provider import Schema
+from conjure.ui.views.newcloud import NewCloudView
 from functools import partial
 from subprocess import check_output
-
 from ubuntui.ev import EventLoop
+import json
+import os
+import os.path as path
+import petname
+import sys
+import yaml
 
 this = sys.modules[__name__]
 this.cloud = None
@@ -76,8 +76,11 @@ def __do_bootstrap(credential=None):
 def __post_bootstrap_exec():
     """ Executes post-bootstrap.sh if exists
     """
-    # Set provider type for post-bootstrap
-    app.env['JUJU_PROVIDERTYPE'] = this.cloud
+    info = model_info(juju.get_current_model())
+    # Set our provider type environment var so that it is
+    # exposed in future processing tasks
+    app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
+    app.env['CONJURE_SPELL'] = app.config['spell']
 
     _post_bootstrap_sh = path.join(app.config['spell-dir'],
                                    'steps/00_post-bootstrap.sh')
