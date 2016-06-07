@@ -74,9 +74,12 @@ class Service:
               "ServiceName": self.service_name,
               "NumUnits": self.num_units,
               "Constraints": self.constraints}
+
         if len(self.options) > 0:
-            optsyaml = yaml.dump(self.options, default_flow_style=False)
-            rd["ConfigYAML"] = optsyaml
+            config_dict = {self.service_name: self.options}
+            config_yaml = yaml.dump(config_dict, default_flow_style=False)
+            rd["ConfigYAML"] = config_yaml
+
         if self.placement_spec:
             specs = [self._prepare_placement(self.placement_spec)]
             rd["Placement"] = yaml.dump(specs, default_flow_style=False)
