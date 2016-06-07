@@ -40,7 +40,7 @@ def render():
         step = steps_queue.popleft()
         if not is_requeued:
             utils.info(
-                "Running: {}".format(common.parse_description(step)))
+                "Running: {}".format(common.parse_title(step)))
         sh = common.run_script(step)
         result = json.loads(sh.stdout.decode('utf8'))
         if result['returnCode'] > 0:

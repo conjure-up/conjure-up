@@ -3,6 +3,7 @@ from conjure import utils
 from conjure.api.models import model_info
 from conjure import juju
 from conjure.app_config import app
+from . import common
 from subprocess import run, PIPE
 import json
 import os
@@ -50,8 +51,21 @@ def render(cloud):
     if app.current_model is None:
         app.current_model = 'default'
 
+    credential = None
+    if this.cloud != 'localhost':
+        if common.do_creds_exist(this.cloud):
+            credentials = juju.get_credentials()[this.cloud]
+            credential = list(credentials.keys())[0]
+        else:
+            utils.warning("You attempted to do an install against a cloud "
+                          "that requires credentials that could not be "
+                          "found.  If you wish to supply those "
+                          "credentials please run "
+                          "`juju add-credential {}`.".format(this.cloud))
+            sys.exit(1)
+
     juju.bootstrap(controller=app.current_controller,
                    cloud=this.cloud,
-                   credential=None)
+                   credential=credential)
     do_post_bootstrap()
     finish()

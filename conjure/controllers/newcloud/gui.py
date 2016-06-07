@@ -1,3 +1,4 @@
+from . import common
 from conjure.ui.views.newcloud import NewCloudView
 from conjure.models.provider import Schema
 from conjure import utils
@@ -118,23 +119,6 @@ def __post_bootstrap_done(future):
     controllers.use('deploy').render(app.current_controller)
 
 
-def __do_creds_exist():
-    """ Check if credentials for existing cloud already exists so
-    we can bypass the cloud config view and go straight to bootstrapping
-    """
-    cred_path = path.join(utils.juju_path(), 'credentials.yaml')
-    if not path.isfile(cred_path):
-        return False
-
-    existing_creds = yaml.safe_load(open(cred_path))
-    if 'credentials' not in existing_creds:
-        return False
-
-    if this.cloud not in existing_creds['credentials'].keys():
-        return False
-    return True
-
-
 def finish(credentials=None, back=False):
     """ Load the Model controller passing along the selected cloud.
 
@@ -209,7 +193,7 @@ def render(cloud):
             return controllers.use('variants').render()
 
     # bootstrap if existing credentials are found for cloud
-    if __do_creds_exist():
+    if common.do_creds_exist(this.cloud):
         creds = juju.get_credentials()[this.cloud]
         if len(creds.keys()) > 0:
             __do_bootstrap(list(creds.keys())[0])
