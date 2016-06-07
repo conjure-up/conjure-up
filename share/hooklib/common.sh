@@ -174,7 +174,8 @@ exposeResult()
 # Arguments:
 # $1: array of services
 checkUnitsForErrors() {
-    for i in "${$1[@]}"
+    services=$1
+    for i in "${services[@]}"
     do
         if [ $(unitStatus $i 0) = "error" ]; then
             debug "$i, gave a charm error."
@@ -188,7 +189,8 @@ checkUnitsForErrors() {
 # Arguments:
 # $1: array of services
 checkUnitsForActive() {
-    for i in "${$1[@]}"
+    services=$1
+    for i in "${services[@]}"
     do
         debug "Checking agent state of $i: $(unitStatus $i 0)"
         if [ $(unitStatus $i 0) != "active" ]; then
