@@ -289,19 +289,23 @@ def set_relations(services, exc_cb=None):
     Arguments:
     services: list of services with relations to set
     """
+    relations = set()
+    for service in services:
+        for a, b in service.relations:
+            if (a, b) not in relations and (b, a) not in relations:
+                relations.add((a, b))
 
     @requires_login
     def do_add_all():
-        for service in services:
-            for a, b in service.relations:
-                params = {"Endpoints": [a, b]}
-                try:
-                    this.CLIENT.Service(request="AddRelation",
-                                        params=params)
-                except Exception as e:
-                    if exc_cb:
-                        exc_cb(e)
-                    return
+        for a, b in list(relations):
+            params = {"Endpoints": [a, b]}
+            try:
+                this.CLIENT.Service(request="AddRelation",
+                                    params=params)
+            except Exception as e:
+                if exc_cb:
+                    exc_cb(e)
+                return
 
     return async.submit(do_add_all,
                         exc_cb,
