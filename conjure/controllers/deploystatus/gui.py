@@ -21,13 +21,9 @@ this.bundle_scripts = path.join(
 )
 
 
-def __fatal(error):
-    return __handle_exception('ED', Exception(error))
-
-
 def __handle_exception(tag, exc):
     utils.pollinate(app.session_id, tag)
-    app.ui.show_exception_message(exc)
+    return app.ui.show_exception_message(exc)
 
 
 def __wait_for_applications(*args):
@@ -36,14 +32,14 @@ def __wait_for_applications(*args):
 
     future = async.submit(partial(common.wait_for_applications,
                                   deploy_done_sh,
-                                  __fatal,
                                   app.ui.set_footer),
                           partial(__handle_exception, 'ED'))
     future.add_done_callback(finish)
 
 
 def finish(future):
-    return controllers.use('steps').render()
+    if not future.exception():
+        return controllers.use('steps').render()
 
 
 def __refresh(*args):

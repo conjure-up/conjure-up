@@ -15,17 +15,16 @@ this.bundle_scripts = os.path.join(
 )
 
 
-def __fatal(error):
-    utils.error(error)
-    sys.exit(1)
-
-
 def finish():
     deploy_done_sh = os.path.join(this.bundle_scripts,
                                   '00_deploy-done.sh')
-    common.wait_for_applications(deploy_done_sh,
-                                 __fatal,
-                                 utils.info)
+
+    try:
+        common.wait_for_applications(deploy_done_sh,
+                                     utils.info)
+    except Exception as e:
+        utils.error(e)
+        sys.exit(1)
 
     return controllers.use('steps').render()
 
