@@ -83,7 +83,9 @@ def __post_bootstrap_exec():
     app.env['CONJURE_SPELL'] = app.config['spell']
 
     _post_bootstrap_sh = path.join(app.config['spell-dir'],
-                                   'steps/00_post-bootstrap.sh')
+                                   'conjure/steps/00_post-bootstrap.sh')
+    app.log.debug(
+        'Checking for post bootstrap task: {}'.format(_post_bootstrap_sh))
     if path.isfile(_post_bootstrap_sh) \
        and os.access(_post_bootstrap_sh, os.X_OK):
         app.ui.set_footer('Running additional environment tasks...')
@@ -119,7 +121,7 @@ def __post_bootstrap_done(future):
     app.log.debug("Switching to controller: {}".format(
         app.current_controller))
     juju.switch(app.current_controller)
-    controllers.use('deploy').render(app.current_controller)
+    controllers.use('deploy').render()
 
 
 def finish(credentials=None, back=False):
