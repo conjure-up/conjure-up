@@ -8,7 +8,7 @@ VERSION := $(shell ./tools/version)
 
 .PHONY: install-dependencies
 install-dependencies:
-	sudo apt-get -yy install devscripts equivs pandoc
+	sudo apt-get -yy install devscripts equivs pandoc bsdtar charm charm-tools jq
 	sudo mk-build-deps -i -t "apt-get --no-install-recommends -y" debian/control
 
 .PHONY: uninstall-dependencies
