@@ -6,12 +6,11 @@ import os
 import time
 
 
-def wait_for_applications(script, error_cb, msg_cb):
+def wait_for_applications(script, msg_cb):
     """ Processes a 00_deploy-done.sh to verify if applications are available
 
     Arguments:
     script: script to run (00_deploy-done.sh)
-    error_cb: error handle callback
     msg_cb: message callback
     """
     if os.path.isfile(script) \
@@ -26,7 +25,7 @@ def wait_for_applications(script, error_cb, msg_cb):
                 if result['returnCode'] > 0:
                     app.log.error(
                         "Failure in deploy done: {}".format(result['message']))
-                    return error_cb(result['message'])
+                    raise Exception(result['message'])
                 if not result['isComplete']:
                     time.sleep(5)
                     if count == 0:
@@ -37,7 +36,7 @@ def wait_for_applications(script, error_cb, msg_cb):
                 count = 0
                 rerun = False
         except CalledProcessError as e:
-            return error_cb(e)
+            raise e
 
 
 def run_script(path):
