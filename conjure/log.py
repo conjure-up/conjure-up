@@ -7,11 +7,14 @@ def setup_logging(app, debug=False):
                             facility=SysLogHandler.LOG_DAEMON)
     if debug:
         env = logging.DEBUG
+        cmdslog.setFormatter(logging.Formatter(
+            "%(name)s: [%(levelname)s] %(filename)s:%(lineno)d - %(message)s"))
     else:
         env = logging.INFO
+        cmdslog.setFormatter(logging.Formatter(
+            "%(name)s: [%(levelname)s] %(message)s"))
+
     cmdslog.setLevel(env)
-    cmdslog.setFormatter(logging.Formatter(
-        "%(name)s: [%(levelname)s] %(message)s"))
 
     logger = logging.getLogger(app)
     logger.setLevel(env)

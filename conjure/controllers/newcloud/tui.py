@@ -22,7 +22,7 @@ def do_post_bootstrap():
     app.env['JUJU_PROVIDERTYPE'] = model_info('default')['ProviderType']
 
     post_bootstrap_sh = os.path.join(app.config['spell-dir'],
-                                     'steps/00_post-bootstrap.sh')
+                                     'conjure/steps/00_post-bootstrap.sh')
     if os.path.isfile(post_bootstrap_sh) \
        and os.access(post_bootstrap_sh, os.X_OK):
         utils.pollinate(app.session_id, 'J001')
