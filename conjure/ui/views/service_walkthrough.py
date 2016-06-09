@@ -31,7 +31,10 @@ class ServiceWalkthroughView(WidgetWrap):
         w = self.build_widgets()
         super().__init__(w)
         self.get_async_info()
-        self.pile.focus_position = len(self.pile.contents) - 2
+        if self.n_remaining == 0:
+            self.pile.focus_position = len(self.pile.contents) - 1
+        else:
+            self.pile.focus_position = len(self.pile.contents) - 2
 
     def selectable(self):
         return True
@@ -42,9 +45,6 @@ class ServiceWalkthroughView(WidgetWrap):
         self.scale_edit = IntegerEditor(default=self.service.num_units)
         connect_signal(self.scale_edit._edit, 'change',
                        self.handle_scale_changed)
-        self.continue_button = PlainButton(
-            "Deploy and Configure Next Application",
-            self.do_deploy)
         self.skip_rest_button = PlainButton(
             "Deploy all {} Remaining Applications with Bundle Defaults".format(
                 self.n_remaining),
@@ -58,6 +58,24 @@ class ServiceWalkthroughView(WidgetWrap):
                                     focus_map='string_input focus'))
             ], dividechars=1
         )
+
+        if self.n_remaining == 0:
+            buttons = [Padding.right_50(Color.button_primary(
+                PlainButton("Deploy and Continue",
+                            self.do_deploy),
+                focus_map='button_primary focus'))]
+        else:
+            buttons = [
+                Padding.right_50(Color.button_primary(
+                    PlainButton(
+                        "Deploy and Configure Next Application",
+                        self.do_deploy),
+                    focus_map='button_primary focus')),
+                Padding.right_50(
+                    Color.button_secondary(
+                        self.skip_rest_button,
+                        focus_map='button_secondary focus'))]
+
         ws = [Text("{} of {}: {}".format(self.idx+1, self.n_total,
                                          self.service.service_name.upper())),
               Padding.center(HR()),
@@ -66,13 +84,7 @@ class ServiceWalkthroughView(WidgetWrap):
               Padding.center(self.readme_w, left=2),
               Padding.center(HR()),
               Padding.left(col, left=1),
-              Padding.line_break(""),
-              Padding.right_50(
-                  Color.button_primary(self.continue_button,
-                                       focus_map='button_primary focus')),
-              Padding.right_50(
-                  Color.button_secondary(self.skip_rest_button,
-                                         focus_map='button_secondary focus'))]
+              Padding.line_break("")] + buttons
 
         self.pile = Pile(ws)
         return Padding.center_90(Filler(self.pile, valign="top"))
