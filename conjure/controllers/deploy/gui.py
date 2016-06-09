@@ -41,14 +41,17 @@ def finish(single_service=None):
     """
     if single_service:
         juju.deploy_service(single_service,
+                            app.ui.set_footer,
                             partial(__handle_exception, "ED"))
         this.svc_idx += 1
         return render()
     else:
         for service in this.services[this.svc_idx:]:
             juju.deploy_service(service,
+                                app.ui.set_footer,
                                 partial(__handle_exception, "ED"))
         f = juju.set_relations(this.services,
+                               app.ui.set_footer,
                                partial(__handle_exception, "ED"))
         futures.wait([f])
 

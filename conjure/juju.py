@@ -261,19 +261,27 @@ def deploy(bundle):
         raise e
 
 
-def deploy_service(service, exc_cb=None):
+def deploy_service(service, msg_cb=None, exc_cb=None):
     """ Juju deploy service
 
     Arguments:
     service: dictionary representing service to deploy
+    msg_cb: message callback
+    exc_cb: exception handler callback
     """
 
     @requires_login
     def do_deploy():
         params = {"Services": [service.as_deployargs()]}
         try:
-            return this.CLIENT.Service(request="Deploy",
-                                       params=params)
+            deploy_message = "Deploying application: {}".format(
+                service.service_name)
+            if msg_cb:
+                msg_cb("{}".format(deploy_message))
+            this.CLIENT.Service(request="Deploy",
+                                params=params)
+            if msg_cb:
+                msg_cb("{}...done.".format(deploy_message))
         except Exception as e:
             if exc_cb:
                 exc_cb(e)
@@ -283,11 +291,13 @@ def deploy_service(service, exc_cb=None):
                         queue_name=JUJU_ASYNC_QUEUE)
 
 
-def set_relations(services, exc_cb=None):
+def set_relations(services, msg_cb=None, exc_cb=None):
     """ Juju set relations
 
     Arguments:
     services: list of services with relations to set
+    msg_cb: message callback
+    exc_cb: exception handler callback
     """
     relations = set()
     for service in services:
@@ -300,6 +310,8 @@ def set_relations(services, exc_cb=None):
         for a, b in list(relations):
             params = {"Endpoints": [a, b]}
             try:
+                if msg_cb:
+                    msg_cb("Setting application relation {}:{}".format(a, b))
                 this.CLIENT.Service(request="AddRelation",
                                     params=params)
             except Exception as e:
