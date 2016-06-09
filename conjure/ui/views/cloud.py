@@ -43,10 +43,6 @@ class CloudView(WidgetWrap):
             Padding.center_60(HR())
         ]
         for item in self.clouds:
-            # Skip MAAS as this is a special case to be handled
-            # a bit differently.
-            if item == "maas":
-                continue
             total_items.append(Padding.center_60(
                 Color.body(
                     menu_btn(label=item,

@@ -15,27 +15,9 @@ import os
 import os.path as path
 import petname
 import sys
-import yaml
 
 this = sys.modules[__name__]
 this.cloud = None
-
-
-def __format_creds(creds):
-    """ Formats the credentials into strings from the widgets values
-    """
-    formatted = {}
-    for k, v in creds.items():
-        if k.startswith('_'):
-            # Not a widget but a private key
-            k = k[1:]
-            formatted[k] = v
-        elif k.startswith('@'):
-            # A Widget, but not stored in credentials
-            continue
-        else:
-            formatted[k] = v.value
-    return formatted
 
 
 def __handle_exception(exc):
@@ -56,17 +38,20 @@ def __handle_bootstrap_done(future):
     __post_bootstrap_exec()
 
 
-def __do_bootstrap(credential=None):
+def __do_bootstrap(cloud=None, credential=None):
     """ We call this in two seperate places so add this for clarity
     """
+    if cloud is None:
+        cloud = this.cloud
+
     app.log.debug("Performing bootstrap: {} {}".format(
-        app.current_controller, this.cloud))
+        app.current_controller, cloud))
 
     app.ui.set_footer('Bootstrapping environment in the background...')
 
     future = juju.bootstrap_async(
         controller=app.current_controller,
-        cloud=this.cloud,
+        cloud=cloud,
         credential=credential,
         exc_cb=__handle_exception)
     future.add_done_callback(
@@ -134,34 +119,18 @@ def finish(credentials=None, back=False):
     if back:
         return controllers.use('clouds').render()
 
-    cred_path = path.join(utils.juju_path(), 'credentials.yaml')
-    try:
-        existing_creds = yaml.safe_load(open(cred_path))
-    except:
-        existing_creds = {'credentials': {}}
+    if credentials is not None:
+        common.save_creds(this.cloud, credentials)
 
-    if this.cloud in existing_creds['credentials'].keys():
-        c = existing_creds['credentials'][this.cloud]
-        c[app.current_controller] = __format_creds(
-            credentials)
-    else:
-        # Handle the case where path exists but an entry for the cloud
-        # has yet to be added.
-        existing_creds['credentials'][this.cloud] = {
-            app.current_controller: __format_creds(
-                credentials)
-        }
-
-    with open(cred_path, 'w') as cred_f:
-        cred_f.write(yaml.safe_dump(existing_creds,
-                                    default_flow_style=False))
+    credentials_key = common.try_get_creds(this.cloud)
 
     if this.cloud == 'maas':
         this.cloud = '{}/{}'.format(this.cloud,
                                     credentials['@maas-server'].value)
     utils.pollinate(app.session_id, 'CA')
 
-    __do_bootstrap()
+    __do_bootstrap(credential=credentials_key)
+
     if app.fetcher != "charmstore-search":
         return controllers.use('deploy').render()
     else:
@@ -197,15 +166,14 @@ def render(cloud):
         else:
             return controllers.use('variants').render()
 
-    # bootstrap if existing credentials are found for cloud
-    if common.do_creds_exist(this.cloud):
-        creds = juju.get_credentials()[this.cloud]
-        if len(creds.keys()) > 0:
-            __do_bootstrap(list(creds.keys())[0])
-            if app.fetcher != 'charmstore-search':
-                return controllers.use('deploy').render()
-            else:
-                return controllers.use('variants').render()
+    # XXX: always prompt for maas information for now as there is no way to
+    # logically store the maas server ip for future sessions.
+    if common.try_get_creds(this.cloud) is not None and this.cloud != 'maas':
+        __do_bootstrap(credential=common.try_get_creds(this.cloud))
+        if app.fetcher != 'charmstore-search':
+            return controllers.use('deploy').render()
+        else:
+            return controllers.use('variants').render()
 
     # show credentials editor otherwise
     try:
