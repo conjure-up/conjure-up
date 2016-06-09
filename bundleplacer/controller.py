@@ -24,7 +24,6 @@ from bundleplacer.state import ServiceState
 
 from bundleplacer.assignmenttype import AssignmentType, label_to_atype
 from bundleplacer.bundle import Bundle
-from bundleplacer.charmstore_api import CharmStoreID
 
 
 log = logging.getLogger('bundleplacer')

@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from enum import Enum
-from urwid import (CheckBox, connect_signal, Divider, Edit, GridFlow,
+from urwid import (CheckBox, connect_signal, Divider, GridFlow,
                    IntEdit, Pile, Text, WidgetWrap)
 from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.input import StringEditor
@@ -66,7 +66,7 @@ class OptionWidget(WidgetWrap):
         self.reset_button = PlainButton("Reset to Default", self.do_reset)
         if self.optype == OptionType.BOOLEAN:
             self.control = CheckBox(self.name, state=bool(self.current_value))
-                
+
         elif self.optype == OptionType.INT:
             self.control = IntEdit(caption="{}: ".format(self.name),
                                    default=self.current_value)
@@ -129,7 +129,7 @@ class OptionsColumn(WidgetWrap):
         self.service = None
         self.filter_string = ""
         self.placement_view = placement_view
-        
+
         w = self.build_widgets()
         super().__init__(w)
         self.update()
@@ -181,7 +181,7 @@ class OptionsColumn(WidgetWrap):
             ow.update()
 
         # MMCC TODO set filterbox.set_info
-        
+
         for w, _ in self.pile.contents[2:]:
             w.update()
         self.sort_option_widgets()
@@ -211,7 +211,7 @@ class OptionsColumn(WidgetWrap):
         self.pile.contents.append((ow,
                                    self.pile.options()))
         return ow
-        
+
     def remove_option_widget(self, opname):
         ow = self.find_option_widget(opname)
         if ow is None:
@@ -223,11 +223,11 @@ class OptionsColumn(WidgetWrap):
             if w == ow:
                 break
             ow_idx += 1
-        
+
         c = self.pile.contents[:ow_idx] + \
             self.pile.contents[ow_idx + 1:]
         self.pile.contents = c
-            
+
     def focus_prev_or_top(self):
         # ? self.pile.focus_position = len(self.pile.contents) - 1
 
