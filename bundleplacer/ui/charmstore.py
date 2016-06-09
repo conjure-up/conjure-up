@@ -17,7 +17,7 @@ from enum import Enum
 import logging
 
 
-from urwid import (AttrMap, Divider, connect_signal, Edit, Padding,
+from urwid import (AttrMap, connect_signal, Edit, Padding,
                    Pile, Text, WidgetWrap)
 
 from ubuntui.ev import EventLoop

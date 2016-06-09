@@ -98,10 +98,12 @@ def _graph_string_for_bundle(bundle, mc):
         if is_provides:
             if s_relname == "":
                 s_relname = [k for k, v in svc_provides[src].items() if
-                             v['Interface'] == list(provides_intersection)[0]][0]
+                             v['Interface'] ==
+                             list(provides_intersection)[0]][0]
             if d_relname == "":
                 d_relname = [k for k, v in svc_requires[dst].items() if
-                             v['Interface'] == list(provides_intersection)[0]][0]
+                             v['Interface'] ==
+                             list(provides_intersection)[0]][0]
 
             if s_relname != d_relname:
                 relname = s_relname + " \N{RIGHTWARDS ARROW} " + d_relname
@@ -114,10 +116,12 @@ def _graph_string_for_bundle(bundle, mc):
         elif is_requires:
             if s_relname == "":
                 s_relname = [k for k, v in svc_requires[src].items() if
-                             v['Interface'] == list(requires_intersection)[0]][0]
+                             v['Interface'] ==
+                             list(requires_intersection)[0]][0]
             if d_relname == "":
                 d_relname = [k for k, v in svc_provides[dst].items() if
-                             v['Interface'] == list(requires_intersection)[0]][0]
+                             v['Interface'] ==
+                             list(requires_intersection)[0]][0]
 
             if s_relname != d_relname:
                 relname = d_relname + " \N{RIGHTWARDS ARROW} " + s_relname

@@ -101,10 +101,10 @@ configOpenrc()
 # IP Address of unit
 unitAddress()
 {
-    juju status --format json | jq -r ".services[\"$1\"][\"units\"][\"$1/$2\"][\"public-address\"]"
+    juju status --format json | jq -r ".applications[\"$1\"][\"units\"][\"$1/$2\"][\"public-address\"]"
 }
 
-# Get status of unit
+# Get workload status of unit
 #
 # Arguments:
 # $1: service
@@ -114,8 +114,22 @@ unitAddress()
 # String of status
 unitStatus()
 {
-    juju status --format json | jq -r ".services[\"$1\"][\"units\"][\"$1/$2\"][\"workload-status\"][\"current\"]"
+    juju status --format json | jq -r ".applications[\"$1\"][\"units\"][\"$1/$2\"][\"workload-status\"][\"current\"]"
 }
+
+# Get juju status of unit
+#
+# Arguments:
+# $1: service
+# $2: unit number
+#
+# Returns:
+# String of status
+unitJujuStatus()
+{
+    juju status --format json | jq -r ".applications[\"$1\"][\"units\"][\"$1/$2\"][\"juju-status\"][\"current\"]"
+}
+
 
 # Get machine for unit, ie 0/lxc/1
 #
@@ -127,7 +141,7 @@ unitStatus()
 # machine identifier
 unitMachine()
 {
-    juju status --format json | jq -r ".services[\"$1\"][\"units\"][\"$1/$2\"][\"machine\"]"
+    juju status --format json | jq -r ".applications[\"$1\"][\"units\"][\"$1/$2\"][\"machine\"]"
 }
 
 # Waits for machine to start
@@ -172,10 +186,10 @@ exposeResult()
 # Checks an array of applications for an error flag
 #
 # Arguments:
-# $1: array of services
+# $1: array of applications
 checkUnitsForErrors() {
-    services=$1
-    for i in "${services[@]}"
+    applications=$1
+    for i in "${applications[@]}"
     do
         if [ $(unitStatus $i 0) = "error" ]; then
             debug "$i, gave a charm error."
@@ -187,10 +201,10 @@ checkUnitsForErrors() {
 # Checks an array of applications for an active flag
 #
 # Arguments:
-# $1: array of services
+# $1: array of applications
 checkUnitsForActive() {
-    services=$1
-    for i in "${services[@]}"
+    applications=$1
+    for i in "${applications[@]}"
     do
         debug "Checking agent state of $i: $(unitStatus $i 0)"
         if [ $(unitStatus $i 0) != "active" ]; then
