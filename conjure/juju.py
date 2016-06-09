@@ -279,8 +279,8 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
                 service.service_name)
             if msg_cb:
                 msg_cb("{}".format(deploy_message))
-            this.CLIENT.Service(request="Deploy",
-                                params=params)
+            this.CLIENT.Application(request="Deploy",
+                                    params=params)
             if msg_cb:
                 msg_cb("{}...done.".format(deploy_message))
         except Exception as e:
@@ -308,6 +308,9 @@ def set_relations(services, msg_cb=None, exc_cb=None):
 
     @requires_login
     def do_add_all():
+        if msg_cb:
+            msg_cb("Setting application relations")
+
         for a, b in list(relations):
             params = {"Endpoints": [a, b]}
             try:
@@ -317,6 +320,8 @@ def set_relations(services, msg_cb=None, exc_cb=None):
                 if exc_cb:
                     exc_cb(e)
                 return
+        if msg_cb:
+            msg_cb("Completed setting application relations")
 
     return async.submit(do_add_all,
                         exc_cb,
