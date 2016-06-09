@@ -60,8 +60,8 @@ class CharmStoreID:
             return nr, ""
         return name, rev
 
-    def as_str_without_rev(self):
-        s = "cs:"
+    def as_str_without_rev(self, include_scheme=True):
+        s = "cs:" if include_scheme else ""
         if self.owner != "":
             s += "~" + self.owner + "/"
         if self.series != "":
@@ -69,8 +69,8 @@ class CharmStoreID:
         s += self.name
         return s
 
-    def as_str(self):
-        s = self.as_str_without_rev()
+    def as_str(self, include_scheme=True):
+        s = self.as_str_without_rev(include_scheme)
         if self.rev != "":
             s += "-" + self.rev
         return s
@@ -145,23 +145,23 @@ class MetadataController:
                 self.metadata_future.add_done_callback(done_cb)
             self.metadata_future.add_done_callback(self.handle_load_done)
 
-    def _request_readme(self, charm_id):
+    def _request_readme(self, charm_id, short_charm_id):
         readme_url = "https://api.jujucharms.com/v4/{}/readme".format(charm_id)
         r = requests.get(readme_url)
         if r.ok:
             t = r.text
         else:
             t = "No README available"
-        self.readmes[charm_id] = t
+        self.readmes[short_charm_id] = t
         return t
 
-    def request_readme(self, charm_id):
+    def request_readme(self, charm_id, short_charm_id):
         rf = submit(
-            partial(self._request_readme, charm_id),
+            partial(self._request_readme, charm_id, short_charm_id),
             lambda _: None)
-        self.readme_futures[charm_id] = rf
+        self.readme_futures[short_charm_id] = rf
 
-        cb = self.readme_callbacks.get(charm_id, None)
+        cb = self.readme_callbacks.get(short_charm_id, None)
         if cb:
             rf.add_done_callback(cb)
 
@@ -183,7 +183,8 @@ class MetadataController:
         for charm_name, charm_dict in sorted(metas.items()):
             md = charm_dict["Meta"]["charm-metadata"]
             csid = CharmStoreID(charm_dict['Id'])
-            self.request_readme(csid.as_seriesname())
+            self.request_readme(csid.as_str(include_scheme=False),
+                                csid.as_seriesname())
             id_no_rev = csid.as_str_without_rev()
             if id_no_rev in self.charm_info:
                 continue
@@ -247,18 +248,18 @@ class MetadataController:
             return None
         return self.charm_info[charm_name]
 
-    def get_readme(self, charm_id, cb):
-        readme = self.readmes.get(charm_id, None)
+    def get_readme(self, short_charm_id, cb):
+        readme = self.readmes.get(short_charm_id, None)
         if readme:
             f = submit(lambda: readme, None)
             f.add_done_callback(cb)
             return
 
-        readme_f = self.readme_futures.get(charm_id, None)
+        readme_f = self.readme_futures.get(short_charm_id, None)
         if readme_f:
             readme_f.add_done_callback(cb)
         else:
-            self.readme_callbacks[charm_id] = cb
+            self.readme_callbacks[short_charm_id] = cb
 
     def get_services_for_iface(self, iface, reltype):
         services = []
