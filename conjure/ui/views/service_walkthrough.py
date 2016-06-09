@@ -39,7 +39,7 @@ class ServiceWalkthroughView(WidgetWrap):
     def build_widgets(self):
         self.description_w = Text("Description Loading…")
         self.readme_w = Text("README Loading…")
-        self.scale_edit = IntegerEditor(default=1)
+        self.scale_edit = IntegerEditor(default=self.service.num_units)
         connect_signal(self.scale_edit._edit, 'change',
                        self.handle_scale_changed)
         self.continue_button = PlainButton(
