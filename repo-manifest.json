@@ -2,7 +2,7 @@
     "repos": [
         {
             "url": "https://github.com/Ubuntu-Solutions-Engineering/macumba.git",
-            "version": "v0.9.1",
+            "version": "master",
             "directories": "macumba"
         },
         {

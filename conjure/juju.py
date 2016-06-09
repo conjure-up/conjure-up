@@ -270,10 +270,11 @@ def deploy_service(service, exc_cb=None):
 
     @requires_login
     def do_deploy():
-        params = {"Services": [service.as_deployargs()]}
+        params = {"Applications": [service.as_deployargs()]}
+        app.log.debug("Deploying {}: {}".format(service, params))
         try:
-            return this.CLIENT.Service(request="Deploy",
-                                       params=params)
+            return this.CLIENT.Application(request="Deploy",
+                                           params=params)
         except Exception as e:
             if exc_cb:
                 exc_cb(e)
@@ -300,8 +301,8 @@ def set_relations(services, exc_cb=None):
         for a, b in list(relations):
             params = {"Endpoints": [a, b]}
             try:
-                this.CLIENT.Service(request="AddRelation",
-                                    params=params)
+                this.CLIENT.Application(request="AddRelation",
+                                        params=params)
             except Exception as e:
                 if exc_cb:
                     exc_cb(e)

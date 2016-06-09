@@ -29,8 +29,10 @@ class keydict(dict):
     def __missing__(self, key):
         return key
 
+
 class BundleFormatError(Exception):
     "Used to notify user about a bundle that can't be read."
+
 
 def create_service(servicename, service_dict, servicemeta, relations):
 
