@@ -153,6 +153,10 @@ class ServiceWalkthroughView(WidgetWrap):
                 if rls[i+1][0] in ['-', '=']:
                     continue
             nrls.append(rls[i])
+
+        if len(nrls) == 0:
+            return
+
         if nrls[0] == '':
             nrls = nrls[1:]
         # split after two paragraphs:
