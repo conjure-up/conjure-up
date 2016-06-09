@@ -36,6 +36,9 @@ def list_clouds():
     """ Returns list of clouds filtering out any results
     """
     clouds = set(juju.get_clouds().keys())
+    # Add support for maas here since juju doesn't display
+    # this as a typical public cloud.
+    clouds.add('maas')
 
     if len(parse_whitelist()) > 0:
         whitelist = set(parse_whitelist())
@@ -60,7 +63,10 @@ def controller_provides_ctype(cloud):
     """
     if not juju.available():
         return None
-    cloud_type = juju.get_cloud(cloud)['type']
+    if cloud == 'maas':
+        cloud_type = 'maas'
+    else:
+        cloud_type = juju.get_cloud(cloud)['type']
     for c in juju.get_controllers()['controllers'].keys():
         juju.switch(c)
         loaded_cloud_type = juju.get_model(juju.get_current_model())['type']
