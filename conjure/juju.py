@@ -261,11 +261,13 @@ def deploy(bundle):
         raise e
 
 
-def deploy_service(service, exc_cb=None):
+def deploy_service(service, msg_cb=None, exc_cb=None):
     """ Juju deploy service
 
     Arguments:
     service: dictionary representing service to deploy
+    msg_cb: message callback
+    exc_cb: exception handler callback
     """
 
     @requires_login
@@ -273,8 +275,14 @@ def deploy_service(service, exc_cb=None):
         params = {"Applications": [service.as_deployargs()]}
         app.log.debug("Deploying {}: {}".format(service, params))
         try:
-            return this.CLIENT.Application(request="Deploy",
-                                           params=params)
+            deploy_message = "Deploying application: {}".format(
+                service.service_name)
+            if msg_cb:
+                msg_cb("{}".format(deploy_message))
+            this.CLIENT.Application(request="Deploy",
+                                    params=params)
+            if msg_cb:
+                msg_cb("{}...done.".format(deploy_message))
         except Exception as e:
             if exc_cb:
                 exc_cb(e)
@@ -284,11 +292,13 @@ def deploy_service(service, exc_cb=None):
                         queue_name=JUJU_ASYNC_QUEUE)
 
 
-def set_relations(services, exc_cb=None):
+def set_relations(services, msg_cb=None, exc_cb=None):
     """ Juju set relations
 
     Arguments:
     services: list of services with relations to set
+    msg_cb: message callback
+    exc_cb: exception handler callback
     """
     relations = set()
     for service in services:
@@ -298,6 +308,9 @@ def set_relations(services, exc_cb=None):
 
     @requires_login
     def do_add_all():
+        if msg_cb:
+            msg_cb("Setting application relations")
+
         for a, b in list(relations):
             params = {"Endpoints": [a, b]}
             try:
@@ -307,6 +320,8 @@ def set_relations(services, exc_cb=None):
                 if exc_cb:
                     exc_cb(e)
                 return
+        if msg_cb:
+            msg_cb("Completed setting application relations")
 
     return async.submit(do_add_all,
                         exc_cb,
