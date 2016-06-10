@@ -21,12 +21,13 @@ class Table:
             self.addRow(Columns(headings), False)
             self._is_header_set = True
 
-    def addColumns(self, row_id, columns, force=False):
+    def addColumns(self, row_id, columns, dividechars=1, force=False):
         """ Convert list of widgets to Columns and add to a table row
 
         Arguments:
         row_id: unique id of new row
         columns: list of columns
+        dividechars: character space between columns
         force: force additional row regardless of existing row_id
         """
         if row_id not in self._row_id or force:
@@ -39,7 +40,7 @@ class Table:
             use_divider = True
             if force:
                 use_divider = False
-            self.addRow(Columns(columns), use_divider)
+            self.addRow(Columns(columns, dividechars=dividechars), use_divider)
 
     def addRow(self, item, use_divider=True):
         """ Appends widget to Pile

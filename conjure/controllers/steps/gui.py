@@ -10,7 +10,8 @@ from glob import glob
 import os.path as path
 import os
 import sys
-from collections import deque
+import yaml
+from collections import deque, OrderedDict
 
 
 this = sys.modules[__name__]
@@ -20,7 +21,10 @@ this.bundle = path.join(
 this.bundle_scripts = path.join(
     app.config['spell-dir'], 'conjure/steps'
 )
-this.steps = deque(sorted(glob(os.path.join(this.bundle_scripts, '*.sh'))))
+this.steps = deque(sorted(glob(
+    os.path.join(this.bundle_scripts, 'step-*.sh'))))
+
+this.results = OrderedDict()
 
 
 def __handle_exception(tag, exc):
@@ -29,48 +33,52 @@ def __handle_exception(tag, exc):
     return app.ui.show_exception_message(exc)
 
 
-def __fatal(error):
-    """ If an exception occurs in the post processing,
-    log it and die
-    """
-    app.log.exception(Exception(error))
-    return __handle_exception('E002', Exception(error))
+def get_result(future):
+    try:
+        title, result = future.result()
+        app.log.debug("Storing step result for: {}={}".format(title, result))
+        this.results[title] = result
+    except:
+        return __handle_exception('E002', future.exception())
 
 
-def __post_exec(*args):
-    """ Executes a bundles post processing script if exists
+def finish(data, done=False):
+    """ handles processing step with input data
+
+    Arguments:
+    data: data returned from widget
+    done: if True continues on to the summary view
     """
-    # post step processing
-    future = async.submit(partial(common.wait_for_steps,
-                                  this.steps,
+    if done:
+        return controllers.use('summary').render(this.results)
+
+    future = async.submit(partial(common.do_step,
+                                  data,
                                   app.ui.set_footer,
                                   this.view.update_icon_state),
                           partial(__handle_exception, 'E002'))
-    future.add_done_callback(finish)
-
-
-def finish(future):
-    try:
-        results = future.result()
-    except:
-        return __handle_exception('E002', future.exception())
-    return controllers.use('summary').render(results)
+    future.add_done_callback(get_result)
 
 
 def render():
     """ Render services status view
     """
-    steps_dict = {}
+    steps_dict = OrderedDict()
     for step in this.steps:
-        if "00_pre.sh" in step \
-           or "00_post-bootstrap.sh" in step \
-           or "00_deploy-done.sh" in step:
-            continue
-        steps_dict[step] = step
-    this.view = StepsView(app, steps_dict)
+        fname, ext = path.splitext(step)
+        step_metadata_path = "{}.yaml".format(fname)
+        step_metadata = {}
+        if path.isfile(step_metadata_path):
+            with open(step_metadata_path) as fp:
+                step_metadata = yaml.load(fp.read())
+        steps_dict[fname] = {'step_metadata': step_metadata}
+        steps_dict[fname]['step_metadata']['path'] = step
+        app.log.debug("Queueing step: {}".format(steps_dict[fname]))
+
+    this.view = StepsView(app, steps_dict, finish)
 
     app.ui.set_header(
-        title="Processing additional tasks")
+        title="Additional Application Configuration")
     app.ui.set_body(this.view)
     app.ui.set_footer('')
-    __post_exec()
+    # __post_exec()

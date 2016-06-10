@@ -4,10 +4,9 @@ from urwid import WidgetWrap, Text, Filler, Pile
 
 class SummaryView(WidgetWrap):
 
-    def __init__(self, app, results):
+    def __init__(self, app, output):
         self.app = app
-        self.results = "\n".join(results)
         _pile = [
-            Padding.center_80(Text(self.results))
+            Padding.center_80(Text(output))
         ]
         super().__init__(Filler(Pile(_pile), valign="top"))
