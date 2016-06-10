@@ -30,6 +30,15 @@ class StepsView(WidgetWrap):
                     step_metadata.description,
                 ]
             )
+            # Need to still prompt for the user to submit
+            # even though no questions are asked
+            if len(step_metadata.additional_input) == 0:
+                self.table.addRow(
+                    Padding.right_20(
+                        Color.button_primary(
+                            submit_btn(on_press=self.submit,
+                                       user_data=step_metadata),
+                            focus_map='button_primary focus')), False)
             for i in step_metadata.additional_input:
                 self.table.addRow(Padding.line_break(""), False)
                 self.table.addColumns(
