@@ -3,6 +3,7 @@
 from conjure import async
 from conjure.utils import juju_path
 from conjure.app_config import app
+from bundleplacer.charmstore_api import CharmStoreID
 from functools import wraps, partial
 import macumba
 from macumba.v2 import JujuClient
@@ -262,13 +263,22 @@ def deploy(bundle):
 
 
 def deploy_service(service, msg_cb=None, exc_cb=None):
-    """ Juju deploy service
+    """Juju deploy service.
+
+    If the service's charm ID doesn't have a revno, will query charm
+    store to get latest revno for the charm
 
     Arguments:
-    service: dictionary representing service to deploy
+    service: Service to deploy
     msg_cb: message callback
     exc_cb: exception handler callback
+
     """
+    if service.csid.rev == "":
+        id_no_rev = service.csid.as_str_without_rev()
+        mc = app.metadata_controller
+        info = mc.get_charm_info(id_no_rev, lambda: None)
+        service.csid = CharmStoreID(info["Id"])
 
     @requires_login
     def do_deploy():
