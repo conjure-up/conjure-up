@@ -82,9 +82,13 @@ class ServiceWalkthroughView(WidgetWrap):
               Padding.center(self.description_w, left=2),
               Padding.line_break(""),
               Padding.center(self.readme_w, left=2),
-              Padding.center(HR()),
-              Padding.left(col, left=1),
-              Padding.line_break("")] + buttons
+              Padding.center(HR())]
+
+        if not self.service.subordinate:
+            ws.append(Padding.left(col, left=1))
+
+        ws.append(Padding.line_break(""))
+        ws += buttons
 
         self.pile = Pile(ws)
         return Padding.center_90(Filler(self.pile, valign="top"))
