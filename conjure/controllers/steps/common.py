@@ -73,12 +73,6 @@ def wait_for_steps(steps, message_cb, icon_state=None):
     results = []
     steps_queue = deque()
     for step in steps:
-        if "00_pre.sh" in step \
-           or "00_post-bootstrap.sh" in step \
-           or "00_deploy-done.sh" in step:
-            app.log.debug("Skipping non steps.")
-            continue
-
         if os.access(step, os.X_OK):
             steps_queue.append(step)
 

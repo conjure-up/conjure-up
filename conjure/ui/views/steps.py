@@ -1,6 +1,7 @@
 from conjure.ui.widgets.step import StepWidget
-from ubuntui.utils import Padding
+from ubuntui.utils import Padding, Color
 from ubuntui.widgets.table import Table
+from ubuntui.widgets.buttons import submit_btn
 from urwid import WidgetWrap
 import random
 
@@ -13,29 +14,39 @@ class StepsView(WidgetWrap):
 
         self.steps_queue = steps
         for k, v in self.steps_queue.items():
-            self.steps_queue[k] = StepWidget(v)
+            meta = StepWidget(v['step_metadata'])
+            if not meta.viewable:
+                continue
             self.table.addColumns(
                 k,
                 [
-                    ('fixed', 3, self.steps_queue[k].icon),
-                    self.steps_queue[k].title,
+                    ('fixed', 3, meta.icon),
+                    meta.description,
                 ]
             )
-            self.table.addColumns(
-                k,
-                [
-                    ('weight', 1, Padding.left(self.steps_queue[k].result,
-                                               left=4))
-
-                ], force=True
-            )
+            for i in meta.additional_input:
+                self.table.addRow(Padding.line_break(""), False)
+                self.table.addColumns(
+                    k,
+                    [
+                        ('weight', 0.5, Padding.left(i['label'], left=5)),
+                        ('weight', 1, Color.string_input(
+                            i['input'],
+                            focus_map='string_input focus')),
+                        ('weight', 0.2,
+                         Color.button_primary(
+                             submit_btn(on_press=self.submit,
+                                        user_data=i),
+                             focus_map='button_primary focus'))
+                    ], force=True
+                )
+                self.table.addRow(Padding.line_break(""), False)
 
         super().__init__(Padding.center_80(self.table.render()))
 
-    def update_step_message(self, key, msg):
-        """ Updates the return results from a step
-        """
-        self.steps_queue[key].result.set_text(('info_context', msg))
+    def submit(self, result, data):
+        import q
+        q.q(result, data['input'].value)
 
     def update_icon_state(self, key, result_code):
         """ updates status icon

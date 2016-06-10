@@ -14,6 +14,7 @@ class MenuSelectButton(Button):
 
 
 confirm_btn = partial(PlainButton, label="Confirm", on_press=None)
+submit_btn = partial(PlainButton, label="Submit", on_press=None)
 cancel_btn = partial(PlainButton, label="Cancel", on_press=None)
 back_btn = partial(PlainButton, label="Back", on_press=None)
 quit_btn = partial(PlainButton, label="Quit", on_press=None)
