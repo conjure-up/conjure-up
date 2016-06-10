@@ -70,7 +70,7 @@ class Service:
         }
 
     def as_deployargs(self):
-        rd = {"CharmUrl": self.charm_source,
+        rd = {"CharmUrl": self.csid.as_str(),
               "ApplicationName": self.service_name,
               "NumUnits": self.num_units,
               "Constraints": self.constraints}
