@@ -15,7 +15,7 @@ def set_env(inputs):
     """
     for i in inputs:
         env_key = i['key'].upper()
-        app.env[env_key] = i['input'].value
+        app.env[env_key] = i['input']
         app.log.debug("Setting environment var: {}={}".format(
             env_key,
             app.env[env_key]))
@@ -43,7 +43,7 @@ def do_step(step, message_cb, icon_state=None):
     if not os.access(step.path, os.X_OK):
         app.log.error("Step {} not executable".format(step.path))
 
-    message_cb("Working: {}".format(step.title.get_text()[0]))
+    message_cb("Working: {}".format(step.title))
     app.log.debug("Executing script: {}".format(step.path))
     sh = run_script(step.path)
     result = json.loads(sh.stdout.decode('utf8'))
@@ -51,7 +51,8 @@ def do_step(step, message_cb, icon_state=None):
         app.log.error(
             "Failure in step: {}".format(result['message']))
         raise Exception(result['message'])
-    message_cb("Done: {}".format(step.title.get_text()[0]))
+    message_cb("Done: {}".format(step.title))
+    step.result = result['message']
     if icon_state:
         icon_state(step.icon, 'active')
-    return step.title.get_text()[0], result['message']
+    return step

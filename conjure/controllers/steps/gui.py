@@ -5,6 +5,7 @@ from conjure import async
 from conjure.app_config import app
 from conjure import utils
 from conjure import controllers
+from conjure.models.step import StepModel
 from . import common
 from glob import glob
 import os.path as path
@@ -35,25 +36,26 @@ def __handle_exception(tag, exc):
 
 def get_result(future):
     try:
-        title, result = future.result()
-        app.log.debug("Storing step result for: {}={}".format(title, result))
-        this.results[title] = result
+        result = future.result()
+        app.log.debug("Storing step result for: {}={}".format(
+            result.title, result.result))
+        this.results[result.title] = result.result
     except:
         return __handle_exception('E002', future.exception())
 
 
-def finish(data, done=False):
+def finish(step_model, done=False):
     """ handles processing step with input data
 
     Arguments:
-    data: data returned from widget
+    step_model: step_model returned from widget
     done: if True continues on to the summary view
     """
     if done:
         return controllers.use('summary').render(this.results)
 
     future = async.submit(partial(common.do_step,
-                                  data,
+                                  step_model,
                                   app.ui.set_footer,
                                   this.view.update_icon_state),
                           partial(__handle_exception, 'E002'))
@@ -63,22 +65,22 @@ def finish(data, done=False):
 def render():
     """ Render services status view
     """
-    steps_dict = OrderedDict()
-    for step in this.steps:
-        fname, ext = path.splitext(step)
+    steps = []
+    for step_path in this.steps:
+        fname, ext = path.splitext(step_path)
         step_metadata_path = "{}.yaml".format(fname)
         step_metadata = {}
         if path.isfile(step_metadata_path):
             with open(step_metadata_path) as fp:
                 step_metadata = yaml.load(fp.read())
-        steps_dict[fname] = {'step_metadata': step_metadata}
-        steps_dict[fname]['step_metadata']['path'] = step
-        app.log.debug("Queueing step: {}".format(steps_dict[fname]))
+        model = StepModel(step_metadata)
+        model.path = step_path
+        steps.append(model)
+        app.log.debug("Queueing step: {}".format(model))
 
-    this.view = StepsView(app, steps_dict, finish)
+    this.view = StepsView(app, steps, finish)
 
     app.ui.set_header(
         title="Additional Application Configuration")
     app.ui.set_body(this.view)
     app.ui.set_footer('')
-    # __post_exec()
