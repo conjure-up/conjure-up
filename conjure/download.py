@@ -1,4 +1,5 @@
 from subprocess import run, CalledProcessError
+import shutil
 import tempfile
 import os
 from conjure.app_config import app
@@ -51,8 +52,8 @@ def download(src, dst, purge_top_level=True):
                      during unzip.
     """
     try:
-        if not os.path.isdir(dst):
-            os.makedirs(dst)
+        shutil.rmtree(dst, ignore_errors=True)
+        os.makedirs(dst)
         with tempfile.TemporaryDirectory() as tmpdirname:
             run("wget -qO {}/temp.zip {}".format(tmpdirname, src),
                 shell=True,
