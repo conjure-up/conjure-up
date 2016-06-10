@@ -21,6 +21,8 @@ class StepWidget:
             'description', 'No description found'))
         self.result = Text('')
         self.icon = Text(("pending_icon", "\N{HOURGLASS}"))
+        self.viewable = step.get('viewable', None)
+        self.path = step.get('path', None)
 
         self.additional_input = []
         if 'additional-input' in self.step \
@@ -31,8 +33,7 @@ class StepWidget:
                     "key": i['key'],
                     "input": self.INPUT_TYPES.get(i['type'])
                 }
-                # if 'default' in i:
-                #     widget['input'] = INPUT_TYPES[i](default=i['default'])
+                if 'default' in i:
+                    widget['input'] = StringEditor(default=i['default'])
 
                 self.additional_input.append(widget)
-        self.viewable = step.get('viewable', None)

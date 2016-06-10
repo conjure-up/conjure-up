@@ -1,68 +1,36 @@
 from subprocess import run, PIPE
 from conjure.app_config import app
 from conjure.api.models import model_info
-import time
 import json
 import os
-from collections import deque
-
-
-def __readlines_key(key, data):
-    """ reads lines looking for a key
-
-    Arguments:
-    key: key to stop on
-    data: list of data usually from reading a file
-    """
-    for line in data:
-        if key in line:
-            try:
-                return line.split(":")[1].strip()
-            except:
-                pass
-    app.log.debug("Unknown Description/Title, "
-                  "please check your step file: {}".format(
-                      key))
-    return ""
-
-
-def parse_description(step):
-    """ Parses description from step file
-
-    Arguments:
-    step: path to step file
-    """
-    app.log.debug("parse_title: {}".format(step))
-    with open(step) as fd:
-        lines = fd.readlines()
-
-    return __readlines_key('Description:', lines)
-
-
-def parse_title(step):
-    """ Parses title from step file
-
-    Arguments:
-    step: path to step file
-    """
-    app.log.debug("parse_title: {}".format(step))
-    with open(step) as fd:
-        lines = fd.readlines()
-
-    return __readlines_key('Title:', lines)
 
 
 def run_script(path):
     return run(path, shell=True, stderr=PIPE, stdout=PIPE, env=app.env)
 
 
-def wait_for_steps(steps, message_cb, icon_state=None):
-    """ Waits for post processing steps and return its results
+def set_env(inputs):
+    """ Sets the application environment with the key/value from the steps
+    input so they can be made available in the step shell scripts
+    """
+    for i in inputs:
+        env_key = i['key'].upper()
+        app.env[env_key] = i['input'].value
+        app.log.debug("Setting environment var: {}={}".format(
+            env_key,
+            app.env[env_key]))
+
+
+def do_step(step, message_cb, icon_state=None):
+    """ Processes steps in the background
 
     Arguments:
-    steps: list of steps to run
+    step: list of steps to run
     message_cb: log writer
     icon_state: optionally set an icon state (gui only)
+
+    Returns:
+    Step title and results message
     """
 
     info = model_info(app.current_model)
@@ -70,39 +38,20 @@ def wait_for_steps(steps, message_cb, icon_state=None):
     # exposed in future processing tasks
     app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
 
-    results = []
-    steps_queue = deque()
-    for step in steps:
-        if os.access(step, os.X_OK):
-            steps_queue.append(step)
+    set_env(step.additional_input)
 
-    is_requeued = False
-    while steps_queue:
-        step = steps_queue.popleft()
-        if not is_requeued:
-            message_cb(
-                "Running: {}".format(parse_title(step)))
-        sh = run_script(step)
-        result = json.loads(sh.stdout.decode('utf8'))
-        if result['returnCode'] > 0:
-            app.log.error(
-                "Failure in step: {}".format(result['message']))
-            raise Exception(result['message'])
-        elif not result['isComplete']:
-            time.sleep(5)
-            if not is_requeued:
-                message_cb("{}, please wait".format(
-                    result['message']))
-            if icon_state:
-                icon_state(step, 'waiting')
-            steps_queue.appendleft(step)
-            is_requeued = True
-            continue
-        else:
-            message_cb(result['message'])
-            results.append(result['message'])
-            if icon_state:
-                icon_state(step, 'active')
-        is_requeued = False
-        app.log.debug("post execution done: {}".format(result))
-    return results
+    if not os.access(step.path, os.X_OK):
+        app.log.error("Step {} not executable".format(step.path))
+
+    message_cb("Working: {}".format(step.title.get_text()[0]))
+    app.log.debug("Executing script: {}".format(step.path))
+    sh = run_script(step.path)
+    result = json.loads(sh.stdout.decode('utf8'))
+    if result['returnCode'] > 0:
+        app.log.error(
+            "Failure in step: {}".format(result['message']))
+        raise Exception(result['message'])
+    message_cb("Done: {}".format(step.title.get_text()[0]))
+    if icon_state:
+        icon_state(step.icon, 'active')
+    return step.title.get_text()[0], result['message']
