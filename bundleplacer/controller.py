@@ -127,7 +127,6 @@ class PlacementController:
         # assignments is {id: {atype: [service]}}
         self.assignments = defaultdict(lambda: defaultdict(list))
         self.deployments = defaultdict(lambda: defaultdict(list))
-        self.autosave_filename = None
         mf = config.getopt('metadata_filename')
         self.bundle = Bundle(filename=config.getopt('bundle_filename'),
                              metadatafilename=mf)
@@ -172,95 +171,8 @@ class PlacementController:
     def __repr__(self):
         return "<PlacementController {}>".format(id(self))
 
-    def set_autosave_filename(self, filename):
-        self.autosave_filename = filename
-
-    def do_autosave(self):
-        if not self.autosave_filename:
-            return
-        with open(self.autosave_filename, 'w') as af:
-            self.save(af)
-
-    def save(self, f):
-        """f is a file-like object to save state to, to be re-read by
-        load(). No guarantees made about the contents of the file.
-        """
-        flat_assignments = defaultdict(dict)
-        for iid, ad in self.assignments.items():
-
-            flat_ad = {}
-            for atype, al in ad.items():
-                flat_al = [cc.service_name for cc in al]
-                flat_ad[atype.name] = flat_al
-
-            flat_assignments[iid]['assignments'] = flat_ad
-
-        for iid, dd in self.deployments.items():
-            flat_dd = {}
-            for atype, dl in dd.items():
-                flat_dl = [cc.service_name for cc in dl]
-                flat_dd[atype.name] = flat_dl
-            flat_assignments[iid]['deployments'] = flat_dd
-
-        for iid in flat_assignments.keys():
-            constraints = {}
-            if self.maas_state is None:
-                machine = next((m for m in self.machines() if
-                                m.instance_id == iid), None)
-                if machine:
-                    constraints = machine.constraints
-                    flat_assignments[iid]['constraints'] = constraints
-
-        yaml.dump(flat_assignments, f)
-
-    def load(self, f):
-        """Load assignments from file object written to by save().
-        replaces current assignments.
-        """
-        def find_service(name):
-            for s in self.services():
-                if s.service_name == name:
-                    return s
-            log.warning("Could not find service "
-                        "matching saved service name {}".format(name))
-            return None
-
-        file_assignments = yaml.load(f)
-        new_assignments = defaultdict(lambda: defaultdict(list))
-        new_deployments = defaultdict(lambda: defaultdict(list))
-        for iid, d in file_assignments.items():
-            if self.maas_state is None and \
-               not self.is_placeholder(iid):
-                constraints = d.get('constraints', {})
-                pm = PlaceholderMachine(iid, iid,
-                                        constraints)
-                self._machines.append(pm)
-
-            ad = d.get('assignments', {})
-            for atypestr, al in ad.items():
-                new_al = [find_service(ccname)
-                          for ccname in al]
-                new_al = [x for x in new_al if x is not None]
-                at = AssignmentType.__members__[atypestr]
-                new_assignments[iid][at] = new_al
-
-            dd = d.get('deployments', {})
-            for atypestr, dl in dd.items():
-                new_dl = [find_service(ccname)
-                          for ccname in dl]
-                new_dl = [x for x in new_dl if x is not None]
-                at = AssignmentType.__members__[atypestr]
-                new_deployments[iid][at] = new_dl
-
-        self.assignments.clear()
-        self.assignments.update(new_assignments)
-        self.deployments.clear()
-        self.deployments.update(new_deployments)
+    def update(self):
         self.reset_assigned_deployed()
-
-    def update_and_save(self):
-        self.reset_assigned_deployed()
-        self.do_autosave()
 
     def is_placeholder(self, mid):
         return mid in [self.sub_placeholder.instance_id,
@@ -405,12 +317,13 @@ class PlacementController:
                         l.remove(service)
 
         self.assignments[machine.instance_id][atype].append(service)
-        self.update_and_save()
+        log.debug(self.assignments)
+        self.update()
 
     def mark_deployed(self, machine, service, atype):
         self.deployments[machine.instance_id][atype].append(service)
         self.assignments[machine.instance_id][atype].remove(service)
-        self.update_and_save()
+        self.update()
 
     def _get_machines_by_atype(self, a_dict, service):
         "Helper for get_assignments and get_deployments"
@@ -449,7 +362,7 @@ class PlacementController:
 
     def clear_all_assignments(self):
         self.assignments = defaultdict(lambda: defaultdict(list))
-        self.update_and_save()
+        self.update()
 
     def clear_assignments(self, m):
         """clears all assignments for machine m.
@@ -459,7 +372,7 @@ class PlacementController:
             return
 
         del self.assignments[m.instance_id]
-        self.update_and_save()
+        self.update()
 
     def remove_one_assignment(self, m, cc):
         ad = self.assignments[m.instance_id]
@@ -467,7 +380,7 @@ class PlacementController:
             if cc in assignment_list:
                 assignment_list.remove(cc)
                 break
-        self.update_and_save()
+        self.update()
 
     def assignments_for_machine(self, m):
         """Returns all assignments for given machine
@@ -498,7 +411,7 @@ class PlacementController:
 
     def set_all_assignments(self, assignments):
         self.assignments = assignments
-        self.update_and_save()
+        self.update()
 
     def reset_assigned_deployed(self):
         self._assigned_services = set()
@@ -641,7 +554,7 @@ class PlacementController:
         for mid, services in unassigned_defaults.items():
             self.assignments[mid] = services
 
-        self.update_and_save()
+        self.update()
 
         unassigned_services = list(self.unassigned_undeployed_services())
         unassigned_reqs = [c for c in unassigned_services if
@@ -665,7 +578,7 @@ class PlacementController:
             al = d[DEFAULT_SHARED_ASSIGNMENT_TYPE]
             for i in range(s.num_units):
                 al.append(s)
-        self.update_and_save()
+        self.update()
 
     def gen_defaults(self, services=None, maas_machines=None):
         """Generates an assignments dictionary for the given service classes and

@@ -77,7 +77,7 @@ class Config:
             self._config[key] = val
             self.save()
         except Exception as e:
-            log.error("Failed to set {} in config: {}".format(key, e))
+            log.exception("Failed to set {} in config: {}".format(key, e))
 
     def getopt(self, key):
         if key in self._config:
