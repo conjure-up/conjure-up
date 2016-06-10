@@ -58,8 +58,8 @@ class StepsView(WidgetWrap):
     def done(self, *args):
         self.cb({}, done=True)
 
-    def submit(self, btn, data):
-        self.cb(data)
+    def submit(self, btn, stepwidget_metadata):
+        self.cb(stepwidget_metadata)
 
     def update_icon_state(self, icon, result_code):
         """ updates status icon
