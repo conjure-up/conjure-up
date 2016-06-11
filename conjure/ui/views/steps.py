@@ -1,4 +1,3 @@
-from conjure.ui.widgets.step import StepWidget
 from ubuntui.widgets.input import (StringEditor, YesNo,
                                    PasswordEditor, IntegerEditor)
 from ubuntui.utils import Padding, Color
