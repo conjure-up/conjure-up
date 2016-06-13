@@ -23,7 +23,7 @@ this.bundle_scripts = path.join(
     app.config['spell-dir'], 'conjure/steps'
 )
 this.steps = deque(sorted(glob(
-    os.path.join(this.bundle_scripts, 'step-*.sh'))))
+    os.path.join(this.bundle_scripts, 'step-*'))))
 
 this.results = OrderedDict()
 
