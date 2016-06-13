@@ -28,7 +28,10 @@ def do_post_bootstrap():
         utils.pollinate(app.session_id, 'J001')
         utils.info("Running additional environment tasks.")
         try:
-            sh = run(post_bootstrap_sh, shell=True, stdout=PIPE, stderr=PIPE)
+            sh = run(post_bootstrap_sh, shell=True,
+                     stdout=PIPE,
+                     stderr=PIPE,
+                     env=app.env)
             result = json.loads(sh.output.decode('utf8'))
             utils.info("Finished post bootstrap task: {}".format(
                 result['message']))
