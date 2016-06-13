@@ -122,7 +122,7 @@ def apply_proxy():
     """ Sets up proxy information.
     """
     # Apply proxy information
-    if app.arg.http_proxy:
+    if app.argv.http_proxy:
         os.environ['HTTP_PROXY'] = app.argv.http_proxy
         os.environ['http_proxy'] = app.argv.http_proxy
     if app.argv.https_proxy:
