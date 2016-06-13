@@ -67,7 +67,7 @@ def __post_bootstrap_exec():
     app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
 
     _post_bootstrap_sh = path.join(app.config['spell-dir'],
-                                   'conjure/steps/00_post-bootstrap.sh')
+                                   'conjure/steps/00_post-bootstrap')
     app.log.debug(
         'Checking for post bootstrap task: {}'.format(_post_bootstrap_sh))
     if path.isfile(_post_bootstrap_sh) \

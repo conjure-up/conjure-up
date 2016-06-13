@@ -28,7 +28,7 @@ def __handle_exception(tag, exc):
 
 def __wait_for_applications(*args):
     deploy_done_sh = os.path.join(this.bundle_scripts,
-                                  '00_deploy-done.sh')
+                                  '00_deploy-done')
 
     future = async.submit(partial(common.wait_for_applications,
                                   deploy_done_sh,
