@@ -116,6 +116,15 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
               controller, cloud)
     cmd += "--config enable-os-refresh-update=false "
     cmd += "--config enable-os-upgrade=false "
+    if app.argv.http_proxy:
+        cmd += "--config http-proxy={} ".format(app.argv.http_proxy)
+    if app.argv.https_proxy:
+        cmd += "--config https-proxy={} ".format(app.argv.https_proxy)
+    if app.argv.apt_http_proxy:
+        cmd += "--config apt-http-proxy={} ".format(app.argv.apt_http_proxy)
+    if app.argv.apt_https_proxy:
+        cmd += "--config apt-https-proxy={} ".format(app.argv.apt_https_proxy)
+
     cmd += "--bootstrap-series={} ".format(series)
     if cloud != "localhost":
         cmd += "--credential {}".format(credential)
