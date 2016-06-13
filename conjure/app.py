@@ -73,10 +73,10 @@ def has_valid_juju():
             sys.exit(1)
 
         beta_release_regex = re.compile('^.*beta(\d+)')
-        beta_release_ver = beta_release_regex(juju_version)
+        beta_release_ver = beta_release_regex.search(juju_version)
         if beta_release_ver is not None:
             app.log.debug("Beta release found, checking minimum requirements.")
-            if int(beta_release_ver) < 9:
+            if int(beta_release_ver.group(1)) < 9:
                 utils.warning(
                     "Juju v2 beta9 is the lowest support release. Please "
                     "make sure you are on the latest release Juju. See {} "
@@ -125,8 +125,6 @@ def main():
         utils.info("")
         sys.exit(1)
 
-    has_valid_juju()
-
     # Application Config
     app.argv = opts
     app.log = setup_logging("conjure-up/{}".format(spell),
@@ -135,6 +133,8 @@ def main():
                                '{}/{}'.format(
                                    spell,
                                    str(uuid.uuid4())))
+
+    has_valid_juju()
 
     global_conf_file = '/etc/conjure-up.conf'
     if not os.path.exists(global_conf_file):
