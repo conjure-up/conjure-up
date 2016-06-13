@@ -51,12 +51,8 @@ def render(cloud):
     if app.current_model is None:
         app.current_model = 'default'
 
-    credential = None
     if this.cloud != 'localhost':
-        if common.do_creds_exist(this.cloud):
-            credentials = juju.get_credentials()[this.cloud]
-            credential = list(credentials.keys())[0]
-        else:
+        if not common.try_get_creds(this.cloud):
             utils.warning("You attempted to do an install against a cloud "
                           "that requires credentials that could not be "
                           "found.  If you wish to supply those "
@@ -66,6 +62,6 @@ def render(cloud):
 
     juju.bootstrap(controller=app.current_controller,
                    cloud=this.cloud,
-                   credential=credential)
+                   credential=common.try_get_creds(this.cloud))
     do_post_bootstrap()
     finish()
