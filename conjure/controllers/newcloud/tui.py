@@ -32,7 +32,7 @@ def do_post_bootstrap():
                      stdout=PIPE,
                      stderr=PIPE,
                      env=app.env)
-            result = json.loads(sh.output.decode('utf8'))
+            result = json.loads(sh.stdout.decode('utf8'))
             utils.info("Finished post bootstrap task: {}".format(
                 result['message']))
         except Exception as e:
