@@ -65,7 +65,6 @@ def __post_bootstrap_exec():
     # Set our provider type environment var so that it is
     # exposed in future processing tasks
     app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
-    app.env['CONJURE_SPELL'] = app.config['spell']
 
     _post_bootstrap_sh = path.join(app.config['spell-dir'],
                                    'conjure/steps/00_post-bootstrap.sh')
