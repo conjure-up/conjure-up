@@ -28,8 +28,10 @@ def finish():
     this.bundle_filename, this.bundle, this.services = get_bundleinfo()
 
     for service in this.services:
-        juju.deploy_service(service, partial(__handle_exception, "ED"))
+        juju.deploy_service(service, utils.info,
+                            partial(__handle_exception, "ED"))
     f = juju.set_relations(this.services,
+                           utils.info,
                            partial(__handle_exception, "ED"))
     futures.wait([f])
     utils.pollinate(app.session_id, 'PC')

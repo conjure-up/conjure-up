@@ -21,7 +21,7 @@ def finish():
     )
 
     # post step processing
-    steps = sorted(glob(os.path.join(bundle_scripts, '*.sh')))
+    steps = sorted(glob(os.path.join(bundle_scripts, 'step-*.sh')))
     common.wait_for_steps(steps, utils.info, __fatal)
 
     return controllers.use('summary').render(this.results)
