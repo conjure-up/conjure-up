@@ -1,5 +1,4 @@
 from . import common
-from conjure import juju
 from conjure import utils
 from conjure import controllers
 from conjure.app_config import app
@@ -30,11 +29,4 @@ def finish():
 
 
 def render():
-    # juju deploy
-    try:
-        utils.info("Deploying charms")
-        juju.deploy(this.bundle)
-    except Exception as e:
-        utils.error("Problem with deployment: {}".format(e))
-        sys.exit(1)
     finish()
