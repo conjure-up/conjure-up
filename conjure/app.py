@@ -32,6 +32,14 @@ def parse_options(argv):
     parser.add_argument('-s', '--status', action='store_true',
                         dest='status_only',
                         help='Display the summary of the conjuring')
+    parser.add_argument('--apt-proxy', dest='apt_http_proxy',
+                        help='Specify APT proxy')
+    parser.add_argument('--apt-https-proxy', dest='apt_https_proxy',
+                        help='Specify APT HTTPS proxy')
+    parser.add_argument('--http-proxy', dest='http_proxy',
+                        help='Specify HTTP proxy')
+    parser.add_argument('--https-proxy', dest='https_proxy',
+                        help='Specify HTTPS proxy')
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
 
@@ -97,6 +105,18 @@ def load_charmstore_results(spell, blessed):
     return charmstore_results['Results']
 
 
+def apply_proxy():
+    """ Sets up proxy information.
+    """
+    # Apply proxy information
+    if app.arg.http_proxy:
+        os.environ['HTTP_PROXY'] = app.argv.http_proxy
+        os.environ['http_proxy'] = app.argv.http_proxy
+    if app.argv.https_proxy:
+        os.environ['HTTPS_PROXY'] = app.argv.https_proxy
+        os.environ['https_proxy'] = app.argv.https_proxy
+
+
 def main():
     opts = parse_options(sys.argv[1:])
     if "/" in opts.spell:
@@ -118,6 +138,10 @@ def main():
     app.argv = opts
     app.log = setup_logging("conjure-up/{}".format(spell),
                             opts.debug)
+
+    # Setup proxy
+    apply_proxy()
+
     app.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
                                '{}/{}'.format(
                                    spell,
