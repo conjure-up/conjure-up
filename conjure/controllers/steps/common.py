@@ -1,14 +1,10 @@
-from subprocess import run, PIPE
 from conjure.app_config import app
 from conjure.api.models import model_info
+from conjure import utils
 import json
 import os
 from collections import deque
 from glob import glob
-
-
-def run_script(path):
-    return run(path, shell=True, stderr=PIPE, stdout=PIPE, env=app.env)
 
 
 def set_env(inputs):
@@ -61,7 +57,7 @@ def do_step(step, message_cb, icon_state=None):
     if icon_state:
         icon_state(step.icon, 'waiting')
     app.log.debug("Executing script: {}".format(step.path))
-    sh = run_script(step.path)
+    sh = utils.run_script(step.path)
     result = json.loads(sh.stdout.decode('utf8'))
     if result['returnCode'] > 0:
         app.log.error(
