@@ -253,6 +253,13 @@ def main():
     app.env = os.environ.copy()
     app.env['CONJURE_UP_SPELL'] = spell
 
+    if app.argv.status_only:
+        if not juju.available():
+            utils.error("Attempted to access the status screen of "
+                        "a non-bootstrapped Juju environment. "
+                        "Please bootstrap an environment first.")
+            sys.exit(1)
+
     if app.headless:
         app.env['CONJURE_UP_HEADLESS'] = "1"
         _start()
