@@ -58,6 +58,8 @@ def do_step(step, message_cb, icon_state=None):
         app.log.error("Step {} not executable".format(step.path))
 
     message_cb("Working: {}".format(step.title))
+    if icon_state:
+        icon_state(step.icon, 'waiting')
     app.log.debug("Executing script: {}".format(step.path))
     sh = run_script(step.path)
     result = json.loads(sh.stdout.decode('utf8'))

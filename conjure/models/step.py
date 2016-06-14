@@ -7,7 +7,7 @@ class StepModel:
         self.title = step.get('title', '')
         self.description = step.get('description', '')
         self.result = ''
-        self.icon = ("pending_icon", "\N{HOURGLASS}")
+        self.icon = ("pending_icon", "\N{BALLOT BOX}")
         self.viewable = step.get('viewable', False)
         self.path = step.get('path', None)
 
