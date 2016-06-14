@@ -3,6 +3,8 @@ from conjure.app_config import app
 from conjure.api.models import model_info
 import json
 import os
+from collections import deque
+from glob import glob
 
 
 def run_script(path):
@@ -19,6 +21,18 @@ def set_env(inputs):
         app.log.debug("Setting environment var: {}={}".format(
             env_key,
             app.env[env_key]))
+
+
+def get_steps(steps_dir):
+    """ Gets a list of steps that can be executed on
+
+    Arguments:
+    steps_dir: path of steps
+
+    Returns:
+    list of executable steps
+    """
+    return deque(sorted(glob(os.path.join(steps_dir, 'step-*.yaml'))))
 
 
 def do_step(step, message_cb, icon_state=None):

@@ -7,12 +7,11 @@ from conjure import utils
 from conjure import controllers
 from conjure.models.step import StepModel
 from . import common
-from glob import glob
 import os.path as path
 import os
 import sys
 import yaml
-from collections import deque, OrderedDict
+from collections import OrderedDict
 
 
 this = sys.modules[__name__]
@@ -22,8 +21,7 @@ this.bundle = path.join(
 this.bundle_scripts = path.join(
     app.config['spell-dir'], 'conjure/steps'
 )
-this.steps = deque(sorted(glob(
-    os.path.join(this.bundle_scripts, 'step-*'))))
+this.steps = common.get_steps(this.bundle_scripts)
 
 this.results = OrderedDict()
 
@@ -68,13 +66,15 @@ def render():
     steps = []
     for step_path in this.steps:
         fname, ext = path.splitext(step_path)
-        step_metadata_path = "{}.yaml".format(fname)
+        if not path.isfile(fname) or not os.access(fname, os.X_OK):
+            app.log.error(
+                'Unable to process step, missing {}'.format(fname))
+            continue
         step_metadata = {}
-        if path.isfile(step_metadata_path):
-            with open(step_metadata_path) as fp:
-                step_metadata = yaml.load(fp.read())
+        with open(step_path) as fp:
+            step_metadata = yaml.load(fp.read())
         model = StepModel(step_metadata)
-        model.path = step_path
+        model.path = fname
         steps.append(model)
         app.log.debug("Queueing step: {}".format(model))
 
