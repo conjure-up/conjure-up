@@ -14,4 +14,7 @@ class StepModel:
         self.additional_input = step.get('additional-input', [])
 
     def __repr__(self):
-        return "<{}>".format(self.title)
+        return "<t: {} d: {} v: {} p:>".format(self.title,
+                                               self.description,
+                                               self.viewable,
+                                               self.path)

@@ -72,6 +72,8 @@ class StepsView(WidgetWrap):
 
     def add_step_widget(self, step_model):
         if not step_model.viewable:
+            self.app.log.debug("{} is not viewable, skipping".format(
+                step_model))
             return
 
         step_widget_dict = {'title': Text(step_model.title),
