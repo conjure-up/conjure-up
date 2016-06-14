@@ -21,7 +21,12 @@ def wait_for_applications(script, msg_cb):
             count = 0
             while rerun:
                 sh = run_script(script)
-                result = json.loads(sh.stdout.decode('utf8'))
+                try:
+                    result = json.loads(sh.stdout.decode('utf8'))
+                except json.decoder.JSONDecodeError as e:
+                    app.log.exception(sh.stdout.decode())
+                    raise Exception(sh)
+
                 if result['returnCode'] > 0:
                     app.log.error(
                         "Failure in deploy done: {}".format(result['message']))
