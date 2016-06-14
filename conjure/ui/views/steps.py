@@ -4,7 +4,6 @@ from ubuntui.utils import Padding, Color
 from ubuntui.widgets.table import Table
 from ubuntui.widgets.buttons import submit_btn, done_btn
 from urwid import WidgetWrap, Text
-import random
 
 
 class StepsView(WidgetWrap):
@@ -125,12 +124,9 @@ class StepsView(WidgetWrap):
             icon.set_text(
                 ("error_icon", "\N{BLACK FLAG}"))
         elif result_code == "waiting":
-            pending_status = [("pending_icon", "\N{CIRCLED BULLET}"),
-                              ("pending_icon", "\N{CIRCLED WHITE BULLET}"),
-                              ("pending_icon", "\N{FISHEYE}")]
-            icon.set_text(random.choice(pending_status))
+            icon.set_text(("pending_icon", "\N{HOURGLASS}"))
         elif result_code == "active":
-            icon.set_text(("success_icon", "\u2713"))
+            icon.set_text(("success_icon", "\N{BALLOT BOX WITH CHECK}"))
         else:
             # NOTE: Should not get here, if we do make sure we account
             # for that error type above.
