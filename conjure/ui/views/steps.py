@@ -4,7 +4,6 @@ from ubuntui.utils import Padding, Color
 from ubuntui.widgets.table import Table
 from ubuntui.widgets.buttons import submit_btn, done_btn
 from urwid import WidgetWrap, Text
-import random
 
 
 class StepsView(WidgetWrap):
