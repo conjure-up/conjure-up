@@ -1,5 +1,5 @@
-from subprocess import run, PIPE
 from conjure.app_config import app
+from conjure import utils
 from subprocess import CalledProcessError
 import json
 import os
@@ -20,8 +20,13 @@ def wait_for_applications(script, msg_cb):
             rerun = True
             count = 0
             while rerun:
-                sh = run_script(script)
-                result = json.loads(sh.stdout.decode('utf8'))
+                sh = utils.run_script(script)
+                try:
+                    result = json.loads(sh.stdout.decode('utf8'))
+                except json.decoder.JSONDecodeError as e:
+                    app.log.exception(sh.stdout.decode())
+                    raise Exception(sh)
+
                 if result['returnCode'] > 0:
                     app.log.error(
                         "Failure in deploy done: {}".format(result['message']))
@@ -37,7 +42,3 @@ def wait_for_applications(script, msg_cb):
                 rerun = False
         except CalledProcessError as e:
             raise e
-
-
-def run_script(path):
-    return run(path, shell=True, stderr=PIPE, stdout=PIPE, env=app.env)

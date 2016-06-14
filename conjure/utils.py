@@ -2,10 +2,14 @@ import shutil
 import os
 import yaml
 from termcolor import colored
-from subprocess import run, check_call, CalledProcessError, DEVNULL
+from subprocess import run, check_call, CalledProcessError, DEVNULL, PIPE
 from conjure.async import submit
 from conjure.app_config import app
 from configobj import ConfigObj
+
+
+def run_script(path):
+    return run(path, shell=True, stderr=PIPE, stdout=PIPE, env=app.env)
 
 
 def check_bridge_exists():
