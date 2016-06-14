@@ -21,6 +21,11 @@ def wait_for_applications(script, msg_cb):
             count = 0
             while rerun:
                 sh = utils.run_script(script)
+                if sh.returncode != 0:
+                    app.log.error("error running {}:\n{}".format(script,
+                                                                 sh.stderr))
+                    raise Exception("Error running {}".format(script))
+
                 try:
                     result = json.loads(sh.stdout.decode('utf8'))
                 except json.decoder.JSONDecodeError as e:
