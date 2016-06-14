@@ -184,12 +184,24 @@ def main():
                       'spell': spell}
 
         # Set a general description of spell
+        definition = None
         if path.isfile('/usr/share/conjure-up/keyword-definitions.yaml'):
             with open('/usr/share/conjure-up/keyword-definitions.yaml') as fp:
                 definitions = yaml.safe_load(fp.read())
-        try:
-            app.config['description'] = definitions[spell]
-        except:
+                definition = definitions.get(spell, None)
+        if definition is None:
+            try:
+                definition = next(
+                    bundle['Meta']['bundle-metadata']['Description']
+                    for bundle in app.bundles if 'Description'
+                    in bundle['Meta']['bundle-metadata'])
+            except StopIteration:
+                app.log.error("Could not find a suitable description "
+                              "for spell: {}".format(spell))
+
+        if definition is not None:
+            app.config['description'] = definition
+        else:
             utils.warning(
                 "Failed to find a description for spell: {}, "
                 "and is a bug that should be filed.".format(spell))
