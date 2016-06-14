@@ -2,9 +2,14 @@
 # Makefile for conjure
 #
 NAME = conjure-up
+CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
 VERSION := $(shell ./tools/version)
+
+PACKAGE_SHARE_PATH := /usr/share/conjure-up
+PACKAGE_SHARE_HOOKLIB_PATH := $(PACKAGE_SHARE_PATH)/hooklib
+
 
 .PHONY: install-dependencies
 install-dependencies:
@@ -34,6 +39,7 @@ clean:
 	@rm -rf conjure-up
 	@rm -rf dist
 	@rm -rf conjure-dev
+	@if [ -L /usr/share/conjure-up/hooklib ]; then sudo unlink $(PACKAGE_SHARE_HOOKLIB_PATH) && sudo mv $(PACKAGE_SHARE_HOOKLIB_PATH).orig $(PACKAGE_SHARE_HOOKLIB_PATH); fi
 
 .PHONY: test
 test:
@@ -67,6 +73,8 @@ pep8:
 
 dev: clean
 	tox -e conjure-dev
+	if [ -d $(PACKAGE_SHARE_HOOKLIB_PATH) ]; then sudo mv $(PACKAGE_SHARE_HOOKLIB_PATH) $(PACKAGE_SHARE_HOOKLIB_PATH).orig; fi
+	sudo ln -s $(CURRENT_DIR)/share/hooklib $(PACKAGE_SHARE_PATH)
 	@echo "Run 'source conjure-dev/bin/activate' to enter the dev venv"
 
 # Indirection to allow 'make run' to build deb automatically, but
