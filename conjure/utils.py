@@ -169,6 +169,7 @@ def pollinate(session, tag):
         E001 - error in post bootstrap phase
         E002 - error in post processor
         E003 - error in pre processor
+        E004 - error creating model in existing controller
 
     Arguments:
     session: randomly generated session id

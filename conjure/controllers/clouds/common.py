@@ -51,9 +51,8 @@ def list_clouds():
     return sorted(list(clouds))
 
 
-def controller_provides_ctype(cloud):
-    """ Returns a controller that is bootstrapped and fulfills
-    the cloud type.
+def get_controller_in_cloud(cloud):
+    """ Returns a controller that is bootstrapped on the named cloud
 
     Arguments:
     cloud: cloud to check for
@@ -61,15 +60,8 @@ def controller_provides_ctype(cloud):
     Returns:
     available controller or None if nothing available
     """
-    if not juju.available():
-        return None
-    if cloud == 'maas':
-        cloud_type = 'maas'
-    else:
-        cloud_type = juju.get_cloud(cloud)['type']
-    for c in juju.get_controllers()['controllers'].keys():
-        juju.switch(c)
-        loaded_cloud_type = juju.get_model(juju.get_current_model())['type']
-        if cloud_type == loaded_cloud_type:
-            return c
+    controllers = juju.get_controllers()['controllers'].items()    
+    for controller_name, controller in controllers:
+        if cloud == controller['cloud']:
+            return controller_name
     return None

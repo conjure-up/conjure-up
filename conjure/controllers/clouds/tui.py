@@ -16,16 +16,18 @@ def finish():
                      "/usr/share/conjure-up/run-lxd-config",
                      back)
 
-    have_existing_controller = common.controller_provides_ctype(app.argv.cloud)
-    if have_existing_controller:
-        utils.info("Creating environment, please wait.")
-        app.current_controller = have_existing_controller
-        juju.switch(have_existing_controller)
-        app.current_model = petname.Name()
-        juju.add_model(app.current_model)
-        juju.switch(app.current_model)
-        return controllers.use('variants').render()
-    return controllers.use('newcloud').render(app.argv.cloud)
+    existing_controller = common.get_controller_in_cloud(app.argv.cloud)
+    if existing_controller is None:
+        return controllers.use('newcloud').render(app.argv.cloud)
+
+    utils.info("Creating environment, please wait.")
+    app.current_controller = existing_controller
+    juju.switch(app.current_controller)
+    app.current_model = petname.Name()
+    juju.add_model(app.current_model)
+    juju.switch(app.current_model)
+
+    return controllers.use('variants').render()
 
 
 def render():
