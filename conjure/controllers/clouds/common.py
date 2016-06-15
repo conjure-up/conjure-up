@@ -60,7 +60,7 @@ def get_controller_in_cloud(cloud):
     Returns:
     available controller or None if nothing available
     """
-    controllers = juju.get_controllers()['controllers'].items()    
+    controllers = juju.get_controllers()['controllers'].items()
     for controller_name, controller in controllers:
         if cloud == controller['cloud']:
             return controller_name
