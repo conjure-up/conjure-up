@@ -7,11 +7,12 @@ from bundleplacer.charmstore_api import CharmStoreID
 from functools import wraps, partial
 import macumba
 from macumba.v2 import JujuClient
-from subprocess import run, PIPE, DEVNULL, CalledProcessError
+from subprocess import (run, PIPE, DEVNULL, CalledProcessError, Popen,
+                        TimeoutExpired)
 import os
 import sys
 import yaml
-
+import q
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
 
@@ -130,9 +131,22 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
         cmd += "--credential {}".format(credential)
     app.log.debug("bootstrap cmd: {}".format(cmd))
     try:
-        return run(cmd, shell=True, stdout=DEVNULL, stderr=PIPE)
+        p = Popen(cmd, shell=True, stdout=DEVNULL, stderr=PIPE)
+        while p.poll() is None:
+            async.sleep_until(2)
+        return p
     except CalledProcessError:
         raise Exception("Unable to bootstrap.")
+    except async.ThreadCancelledException:
+        p.terminate()
+        try:
+            p.wait(timeout=2)
+        except TimeoutExpired:
+            p.kill()
+            p.wait()
+        return p
+    except Exception as e:
+        raise e
 
 
 def bootstrap_async(controller, cloud, credential=None, exc_cb=None):

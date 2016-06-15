@@ -28,9 +28,14 @@ def __handle_exception(exc):
 def __handle_bootstrap_done(future):
     app.log.debug("handle bootstrap")
     result = future.result()
+    if result.returncode < 0:
+        # bootstrap killed via user signal, we're quitting
+        return
     if result.returncode > 0:
-        app.log.error(result.stderr.decode())
-        return __handle_exception(Exception(result.stderr.decode()))
+        err = result.stderr.read().decode()
+        app.log.error(err)
+        return __handle_exception(Exception("error "))
+
     utils.pollinate(app.session_id, 'J004')
     EventLoop.remove_alarms()
     app.ui.set_footer('Bootstrap complete...')
