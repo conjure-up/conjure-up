@@ -12,7 +12,6 @@ from subprocess import (run, PIPE, DEVNULL, CalledProcessError, Popen,
 import os
 import sys
 import yaml
-import q
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
 
