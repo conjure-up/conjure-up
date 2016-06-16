@@ -19,11 +19,13 @@ this.bundle_filename = None
 this.bundle = None
 this.services = []
 this.svc_idx = 0
+this.showing_error = False
 
 
 def __handle_exception(tag, exc):
     utils.pollinate(app.session_id, tag)
     app.ui.show_exception_message(exc)
+    this.showing_error = True
 
 
 def finish(single_service=None):
@@ -61,7 +63,8 @@ def finish(single_service=None):
 
 
 def render():
-
+    if this.showing_error:
+        return
     if not this.bundle:
         this.bundle_filename, this.bundle, this.services = get_bundleinfo()
 
