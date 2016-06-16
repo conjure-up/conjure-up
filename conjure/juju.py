@@ -252,22 +252,50 @@ def get_cloud(name):
     raise LookupError("Unable to locate cloud: {}".format(name))
 
 
-def switch(model):
-    """ Switch to a Juju Model
+def _do_switch(target):
+    try:
+        app.log.debug('calling juju switch {}'.format(target))
+        run('juju switch {}'.format(target),
+            shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)
+    except CalledProcessError as e:
+        raise LookupError("Unable to switch: {}".format(e))
+
+
+def switch_model(model):
+    """Switch
 
     Arguments:
     model: Model to select
 
-    Returns:
-    Raises exception if failed to switch models.
+    Returns: Raises exception if model is not a model in the current
+    controller, or if we otherwise failed to switch models.
     """
-    try:
-        app.log.debug('switching to juju model: {}'.format(model))
-        run('juju switch {}'.format(model),
-            shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)
-        login(True)
-    except CalledProcessError as e:
-        raise LookupError("Unable to switch models: {}".format(e))
+
+    if model not in [m['name'] for m in get_models()['models']]:
+        raise Exception("model '{}' not found in controller '{}'.".format(
+            model, get_current_controller()))
+    _do_switch(model)
+
+
+def switch_controller(controller):
+    """ switch controllers
+
+    Arguments:
+    controller: controller to switch to
+
+    Returns None.
+    Raises exception if failed to switch.
+    """
+    assert controller is not None
+
+    cinfo = get_controllers()
+    prev_controller = cinfo.get('current-controller', None)
+    if prev_controller == controller:
+        return
+    if controller not in cinfo.get('controllers', {}).keys():
+        raise Exception("Could not find controller '{}'".format(controller))
+    _do_switch(controller)
+    login(True)
 
 
 def deploy(bundle):

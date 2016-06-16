@@ -39,7 +39,7 @@ def __handle_bootstrap_done(future):
     utils.pollinate(app.session_id, 'J004')
     EventLoop.remove_alarms()
     app.ui.set_footer('Bootstrap complete...')
-    juju.switch(app.current_controller)
+    juju.switch_controller(app.current_controller)
     __post_bootstrap_exec()
 
 
@@ -109,7 +109,7 @@ def __post_bootstrap_done(future):
     app.ui.set_footer('')
     app.log.debug("Switching to controller: {}".format(
         app.current_controller))
-    juju.switch(app.current_controller)
+    juju.switch_controller(app.current_controller)
     controllers.use('deploy').render()
 
 
