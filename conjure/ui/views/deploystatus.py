@@ -20,7 +20,7 @@ class DeployStatusView(WidgetWrap):
         """ Adds services to the view if they don't already exist
         """
         status = model_status()
-        for name, service in sorted(status['Applications'].items()):
+        for name, service in sorted(status['applications'].items()):
             service_w = ServiceWidget(name, service)
             for unit in service_w.Units:
                 try:
@@ -81,17 +81,17 @@ class DeployStatusView(WidgetWrap):
         unit: current unit for service
         """
         try:
-            unit_w.Machine.set_text(unit.get('Machine', '-'))
-            unit_w.PublicAddress.set_text(unit['PublicAddress'])
-            unit_w.WorkloadInfo.set_text(unit['WorkloadStatus']['Info'])
-            if unit['WorkloadStatus']['Status'] != 'unknown':
-                unit_w.AgentStatus.set_text(unit['WorkloadStatus']['Status'])
+            unit_w.Machine.set_text(unit.get('machine', '-'))
+            unit_w.PublicAddress.set_text(unit['public-address'])
+            unit_w.WorkloadInfo.set_text(unit['workload-status']['info'])
+            if unit['workload-status']['status'] != 'unknown':
+                unit_w.AgentStatus.set_text(unit['workload-status']['status'])
                 unit_w.Icon.set_text(
-                    self.status_icon_state(unit['WorkloadStatus']['Status']))
+                    self.status_icon_state(unit['workload-status']['status']))
             else:
-                unit_w.AgentStatus.set_text(unit['AgentStatus']['Status'])
+                unit_w.AgentStatus.set_text(unit['agent-status']['status'])
                 unit_w.Icon.set_text(
-                    self.status_icon_state(unit['AgentStatus']['Status']))
+                    self.status_icon_state(unit['agent-status']['status']))
         except Exception as e:
             self.app.log.exception(e)
             self.app.ui.show_exception_message(e)

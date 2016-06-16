@@ -14,7 +14,7 @@ class ServiceWidget:
         """
         self.Name = Text(name)
         self.Units = []
-        if service['Units']:
-            for n, unit in service['Units'].items():
+        if service['units']:
+            for n, unit in service['units'].items():
                 w = UnitWidget(n, unit)
                 self.Units.append(w)

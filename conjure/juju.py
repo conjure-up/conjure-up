@@ -304,7 +304,7 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
 
     @requires_login
     def do_deploy():
-        params = {"Applications": [service.as_deployargs()]}
+        params = {"applications": [service.as_deployargs()]}
         app.log.debug("Deploying {}: {}".format(service, params))
         try:
             deploy_message = "Deploying application: {}".format(
