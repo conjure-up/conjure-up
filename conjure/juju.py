@@ -323,15 +323,13 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
     msg_cb: message callback
     exc_cb: exception handler callback
 
+    Returns None.
     """
-    if service.csid.rev == "":
-        id_no_rev = service.csid.as_str_without_rev()
-        mc = app.metadata_controller
-        info = mc.get_charm_info(id_no_rev, lambda: None)
-        service.csid = CharmStoreID(info["Id"])
 
     @requires_login
-    def do_deploy():
+    def do_deploy(new_service_info=None):
+        if new_service_info:
+            service.csid = CharmStoreID(new_service_info["Id"])
         params = {"applications": [service.as_deployargs()]}
         app.log.debug("Deploying {}: {}".format(service, params))
         try:
@@ -347,9 +345,14 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
             if exc_cb:
                 exc_cb(e)
 
-    return async.submit(do_deploy,
-                        exc_cb,
-                        queue_name=JUJU_ASYNC_QUEUE)
+    if service.csid.rev == "":
+        id_no_rev = service.csid.as_str_without_rev()
+        mc = app.metadata_controller
+        mc.get_charm_info(id_no_rev, do_deploy)
+    else:
+        async.submit(do_deploy,
+                     exc_cb,
+                     queue_name=JUJU_ASYNC_QUEUE)
 
 
 def set_relations(services, msg_cb=None, exc_cb=None):
