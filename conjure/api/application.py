@@ -12,11 +12,11 @@ def get_workload_statuses():
     Returns:
     List of all units status
     """
-    apps = model_status()['Applications']
+    apps = model_status()['applications']
     units = []
     for k, v in apps.items():
-        if v['Units'] is None:
+        if v['units'] is None:
             continue
-        for a, b in v['Units'].items():
-            units.append(b['WorkloadStatus']['Status'])
+        for a, b in v['units'].items():
+            units.append(b['workload-status']['status'])
     return units

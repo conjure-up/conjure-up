@@ -14,16 +14,16 @@ class UnitWidget:
         self._unit = unit
         self._name = name
         self.Name = Text(self._name)
-        self.PublicAddress = Text(unit.get('PublicAddress', ''))
-        self.Machine = Text(unit.get('Machine', ''))
+        self.PublicAddress = Text(unit.get('public-address', ''))
+        self.Machine = Text(unit.get('machine', ''))
 
-        agent_status = unit.get('AgentStatus', {})
+        agent_status = unit.get('agent-status', {})
         if agent_status:
-            self.AgentStatus = Text(agent_status.get('Status', ''))
-            self.AgentStatusInfo = Text(agent_status.get('Info', ''))
+            self.AgentStatus = Text(agent_status.get('status', ''))
+            self.AgentStatusInfo = Text(agent_status.get('info', ''))
 
-        workload = unit.get('WorkloadStatus', {})
+        workload = unit.get('workload-status', {})
         if workload:
-            self.WorkloadInfo = Text(workload.get('Info', ''))
-            self.WorkloadStatus = Text(workload.get('Status', ''))
+            self.WorkloadInfo = Text(workload.get('info', ''))
+            self.WorkloadStatus = Text(workload.get('status', ''))
         self.Icon = Text("")
