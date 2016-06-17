@@ -3,16 +3,13 @@ from functools import partial
 
 import sys
 
-from bundleplacer.charmstore_api import MetadataController
-from bundleplacer.config import Config
-
 from conjure import controllers
 from conjure import juju
 from conjure.app_config import app
 from conjure.ui.views.service_walkthrough import ServiceWalkthroughView
 from conjure import utils
 
-from .common import get_bundleinfo
+from .common import get_bundleinfo, get_metadata_controller
 
 this = sys.modules[__name__]
 this.bundle_filename = None
@@ -68,16 +65,10 @@ def render():
     if not this.bundle:
         this.bundle_filename, this.bundle, this.services = get_bundleinfo()
 
-    bundleplacer_cfg = Config(
-        'bundle-placer',
-        {
-            'bundle_filename': this.bundle_filename,
-            'bundle_key': None,
-        })
-
     if not app.metadata_controller:
-        app.metadata_controller = MetadataController(this.bundle,
-                                                     bundleplacer_cfg)
+        app.metadata_controller = get_metadata_controller(this.bundle,
+                                                          this.bundle_filename)
+
     n_total = len(this.bundle.services)
     if this.svc_idx >= n_total:
         return finish(single_service=None)

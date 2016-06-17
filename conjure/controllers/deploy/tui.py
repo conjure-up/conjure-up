@@ -8,7 +8,8 @@ from conjure import utils
 from conjure.app_config import app
 from conjure import juju
 
-from .common import get_bundleinfo
+from .common import get_bundleinfo, get_metadata_controller
+
 
 this = sys.modules[__name__]
 this.bundle_filename = None
@@ -26,6 +27,8 @@ def finish():
 
     """
     this.bundle_filename, this.bundle, this.services = get_bundleinfo()
+    app.metadata_controller = get_metadata_controller(this.bundle,
+                                                      this.bundle_filename)
 
     for service in this.services:
         juju.deploy_service(service, utils.info,
