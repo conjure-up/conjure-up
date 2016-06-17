@@ -345,14 +345,17 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
             if exc_cb:
                 exc_cb(e)
 
+    def enqueue_deploy(new_service_info=None):
+        async.submit(partial(do_deploy, new_service_info),
+                     exc_cb,
+                     queue_name=JUJU_ASYNC_QUEUE)
+
     if service.csid.rev == "":
         id_no_rev = service.csid.as_str_without_rev()
         mc = app.metadata_controller
-        mc.get_charm_info(id_no_rev, do_deploy)
+        mc.get_charm_info(id_no_rev, enqueue_deploy)
     else:
-        async.submit(do_deploy,
-                     exc_cb,
-                     queue_name=JUJU_ASYNC_QUEUE)
+        enqueue_deploy()
 
 
 def set_relations(services, msg_cb=None, exc_cb=None):

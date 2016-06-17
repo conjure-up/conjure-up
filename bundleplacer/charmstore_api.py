@@ -246,6 +246,7 @@ class MetadataController:
         if not self.loaded():
             self.info_callbacks.append((charm_name, cb))
             return None
+        cb(self.charm_info[charm_name])
         return self.charm_info[charm_name]
 
     def get_readme(self, short_charm_id, cb):
