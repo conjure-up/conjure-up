@@ -17,7 +17,7 @@ this.bundle = None
 this.services = []
 this.svc_idx = 0
 this.showing_error = False
-
+this.deploy_futures = []
 
 def __handle_exception(tag, exc):
     utils.pollinate(app.session_id, tag)
@@ -39,16 +39,19 @@ def finish(single_service=None):
 
     """
     if single_service:
-        juju.deploy_service(single_service,
-                            app.ui.set_footer,
-                            partial(__handle_exception, "ED"))
+        f = juju.deploy_service(single_service,
+                                app.ui.set_footer,
+                                partial(__handle_exception, "ED"))
+        this.deploy_futures.append(f)
         this.svc_idx += 1
         return render()
     else:
-        for service in this.services[this.svc_idx:]:
-            juju.deploy_service(service,
-                                app.ui.set_footer,
-                                partial(__handle_exception, "ED"))
+        fs = [juju.deploy_service(service,
+                                  app.ui.set_footer,
+                                  partial(__handle_exception, "ED"))
+              for service in this.services[this.svc_idx:]]
+        this.deploy_futures += fs
+        futures.wait(this.deploy_futures)
         f = juju.set_relations(this.services,
                                app.ui.set_footer,
                                partial(__handle_exception, "ED"))

@@ -30,9 +30,10 @@ def finish():
     app.metadata_controller = get_metadata_controller(this.bundle,
                                                       this.bundle_filename)
 
-    for service in this.services:
-        juju.deploy_service(service, utils.info,
-                            partial(__handle_exception, "ED"))
+    deploy_futures = [juju.deploy_service(service, utils.info,
+                                          partial(__handle_exception, "ED"))
+                      for service in this.services]
+    futures.wait(deploy_futures)
     f = juju.set_relations(this.services,
                            utils.info,
                            partial(__handle_exception, "ED"))
