@@ -19,6 +19,7 @@ this.svc_idx = 0
 this.showing_error = False
 this.deploy_futures = []
 
+
 def __handle_exception(tag, exc):
     utils.pollinate(app.session_id, tag)
     app.ui.show_exception_message(exc)
