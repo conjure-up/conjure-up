@@ -1,17 +1,22 @@
 """ Juju helpers
 """
+from concurrent import futures
+from functools import wraps, partial
+import os
+import sys
+from subprocess import (run, PIPE, DEVNULL, CalledProcessError, Popen,
+                        TimeoutExpired)
+import yaml
+
+from bundleplacer.charmstore_api import CharmStoreID
+
 from conjure import async
 from conjure.utils import juju_path
 from conjure.app_config import app
-from bundleplacer.charmstore_api import CharmStoreID
-from functools import wraps, partial
+
+
 import macumba
 from macumba.v2 import JujuClient
-from subprocess import (run, PIPE, DEVNULL, CalledProcessError, Popen,
-                        TimeoutExpired)
-import os
-import sys
-import yaml
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
 
@@ -323,39 +328,35 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
     msg_cb: message callback
     exc_cb: exception handler callback
 
-    Returns None.
+    Returns a future that will be completed after the deploy has been
+    submitted to juju
+
     """
 
     @requires_login
-    def do_deploy(new_service_info=None):
-        if new_service_info:
-            service.csid = CharmStoreID(new_service_info["Id"])
+    def _deploy_async():
+        if service.csid.rev == "":
+            id_no_rev = service.csid.as_str_without_rev()
+            mc = app.metadata_controller
+            futures.wait([mc.metadata_future])
+            info = mc.get_charm_info(id_no_rev, lambda _: None)
+            service.csid = CharmStoreID(info["Id"])
         params = {"applications": [service.as_deployargs()]}
+
         app.log.debug("Deploying {}: {}".format(service, params))
-        try:
-            deploy_message = "Deploying application: {}".format(
-                service.service_name)
-            if msg_cb:
-                msg_cb("{}".format(deploy_message))
-            this.CLIENT.Application(request="Deploy",
-                                    params=params)
-            if msg_cb:
-                msg_cb("{}...done.".format(deploy_message))
-        except Exception as e:
-            if exc_cb:
-                exc_cb(e)
 
-    def enqueue_deploy(new_service_info=None):
-        async.submit(partial(do_deploy, new_service_info),
-                     exc_cb,
-                     queue_name=JUJU_ASYNC_QUEUE)
+        deploy_message = "Deploying application: {}".format(
+            service.service_name)
+        if msg_cb:
+            msg_cb("{}".format(deploy_message))
+        this.CLIENT.Application(request="Deploy",
+                                params=params)
+        if msg_cb:
+            msg_cb("{}...done.".format(deploy_message))
 
-    if service.csid.rev == "":
-        id_no_rev = service.csid.as_str_without_rev()
-        mc = app.metadata_controller
-        mc.get_charm_info(id_no_rev, enqueue_deploy)
-    else:
-        enqueue_deploy()
+    return async.submit(_deploy_async,
+                        exc_cb,
+                        queue_name=JUJU_ASYNC_QUEUE)
 
 
 def set_relations(services, msg_cb=None, exc_cb=None):

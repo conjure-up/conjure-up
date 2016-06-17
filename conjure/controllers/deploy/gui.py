@@ -3,16 +3,13 @@ from functools import partial
 
 import sys
 
-from bundleplacer.charmstore_api import MetadataController
-from bundleplacer.config import Config
-
 from conjure import controllers
 from conjure import juju
 from conjure.app_config import app
 from conjure.ui.views.service_walkthrough import ServiceWalkthroughView
 from conjure import utils
 
-from .common import get_bundleinfo
+from .common import get_bundleinfo, get_metadata_controller
 
 this = sys.modules[__name__]
 this.bundle_filename = None
@@ -20,6 +17,7 @@ this.bundle = None
 this.services = []
 this.svc_idx = 0
 this.showing_error = False
+this.deploy_futures = []
 
 
 def __handle_exception(tag, exc):
@@ -42,16 +40,19 @@ def finish(single_service=None):
 
     """
     if single_service:
-        juju.deploy_service(single_service,
-                            app.ui.set_footer,
-                            partial(__handle_exception, "ED"))
+        f = juju.deploy_service(single_service,
+                                app.ui.set_footer,
+                                partial(__handle_exception, "ED"))
+        this.deploy_futures.append(f)
         this.svc_idx += 1
         return render()
     else:
-        for service in this.services[this.svc_idx:]:
-            juju.deploy_service(service,
-                                app.ui.set_footer,
-                                partial(__handle_exception, "ED"))
+        fs = [juju.deploy_service(service,
+                                  app.ui.set_footer,
+                                  partial(__handle_exception, "ED"))
+              for service in this.services[this.svc_idx:]]
+        this.deploy_futures += fs
+        futures.wait(this.deploy_futures)
         f = juju.set_relations(this.services,
                                app.ui.set_footer,
                                partial(__handle_exception, "ED"))
@@ -68,16 +69,10 @@ def render():
     if not this.bundle:
         this.bundle_filename, this.bundle, this.services = get_bundleinfo()
 
-    bundleplacer_cfg = Config(
-        'bundle-placer',
-        {
-            'bundle_filename': this.bundle_filename,
-            'bundle_key': None,
-        })
-
     if not app.metadata_controller:
-        app.metadata_controller = MetadataController(this.bundle,
-                                                     bundleplacer_cfg)
+        app.metadata_controller = get_metadata_controller(this.bundle,
+                                                          this.bundle_filename)
+
     n_total = len(this.bundle.services)
     if this.svc_idx >= n_total:
         return finish(single_service=None)
