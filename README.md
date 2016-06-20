@@ -23,6 +23,7 @@ Brave? Try the bleeding edge version and file bugs to keep us honest.
 
 ```
 $ sudo apt-add-repository ppa:conjure/next
+$ sudo apt-add-repository ppa:juju/devel
 ```
 
 ### Install the packages
