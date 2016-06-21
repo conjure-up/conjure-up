@@ -40,6 +40,7 @@ def __wait_for_applications(*args):
 def finish(future):
     if not future.exception():
         return controllers.use('steps').render()
+    EventLoop.remove_alarms()
 
 
 def __refresh(*args):
@@ -47,7 +48,7 @@ def __refresh(*args):
     EventLoop.set_alarm_in(1, __refresh)
 
 
-def render():
+def render(deploy_future):
     """ Render deploy status view
     """
     this.view = DeployStatusView(app)
@@ -61,5 +62,5 @@ def render():
             name)
     )
     app.ui.set_body(this.view)
-    EventLoop.set_alarm_in(1, __refresh)
-    __wait_for_applications()
+    deploy_future.add_done_callback(__refresh)
+    deploy_future.add_done_callback(__wait_for_applications)
