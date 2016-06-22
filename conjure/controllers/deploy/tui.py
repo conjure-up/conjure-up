@@ -1,4 +1,3 @@
-from concurrent import futures
 import sys
 from functools import partial
 

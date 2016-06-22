@@ -1,4 +1,3 @@
-from concurrent import futures
 from functools import partial
 
 import sys
@@ -53,9 +52,9 @@ def finish(single_service=None):
                                 app.ui.set_footer,
                                 partial(__handle_exception, "ED"))
 
-        f =juju.set_relations(this.services,
-                              app.ui.set_footer,
-                              partial(__handle_exception, "ED"))
+        f = juju.set_relations(this.services,
+                               app.ui.set_footer,
+                               partial(__handle_exception, "ED"))
 
         return controllers.use('deploystatus').render(f)
 
