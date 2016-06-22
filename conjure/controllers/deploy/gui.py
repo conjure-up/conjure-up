@@ -1,7 +1,8 @@
-from concurrent import futures
 from functools import partial
 
 import sys
+
+from ubuntui.ev import EventLoop
 
 from conjure import controllers
 from conjure import juju
@@ -17,13 +18,13 @@ this.bundle = None
 this.services = []
 this.svc_idx = 0
 this.showing_error = False
-this.deploy_futures = []
 
 
 def __handle_exception(tag, exc):
     utils.pollinate(app.session_id, tag)
     app.ui.show_exception_message(exc)
     this.showing_error = True
+    EventLoop.remove_alarms()
 
 
 def finish(single_service=None):
@@ -40,25 +41,22 @@ def finish(single_service=None):
 
     """
     if single_service:
-        f = juju.deploy_service(single_service,
-                                app.ui.set_footer,
-                                partial(__handle_exception, "ED"))
-        this.deploy_futures.append(f)
+        juju.deploy_service(single_service,
+                            app.ui.set_footer,
+                            partial(__handle_exception, "ED"))
         this.svc_idx += 1
         return render()
     else:
-        fs = [juju.deploy_service(service,
-                                  app.ui.set_footer,
-                                  partial(__handle_exception, "ED"))
-              for service in this.services[this.svc_idx:]]
-        this.deploy_futures += fs
-        futures.wait(this.deploy_futures)
+        for service in this.services[this.svc_idx:]:
+            juju.deploy_service(service,
+                                app.ui.set_footer,
+                                partial(__handle_exception, "ED"))
+
         f = juju.set_relations(this.services,
                                app.ui.set_footer,
                                partial(__handle_exception, "ED"))
-        futures.wait([f])
 
-        return controllers.use('deploystatus').render()
+        return controllers.use('deploystatus').render(f)
 
     utils.pollinate(app.session_id, 'PC')
 

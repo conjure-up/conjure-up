@@ -1,4 +1,3 @@
-from concurrent import futures
 import sys
 from functools import partial
 
@@ -30,16 +29,16 @@ def finish():
     app.metadata_controller = get_metadata_controller(this.bundle,
                                                       this.bundle_filename)
 
-    deploy_futures = [juju.deploy_service(service, utils.info,
-                                          partial(__handle_exception, "ED"))
-                      for service in this.services]
-    futures.wait(deploy_futures)
+    for service in this.services:
+        juju.deploy_service(service, utils.info,
+                            partial(__handle_exception, "ED"))
+
     f = juju.set_relations(this.services,
                            utils.info,
                            partial(__handle_exception, "ED"))
-    futures.wait([f])
+
     utils.pollinate(app.session_id, 'PC')
-    controllers.use('deploystatus').render()
+    controllers.use('deploystatus').render(f)
 
 
 def render():

@@ -14,7 +14,10 @@ this.bundle_scripts = os.path.join(
 )
 
 
-def finish():
+def finish(future):
+    if future.exception():
+        return
+
     deploy_done_sh = os.path.join(this.bundle_scripts,
                                   '00_deploy-done')
 
@@ -28,5 +31,5 @@ def finish():
     return controllers.use('steps').render()
 
 
-def render():
-    finish()
+def render(deploy_future):
+    deploy_future.add_done_callback(finish)
