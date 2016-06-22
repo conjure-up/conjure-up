@@ -14,7 +14,6 @@ class DeployStatusView(WidgetWrap):
         self.unit_w = None
         self.table = Table()
         super().__init__(Padding.center_80(self.table.render()))
-        self.refresh_nodes()
 
     def refresh_nodes(self):
         """ Adds services to the view if they don't already exist
