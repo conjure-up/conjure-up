@@ -84,8 +84,7 @@ dev: clean
 
 .PHONY: install
 install: ../conjure*.deb
-	-dpkg -i ../conjure-up_*deb
-	-dpkg -i ../conjure-up-${type}*deb
-	apt-get -yy install -f
+	sudo dpkg -i ../conjure-up_*deb
+	sudo apt-get -yy install -f
 
 all: deb
