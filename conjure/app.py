@@ -84,9 +84,9 @@ def has_valid_juju():
         beta_release_ver = beta_release_regex.search(juju_version)
         if beta_release_ver is not None:
             app.log.debug("Beta release found, checking minimum requirements.")
-            if int(beta_release_ver.group(1)) < 9:
+            if int(beta_release_ver.group(1)) < 10:
                 utils.warning(
-                    "Juju v2 beta9 is the lowest support release. Please "
+                    "Juju v2 beta10 is the lowest support release. Please "
                     "make sure you are on the latest release Juju. See {} "
                     "for more information.".format(docs_url)
                 )
