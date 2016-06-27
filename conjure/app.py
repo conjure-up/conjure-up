@@ -96,13 +96,21 @@ def has_valid_juju():
         sys.exit(1)
 
 
-def install_curated_spell(spell):
+def install_pkgs(pkgs):
     """ Installs the debian package associated with curated spell
     """
-    if not utils.check_deb_installed(spell):
+    if not isinstance(pkgs, list):
+        pkgs = [pkgs]
+
+    all_debs_installed = all(utils.check_deb_installed(x) for x
+                             in pkgs)
+    if not all_debs_installed:
+        utils.info(
+            "Installing additional required packages: {}".format(
+                " ".join(pkgs)))
         os.execl("/usr/share/conjure-up/do-apt-install",
                  "/usr/share/conjure-up/do-apt-install",
-                 spell)
+                 " ".join(pkgs))
 
 
 def load_charmstore_results(spell, blessed):
@@ -170,9 +178,6 @@ def main():
     # Bind UI
     app.ui = ConjureUI()
 
-    if spell in global_conf['curated_spells']:
-        install_curated_spell(spell)
-
     spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
         os.path.expanduser('~'),
         '.cache/conjure-up'))
@@ -206,6 +211,14 @@ def main():
                 "Failed to find a description for spell: {}, "
                 "and is a bug that should be filed.".format(spell))
 
+        # Install any required packages for any of the bundles
+        for bundle in app.bundles:
+            extra_info = bundle['Meta']['extra-info/conjure']
+            if 'packages' in extra_info:
+                app.log.debug('Found {} to install via apt'.format(
+                    extra_info['packages']))
+                install_pkgs(extra_info['packages'])
+
     else:
         # Check cache dir for spells
         spell_dir = path.join(spell_dir, spell)
@@ -230,6 +243,9 @@ def main():
         app.config = {'metadata': metadata,
                       'spell-dir': spell_dir,
                       'spell': spell}
+
+        if app.config['metadata'].get('packages', None):
+            install_pkgs(app.config['metadata']['packages'])
 
         # Need to provide app.bundles dictionary even for single
         # spells in the GUI
