@@ -46,7 +46,7 @@ def do_step(step, message_cb, icon_state=None):
     info = model_info(app.current_model)
     # Set our provider type environment var so that it is
     # exposed in future processing tasks
-    app.env['JUJU_PROVIDERTYPE'] = info['ProviderType']
+    app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
 
     set_env(step.additional_input)
 
