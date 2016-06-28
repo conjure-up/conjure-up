@@ -8,7 +8,8 @@ from conjure import juju
 from conjure import utils
 from conjure import charm
 from conjure.app_config import app
-from conjure.download import download, get_remote_url, fetcher
+from conjure.download import (download, download_local,
+                              get_remote_url, fetcher)
 from conjure.log import setup_logging
 from conjure.ui import ConjureUI
 from ubuntui.ev import EventLoop
@@ -145,6 +146,11 @@ def main():
     else:
         spell = opts.spell
 
+    # cached spell dir
+    spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
+        os.path.expanduser('~'),
+        '.cache/conjure-up'))
+
     app.fetcher = fetcher(opts.spell)
 
     if os.geteuid() == 0:
@@ -177,10 +183,6 @@ def main():
 
     # Bind UI
     app.ui = ConjureUI()
-
-    spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
-        os.path.expanduser('~'),
-        '.cache/conjure-up'))
 
     if app.fetcher == "charmstore-search":
         app.bundles = load_charmstore_results(spell, global_conf['blessed'])
@@ -220,19 +222,31 @@ def main():
                 install_pkgs(extra_info['packages'])
 
     else:
-        # Check cache dir for spells
-        spell_dir = path.join(spell_dir, spell)
-
-        metadata_path = path.join(spell_dir,
-                                  'conjure/metadata.json')
+        app.config = {'metadata': None,
+                      'spell-dir': path.join(spell_dir, spell),
+                      'spell': spell}
 
         remote = get_remote_url(opts.spell)
         purge_top_level = True
         if remote is not None:
-            if app.fetcher == "charmstore-search" or \
-               app.fetcher == "charmstore-direct":
-                purge_top_level = False
-            download(remote, spell_dir, purge_top_level)
+
+            metadata_path = path.join(app.config['spell-dir'],
+                                      'conjure/metadata.json')
+
+            if app.fetcher == "local":
+                app.config['spell-dir'] = path.join(
+                    spell_dir,
+                    os.path.basename(
+                        os.path.abspath(spell)))
+                metadata_path = path.join(app.config['spell-dir'],
+                                          'conjure/metadata.json')
+                download_local(remote, app.config['spell-dir'])
+
+            else:
+                if app.fetcher == "charmstore-search" or \
+                   app.fetcher == "charmstore-direct":
+                    purge_top_level = False
+                download(remote, app.config['spell-dir'], purge_top_level)
         else:
             utils.warning("Could not find spell: {}".format(spell))
             sys.exit(1)
@@ -240,10 +254,7 @@ def main():
         with open(metadata_path) as fp:
             metadata = json.load(fp)
 
-        app.config = {'metadata': metadata,
-                      'spell-dir': spell_dir,
-                      'spell': spell}
-
+        app.config['metadata'] = metadata
         if app.config['metadata'].get('packages', None):
             install_pkgs(app.config['metadata']['packages'])
 

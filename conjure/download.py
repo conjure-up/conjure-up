@@ -17,12 +17,15 @@ def fetcher(spell):
     direct: Pulling from a remote webserver
     vcs: Pulling from a remote Vcs like github
     deb: This spell was accessed from one of our official deb packages
+    local: Spell available on local filesystem
 
     Returns:
     Endpoint type
     """
     if spell.startswith('~') or spell.startswith('cs:~'):
         return "charmstore-direct"
+    if os.path.isdir(spell) or spell == '.':
+        return "local"
     if "/" in spell:
         return "vcs"
     if spell.startswith('http'):
@@ -39,6 +42,20 @@ def remote_exists(path):
     except CalledProcessError:
         return False
     return True
+
+
+def download_local(src, dst):
+    """ Copies spell from local filesystem into cache
+    """
+    try:
+        shutil.rmtree(dst, ignore_errors=True)
+        app.log.debug("Path is local filesystem, copying {} to {}".format(
+            src, dst))
+        shutil.copytree(src, dst)
+        return
+    except Exception as e:
+        app.log.debug("Failed to download local spell: {}".format(e))
+        raise e
 
 
 def download(src, dst, purge_top_level=True):
@@ -73,7 +90,7 @@ def get_remote_url(path):
     spells from
 
     Arguments:
-    path: Can be local zip, remote zip, or a short url to check
+    path: Can be local, local zip, remote zip, or a short url to check
     github, bitbucket, and the charmstore.
 
     For example, using the charmstore bundle key 'apache-core-batch-processing'
@@ -85,6 +102,9 @@ def get_remote_url(path):
     Returns:
     The url if exists otherwise None.
     """
+    if os.path.isdir(path):
+        return path
+
     if path.startswith("http") and path.endswith(".zip"):
         if remote_exists(path):
             # Path is a full URL to an archived zip
