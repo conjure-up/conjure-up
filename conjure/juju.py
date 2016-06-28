@@ -129,6 +129,11 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
         cmd += "--config apt-http-proxy={} ".format(app.argv.apt_http_proxy)
     if app.argv.apt_https_proxy:
         cmd += "--config apt-https-proxy={} ".format(app.argv.apt_https_proxy)
+    if app.argv.no_proxy:
+        cmd += "--config no-proxy={} ".format(app.argv.no_proxy)
+    if app.argv.bootstrap_timeout:
+        cmd += "--config bootstrap-timeout={} ".format(
+            app.argv.bootstrap_timeout)
 
     cmd += "--bootstrap-series={} ".format(series)
     if cloud != "localhost":
