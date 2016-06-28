@@ -49,10 +49,16 @@ Depends: bsdtar,
          ${misc:Depends},
          ${python3:Depends},
          ${shlibs:Depends}
-Conflicts: conjure
-Replaces: conjure
-Provides: conjure
+Breaks: conjure (<< 0.1)
+Replaces: conjure (<< 0.1)
 Description: Package runtime for apt-installable juju bundles
  This package provides Conjure, an interface to configuring apt-installable
  packages from the cloud. It utilizes apt, juju, and conjure's custom
  configuration views.
+
+Package: conjure
+Section: oldlibs
+Architecture: all
+Depends: conjure-up, ${misc:Depends}
+Description: transitional dummy package for conjure-up
+ This is a transitional dummy package for conjure-up. It can safely be removed.
