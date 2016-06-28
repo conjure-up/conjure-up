@@ -1,15 +1,16 @@
 from functools import partial
-
+import json
 import sys
-
+import os
 from ubuntui.ev import EventLoop
-
+from subprocess import check_output
 from conjure import controllers
 from conjure import juju
+from conjure import async
 from conjure.app_config import app
 from conjure.ui.views.service_walkthrough import ServiceWalkthroughView
 from conjure import utils
-
+from conjure.api.models import model_info
 from .common import get_bundleinfo, get_metadata_controller
 
 this = sys.modules[__name__]
@@ -25,6 +26,42 @@ def __handle_exception(tag, exc):
     app.ui.show_exception_message(exc)
     this.showing_error = True
     EventLoop.remove_alarms()
+
+
+def __pre_deploy_exec():
+    """ runs pre deploy script if exists
+    """
+    app.env['JUJU_PROVIDERTYPE'] = model_info(
+        juju.get_current_model())['provider-type']
+
+    pre_deploy_sh = os.path.join(app.config['spell-dir'],
+                                 'conjure/steps/00_pre-deploy')
+    if os.path.isfile(pre_deploy_sh) \
+       and os.access(pre_deploy_sh, os.X_OK):
+        utils.pollinate(app.session_id, 'J001')
+        msg = "Running pre-deployment tasks."
+        app.log.debug(msg)
+        app.ui.set_footer(msg)
+        return check_output(pre_deploy_sh,
+                            shell=True,
+                            env=app.env)
+    return {'message': 'No pre deploy necessary',
+            'returnCode': 0,
+            'isComplete': True}
+
+
+def __pre_deploy_done(future):
+    try:
+        result = json.loads(future.result().decode())
+    except Exception as e:
+        return __handle_exception('E003', e)
+
+    app.log.debug("pre_deploy_done: {}".format(result))
+    if result['returnCode'] > 0:
+        utils.pollinate(app.session_id, 'E003')
+        return __handle_exception('E003', Exception(
+            'There was an error during the pre '
+            'deploy processing phase: {}.'.format(result)))
 
 
 def finish(single_service=None):
@@ -62,6 +99,14 @@ def finish(single_service=None):
 
 
 def render():
+    try:
+        future = async.submit(__pre_deploy_exec,
+                              partial(__handle_exception, 'E003'),
+                              queue_name=juju.JUJU_ASYNC_QUEUE)
+        future.add_done_callback(__pre_deploy_done)
+    except Exception as e:
+        return __handle_exception('E003', e)
+
     if this.showing_error:
         return
     if not this.bundle:
