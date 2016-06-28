@@ -147,10 +147,7 @@ def apply_proxy():
 
 def main():
     opts = parse_options(sys.argv[1:])
-    if "/" in opts.spell:
-        spell = opts.spell.split("/")[-1]
-    else:
-        spell = opts.spell
+    spell = os.path.basename(os.path.abspath(opts.spell))
 
     # cached spell dir
     spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
