@@ -349,6 +349,8 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
             service.service_name)
         if msg_cb:
             msg_cb("{}".format(deploy_message))
+        this.CLIENT.Client(request="AddCharm",
+                           params={"url": service.csid.as_str()})
         this.CLIENT.Application(request="Deploy",
                                 params=params)
         if msg_cb:
