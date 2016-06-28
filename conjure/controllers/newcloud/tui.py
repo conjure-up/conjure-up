@@ -19,7 +19,7 @@ def do_post_bootstrap():
     """ runs post bootstrap script if exists
     """
     # Set provider type for post-bootstrap
-    app.env['JUJU_PROVIDERTYPE'] = model_info('default')['ProviderType']
+    app.env['JUJU_PROVIDERTYPE'] = model_info('default')['provider-type']
 
     post_bootstrap_sh = os.path.join(app.config['spell-dir'],
                                      'conjure/steps/00_post-bootstrap')
