@@ -46,3 +46,14 @@ def agent_states():
             message = unit_dict['workload-status']['message']
             agent_states.append((unit_name, cur_state, message))
     return agent_states
+
+
+def machine_states():
+    """ get a list of machine states
+
+    Returns:
+    A list of tuples of [(machine_name, current_state, machine_message)]
+    """
+    return [(name, md['juju-status'].get('current', ''),
+             md['juju-status'].get('message', ''))
+            for name, md in status().get('machines',  {}).items()]
