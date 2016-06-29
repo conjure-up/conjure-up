@@ -43,7 +43,9 @@ def agent_states():
     for app_name, app_dict in juju_status['applications'].items():
         for unit_name, unit_dict in app_dict.get('units', {}).items():
             cur_state = unit_dict['workload-status']['current']
-            message = unit_dict['workload-status']['message']
+            message = unit_dict['workload-status'].get(
+                'message',
+                'Unknown workload status message')
             agent_states.append((unit_name, cur_state, message))
     return agent_states
 
