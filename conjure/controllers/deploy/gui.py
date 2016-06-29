@@ -19,6 +19,7 @@ this.bundle = None
 this.services = []
 this.svc_idx = 0
 this.showing_error = False
+this.is_predeploy_queued = False
 
 
 def __handle_exception(tag, exc):
@@ -31,6 +32,7 @@ def __handle_exception(tag, exc):
 def __pre_deploy_exec():
     """ runs pre deploy script if exists
     """
+    this.is_predeploy_queued = True
     app.env['JUJU_PROVIDERTYPE'] = model_info(
         juju.get_current_model())['provider-type']
 
@@ -45,14 +47,16 @@ def __pre_deploy_exec():
         return check_output(pre_deploy_sh,
                             shell=True,
                             env=app.env)
-    return {'message': 'No pre deploy necessary',
-            'returnCode': 0,
-            'isComplete': True}
+    return json.dumps({'message': 'No pre deploy necessary',
+                       'returnCode': 0,
+                       'isComplete': True})
 
 
 def __pre_deploy_done(future):
     try:
         result = json.loads(future.result().decode())
+    except AttributeError:
+        result = json.loads(future.result())
     except Exception as e:
         return __handle_exception('E003', e)
 
@@ -99,13 +103,14 @@ def finish(single_service=None):
 
 
 def render():
-    try:
-        future = async.submit(__pre_deploy_exec,
-                              partial(__handle_exception, 'E003'),
-                              queue_name=juju.JUJU_ASYNC_QUEUE)
-        future.add_done_callback(__pre_deploy_done)
-    except Exception as e:
-        return __handle_exception('E003', e)
+    if not this.is_predeploy_queued:
+        try:
+            future = async.submit(__pre_deploy_exec,
+                                  partial(__handle_exception, 'E003'),
+                                  queue_name=juju.JUJU_ASYNC_QUEUE)
+            future.add_done_callback(__pre_deploy_done)
+        except Exception as e:
+            return __handle_exception('E003', e)
 
     if this.showing_error:
         return
