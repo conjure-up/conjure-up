@@ -3,7 +3,7 @@ import json
 import sys
 import os
 from ubuntui.ev import EventLoop
-from subprocess import check_output
+from subprocess import run, PIPE
 from conjure import controllers
 from conjure import juju
 from conjure import async
@@ -44,9 +44,11 @@ def __pre_deploy_exec():
         msg = "Running pre-deployment tasks."
         app.log.debug(msg)
         app.ui.set_footer(msg)
-        return check_output(pre_deploy_sh,
-                            shell=True,
-                            env=app.env)
+        return run(pre_deploy_sh,
+                   shell=True,
+                   stdout=PIPE,
+                   stderr=PIPE,
+                   env=app.env)
     return json.dumps({'message': 'No pre deploy necessary',
                        'returnCode': 0,
                        'isComplete': True})
@@ -54,11 +56,15 @@ def __pre_deploy_exec():
 
 def __pre_deploy_done(future):
     try:
-        result = json.loads(future.result().decode())
+        result = json.loads(future.result().stdout.decode())
     except AttributeError:
         result = json.loads(future.result())
-    except Exception as e:
-        return __handle_exception('E003', e)
+    except:
+        return __handle_exception(
+            'E003',
+            Exception(
+                "Problem with pre-deploy: \n{}, ".format(
+                    future.result())))
 
     app.log.debug("pre_deploy_done: {}".format(result))
     if result['returnCode'] > 0:
