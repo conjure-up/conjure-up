@@ -7,7 +7,7 @@ import sys
 from subprocess import (run, PIPE, DEVNULL, CalledProcessError, Popen,
                         TimeoutExpired)
 import yaml
-
+import json
 from bundleplacer.charmstore_api import CharmStoreID
 
 from conjure import async
@@ -346,6 +346,28 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
             futures.wait([mc.metadata_future])
             info = mc.get_charm_info(id_no_rev, lambda _: None)
             service.csid = CharmStoreID(info["Id"])
+
+        # Add charm to Juju
+        this.CLIENT.Client(request="AddCharm",
+                           params={"url": service.csid.as_str()})
+
+        # We must load any resources prior to deploying
+        resources = app.metadata_controller.get_resources(
+            service.csid.as_str_without_rev())
+        app.log.debug("Resources: {}".format(resources))
+        if resources:
+            params = {"tag": "application-{}".format(service.csid.name),
+                      "url": service.csid.as_str(),
+                      "resources": resources}
+            app.log.debug("Adding pending resources: {}".format(params))
+            resource_ids = this.CLIENT.resources(
+                request="AddPendingResources",
+                params=params)
+            app.log.debug("Pending resources IDs: {}".format(resource_ids))
+            application_to_resource_map = {}
+            for idx, resource in enumerate(resources):
+                application_to_resource_map[resource['Name']] = resource_ids['PendingIDs'][idx]
+            service.resources = application_to_resource_map
         params = {"applications": [service.as_deployargs()]}
 
         app.log.debug("Deploying {}: {}".format(service, params))
@@ -354,8 +376,6 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
             service.service_name)
         if msg_cb:
             msg_cb("{}".format(deploy_message))
-        this.CLIENT.Client(request="AddCharm",
-                           params={"url": service.csid.as_str()})
         this.CLIENT.Application(request="Deploy",
                                 params=params)
         if msg_cb:

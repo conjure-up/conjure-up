@@ -45,6 +45,7 @@ class Service:
         self.isolate = True if not subordinate else False
         self.relations = relations
         self.placement_spec = placement_spec
+        self.resources = None
 
     @property
     def summary(self):
@@ -74,6 +75,9 @@ class Service:
               "application": self.service_name,
               "num-units": self.num_units,
               "constraints": self.constraints}
+
+        if self.resources:
+            rd['resources'] = self.resources
 
         if len(self.options) > 0:
             config_dict = {self.service_name: self.options}

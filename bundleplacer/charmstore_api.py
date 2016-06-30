@@ -279,6 +279,18 @@ class MetadataController:
             return {}
         return self.charm_info[charm_name]['Meta']['charm-config']['Options']
 
+    def get_resources(self, charm):
+        resource_url = ("https://api.jujucharms.com/charmstore/v5/meta/any"
+                        "?include=resources&id={}".format(charm))
+        r = requests.get(resource_url)
+        if r.ok:
+            resources = r.json()
+            resources = resources[charm]['Meta']['resources']
+            for r in resources:
+                r['Origin'] = 'store'
+            return resources
+        return None
+
     def handle_search_error(self, e):
         self.error_cb(e)
 
