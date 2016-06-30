@@ -49,7 +49,7 @@ agentState()
 # unit status
 agentStateUnit()
 {
-    juju status --format json | jq ".services[\"$1\"][\"units\"][\"$1/$2\"][\"workload-status\"][\"current\"]"
+    juju status --format json | jq ".applications[\"$1\"][\"units\"][\"$1/$2\"][\"workload-status\"][\"current\"]"
 }
 
 # Gets current leader of a service
@@ -71,7 +71,7 @@ for leader in leader_yaml:
         print(leader['UnitId'])
 "
 
-    juju run --service $1 is-leader --format yaml | env python3 -c "$py_script"
+    juju run --application $1 is-leader --format yaml | env python3 -c "$py_script"
 }
 
 # Exports the variables required for communicating with your cloud.
