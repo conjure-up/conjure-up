@@ -5,7 +5,6 @@ from functools import partial
 # https://github.com/juju/juju/blob/master/api/facadeversions.go
 _FACADE_VERSIONS = {
     "Action":                       2,
-    "Addresser":                    2,
     "Agent":                        2,
     "AgentTools":                   1,
     "AllModelWatcher":              2,
@@ -19,6 +18,7 @@ _FACADE_VERSIONS = {
     "Charms":                       2,
     "Cleaner":                      2,
     "Client":                       1,
+    "Cloud":                        1,
     "Controller":                   3,
     "Deployer":                     1,
     "DiscoverSpaces":               2,
@@ -70,7 +70,8 @@ _FACADE_VERSIONS = {
     "Uniter":                       4,
     "Upgrader":                     1,
     "UserManager":                  1,
-    "VolumeAttachmentsWatcher":     2
+    "VolumeAttachmentsWatcher":     2,
+    "resources": 1
 }
 
 
