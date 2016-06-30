@@ -7,7 +7,6 @@ import sys
 from subprocess import (run, PIPE, DEVNULL, CalledProcessError, Popen,
                         TimeoutExpired)
 import yaml
-import json
 from bundleplacer.charmstore_api import CharmStoreID
 
 from conjure import async
@@ -366,7 +365,8 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
             app.log.debug("Pending resources IDs: {}".format(resource_ids))
             application_to_resource_map = {}
             for idx, resource in enumerate(resources):
-                application_to_resource_map[resource['Name']] = resource_ids['PendingIDs'][idx]
+                pid = resource_ids['PendingIDs'][idx]
+                application_to_resource_map[resource['Name']] = pid
             service.resources = application_to_resource_map
         params = {"applications": [service.as_deployargs()]}
 
