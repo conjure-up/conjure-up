@@ -359,7 +359,7 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
                       "url": service.csid.as_str(),
                       "resources": resources}
             app.log.debug("Adding pending resources: {}".format(params))
-            resource_ids = this.CLIENT.resources(
+            resource_ids = this.CLIENT.Resources(
                 request="AddPendingResources",
                 params=params)
             app.log.debug("Pending resources IDs: {}".format(resource_ids))

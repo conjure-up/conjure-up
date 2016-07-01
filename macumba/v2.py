@@ -35,6 +35,7 @@ _FACADE_VERSIONS = {
     "KeyUpdater":                   1,
     "LeadershipService":            2,
     "LifeFlag":                     1,
+    "LogForwarding":                1,
     "Logger":                       1,
     "MachineActions":               1,
     "MachineManager":               2,
@@ -50,11 +51,15 @@ _FACADE_VERSIONS = {
     "MigrationTarget":              1,
     "ModelManager":                 2,
     "NotifyWatcher":                1,
+    "Payloads":                     1,
+    "PayloadsHookContext":          1,
     "Pinger":                       1,
     "Provisioner":                  3,
     "ProxyUpdater":                 1,
     "Reboot":                       2,
     "RelationUnitsWatcher":         1,
+    "Resources":                    1,
+    "ResourcesHookContext":         1,
     "Resumer":                      2,
     "RetryStrategy":                1,
     "Singular":                     1,
@@ -70,8 +75,7 @@ _FACADE_VERSIONS = {
     "Uniter":                       4,
     "Upgrader":                     1,
     "UserManager":                  1,
-    "VolumeAttachmentsWatcher":     2,
-    "resources": 1
+    "VolumeAttachmentsWatcher":     2
 }
 
 
