@@ -365,7 +365,7 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
             app.log.debug("Pending resources IDs: {}".format(resource_ids))
             application_to_resource_map = {}
             for idx, resource in enumerate(resources):
-                pid = resource_ids['PendingIDs'][idx]
+                pid = resource_ids['pending-ids'][idx]
                 application_to_resource_map[resource['Name']] = pid
             service.resources = application_to_resource_map
         params = {"applications": [service.as_deployargs()]}
