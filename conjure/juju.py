@@ -167,11 +167,11 @@ def bootstrap_async(controller, cloud, credential=None, exc_cb=None):
                         queue_name=JUJU_ASYNC_QUEUE)
 
 
-def available():
+def model_available():
     """ Checks if juju is available
 
     Returns:
-    True/False if juju status was successful and a environment is found
+    True/False if juju status was successful and a working model is found
     """
     try:
         run('juju status', shell=True,
