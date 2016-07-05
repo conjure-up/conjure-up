@@ -72,6 +72,8 @@ def __pre_deploy_done(future):
         return __handle_exception('E003', Exception(
             'There was an error during the pre '
             'deploy processing phase: {}.'.format(result)))
+    else:
+        app.ui.set_footer("Pre-deploy processing done.")
 
 
 def finish(single_service=None):

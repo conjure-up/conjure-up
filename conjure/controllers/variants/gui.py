@@ -46,7 +46,7 @@ def finish(spell):
                   'spell-dir': spell_dir,
                   'spell': spell_name}
 
-    return controllers.use('deploy').render()
+    return controllers.use('bundlereadme').render()
 
 
 def render():
