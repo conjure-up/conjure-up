@@ -31,5 +31,8 @@ def finish(future):
     return controllers.use('steps').render()
 
 
-def render(deploy_future):
-    deploy_future.add_done_callback(finish)
+def render(deploy_future=None):
+    if deploy_future:
+        deploy_future.add_done_callback(finish)
+    else:
+        finish()
