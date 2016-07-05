@@ -46,7 +46,7 @@ def parse_options(argv):
                         help='Comma separated list of IPs to not '
                         'filter through a proxy')
     parser.add_argument('--bootstrap-timeout', dest='bootstrap_timeout',
-                        help='Amount of time to wait for initial environment '
+                        help='Amount of time to wait for initial controller '
                         'creation. Useful for slower network connections.')
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
@@ -284,10 +284,11 @@ def main():
     app.env['CONJURE_UP_SPELL'] = spell
 
     if app.argv.status_only:
-        if not juju.available():
-            utils.error("Attempted to access the status screen of "
-                        "a non-bootstrapped Juju environment. "
-                        "Please bootstrap an environment first.")
+        if not juju.model_available():
+            utils.error("Attempted to access the status screen without "
+                        "an available Juju model.\n"
+                        "Please select a model using 'juju switch' or "
+                        "create a new controller using 'juju bootstrap'.")
             sys.exit(1)
 
     if app.headless:

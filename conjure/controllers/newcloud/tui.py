@@ -26,7 +26,7 @@ def do_post_bootstrap():
     if os.path.isfile(post_bootstrap_sh) \
        and os.access(post_bootstrap_sh, os.X_OK):
         utils.pollinate(app.session_id, 'J001')
-        utils.info("Running additional environment tasks.")
+        utils.info("Running post-bootstrap tasks.")
         try:
             sh = run(post_bootstrap_sh, shell=True,
                      stdout=PIPE,
