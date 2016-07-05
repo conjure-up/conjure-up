@@ -46,7 +46,7 @@ def parse_options(argv):
                         help='Comma separated list of IPs to not '
                         'filter through a proxy')
     parser.add_argument('--bootstrap-timeout', dest='bootstrap_timeout',
-                        help='Amount of time to wait for initial environment '
+                        help='Amount of time to wait for initial controller '
                         'creation. Useful for slower network connections.')
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))

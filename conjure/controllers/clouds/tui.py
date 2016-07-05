@@ -20,10 +20,11 @@ def finish():
     if existing_controller is None:
         return controllers.use('newcloud').render(app.argv.cloud)
 
-    utils.info("Creating environment, please wait.")
     app.current_controller = existing_controller
     juju.switch_controller(app.current_controller)
     app.current_model = petname.Name()
+    utils.info("Creating new juju model named '{}', "
+               "please wait.".format(app.current_model))
     juju.add_model(app.current_model)
     juju.switch_model(app.current_model)
 
