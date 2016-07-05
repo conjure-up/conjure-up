@@ -120,14 +120,16 @@ def install_pkgs(pkgs):
                  " ".join(pkgs))
 
 
-def load_charmstore_results(spell, blessed):
-    """ Loads results from charmstore
+def get_charmstore_bundles(spell, blessed):
+    """searches charmstore, returns list of bundle metadata for bundles
+    with tag 'conjure-$spell'
     """
     # We process multiple bundles here with our keyword search
     charmstore_results = charm.search(spell, blessed)
     # Check charmstore
     if charmstore_results['Total'] == 0:
-        utils.warning('Could not find spell in charmstore.')
+        utils.warning("Could not find spells tagged 'conjure-{}'"
+                      " in the Juju Charmstore.".format(spell))
         sys.exit(1)
 
     return charmstore_results['Results']
@@ -188,7 +190,9 @@ def main():
     app.ui = ConjureUI()
 
     if app.fetcher == "charmstore-search":
-        app.bundles = load_charmstore_results(spell, global_conf['blessed'])
+        utils.info("Loading current {} spells "
+                   "from Juju Charmstore, please wait.".format(spell))
+        app.bundles = get_charmstore_bundles(spell, global_conf['blessed'])
         app.config = {'metadata': None,
                       'spell-dir': spell_dir,
                       'spell': spell}
