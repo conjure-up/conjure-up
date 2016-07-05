@@ -7,7 +7,6 @@ import sys
 from subprocess import (run, PIPE, DEVNULL, CalledProcessError, Popen,
                         TimeoutExpired)
 import yaml
-
 from bundleplacer.charmstore_api import CharmStoreID
 
 from conjure import async
@@ -129,6 +128,11 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
         cmd += "--config apt-http-proxy={} ".format(app.argv.apt_http_proxy)
     if app.argv.apt_https_proxy:
         cmd += "--config apt-https-proxy={} ".format(app.argv.apt_https_proxy)
+    if app.argv.no_proxy:
+        cmd += "--config no-proxy={} ".format(app.argv.no_proxy)
+    if app.argv.bootstrap_timeout:
+        cmd += "--config bootstrap-timeout={} ".format(
+            app.argv.bootstrap_timeout)
 
     cmd += "--bootstrap-series={} ".format(series)
     if cloud != "localhost":
@@ -341,6 +345,29 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
             futures.wait([mc.metadata_future])
             info = mc.get_charm_info(id_no_rev, lambda _: None)
             service.csid = CharmStoreID(info["Id"])
+
+        # Add charm to Juju
+        this.CLIENT.Client(request="AddCharm",
+                           params={"url": service.csid.as_str()})
+
+        # We must load any resources prior to deploying
+        resources = app.metadata_controller.get_resources(
+            service.csid.as_str_without_rev())
+        app.log.debug("Resources: {}".format(resources))
+        if resources:
+            params = {"tag": "application-{}".format(service.csid.name),
+                      "url": service.csid.as_str(),
+                      "resources": resources}
+            app.log.debug("Adding pending resources: {}".format(params))
+            resource_ids = this.CLIENT.Resources(
+                request="AddPendingResources",
+                params=params)
+            app.log.debug("Pending resources IDs: {}".format(resource_ids))
+            application_to_resource_map = {}
+            for idx, resource in enumerate(resources):
+                pid = resource_ids['pending-ids'][idx]
+                application_to_resource_map[resource['Name']] = pid
+            service.resources = application_to_resource_map
         params = {"applications": [service.as_deployargs()]}
 
         app.log.debug("Deploying {}: {}".format(service, params))

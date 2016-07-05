@@ -45,6 +45,7 @@ class Service:
         self.isolate = True if not subordinate else False
         self.relations = relations
         self.placement_spec = placement_spec
+        self.resources = None
 
     @property
     def summary(self):
@@ -70,19 +71,22 @@ class Service:
         }
 
     def as_deployargs(self):
-        rd = {"CharmUrl": self.csid.as_str(),
-              "ApplicationName": self.service_name,
-              "NumUnits": self.num_units,
-              "Constraints": self.constraints}
+        rd = {"charm-url": self.csid.as_str(),
+              "application": self.service_name,
+              "num-units": self.num_units,
+              "constraints": self.constraints}
+
+        if self.resources:
+            rd['resources'] = self.resources
 
         if len(self.options) > 0:
             config_dict = {self.service_name: self.options}
             config_yaml = yaml.dump(config_dict, default_flow_style=False)
-            rd["ConfigYAML"] = config_yaml
+            rd["config-yaml"] = config_yaml
 
         if self.placement_spec:
             specs = [self._prepare_placement(self.placement_spec)]
-            rd["Placement"] = yaml.dump(specs, default_flow_style=False)
+            rd["placement"] = yaml.dump(specs, default_flow_style=False)
 
         return rd
 

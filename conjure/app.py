@@ -8,7 +8,8 @@ from conjure import juju
 from conjure import utils
 from conjure import charm
 from conjure.app_config import app
-from conjure.download import download, get_remote_url, fetcher
+from conjure.download import (download, download_local,
+                              get_remote_url, fetcher)
 from conjure.log import setup_logging
 from conjure.ui import ConjureUI
 from ubuntui.ev import EventLoop
@@ -41,6 +42,12 @@ def parse_options(argv):
                         help='Specify HTTP proxy')
     parser.add_argument('--https-proxy', dest='https_proxy',
                         help='Specify HTTPS proxy')
+    parser.add_argument('--proxy-proxy', dest='no_proxy',
+                        help='Comma separated list of IPs to not '
+                        'filter through a proxy')
+    parser.add_argument('--bootstrap-timeout', dest='bootstrap_timeout',
+                        help='Amount of time to wait for initial environment '
+                        'creation. Useful for slower network connections.')
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
 
@@ -84,9 +91,9 @@ def has_valid_juju():
         beta_release_ver = beta_release_regex.search(juju_version)
         if beta_release_ver is not None:
             app.log.debug("Beta release found, checking minimum requirements.")
-            if int(beta_release_ver.group(1)) < 9:
+            if int(beta_release_ver.group(1)) < 10:
                 utils.warning(
-                    "Juju v2 beta9 is the lowest support release. Please "
+                    "Juju v2 beta10 is the lowest support release. Please "
                     "make sure you are on the latest release Juju. See {} "
                     "for more information.".format(docs_url)
                 )
@@ -96,13 +103,21 @@ def has_valid_juju():
         sys.exit(1)
 
 
-def install_curated_spell(spell):
+def install_pkgs(pkgs):
     """ Installs the debian package associated with curated spell
     """
-    if not utils.check_deb_installed(spell):
+    if not isinstance(pkgs, list):
+        pkgs = [pkgs]
+
+    all_debs_installed = all(utils.check_deb_installed(x) for x
+                             in pkgs)
+    if not all_debs_installed:
+        utils.info(
+            "Installing additional required packages: {}".format(
+                " ".join(pkgs)))
         os.execl("/usr/share/conjure-up/do-apt-install",
                  "/usr/share/conjure-up/do-apt-install",
-                 spell)
+                 " ".join(pkgs))
 
 
 def load_charmstore_results(spell, blessed):
@@ -132,10 +147,12 @@ def apply_proxy():
 
 def main():
     opts = parse_options(sys.argv[1:])
-    if "/" in opts.spell:
-        spell = opts.spell.split("/")[-1]
-    else:
-        spell = opts.spell
+    spell = os.path.basename(os.path.abspath(opts.spell))
+
+    # cached spell dir
+    spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
+        os.path.expanduser('~'),
+        '.cache/conjure-up'))
 
     app.fetcher = fetcher(opts.spell)
 
@@ -170,13 +187,6 @@ def main():
     # Bind UI
     app.ui = ConjureUI()
 
-    if spell in global_conf['curated_spells']:
-        install_curated_spell(spell)
-
-    spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
-        os.path.expanduser('~'),
-        '.cache/conjure-up'))
-
     if app.fetcher == "charmstore-search":
         app.bundles = load_charmstore_results(spell, global_conf['blessed'])
         app.config = {'metadata': None,
@@ -206,20 +216,40 @@ def main():
                 "Failed to find a description for spell: {}, "
                 "and is a bug that should be filed.".format(spell))
 
-    else:
-        # Check cache dir for spells
-        spell_dir = path.join(spell_dir, spell)
+        # Install any required packages for any of the bundles
+        for bundle in app.bundles:
+            extra_info = bundle['Meta']['extra-info/conjure']
+            if 'packages' in extra_info:
+                app.log.debug('Found {} to install via apt'.format(
+                    extra_info['packages']))
+                install_pkgs(extra_info['packages'])
 
-        metadata_path = path.join(spell_dir,
-                                  'conjure/metadata.json')
+    else:
+        app.config = {'metadata': None,
+                      'spell-dir': path.join(spell_dir, spell),
+                      'spell': spell}
 
         remote = get_remote_url(opts.spell)
         purge_top_level = True
         if remote is not None:
-            if app.fetcher == "charmstore-search" or \
-               app.fetcher == "charmstore-direct":
-                purge_top_level = False
-            download(remote, spell_dir, purge_top_level)
+
+            metadata_path = path.join(app.config['spell-dir'],
+                                      'conjure/metadata.json')
+
+            if app.fetcher == "local":
+                app.config['spell-dir'] = path.join(
+                    spell_dir,
+                    os.path.basename(
+                        os.path.abspath(spell)))
+                metadata_path = path.join(app.config['spell-dir'],
+                                          'conjure/metadata.json')
+                download_local(remote, app.config['spell-dir'])
+
+            else:
+                if app.fetcher == "charmstore-search" or \
+                   app.fetcher == "charmstore-direct":
+                    purge_top_level = False
+                download(remote, app.config['spell-dir'], purge_top_level)
         else:
             utils.warning("Could not find spell: {}".format(spell))
             sys.exit(1)
@@ -227,9 +257,9 @@ def main():
         with open(metadata_path) as fp:
             metadata = json.load(fp)
 
-        app.config = {'metadata': metadata,
-                      'spell-dir': spell_dir,
-                      'spell': spell}
+        app.config['metadata'] = metadata
+        if app.config['metadata'].get('packages', None):
+            install_pkgs(app.config['metadata']['packages'])
 
         # Need to provide app.bundles dictionary even for single
         # spells in the GUI
