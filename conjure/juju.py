@@ -75,14 +75,14 @@ def get_controller(id):
 def login(force=False):
     """ Login to Juju API server
     """
-    if not available():
-        raise Exception("Tried to login to a non bootstrapped environment.")
-
     if this.IS_AUTHENTICATED is True and not force:
         return
 
     if not get_current_controller():
         raise Exception("Unable to determine current controller")
+
+    if not get_current_model():
+        raise Exception("Tried to login with no current model set.")
 
     env = get_controller(get_current_controller())
     account = get_account(get_current_controller())
