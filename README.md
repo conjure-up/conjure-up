@@ -55,13 +55,16 @@ with all the sensible defaults in place.
 $ conjure-up ~containers/observable-kubernetes to azure
 ```
 
+# authors
+
+* Adam Stokes <adam.stokes@ubuntu.com>
+* Mike McCracken <mike.mccracken@canonical.com>
+
 # license
 
 The MIT License (MIT)
 
 * Copyright (c) 2015-2016 Canonical Ltd.
-* Copyright (c) 2015-2016 Adam Stokes <adam.stokes@ubuntu.com>
-* Copyright (c) 2015-2016 Mike McCracken <mike.mccracken@canonical.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
