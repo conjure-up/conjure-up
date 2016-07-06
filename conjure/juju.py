@@ -320,6 +320,45 @@ def deploy(bundle):
         raise e
 
 
+def add_machine(machine, msg_cb=None, exc_cb=None):
+    """ Add single machine to model
+
+    Arguments:
+    machine: Dictionary of machine
+       {"series": "",
+        "constraints": {},
+        "jobs": ["JobHostUnits"],
+        "parent-id": "",
+        "container-type": "",
+        "instance-id": ""}
+
+    Returns:
+    machine_response: {"machines":[{"machine":"0"}]}}
+    """
+    return add_machines([machine], msg_cb, exc_cb)
+
+
+def add_machines(machines, msg_cb=None, exc_cb=None):
+    """ Add machines to model
+
+    {"request-id":4,"type":"Client","version":1,"request":"AddMachinesV2","params":{"params":[{"series":"","constraints":{},"jobs":["JobHostUnits"],"parent-id":"","container-type":"","instance-id":"","nonce":"","hardware-characteristics":{},"addresses":null}]}}
+
+    Arguments:
+    machines: list of dictionary machine attributes
+    """
+    @requires_login
+    def _add_machines_async():
+        machine_response = this.CLIENT.Client(request="AddMachines",
+                                              params={"params": machines})
+        if msg_cb:
+            msg_cb("Added machines: {}".format(machine_response))
+        return machine_response
+
+    return async.submit(_add_machines_async,
+                        exc_cb,
+                        queue_name=JUJU_ASYNC_QUEUE)
+
+
 def deploy_service(service, msg_cb=None, exc_cb=None):
     """Juju deploy service.
 
