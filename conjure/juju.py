@@ -118,7 +118,6 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
     cmd = "juju bootstrap {} {} --upload-tools " \
           "--config image-stream=daily ".format(
               controller, cloud)
-    cmd += "--config enable-os-refresh-update=false "
     cmd += "--config enable-os-upgrade=false "
     if app.argv.http_proxy:
         cmd += "--config http-proxy={} ".format(app.argv.http_proxy)
