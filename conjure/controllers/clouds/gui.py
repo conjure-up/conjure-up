@@ -40,7 +40,7 @@ def finish(cloud):
     # Go through the rest of the gui since we already provide a direct
     # spell path
     if app.fetcher != 'charmstore-search':
-        return controllers.use('deploy').render()
+        return controllers.use('bundlereadme').render()
     return controllers.use('variants').render()
 
 
