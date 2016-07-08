@@ -320,36 +320,26 @@ def deploy(bundle):
         raise e
 
 
-def add_machine(machine, msg_cb=None, exc_cb=None):
-    """ Add single machine to model
-
-    Arguments:
-    machine: Dictionary of machine
-       {"series": "",
-        "constraints": {},
-        "jobs": ["JobHostUnits"],
-        "parent-id": "",
-        "container-type": "",
-        "instance-id": ""}
-
-    Returns:
-    machine_response: {"machines":[{"machine":"0"}]}}
-    """
-    return add_machines([machine], msg_cb, exc_cb)
-
-
 def add_machines(machines, msg_cb=None, exc_cb=None):
-    """ Add machines to model
-
-    {"request-id":4,"type":"Client","version":1,"request":"AddMachinesV2","params":{"params":[{"series":"","constraints":{},"jobs":["JobHostUnits"],"parent-id":"","container-type":"","instance-id":"","nonce":"","hardware-characteristics":{},"addresses":null}]}}
+    """Add machines to model
 
     Arguments:
-    machines: list of dictionary machine attributes
+
+    machines: list of dictionaries of machine attributes.
+    The key 'series' is required, and 'constraints' is the only other
+    supported key
+
     """
     @requires_login
     def _add_machines_async():
-        machine_response = this.CLIENT.Client(request="AddMachines",
-                                              params={"params": machines})
+        machine_params = [{"series": m['series'],
+                           "constraints": m.get('constraints', {}),
+                           "jobs": ["JobHostUnits"]}
+                          for m in machines]
+
+        machine_response = this.CLIENT.Client(
+            request="AddMachines", params={"params": machine_params})
+
         if msg_cb:
             msg_cb("Added machines: {}".format(machine_response))
         return machine_response
@@ -406,16 +396,17 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
                 pid = resource_ids['pending-ids'][idx]
                 application_to_resource_map[resource['Name']] = pid
             service.resources = application_to_resource_map
-        params = {"applications": [service.as_deployargs()]}
 
-        app.log.debug("Deploying {}: {}".format(service, params))
+        app_params = {"applications": [service.as_deployargs()]}
+
+        app.log.debug("Deploying {}: {}".format(service, app_params))
 
         deploy_message = "Deploying application: {}".format(
             service.service_name)
         if msg_cb:
             msg_cb("{}".format(deploy_message))
         this.CLIENT.Application(request="Deploy",
-                                params=params)
+                                params=app_params)
         if msg_cb:
             msg_cb("{}...done.".format(deploy_message))
 
