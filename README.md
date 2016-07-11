@@ -22,7 +22,18 @@ It is included in the archive.
 Brave? Try the bleeding edge version and file bugs to keep us honest.
 
 ```
-$ sudo apt-add-repository ppa:conjure/next
+$ sudo apt-add-repository ppa:conjure-up/daily-git
+```
+
+Or install our **pre-releases**
+
+```
+$ sudo apt-add-repository ppa:conjure-up/next
+```
+
+Add the latest Juju
+
+```
 $ sudo apt-add-repository ppa:juju/devel
 ```
 
