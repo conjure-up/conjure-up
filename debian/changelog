@@ -1,10 +1,10 @@
-conjure-up (2.0.0.4) UNRELEASED; urgency=medium
+conjure-up (2.0.0.5) UNRELEASED; urgency=medium
 
   * Pre-release of conjure-up 2.0
     Release notes:
-      https://github.com/ubuntu/conjure-up/releases/tag/2.0.0.4
+      https://github.com/ubuntu/conjure-up/releases/tag/2.0.0.5
 
- -- Adam Stokes <adam.stokes@ubuntu.com>  Mon, 09 May 2016 11:24:32 -0500
+ -- Adam Stokes <adam.stokes@ubuntu.com>  Tue, 12 Jul 2016 12:56:50 -0400
 
 conjure-up (1.0.0) UNRELEASED; urgency=medium
 
