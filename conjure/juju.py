@@ -75,14 +75,14 @@ def get_controller(id):
 def login(force=False):
     """ Login to Juju API server
     """
-    if not available():
-        raise Exception("Tried to login to a non bootstrapped environment.")
-
     if this.IS_AUTHENTICATED is True and not force:
         return
 
     if not get_current_controller():
         raise Exception("Unable to determine current controller")
+
+    if not get_current_model():
+        raise Exception("Tried to login with no current model set.")
 
     env = get_controller(get_current_controller())
     account = get_account(get_current_controller())
@@ -118,7 +118,6 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
     cmd = "juju bootstrap {} {} --upload-tools " \
           "--config image-stream=daily ".format(
               controller, cloud)
-    cmd += "--config enable-os-refresh-update=false "
     cmd += "--config enable-os-upgrade=false "
     if app.argv.http_proxy:
         cmd += "--config http-proxy={} ".format(app.argv.http_proxy)
@@ -167,11 +166,11 @@ def bootstrap_async(controller, cloud, credential=None, exc_cb=None):
                         queue_name=JUJU_ASYNC_QUEUE)
 
 
-def available():
+def model_available():
     """ Checks if juju is available
 
     Returns:
-    True/False if juju status was successful and a environment is found
+    True/False if juju status was successful and a working model is found
     """
     try:
         run('juju status', shell=True,
@@ -321,6 +320,50 @@ def deploy(bundle):
         raise e
 
 
+def add_machines(machines, msg_cb=None, exc_cb=None):
+    """Add machines to model
+
+    Arguments:
+
+    machines: list of dictionaries of machine attributes.
+    The key 'series' is required, and 'constraints' is the only other
+    supported key
+
+    """
+    def _prepare_constraints(constraints):
+        list_constraints = constraints.split(' ')
+        new_constraints = {}
+        if len(list_constraints) > 0:
+            for c in list_constraints:
+                constraint, constraint_value = c.split('=')
+                new_constraints[constraint] = constraint_value
+        return new_constraints
+
+    @requires_login
+    def _add_machines_async():
+        machine_params = [{"series": m['series'],
+                           "constraints": _prepare_constraints(
+                               m.get('constraints', {})),
+                           "jobs": ["JobHostUnits"]}
+                          for m in machines]
+        app.log.debug(machine_params)
+        try:
+            machine_response = this.CLIENT.Client(
+                request="AddMachines", params={"params": machine_params})
+        except Exception as e:
+            if exc_cb:
+                exc_cb(e)
+            return
+
+        if msg_cb:
+            msg_cb("Added machines: {}".format(machine_response))
+        return machine_response
+
+    return async.submit(_add_machines_async,
+                        exc_cb,
+                        queue_name=JUJU_ASYNC_QUEUE)
+
+
 def deploy_service(service, msg_cb=None, exc_cb=None):
     """Juju deploy service.
 
@@ -368,16 +411,17 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
                 pid = resource_ids['pending-ids'][idx]
                 application_to_resource_map[resource['Name']] = pid
             service.resources = application_to_resource_map
-        params = {"applications": [service.as_deployargs()]}
 
-        app.log.debug("Deploying {}: {}".format(service, params))
+        app_params = {"applications": [service.as_deployargs()]}
+
+        app.log.debug("Deploying {}: {}".format(service, app_params))
 
         deploy_message = "Deploying application: {}".format(
             service.service_name)
         if msg_cb:
             msg_cb("{}".format(deploy_message))
         this.CLIENT.Application(request="Deploy",
-                                params=params)
+                                params=app_params)
         if msg_cb:
             msg_cb("{}...done.".format(deploy_message))
 

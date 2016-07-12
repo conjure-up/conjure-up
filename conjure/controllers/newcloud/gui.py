@@ -52,7 +52,7 @@ def __do_bootstrap(cloud=None, credential=None):
     app.log.debug("Performing bootstrap: {} {}".format(
         app.current_controller, cloud))
 
-    app.ui.set_footer('Bootstrapping environment in the background...')
+    app.ui.set_footer('Bootstrapping Juju controller in the background...')
 
     future = juju.bootstrap_async(
         controller=app.current_controller,
@@ -77,7 +77,7 @@ def __post_bootstrap_exec():
         'Checking for post bootstrap task: {}'.format(_post_bootstrap_sh))
     if path.isfile(_post_bootstrap_sh) \
        and os.access(_post_bootstrap_sh, os.X_OK):
-        app.ui.set_footer('Running additional environment tasks...')
+        app.ui.set_footer('Running post-bootstrap tasks...')
         utils.pollinate(app.session_id, 'J001')
         app.log.debug("post_bootstrap running: {}".format(
             _post_bootstrap_sh
@@ -110,7 +110,7 @@ def __post_bootstrap_done(future):
     app.log.debug("Switching to controller: {}".format(
         app.current_controller))
     juju.switch_controller(app.current_controller)
-    controllers.use('deploy').render()
+    controllers.use('bundlereadme').render()
 
 
 def finish(credentials=None, back=False):
@@ -136,7 +136,7 @@ def finish(credentials=None, back=False):
     __do_bootstrap(credential=credentials_key)
 
     if app.fetcher != "charmstore-search":
-        return controllers.use('deploy').render()
+        return controllers.use('bundlereadme').render()
     else:
         return controllers.use('variants').render()
 
@@ -166,7 +166,7 @@ def render(cloud):
 
         __do_bootstrap()
         if app.fetcher != 'charmstore-search':
-            return controllers.use('deploy').render()
+            return controllers.use('bundlereadme').render()
         else:
             return controllers.use('variants').render()
 
@@ -175,7 +175,7 @@ def render(cloud):
     if common.try_get_creds(this.cloud) is not None and this.cloud != 'maas':
         __do_bootstrap(credential=common.try_get_creds(this.cloud))
         if app.fetcher != 'charmstore-search':
-            return controllers.use('deploy').render()
+            return controllers.use('bundlereadme').render()
         else:
             return controllers.use('variants').render()
 

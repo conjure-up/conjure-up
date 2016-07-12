@@ -41,10 +41,15 @@ def do_pre_deploy():
                      stderr=PIPE,
                      env=app.env)
             result = json.loads(sh.stdout.decode('utf8'))
+            if result['returnCode'] > 0:
+                utils.error("Failed to run pre-deploy task: "
+                            "{}".format(result['message']))
+                sys.exit(1)
+
             utils.info("Finished pre deploy task: {}".format(
                 result['message']))
         except Exception as e:
-            utils.warning(
+            utils.error(
                 "Failed to run pre deploy task: {}".format(e))
             sys.exit(1)
 

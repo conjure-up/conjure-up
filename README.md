@@ -22,7 +22,18 @@ It is included in the archive.
 Brave? Try the bleeding edge version and file bugs to keep us honest.
 
 ```
-$ sudo apt-add-repository ppa:conjure/next
+$ sudo apt-add-repository ppa:conjure-up/daily-git
+```
+
+Or install our **pre-releases**
+
+```
+$ sudo apt-add-repository ppa:conjure-up/next
+```
+
+Add the latest Juju
+
+```
 $ sudo apt-add-repository ppa:juju/devel
 ```
 
@@ -55,12 +66,16 @@ with all the sensible defaults in place.
 $ conjure-up ~containers/observable-kubernetes to azure
 ```
 
+# authors
+
+* Adam Stokes <adam.stokes@ubuntu.com>
+* Mike McCracken <mike.mccracken@canonical.com>
+
 # license
 
 The MIT License (MIT)
 
 * Copyright (c) 2015-2016 Canonical Ltd.
-* Copyright (c) 2015-2016 Adam Stokes <adam.stokes@ubuntu.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

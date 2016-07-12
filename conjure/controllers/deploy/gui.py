@@ -72,6 +72,13 @@ def __pre_deploy_done(future):
         return __handle_exception('E003', Exception(
             'There was an error during the pre '
             'deploy processing phase: {}.'.format(result)))
+    else:
+        app.ui.set_footer("Pre-deploy processing done.")
+
+
+def __do_add_machines():
+    juju.add_machines([md for _, md in this.bundle.machines.items()],
+                      exc_cb=partial(__handle_exception, "ED"))
 
 
 def finish(single_service=None):
@@ -120,8 +127,13 @@ def render():
 
     if this.showing_error:
         return
+
     if not this.bundle:
         this.bundle_filename, this.bundle, this.services = get_bundleinfo()
+
+        async.submit(__do_add_machines,
+                     partial(__handle_exception, "ED"),
+                     queue_name=juju.JUJU_ASYNC_QUEUE)
 
     if not app.metadata_controller:
         app.metadata_controller = get_metadata_controller(this.bundle,

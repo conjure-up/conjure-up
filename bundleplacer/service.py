@@ -58,17 +58,29 @@ class Service:
         return "{} ({})".format(self.service_name,
                                 self.charm_source)
 
-    def _prepare_placement(self, placement):
+    def _format_scope_directive(self, placement):
         if ':' in placement:
             scope, directive = placement.split(':')
+            if scope == 'lxc':
+                scope = 'lxd'
+            return {"scope": scope, "directive":
+                    str(directive)}
         else:
             # Assume that the placement is to a machine number
             scope = '#'
             directive = placement
-        return {
-            "Scope": scope,
-            "Directive": str(directive)
-        }
+            return {"scope": scope, "directive":
+                    str(directive)}
+
+    def _prepare_placement(self, placement):
+        new_placements = []
+        if isinstance(placement, list):
+            for p in placement:
+                new_placements.append(self._format_scope_directive(p))
+        else:
+            new_placements.append(self._format_scope_directive(placement))
+
+        return new_placements
 
     def as_deployargs(self):
         rd = {"charm-url": self.csid.as_str(),
@@ -85,8 +97,8 @@ class Service:
             rd["config-yaml"] = config_yaml
 
         if self.placement_spec:
-            specs = [self._prepare_placement(self.placement_spec)]
-            rd["placement"] = yaml.dump(specs, default_flow_style=False)
+            specs = self._prepare_placement(self.placement_spec)
+            rd["placement"] = specs
 
         return rd
 

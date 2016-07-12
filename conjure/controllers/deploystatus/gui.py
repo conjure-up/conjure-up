@@ -48,7 +48,7 @@ def __refresh(*args):
     EventLoop.set_alarm_in(1, __refresh)
 
 
-def render(deploy_future):
+def render(deploy_future=None):
     """ Render deploy status view
     """
     this.view = DeployStatusView(app)
@@ -62,5 +62,9 @@ def render(deploy_future):
             name)
     )
     app.ui.set_body(this.view)
-    deploy_future.add_done_callback(__refresh)
-    deploy_future.add_done_callback(__wait_for_applications)
+    if deploy_future:
+        deploy_future.add_done_callback(__refresh)
+        deploy_future.add_done_callback(__wait_for_applications)
+    else:
+        __refresh()
+        __wait_for_applications()
