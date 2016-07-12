@@ -330,10 +330,20 @@ def add_machines(machines, msg_cb=None, exc_cb=None):
     supported key
 
     """
+    def _prepare_constraints(constraints):
+        list_constraints = constraints.split(' ')
+        new_constraints = {}
+        if len(list_constraints) > 0:
+            for c in list_constraints:
+                constraint, constraint_value = c.split('=')
+                new_constraints[constraint] = constraint_value
+        return new_constraints
+
     @requires_login
     def _add_machines_async():
         machine_params = [{"series": m['series'],
-                           "constraints": m.get('constraints', {}),
+                           "constraints": _prepare_constraints(
+                               m.get('constraints', {})),
                            "jobs": ["JobHostUnits"]}
                           for m in machines]
         app.log.debug(machine_params)
