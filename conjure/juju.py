@@ -336,9 +336,14 @@ def add_machines(machines, msg_cb=None, exc_cb=None):
                            "constraints": m.get('constraints', {}),
                            "jobs": ["JobHostUnits"]}
                           for m in machines]
-
-        machine_response = this.CLIENT.Client(
-            request="AddMachines", params={"params": machine_params})
+        app.log.debug(machine_params)
+        try:
+            machine_response = this.CLIENT.Client(
+                request="AddMachines", params={"params": machine_params})
+        except Exception as e:
+            if exc_cb:
+                exc_cb(e)
+            return
 
         if msg_cb:
             msg_cb("Added machines: {}".format(machine_response))
