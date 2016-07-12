@@ -77,7 +77,8 @@ def __pre_deploy_done(future):
 
 
 def __do_add_machines():
-    juju.add_machines([md for _, md in this.bundle.machines.items()])
+    juju.add_machines([md for _, md in this.bundle.machines.items()],
+                      exc_cb=partial(__handle_exception, "ED"))
 
 
 def finish(single_service=None):
