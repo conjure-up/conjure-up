@@ -19,7 +19,7 @@ def __refresh(*args):
     this.alarm_handle = EventLoop.set_alarm_in(1, __refresh)
 
 
-def render(deploy_future=None):
+def render():
     app.log.debug("Rendering bootstrap wait")
 
     this.view = BootstrapWaitView(

@@ -111,9 +111,9 @@ def finish(single_service=None):
                                partial(__handle_exception, "ED"))
 
         if app.bootstrap.running and not app.bootstrap.running.done():
-            return controllers.use('bootstrapwait').render(f)
+            return controllers.use('bootstrapwait').render()
         else:
-            return controllers.use('deploystatus').render(f)
+            return controllers.use('deploystatus').render()
 
     utils.pollinate(app.session_id, 'PC')
 

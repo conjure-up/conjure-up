@@ -71,7 +71,7 @@ def finish():
                            partial(__handle_exception, "ED"))
 
     utils.pollinate(app.session_id, 'PC')
-    controllers.use('deploystatus').render(f)
+    controllers.use('deploystatus').render()
 
 
 def render():
