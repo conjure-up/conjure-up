@@ -110,7 +110,7 @@ def finish(single_service=None):
                                app.ui.set_footer,
                                partial(__handle_exception, "ED"))
 
-        if app.bootstrap.running:
+        if app.bootstrap.running and not app.bootstrap.running.done():
             return controllers.use('bootstrapwait').render(f)
         else:
             return controllers.use('deploystatus').render(f)

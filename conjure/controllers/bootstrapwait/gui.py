@@ -5,15 +5,18 @@ from ubuntui.ev import EventLoop
 import sys
 
 this = sys.modules[__name__]
+this.alarm_handle = None
 
 
 def finish(*args):
+    if this.alarm_handle:
+        EventLoop.remove_alarm(this.alarm_handle)
     return controllers.use('deploystatus').render()
 
 
 def __refresh(*args):
     this.view.redraw_kitt()
-    EventLoop.set_alarm_in(1, __refresh)
+    this.alarm_handle = EventLoop.set_alarm_in(1, __refresh)
 
 
 def render(deploy_future=None):
