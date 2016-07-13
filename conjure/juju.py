@@ -331,19 +331,27 @@ def add_machines(machines, msg_cb=None, exc_cb=None):
 
     """
     def _prepare_constraints(constraints):
-        list_constraints = constraints.split(' ')
         new_constraints = {}
-        if len(list_constraints) > 0:
-            for c in list_constraints:
+        if not isinstance(constraints, str):
+            app.log.debug(
+                "Invalid constraints: {}, skipping".format(
+                    constraints))
+            return new_constraints
+
+        list_constraints = constraints.split(' ')
+        for c in list_constraints:
+            try:
                 constraint, constraint_value = c.split('=')
                 new_constraints[constraint] = constraint_value
+            except ValueError as e:
+                app.log.debug("Skipping constraint: {} ({})".format(c, e))
         return new_constraints
 
     @requires_login
     def _add_machines_async():
         machine_params = [{"series": m['series'],
                            "constraints": _prepare_constraints(
-                               m.get('constraints', {})),
+                               m.get('constraints', "")),
                            "jobs": ["JobHostUnits"]}
                           for m in machines]
         app.log.debug(machine_params)
