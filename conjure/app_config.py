@@ -3,7 +3,17 @@
 from types import SimpleNamespace
 
 
+bootstrap = SimpleNamespace(
+    # Is bootstrap running
+    running=False,
+
+    # Attached output
+    output=None
+)
+
 app = SimpleNamespace(
+    # Juju bootstrap details
+    bootstrap=bootstrap,
 
     # The conjure-up UI framework
     ui=None,

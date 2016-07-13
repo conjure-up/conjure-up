@@ -59,6 +59,8 @@ def __do_bootstrap(cloud=None, credential=None):
         cloud=cloud,
         credential=credential,
         exc_cb=__handle_exception)
+    app.bootstrap.running = future
+
     future.add_done_callback(
         __handle_bootstrap_done)
 

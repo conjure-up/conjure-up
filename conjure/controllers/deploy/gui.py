@@ -110,7 +110,10 @@ def finish(single_service=None):
                                app.ui.set_footer,
                                partial(__handle_exception, "ED"))
 
-        return controllers.use('deploystatus').render(f)
+        if app.bootstrap.running and not app.bootstrap.running.done():
+            return controllers.use('bootstrapwait').render(f)
+        else:
+            return controllers.use('deploystatus').render(f)
 
     utils.pollinate(app.session_id, 'PC')
 
