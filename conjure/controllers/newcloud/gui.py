@@ -54,12 +54,13 @@ def __do_bootstrap(cloud=None, credential=None):
 
     app.ui.set_footer('Bootstrapping Juju controller in the background...')
 
-    app.bootstrap.running = True
     future = juju.bootstrap_async(
         controller=app.current_controller,
         cloud=cloud,
         credential=credential,
         exc_cb=__handle_exception)
+    app.bootstrap.running = future
+
     future.add_done_callback(
         __handle_bootstrap_done)
 
@@ -67,7 +68,6 @@ def __do_bootstrap(cloud=None, credential=None):
 def __post_bootstrap_exec():
     """ Executes post-bootstrap.sh if exists
     """
-    app.bootstrap.running = False
     info = model_info(juju.get_current_model())
     # Set our provider type environment var so that it is
     # exposed in future processing tasks
