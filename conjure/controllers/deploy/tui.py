@@ -71,7 +71,10 @@ def finish():
                            partial(__handle_exception, "ED"))
 
     utils.pollinate(app.session_id, 'PC')
-    controllers.use('deploystatus').render(f)
+    if app.bootstrap.running:
+        controllers.use('bootstrapwait').render(f)
+    else:
+        controllers.use('deploystatus').render(f)
 
 
 def render():
