@@ -68,7 +68,7 @@ def _start(*args, **kwargs):
     """ Initially load cloud selection screen
     """
     if app.argv.status_only:
-        controllers.use('deploystatus').render()
+        controllers.use('summary').render()
     else:
         controllers.use('clouds').render()
 
