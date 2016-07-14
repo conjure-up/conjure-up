@@ -47,7 +47,7 @@ class VariantView(WidgetWrap):
         for bundle in app.bundles:
             bundle_metadata = bundle['Meta']['bundle-metadata']
             try:
-                conjure_data = bundle['Meta']['extra-info/conjure']
+                conjure_data = bundle['Meta']['extra-info/conjure-up']
                 name = conjure_data.get('friendly-name',
                                         bundle['Meta']['id']['Name'])
             except KeyError:
