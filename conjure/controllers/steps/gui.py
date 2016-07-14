@@ -81,6 +81,8 @@ def render():
     this.view = StepsView(app, steps, finish)
 
     app.ui.set_header(
-        title="Additional Application Configuration")
+        title="Additional Application Configuration",
+        excerpt="Please finish the installation by configuring your "
+        "application with these steps.")
     app.ui.set_body(this.view)
     app.ui.set_footer('')

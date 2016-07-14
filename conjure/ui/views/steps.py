@@ -1,9 +1,9 @@
 from ubuntui.widgets.input import (StringEditor, YesNo,
                                    PasswordEditor, IntegerEditor)
 from ubuntui.utils import Padding, Color
-from ubuntui.widgets.table import Table
+from ubuntui.widgets.hr import HR
 from ubuntui.widgets.buttons import submit_btn, done_btn
-from urwid import WidgetWrap, Text
+from urwid import (WidgetWrap, Text, Filler, Pile, Columns)
 
 
 class StepsView(WidgetWrap):
@@ -22,53 +22,71 @@ class StepsView(WidgetWrap):
         cb: process step callback
         """
         self.app = app
-        self.table = Table()
         self.cb = cb
-
         self.steps_queue = steps
+        _pile = [
+            Padding.center_90(HR()),
+            Padding.line_break(""),
+            Padding.center_90(self.build_steps()),
+            Padding.line_break(""),
+            Padding.center_20(self.buttons())
+        ]
+        super().__init__(Filler(Pile(_pile), valign="top"))
+
+    def buttons(self):
+        buttons = [
+            Color.button_primary(
+                done_btn(on_press=self.done, label="View Summary"),
+                focus_map='button_primary focus')
+        ]
+        return Pile(buttons)
+
+    def build_steps(self):
+        rows = []
         for step_model in self.steps_queue:
             step_widget = self.add_step_widget(step_model)
-            self.table.addColumns(
-                step_model.path,
-                [
-                    ('fixed', 3, step_widget['icon']),
-                    step_widget['description'],
-                ]
+            rows.append(
+                Columns(
+                    [
+                        ('fixed', 3, step_widget['icon']),
+                        step_widget['description'],
+                    ], dividechars=1
+                )
             )
+
             # Need to still prompt for the user to submit
             # even though no questions are asked
             if len(step_widget['additional_input']) == 0:
-                self.table.addRow(
+                rows.append(
                     Padding.right_20(
                         Color.button_primary(
                             submit_btn(on_press=self.submit,
                                        user_data=(step_model, step_widget)),
-                            focus_map='button_primary focus')), False)
+                            focus_map='button_primary focus')))
+                rows.append(HR())
+
             for i in step_widget['additional_input']:
-                self.table.addRow(Padding.line_break(""), False)
-                self.table.addColumns(
-                    step_model.path,
-                    [
-                        ('weight', 0.5, Padding.left(i['label'], left=5)),
-                        ('weight', 1, Color.string_input(
-                            i['input'],
-                            focus_map='string_input focus')),
-                    ], force=True
+                rows.append(Padding.line_break(""))
+                rows.append(
+                    Columns(
+                        [
+                            ('weight', 0.5, Padding.left(i['label'], left=5)),
+                            ('weight', 1, Color.string_input(
+                                i['input'],
+                                focus_map='string_input focus')),
+                        ], dividechars=3
+                    )
                 )
-                self.table.addRow(
+                rows.append(
                     Padding.right_20(
                         Color.button_primary(
                             submit_btn(
                                 on_press=self.submit,
                                 user_data=(step_model, step_widget)),
-                            focus_map='button_primary focus')), False)
-                self.table.addRow(Padding.line_break(""), False)
-
-        self.table.addRow(Padding.center_20(
-                        Color.button_primary(
-                            done_btn(on_press=self.done, label="View Summary"),
                             focus_map='button_primary focus')))
-        super().__init__(Padding.center_80(self.table.render()))
+                rows.append(HR())
+
+        return Pile(rows)
 
     def add_step_widget(self, step_model):
         if not step_model.viewable:
