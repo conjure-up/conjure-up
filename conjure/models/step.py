@@ -7,11 +7,13 @@ class StepModel:
         self.title = step.get('title', '')
         self.description = step.get('description', '')
         self.result = ''
-        self.icon = ("pending_icon", "\N{BALLOT BOX}")
         self.viewable = step.get('viewable', False)
         self.path = step.get('path', None)
 
         self.additional_input = step.get('additional-input', [])
+        self.widget = None
+        self.next_widget = None
+        self.submit = None
 
     def __repr__(self):
         return "<t: {} d: {} v: {} p:>".format(self.title,

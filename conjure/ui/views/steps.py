@@ -6,14 +6,54 @@ from ubuntui.widgets.buttons import submit_btn, done_btn
 from urwid import (WidgetWrap, Text, Filler, Pile, Columns)
 
 
-class StepsView(WidgetWrap):
-
+class StepWidget:
     INPUT_TYPES = {
         'text': StringEditor(),
         'password': PasswordEditor(),
         'boolean': YesNo(),
         'integer': IntegerEditor()
     }
+
+    def __init__(self, step_model, cb):
+        """
+
+        Arguments:
+        step_model: step model
+        cb: submit button cb
+        """
+        self.title = Text(('info_minor', step_model.title))
+        self.description = Text(('info_minor', step_model.description))
+        self.result = Text(step_model.result)
+        self.icon = Text(("pending_icon", "\N{BALLOT BOX}"))
+        self.cb = cb
+        self.idx = 0
+
+        self.additional_input = []
+        if len(step_model.additional_input) > 0:
+            for i in step_model.additional_input:
+                widget = {
+                    "label": Text(('info_minor', i['label'])),
+                    "key": i['key'],
+                    "input": self.INPUT_TYPES.get(i['type']),
+                    "submit": submit_btn(
+                        user_data=step_model,
+                        on_press=self.cb,
+                        label="Waiting for previous step to complete.")
+                }
+                if 'default' in i:
+                    widget['input'] = StringEditor(default=i['default'])
+
+                self.additional_input.append(widget)
+        self.submit = submit_btn(
+            user_data=step_model,
+            on_press=self.cb,
+            label="Waiting for previous step to complete.")
+
+        def __repr__(self):
+            return "<Additional Input: {}".format(self.additional_input)
+
+
+class StepsView(WidgetWrap):
 
     def __init__(self, app, steps, cb=None):
         """ init
@@ -23,7 +63,8 @@ class StepsView(WidgetWrap):
         """
         self.app = app
         self.cb = cb
-        self.steps_queue = steps
+        self.steps_queue = [self.attach_step_widget_to_model(step)
+                            for step in steps]
         _pile = [
             Padding.center_90(HR()),
             Padding.line_break(""),
@@ -32,6 +73,12 @@ class StepsView(WidgetWrap):
             Padding.center_20(self.buttons())
         ]
         super().__init__(Filler(Pile(_pile), valign="top"))
+
+    def attach_step_widget_to_model(self, step_model):
+        """ Attaches a step widget to step model
+        """
+        step_model.widget = StepWidget(step_model, self.submit)
+        return step_model
 
     def buttons(self):
         buttons = [
@@ -43,29 +90,48 @@ class StepsView(WidgetWrap):
 
     def build_steps(self):
         rows = []
-        for step_model in self.steps_queue:
-            step_widget = self.add_step_widget(step_model)
+        for idx, step in enumerate(self.steps_queue):
+            step.widget.idx = idx
+            try:
+                step.next_widget = self.steps_queue[idx+1].widget
+            except IndexError:
+                self.app.log.debug("No more next widgets, skipping.")
+
+            if not step.viewable:
+                self.app.log.debug("{} is not viewable, skipping".format(
+                    step))
+                continue
+
+            # set first step title description color
+            if idx == 0:
+                step.widget.description.set_text(('body', step.description))
+
             rows.append(
                 Columns(
                     [
-                        ('fixed', 3, step_widget['icon']),
-                        step_widget['description'],
+                        ('fixed', 3, step.widget.icon),
+                        step.widget.description,
                     ], dividechars=1
                 )
             )
 
             # Need to still prompt for the user to submit
             # even though no questions are asked
-            if len(step_widget['additional_input']) == 0:
+            if len(step.widget.additional_input) == 0:
+                # set initial submit labels
+                if idx == 0:
+                    step.widget.submit.set_label(
+                        "Submit")
+
                 rows.append(
                     Padding.right_20(
                         Color.button_primary(
-                            submit_btn(on_press=self.submit,
-                                       user_data=(step_model, step_widget)),
+                            step.widget.submit,
                             focus_map='button_primary focus')))
                 rows.append(HR())
 
-            for i in step_widget['additional_input']:
+            for i in step.widget.additional_input:
+                self.app.log.debug(i)
                 rows.append(Padding.line_break(""))
                 rows.append(
                     Columns(
@@ -77,54 +143,29 @@ class StepsView(WidgetWrap):
                         ], dividechars=3
                     )
                 )
+
+                if idx == 0:
+                    i['submit'].set_label("Submit")
                 rows.append(
                     Padding.right_20(
                         Color.button_primary(
-                            submit_btn(
-                                on_press=self.submit,
-                                user_data=(step_model, step_widget)),
+                            i['submit'],
                             focus_map='button_primary focus')))
                 rows.append(HR())
 
         return Pile(rows)
 
-    def add_step_widget(self, step_model):
-        if not step_model.viewable:
-            self.app.log.debug("{} is not viewable, skipping".format(
-                step_model))
-            return
-
-        step_widget_dict = {'title': Text(step_model.title),
-                            'description': Text(step_model.description),
-                            'result': Text(step_model.result),
-                            'icon': Text(step_model.icon)}
-        step_widget_dict['additional_input'] = []
-        if len(step_model.additional_input) > 0:
-            for i in step_model.additional_input:
-                widget = {
-                    "label": Text(i['label']),
-                    "key": i['key'],
-                    "input": self.INPUT_TYPES.get(i['type'])
-                }
-                if 'default' in i:
-                    widget['input'] = StringEditor(default=i['default'])
-
-                step_widget_dict['additional_input'].append(widget)
-        return step_widget_dict
-
     def done(self, *args):
         self.cb({}, done=True)
 
-    def submit(self, btn, stepmodel_stepwidget):
-        step_model, step_widget = stepmodel_stepwidget
-
-        # set icon
-        step_model.icon = step_widget['icon']
+    def submit(self, btn, step_model):
+        btn.set_label('Submitted')
         # merge the step_widget input data into our step model
         for i in step_model.additional_input:
             try:
-                matching_widget = [x for x in step_widget['additional_input']
-                                   if x['key'] == i['key']][0]
+                matching_widget = [
+                    x for x in step_model.widget.additional_input
+                    if x['key'] == i['key']][0]
                 i['input'] = matching_widget['input'].value
             except IndexError as e:
                 self.app.log.error(
@@ -132,22 +173,3 @@ class StepsView(WidgetWrap):
                     "invalid input: {}/{}".format(e,
                                                   matching_widget))
         self.cb(step_model)
-
-    def update_icon_state(self, icon, result_code):
-        """ updates status icon
-
-        Arguments:
-        icon: icon widget
-        result_code: 3 types of results, error, waiting, complete
-        """
-        if result_code == "error":
-            icon.set_text(
-                ("error_icon", "\N{BLACK FLAG}"))
-        elif result_code == "waiting":
-            icon.set_text(("pending_icon", "\N{HOURGLASS}"))
-        elif result_code == "active":
-            icon.set_text(("success_icon", "\N{BALLOT BOX WITH CHECK}"))
-        else:
-            # NOTE: Should not get here, if we do make sure we account
-            # for that error type above.
-            icon.set_text(("error_icon", "?"))

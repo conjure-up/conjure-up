@@ -31,13 +31,33 @@ def get_steps(steps_dir):
     return deque(sorted(glob(os.path.join(steps_dir, 'step-*.yaml'))))
 
 
-def do_step(step, message_cb, icon_state=None):
+def update_icon_state(icon, result_code):
+    """ updates status icon
+
+    Arguments:
+    icon: icon widget
+    result_code: 3 types of results, error, waiting, complete
+    """
+    if result_code == "error":
+        icon.set_text(
+            ("error_icon", "\N{BLACK FLAG}"))
+    elif result_code == "waiting":
+        icon.set_text(("pending_icon", "\N{HOURGLASS}"))
+    elif result_code == "active":
+        icon.set_text(("success_icon", "\N{BALLOT BOX WITH CHECK}"))
+    else:
+        # NOTE: Should not get here, if we do make sure we account
+        # for that error type above.
+        icon.set_text(("error_icon", "?"))
+
+
+def do_step(step, message_cb, gui=False):
     """ Processes steps in the background
 
     Arguments:
     step: a step to run
     message_cb: log writer
-    icon_state: optionally set an icon state (gui only)
+    gui: optionally set an UI components if GUI
 
     Returns:
     Step title and results message
@@ -54,8 +74,8 @@ def do_step(step, message_cb, icon_state=None):
         app.log.error("Step {} not executable".format(step.path))
 
     message_cb("Working: {}".format(step.title))
-    if icon_state:
-        icon_state(step.icon, 'waiting')
+    if gui:
+        update_icon_state(step.widget.icon, 'waiting')
     app.log.debug("Executing script: {}".format(step.path))
     sh = utils.run_script(step.path)
     result = json.loads(sh.stdout.decode('utf8'))
@@ -65,6 +85,18 @@ def do_step(step, message_cb, icon_state=None):
         raise Exception(result['message'])
     message_cb("Done: {}".format(step.title))
     step.result = result['message']
-    if icon_state:
-        icon_state(step.icon, 'active')
+    if gui:
+        # All is well here, set the current title and description back
+        # to a darker color and set the next widget to a bright white
+        # if exists.
+        update_icon_state(step.widget.icon, 'active')
+        if step.next_widget:
+            step.widget.description.set_text(('info_minor', step.description))
+            step.next_widget.description.set_text(
+                ('body',
+                 step.next_widget.description.get_text()[0]))
+            for i in step.next_widget.additional_input:
+                i['submit'].set_label('Submit')
+                i['label'].set_text(('body', i['label'].get_text()[0]))
+            step.next_widget.submit.set_label('Submit')
     return step

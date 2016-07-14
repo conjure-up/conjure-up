@@ -55,7 +55,7 @@ def finish(step_model, done=False):
     future = async.submit(partial(common.do_step,
                                   step_model,
                                   app.ui.set_footer,
-                                  this.view.update_icon_state),
+                                  gui=True),
                           partial(__handle_exception, 'E002'))
     future.add_done_callback(get_result)
 
@@ -78,7 +78,10 @@ def render():
         steps.append(model)
         app.log.debug("Queueing step: {}".format(model))
 
-    this.view = StepsView(app, steps, finish)
+    try:
+        this.view = StepsView(app, steps, finish)
+    except Exception as e:
+        return __handle_exception('E002', e)
 
     app.ui.set_header(
         title="Additional Application Configuration",
