@@ -66,12 +66,12 @@ def finish():
         juju.deploy_service(service, utils.info,
                             partial(__handle_exception, "ED"))
 
-    f = juju.set_relations(this.services,
-                           utils.info,
-                           partial(__handle_exception, "ED"))
+    juju.set_relations(this.services,
+                       utils.info,
+                       partial(__handle_exception, "ED"))
 
     utils.pollinate(app.session_id, 'PC')
-    controllers.use('deploystatus').render(f)
+    controllers.use('deploystatus').render()
 
 
 def render():
