@@ -4,6 +4,7 @@ from conjure.app_config import app
 from conjure import utils
 from conjure import controllers
 from conjure import async
+from conjure import juju
 from functools import partial
 from . import common
 import os.path as path
@@ -33,7 +34,8 @@ def __wait_for_applications(*args):
     future = async.submit(partial(common.wait_for_applications,
                                   deploy_done_sh,
                                   app.ui.set_footer),
-                          partial(__handle_exception, 'ED'))
+                          partial(__handle_exception, 'ED'),
+                          queue_name=juju.JUJU_ASYNC_QUEUE)
     future.add_done_callback(finish)
 
 
