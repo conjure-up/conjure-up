@@ -116,6 +116,7 @@ class StepWidget(WidgetWrap):
                                          focus_map='button_primary focus')),
                  self.step_pile.options()))
             self.step_pile.contents.append((HR(), self.step_pile.options()))
+        self.step_pile.focus_position = self.current_button_index
 
     def submit(self, btn):
         self.cb(self)
