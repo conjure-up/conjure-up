@@ -81,22 +81,10 @@ def do_step(step, message_cb, gui=False):
     message_cb("Done: {}".format(step.model.title))
     step.model.result = result['message']
     if gui:
-        # All is well here, set the current title and description back
-        # to a darker color and set the next widget to a bright white
-        # if exists.
         step.set_icon_state('active')
         step.set_description(
             "{}\n\nResult: {}".format(
                 step.model.description,
                 step.model.result),
             'info_context')
-        # if step.next_widget:
-        #     step.next_widget.description.set_text(
-        #         ('body',
-        #          step.next_widget.description.get_text()[0]))
-        #     for i in step.widget.additional_input:
-        #         i['label'].set_text(('info_minor',
-        #                              i['label'].get_text()[0]))
-        #     for i in step.next_widget.additional_input:
-        #         i['label'].set_text(('body', i['label'].get_text()[0]))
     return step

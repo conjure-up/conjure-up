@@ -118,4 +118,5 @@ class StepWidget(WidgetWrap):
         self.step_pile.focus_position = self.current_button_index
 
     def submit(self, btn):
+        self.set_icon_state('waiting')
         self.cb(self)

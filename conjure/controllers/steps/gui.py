@@ -41,21 +41,6 @@ def get_result(future):
             result.model.title, result.model.result))
         this.results[result.model.title] = result.model.result
 
-        # Set next button focus here now that the step is complete.
-        try:
-            this.view.steps.popleft()
-            next_step = this.view.steps[0]
-            next_step.generate_additional_input()
-            app.log.debug("Grabbing next step: {}".format(next_step))
-            index = next_step.current_button_index
-            app.log.debug(next_step.step_pile.contents[index])
-        except Exception as e:
-            app.log.debug(
-                "End of step list setting the view "
-                "summary button in focus.: {}".format(e))
-            index = this.view.current_summary_button_index
-            app.log.debug("Next focused button: {}".format(index))
-            # this.view.step_pile.contents[index].focus()
     except:
         return __handle_exception('E002', future.exception())
 
@@ -69,6 +54,20 @@ def finish(step_model, done=False):
     """
     if done:
         return controllers.use('summary').render(this.results)
+
+    # Set next button focus here now that the step is complete.
+    try:
+        this.view.steps.popleft()
+        next_step = this.view.steps[0]
+        next_step.generate_additional_input()
+        this.view.step_pile.focus_position = this.view.step_pile.focus_position + 1  # noqa
+    except Exception as e:
+        app.log.debug(
+            "End of step list setting the view "
+            "summary button in focus.: {}".format(e))
+        index = this.view.current_summary_button_index
+        app.log.debug("Next focused button: {}".format(index))
+        this.view.step_pile.focus_position = index
 
     future = async.submit(partial(common.do_step,
                                   step_model,
@@ -116,6 +115,7 @@ def render():
         steps[0].widget.description.set_text((
             'body', steps[0].model.description))
         steps[0].generate_additional_input()
+        this.view.step_pile.focus_position = 2
 
     except Exception as e:
         return __handle_exception('E002', e)
