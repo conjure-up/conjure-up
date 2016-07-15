@@ -56,15 +56,15 @@ def finish(step_model, done=False):
         return controllers.use('summary').render(this.results)
 
     # Set next button focus here now that the step is complete.
-    try:
-        this.view.steps.popleft()
+    this.view.steps.popleft()
+    if len(this.view.steps) > 0:
         next_step = this.view.steps[0]
         next_step.generate_additional_input()
         this.view.step_pile.focus_position = this.view.step_pile.focus_position + 1  # noqa
-    except Exception as e:
+    else:
         app.log.debug(
             "End of step list setting the view "
-            "summary button in focus.: {}".format(e))
+            "summary button in focus.")
         index = this.view.current_summary_button_index
         app.log.debug("Next focused button: {}".format(index))
         this.view.step_pile.focus_position = index
