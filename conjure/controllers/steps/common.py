@@ -90,13 +90,17 @@ def do_step(step, message_cb, gui=False):
         # to a darker color and set the next widget to a bright white
         # if exists.
         update_icon_state(step.widget.icon, 'active')
+        step.widget.description.set_text((
+            'info_context', "{}\n\nResult: {}".format(
+                step.widget.description.get_text()[0],
+                step.result)))
         if step.next_widget:
-            step.widget.description.set_text(('info_minor', step.description))
             step.next_widget.description.set_text(
                 ('body',
                  step.next_widget.description.get_text()[0]))
+            for i in step.widget.additional_input:
+                i['label'].set_text(('info_minor',
+                                     i['label'].get_text()[0]))
             for i in step.next_widget.additional_input:
-                i['submit'].set_label('Submit')
                 i['label'].set_text(('body', i['label'].get_text()[0]))
-            step.next_widget.submit.set_label('Submit')
     return step

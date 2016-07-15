@@ -3,7 +3,8 @@ from ubuntui.widgets.input import (StringEditor, YesNo,
 from ubuntui.utils import Padding, Color
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.buttons import submit_btn, done_btn
-from urwid import (WidgetWrap, Text, Filler, Pile, Columns)
+from urwid import (WidgetWrap, Text, Filler, Pile, Columns,
+                   SelectableIcon)
 
 
 class StepWidget:
@@ -26,7 +27,6 @@ class StepWidget:
         self.result = Text(step_model.result)
         self.icon = Text(("pending_icon", "\N{BALLOT BOX}"))
         self.cb = cb
-        self.idx = 0
 
         self.additional_input = []
         if len(step_model.additional_input) > 0:
@@ -34,20 +34,19 @@ class StepWidget:
                 widget = {
                     "label": Text(('info_minor', i['label'])),
                     "key": i['key'],
-                    "input": self.INPUT_TYPES.get(i['type']),
-                    "submit": submit_btn(
-                        user_data=step_model,
-                        on_press=self.cb,
-                        label="Waiting for previous step to complete.")
+                    "input": self.INPUT_TYPES.get(i['type'])
                 }
                 if 'default' in i:
                     widget['input'] = StringEditor(default=i['default'])
 
                 self.additional_input.append(widget)
-        self.submit = submit_btn(
-            user_data=step_model,
-            on_press=self.cb,
-            label="Waiting for previous step to complete.")
+        else:
+            widget = {
+                "label": Text(""),
+                "key": "submit",
+                "input": None
+            }
+            self.additional_input.append(widget)
 
         def __repr__(self):
             return "<Additional Input: {}".format(self.additional_input)
@@ -65,10 +64,11 @@ class StepsView(WidgetWrap):
         self.cb = cb
         self.steps_queue = [self.attach_step_widget_to_model(step)
                             for step in steps]
+        self.step_pile = Pile(self.build_steps())
         _pile = [
             Padding.center_90(HR()),
             Padding.line_break(""),
-            Padding.center_90(self.build_steps()),
+            Padding.center_90(self.step_pile),
             Padding.line_break(""),
             Padding.center_20(self.buttons())
         ]
@@ -89,77 +89,92 @@ class StepsView(WidgetWrap):
         return Pile(buttons)
 
     def build_steps(self):
-        rows = []
+        widgets = []
         for idx, step in enumerate(self.steps_queue):
-            step.widget.idx = idx
             try:
                 step.next_widget = self.steps_queue[idx+1].widget
             except IndexError:
-                self.app.log.debug("No more next widgets, skipping.")
+                self.app.log.debug(
+                    "No more next widgets, assuming end of steps list.")
 
             if not step.viewable:
                 self.app.log.debug("{} is not viewable, skipping".format(
                     step))
                 continue
+            widgets.append(self.build_step(idx, step))
+        return widgets
 
-            # set first step title description color
-            if idx == 0:
-                step.widget.description.set_text(('body', step.description))
+    def build_step(self, idx, step):
 
-            rows.append(
-                Columns(
-                    [
-                        ('fixed', 3, step.widget.icon),
-                        step.widget.description,
-                    ], dividechars=1
-                )
+        # set first step title description color
+        rows = []
+        if idx == 0:
+            step.widget.description.set_text(('body', step.description))
+
+        rows.append(
+            Columns(
+                [
+                    ('fixed', 3, step.widget.icon),
+                    step.widget.description,
+                ], dividechars=1
             )
+        )
 
-            # Need to still prompt for the user to submit
-            # even though no questions are asked
-            if len(step.widget.additional_input) == 0:
-                # set initial submit labels
-                if idx == 0:
-                    step.widget.submit.set_label(
-                        "Submit")
+        for i in step.widget.additional_input:
+            self.app.log.debug(i)
+            rows.append(Padding.line_break(""))
+            column_input = [
+                ('weight', 0.5, Padding.left(i['label'], left=5))
+            ]
+            if i['input']:
+                column_input.append(
+                    ('weight', 1, Color.string_input(
+                        i['input'],
+                        focus_map='string_input focus')))
+            rows.append(Columns(column_input, dividechars=3))
 
-                rows.append(
-                    Padding.right_20(
-                        Color.button_primary(
-                            step.widget.submit,
-                            focus_map='button_primary focus')))
-                rows.append(HR())
+            if idx == 0:
+                label = "Submit"
+            else:
+                label = "Waiting for previous step to complete."
 
-            for i in step.widget.additional_input:
-                self.app.log.debug(i)
-                rows.append(Padding.line_break(""))
-                rows.append(
-                    Columns(
-                        [
-                            ('weight', 0.5, Padding.left(i['label'], left=5)),
-                            ('weight', 1, Color.string_input(
-                                i['input'],
-                                focus_map='string_input focus')),
-                        ], dividechars=3
-                    )
-                )
-
-                if idx == 0:
-                    i['submit'].set_label("Submit")
-                rows.append(
-                    Padding.right_20(
-                        Color.button_primary(
-                            i['submit'],
-                            focus_map='button_primary focus')))
-                rows.append(HR())
+            rows.append(Padding.right_20(
+                Color.button_primary(
+                    submit_btn(
+                        user_data=(idx, step),
+                        on_press=self.submit,
+                        label=label),
+                    focus_map='button_primary focus')))
+            rows.append(HR())
 
         return Pile(rows)
 
     def done(self, *args):
         self.cb({}, done=True)
 
-    def submit(self, btn, step_model):
-        btn.set_label('Submitted')
+    def submit(self, btn, idx_step_model):
+        idx, step_model = idx_step_model
+
+        if step_model.next_widget:
+            next_button_text = "[ Go to next step ]"
+        else:
+            next_button_text = "[ Done ]"
+
+        self.step_pile.contents[idx] = (
+            Pile(
+                [
+                    Columns(
+                        [
+                            ('fixed', 3, step_model.widget.icon),
+                            step_model.widget.description,
+                        ], dividechars=1
+                    ),
+                    Padding.right_20(SelectableIcon(next_button_text)),
+                    HR(),
+                ]
+            ),
+            self.step_pile.options())
+
         # merge the step_widget input data into our step model
         for i in step_model.additional_input:
             try:
