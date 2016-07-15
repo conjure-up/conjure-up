@@ -31,8 +31,7 @@ class StepsView(WidgetWrap):
     def current_summary_button_index(self):
         """ Returns the pile index where the summary button is located
         """
-        return self.step_pile.contents.index(
-            self.step_pile.contents[len(self.step_pile.contents)-1])
+        return len(self.step_pile.contents)-1
 
     def buttons(self):
         buttons = [
