@@ -5,16 +5,16 @@ from urwid import (WidgetWrap, Pile, Columns, Text)
 
 
 class StepWidget(WidgetWrap):
-    def __init__(self, app, idx, step_model, cb):
+    def __init__(self, app, step_model, step_model_widget, cb):
         """
         Arguments:
-        idx: parent pile index
         step_model: step model
+        step_model_widget: step model widget
         cb: callback
         """
         self.app = app
-        self.parent_pile_idx = idx
         self._step_model = step_model
+        self._step_model_widget = step_model_widget
         self.cb = cb
         self.step_pile = self.build_widget()
         super().__init__(self.step_pile)
@@ -25,7 +25,10 @@ class StepWidget(WidgetWrap):
 
     @property
     def widget(self):
-        return self._step_model.widget
+        return self._step_model_widget
+
+    def __repr__(self):
+        return "<StepWidget: {}>".format(self.model.title)
 
     def set_description(self, description, color='info_minor'):
         self.widget.description.set_text(
@@ -59,6 +62,13 @@ class StepWidget(WidgetWrap):
         return self.step_pile.contents.index(
             self.step_pile.contents[len(self.step_pile.contents)-2])
 
+    @property
+    def current_button_widget(self):
+        """ Returns the current button widget
+        """
+        if self.button:
+            return self.button
+
     def clear_button(self):
         """ Clears current button so it can't be pressed again
         """
@@ -69,19 +79,24 @@ class StepWidget(WidgetWrap):
             Text(""), self.step_pile.options())
 
     def build_widget(self):
-        rows = []
-        rows.append(
+        return Pile([
             Columns(
                 [
                     ('fixed', 3, self.widget.icon),
                     self.widget.description,
                 ], dividechars=1
-            )
+            )]
         )
 
+    def generate_additional_input(self):
+        """ Generates additional input fields, useful for doing it after
+        a previous step is run
+        """
+        self.set_description(self.model.description, 'body')
         for i in self.widget.additional_input:
             self.app.log.debug(i)
-            rows.append(Padding.line_break(""))
+            self.step_pile.contents.append((Padding.line_break(""),
+                                            self.step_pile.options()))
             column_input = [
                 ('weight', 0.5, Padding.left(i['label'], left=5))
             ]
@@ -90,15 +105,17 @@ class StepWidget(WidgetWrap):
                     ('weight', 1, Color.string_input(
                         i['input'],
                         focus_map='string_input focus')))
-            rows.append(Columns(column_input, dividechars=3))
-            rows.append(Padding.right_20(
-                Color.button_primary(
-                    submit_btn(
-                        on_press=self.submit),
-                    focus_map='button_primary focus')))
-            rows.append(HR())
+            self.step_pile.contents.append(
+                (Columns(column_input, dividechars=3),
+                 self.step_pile.options()))
 
-        return Pile(rows)
+            self.button = submit_btn(on_press=self.submit)
+            self.step_pile.contents.append(
+                (Padding.right_20(
+                    Color.button_primary(self.button,
+                                         focus_map='button_primary focus')),
+                 self.step_pile.options()))
+            self.step_pile.contents.append((HR(), self.step_pile.options()))
 
     def submit(self, btn):
         self.cb(self)

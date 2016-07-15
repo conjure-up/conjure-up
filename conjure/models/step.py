@@ -11,7 +11,6 @@ class StepModel:
         self.path = step.get('path', None)
 
         self.additional_input = step.get('additional-input', [])
-        self.widget = None
 
     def __repr__(self):
         return "<t: {} d: {} v: {} p:>".format(self.title,

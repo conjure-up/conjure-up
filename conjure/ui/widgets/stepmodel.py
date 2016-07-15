@@ -27,7 +27,7 @@ class StepModelWidget:
         if len(step_model.additional_input) > 0:
             for i in step_model.additional_input:
                 widget = {
-                    "label": Text(('info_minor', i['label'])),
+                    "label": Text(('body', i['label'])),
                     "key": i['key'],
                     "input": self.INPUT_TYPES.get(i['type'])
                 }

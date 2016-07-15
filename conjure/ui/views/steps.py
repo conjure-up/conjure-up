@@ -2,8 +2,6 @@ from ubuntui.utils import Padding, Color
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.buttons import done_btn
 from urwid import (WidgetWrap,  Filler, Pile)
-from conjure.ui.widgets.step import StepWidget
-from conjure.ui.widgets.stepmodel import StepModelWidget
 
 
 class StepsView(WidgetWrap):
@@ -17,14 +15,21 @@ class StepsView(WidgetWrap):
         self.app = app
         self.cb = cb
         self.steps = steps
-        _pile = [
+        self.step_pile = Pile([
             Padding.center_90(HR()),
             Padding.line_break(""),
-            Padding.center_90(self.build_steps()),
+            Padding.center_90(Pile(self.steps)),
             Padding.line_break(""),
             Padding.center_20(self.buttons())
-        ]
-        super().__init__(Filler(Pile(_pile), valign="top"))
+        ])
+        super().__init__(Filler(self.step_pile, valign="top"))
+
+    @property
+    def current_summary_button_index(self):
+        """ Returns the pile index where the summary button is located
+        """
+        return self.step_pile.contents.index(
+            self.step_pile.contents[len(self.step_pile.contents)-1])
 
     def buttons(self):
         buttons = [
@@ -33,23 +38,6 @@ class StepsView(WidgetWrap):
                 focus_map='button_primary focus')
         ]
         return Pile(buttons)
-
-    def build_steps(self):
-        widgets = []
-        for idx, step in enumerate(self.steps):
-            self.app.log.debug("Step widget processing: {}".format(step))
-            if not step.viewable:
-                self.app.log.debug("{} is not viewable, skipping".format(
-                    step))
-                continue
-            step.widget = StepModelWidget(step)
-            w = StepWidget(self.app,
-                           idx,
-                           step,
-                           self.cb)
-            self.app.log.debug("Widgeting Step: {}".format(w))
-            widgets.append(w)
-        return Pile(widgets)
 
     def done(self, *args):
         self.cb({}, done=True)
