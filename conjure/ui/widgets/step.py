@@ -59,8 +59,7 @@ class StepWidget(WidgetWrap):
     def current_button_index(self):
         """ Returns the pile index where the button is located
         """
-        return self.step_pile.contents.index(
-            self.step_pile.contents[len(self.step_pile.contents)-2])
+        return len(self.step_pile.contents)-2
 
     @property
     def current_button_widget(self):
