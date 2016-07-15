@@ -36,8 +36,8 @@ def get_result(future):
     try:
         result = future.result()
         app.log.debug("Storing step result for: {}={}".format(
-            result.title, result.result))
-        this.results[result.title] = result.result
+            result.model.title, result.model.result))
+        this.results[result.model.title] = result.model.result
     except:
         return __handle_exception('E002', future.exception())
 
@@ -80,6 +80,11 @@ def render():
 
     try:
         this.view = StepsView(app, steps, finish)
+
+        # Set initial step as active and viewable
+        steps[0].widget.description.set_text((
+            'body', steps[0].description))
+
     except Exception as e:
         return __handle_exception('E002', e)
 

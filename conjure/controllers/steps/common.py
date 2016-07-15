@@ -31,26 +31,6 @@ def get_steps(steps_dir):
     return deque(sorted(glob(os.path.join(steps_dir, 'step-*.yaml'))))
 
 
-def update_icon_state(icon, result_code):
-    """ updates status icon
-
-    Arguments:
-    icon: icon widget
-    result_code: 3 types of results, error, waiting, complete
-    """
-    if result_code == "error":
-        icon.set_text(
-            ("error_icon", "\N{BLACK FLAG}"))
-    elif result_code == "waiting":
-        icon.set_text(("pending_icon", "\N{HOURGLASS}"))
-    elif result_code == "active":
-        icon.set_text(("success_icon", "\N{BALLOT BOX WITH CHECK}"))
-    else:
-        # NOTE: Should not get here, if we do make sure we account
-        # for that error type above.
-        icon.set_text(("error_icon", "?"))
-
-
 def do_step(step, message_cb, gui=False):
     """ Processes steps in the background
 
@@ -63,44 +43,60 @@ def do_step(step, message_cb, gui=False):
     Step title and results message
     """
 
+    step.clear_button()
+
+    # merge the step_widget input data into our step model
+    for i in step.model.additional_input:
+        try:
+            matching_widget = [
+                x for x in step.widget.additional_input
+                if x['key'] == i['key']][0]
+            i['input'] = matching_widget['input'].value
+        except IndexError as e:
+            app.log.error(
+                "Tried to pull a value from an "
+                "invalid input: {}/{}".format(e,
+                                              matching_widget))
+
     info = model_info(app.current_model)
     # Set our provider type environment var so that it is
     # exposed in future processing tasks
     app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
 
-    set_env(step.additional_input)
+    set_env(step.model.additional_input)
 
-    if not os.access(step.path, os.X_OK):
-        app.log.error("Step {} not executable".format(step.path))
+    if not os.access(step.model.path, os.X_OK):
+        app.log.error("Step {} not executable".format(step.model.path))
 
-    message_cb("Working: {}".format(step.title))
+    message_cb("Working: {}".format(step.model.title))
     if gui:
-        update_icon_state(step.widget.icon, 'waiting')
-    app.log.debug("Executing script: {}".format(step.path))
-    sh = utils.run_script(step.path)
+        step.set_icon_state('waiting')
+    app.log.debug("Executing script: {}".format(step.model.path))
+    sh = utils.run_script(step.model.path)
     result = json.loads(sh.stdout.decode('utf8'))
     if result['returnCode'] > 0:
         app.log.error(
             "Failure in step: {}".format(result['message']))
         raise Exception(result['message'])
-    message_cb("Done: {}".format(step.title))
-    step.result = result['message']
+    message_cb("Done: {}".format(step.model.title))
+    step.model.result = result['message']
     if gui:
         # All is well here, set the current title and description back
         # to a darker color and set the next widget to a bright white
         # if exists.
-        update_icon_state(step.widget.icon, 'active')
-        step.widget.description.set_text((
-            'info_context', "{}\n\nResult: {}".format(
-                step.widget.description.get_text()[0],
-                step.result)))
-        if step.next_widget:
-            step.next_widget.description.set_text(
-                ('body',
-                 step.next_widget.description.get_text()[0]))
-            for i in step.widget.additional_input:
-                i['label'].set_text(('info_minor',
-                                     i['label'].get_text()[0]))
-            for i in step.next_widget.additional_input:
-                i['label'].set_text(('body', i['label'].get_text()[0]))
+        step.set_icon_state('active')
+        step.set_description(
+            "{}\n\nResult: {}".format(
+                step.model.description,
+                step.model.result),
+            'info_context')
+        # if step.next_widget:
+        #     step.next_widget.description.set_text(
+        #         ('body',
+        #          step.next_widget.description.get_text()[0]))
+        #     for i in step.widget.additional_input:
+        #         i['label'].set_text(('info_minor',
+        #                              i['label'].get_text()[0]))
+        #     for i in step.next_widget.additional_input:
+        #         i['label'].set_text(('body', i['label'].get_text()[0]))
     return step
