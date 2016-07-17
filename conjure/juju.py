@@ -88,14 +88,12 @@ def login(force=False):
     account = get_account(get_current_controller())
     uuid = get_model(get_current_model())['model-uuid']
     server = env['api-endpoints'][0]
-    this.USER_TAG = "user-{}".format(account['current'])
-    current_user = account['current']
-    password = account['users'][current_user]['password']
+    this.USER_TAG = "user-{}".format(account['user'].split("@")[0])
     url = os.path.join('wss://', server, 'model', uuid, 'api')
     this.CLIENT = JujuClient(
         user=this.USER_TAG,
         url=url,
-        password=password)
+        password=account['password'])
     try:
         this.CLIENT.login()
     except macumba.errors.LoginError as e:
@@ -520,18 +518,8 @@ def get_account(controller):
     Dictionary containing list of accounts for controller and the
     current account in use.
 
-    eg: {'users': [accounts], 'current': 'admin@local'}
     """
-    account = {
-        'users': None,
-        'current': None
-    }
-    accounts = get_accounts()
-    if accounts and controller in accounts:
-        account['users'] = accounts[controller].get('accounts', [])
-        account['current'] = accounts[controller].get(
-            'current-account', None)
-    return account
+    return get_accounts().get(controller, {})
 
 
 def get_accounts():
