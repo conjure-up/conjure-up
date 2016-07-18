@@ -35,10 +35,13 @@ c = controllers.use('clouds')
 c.finish()
 """
 
+from functools import lru_cache
 from importlib import import_module
+
 from conjure.app_config import app
 
 
+@lru_cache(maxsize=None)
 def use(controller):
     """ Loads view Controller
 
@@ -53,6 +56,10 @@ def use(controller):
             pkg = ("conjure.controllers.{}.tui".format(controller))
         else:
             pkg = ("conjure.controllers.{}.gui".format(controller))
-        return import_module(pkg)
+        module = import_module(pkg)
+        if '_controller_class' in dir(module):
+            return module._controller_class()
+        else:
+            return module
     except Exception as e:
         raise e

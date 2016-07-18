@@ -148,3 +148,5 @@ class DeployController:
 
         app.ui.set_header("Review and Configure Applications")
         app.ui.set_body(wv)
+
+_controller_class = DeployController
