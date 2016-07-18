@@ -1,4 +1,4 @@
-from ubuntui.utils import Padding, Color
+from ubuntui.utils import Padding
 from urwid import WidgetWrap, Text, Filler, Pile, Columns
 from ubuntui.widgets.hr import HR
 
