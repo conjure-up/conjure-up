@@ -28,6 +28,7 @@ class ServiceWalkthroughView(WidgetWrap):
         self.n_total = n_total
         self.n_remaining = n_total - idx - 1
         self.metadata_controller = metadata_controller
+        self.info_handled = False
         w = self.build_widgets()
         super().__init__(w)
         self.get_async_info()
@@ -105,6 +106,9 @@ class ServiceWalkthroughView(WidgetWrap):
             self.handle_readme_updated)
 
     def handle_info_updated(self, new_info):
+        if self.info_handled:
+            return
+        self.info_handled = True
         EventLoop.loop.event_loop._loop.call_soon_threadsafe(
             self._update_info_on_main_thread,
             new_info)
