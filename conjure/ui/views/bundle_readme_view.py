@@ -34,6 +34,13 @@ class BundleReadmeView(WidgetWrap):
     def selectable(self):
         return True
 
+    def keypress(self, size, key):
+        if key == 'tab':
+            cur = self.pile.focus_position
+            self.pile.focus_position = 3 if cur == 1 else 1
+        else:
+            return super(BundleReadmeView, self).keypress(size, key)
+
     def build_widgets(self):
         readme_files = glob(os.path.join(app.config['spell-dir'], 'README.*'))
         if len(readme_files) == 0:
@@ -57,7 +64,8 @@ class BundleReadmeView(WidgetWrap):
               Padding.center(HR()),
               Padding.center(self.readme_w, left=2),
               Padding.center(HR()),
-              Padding.center(Text("Use arrow keys to scroll text."))]
+              Padding.center(Text("Use arrow keys to scroll text "
+                                  "and TAB to select the button."))]
 
         self.pile = Pile(ws)
         return Padding.center_90(Filler(self.pile, valign="top"))
