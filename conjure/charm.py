@@ -64,8 +64,8 @@ def search(tags, promulgated=True):
     """ Search charmstore by tag(s)
 
     Usage:
-    https://api.jujucharms.com/charmstore/v5/search?tags=conjure-openstack
-    &include=id&include=extra-info/conjure&type=bundle
+    https://api.jujucharms.com/charmstore/v5/search?tags=conjure-up-openstack
+    &include=id&include=extra-info/conjure-up&type=bundle
 
     Arguments:
     tags: single or list of tags to search for
@@ -74,13 +74,13 @@ def search(tags, promulgated=True):
     if not isinstance(tags, list):
         tags = [tags]
 
-    tags = ["conjure-{}".format(t) for t in tags]
+    tags = ["conjure-up-{}".format(t) for t in tags]
     query_str = "&tags=".join(tags)
     if promulgated:
         query_str += "&promulgated=1"
     query_str += "&include=bundle-metadata"
     query_str += "&include=id"
-    query_str += "&include=extra-info/conjure"
+    query_str += "&include=extra-info/conjure-up"
     query_str += "&type=bundle"
     query = path.join(cs, 'search?tags={}'.format(query_str))
     req = requests.get(query)
@@ -99,8 +99,8 @@ def set_metadata(bundle_path, data):
     data: dictionary of fields
     """
     try:
-        cmd = ("charm set {} conjure:='{}'".format(bundle_path,
-                                                   json.dumps(data)))
+        cmd = ("charm set {} conjure-up:='{}'".format(bundle_path,
+                                                      json.dumps(data)))
         app.log.debug(cmd)
         run(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
     except CalledProcessError as e:

@@ -9,7 +9,7 @@ def parse_whitelist():
     for bundle in app.bundles:
         try:
             for cloud \
-                 in bundle['Meta']['extra-info/conjure']['cloud-whitelist']:
+                 in bundle['Meta']['extra-info/conjure-up']['cloud-whitelist']:
                 if cloud not in current:
                     current.append(cloud)
         except:
@@ -24,7 +24,7 @@ def parse_blacklist():
     for bundle in app.bundles:
         try:
             for cloud \
-                 in bundle['Meta']['extra-info/conjure']['cloud-blacklist']:
+                 in bundle['Meta']['extra-info/conjure-up']['cloud-blacklist']:
                 if cloud not in current:
                     current.append(cloud)
         except:

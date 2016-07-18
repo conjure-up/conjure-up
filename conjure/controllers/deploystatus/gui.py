@@ -4,6 +4,7 @@ from conjure.app_config import app
 from conjure import utils
 from conjure import controllers
 from conjure import async
+from conjure import juju
 from functools import partial
 from . import common
 import os.path as path
@@ -33,7 +34,8 @@ def __wait_for_applications(*args):
     future = async.submit(partial(common.wait_for_applications,
                                   deploy_done_sh,
                                   app.ui.set_footer),
-                          partial(__handle_exception, 'ED'))
+                          partial(__handle_exception, 'ED'),
+                          queue_name=juju.JUJU_ASYNC_QUEUE)
     future.add_done_callback(finish)
 
 
@@ -48,7 +50,7 @@ def __refresh(*args):
     EventLoop.set_alarm_in(1, __refresh)
 
 
-def render(deploy_future=None):
+def render():
     """ Render deploy status view
     """
     this.view = DeployStatusView(app)
@@ -62,9 +64,5 @@ def render(deploy_future=None):
             name)
     )
     app.ui.set_body(this.view)
-    if deploy_future:
-        deploy_future.add_done_callback(__refresh)
-        deploy_future.add_done_callback(__wait_for_applications)
-    else:
-        __refresh()
-        __wait_for_applications()
+    __refresh()
+    __wait_for_applications()

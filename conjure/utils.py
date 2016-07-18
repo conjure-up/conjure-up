@@ -1,8 +1,13 @@
 import shutil
 import os
 import yaml
+import pty
+import codecs
+import errno
 from termcolor import colored
-from subprocess import run, check_call, CalledProcessError, DEVNULL, PIPE
+from subprocess import (run, check_call,
+                        CalledProcessError, DEVNULL,
+                        PIPE, Popen)
 from conjure.async import submit
 from conjure.app_config import app
 from configobj import ConfigObj
@@ -10,6 +15,70 @@ from configobj import ConfigObj
 
 def run_script(path):
     return run(path, shell=True, stderr=PIPE, stdout=PIPE, env=app.env)
+
+
+def run_attach(cmd, output_cb=None):
+    """ run command and attach output to cb
+
+    Arguments:
+    cmd: shell command
+    output_cb: where to display output
+    """
+
+    stdoutmaster, stdoutslave = pty.openpty()
+    subproc = Popen(cmd, shell=True,
+                    stdout=stdoutslave,
+                    stderr=PIPE)
+    os.close(stdoutslave)
+    decoder = codecs.getincrementaldecoder('utf-8')()
+
+    def last_ten_lines(s):
+        chunk = s[-1500:]
+        lines = chunk.splitlines(True)
+        return ''.join(lines[-10:]).replace('\r', '')
+
+    decoded_output = ""
+    try:
+        while subproc.poll() is None:
+            try:
+                b = os.read(stdoutmaster, 512)
+            except OSError as e:
+                if e.errno != errno.EIO:
+                    raise
+                break
+            else:
+                final = False
+                if not b:
+                    final = True
+                decoded_chars = decoder.decode(b, final)
+                if decoded_chars is None:
+                    continue
+
+                decoded_output += decoded_chars
+                if output_cb:
+                    ls = last_ten_lines(decoded_output)
+
+                    output_cb(ls)
+                if final:
+                    break
+    finally:
+        os.close(stdoutmaster)
+        if subproc.poll() is None:
+            subproc.kill()
+        subproc.wait()
+
+    errors = [l.decode('utf-8') for l in subproc.stderr.readlines()]
+    if output_cb:
+        output_cb(last_ten_lines(decoded_output))
+
+    errors = ''.join(errors)
+
+    if subproc.returncode == 0:
+        return decoded_output.strip()
+    else:
+        raise Exception("Problem running {0} "
+                        "{1}:{2}".format(cmd,
+                                         subproc.returncode))
 
 
 def check_bridge_exists():

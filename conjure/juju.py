@@ -88,14 +88,12 @@ def login(force=False):
     account = get_account(get_current_controller())
     uuid = get_model(get_current_model())['model-uuid']
     server = env['api-endpoints'][0]
-    this.USER_TAG = "user-{}".format(account['current'])
-    current_user = account['current']
-    password = account['users'][current_user]['password']
+    this.USER_TAG = "user-{}".format(account['user'].split("@")[0])
     url = os.path.join('wss://', server, 'model', uuid, 'api')
     this.CLIENT = JujuClient(
         user=this.USER_TAG,
         url=url,
-        password=password)
+        password=account['password'])
     try:
         this.CLIENT.login()
     except macumba.errors.LoginError as e:
@@ -331,19 +329,27 @@ def add_machines(machines, msg_cb=None, exc_cb=None):
 
     """
     def _prepare_constraints(constraints):
-        list_constraints = constraints.split(' ')
         new_constraints = {}
-        if len(list_constraints) > 0:
-            for c in list_constraints:
+        if not isinstance(constraints, str):
+            app.log.debug(
+                "Invalid constraints: {}, skipping".format(
+                    constraints))
+            return new_constraints
+
+        list_constraints = constraints.split(' ')
+        for c in list_constraints:
+            try:
                 constraint, constraint_value = c.split('=')
                 new_constraints[constraint] = constraint_value
+            except ValueError as e:
+                app.log.debug("Skipping constraint: {} ({})".format(c, e))
         return new_constraints
 
     @requires_login
     def _add_machines_async():
         machine_params = [{"series": m['series'],
                            "constraints": _prepare_constraints(
-                               m.get('constraints', {})),
+                               m.get('constraints', "")),
                            "jobs": ["JobHostUnits"]}
                           for m in machines]
         app.log.debug(machine_params)
@@ -512,18 +518,8 @@ def get_account(controller):
     Dictionary containing list of accounts for controller and the
     current account in use.
 
-    eg: {'users': [accounts], 'current': 'admin@local'}
     """
-    account = {
-        'users': None,
-        'current': None
-    }
-    accounts = get_accounts()
-    if accounts and controller in accounts:
-        account['users'] = accounts[controller].get('accounts', [])
-        account['current'] = accounts[controller].get(
-            'current-account', None)
-    return account
+    return get_accounts().get(controller, {})
 
 
 def get_accounts():

@@ -1,5 +1,6 @@
 import random
 from urwid import (Text, WidgetWrap)
+from ubuntui.ev import EventLoop
 from ubuntui.widgets.juju.service import ServiceWidget
 from ubuntui.widgets.table import Table
 from ubuntui.utils import Color, Padding
@@ -16,8 +17,15 @@ class DeployStatusView(WidgetWrap):
         super().__init__(Padding.center_80(self.table.render()))
 
     def refresh_nodes(self):
-        """ Adds services to the view if they don't already exist
+        """Adds services to the view if they don't already exist
+
+        Schedules UI update on main thread to avoid urwid issues with
+        changing listbox state during render.
         """
+        EventLoop.loop.event_loop._loop.call_soon_threadsafe(
+            self._refresh_nodes_on_main_thread)
+
+    def _refresh_nodes_on_main_thread(self):
         status = model_status()
         for name, service in sorted(status['applications'].items()):
             service_w = ServiceWidget(name, service)

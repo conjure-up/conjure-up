@@ -222,7 +222,7 @@ def main():
 
         # Install any required packages for any of the bundles
         for bundle in app.bundles:
-            extra_info = bundle['Meta']['extra-info/conjure']
+            extra_info = bundle['Meta']['extra-info/conjure-up']
             if 'packages' in extra_info:
                 app.log.debug('Found {} to install via apt'.format(
                     extra_info['packages']))
@@ -270,7 +270,7 @@ def main():
         app.bundles = [
             {
                 'Meta': {
-                    'extra-info/conjure': metadata
+                    'extra-info/conjure-up': metadata
                 }
             }
         ]
