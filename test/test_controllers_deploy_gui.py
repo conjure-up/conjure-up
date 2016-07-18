@@ -19,59 +19,89 @@
 
 
 import unittest
-from unittest.mock import ANY, patch, MagicMock
-from importlib import reload
+from unittest.mock import ANY, call, patch, MagicMock
 from conjure import juju
 
-import conjure.controllers.deploy.gui
-guimodule = conjure.controllers.deploy.gui
+from conjure.controllers.deploy.gui import DeployController
 
 
 class DeployGUIRenderTestCase(unittest.TestCase):
     def setUp(self):
-        reload(conjure.controllers.deploy.gui)
-        self.gui = conjure.controllers.deploy.gui
+        self.controller = DeployController()
+
         self.bundleinfo_patcher = patch(
             'conjure.controllers.deploy.gui.get_bundleinfo')
         self.mock_get_bundleinfo = self.bundleinfo_patcher.start()
-        self.mock_bundle = MagicMock()
+        self.mock_bundle = MagicMock(name="bundle")
+        self.mock_service_1 = MagicMock(name="s1")
         self.mock_get_bundleinfo.return_value = ("filename",
                                                  self.mock_bundle,
-                                                 [])
+                                                 [self.mock_service_1])
         self.finish_patcher = patch(
-            'conjure.controllers.deploy.gui.finish')
+            'conjure.controllers.deploy.gui.DeployController.finish')
         self.mock_finish = self.finish_patcher.start()
 
         self.submit_patcher = patch(
             'conjure.controllers.deploy.gui.async.submit')
         self.mock_submit = self.submit_patcher.start()
 
+        self.predeploy_call = call(self.controller._pre_deploy_exec, ANY,
+                                   queue_name=juju.JUJU_ASYNC_QUEUE)
+        self.add_machines_call = call(self.controller._do_add_machines, ANY,
+                                      queue_name=juju.JUJU_ASYNC_QUEUE)
+
+        self.view_patcher = patch(
+            'conjure.controllers.deploy.gui.ServiceWalkthroughView')
+        self.view_patcher.start()
+        self.ui_patcher = patch(
+            'conjure.controllers.deploy.gui.app')
+        mock_app = self.ui_patcher.start()
+        mock_app.ui = MagicMock(name="app.ui")
+
     def tearDown(self):
         self.bundleinfo_patcher.stop()
         self.finish_patcher.stop()
         self.submit_patcher.stop()
+        self.view_patcher.stop()
+        self.ui_patcher.stop()
 
     def test_queue_predeploy_skipping(self):
         "Test that we do not call predeploy more than once"
 
-        self.gui.is_predeploy_queued = True
-        self.gui.render()
+        self.controller.is_predeploy_queued = True
+        self.controller.render()
 
-        # TEST NOTE: we'd like to have the first ANY here be
-        # conjure.controllers.deploy.gui.__do_add_machines so we
-        # could check that we call the right thing, but unittest
-        # is renaming the module, so that comparison fails.
-
-        # This is one thing that wouldn't be a problem with
-        # controllers as classes.
         self.mock_submit.assert_called_once_with(
-            ANY, ANY, queue_name=juju.JUJU_ASYNC_QUEUE)
+            self.controller._do_add_machines, ANY,
+            queue_name=juju.JUJU_ASYNC_QUEUE)
 
     def test_queue_predeploy_once(self):
         "Call submit to schedule predeploy if we haven't yet"
-        self.gui.render()
-        print(self.mock_submit.mock_calls)
-        assert self.mock_submit.call_count == 2
-    
-    def test_call_add_machines(self):
+        self.controller.render()
+        self.mock_submit.assert_has_calls([self.predeploy_call,
+                                           self.add_machines_call],
+                                          any_order=True)
+
+    def test_call_add_machines_once_only(self):
         "Call add_machines once"
+        self.controller.render()
+        self.mock_submit.assert_has_calls([self.predeploy_call,
+                                           self.add_machines_call],
+                                          any_order=True)
+
+        self.mock_submit.reset_mock()
+        self.controller.is_predeploy_queued = True
+        self.controller.render()
+        self.assertEqual(self.mock_submit.call_count, 0)
+
+    def test_finish_at_end(self):
+        "Call finish only at end"
+        # the ServiceWalkthroughView will call finish() for the first
+        # N-1 services if the user chooses to do so individually
+
+        self.assertEqual(self.mock_finish.call_count, 0)
+        self.controller.render()
+        self.assertEqual(self.mock_finish.call_count, 0)
+        self.controller.svc_idx += 1
+        self.controller.render()
+        self.mock_finish.assert_called_once_with()
