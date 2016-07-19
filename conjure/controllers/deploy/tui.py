@@ -9,7 +9,6 @@ from conjure.api.models import model_info
 from conjure.app_config import app
 from conjure import juju
 from subprocess import run, PIPE
-from .common import get_bundleinfo, get_metadata_controller
 
 
 this = sys.modules[__name__]
@@ -58,10 +57,6 @@ def finish():
     """ handles deployment
 
     """
-    this.bundle_filename, this.bundle, this.services = get_bundleinfo()
-    app.metadata_controller = get_metadata_controller(this.bundle,
-                                                      this.bundle_filename)
-
     for service in this.services:
         juju.deploy_service(service, utils.info,
                             partial(__handle_exception, "ED"))

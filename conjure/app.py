@@ -12,8 +12,14 @@ from conjure.download import (download, download_local,
                               get_remote_url, fetcher)
 from conjure.log import setup_logging
 from conjure.ui import ConjureUI
+
+from bundleplacer.bundle import Bundle
+from bundleplacer.charmstore_api import MetadataController
+from bundleplacer.config import Config
+
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
+
 import argparse
 import json
 import os
@@ -65,12 +71,24 @@ def unhandled_input(key):
 
 
 def _start(*args, **kwargs):
-    """ Initially load cloud selection screen
-    """
+    setup_metadata()
     if app.argv.status_only:
         controllers.use('deploystatus').render()
     else:
         controllers.use('clouds').render()
+
+
+def setup_metadata():
+    bundle_filename = os.path.join(app.config['spell-dir'], 'bundle.yaml')
+    bundle = Bundle(filename=bundle_filename)
+    bundleplacer_cfg = Config(
+        'bundle-placer',
+        {
+            'bundle_filename': bundle_filename,
+            'bundle_key': None,
+        })
+
+    app.metadata_controller = MetadataController(bundle, bundleplacer_cfg)
 
 
 def has_valid_juju():
