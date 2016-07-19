@@ -119,4 +119,5 @@ class StepWidget(WidgetWrap):
 
     def submit(self, btn):
         self.set_icon_state('waiting')
+        self.clear_button()
         self.cb(self)
