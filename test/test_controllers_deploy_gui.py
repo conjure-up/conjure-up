@@ -19,7 +19,7 @@
 
 
 import unittest
-from unittest.mock import ANY, call, patch, MagicMock
+from unittest.mock import ANY, call, MagicMock, patch, sentinel
 from conjure import juju
 
 from conjure.controllers.deploy.gui import DeployController
@@ -28,6 +28,10 @@ from conjure.controllers.deploy.gui import DeployController
 class DeployGUIRenderTestCase(unittest.TestCase):
     def setUp(self):
         self.controller = DeployController()
+
+        self.utils_patcher = patch(
+            'conjure.controllers.deploy.gui.utils')
+        self.mock_utils = self.utils_patcher.start()
 
         self.bundleinfo_patcher = patch(
             'conjure.controllers.deploy.gui.get_bundleinfo')
@@ -53,17 +57,18 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.view_patcher = patch(
             'conjure.controllers.deploy.gui.ServiceWalkthroughView')
         self.view_patcher.start()
-        self.ui_patcher = patch(
+        self.app_patcher = patch(
             'conjure.controllers.deploy.gui.app')
-        mock_app = self.ui_patcher.start()
+        mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
 
     def tearDown(self):
+        self.utils_patcher.stop()
         self.bundleinfo_patcher.stop()
         self.finish_patcher.stop()
         self.submit_patcher.stop()
         self.view_patcher.stop()
-        self.ui_patcher.stop()
+        self.app_patcher.stop()
 
     def test_queue_predeploy_skipping(self):
         "Test that we do not call predeploy more than once"
@@ -105,3 +110,72 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.controller.svc_idx += 1
         self.controller.render()
         self.mock_finish.assert_called_once_with()
+
+
+class DeployGUIFinishTestCase(unittest.TestCase):
+    def setUp(self):
+        self.controller = DeployController()
+
+        self.controllers_patcher = patch(
+            'conjure.controllers.deploy.gui.controllers')
+        self.mock_controllers = self.controllers_patcher.start()
+
+        self.utils_patcher = patch(
+            'conjure.controllers.deploy.gui.utils')
+        self.mock_utils = self.utils_patcher.start()
+
+        self.juju_patcher = patch(
+            'conjure.controllers.deploy.gui.juju')
+        self.mock_juju = self.juju_patcher.start()
+
+        self.render_patcher = patch(
+            'conjure.controllers.deploy.gui.DeployController.render')
+        self.mock_render = self.render_patcher.start()
+        self.app_patcher = patch(
+            'conjure.controllers.deploy.gui.app')
+        self.mock_app = self.app_patcher.start()
+        self.mock_app.ui = MagicMock(name="app.ui")
+
+    def tearDown(self):
+        self.controllers_patcher.stop()
+        self.utils_patcher.stop()
+        self.juju_patcher.stop()
+        self.render_patcher.stop()
+        self.app_patcher.stop()
+
+    def test_deploy_single(self):
+        "Deploy a single service in finish"
+        self.controller.finish(sentinel.single_service)
+        self.assertEqual(self.mock_juju.mock_calls,
+                         [call.deploy_service(sentinel.single_service,
+                                              ANY, ANY)])
+        self.mock_render.assert_called_once_with()
+        self.assertEqual(self.mock_controllers.mock_calls, [])
+
+    def test_deploy_rest(self):
+        "Deploy multiple services in finish"
+        self.controller.services = [sentinel.service_1, sentinel.service_2]
+        self.controller.finish()
+        self.assertEqual(self.mock_juju.mock_calls,
+                         [call.deploy_service(sentinel.service_1, ANY, ANY),
+                          call.deploy_service(sentinel.service_2, ANY, ANY),
+                          call.set_relations([sentinel.service_1,
+                                              sentinel.service_2], ANY, ANY)])
+
+    def test_show_bootstrap_wait(self):
+        "Go to bootstrap wait controller if bootstrap pending"
+        self.mock_app.bootstrap = MagicMock(name="bootstrap")
+        self.mock_app.bootstrap.running = MagicMock(name='running_future')
+        self.mock_app.bootstrap.running.done = MagicMock(name='done')
+        self.mock_app.bootstrap.running.done.return_value = False
+        self.controller.finish()
+        self.assertEqual(self.mock_controllers.mock_calls,
+                         [call.use('bootstrapwait'),
+                          call.use().render()])
+
+    def test_skip_bootstrap_wait(self):
+        "Go directly to deploystatus if bootstrap is done"
+        self.controller.finish()
+        self.assertEqual(self.mock_controllers.mock_calls,
+                         [call.use('deploystatus'),
+                          call.use().render()])
