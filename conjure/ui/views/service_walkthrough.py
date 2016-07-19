@@ -180,7 +180,10 @@ class ServiceWalkthroughView(WidgetWrap):
         if nrls[0] == '':
             nrls = nrls[1:]
         # split after two paragraphs:
-        firstparidx = nrls.index('')
+        if '' in nrls:
+            firstparidx = nrls.index('')
+        else:
+            firstparidx = 1
         try:
             splitidx = nrls.index('', firstparidx + 1)
         except:
