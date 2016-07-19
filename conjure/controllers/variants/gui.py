@@ -50,6 +50,8 @@ class VariantsController:
                       'spell-dir': spell_dir,
                       'spell': spell_name}
 
+        utils.setup_metadata_controller()
+
         return controllers.use('bundlereadme').render()
 
     def render(self):
