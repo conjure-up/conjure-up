@@ -10,7 +10,7 @@ from conjure.app_config import app
 from conjure.ui.views.service_walkthrough import ServiceWalkthroughView
 from conjure import utils
 from conjure.api.models import model_info
-from .common import get_bundleinfo, get_metadata_controller
+from .common import get_bundleinfo
 
 
 class DeployController:
@@ -133,10 +133,6 @@ class DeployController:
             async.submit(self._do_add_machines,
                          partial(self._handle_exception, "ED"),
                          queue_name=juju.JUJU_ASYNC_QUEUE)
-
-        if not app.metadata_controller:
-            app.metadata_controller = get_metadata_controller(
-                self.bundle, self.bundle_filename)
 
         n_total = len(self.services)
         if self.svc_idx >= n_total:
