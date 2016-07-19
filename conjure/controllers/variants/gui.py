@@ -8,52 +8,58 @@ import json
 import os.path as path
 
 
-def finish(spell):
-    """ Finalizes and downloads chosen variant
+class VariantsController:
+    def __init__(self):
+        self.view = None
 
-    Arguments:
-    spell: dictionary of charm/bundle to use
-    """
-    app.current_bundle = spell['Meta']['bundle-metadata']
+    def finish(self, spell):
+        """ Finalizes and downloads chosen variant
 
-    spell_name = spell['Meta']['id']['Name']
+        Arguments:
+        spell: dictionary of charm/bundle to use
+        """
+        app.current_bundle = spell['Meta']['bundle-metadata']
 
-    # Check cache dir for spells
-    spell_dir = path.join(app.config['spell-dir'],
-                          spell_name)
+        spell_name = spell['Meta']['id']['Name']
 
-    app.log.debug("Chosen spell: {}".format(spell_name))
-    utils.pollinate(app.session_id, 'B001')
+        # Check cache dir for spells
+        spell_dir = path.join(app.config['spell-dir'],
+                              spell_name)
 
-    metadata_path = path.join(spell_dir,
-                              'conjure/metadata.json')
+        app.log.debug("Chosen spell: {}".format(spell_name))
+        utils.pollinate(app.session_id, 'B001')
 
-    remote = get_remote_url(spell['Id'])
-    purge_top_level = True
-    if remote is not None:
-        if app.fetcher == "charmstore-search" or \
-           app.fetcher == "charmstore-direct":
-            purge_top_level = False
-        download(remote, spell_dir, purge_top_level)
-    else:
-        utils.warning("Could not find spell: {}".format(spell))
-        sys.exit(1)
+        metadata_path = path.join(spell_dir,
+                                  'conjure/metadata.json')
 
-    with open(metadata_path) as fp:
-        metadata = json.load(fp)
+        remote = get_remote_url(spell['Id'])
+        purge_top_level = True
+        if remote is not None:
+            if app.fetcher == "charmstore-search" or \
+               app.fetcher == "charmstore-direct":
+                purge_top_level = False
+            download(remote, spell_dir, purge_top_level)
+        else:
+            utils.warning("Could not find spell: {}".format(spell))
+            sys.exit(1)
 
-    app.config = {'metadata': metadata,
-                  'spell-dir': spell_dir,
-                  'spell': spell_name}
+        with open(metadata_path) as fp:
+            metadata = json.load(fp)
 
-    return controllers.use('bundlereadme').render()
+        app.config = {'metadata': metadata,
+                      'spell-dir': spell_dir,
+                      'spell': spell_name}
+
+        return controllers.use('bundlereadme').render()
+
+    def render(self):
+        self.view = VariantView(self.finish)
+        app.log.debug("Rendering GUI controller for Variant")
+        utils.pollinate(app.session_id, 'W001')
+        app.ui.set_header(
+            title='Please choose a spell to conjure'
+        )
+        app.ui.set_body(self.view)
 
 
-def render():
-    view = VariantView(finish)
-    app.log.debug("Rendering GUI controller for Variant")
-    utils.pollinate(app.session_id, 'W001')
-    app.ui.set_header(
-        title='Please choose a spell to conjure'
-    )
-    app.ui.set_body(view)
+_controller_class = VariantsController
