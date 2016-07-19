@@ -12,6 +12,10 @@ from conjure.async import submit
 from conjure.app_config import app
 from configobj import ConfigObj
 
+from bundleplacer.bundle import Bundle
+from bundleplacer.config import Config
+from bundleplacer.charmstore_api import MetadataController
+
 
 def run_script(path):
     return run(path, shell=True, stderr=PIPE, stdout=PIPE, env=app.env)
@@ -275,3 +279,16 @@ def load_global_conf():
             return yaml.safe_load(fp.read())
     except:
         return {}
+
+
+def setup_metadata_controller():
+    bundle_filename = os.path.join(app.config['spell-dir'], 'bundle.yaml')
+    bundle = Bundle(filename=bundle_filename)
+    bundleplacer_cfg = Config(
+        'bundle-placer',
+        {
+            'bundle_filename': bundle_filename,
+            'bundle_key': None,
+        })
+
+    app.metadata_controller = MetadataController(bundle, bundleplacer_cfg)
