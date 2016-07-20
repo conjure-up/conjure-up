@@ -61,6 +61,7 @@ class NewCloudController:
                               "`juju add-credential {}`.".format(self.cloud))
                 sys.exit(1)
 
+        utils.info("Bootstrapping Juju controller")
         juju.bootstrap(controller=app.current_controller,
                        cloud=self.cloud,
                        credential=common.try_get_creds(self.cloud))
