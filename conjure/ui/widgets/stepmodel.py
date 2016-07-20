@@ -21,7 +21,7 @@ class StepModelWidget:
         self.title = Text(('info_minor', step_model.title))
         self.description = Text(('info_minor', step_model.description))
         self.result = Text(step_model.result)
-        self.icon = Text(("pending_icon", "\N{BALLOT BOX}"))
+        self.icon = Text(("info_minor", "\N{BALLOT BOX}"))
 
         self.additional_input = []
         if len(step_model.additional_input) > 0:
