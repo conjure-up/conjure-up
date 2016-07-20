@@ -2,10 +2,13 @@ from conjure import utils
 from conjure import controllers
 
 
-def finish():
-    controllers.use('deploystatus').render()
+class BootstrapWaitController:
+    def finish(self):
+        controllers.use('deploystatus').render()
+
+    def render(self):
+        utils.info("Waiting for bootstrap to finish")
+        self.finish()
 
 
-def render():
-    utils.info("Waiting for bootstrap to finish")
-    finish()
+_controller_class = BootstrapWaitController

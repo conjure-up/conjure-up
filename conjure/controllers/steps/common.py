@@ -46,17 +46,18 @@ def do_step(step, message_cb, gui=False):
     step.clear_button()
 
     # merge the step_widget input data into our step model
-    for i in step.model.additional_input:
-        try:
-            matching_widget = [
-                x for x in step.widget.additional_input
-                if x['key'] == i['key']][0]
-            i['input'] = matching_widget['input'].value
-        except IndexError as e:
-            app.log.error(
-                "Tried to pull a value from an "
-                "invalid input: {}/{}".format(e,
-                                              matching_widget))
+    if gui:
+        for i in step.model.additional_input:
+            try:
+                matching_widget = [
+                    x for x in step.widget.additional_input
+                    if x['key'] == i['key']][0]
+                i['input'] = matching_widget['input'].value
+            except IndexError as e:
+                app.log.error(
+                    "Tried to pull a value from an "
+                    "invalid input: {}/{}".format(e,
+                                                  matching_widget))
 
     info = model_info(app.current_model)
     # Set our provider type environment var so that it is

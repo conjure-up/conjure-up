@@ -3,11 +3,13 @@ from conjure import utils
 import sys
 
 
-def finish():
-    sys.exit(0)
+class SummaryController:
+    def finish(self):
+        sys.exit(0)
 
+    def render(self, results):
+        common.write_results(results)
+        utils.info("\n".join(results))
+        self.finish()
 
-def render(results):
-    common.write_results(results)
-    utils.info("\n".join(results))
-    finish()
+_controller_class = SummaryController

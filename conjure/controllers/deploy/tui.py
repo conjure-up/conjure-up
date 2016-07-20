@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import concurrent
 from functools import partial
 
 from conjure import controllers
@@ -9,7 +10,6 @@ from conjure.api.models import model_info
 from conjure.app_config import app
 from conjure import juju
 from subprocess import run, PIPE
-
 from .common import get_bundleinfo
 
 
@@ -55,22 +55,21 @@ class DeployController:
 
     def finish(self):
         """ handles deployment
-
         """
         for service in self.services:
             juju.deploy_service(service, utils.info,
                                 partial(self.__handle_exception, "ED"))
 
-        juju.set_relations(self.services,
-                           utils.info,
-                           partial(self.__handle_exception, "ED"))
+        f = juju.set_relations(self.services,
+                               utils.info,
+                               partial(self.__handle_exception, "ED"))
+        concurrent.futures.wait([f])
 
         utils.pollinate(app.session_id, 'PC')
         controllers.use('deploystatus').render()
 
     def render(self):
         self.bundle_filename, self.bundle, self.services = get_bundleinfo()
-
         self.do_pre_deploy()
         self.finish()
 
