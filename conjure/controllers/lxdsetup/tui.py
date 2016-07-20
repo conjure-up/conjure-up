@@ -1,8 +1,8 @@
+class LXDSetupController:
+    def finish(self):
+        pass
 
+    def render(self):
+        pass
 
-def finish():
-    pass
-
-
-def render():
-    pass
+_controller_class = LXDSetupController
