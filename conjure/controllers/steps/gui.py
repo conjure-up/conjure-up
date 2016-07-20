@@ -110,6 +110,9 @@ class StepsController:
             # Set initial step as active and viewable
             steps[0].widget.description.set_text((
                 'body', steps[0].model.description))
+            steps[0].widget.icon.set_text((
+                'pending_icon', steps[0].widget.icon.get_text()[0]
+            ))
             steps[0].generate_additional_input()
             self.view.step_pile.focus_position = 2
 

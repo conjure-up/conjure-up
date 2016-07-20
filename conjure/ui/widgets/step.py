@@ -92,6 +92,10 @@ class StepWidget(WidgetWrap):
         a previous step is run
         """
         self.set_description(self.model.description, 'body')
+        self.widget.icon.set_text((
+            'pending_icon',
+            self.widget.icon.get_text()[0]
+        ))
         for i in self.widget.additional_input:
             self.app.log.debug(i)
             self.step_pile.contents.append((Padding.line_break(""),
