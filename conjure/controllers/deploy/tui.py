@@ -71,6 +71,8 @@ class DeployController:
     def render(self):
         self.bundle_filename, self.bundle, self.services = get_bundleinfo()
         self.do_pre_deploy()
+        juju.add_machines([md for _, md in self.bundle.machines.items()],
+                          exc_cb=partial(self._handle_exception, "ED"))
         self.finish()
 
 _controller_class = DeployController

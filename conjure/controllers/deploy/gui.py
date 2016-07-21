@@ -73,10 +73,6 @@ class DeployController:
         else:
             app.ui.set_footer("Pre-deploy processing done.")
 
-    def _do_add_machines(self):
-        juju.add_machines([md for _, md in self.bundle.machines.items()],
-                          exc_cb=partial(self._handle_exception, "ED"))
-
     def finish(self, single_service=None):
         """handles deployment
 
@@ -129,10 +125,8 @@ class DeployController:
 
         if not self.bundle:
             self.bundle_filename, self.bundle, self.services = get_bundleinfo()
-
-            async.submit(self._do_add_machines,
-                         partial(self._handle_exception, "ED"),
-                         queue_name=juju.JUJU_ASYNC_QUEUE)
+            juju.add_machines([md for _, md in self.bundle.machines.items()],
+                              exc_cb=partial(self._handle_exception, "ED"))
 
         n_total = len(self.services)
         if self.svc_idx >= n_total:
