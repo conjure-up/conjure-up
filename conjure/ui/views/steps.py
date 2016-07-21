@@ -42,4 +42,4 @@ class StepsView(WidgetWrap):
         return Pile(buttons)
 
     def done(self, *args):
-        self.cb({}, done=True)
+        self.cb(None, None, done=True)

@@ -1,11 +1,21 @@
 from ubuntui.utils import Padding, Color
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.buttons import submit_btn
+from ubuntui.widgets.input import (StringEditor, YesNo,
+                                   PasswordEditor, IntegerEditor)
+
 from urwid import (WidgetWrap, Pile, Columns, Text)
 
 
 class StepWidget(WidgetWrap):
-    def __init__(self, app, step_model, step_model_widget, cb):
+    INPUT_TYPES = {
+        'text': StringEditor(),
+        'password': PasswordEditor(),
+        'boolean': YesNo(),
+        'integer': IntegerEditor()
+    }
+
+    def __init__(self, app, step_model, cb):
         """
         Arguments:
         step_model: step model
@@ -13,25 +23,42 @@ class StepWidget(WidgetWrap):
         cb: callback
         """
         self.app = app
-        self._step_model = step_model
-        self._step_model_widget = step_model_widget
+        self.model = step_model
+
+        self.title = Text(('info_minor', step_model.title))
+        self.description = Text(('info_minor', step_model.description))
+        self.result = Text(step_model.result)
+        self.icon = Text(("info_minor", "\N{BALLOT BOX}"))
+
+        self.additional_input = []
+        if len(step_model.additional_input) > 0:
+            for i in step_model.additional_input:
+                widget = {
+                    "label": Text(('body', i['label'])),
+                    "key": i['key'],
+                    "input": self.INPUT_TYPES.get(i['type'])
+                }
+                if 'default' in i:
+                    widget['input'] = StringEditor(default=i['default'])
+
+                self.additional_input.append(widget)
+        else:
+            widget = {
+                "label": Text(""),
+                "key": "submit",
+                "input": None
+            }
+            self.additional_input.append(widget)
+
         self.cb = cb
         self.step_pile = self.build_widget()
         super().__init__(self.step_pile)
-
-    @property
-    def model(self):
-        return self._step_model
-
-    @property
-    def widget(self):
-        return self._step_model_widget
 
     def __repr__(self):
         return "<StepWidget: {}>".format(self.model.title)
 
     def set_description(self, description, color='info_minor'):
-        self.widget.description.set_text(
+        self.description.set_text(
             (color, description))
 
     def set_icon_state(self, result_code):
@@ -42,18 +69,18 @@ class StepWidget(WidgetWrap):
         result_code: 3 types of results, error, waiting, complete
         """
         if result_code == "error":
-            self.widget.icon.set_text(
+            self.icon.set_text(
                 ("error_icon", "\N{BLACK FLAG}"))
         elif result_code == "waiting":
-            self.widget.icon.set_text(
+            self.icon.set_text(
                 ("pending_icon", "\N{HOURGLASS}"))
         elif result_code == "active":
-            self.widget.icon.set_text(
+            self.icon.set_text(
                 ("success_icon", "\N{BALLOT BOX WITH CHECK}"))
         else:
             # NOTE: Should not get here, if we do make sure we account
             # for that error type above.
-            self.widget.icon.set_text(("error_icon", "?"))
+            self.icon.set_text(("error_icon", "?"))
 
     @property
     def current_button_index(self):
@@ -81,8 +108,8 @@ class StepWidget(WidgetWrap):
         return Pile([
             Columns(
                 [
-                    ('fixed', 3, self.widget.icon),
-                    self.widget.description,
+                    ('fixed', 3, self.icon),
+                    self.description,
                 ], dividechars=1
             )]
         )
@@ -92,11 +119,11 @@ class StepWidget(WidgetWrap):
         a previous step is run
         """
         self.set_description(self.model.description, 'body')
-        self.widget.icon.set_text((
+        self.icon.set_text((
             'pending_icon',
-            self.widget.icon.get_text()[0]
+            self.icon.get_text()[0]
         ))
-        for i in self.widget.additional_input:
+        for i in self.additional_input:
             self.app.log.debug(i)
             self.step_pile.contents.append((Padding.line_break(""),
                                             self.step_pile.options()))
@@ -124,4 +151,4 @@ class StepWidget(WidgetWrap):
     def submit(self, btn):
         self.set_icon_state('waiting')
         self.clear_button()
-        self.cb(self)
+        self.cb(self.model, self)

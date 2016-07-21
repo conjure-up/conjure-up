@@ -1,15 +1,10 @@
 from . import common
 from conjure import utils
-import sys
 
 
 class SummaryController:
-    def finish(self):
-        sys.exit(0)
-
     def render(self, results):
         common.write_results(results)
-        utils.info("\n".join(results))
-        self.finish()
+        utils.info("Installation of your big software is now complete.")
 
 _controller_class = SummaryController

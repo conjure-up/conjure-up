@@ -31,7 +31,7 @@ def get_steps(steps_dir):
     return deque(sorted(glob(os.path.join(steps_dir, 'step-*.yaml'))))
 
 
-def do_step(step, message_cb, gui=False):
+def do_step(step_model, step_widget, message_cb, gui=False):
     """ Processes steps in the background
 
     Arguments:
@@ -43,14 +43,13 @@ def do_step(step, message_cb, gui=False):
     Step title and results message
     """
 
-    step.clear_button()
-
     # merge the step_widget input data into our step model
     if gui:
-        for i in step.model.additional_input:
+        step_widget.clear_button()
+        for i in step_model.additional_input:
             try:
                 matching_widget = [
-                    x for x in step.widget.additional_input
+                    x for x in step_widget.additional_input
                     if x['key'] == i['key']][0]
                 i['input'] = matching_widget['input'].value
             except IndexError as e:
@@ -64,28 +63,34 @@ def do_step(step, message_cb, gui=False):
     # exposed in future processing tasks
     app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
 
-    set_env(step.model.additional_input)
-
-    if not os.access(step.model.path, os.X_OK):
-        app.log.error("Step {} not executable".format(step.model.path))
-
-    message_cb("Working: {}".format(step.model.title))
     if gui:
-        step.set_icon_state('waiting')
-    app.log.debug("Executing script: {}".format(step.model.path))
-    sh = utils.run_script(step.model.path)
+        # These environment variables must be set on the CLI or exported
+        # in shell
+        set_env(step_model.additional_input)
+
+    if not os.access(step_model.path, os.X_OK):
+        app.log.error("Step {} not executable".format(step_model.path))
+
+    message_cb("Running step: {}".format(step_model.title))
+    if gui:
+        step_widget.set_icon_state('waiting')
+    app.log.debug("Executing script: {}".format(step_model.path))
+    sh = utils.run_script(step_model.path)
     result = json.loads(sh.stdout.decode('utf8'))
     if result['returnCode'] > 0:
         app.log.error(
             "Failure in step: {}".format(result['message']))
         raise Exception(result['message'])
-    message_cb("Done: {}".format(step.model.title))
-    step.model.result = result['message']
+    message_cb("Done: {}".format(step_model.title))
+    step_model.result = result['message']
     if gui:
-        step.set_icon_state('active')
-        step.set_description(
+        step_widget.set_icon_state('active')
+        step_widget.set_description(
             "{}\n\nResult: {}".format(
-                step.model.description,
-                step.model.result),
+                step_model.description,
+                step_model.result),
             'info_context')
-    return step
+        return (step_model, step_widget)
+    else:
+        message_cb("Result: {}".format(step_model.result))
+        return (step_model, None)
