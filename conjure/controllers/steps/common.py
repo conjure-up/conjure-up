@@ -31,7 +31,7 @@ def get_steps(steps_dir):
     return deque(sorted(glob(os.path.join(steps_dir, 'step-*.yaml'))))
 
 
-def do_step(step, message_cb, gui=False):
+def do_step(step_model, step_widget, message_cb, gui=False):
     """ Processes steps in the background
 
     Arguments:
@@ -43,16 +43,9 @@ def do_step(step, message_cb, gui=False):
     Step title and results message
     """
 
-    if gui:
-        step_model = step.model
-        step_widget = step.widget
-    else:
-        step_model = step
-        step_widget = None
-
     # merge the step_widget input data into our step model
     if gui:
-        step.clear_button()
+        step_widget.clear_button()
         for i in step_model.additional_input:
             try:
                 matching_widget = [
@@ -80,7 +73,7 @@ def do_step(step, message_cb, gui=False):
 
     message_cb("Running step: {}".format(step_model.title))
     if gui:
-        step.set_icon_state('waiting')
+        step_widget.set_icon_state('waiting')
     app.log.debug("Executing script: {}".format(step_model.path))
     sh = utils.run_script(step_model.path)
     result = json.loads(sh.stdout.decode('utf8'))
@@ -91,12 +84,13 @@ def do_step(step, message_cb, gui=False):
     message_cb("Done: {}".format(step_model.title))
     step_model.result = result['message']
     if gui:
-        step.set_icon_state('active')
-        step.set_description(
+        step_widget.set_icon_state('active')
+        step_widget.set_description(
             "{}\n\nResult: {}".format(
                 step_model.description,
                 step_model.result),
             'info_context')
+        return (step_model, step_widget)
     else:
         message_cb("Result: {}".format(step_model.result))
-    return step
+        return (step_model, None)

@@ -35,9 +35,9 @@ class StepsController:
             model.path = fname
             app.log.debug("Running step: {}".format(model))
             try:
-                result = common.do_step(model,
-                                        utils.info)
-                self.results[result.title] = result.result
+                step_model, _ = common.do_step(model,
+                                               utils.info)
+                self.results[step_model.title] = step_model.result
             except Exception as e:
                 utils.error("Failed to run {}: {}".format(model.path, e))
                 sys.exit(1)

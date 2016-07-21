@@ -12,7 +12,6 @@ import os
 import yaml
 from collections import OrderedDict, deque
 from conjure.ui.widgets.step import StepWidget
-from conjure.ui.widgets.stepmodel import StepModelWidget
 
 
 class StepsController:
@@ -34,15 +33,15 @@ class StepsController:
 
     def get_result(self, future):
         try:
-            result = future.result()
+            step_model, step_widget = future.result()
             app.log.debug("Storing step result for: {}={}".format(
-                result.model.title, result.model.result))
-            self.results[result.model.title] = result.model.result
+                step_model.title, step_model.result))
+            self.results[step_model.title] = step_model.result
 
         except:
             return self.__handle_exception('E002', future.exception())
 
-    def finish(self, step_model, done=False):
+    def finish(self, step_model, step_widget, done=False):
         """ handles processing step with input data
 
         Arguments:
@@ -68,6 +67,7 @@ class StepsController:
 
         future = async.submit(partial(common.do_step,
                                       step_model,
+                                      step_widget,
                                       app.ui.set_footer,
                                       gui=True),
                               partial(self.__handle_exception, 'E002'))
@@ -93,7 +93,6 @@ class StepsController:
                 step_widget = StepWidget(
                     app,
                     model,
-                    StepModelWidget(model),
                     self.finish)
                 if not step_widget.model.viewable:
                     app.log.debug("Skipping step: {}".format(step_widget))
@@ -108,10 +107,10 @@ class StepsController:
             self.view = StepsView(app, steps, self.finish)
 
             # Set initial step as active and viewable
-            steps[0].widget.description.set_text((
+            steps[0].description.set_text((
                 'body', steps[0].model.description))
-            steps[0].widget.icon.set_text((
-                'pending_icon', steps[0].widget.icon.get_text()[0]
+            steps[0].icon.set_text((
+                'pending_icon', steps[0].icon.get_text()[0]
             ))
             steps[0].generate_additional_input()
             self.view.step_pile.focus_position = 2
