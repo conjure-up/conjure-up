@@ -20,7 +20,6 @@
 
 import unittest
 from unittest.mock import ANY, call, MagicMock, patch, sentinel
-from conjure import juju
 
 from conjure.controllers.deploy.gui import DeployController
 
@@ -37,6 +36,7 @@ class DeployGUIRenderTestCase(unittest.TestCase):
             'conjure.controllers.deploy.gui.get_bundleinfo')
         self.mock_get_bundleinfo = self.bundleinfo_patcher.start()
         self.mock_bundle = MagicMock(name="bundle")
+        self.mock_bundle.machines = {"1": sentinel.machine_1}
         self.mock_service_1 = MagicMock(name="s1")
         self.mock_get_bundleinfo.return_value = ("filename",
                                                  self.mock_bundle,
@@ -50,9 +50,7 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.mock_submit = self.submit_patcher.start()
 
         self.predeploy_call = call(self.controller._pre_deploy_exec, ANY,
-                                   queue_name=juju.JUJU_ASYNC_QUEUE)
-        self.add_machines_call = call(self.controller._do_add_machines, ANY,
-                                      queue_name=juju.JUJU_ASYNC_QUEUE)
+                                   queue_name=sentinel.JUJU_ASYNC_QUEUE)
 
         self.view_patcher = patch(
             'conjure.controllers.deploy.gui.ServiceWalkthroughView')
@@ -62,6 +60,11 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
 
+        self.juju_patcher = patch(
+            'conjure.controllers.deploy.gui.juju')
+        self.mock_juju = self.juju_patcher.start()
+        self.mock_juju.JUJU_ASYNC_QUEUE = sentinel.JUJU_ASYNC_QUEUE
+
     def tearDown(self):
         self.utils_patcher.stop()
         self.bundleinfo_patcher.stop()
@@ -69,35 +72,33 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.submit_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
+        self.juju_patcher.stop()
 
     def test_queue_predeploy_skipping(self):
-        "Test that we do not call predeploy more than once"
+        "Do not enqueue predeploy more than once"
 
         self.controller.is_predeploy_queued = True
         self.controller.render()
-
-        self.mock_submit.assert_called_once_with(
-            self.controller._do_add_machines, ANY,
-            queue_name=juju.JUJU_ASYNC_QUEUE)
+        self.assertEqual(self.mock_submit.call_count, 0)
 
     def test_queue_predeploy_once(self):
         "Call submit to schedule predeploy if we haven't yet"
         self.controller.render()
-        self.mock_submit.assert_has_calls([self.predeploy_call,
-                                           self.add_machines_call],
+        self.mock_submit.assert_has_calls([self.predeploy_call],
                                           any_order=True)
 
     def test_call_add_machines_once_only(self):
         "Call add_machines once"
         self.controller.render()
-        self.mock_submit.assert_has_calls([self.predeploy_call,
-                                           self.add_machines_call],
+        self.mock_submit.assert_has_calls([self.predeploy_call],
                                           any_order=True)
 
         self.mock_submit.reset_mock()
         self.controller.is_predeploy_queued = True
         self.controller.render()
         self.assertEqual(self.mock_submit.call_count, 0)
+        self.mock_juju.add_machines.assert_called_once_with(
+            [sentinel.machine_1], exc_cb=ANY)
 
     def test_finish_at_end(self):
         "Call finish only at end"
