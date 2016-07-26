@@ -21,7 +21,7 @@
 import unittest
 from unittest.mock import ANY, call, MagicMock, patch, sentinel
 
-from conjure.controllers.deploy.gui import DeployController
+from conjureup.controllers.deploy.gui import DeployController
 
 
 class DeployGUIRenderTestCase(unittest.TestCase):
@@ -29,11 +29,11 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.controller = DeployController()
 
         self.utils_patcher = patch(
-            'conjure.controllers.deploy.gui.utils')
+            'conjureup.controllers.deploy.gui.utils')
         self.mock_utils = self.utils_patcher.start()
 
         self.bundleinfo_patcher = patch(
-            'conjure.controllers.deploy.gui.get_bundleinfo')
+            'conjureup.controllers.deploy.gui.get_bundleinfo')
         self.mock_get_bundleinfo = self.bundleinfo_patcher.start()
         self.mock_bundle = MagicMock(name="bundle")
         self.mock_bundle.machines = {"1": sentinel.machine_1}
@@ -42,26 +42,26 @@ class DeployGUIRenderTestCase(unittest.TestCase):
                                                  self.mock_bundle,
                                                  [self.mock_service_1])
         self.finish_patcher = patch(
-            'conjure.controllers.deploy.gui.DeployController.finish')
+            'conjureup.controllers.deploy.gui.DeployController.finish')
         self.mock_finish = self.finish_patcher.start()
 
         self.submit_patcher = patch(
-            'conjure.controllers.deploy.gui.async.submit')
+            'conjureup.controllers.deploy.gui.async.submit')
         self.mock_submit = self.submit_patcher.start()
 
         self.predeploy_call = call(self.controller._pre_deploy_exec, ANY,
                                    queue_name=sentinel.JUJU_ASYNC_QUEUE)
 
         self.view_patcher = patch(
-            'conjure.controllers.deploy.gui.ServiceWalkthroughView')
+            'conjureup.controllers.deploy.gui.ServiceWalkthroughView')
         self.view_patcher.start()
         self.app_patcher = patch(
-            'conjure.controllers.deploy.gui.app')
+            'conjureup.controllers.deploy.gui.app')
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
 
         self.juju_patcher = patch(
-            'conjure.controllers.deploy.gui.juju')
+            'conjureup.controllers.deploy.gui.juju')
         self.mock_juju = self.juju_patcher.start()
         self.mock_juju.JUJU_ASYNC_QUEUE = sentinel.JUJU_ASYNC_QUEUE
 
@@ -118,22 +118,22 @@ class DeployGUIFinishTestCase(unittest.TestCase):
         self.controller = DeployController()
 
         self.controllers_patcher = patch(
-            'conjure.controllers.deploy.gui.controllers')
+            'conjureup.controllers.deploy.gui.controllers')
         self.mock_controllers = self.controllers_patcher.start()
 
         self.utils_patcher = patch(
-            'conjure.controllers.deploy.gui.utils')
+            'conjureup.controllers.deploy.gui.utils')
         self.mock_utils = self.utils_patcher.start()
 
         self.juju_patcher = patch(
-            'conjure.controllers.deploy.gui.juju')
+            'conjureup.controllers.deploy.gui.juju')
         self.mock_juju = self.juju_patcher.start()
 
         self.render_patcher = patch(
-            'conjure.controllers.deploy.gui.DeployController.render')
+            'conjureup.controllers.deploy.gui.DeployController.render')
         self.mock_render = self.render_patcher.start()
         self.app_patcher = patch(
-            'conjure.controllers.deploy.gui.app')
+            'conjureup.controllers.deploy.gui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
 
