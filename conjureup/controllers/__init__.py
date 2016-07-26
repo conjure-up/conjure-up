@@ -53,9 +53,9 @@ def use(controller):
     """
     try:
         if app.headless:
-            pkg = ("conjure.controllers.{}.tui".format(controller))
+            pkg = ("conjureup.controllers.{}.tui".format(controller))
         else:
-            pkg = ("conjure.controllers.{}.gui".format(controller))
+            pkg = ("conjureup.controllers.{}.gui".format(controller))
         module = import_module(pkg)
         if '_controller_class' in dir(module):
             return module._controller_class()
