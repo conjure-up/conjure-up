@@ -17,7 +17,13 @@ solutions up and going with as little hindrance as possible.
 
 It is included in the archive.
 
-## Bleeding edge
+## SNAP
+
+```
+$ sudo snap install conjure-up --edge --devmode
+```
+
+## Bleeding edge (APT)
 
 Brave? Try the bleeding edge version and file bugs to keep us honest.
 
