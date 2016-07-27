@@ -1,0 +1,24 @@
+name: conjure-up  # the name of the snap
+version: 1
+summary: Package runtime for conjure-up spells
+description: >
+   This package provides conjure-up, an interface to installing spells that
+   provide the user with an end to end walkthrough experience for installing and
+   using big software.
+
+confinement: devmode  # use "strict" to enforce system access only via declared interfaces
+
+apps:
+    conjure-up:
+        command: conjure-up
+    python3:
+        command: python3
+    shell:
+        command: bash
+
+parts:
+    conjure:
+        plugin: python3
+        source: https://github.com/ubuntu/conjure-up.git
+        source-type: git
+        requirements: parts/conjure/src/requirements.txt

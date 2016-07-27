@@ -51,10 +51,10 @@ Depends: bsdtar,
          ${shlibs:Depends}
 Breaks: conjure (<< 0.1)
 Replaces: conjure (<< 0.1)
-Description: Package runtime for apt-installable juju bundles
- This package provides Conjure, an interface to configuring apt-installable
- packages from the cloud. It utilizes apt, juju, and conjure's custom
- configuration views.
+Description: Package runtime for conjure-up spells
+ This package provides conjure-up, an interface to installing spells that
+ provide the user with an end to end walkthrough experience for installing and
+ using big software.
 
 Package: conjure
 Section: oldlibs
