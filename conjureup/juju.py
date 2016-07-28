@@ -136,10 +136,15 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
         cmd += "--credential {}".format(credential)
     app.log.debug("bootstrap cmd: {}".format(cmd))
     try:
-        p = Popen(cmd, shell=True, stdout=DEVNULL, stderr=PIPE)
-        while p.poll() is None:
-            async.sleep_until(2)
-        return p
+        pathbase = os.path.join(app.config['spell-dir'],
+                                'bootstrap')
+        with open(pathbase + ".out", 'w') as outf:
+            with open(pathbase + ".err", 'w') as errf:
+                p = Popen(cmd, shell=True, stdout=outf,
+                          stderr=errf)
+                while p.poll() is None:
+                    async.sleep_until(2)
+                return p
     except CalledProcessError:
         raise Exception("Unable to bootstrap.")
     except async.ThreadCancelledException:

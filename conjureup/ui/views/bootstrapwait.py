@@ -1,6 +1,12 @@
-from ubuntui.utils import Padding
-from urwid import (WidgetWrap, Text, Filler, Pile, Columns)
+import os
 import random
+from subprocess import check_output
+
+from urwid import (WidgetWrap, Text, Filler, Pile, Columns)
+
+from ubuntui.utils import Padding
+
+from conjureup.app_config import app
 
 
 class BootstrapWaitView(WidgetWrap):
@@ -16,6 +22,7 @@ class BootstrapWaitView(WidgetWrap):
 
     def __init__(self, app, message):
         self.message = Text(message, align="center")
+        self.output = Text("", align="center")
         self.loading_boxes = [Text(x) for x in self.load_attributes]
         super().__init__(self._build_node_waiting())
 
@@ -27,11 +34,18 @@ class BootstrapWaitView(WidgetWrap):
             i.set_text(
                 self.load_attributes[random.randrange(
                     len(self.load_attributes))])
+        bootstrap_stderrpath = os.path.join(app.config['spell-dir'],
+                                            'bootstrap.err')
+        out = check_output("tail -n 10 {}".format(bootstrap_stderrpath),
+                           shell=True)
+        self.output.set_text(out)
 
     def _build_node_waiting(self):
         """ creates a loading screen if nodes do not exist yet """
         text = [Padding.line_break(""),
                 self.message,
+                Padding.line_break(""),
+                self.output,
                 Padding.line_break("")]
 
         _boxes = []
