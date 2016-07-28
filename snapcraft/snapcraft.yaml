@@ -5,7 +5,6 @@ description: >
    This package provides conjure-up, an interface to installing spells that
    provide the user with an end to end walkthrough experience for installing and
    using big software.
-
 confinement: devmode  # use "strict" to enforce system access only via declared interfaces
 
 apps:
@@ -22,3 +21,6 @@ parts:
         source: https://github.com/ubuntu/conjure-up.git
         source-type: git
         requirements: parts/conjure/src/requirements.txt
+    stage-packages:
+        plugin: nil
+        stage-packages: [juju, wget]

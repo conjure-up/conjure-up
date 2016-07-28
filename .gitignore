@@ -75,3 +75,4 @@ virtualenv
 snapcraft/parts
 snapcraft/prime
 snapcraft/stage
+snapcraft/*.snap
