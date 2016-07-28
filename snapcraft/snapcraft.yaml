@@ -1,11 +1,11 @@
-name: conjure-up  # the name of the snap
-version: 1
+name: conjure-up
+version: 2.0.0.7
 summary: Package runtime for conjure-up spells
 description: >
    This package provides conjure-up, an interface to installing spells that
    provide the user with an end to end walkthrough experience for installing and
    using big software.
-confinement: devmode  # use "strict" to enforce system access only via declared interfaces
+confinement: strict
 
 apps:
     conjure-up:
