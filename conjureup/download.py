@@ -116,7 +116,7 @@ def get_remote_url(path):
                "/{}/bundle/{}/archive".format(namespace, bundle))
         return url
 
-    if path.startswith("cs:"):
+    if path.startswith("cs:") or path.startswith("cs:~"):
         url = ("https://api.jujucharms.com/charmstore/v5"
                "/{}/archive".format(path[3:]))
         return url
