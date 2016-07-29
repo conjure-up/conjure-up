@@ -23,7 +23,6 @@ import os
 import os.path as path
 import sys
 import uuid
-import yaml
 import re
 
 
@@ -158,6 +157,8 @@ def main():
     spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
         os.path.expanduser('~'),
         '.cache/conjure-up'))
+    if not os.path.isdir(spell_dir):
+        os.makedirs(spell_dir)
 
     app.fetcher = fetcher(opts.spell)
 
@@ -182,30 +183,19 @@ def main():
 
     has_valid_juju()
 
-    global_conf_file = '/etc/conjure-up.conf'
-    if not os.path.exists(global_conf_file):
-        global_conf_file = os.path.join(
-            os.path.dirname(__file__), '..', 'etc', 'conjure-up.conf')
-    with open(global_conf_file) as fp:
-        global_conf = yaml.safe_load(fp.read())
-
     # Bind UI
     app.ui = ConjureUI()
 
     if app.fetcher == "charmstore-search":
         utils.info("Loading current {} spells "
                    "from Juju Charmstore, please wait.".format(spell))
-        app.bundles = get_charmstore_bundles(spell, global_conf['blessed'])
+        app.bundles = get_charmstore_bundles(spell, False)
         app.config = {'metadata': None,
                       'spell-dir': spell_dir,
                       'spell': spell}
 
         # Set a general description of spell
         definition = None
-        if path.isfile('/usr/share/conjure-up/keyword-definitions.yaml'):
-            with open('/usr/share/conjure-up/keyword-definitions.yaml') as fp:
-                definitions = yaml.safe_load(fp.read())
-                definition = definitions.get(spell, None)
         if definition is None:
             try:
                 definition = next(
