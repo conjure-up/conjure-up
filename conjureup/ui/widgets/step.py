@@ -1,3 +1,6 @@
+import json
+import os
+
 from ubuntui.utils import Padding, Color
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.buttons import submit_btn
@@ -28,6 +31,7 @@ class StepWidget(WidgetWrap):
         self.title = Text(('info_minor', step_model.title))
         self.description = Text(('info_minor', step_model.description))
         self.result = Text(step_model.result)
+        self.output = Text(('info_minor', ''))
         self.icon = Text(("info_minor", "\N{BALLOT BOX}"))
 
         self.additional_input = []
@@ -52,10 +56,27 @@ class StepWidget(WidgetWrap):
 
         self.cb = cb
         self.step_pile = self.build_widget()
+        self.show_output = True
         super().__init__(self.step_pile)
 
     def __repr__(self):
         return "<StepWidget: {}>".format(self.model.title)
+
+    def update(self):
+        if not self.show_output:
+            return
+        if not os.path.exists(self.model.path + ".out"):
+            return
+        with open(self.model.path + ".out") as outf:
+            lines = outf.readlines()
+            if len(lines) < 1:
+                return
+            result = json.loads(lines[-1])
+            self.output.set_text(('body', "\n    " +
+                                  result['message']))
+
+    def clear_output(self):
+        self.output.set_text("")
 
     def set_description(self, description, color='info_minor'):
         self.description.set_text(
@@ -110,8 +131,9 @@ class StepWidget(WidgetWrap):
                 [
                     ('fixed', 3, self.icon),
                     self.description,
-                ], dividechars=1
-            )]
+                ], dividechars=1),
+            self.output
+        ]
         )
 
     def generate_additional_input(self):

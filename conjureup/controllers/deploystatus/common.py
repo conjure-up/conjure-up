@@ -27,7 +27,8 @@ def wait_for_applications(script, msg_cb):
                     raise Exception("Error running {}".format(script))
 
                 try:
-                    result = json.loads(sh.stdout.decode('utf8'))
+                    lines = sh.stdout.decode('utf8').splitlines()
+                    result = json.loads(lines[-1])
                 except json.decoder.JSONDecodeError as e:
                     app.log.exception(sh.stdout.decode())
                     raise Exception(sh)

@@ -31,11 +31,12 @@ class StepsController:
             step_metadata = {}
             with open(step_path) as fp:
                 step_metadata = yaml.load(fp.read())
-            model = StepModel(step_metadata)
+            model = StepModel(step_metadata, step_path)
             model.path = fname
             app.log.debug("Running step: {}".format(model))
             try:
                 step_model, _ = common.do_step(model,
+                                               None,
                                                utils.info)
                 self.results[step_model.title] = step_model.result
             except Exception as e:

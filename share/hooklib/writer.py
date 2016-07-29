@@ -60,3 +60,9 @@ def error(msg):
         'isComplete': False
     }))
     sys.exit(0)
+
+
+def info(msg):
+    print(json.dumps({
+        'message': msg}))
+    sys.stdout.flush()
