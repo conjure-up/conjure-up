@@ -171,6 +171,12 @@ waitForService()
     done
 }
 
+
+printInfo()
+{
+    printf '{"message": "%s"}' "$1"
+}
+
 # Parses result into json output
 #
 # Arguments:

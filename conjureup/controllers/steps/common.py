@@ -75,22 +75,27 @@ def do_step(step_model, step_widget, message_cb, gui=False):
     if gui:
         step_widget.set_icon_state('waiting')
     app.log.debug("Executing script: {}".format(step_model.path))
-    sh = utils.run_script(step_model.path)
-    result = json.loads(sh.stdout.decode('utf8'))
+    with open(step_model.path + ".out", 'w') as outf:
+            with open(step_model.path + ".err", 'w') as errf:
+                utils.run_script(step_model.path,
+                                 stderr=errf,
+                                 stdout=outf)
+    try:
+        with open(step_model.path + ".out") as outf:
+            lines = outf.readlines()
+            result = json.loads(lines[-1])
+    except:
+        raise Exception("Could not read output from step "
+                        "{}".format(step_model.path))
+    if 'returnCode' not in result:
+        raise Exception("Invalid last message from step: {}".format(result))
     if result['returnCode'] > 0:
         app.log.error(
             "Failure in step: {}".format(result['message']))
         raise Exception(result['message'])
-    message_cb("Done: {}".format(step_model.title))
+
     step_model.result = result['message']
-    if gui:
-        step_widget.set_icon_state('active')
-        step_widget.set_description(
-            "{}\n\nResult: {}".format(
-                step_model.description,
-                step_model.result),
-            'info_context')
-        return (step_model, step_widget)
-    else:
-        message_cb("Result: {}".format(step_model.result))
-        return (step_model, None)
+    message_cb("{} done, result:".format(step_model.title,
+                                         step_model.result))
+
+    return (step_model, step_widget)

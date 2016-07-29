@@ -29,17 +29,26 @@ class StepsController:
     def __handle_exception(self, tag, exc):
         utils.pollinate(app.session_id, tag)
         EventLoop.remove_alarms()
-        return app.ui.show_exception_message(exc)
+        app.ui.show_exception_message(exc)
 
     def get_result(self, future):
-        try:
-            step_model, step_widget = future.result()
-            app.log.debug("Storing step result for: {}={}".format(
-                step_model.title, step_model.result))
-            self.results[step_model.title] = step_model.result
+        if future.exception():
+            self.__handle_exception('E002', future.exception())
 
-        except:
-            return self.__handle_exception('E002', future.exception())
+        step_model, step_widget = future.result()
+
+        step_widget.set_icon_state('active')
+        step_widget.set_description(
+            "{}\n\nResult: {}".format(
+                step_model.description,
+                step_model.result),
+            'info_context')
+        step_widget.show_output = False
+        step_widget.clear_output()
+
+        app.log.debug("Storing step result for: {}={}".format(
+            step_model.title, step_model.result))
+        self.results[step_model.title] = step_model.result
 
     def finish(self, step_model, step_widget, done=False):
         """ handles processing step with input data
@@ -49,6 +58,7 @@ class StepsController:
         done: if True continues on to the summary view
         """
         if done:
+            EventLoop.remove_alarms()
             return controllers.use('summary').render(self.results)
 
         # Set next button focus here now that the step is complete.
@@ -73,6 +83,11 @@ class StepsController:
                               partial(self.__handle_exception, 'E002'))
         future.add_done_callback(self.get_result)
 
+    def update(self, *args):
+        for w in self.all_step_widgets:
+            w.update()
+        EventLoop.set_alarm_in(1, self.update)
+
     def render(self):
         """ Render services status view
         """
@@ -89,7 +104,7 @@ class StepsController:
 
             try:
                 # Store step model and its widget
-                model = StepModel(step_metadata)
+                model = StepModel(step_metadata, step_path)
                 step_widget = StepWidget(
                     app,
                     model,
@@ -101,9 +116,10 @@ class StepsController:
                 steps.append(step_widget)
                 app.log.debug("Queueing step: {}".format(step_widget))
             except Exception as e:
-                return self.__handle_exception('E002', e)
+                self.__handle_exception('E002', e)
 
         try:
+            self.all_step_widgets = list(steps)
             self.view = StepsView(app, steps, self.finish)
 
             # Set initial step as active and viewable
@@ -116,7 +132,7 @@ class StepsController:
             self.view.step_pile.focus_position = 2
 
         except Exception as e:
-            return self.__handle_exception('E002', e)
+            self.__handle_exception('E002', e)
 
         app.ui.set_header(
             title="Additional Application Configuration",
@@ -124,6 +140,7 @@ class StepsController:
             "application with these steps.")
         app.ui.set_body(self.view)
         app.ui.set_footer('')
+        self.update()
 
 
 _controller_class = StepsController

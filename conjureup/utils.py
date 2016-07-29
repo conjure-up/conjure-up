@@ -17,8 +17,8 @@ from bundleplacer.config import Config
 from bundleplacer.charmstore_api import MetadataController
 
 
-def run_script(path):
-    return run(path, shell=True, stderr=PIPE, stdout=PIPE, env=app.env)
+def run_script(path, stderr=PIPE, stdout=PIPE):
+    return run(path, shell=True, stderr=stderr, stdout=stdout, env=app.env)
 
 
 def run_attach(cmd, output_cb=None):
