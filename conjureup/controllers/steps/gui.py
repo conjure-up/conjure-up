@@ -89,8 +89,11 @@ class StepsController:
         EventLoop.set_alarm_in(1, self.update)
 
     def render(self):
-        """ Render services status view
-        """
+
+        if len(self.step_metas) == 0:
+            self.finish(None, None, done=True)
+            return
+
         step_widgets = deque()
         
         for step_meta_path in self.step_metas:
