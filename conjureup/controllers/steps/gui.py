@@ -119,6 +119,7 @@ class StepsController:
                 app.log.debug("Queueing step: {}".format(step_widget))
             except Exception as e:
                 self.__handle_exception('E002', e)
+                return
 
         try:
             self.all_step_widgets = list(step_widgets)
@@ -135,6 +136,7 @@ class StepsController:
 
         except Exception as e:
             self.__handle_exception('E002', e)
+            return
 
         app.ui.set_header(
             title="Additional Application Configuration",
