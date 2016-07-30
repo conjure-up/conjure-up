@@ -19,16 +19,18 @@ def set_env(inputs):
             app.env[env_key]))
 
 
-def get_steps(steps_dir):
-    """ Gets a list of steps that can be executed on
+def get_step_metadata_filenames(steps_dir):
+    """Gets a list of step metadata filenames sorted alphabetically
+    (hence in execution order)
 
     Arguments:
-    steps_dir: path of steps
+    steps_dir: path to search for step metadata files
 
     Returns:
-    list of executable steps
+    list of step metadata file names
+
     """
-    return deque(sorted(glob(os.path.join(steps_dir, 'step-*.yaml'))))
+    return sorted(glob(os.path.join(steps_dir, 'step-*.yaml')))
 
 
 def do_step(step_model, step_widget, message_cb, gui=False):
