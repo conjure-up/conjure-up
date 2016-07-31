@@ -6,7 +6,7 @@ from conjureup.app_config import app
 from conjureup import utils
 from conjureup import controllers
 from conjureup.models.step import StepModel
-from . import common
+from .common import do_step, get_step_metadata_filenames
 import os.path as path
 import os
 import yaml
@@ -22,7 +22,7 @@ class StepsController:
         self.bundle_scripts = path.join(
             app.config['spell-dir'], 'conjure/steps'
         )
-        self.steps = common.get_steps(self.bundle_scripts)
+        self.step_metas = get_step_metadata_filenames(self.bundle_scripts)
 
         self.results = OrderedDict()
 
@@ -75,7 +75,7 @@ class StepsController:
             app.log.debug("Next focused button: {}".format(index))
             self.view.step_pile.focus_position = index
 
-        future = async.submit(partial(common.do_step,
+        future = async.submit(partial(do_step,
                                       step_model,
                                       step_widget,
                                       app.ui.set_footer,
@@ -89,22 +89,27 @@ class StepsController:
         EventLoop.set_alarm_in(1, self.update)
 
     def render(self):
-        """ Render services status view
-        """
-        steps = deque()
-        for step_path in self.steps:
-            fname, ext = path.splitext(step_path)
-            if not path.isfile(fname) or not os.access(fname, os.X_OK):
+
+        if len(self.step_metas) == 0:
+            self.finish(None, None, done=True)
+            return
+
+        step_widgets = deque()
+        
+        for step_meta_path in self.step_metas:
+            step_ex_path, ext = path.splitext(step_meta_path)
+            if not path.isfile(step_ex_path) or \
+               not os.access(step_ex_path, os.X_OK):
                 app.log.error(
-                    'Unable to process step, missing {}'.format(fname))
+                    'Unable to process step, missing {}'.format(step_ex_path))
                 continue
             step_metadata = {}
-            with open(step_path) as fp:
+            with open(step_meta_path) as fp:
                 step_metadata = yaml.load(fp.read())
 
             try:
                 # Store step model and its widget
-                model = StepModel(step_metadata, step_path)
+                model = StepModel(step_metadata, step_meta_path)
                 step_widget = StepWidget(
                     app,
                     model,
@@ -112,27 +117,29 @@ class StepsController:
                 if not step_widget.model.viewable:
                     app.log.debug("Skipping step: {}".format(step_widget))
                     continue
-                model.path = fname
-                steps.append(step_widget)
+                model.path = step_ex_path
+                step_widgets.append(step_widget)
                 app.log.debug("Queueing step: {}".format(step_widget))
             except Exception as e:
                 self.__handle_exception('E002', e)
+                return
 
         try:
-            self.all_step_widgets = list(steps)
-            self.view = StepsView(app, steps, self.finish)
+            self.all_step_widgets = list(step_widgets)
+            self.view = StepsView(app, step_widgets, self.finish)
 
             # Set initial step as active and viewable
-            steps[0].description.set_text((
-                'body', steps[0].model.description))
-            steps[0].icon.set_text((
-                'pending_icon', steps[0].icon.get_text()[0]
+            step_widgets[0].description.set_text((
+                'body', step_widgets[0].model.description))
+            step_widgets[0].icon.set_text((
+                'pending_icon', step_widgets[0].icon.get_text()[0]
             ))
-            steps[0].generate_additional_input()
+            step_widgets[0].generate_additional_input()
             self.view.step_pile.focus_position = 2
 
         except Exception as e:
             self.__handle_exception('E002', e)
+            return
 
         app.ui.set_header(
             title="Additional Application Configuration",
