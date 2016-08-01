@@ -3,6 +3,10 @@ import shutil
 import tempfile
 import os
 from conjureup.app_config import app
+import requests
+from progressbar import (ProgressBar, Bar,
+                         Percentage, AnimatedMarker,
+                         UnknownLength)
 
 
 def fetcher(spell):
@@ -36,12 +40,7 @@ def fetcher(spell):
 def remote_exists(path):
     """ Verifies remote url archive exists
     """
-    try:
-        run('wget --spider -q {}'.format(path), shell=True,
-            check=True)
-    except CalledProcessError:
-        return False
-    return True
+    return requests.head(path).ok
 
 
 def download_local(src, dst):
@@ -58,6 +57,34 @@ def download_local(src, dst):
         raise e
 
 
+def download_requests_stream(request_stream, destination, message=None):
+    """ This is a facility to download a request with nice progress bars.
+    """
+    if not message:
+        message = 'Downloading {!r}'.format(os.path.basename(destination))
+
+    total_length = int(request_stream.headers.get('Content-Length', '0'))
+    if total_length:
+        progress_bar = ProgressBar(
+            widgets=[message,
+                     Bar(marker='=', left='[', right=']'),
+                     ' ', Percentage()],
+            maxval=total_length)
+    else:
+        progress_bar = ProgressBar(
+            widgets=[message, AnimatedMarker()],
+            maxval=UnknownLength)
+
+    total_read = 0
+    progress_bar.start()
+    with open(destination, 'wb') as destination_file:
+        for buf in request_stream.iter_content(1024):
+            destination_file.write(buf)
+            total_read += len(buf)
+            progress_bar.update(total_read)
+    progress_bar.finish()
+
+
 def download(src, dst, purge_top_level=True):
     """ Download and extract archive
 
@@ -72,9 +99,8 @@ def download(src, dst, purge_top_level=True):
         shutil.rmtree(dst, ignore_errors=True)
         os.makedirs(dst)
         with tempfile.TemporaryDirectory() as tmpdirname:
-            run("wget -qO {}/temp.zip {}".format(tmpdirname, src),
-                shell=True,
-                check=True)
+            request = requests.get(src, stream=True)
+            download_requests_stream(request, "{}/temp.zip".format(tmpdirname))
             bsdtar_cmd = "bsdtar -xf {}/temp.zip ".format(tmpdirname)
             if purge_top_level:
                 bsdtar_cmd += "-s'|[^/]*/||' "

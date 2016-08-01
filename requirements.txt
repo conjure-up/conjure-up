@@ -10,3 +10,4 @@ termcolor
 petname
 six
 configobj
+progressbar2
