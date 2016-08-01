@@ -34,8 +34,13 @@ class BootstrapWaitView(WidgetWrap):
             i.set_text(
                 self.load_attributes[random.randrange(
                     len(self.load_attributes))])
-        bootstrap_stderrpath = os.path.join(app.config['spell-dir'],
-                                            'bootstrap.err')
+        cache_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
+            os.path.expanduser('~'),
+            '.cache/conjure-up'))
+
+        bootstrap_stderrpath = os.path.join(
+            cache_dir,
+            '{}-bootstrap.err').format(app.current_controller)
         try:
             out = check_output("tail -n 10 {}".format(bootstrap_stderrpath),
                                shell=True, stderr=DEVNULL)
