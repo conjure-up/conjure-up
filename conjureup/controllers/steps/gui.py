@@ -6,7 +6,7 @@ from conjureup.app_config import app
 from conjureup import utils
 from conjureup import controllers
 from conjureup.models.step import StepModel
-from .common import do_step, get_step_metadata_filenames
+from conjureup.controllers.steps import common
 import os.path as path
 import os
 import yaml
@@ -22,7 +22,8 @@ class StepsController:
         self.bundle_scripts = path.join(
             app.config['spell-dir'], 'conjure/steps'
         )
-        self.step_metas = get_step_metadata_filenames(self.bundle_scripts)
+        self.step_metas = common.get_step_metadata_filenames(
+            self.bundle_scripts)
 
         self.results = OrderedDict()
 
@@ -75,7 +76,7 @@ class StepsController:
             app.log.debug("Next focused button: {}".format(index))
             self.view.step_pile.focus_position = index
 
-        future = async.submit(partial(do_step,
+        future = async.submit(partial(common.do_step,
                                       step_model,
                                       step_widget,
                                       app.ui.set_footer,
