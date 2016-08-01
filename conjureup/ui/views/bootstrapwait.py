@@ -1,6 +1,6 @@
 import os
 import random
-from subprocess import check_output, CalledProcessError
+from subprocess import check_output, CalledProcessError, DEVNULL
 
 from urwid import (WidgetWrap, Text, Filler, Pile, Columns)
 
@@ -38,7 +38,7 @@ class BootstrapWaitView(WidgetWrap):
                                             'bootstrap.err')
         try:
             out = check_output("tail -n 10 {}".format(bootstrap_stderrpath),
-                               shell=True)
+                               shell=True, stderr=DEVNULL)
             self.output.set_text(out)
         except CalledProcessError:
             self.output.set_text("Waiting")
