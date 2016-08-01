@@ -1,6 +1,6 @@
 import os
 import random
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 
 from urwid import (WidgetWrap, Text, Filler, Pile, Columns)
 
@@ -36,8 +36,11 @@ class BootstrapWaitView(WidgetWrap):
                     len(self.load_attributes))])
         bootstrap_stderrpath = os.path.join(app.config['spell-dir'],
                                             'bootstrap.err')
-        out = check_output("tail -n 10 {}".format(bootstrap_stderrpath),
-                           shell=True)
+        try:
+            out = check_output("tail -n 10 {}".format(bootstrap_stderrpath),
+                               shell=True)
+        except CalledProcessError:
+            self.output.set_text("Waiting")
         self.output.set_text(out)
 
     def _build_node_waiting(self):
