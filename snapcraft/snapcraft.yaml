@@ -21,6 +21,15 @@ parts:
         source: https://github.com/ubuntu/conjure-up.git
         source-type: git
         requirements: parts/conjure/src/requirements.txt
-    stage-packages:
-        plugin: nil
-        stage-packages: [juju, wget]
+        stage-packages:
+          - juju
+          - bsdtar
+          - coreutils
+          - lxd-client
+          - lxd
+          - jq
+          - charm-tools
+          - charm
+          - python3-glanceclient
+          - python3-neutronclient
+          - python3-openstackclient
