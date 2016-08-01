@@ -39,9 +39,9 @@ class BootstrapWaitView(WidgetWrap):
         try:
             out = check_output("tail -n 10 {}".format(bootstrap_stderrpath),
                                shell=True)
+            self.output.set_text(out)
         except CalledProcessError:
             self.output.set_text("Waiting")
-        self.output.set_text(out)
 
     def _build_node_waiting(self):
         """ creates a loading screen if nodes do not exist yet """
