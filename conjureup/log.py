@@ -1,10 +1,15 @@
 import logging
-from logging.handlers import SysLogHandler
+import os.path as path
+from logging.handlers import TimedRotatingFileHandler
 
 
 def setup_logging(app, debug=False):
-    cmdslog = SysLogHandler('/dev/log',
-                            facility=SysLogHandler.LOG_DAEMON)
+    LOGFILE = path.join(app.config['spell-dir'],
+                        'log')
+    cmdslog = TimedRotatingFileHandler(LOGFILE,
+                                       when='D',
+                                       interval=1,
+                                       backupCount=7)
     if debug:
         env = logging.DEBUG
         cmdslog.setFormatter(logging.Formatter(

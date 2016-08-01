@@ -23,4 +23,4 @@ parts:
         requirements: parts/conjure/src/requirements.txt
     stage-packages:
         plugin: nil
-        stage-packages: [juju, wget]
+        stage-packages: [juju, wget, bsdtar, coreutils]
