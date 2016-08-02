@@ -92,12 +92,22 @@ class DeployTUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.deploy.tui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.juju_patcher = patch(
+            'conjureup.controllers.deploy.tui.juju')
+        self.mock_juju = self.juju_patcher.start()
+        self.mock_juju.JUJU_ASYNC_QUEUE = sentinel.JUJU_ASYNC_QUEUE
+
+        self.concurrent_patcher = patch(
+            'conjureup.controllers.deploy.tui.concurrent')
+        self.mock_concurrent = self.concurrent_patcher.start()
 
     def tearDown(self):
         self.controllers_patcher.stop()
         self.utils_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.juju_patcher.stop()
+        self.concurrent_patcher.stop()
 
     def test_finish(self):
         "call finish"
