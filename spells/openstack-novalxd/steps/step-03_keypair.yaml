@@ -1,0 +1,10 @@
+title: SSH
+description: |
+  Import SSH keypairs into OpenStack. This allows you to access the newly deployed instances via SSH with your current user. If you are not sure about the location of a ssh key leave it as is and we will create one automatically.
+viewable: True
+required: True
+additional-input:
+  - label: SSH public key path
+    key: SSHPUBLICKEY
+    type: text
+    default: ~/.ssh/id_rsa.pub

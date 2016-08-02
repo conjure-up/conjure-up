@@ -1,0 +1,5 @@
+cloud-blacklist:
+- localhost
+friendly-name: Kubernetes
+version: 1
+bundle-location: https://api.jujucharms.com/charmstore/v5/observable-kubernetes/archive/bundle.yaml

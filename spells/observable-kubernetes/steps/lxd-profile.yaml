@@ -1,0 +1,19 @@
+name: juju-##MODEL##
+config:
+  linux.kernel_modules: overlay, nf_nat
+  security.nesting: "true"
+  security.privileged: "true"
+description: Profile supporting docker in containers
+devices:
+  aadisable:
+    path: /sys/module/apparmor/parameters/enabled
+    source: /dev/null
+    type: disk
+  fuse:
+    path: /dev/fuse
+    type: unix-char
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: lxdbr0
+    type: nic

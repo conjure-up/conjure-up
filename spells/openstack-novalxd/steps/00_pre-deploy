@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import time
+from subprocess import run, PIPE, CalledProcessError
+
+# Conjure-up specific
+sys.path.insert(0, '/usr/share/conjure-up/hooklib')
+import juju  # noqa
+from writer import log, success, fail, error  # noqa
+
+SCRIPTPATH = os.path.dirname(os.path.abspath(__file__))
+
+
+def main():
+    provider_type = os.environ.get('JUJU_PROVIDERTYPE', None)
+
+    if provider_type == "lxd":
+        log.debug("Running pre-deploy for OpenStack")
+        # Give LXD enough time to learn about the profile
+        time.sleep(5)
+        try:
+            profilename = run('juju switch | cut -d: -f2',
+                              shell=True,
+                              stdout=PIPE,
+                              stderr=PIPE)
+            profilename = profilename.stdout.decode().strip()
+        except CalledProcessError as e:
+            error(e)
+
+        log.debug("Processing lxd profile: {}".format(profilename))
+
+        try:
+            profile_edit = run(
+                'sed "s/##MODEL##/{profile}/" '
+                '{scriptpath}/lxd-profile.yaml | '
+                'lxc profile edit "juju-{profile}"'.format(
+                    profile=profilename,
+                    scriptpath=SCRIPTPATH),
+                shell=True,
+                stdout=PIPE,
+                stderr=PIPE)
+        except CalledProcessError as e:
+            error(e)
+
+        if profile_edit.returncode > 0:
+            error(profile_edit.stderr)
+
+    success("Successful pre-deploy.")
+
+if __name__ == "__main__":
+    main()

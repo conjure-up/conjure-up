@@ -1,0 +1,16 @@
+cloud-whitelist:
+- localhost
+friendly-name: OpenStack with NovaLXD
+options-whitelist:
+  keystone:
+  - admin-password
+  lxd:
+  - block-devices
+  mysql:
+  - max-connections
+  neutron-gateway:
+  - ext-port
+  nova-compute:
+  - virt-type
+packages:
+- openstack

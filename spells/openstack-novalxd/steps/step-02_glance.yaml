@@ -1,0 +1,4 @@
+title: Glance
+description: |
+    Import glance images that will be readily available to start compute instances.
+viewable: True
