@@ -1,11 +1,6 @@
-from conjureup.app_config import app
-import os
 
 
-save_path = os.path.join(app.config['spell-dir'], 'results.txt')
-
-
-def write_results(results):
+def write_results(results, save_path):
     output = []
     for k, v in results.items():
         output.append("{}: {}".format(k, v))

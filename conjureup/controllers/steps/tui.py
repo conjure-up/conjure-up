@@ -1,4 +1,4 @@
-from .common import do_step, get_step_metadata_filenames
+from conjureup.controllers.steps import common
 from collections import OrderedDict
 from conjureup import controllers
 from conjureup.app_config import app
@@ -15,7 +15,8 @@ class StepsController:
         self.bundle_scripts = path.join(
             app.config['spell-dir'], 'conjure/steps'
         )
-        self.step_metas = get_step_metadata_filenames(self.bundle_scripts)
+        self.step_metas = common.get_step_metadata_filenames(
+            self.bundle_scripts)
         self.results = OrderedDict()
 
     def finish(self):
@@ -36,9 +37,9 @@ class StepsController:
             model.path = step_ex_path
             app.log.debug("Running step: {}".format(model))
             try:
-                step_model, _ = do_step(model,
-                                        None,
-                                        utils.info)
+                step_model, _ = common.do_step(model,
+                                               None,
+                                               utils.info)
                 self.results[step_model.title] = step_model.result
             except Exception as e:
                 utils.error("Failed to run {}: {}".format(model.path, e))
