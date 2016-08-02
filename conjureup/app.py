@@ -138,12 +138,6 @@ def main():
 
     app.fetcher = fetcher(opts.spell)
 
-    if os.geteuid() == 0:
-        utils.info("")
-        utils.info("This should _not_ be run as root or with sudo.")
-        utils.info("")
-        sys.exit(1)
-
     # Application Config
     app.argv = opts
     app.log = setup_logging("conjure-up/{}".format(spell),
