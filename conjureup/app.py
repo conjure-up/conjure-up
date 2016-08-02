@@ -135,6 +135,8 @@ def main():
 
     # cached spell dir
     spell_dir = opts.spell_dir
+    if not os.path.isdir(spell_dir):
+        os.makedirs(spell_dir)
 
     app.fetcher = fetcher(opts.spell)
 
@@ -147,6 +149,7 @@ def main():
     # Application Config
     app.argv = opts
     app.log = setup_logging("conjure-up/{}".format(spell),
+                            os.path.join(spell_dir, 'conjure-up.log'),
                             opts.debug)
 
     # Setup proxy
