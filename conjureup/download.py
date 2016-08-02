@@ -98,15 +98,16 @@ def download(src, dst, purge_top_level=True):
     try:
         shutil.rmtree(dst, ignore_errors=True)
         os.makedirs(dst)
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            request = requests.get(src, stream=True)
-            download_requests_stream(request, "{}/temp.zip".format(tmpdirname))
-            bsdtar_cmd = "bsdtar -xf {}/temp.zip ".format(tmpdirname)
-            if purge_top_level:
-                bsdtar_cmd += "-s'|[^/]*/||' "
-            bsdtar_cmd += "-C {}".format(dst)
-            app.log.debug("Extracting spell: {}".format(bsdtar_cmd))
-            run(bsdtar_cmd, shell=True, check=True)
+        request = requests.get(src, stream=True)
+        tmpfile = os.path.join(os.environ.get('TEMPDIR', '/tmp'),
+                               'temp.zip')
+        download_requests_stream(request, tmpfile)
+        bsdtar_cmd = "bsdtar -xf {} ".format(tmpfile)
+        if purge_top_level:
+            bsdtar_cmd += "-s'|[^/]*/||' "
+        bsdtar_cmd += "-C {}".format(dst)
+        app.log.debug("Extracting spell: {}".format(bsdtar_cmd))
+        run(bsdtar_cmd, shell=True, check=True)
     except CalledProcessError as e:
         raise Exception("Unable to download {}: {}".format(src, e))
 

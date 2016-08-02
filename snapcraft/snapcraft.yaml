@@ -8,28 +8,39 @@ description: >
 confinement: strict
 
 apps:
-    conjure-up:
-        command: conjure-up
-    python3:
-        command: python3
-    shell:
-        command: bash
+  conjure-up:
+    command: conjure-up -c $SNAP/etc/conjure-up.conf --spell-dir $HOME/spells --spell-definitions $SNAP/spell-definitions.yaml
+    plugs: [home]
+  python3:
+    command: python3
+  shell:
+    command: bash
 
 parts:
-    conjure:
-        plugin: python3
-        source: https://github.com/ubuntu/conjure-up.git
-        source-type: git
-        requirements: parts/conjure/src/requirements.txt
-        stage-packages:
-          - juju
-          - bsdtar
-          - coreutils
-          - lxd-client
-          - lxd
-          - jq
-          - charm-tools
-          - charm
-          - python3-glanceclient
-          - python3-neutronclient
-          - python3-openstackclient
+  conjure:
+    plugin: python3
+    source: https://github.com/ubuntu/conjure-up.git
+    source-type: git
+    requirements: parts/conjure/src/requirements.txt
+    stage-packages:
+      - bsdtar
+      - coreutils
+      - lxd-client
+      - lxd
+      - jq
+      - charm-tools
+      - charm
+  juju:
+    plugin: nil
+    stage-packages:
+      - juju
+    snap:
+      - usr/bin/juju*
+      - usr/lib/juju*
+  conjure-configs:
+    plugin: copy
+    source: https://github.com/ubuntu/conjure-up.git
+    source-type: git
+    files:
+      etc/conjure-up.conf: etc/conjure-up.conf
+      share/spell-definitions.yaml: spell-definitions.yaml
