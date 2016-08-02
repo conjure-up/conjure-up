@@ -30,9 +30,6 @@ parts:
       - jq
       - charm-tools
       - charm
-      - python3-glanceclient
-      - python3-neutronclient
-      - python3-openstackclient
   juju:
     plugin: nil
     stage-packages:
