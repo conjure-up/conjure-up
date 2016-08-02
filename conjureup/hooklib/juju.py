@@ -20,8 +20,10 @@ def leader(application):
     application: name of application to query.
     """
     try:
-        sh = run('juju run --application $1 is-leader --format yaml',
-                 shell=True, stdout=PIPE, check=True)
+        sh = run(
+            'juju run --application {} is-leader --format yaml'.format(
+                application),
+            shell=True, stdout=PIPE, check=True)
     except CalledProcessError:
         return None
 
