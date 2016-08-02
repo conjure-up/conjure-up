@@ -2,7 +2,8 @@ from conjureup import controllers
 from conjureup import juju
 from conjureup import utils
 from conjureup.app_config import app
-from . import common
+from conjureup.controllers.clouds.common import get_controller_in_cloud
+
 import petname
 import sys
 import os
@@ -17,7 +18,7 @@ class CloudsController:
                          "/usr/share/conjure-up/run-lxd-config",
                          back)
 
-        existing_controller = common.get_controller_in_cloud(app.argv.cloud)
+        existing_controller = get_controller_in_cloud(app.argv.cloud)
         if existing_controller is None:
             return controllers.use('newcloud').render(app.argv.cloud)
 

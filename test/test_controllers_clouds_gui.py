@@ -19,8 +19,8 @@
 
 
 import unittest
-#  from unittest.mock import ANY, call, MagicMock, patch, sentinel
-from unittest.mock import patch, MagicMock
+
+from unittest.mock import call, patch, MagicMock
 
 from conjureup.controllers.clouds.gui import CloudsController
 
@@ -44,17 +44,17 @@ class CloudsGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.clouds.gui.app')
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
-        self.common_patcher = patch(
-            'conjureup.controllers.clouds.gui.common')
-        self.mock_common = self.common_patcher.start()
-        self.mock_common.list_clouds.return_value = ['test1', 'test2']
+        self.list_clouds_patcher = patch(
+            'conjureup.controllers.clouds.gui.list_clouds')
+        self.mock_list_clouds = self.list_clouds_patcher.start()
+        self.mock_list_clouds.return_value = ['test1', 'test2']
 
     def tearDown(self):
         self.utils_patcher.stop()
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
-        self.common_patcher.start()
+        self.list_clouds_patcher.start()
 
     def test_render(self):
         "call render"
@@ -82,13 +82,32 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
         self.mock_app.ui = MagicMock(name="app.ui")
 
         self.cloudname = 'testcloudname'
+        self.juju_patcher = patch(
+            'conjureup.controllers.clouds.gui.juju')
+        self.mock_juju = self.juju_patcher.start()
+
+        self.gcc_patcher = patch(
+            'conjureup.controllers.clouds.gui.get_controller_in_cloud')
+        self.mock_gcc = self.gcc_patcher.start()
 
     def tearDown(self):
         self.controllers_patcher.stop()
         self.utils_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.juju_patcher.stop()
+        self.gcc_patcher.stop()
 
-    def test_finish(self):
-        "call finish"
-        self.controller.finish(self.cloudname)
+    def test_finish_w_controller(self):
+        "clouds.finish with an existing controller"
+        self.mock_gcc.return_value = 'testcontroller'
+        self.controller.finish('testcloud')
+        self.mock_juju.assert_has_calls([
+            call.switch_controller('testcontroller')])
+
+    def test_finish_no_controller(self):
+        "clouds.finish without existing controller"
+        self.mock_gcc.return_value = None
+        self.controller.finish('testcloud')
+        self.mock_controllers.use.assert_has_calls([
+            call('newcloud'), call().render('testcloud')])

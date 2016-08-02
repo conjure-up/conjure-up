@@ -5,7 +5,8 @@ from conjureup import controllers
 from conjureup.app_config import app
 from conjureup import juju
 import petname
-from . import common
+from conjureup.controllers.clouds.common import (get_controller_in_cloud,
+                                                 list_clouds)
 
 
 class CloudsController:
@@ -28,7 +29,7 @@ class CloudsController:
         cloud: Cloud to create the controller/model on.
         """
         utils.pollinate(app.session_id, 'CS')
-        existing_controller = common.get_controller_in_cloud(cloud)
+        existing_controller = get_controller_in_cloud(cloud)
 
         if existing_controller is None:
             return controllers.use('newcloud').render(cloud)
@@ -46,7 +47,7 @@ class CloudsController:
         return controllers.use('variants').render()
 
     def render(self):
-        clouds = common.list_clouds()
+        clouds = list_clouds()
         excerpt = app.config.get(
             'description',
             "Please select from a list of available clouds")
