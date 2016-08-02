@@ -24,7 +24,6 @@ import os.path as path
 import sys
 import uuid
 import yaml
-import re
 
 
 def parse_options(argv):
@@ -37,6 +36,16 @@ def parse_options(argv):
     parser.add_argument('-s', '--status', action='store_true',
                         dest='status_only',
                         help='Display the summary of the conjuring')
+    parser.add_argument('-c', dest='global_config_file',
+                        help='Location of conjure-up.conf',
+                        default='/etc/conjure-up.conf')
+    parser.add_argument(
+        '--spell-definitions', dest='spell_definitions',
+        help='Location of spell definitions',
+        default='/usr/share/conjure-up/spell-definitions.yaml')
+    parser.add_argument('--spell-dir', dest='spell_dir',
+                        help='Location of spells directory',
+                        default='/usr/share/conjure-up')
     parser.add_argument('--apt-proxy', dest='apt_http_proxy',
                         help='Specify APT proxy')
     parser.add_argument('--apt-https-proxy', dest='apt_https_proxy',
@@ -74,36 +83,6 @@ def _start(*args, **kwargs):
         controllers.use('deploystatus').render()
     else:
         controllers.use('clouds').render()
-
-
-def has_valid_juju():
-    """ Checks for valid Juju version
-    """
-    try:
-        docs_url = "https://jujucharms.com/docs/stable/getting-started"
-        juju_version = juju.version()
-        if int(juju_version[0]) < 2:
-            utils.warning(
-                "Only Juju v2 beta9 and above is supported, "
-                "your currently installed version is {}.\n\n"
-                "Please refer to {} for help on installing "
-                "the correct Juju.".format(juju_version, docs_url))
-            sys.exit(1)
-
-        beta_release_regex = re.compile('^.*beta(\d+)')
-        beta_release_ver = beta_release_regex.search(juju_version)
-        if beta_release_ver is not None:
-            app.log.debug("Beta release found, checking minimum requirements.")
-            if int(beta_release_ver.group(1)) < 10:
-                utils.warning(
-                    "Juju v2 beta10 is the lowest support release. Please "
-                    "make sure you are on the latest release Juju. See {} "
-                    "for more information.".format(docs_url)
-                )
-                sys.exit(1)
-    except Exception as e:
-        utils.warning(e)
-        sys.exit(1)
 
 
 def install_pkgs(pkgs):
@@ -155,9 +134,7 @@ def main():
     spell = os.path.basename(os.path.abspath(opts.spell))
 
     # cached spell dir
-    spell_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
-        os.path.expanduser('~'),
-        '.cache/conjure-up'))
+    spell_dir = opts.spell_dir
 
     app.fetcher = fetcher(opts.spell)
 
@@ -180,13 +157,11 @@ def main():
                                    spell,
                                    str(uuid.uuid4())))
 
-    has_valid_juju()
-
-    global_conf_file = '/etc/conjure-up.conf'
-    if not os.path.exists(global_conf_file):
-        global_conf_file = os.path.join(
-            os.path.dirname(__file__), '..', 'etc', 'conjure-up.conf')
-    with open(global_conf_file) as fp:
+    if not os.path.exists(app.argv.global_config_file):
+        utils.error("Could not find: {}, please check your install.".format(
+            app.argv.global_config_file))
+        sys.exit(1)
+    with open(app.argv.global_config_file) as fp:
         global_conf = yaml.safe_load(fp.read())
 
     # Bind UI
@@ -202,8 +177,9 @@ def main():
 
         # Set a general description of spell
         definition = None
-        if path.isfile('/usr/share/conjure-up/keyword-definitions.yaml'):
-            with open('/usr/share/conjure-up/keyword-definitions.yaml') as fp:
+        spell_definitions_file = app.argv.spell_definitions
+        if path.isfile(spell_definitions_file):
+            with open(spell_definitions_file) as fp:
                 definitions = yaml.safe_load(fp.read())
                 definition = definitions.get(spell, None)
         if definition is None:

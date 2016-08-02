@@ -136,11 +136,7 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
         cmd += "--credential {}".format(credential)
     app.log.debug("bootstrap cmd: {}".format(cmd))
     try:
-        cache_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
-            os.path.expanduser('~'),
-            '.cache/conjure-up'))
-
-        pathbase = os.path.join(cache_dir,
+        pathbase = os.path.join(app.config['spell-dir'],
                                 '{}-bootstrap').format(app.current_controller)
         with open(pathbase + ".out", 'w') as outf:
             with open(pathbase + ".err", 'w') as errf:

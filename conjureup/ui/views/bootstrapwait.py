@@ -34,9 +34,7 @@ class BootstrapWaitView(WidgetWrap):
             i.set_text(
                 self.load_attributes[random.randrange(
                     len(self.load_attributes))])
-        cache_dir = os.environ.get('XDG_CACHE_HOME', os.path.join(
-            os.path.expanduser('~'),
-            '.cache/conjure-up'))
+        cache_dir = app.config['spell-dir']
 
         bootstrap_stderrpath = os.path.join(
             cache_dir,
