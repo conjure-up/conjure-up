@@ -15,7 +15,7 @@ bigdata:
     - realtime-syslog-analytics
   description: |
     Distributed computing infrastructure for processing vast amounts of data in parallel on large clusters of machines.
-"business intelligence":
+analytics:
   spells:
     - elk-stack
   description: |
