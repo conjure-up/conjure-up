@@ -1,4 +1,4 @@
-# conjure-up
+# conjure-up [![Build Status](https://travis-ci.org/conjure-up/conjure-up.svg?branch=master)](https://travis-ci.org/conjure-up/conjure-up)
 > Installing cloud packages like whoa.
 
 # what it is
