@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+import sys
+from subprocess import run, DEVNULL, PIPE
+# Conjure-up specific
+sys.path.insert(0, '/usr/share/conjure-up/hooklib')
+import juju  # noqa
+from writer import log, success, fail, error  # noqa
+
+
+if __name__ == "__main__":
+    status = juju.status()
+    applications = status['applications']['spark']
+    zeppelin_ip = applications['units']['spark/0']['public-address']
+    if zeppelin_ip:
+        sh = run('juju expose zeppelin', shell=True,
+                 stderr=PIPE,
+                 stdout=DEVNULL)
+        if sh.returncode > 0:
+            error("Failed to expose Zeppelin UI: {}".format(
+                sh.stderr.decode()))
+        success("Zeppelin UI is now configured "
+                "and can be viewed at http://{}:9090".format(zeppelin_ip))
+    fail("Unable to determine Zeppelin UI URL")

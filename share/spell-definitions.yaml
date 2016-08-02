@@ -1,5 +1,0 @@
-# basic keyword definitions
-openstack: |
-  Quickly and reliably build an enterprise-scale cloud run on Ubuntu - the most popular operating system for OpenStack.
-kubernetes: |
-  Kubernetes is an open-source platform for deploying, scaling, and operations of application containers across a cluster of hosts. Kubernetes is portable in that it works with public, private, and hybrid clouds. Extensible through a pluggable infrastructure. Self healing in that it will automatically restart and place containers on healthy nodes if a node ever goes away.

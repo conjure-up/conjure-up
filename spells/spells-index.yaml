@@ -1,0 +1,22 @@
+# spell keyword mapping
+openstack:
+  spells:
+    - openstack-novalxd
+  description: |
+    Quickly and reliably build an enterprise-scale cloud run on Ubuntu - the most popular operating system for OpenStack.
+kubernetes:
+  spells:
+    - observable-kubernetes
+  description: |
+    Kubernetes is an open-source platform for deploying, scaling, and operations of application containers across a cluster of hosts. Kubernetes is portable in that it works with public, private, and hybrid clouds. Extensible through a pluggable infrastructure. Self healing in that it will automatically restart and place containers on healthy nodes if a node ever goes away.
+bigdata:
+  spells:
+    - apache-processing-mapreduce
+    - realtime-syslog-analytics
+  description: |
+    Distributed computing infrastructure for processing vast amounts of data in parallel on large clusters of machines.
+"business intelligence":
+  spells:
+    - elk-stack
+  description: |
+    The Elastic Stack — that is Elasticsearch, Logstash, Kibana — are open source projects that help you take data from any source, any format and search, analyze, and visualize it in real time.

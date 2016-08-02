@@ -1,0 +1,4 @@
+title: Apache Spark Test
+description: |
+  Run a smoke test to validate Apache Spark component.
+viewable: True

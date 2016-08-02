@@ -1,0 +1,135 @@
+relations:
+- - nova-compute:amqp
+  - rabbitmq-server:amqp
+- - neutron-gateway:amqp
+  - rabbitmq-server:amqp
+- - keystone:shared-db
+  - mysql:shared-db
+- - nova-cloud-controller:identity-service
+  - keystone:identity-service
+- - glance:identity-service
+  - keystone:identity-service
+- - neutron-api:identity-service
+  - keystone:identity-service
+- - neutron-openvswitch:neutron-plugin-api
+  - neutron-api:neutron-plugin-api
+- - neutron-api:shared-db
+  - mysql:shared-db
+- - neutron-api:amqp
+  - rabbitmq-server:amqp
+- - neutron-gateway:neutron-plugin-api
+  - neutron-api:neutron-plugin-api
+- - glance:shared-db
+  - mysql:shared-db
+- - glance:amqp
+  - rabbitmq-server:amqp
+- - nova-cloud-controller:image-service
+  - glance:image-service
+- - nova-compute:image-service
+  - glance:image-service
+- - nova-cloud-controller:cloud-compute
+  - nova-compute:cloud-compute
+- - nova-cloud-controller:amqp
+  - rabbitmq-server:amqp
+- - nova-cloud-controller:quantum-network-service
+  - neutron-gateway:quantum-network-service
+- - nova-compute:neutron-plugin
+  - neutron-openvswitch:neutron-plugin
+- - neutron-openvswitch:amqp
+  - rabbitmq-server:amqp
+- - openstack-dashboard:identity-service
+  - keystone:identity-service
+- - nova-cloud-controller:shared-db
+  - mysql:shared-db
+- - nova-cloud-controller:neutron-api
+  - neutron-api:neutron-api
+- - ceph-mon:client
+  - nova-compute:ceph
+- - ceph-mon:client
+  - glance:ceph
+- - ceph-radosgw:mon
+  - ceph-mon:radosgw
+- - ceph-osd:mon
+  - ceph-mon:osd
+- - ceph-radosgw:identity-service
+  - keystone:identity-service
+- - nova-compute:lxd
+  - lxd:lxd
+series: xenial
+services:
+  ceph-mon:
+    charm: cs:xenial/ceph-mon
+    num_units: 3
+    options:
+      fsid: 5a791d94-980b-11e4-b6f6-3c970e8b1cf7
+      monitor-secret: AQAi5a9UeJXUExAA+By9u+GPhl8/XiUQ4nwI3A==
+  ceph-osd:
+    charm: cs:xenial/ceph-osd
+    num_units: 3
+    options:
+      osd-devices: /srv/osd
+      use-direct-io: False
+  ceph-radosgw:
+    charm: cs:xenial/ceph-radosgw
+    num_units: 1
+    options:
+      use-embedded-webserver: true
+  glance:
+    charm: cs:xenial/glance
+    num_units: 1
+  keystone:
+    charm: cs:xenial/keystone
+    num_units: 1
+    options:
+      admin-password: openstack
+  mysql:
+    charm: cs:xenial/percona-cluster
+    num_units: 1
+    options:
+      max-connections: 20000
+      dataset-size: 256M
+  neutron-api:
+    charm: cs:xenial/neutron-api
+    num_units: 1
+    options:
+      neutron-security-groups: true
+      overlay-network-type: "gre vxlan"
+  neutron-gateway:
+    charm: cs:xenial/neutron-gateway
+    num_units: 1
+    options:
+      ext-port: eth1
+  neutron-openvswitch:
+    charm: cs:xenial/neutron-openvswitch
+    num_units: 0
+  nova-cloud-controller:
+    charm: cs:xenial/nova-cloud-controller
+    num_units: 1
+    options:
+      network-manager: Neutron
+  nova-compute:
+    charm: cs:xenial/nova-compute
+    num_units: 1
+    options:
+      enable-live-migration: False
+      enable-resize: False
+      virt-type: lxd
+  ntp:
+    charm: cs:xenial/ntp
+    num_units: 0
+  lxd:
+    charm: cs:xenial/lxd
+    options:
+      block-devices: None
+  openstack-dashboard:
+    charm: cs:xenial/openstack-dashboard
+    num_units: 1
+  rabbitmq-server:
+    charm: cs:xenial/rabbitmq-server
+    num_units: 1
+tags:
+  - conjure-up-openstack
+description: |
+  This spell summons an OpenStack Cloud (Mitaka release), configured to use LXD (the lightweight container hypervisor), on Ubuntu 16.04, providing Dashboard, Compute, Network, Object Storage, Identity and Image services.
+
+  This can be deployed on a Single machine for quick Proof-of-Concepts and local development of OpenStack components and services.

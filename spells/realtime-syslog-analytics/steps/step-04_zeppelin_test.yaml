@@ -1,0 +1,4 @@
+title: Apache Zeppelin Test
+description: |
+  Run a smoke test to validate Apache Zeppelin component.
+viewable: True

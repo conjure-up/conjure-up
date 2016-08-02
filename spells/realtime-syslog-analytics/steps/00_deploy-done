@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+
+# Global imports
+import sys
+
+# Conjure-up specific
+sys.path.insert(0, '/usr/share/conjure-up/hooklib')
+import juju  # noqa
+from writer import log, success, fail, error  # noqa
+
+NUM_AGENTS = 8
+
+
+def main():
+    log.debug("Running deploy-done for Realtime "
+              "syslog analytics installation.")
+    agent_states = juju.agent_states()
+
+    errored_units = [(unit_name, message) for unit_name, state, message
+                     in agent_states if state == "error"]
+    if len(errored_units) > 0:
+        errs = "\n".join(["{}: {}".format(n, m) for n, m in errored_units])
+        error('Deployment errors:\n{}'.format(errs))
+
+    machines = juju.machine_states()
+    errored_machines = [(name, err) for name, status, err in machines
+                        if status == "error"]
+    if len(errored_machines) > 0:
+        errs = "\n".join(["{}: {}".format(n, m) for n, m in errored_machines])
+        error("Machine creation errors:\n{}".format(errs))
+
+    # 13 total agents for this spell
+    if len(agent_states) < NUM_AGENTS:
+        fail('{} applications are still deploying'.format(
+            NUM_AGENTS - len(agent_states)))
+
+    # Ganglia does not use the normal status-set 'active' so we skip their
+    # workload status when checking all agent states.
+    active_states = [state == 'active' for _, state, _ in agent_states
+                     if state != 'unknown']
+    if len(active_states) > 0 and all(active_states):
+        success('Applications are ready')
+
+    fail('Applications not ready yet')
+
+
+if __name__ == "__main__":
+    main()
