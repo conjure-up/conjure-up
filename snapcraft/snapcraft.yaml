@@ -9,7 +9,7 @@ confinement: strict
 
 apps:
   conjure-up:
-    command: conjure-up -c $SNAP/etc/conjure-up.conf --spell-dir $HOME/spells --spell-definitions $SNAP/spell-definitions.yaml
+    command: conjure-up -c $SNAP/etc/conjure-up.conf --spells-dir $SNAP/spells --cache-dir $SNAP_DATA/conjure-up
     plugs: [home]
   python3:
     command: python3
@@ -43,4 +43,4 @@ parts:
     source-type: git
     files:
       etc/conjure-up.conf: etc/conjure-up.conf
-      share/spell-definitions.yaml: spell-definitions.yaml
+      spells: spells

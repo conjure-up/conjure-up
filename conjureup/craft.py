@@ -8,7 +8,7 @@ from conjureup.log import setup_logging
 import argparse
 import os
 import sys
-import json
+import yaml
 
 
 def parse_options(argv):
@@ -40,7 +40,7 @@ def main():
                     'Please make sure you are in the correct directory.')
         sys.exit(1)
 
-    if not os.path.isfile('conjure/metadata.json'):
+    if not os.path.isfile('metadata.yaml'):
         utils.error('Unable to find conjure metadata.')
         sys.exit(1)
 
@@ -57,8 +57,8 @@ def main():
         utils.info("Applying conjure-up metadata")
         charm.publish(spell)
         charm.grant(spell)
-        with open('conjure/metadata.json') as fp:
-            metadata = json.load(fp)
+        with open('conjure/metadata.yaml') as fp:
+            metadata = yaml.safe_load(fp.read())
         charm.set_metadata(spell, metadata)
         utils.info("Success.")
     except Exception as e:

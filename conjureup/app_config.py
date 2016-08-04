@@ -2,7 +2,6 @@
 """
 from types import SimpleNamespace
 
-
 bootstrap = SimpleNamespace(
     # Is bootstrap running
     running=False,
@@ -20,6 +19,9 @@ app = SimpleNamespace(
 
     # Contains metadata and spell name
     config=None,
+
+    # Contains conjure-up global settings
+    global_config=None,
 
     # List of multiple bundles, usually from a charmstore search
     bundles=None,

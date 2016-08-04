@@ -1,4 +1,6 @@
-# spell keyword mapping
+# spell keyword mapping -- unassigned spells are included in the package but not given a keyword
+_unassigned_spells:
+  spells: []
 openstack:
   spells:
     - openstack-novalxd

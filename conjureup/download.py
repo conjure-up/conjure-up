@@ -2,6 +2,7 @@ from subprocess import run, CalledProcessError
 import shutil
 import tempfile
 import os
+from conjureup.consts import UNSPECIFIED_SPELL
 from conjureup.app_config import app
 import requests
 from progressbar import (ProgressBar, Bar,
@@ -34,6 +35,8 @@ def fetcher(spell):
         return "vcs"
     if spell.startswith('http'):
         return "direct"
+    if spell == UNSPECIFIED_SPELL:
+        return None
     return "charmstore-search"
 
 
