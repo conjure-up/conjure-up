@@ -43,7 +43,7 @@ def parse_options(argv):
     parser.add_argument('-c', dest='global_config_file',
                         help='Location of conjure-up.conf',
                         default='/etc/conjure-up.conf')
-    parser.add_argument('--cache_dir', dest='cache_dir',
+    parser.add_argument('--cache-dir', dest='cache_dir',
                         help='Download directory for spells',
                         default=os.path.expanduser("~/.cache/conjure-up"))
     parser.add_argument('--spells-dir', dest='spells_dir',
