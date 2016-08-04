@@ -160,11 +160,17 @@ def main():
                                    spell,
                                    str(uuid.uuid4())))
 
-    if not os.path.exists(app.argv.global_config_file):
-        utils.error("Could not find: {}, please check your install.".format(
-            app.argv.global_config_file))
-        sys.exit(1)
-    with open(app.argv.global_config_file) as fp:
+    global_config_filename = app.argv.global_config_file
+    if not os.path.exists(global_config_filename):
+        # fallback to source tree location
+        global_config_filename = os.path.join(os.path.dirname(__file__),
+                                              "../etc/conjure-up.conf")
+        if not os.path.exists(global_config_filename):
+            utils.error("Could not find: {}, please check your install.".format(
+                app.argv.global_config_file))
+            sys.exit(1)
+
+    with open(global_config_filename) as fp:
         global_conf = yaml.safe_load(fp.read())
 
     # Bind UI
