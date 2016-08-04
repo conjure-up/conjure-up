@@ -22,15 +22,11 @@ class VariantsController:
 
         spell_name = spell['Meta']['id']['Name']
 
-        # Check cache dir for spells
-        spell_dir = path.join(app.config['spell-dir'],
-                              spell_name)
-
         app.log.debug("Chosen spell: {}".format(spell_name))
         utils.pollinate(app.session_id, 'B001')
 
-        metadata_path = path.join(spell_dir,
-                                  'conjure/metadata.json')
+        metadata_path = path.join(app.config['spell_dir'],
+                                  'metadata.yaml')
 
         remote = get_remote_url(spell['Id'])
         purge_top_level = True
@@ -38,7 +34,7 @@ class VariantsController:
             if app.fetcher == "charmstore-search" or \
                app.fetcher == "charmstore-direct":
                 purge_top_level = False
-            download(remote, spell_dir, purge_top_level)
+            download(remote, app.config['spell_dir'], purge_top_level)
         else:
             utils.warning("Could not find spell: {}".format(spell))
             sys.exit(1)
@@ -46,9 +42,8 @@ class VariantsController:
         with open(metadata_path) as fp:
             metadata = json.load(fp)
 
-        app.config = {'metadata': metadata,
-                      'spell-dir': spell_dir,
-                      'spell': spell_name}
+        app.config.extend({'metadata': metadata,
+                           'spell': spell_name})
 
         utils.setup_metadata_controller()
 

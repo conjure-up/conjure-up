@@ -5,3 +5,5 @@
 --ignore-dir=bundleplacer
 --ignore-dir=macumba
 --ignore-dir=conjure-dev
+--ignore-dir=snapcraft/stage
+--ignore-dir=snapcraft/parts

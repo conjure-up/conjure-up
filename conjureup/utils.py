@@ -292,3 +292,48 @@ def setup_metadata_controller():
         })
 
     app.metadata_controller = MetadataController(bundle, bundleplacer_cfg)
+
+
+def set_chosen_spell(spell_name, spell_dir):
+    app.env = os.environ.copy()
+    app.env['CONJURE_UP_SPELL'] = spell_name
+    app.config.update({'spell-dir': spell_dir,
+                       'spell': spell_name})
+
+
+def set_spell_metadata():
+    metadata_path = os.path.join(app.config['spell-dir'],
+                                 'metadata.yaml')
+
+    with open(metadata_path) as fp:
+        metadata = yaml.safe_load(fp.read())
+
+    app.config['metadata'] = metadata
+    if app.config['metadata'].get('packages', None):
+        install_pkgs(app.config['metadata']['packages'])
+
+    # Need to provide app.bundles dictionary even for single
+    # spells in the GUI
+    app.bundles = [
+        {
+            'Meta': {
+                'extra-info/conjure-up': metadata
+            }
+        }
+    ]
+
+
+def install_pkgs(pkgs):
+    """ Installs the debian package associated with curated spell
+    """
+    if not isinstance(pkgs, list):
+        pkgs = [pkgs]
+
+    all_debs_installed = all(check_deb_installed(x) for x
+                             in pkgs)
+    if not all_debs_installed:
+        info("Installing additional required packages: {}".format(
+                " ".join(pkgs)))
+        os.execl("/usr/share/conjure-up/do-apt-install",
+                 "/usr/share/conjure-up/do-apt-install",
+                 " ".join(pkgs))

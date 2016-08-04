@@ -3,6 +3,7 @@
 
 from conjureup import __version__ as VERSION
 from conjureup import async
+from conjureup import consts
 from conjureup import controllers
 from conjureup import juju
 from conjureup import utils
@@ -18,7 +19,6 @@ from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 
 import argparse
-import json
 import os
 import os.path as path
 import sys
@@ -28,8 +28,12 @@ import yaml
 
 def parse_options(argv):
     parser = argparse.ArgumentParser(prog="conjure-up")
-    parser.add_argument('spell', help="Specify the solution to "
-                        "conjure, e.g. openstack")
+    parser.add_argument('spell', nargs='?',
+                        default=consts.UNSPECIFIED_SPELL,
+                        help="""The name ('openstack-nclxd') or location
+                        ('githubusername/spellrepo') of a conjure-up
+                        spell, or a keyword matching multiple spells
+                        e.g. openstack""")
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug',
                         help='Enable debug logging.')
@@ -39,13 +43,12 @@ def parse_options(argv):
     parser.add_argument('-c', dest='global_config_file',
                         help='Location of conjure-up.conf',
                         default='/etc/conjure-up.conf')
-    parser.add_argument(
-        '--spell-definitions', dest='spell_definitions',
-        help='Location of spell definitions',
-        default='/usr/share/conjure-up/spell-definitions.yaml')
-    parser.add_argument('--spell-dir', dest='spell_dir',
-                        help='Location of spells directory',
-                        default='/usr/share/conjure-up')
+    parser.add_argument('--cache_dir', dest='cache_dir',
+                        help='Download directory for spells',
+                        default=os.path.expanduser("~/.cache/conjure-up"))
+    parser.add_argument('--spells-dir', dest='spells_dir',
+                        help='Location of readonly packaged spells directory',
+                        default='/usr/share/conjure-up/spells')
     parser.add_argument('--apt-proxy', dest='apt_http_proxy',
                         help='Specify APT proxy')
     parser.add_argument('--apt-https-proxy', dest='apt_https_proxy',
@@ -77,29 +80,16 @@ def unhandled_input(key):
 
 
 def _start(*args, **kwargs):
+    if app.fetcher is None:
+        controllers.use('recommended').render()
+        return
+
     if app.fetcher != 'charmstore-search':
         utils.setup_metadata_controller()
     if app.argv.status_only:
         controllers.use('deploystatus').render()
     else:
         controllers.use('clouds').render()
-
-
-def install_pkgs(pkgs):
-    """ Installs the debian package associated with curated spell
-    """
-    if not isinstance(pkgs, list):
-        pkgs = [pkgs]
-
-    all_debs_installed = all(utils.check_deb_installed(x) for x
-                             in pkgs)
-    if not all_debs_installed:
-        utils.info(
-            "Installing additional required packages: {}".format(
-                " ".join(pkgs)))
-        os.execl("/usr/share/conjure-up/do-apt-install",
-                 "/usr/share/conjure-up/do-apt-install",
-                 " ".join(pkgs))
 
 
 def get_charmstore_bundles(spell, blessed):
@@ -133,10 +123,8 @@ def main():
     opts = parse_options(sys.argv[1:])
     spell = os.path.basename(os.path.abspath(opts.spell))
 
-    # cached spell dir
-    spell_dir = opts.spell_dir
-    if not os.path.isdir(spell_dir):
-        os.makedirs(spell_dir)
+    if not os.path.isdir(opts.cache_dir):
+        os.makedirs(opts.cache_dir)
 
     app.fetcher = fetcher(opts.spell)
 
@@ -147,9 +135,10 @@ def main():
         sys.exit(1)
 
     # Application Config
+    app.config = {'metadata': None}    
     app.argv = opts
     app.log = setup_logging("conjure-up/{}".format(spell),
-                            os.path.join(spell_dir, 'conjure-up.log'),
+                            os.path.join(opts.cache_dir, 'conjure-up.log'),
                             opts.debug)
 
     # Setup proxy
@@ -160,114 +149,62 @@ def main():
                                    spell,
                                    str(uuid.uuid4())))
 
-    if not os.path.exists(app.argv.global_config_file):
-        utils.error("Could not find: {}, please check your install.".format(
-            app.argv.global_config_file))
-        sys.exit(1)
-    with open(app.argv.global_config_file) as fp:
+    global_config_filename = app.argv.global_config_file
+    if not os.path.exists(global_config_filename):
+        # fallback to source tree location
+        global_config_filename = os.path.join(os.path.dirname(__file__),
+                                              "../etc/conjure-up.conf")
+        if not os.path.exists(global_config_filename):
+            utils.error("Could not find {}.".format(global_config_filename))
+            sys.exit(1)
+
+    with open(global_config_filename) as fp:
         global_conf = yaml.safe_load(fp.read())
+        app.global_config = global_conf
+
+    spells_dir = app.argv.spells_dir
+    if not os.path.exists(spells_dir):
+        spells_dir = os.path.join(os.path.dirname(__file__),
+                                  "../spells")
+
+    app.config['spells-dir'] = spells_dir
+    spells_index_path = os.path.join(app.config['spells-dir'],
+                                     'spells-index.yaml')
+    with open(spells_index_path) as fp:
+        app.spells_index = yaml.safe_load(fp.read())
 
     # Bind UI
     app.ui = ConjureUI()
 
-    if app.fetcher == "charmstore-search":
-        utils.info("Loading current {} spells "
-                   "from Juju Charmstore, please wait.".format(spell))
-        app.bundles = get_charmstore_bundles(spell, global_conf['blessed'])
-        app.config = {'metadata': None,
-                      'spell-dir': spell_dir,
-                      'spell': spell}
-
-        # Set a general description of spell
-        definition = None
-        spell_definitions_file = app.argv.spell_definitions
-        if path.isfile(spell_definitions_file):
-            with open(spell_definitions_file) as fp:
-                definitions = yaml.safe_load(fp.read())
-                definition = definitions.get(spell, None)
-        if definition is None:
-            try:
-                definition = next(
-                    bundle['Meta']['bundle-metadata']['Description']
-                    for bundle in app.bundles if 'Description'
-                    in bundle['Meta']['bundle-metadata'])
-            except StopIteration:
-                app.log.error("Could not find a suitable description "
-                              "for spell: {}".format(spell))
-
-        if definition is not None:
-            app.config['description'] = definition
-        else:
-            utils.warning(
-                "Failed to find a description for spell: {}, "
-                "and is a bug that should be filed.".format(spell))
-
-        # Install any required packages for any of the bundles
-        for bundle in app.bundles:
-            extra_info = bundle['Meta']['extra-info/conjure-up']
-            if 'packages' in extra_info:
-                app.log.debug('Found {} to install via apt'.format(
-                    extra_info['packages']))
-                install_pkgs(extra_info['packages'])
-
-    else:
-        app.config = {'metadata': None,
-                      'spell-dir': path.join(spell_dir, spell),
-                      'spell': spell}
+    if app.fetcher is not None:
+        utils.set_chosen_spell(spell, path.join(opts.cache_dir, spell))
 
         remote = get_remote_url(opts.spell)
         purge_top_level = True
         if remote is not None:
 
-            metadata_path = path.join(app.config['spell-dir'],
-                                      'conjure/metadata.json')
-
             if app.fetcher == "local":
                 app.config['spell-dir'] = path.join(
-                    spell_dir,
+                    opts.cache_dir,
                     os.path.basename(
                         os.path.abspath(spell)))
-                metadata_path = path.join(app.config['spell-dir'],
-                                          'conjure/metadata.json')
                 download_local(remote, app.config['spell-dir'])
 
             else:
-                if app.fetcher == "charmstore-search" or \
-                   app.fetcher == "charmstore-direct":
-                    purge_top_level = False
                 download(remote, app.config['spell-dir'], purge_top_level)
         else:
             utils.warning("Could not find spell: {}".format(spell))
             sys.exit(1)
 
-        with open(metadata_path) as fp:
-            metadata = json.load(fp)
-
-        app.config['metadata'] = metadata
-        if app.config['metadata'].get('packages', None):
-            install_pkgs(app.config['metadata']['packages'])
-
-        # Need to provide app.bundles dictionary even for single
-        # spells in the GUI
-        app.bundles = [
-            {
-                'Meta': {
-                    'extra-info/conjure-up': metadata
-                }
-            }
-        ]
-
+        utils.set_spell_metadata()
+            
     if hasattr(app.argv, 'cloud'):
-        if app.fetcher != "charmstore-search":
+        if app.fetcher is not None:
             app.headless = True
             app.ui = None
         else:
-            utils.error("Unable run a keyword search in headless mode, "
-                        "please provide a single bundle path.")
+            utils.error("Please specify a spell for headless mode.")
             sys.exit(1)
-
-    app.env = os.environ.copy()
-    app.env['CONJURE_UP_SPELL'] = spell
 
     if app.argv.status_only:
         if not juju.model_available():
@@ -285,3 +222,5 @@ def main():
                              unhandled_input=unhandled_input)
         EventLoop.set_alarm_in(0.05, _start)
         EventLoop.run()
+
+
