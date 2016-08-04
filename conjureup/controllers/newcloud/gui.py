@@ -1,6 +1,7 @@
 from . import common
 from conjureup import async
 from conjureup import controllers
+from conjureup.download import EndpointType
 from conjureup import juju
 from conjureup import utils
 from conjureup.api.models import model_info
@@ -132,10 +133,8 @@ class NewCloudController:
 
         self.__do_bootstrap(credential=credentials_key)
 
-        if app.fetcher != "charmstore-search":
-            return controllers.use('bundlereadme').render()
-        else:
-            return controllers.use('variants').render()
+        return controllers.use('bundlereadme').render()
+
 
     def render(self, cloud):
         """ Render
@@ -161,20 +160,15 @@ class NewCloudController:
                           "assuming LXD is configured.")
 
             self.__do_bootstrap()
-            if app.fetcher != 'charmstore-search':
-                return controllers.use('bundlereadme').render()
-            else:
-                return controllers.use('variants').render()
+
+            return controllers.use('bundlereadme').render()
 
         # XXX: always prompt for maas information for now as there is no way to
         # logically store the maas server ip for future sessions.
         if common.try_get_creds(self.cloud) \
            is not None and self.cloud != 'maas':
             self.__do_bootstrap(credential=common.try_get_creds(self.cloud))
-            if app.fetcher != 'charmstore-search':
-                return controllers.use('bundlereadme').render()
-            else:
-                return controllers.use('variants').render()
+            return controllers.use('bundlereadme').render()
 
         # show credentials editor otherwise
         try:

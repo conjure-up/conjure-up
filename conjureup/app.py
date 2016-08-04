@@ -7,10 +7,10 @@ from conjureup import consts
 from conjureup import controllers
 from conjureup import juju
 from conjureup import utils
-from conjureup import charm
 from conjureup.app_config import app
-from conjureup.download import (download, download_local,
-                                get_remote_url, fetcher)
+from conjureup.download import (EndpointType, download,
+                                download_local, get_remote_url,
+                                detect_endpoint)
 from conjureup.log import setup_logging
 from conjureup.ui import ConjureUI
 
@@ -79,31 +79,16 @@ def unhandled_input(key):
 
 
 def _start(*args, **kwargs):
-    if app.fetcher is None:
-        controllers.use('recommended').render()
+    if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
+        controllers.use('spellpicker').render()
         return
 
-    if app.fetcher != 'charmstore-search':
-        utils.setup_metadata_controller()
+    utils.setup_metadata_controller()
+
     if app.argv.status_only:
         controllers.use('deploystatus').render()
     else:
         controllers.use('clouds').render()
-
-
-def get_charmstore_bundles(spell, blessed):
-    """searches charmstore, returns list of bundle metadata for bundles
-    with tag 'conjure-$spell'
-    """
-    # We process multiple bundles here with our keyword search
-    charmstore_results = charm.search(spell, blessed)
-    # Check charmstore
-    if charmstore_results['Total'] == 0:
-        utils.warning("Could not find spells tagged 'conjure-{}'"
-                      " in the Juju Charmstore.".format(spell))
-        sys.exit(1)
-
-    return charmstore_results['Results']
 
 
 def apply_proxy():
@@ -125,7 +110,7 @@ def main():
     if not os.path.isdir(opts.cache_dir):
         os.makedirs(opts.cache_dir)
 
-    app.fetcher = fetcher(opts.spell)
+    app.endpoint_type = detect_endpoint(opts.spell)
 
     if os.geteuid() == 0:
         utils.info("")
@@ -172,38 +157,29 @@ def main():
     with open(spells_index_path) as fp:
         app.spells_index = yaml.safe_load(fp.read())
 
-    # Bind UI
-    app.ui = ConjureUI()
-
-    if app.fetcher is not None:
-        utils.set_chosen_spell(spell, path.join(opts.cache_dir, spell))
-
-        remote = get_remote_url(opts.spell)
-        purge_top_level = True
-        if remote is not None:
-
-            if app.fetcher == "local":
-                app.config['spell-dir'] = path.join(
-                    opts.cache_dir,
-                    os.path.basename(
-                        os.path.abspath(spell)))
-                download_local(remote, app.config['spell-dir'])
-
-            else:
-                download(remote, app.config['spell-dir'], purge_top_level)
-        else:
-            utils.warning("Could not find spell: {}".format(spell))
+    # download spell if necessary
+    if app.endpoint_type == EndpointType.LOCAL_DIR:
+        if not os.path.isdir(opts.spell):
+            utils.warning("Could not find spell {}".format(opts.spell))
             sys.exit(1)
 
+        spell_name = os.path.basename(os.path.abspath(spell))
+        utils.set_chosen_spell(spell_name,
+                               path.join(opts.cache_dir, spell_name))
+        download_local(opts.spell, app.config['spell-dir'])
         utils.set_spell_metadata()
 
-    if app.argv.cloud:
-        if app.fetcher is not None:
-            app.headless = True
-            app.ui = None
-        else:
-            utils.error("Please specify a spell for headless mode.")
+    elif app.endpoint_type in [EndpointType.VCS, EndpointType.HTTP]:
+
+        utils.set_chosen_spell(spell, path.join(opts.cache_dir, spell))
+        remote = get_remote_url(opts.spell)
+
+        if remote is None:
+            utils.warning("Can't guess URL matching '{}'".format(opts.spell))
             sys.exit(1)
+
+        download(remote, app.config['spell-dir'], True)
+        utils.set_spell_metadata()
 
     if app.argv.status_only:
         if not juju.model_available():
@@ -213,10 +189,18 @@ def main():
                         "create a new controller using 'juju bootstrap'.")
             sys.exit(1)
 
-    if app.headless:
+    if app.argv.cloud:
+        if app.endpoint_type is None:
+            utils.error("Please specify a spell for headless mode.")
+            sys.exit(1)
+
+        app.headless = True
+        app.ui = None
         app.env['CONJURE_UP_HEADLESS'] = "1"
         _start()
+
     else:
+        app.ui = ConjureUI()
         EventLoop.build_loop(app.ui, STYLES,
                              unhandled_input=unhandled_input)
         EventLoop.set_alarm_in(0.05, _start)

@@ -9,35 +9,35 @@ from progressbar import (ProgressBar, Bar,
                          Percentage, AnimatedMarker,
                          UnknownLength)
 
+from enum import Enum
 
-def fetcher(spell):
-    """ Returns endpoint type
+
+class EndpointType(Enum):
+    LOCAL_DIR = 0               # A path on the local filesystem
+    LOCAL_SEARCH = 1            # A spell or keyword to up in the index
+    VCS = 2                     # A remote VCS url (git, bzr)
+    HTTP = 3                    # An http/s URL
+
+
+def detect_endpoint(spell):
+    """ Returns endpoint type for fetching the spell
 
     Arguments:
     spell: full spell indentifier
 
-    Types:
-    charmstore-direct: Pulling a single bundle from cs
-    charmstore-search: Querying a keyword/tag in charmstore
-    direct: Pulling from a remote webserver
-    vcs: Pulling from a remote Vcs like github
-    deb: This spell was accessed from one of our official deb packages
-    local: Spell available on local filesystem
-
-    Returns:
-    Endpoint type
+    Returns
+    EndpointType or None, if no spell was specified
     """
-    if spell.startswith('~') or spell.startswith('cs:~'):
-        return "charmstore-direct"
     if os.path.isdir(spell) or spell == '.':
-        return "local"
-    if "/" in spell:
-        return "vcs"
+        return EndpointType.LOCAL_DIR
     if spell.startswith('http'):
-        return "direct"
+        return EndpointType.HTTP
+    if "/" in spell:
+        return EndpointType.VCS
     if spell == UNSPECIFIED_SPELL:
         return None
-    return "charmstore-search"
+
+    return EndpointType.LOCAL_SEARCH
 
 
 def remote_exists(path):
@@ -121,10 +121,7 @@ def get_remote_url(path):
 
     Arguments:
     path: Can be local, local zip, remote zip, or a short url to check
-    github, bitbucket, and the charmstore.
-
-    For example, using the charmstore bundle key 'apache-core-batch-processing'
-    will check the charmstore and download that bundle.
+    github, bitbucket, etc.
 
     Using something like 'ubuntu-solutions-engineering/kubernetes' will check
     GitHub for that spell and download appropriately.
@@ -132,29 +129,15 @@ def get_remote_url(path):
     Returns:
     The url if exists otherwise None.
     """
-    if os.path.isdir(path):
-        return path
 
     if path.startswith("http") and path.endswith(".zip"):
         if remote_exists(path):
             # Path is a full URL to an archived zip
             return path
 
-    if path.startswith("~"):
-        namespace, bundle = path.split("/")
-        url = ("https://api.jujucharms.com/charmstore/v5"
-               "/{}/bundle/{}/archive".format(namespace, bundle))
-        return url
-
-    if path.startswith("cs:"):
-        url = ("https://api.jujucharms.com/charmstore/v5"
-               "/{}/archive".format(path[3:]))
-        return url
-
     remotes = [
         "https://github.com/{}/archive/master.zip".format(path),
-        "https://bitbucket.org/{}/get/master.zip".format(path),
-        "https://api.jujucharms.com/charmstore/v5/{}/archive".format(path),
+        "https://bitbucket.org/{}/get/master.zip".format(path)
     ]
     for r in remotes:
         app.log.debug("Checking remote URL: {}".format(r))

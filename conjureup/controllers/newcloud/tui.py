@@ -41,7 +41,7 @@ class NewCloudController:
                 sys.exit(1)
 
     def finish(self):
-        return controllers.use('variants').render()
+        return controllers.use('deploy').render()
 
     def render(self, cloud):
 

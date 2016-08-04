@@ -56,5 +56,5 @@ app = SimpleNamespace(
     # Run in non interactive mode
     headless=False,
 
-    # Remote endpoint type, vcs, charmstore, charmstore-direct, direct
-    fetcher=None)
+    # Remote endpoint type (An enum, see download.py)
+    endpoint_type=None)
