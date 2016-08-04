@@ -135,7 +135,7 @@ def main():
         sys.exit(1)
 
     # Application Config
-    app.config = {'metadata': None}    
+    app.config = {'metadata': None}
     app.argv = opts
     app.log = setup_logging("conjure-up/{}".format(spell),
                             os.path.join(opts.cache_dir, 'conjure-up.log'),
@@ -197,7 +197,7 @@ def main():
             sys.exit(1)
 
         utils.set_spell_metadata()
-            
+
     if hasattr(app.argv, 'cloud'):
         if app.fetcher is not None:
             app.headless = True
@@ -222,5 +222,3 @@ def main():
                              unhandled_input=unhandled_input)
         EventLoop.set_alarm_in(0.05, _start)
         EventLoop.run()
-
-

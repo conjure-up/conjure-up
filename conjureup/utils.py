@@ -309,8 +309,6 @@ def set_spell_metadata():
         metadata = yaml.safe_load(fp.read())
 
     app.config['metadata'] = metadata
-    if app.config['metadata'].get('packages', None):
-        install_pkgs(app.config['metadata']['packages'])
 
     # Need to provide app.bundles dictionary even for single
     # spells in the GUI
@@ -321,19 +319,3 @@ def set_spell_metadata():
             }
         }
     ]
-
-
-def install_pkgs(pkgs):
-    """ Installs the debian package associated with curated spell
-    """
-    if not isinstance(pkgs, list):
-        pkgs = [pkgs]
-
-    all_debs_installed = all(check_deb_installed(x) for x
-                             in pkgs)
-    if not all_debs_installed:
-        info("Installing additional required packages: {}".format(
-                " ".join(pkgs)))
-        os.execl("/usr/share/conjure-up/do-apt-install",
-                 "/usr/share/conjure-up/do-apt-install",
-                 " ".join(pkgs))
