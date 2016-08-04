@@ -33,7 +33,7 @@ def parse_options(argv):
                         help="""The name ('openstack-nclxd') or location
                         ('githubusername/spellrepo') of a conjure-up
                         spell, or a keyword matching multiple spells
-                        e.g. openstack""")
+                        ('openstack')""")
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug',
                         help='Enable debug logging.')
@@ -66,10 +66,9 @@ def parse_options(argv):
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
 
-    subparsers = parser.add_subparsers(help='sub-command help')
-    parse_to = subparsers.add_parser('to',
-                                     help='Indicate which cloud to deploy to')
-    parse_to.add_argument('cloud', help='Name of a public cloud')
+    parser.add_argument('cloud', nargs='?',
+                        help="Name of a Juju controller type to "
+                        "target, such as ['aws', 'localhost' ...]")
     return parser.parse_args(argv)
 
 
@@ -198,7 +197,7 @@ def main():
 
         utils.set_spell_metadata()
 
-    if hasattr(app.argv, 'cloud'):
+    if app.argv.cloud:
         if app.fetcher is not None:
             app.headless = True
             app.ui = None
