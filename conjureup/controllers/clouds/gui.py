@@ -1,4 +1,5 @@
 from conjureup.ui.views.cloud import CloudView
+from conjureup.download import EndpointType
 from conjureup import async
 from conjureup import utils
 from conjureup import controllers
@@ -40,11 +41,7 @@ class CloudsController:
                      self.__handle_exception,
                      queue_name=juju.JUJU_ASYNC_QUEUE)
 
-        # Go through the rest of the gui since we already provide a direct
-        # spell path
-        if app.fetcher != 'charmstore-search':
-            return controllers.use('bundlereadme').render()
-        return controllers.use('variants').render()
+        return controllers.use('bundlereadme').render()
 
     def render(self):
         clouds = list_clouds()

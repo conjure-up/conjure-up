@@ -30,7 +30,7 @@ class CloudsController:
         juju.add_model(app.current_model)
         juju.switch_model(app.current_model)
 
-        return controllers.use('variants').render()
+        return controllers.use('deploy').render()
 
     def render(self):
         if app.argv.cloud not in juju.get_clouds().keys():

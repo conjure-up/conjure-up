@@ -319,3 +319,14 @@ def set_spell_metadata():
             }
         }
     ]
+
+
+def find_spells_matching(key):
+    if key in app.spells_index:
+        return app.spells_index[key]['spells']
+
+    for k, d in app.spells_index:
+        for spell in d['spells']:
+            if spell == key:
+                return [spell]
+    return []

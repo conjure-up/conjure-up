@@ -2,16 +2,15 @@ from urwid import (WidgetWrap, Pile,
                    Filler)
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.hr import HR
-from ubuntui.widgets.text import Instruction
 from ubuntui.widgets.buttons import quit_btn, menu_btn
 from ubuntui.ev import EventLoop
 
 
-class RecommendedSpellView(WidgetWrap):
-    def __init__(self, app, recommended_spells, cb):
+class SpellPickerView(WidgetWrap):
+    def __init__(self, app, spells, cb):
         self.app = app
         self.cb = cb
-        self.recommended_spells = recommended_spells
+        self.spells = spells
         self.config = self.app.config
         super().__init__(self._build_widget())
 
@@ -39,10 +38,9 @@ class RecommendedSpellView(WidgetWrap):
 
     def _build_widget(self):
         total_items = [
-            Padding.center_60(Instruction("Choose a Spell")),
             Padding.center_60(HR())
         ]
-        for spell in self.recommended_spells:
+        for spell in self.spells:
             total_items.append(Padding.center_60(
                 Color.body(
                     menu_btn(label=spell,

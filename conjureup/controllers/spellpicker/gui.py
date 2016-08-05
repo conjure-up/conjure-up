@@ -1,13 +1,13 @@
 import os
 
-from conjureup.download import download_local, get_remote_url
-from conjureup.ui.views.recommended import RecommendedSpellView
+from conjureup.download import download_local, EndpointType
+from conjureup.ui.views.spellpicker import SpellPickerView
 from conjureup import utils
 from conjureup import controllers
 from conjureup.app_config import app
 
 
-class RecommendedSpellsController:
+class SpellPickerController:
     def __init__(self):
         self.view = None
 
@@ -29,21 +29,27 @@ class RecommendedSpellsController:
         return controllers.use('clouds').render()
 
     def render(self):
-        recs = []
+        spells = []
 
-        for _, kd in app.spells_index.items():
+        if app.endpoint_type is None:
+            for _, kd in app.spells_index.items():
+                spells += kd['spells']
+        elif app.endpoint_type == EndpointType.LOCAL_SEARCH:
+            spells = utils.find_spells_matching(app.argv.spell)
+        else:
+            e = Exception("Unexpected endpoint type {}".format(
+                app.endpoint_type))
+            app.ui.show_exception_message(e)
 
-            recs += kd['spells']
-
-        view = RecommendedSpellView(app,
-                                    recs,
-                                    self.finish)
+        view = SpellPickerView(app,
+                               spells,
+                               self.finish)
 
         app.ui.set_header(
             title="Choose a Spell",
-            excerpt="Choose from this list of recommended spells"
+            excerpt="Choose the spell you want to conjure"
         )
         app.ui.set_body(view)
 
 
-_controller_class = RecommendedSpellsController
+_controller_class = SpellPickerController
