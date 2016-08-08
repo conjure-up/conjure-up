@@ -12,7 +12,7 @@ class SpellPickerController:
         self.view = None
 
     def __handle_exception(self, exc):
-        utils.pollinate(app.session_id, "TODO")
+        utils.pollinate(app.session_id, "E005")
         app.ui.show_exception_message(exc)
 
     def finish(self, spellname):

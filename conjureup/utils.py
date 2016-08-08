@@ -243,6 +243,7 @@ def pollinate(session, tag):
         E002 - error in post processor
         E003 - error in pre processor
         E004 - error creating model in existing controller
+        E005 - error in picking spells
 
     Arguments:
     session: randomly generated session id
