@@ -1,6 +1,5 @@
 from subprocess import run, CalledProcessError
 import shutil
-import tempfile
 import os
 from conjureup.consts import UNSPECIFIED_SPELL
 from conjureup.app_config import app
