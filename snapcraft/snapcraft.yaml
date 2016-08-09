@@ -9,7 +9,7 @@ confinement: strict
 
 apps:
   conjure-up:
-    command: conjure-up -c $SNAP/etc/conjure-up.conf --spells-dir $SNAP/spells --cache-dir $SNAP_DATA/conjure-up
+    command: conjure-up -c $SNAP/etc/conjure-up.conf --spells-dir $SNAP/spells --cache-dir $SNAP_USER_DATA/conjure-up
     plugs: [home]
   python3:
     command: python3
@@ -21,7 +21,7 @@ parts:
     plugin: python3
     source: https://github.com/ubuntu/conjure-up.git
     source-type: git
-    requirements: parts/conjure/src/requirements.txt
+    requirements: requirements.txt
     stage-packages:
       - bsdtar
       - coreutils
