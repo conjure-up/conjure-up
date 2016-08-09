@@ -9,7 +9,7 @@ confinement: strict
 
 apps:
   conjure-up:
-    command: conjure-up -c $SNAP/etc/conjure-up.conf --spells-dir $SNAP/spells --cache-dir $SNAP_USER_DATA/conjure-up
+    command: bin/conjure-up-wrapper
     plugs: [home]
   python3:
     command: python3
@@ -44,3 +44,8 @@ parts:
     files:
       etc/conjure-up.conf: etc/conjure-up.conf
       spells: spells
+  conjure-up-copy:
+    plugin: copy
+    source: .
+    files:
+      conjure-up-wrapper: bin/conjure-up-wrapper
