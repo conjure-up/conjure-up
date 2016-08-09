@@ -7,6 +7,7 @@ import macumba  # noqa
 import ubuntui  # noqa
 import bundleplacer  # noqa
 
+find_420_packages = setuptools.PEP420PackageFinder.find
 
 setuptools.setup(
     name="conjure-up",
@@ -14,8 +15,8 @@ setuptools.setup(
     author="Adam Stokes",
     author_email="adam.stokes@ubuntu.com",
     description="conjure-up a power tool for installing big software",
-    url="https://github.com/ubuntu-solutions-engineering/conjure-up",
-    packages=setuptools.find_packages(),
+    url="https://github.com/conjure-up/conjure-up",
+    packages=find_420_packages(),
     entry_points={
         "console_scripts": [
             "conjure-up = conjureup.app:main",
