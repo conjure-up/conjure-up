@@ -3,7 +3,6 @@ from conjureup.api.models import model_info
 from conjureup import utils
 import json
 import os
-from collections import deque
 from glob import glob
 
 

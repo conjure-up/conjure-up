@@ -10,7 +10,7 @@ scope_re = re.compile("^(\s*)def (\w*)\(")
 
 def get_graph_string(filelist):
     s = "[ summary ] -> [ END ]\n"
-    
+
     for fn in filelist:
         if os.path.basename(fn) == 'app.py':
             src = "START"
@@ -32,9 +32,9 @@ def get_graph_string(filelist):
                     use_indent = len(use_match.group(1))
                     if use_indent <= scope_indent:
                         scopes.pop()
-                    s += "[ {} ] - {} -> [ {} ]\n".format(src,
-                                                          "{}:{}".format(scopes[0], i+1),
-                                                          use_match.group(2))
+                    s += "[ {} ] - {} -> [ {} ]\n".format(
+                        src, "{}:{}".format(scopes[0], i+1),
+                        use_match.group(2))
     return s
 
 

@@ -1,7 +1,6 @@
 from . import common
 from conjureup import async
 from conjureup import controllers
-from conjureup.download import EndpointType
 from conjureup import juju
 from conjureup import utils
 from conjureup.api.models import model_info
@@ -134,7 +133,6 @@ class NewCloudController:
         self.__do_bootstrap(credential=credentials_key)
 
         return controllers.use('bundlereadme').render()
-
 
     def render(self, cloud):
         """ Render

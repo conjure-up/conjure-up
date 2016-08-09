@@ -4,4 +4,3 @@ class SpellPickerController:
         ...
 
 _controller_class = SpellPickerController
-

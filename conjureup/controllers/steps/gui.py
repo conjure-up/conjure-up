@@ -96,7 +96,7 @@ class StepsController:
             return
 
         step_widgets = deque()
-        
+
         for step_meta_path in self.step_metas:
             step_ex_path, ext = path.splitext(step_meta_path)
             if not path.isfile(step_ex_path) or \
