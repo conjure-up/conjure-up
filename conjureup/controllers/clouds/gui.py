@@ -1,5 +1,4 @@
 from conjureup.ui.views.cloud import CloudView
-from conjureup.download import EndpointType
 from conjureup import async
 from conjureup import utils
 from conjureup import controllers
