@@ -243,6 +243,7 @@ def pollinate(session, tag):
         E002 - error in post processor
         E003 - error in pre processor
         E004 - error creating model in existing controller
+        E005 - error in picking spells
 
     Arguments:
     session: randomly generated session id
@@ -325,7 +326,7 @@ def find_spells_matching(key):
     if key in app.spells_index:
         return app.spells_index[key]['spells']
 
-    for k, d in app.spells_index:
+    for k, d in app.spells_index.items():
         for spell in d['spells']:
             if spell == key:
                 return [spell]

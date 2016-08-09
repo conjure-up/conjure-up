@@ -110,8 +110,6 @@ def main():
     if not os.path.isdir(opts.cache_dir):
         os.makedirs(opts.cache_dir)
 
-    app.endpoint_type = detect_endpoint(opts.spell)
-
     if os.geteuid() == 0:
         utils.info("")
         utils.info("This should _not_ be run as root or with sudo.")
@@ -157,8 +155,34 @@ def main():
     with open(spells_index_path) as fp:
         app.spells_index = yaml.safe_load(fp.read())
 
+    spell_name = spell
+    app.endpoint_type = detect_endpoint(opts.spell)
+
+    if app.endpoint_type == EndpointType.LOCAL_SEARCH:
+        spells = utils.find_spells_matching(opts.spell)
+
+        if len(spells) == 0:
+            utils.error("Can't find a spell matching '{}'".format(opts.spell))
+            sys.exit(1)
+
+        # One result means it was a direct match and we can copy it
+        # now. Changing the endpoint type then stops us from showing
+        # the picker UI. More than one result means we need to show
+        # the picker UI and will defer the copy to
+        # SpellPickerController.finish(), so nothing to do here.
+        if len(spells) == 1:
+            print("found spell {}".format(spells[0]))
+            utils.set_chosen_spell(spell_name,
+                                   os.path.join(opts.cache_dir,
+                                                spell_name))
+            download_local(os.path.join(app.config['spells-dir'],
+                                        spell_name),
+                           app.config['spell-dir'])
+            utils.set_spell_metadata()
+            app.endpoint_type = EndpointType.LOCAL_DIR
+
     # download spell if necessary
-    if app.endpoint_type == EndpointType.LOCAL_DIR:
+    elif app.endpoint_type == EndpointType.LOCAL_DIR:
         if not os.path.isdir(opts.spell):
             utils.warning("Could not find spell {}".format(opts.spell))
             sys.exit(1)
@@ -189,8 +213,11 @@ def main():
                         "create a new controller using 'juju bootstrap'.")
             sys.exit(1)
 
+    app.env = os.environ.copy()
+    app.env['CONJURE_UP_SPELL'] = spell_name
+
     if app.argv.cloud:
-        if app.endpoint_type is None:
+        if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
             utils.error("Please specify a spell for headless mode.")
             sys.exit(1)
 
