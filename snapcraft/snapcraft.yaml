@@ -15,6 +15,12 @@ apps:
     command: python3
   shell:
     command: bash
+  juju:
+    command: juju
+  lxd:
+    command: lxd
+  lxc:
+    command: lxc
 
 parts:
   conjure:
@@ -30,7 +36,7 @@ parts:
       - jq
       - charm-tools
       - charm
-  juju:
+  juju-copy:
     plugin: nil
     stage-packages:
       - juju
