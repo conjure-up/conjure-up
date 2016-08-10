@@ -15,8 +15,7 @@ from conjureup.api.models import model_info
 class DeployController:
 
     def __init__(self):
-        self.bundle_filename = None
-        self.bundle = None
+        self.is_add_machine_complete = False
         self.services = []
         self.svc_idx = 0
         self.showing_error = False
@@ -122,9 +121,12 @@ class DeployController:
         if self.showing_error:
             return
 
-        juju.add_machines([md for _, md in
-                           app.metadata_controller.bundle.machines.items()],
-                          exc_cb=partial(self._handle_exception, "ED"))
+        if not self.is_add_machine_complete:
+            juju.add_machines(
+                [md for _, md in
+                 app.metadata_controller.bundle.machines.items()],
+                exc_cb=partial(self._handle_exception, "ED"))
+            self.is_add_machine_complete = True
 
         n_total = len(self.services)
         if self.svc_idx >= n_total:

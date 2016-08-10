@@ -32,15 +32,9 @@ class DeployGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.deploy.gui.utils')
         self.mock_utils = self.utils_patcher.start()
 
-        self.bundleinfo_patcher = patch(
-            'conjureup.controllers.deploy.gui.get_bundleinfo')
-        self.mock_get_bundleinfo = self.bundleinfo_patcher.start()
         self.mock_bundle = MagicMock(name="bundle")
         self.mock_bundle.machines = {"1": sentinel.machine_1}
         self.mock_service_1 = MagicMock(name="s1")
-        self.mock_get_bundleinfo.return_value = ("filename",
-                                                 self.mock_bundle,
-                                                 [self.mock_service_1])
         self.finish_patcher = patch(
             'conjureup.controllers.deploy.gui.DeployController.finish')
         self.mock_finish = self.finish_patcher.start()
@@ -67,7 +61,6 @@ class DeployGUIRenderTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.utils_patcher.stop()
-        self.bundleinfo_patcher.stop()
         self.finish_patcher.stop()
         self.submit_patcher.stop()
         self.view_patcher.stop()
