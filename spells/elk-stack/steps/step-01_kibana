@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+from subprocess import run, DEVNULL, PIPE
+from conjureup.hooklib import juju
+from conjureup.hooklib.writer import success, fail, error  # noqa
+
+
+status = juju.status()
+applications = status['applications']['kibana']
+ip = applications['units']['kibana/0']['public-address']
+if ip:
+    sh = run('juju expose kibana', shell=True,
+             stderr=PIPE,
+             stdout=DEVNULL)
+    if sh.returncode > 0:
+        error("Failed to expose Kibana UI: {}".format(sh.stderr.decode()))
+    success("Kibana is now configured "
+            "and can be viewed at http://{}".format(ip))
+fail("Unable to determine Kibana URL")

@@ -40,7 +40,7 @@ class SpellPickerView(WidgetWrap):
         total_items = [
             Padding.center_60(HR())
         ]
-        for spell in self.spells:
+        for spell in sorted(self.spells):
             total_items.append(Padding.center_60(
                 Color.body(
                     menu_btn(label=spell,

@@ -7,7 +7,7 @@ import time
 
 
 def wait_for_applications(script, msg_cb):
-    """ Processes a 00_deploy-done.sh to verify if applications are available
+    """ Processes a 00_deploy-done to verify if applications are available
 
     Arguments:
     script: script to run (00_deploy-done.sh)
