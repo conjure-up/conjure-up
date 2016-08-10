@@ -10,7 +10,6 @@ from conjureup.app_config import app
 from conjureup.ui.views.service_walkthrough import ServiceWalkthroughView
 from conjureup import utils
 from conjureup.api.models import model_info
-from .common import get_bundleinfo
 
 
 class DeployController:
@@ -123,10 +122,9 @@ class DeployController:
         if self.showing_error:
             return
 
-        if not self.bundle:
-            self.bundle_filename, self.bundle, self.services = get_bundleinfo()
-            juju.add_machines([md for _, md in self.bundle.machines.items()],
-                              exc_cb=partial(self._handle_exception, "ED"))
+        juju.add_machines([md for _, md in
+                           app.metadata_controller.bundle.machines.items()],
+                          exc_cb=partial(self._handle_exception, "ED"))
 
         n_total = len(self.services)
         if self.svc_idx >= n_total:
