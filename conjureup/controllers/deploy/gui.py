@@ -1,6 +1,7 @@
 from functools import partial
 import json
 import os
+from operator import attrgetter
 from ubuntui.ev import EventLoop
 from subprocess import run, PIPE
 from conjureup import controllers
@@ -121,6 +122,8 @@ class DeployController:
         if self.showing_error:
             return
 
+        self.services = sorted(app.metadata_controller.bundle.services,
+                               key=attrgetter('service_name'))
         if not self.is_add_machine_complete:
             juju.add_machines(
                 list(app.metadata_controller.bundle.machines.values()),
