@@ -12,5 +12,3 @@ options-whitelist:
   - ext-port
   nova-compute:
   - virt-type
-packages:
-- openstack

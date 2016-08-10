@@ -11,10 +11,8 @@ import sys
 
 class DeployStatusController:
     def __init__(self):
-        self.bundle = os.path.join(
-            app.config['spell-dir'], 'bundle.yaml')
         self.bundle_scripts = os.path.join(
-            app.config['spell-dir'], 'conjure/steps'
+            app.config['spell-dir'], 'steps'
         )
 
     def __handle_exception(self, tag, exc):

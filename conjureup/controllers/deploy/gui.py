@@ -1,6 +1,7 @@
 from functools import partial
 import json
 import os
+from operator import attrgetter
 from ubuntui.ev import EventLoop
 from subprocess import run, PIPE
 from conjureup import controllers
@@ -10,14 +11,12 @@ from conjureup.app_config import app
 from conjureup.ui.views.service_walkthrough import ServiceWalkthroughView
 from conjureup import utils
 from conjureup.api.models import model_info
-from .common import get_bundleinfo
 
 
 class DeployController:
 
     def __init__(self):
-        self.bundle_filename = None
-        self.bundle = None
+        self.is_add_machine_complete = False
         self.services = []
         self.svc_idx = 0
         self.showing_error = False
@@ -123,10 +122,13 @@ class DeployController:
         if self.showing_error:
             return
 
-        if not self.bundle:
-            self.bundle_filename, self.bundle, self.services = get_bundleinfo()
-            juju.add_machines([md for _, md in self.bundle.machines.items()],
-                              exc_cb=partial(self._handle_exception, "ED"))
+        self.services = sorted(app.metadata_controller.bundle.services,
+                               key=attrgetter('service_name'))
+        if not self.is_add_machine_complete:
+            juju.add_machines(
+                list(app.metadata_controller.bundle.machines.values()),
+                exc_cb=partial(self._handle_exception, "ED"))
+            self.is_add_machine_complete = True
 
         n_total = len(self.services)
         if self.svc_idx >= n_total:

@@ -17,10 +17,8 @@ from conjureup.ui.widgets.step import StepWidget
 class StepsController:
     def __init__(self):
         self.view = None
-        self.bundle = path.join(
-            app.config['spell-dir'], 'bundle.yaml')
         self.bundle_scripts = path.join(
-            app.config['spell-dir'], 'conjure/steps'
+            app.config['spell-dir'], 'steps'
         )
         self.step_metas = common.get_step_metadata_filenames(
             self.bundle_scripts)

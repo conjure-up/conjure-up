@@ -4,7 +4,6 @@ Api for the charmstore:
 https://github.com/juju/charmstore/blob/v5/docs/API.md
 """
 from conjureup.app_config import app
-from conjureup.utils import spew
 from subprocess import run, CalledProcessError, DEVNULL, PIPE
 from tempfile import NamedTemporaryFile
 import json
@@ -30,7 +29,7 @@ def get_bundle(bundle, to_file=False):
     """ Attempts to grab the bundle.yaml
 
     Arguments:
-    bundle: name of bundle or absolute path to local bundle
+    bundle: URL of bundle or absolute path to local bundle
     to_file: store to a temporary file
 
     Returns:
@@ -47,14 +46,13 @@ def get_bundle(bundle, to_file=False):
             with open(bundle) as f:
                 return yaml.safe_load(f.read())
 
-    bundle = path.join(cs, bundle, 'archive/bundle.yaml')
     req = requests.get(bundle)
     if not req.ok:
         raise Exception("Problem getting bundle: {}".format(req))
     if to_file:
         with NamedTemporaryFile(mode="w", encoding="utf-8",
                                 delete=False) as tempf:
-            spew(tempf.name, req.text)
+            tempf.write(req.text)
             return tempf.name
     else:
         return yaml.safe_load(req.text)

@@ -10,7 +10,7 @@ confinement: strict
 apps:
   conjure-up:
     command: bin/conjure-up-wrapper
-    plugs: [home]
+    plugs: [home, network, network-control, network-bind]
   python3:
     command: python3
   shell:

@@ -28,15 +28,9 @@ class DeployTUIRenderTestCase(unittest.TestCase):
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
 
-        self.bundleinfo_patcher = patch(
-            'conjureup.controllers.deploy.tui.get_bundleinfo')
-        self.mock_get_bundleinfo = self.bundleinfo_patcher.start()
         self.mock_bundle = MagicMock(name="bundle")
         self.mock_bundle.machines = {"1": sentinel.machine_1}
         self.mock_service_1 = MagicMock(name="s1")
-        self.mock_get_bundleinfo.return_value = ("filename",
-                                                 self.mock_bundle,
-                                                 [self.mock_service_1])
 
         self.controller = DeployController()
 
@@ -49,7 +43,6 @@ class DeployTUIRenderTestCase(unittest.TestCase):
         self.utils_patcher.stop()
         self.finish_patcher.stop()
         self.app_patcher.stop()
-        self.bundleinfo_patcher.stop()
         self.juju_patcher.stop()
 
     def test_render(self):

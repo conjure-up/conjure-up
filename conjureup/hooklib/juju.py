@@ -1,5 +1,9 @@
 from subprocess import run, PIPE, CalledProcessError
 import yaml
+import logging
+import time
+from .writer import fail, success
+log = logging.getLogger('conjureup')
 
 
 def status():
@@ -61,3 +65,50 @@ def machine_states():
     return [(name, md['juju-status'].get('current', ''),
              md['juju-status'].get('message', ''))
             for name, md in status().get('machines',  {}).items()]
+
+
+def run_action(unit, action):
+    """ runs an action on a unit, waits for result
+    """
+    is_complete = False
+    sh = run('juju run-action {} {}'.format(unit, action),
+             shell=True,
+             stdout=PIPE)
+    run_action_output = yaml.load(sh.stdout.decode())
+    log.debug("{}: {}".format(sh.args, run_action_output))
+    action_id = run_action_output.get('Action queued with id', None)
+    log.debug("Found action: {}".format(action_id))
+    if not action_id:
+        fail("Could not determine action id for test")
+
+    while not is_complete:
+        sh = run('juju show-action-output {}'.format(action_id),
+                 shell=True,
+                 stderr=PIPE,
+                 stdout=PIPE)
+        log.debug(sh)
+        try:
+            output = yaml.load(sh.stdout.decode())
+            log.debug(output)
+        except Exception as e:
+            log.debug(e)
+        if output['status'] == 'running' or output['status'] == 'pending':
+            time.sleep(5)
+            continue
+        if output['status'] == 'failed':
+            fail("The test failed, "
+                 "please have a look at `juju show-action-status`")
+        if output['status'] == 'completed':
+            completed_msg = "{} test passed".format(unit)
+            results = output.get('results', None)
+            if not results:
+                is_complete = True
+                success(completed_msg)
+            if results.get('outcome', None):
+                is_complete = True
+                completed_msg = "{}: (result) {}".format(
+                    completed_msg,
+                    results.get('outcome'))
+                success(completed_msg)
+    fail("There is an unknown issue with running the test, "
+         "please have a look at `juju show-action-status`")

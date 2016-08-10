@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
+from conjureup.hooklib import juju
 
-import utils
-
-if __name__ == "__main__":
-    utils.run_smoke_test('resourcemanager')
+juju.run_action('resourcemanager/0', 'smoke-test')

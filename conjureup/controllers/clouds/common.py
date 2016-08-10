@@ -6,14 +6,10 @@ def parse_whitelist():
     """ Parses all whitelists from multiple bundle results
     """
     current = []
-    for bundle in app.bundles:
-        try:
-            for cloud \
-                 in bundle['Meta']['extra-info/conjure-up']['cloud-whitelist']:
-                if cloud not in current:
-                    current.append(cloud)
-        except:
-            continue
+    if 'cloud-whitelist' in app.config['metadata']:
+        for cloud in app.config['metadata']:
+            if cloud not in current:
+                current.append(cloud)
     return current
 
 
@@ -21,14 +17,11 @@ def parse_blacklist():
     """ Parses all blacklist from multiple bundle results
     """
     current = []
-    for bundle in app.bundles:
-        try:
-            for cloud \
-                 in bundle['Meta']['extra-info/conjure-up']['cloud-blacklist']:
-                if cloud not in current:
-                    current.append(cloud)
-        except:
-            continue
+    if 'cloud-blacklist' in app.config['metadata']:
+        for cloud in app.config['metadata']:
+            if cloud not in current:
+                current.append(cloud)
+
     return current
 
 

@@ -10,7 +10,6 @@ from conjureup.api.models import model_info
 from conjureup.app_config import app
 from conjureup import juju
 from subprocess import run, PIPE
-from .common import get_bundleinfo
 
 
 class DeployController:
@@ -69,10 +68,10 @@ class DeployController:
         controllers.use('deploystatus').render()
 
     def render(self):
-        self.bundle_filename, self.bundle, self.services = get_bundleinfo()
         self.do_pre_deploy()
-        juju.add_machines([md for _, md in self.bundle.machines.items()],
-                          exc_cb=partial(self.__handle_exception, "ED"))
+        juju.add_machines(
+            list(app.metadata_controller.bundle.machines.values()),
+            exc_cb=partial(self.__handle_exception, "ED"))
         self.finish()
 
 _controller_class = DeployController
