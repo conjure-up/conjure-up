@@ -26,6 +26,7 @@ class SpellPickerController:
                                     spellname),
                        app.config['spell-dir'])
         utils.set_spell_metadata()
+        utils.setup_metadata_controller()
         return controllers.use('clouds').render()
 
     def render(self):

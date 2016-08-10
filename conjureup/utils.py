@@ -9,6 +9,7 @@ from subprocess import (run, check_call,
                         CalledProcessError, DEVNULL,
                         PIPE, Popen)
 from conjureup.async import submit
+from conjureup import charm
 from conjureup.app_config import app
 from configobj import ConfigObj
 
@@ -284,6 +285,10 @@ def load_global_conf():
 
 def setup_metadata_controller():
     bundle_filename = os.path.join(app.config['spell-dir'], 'bundle.yaml')
+    if not os.path.isfile(bundle_filename):
+        bundle_filename = charm.get_bundle(
+            app.config['metadata']['bundle-location'], True)
+
     bundle = Bundle(filename=bundle_filename)
     bundleplacer_cfg = Config(
         'bundle-placer',
@@ -310,16 +315,6 @@ def set_spell_metadata():
         metadata = yaml.safe_load(fp.read())
 
     app.config['metadata'] = metadata
-
-    # Need to provide app.bundles dictionary even for single
-    # spells in the GUI
-    app.bundles = [
-        {
-            'Meta': {
-                'extra-info/conjure-up': metadata
-            }
-        }
-    ]
 
 
 def find_spells_matching(key):
