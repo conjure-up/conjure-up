@@ -70,7 +70,7 @@ class DeployController:
     def render(self):
         self.do_pre_deploy()
         juju.add_machines(
-            app.metadata_controller.bundle.machines.values(),
+            list(app.metadata_controller.bundle.machines.values()),
             exc_cb=partial(self.__handle_exception, "ED"))
         self.finish()
 
