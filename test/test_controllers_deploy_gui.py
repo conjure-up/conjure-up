@@ -53,6 +53,7 @@ class DeployGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.deploy.gui.app')
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
+        mock_app.metadata_controller.bundle = self.mock_bundle
 
         self.juju_patcher = patch(
             'conjureup.controllers.deploy.gui.juju')

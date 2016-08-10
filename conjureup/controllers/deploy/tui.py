@@ -69,9 +69,9 @@ class DeployController:
 
     def render(self):
         self.do_pre_deploy()
-        juju.add_machines([md for _, md in
-                           app.metadata_controller.bundle.machines.items()],
-                          exc_cb=partial(self.__handle_exception, "ED"))
+        juju.add_machines(
+            app.metadata_controller.bundle.machines.values(),
+            exc_cb=partial(self.__handle_exception, "ED"))
         self.finish()
 
 _controller_class = DeployController

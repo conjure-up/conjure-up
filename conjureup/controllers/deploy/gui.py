@@ -123,8 +123,7 @@ class DeployController:
 
         if not self.is_add_machine_complete:
             juju.add_machines(
-                [md for _, md in
-                 app.metadata_controller.bundle.machines.items()],
+                app.metadata_controller.bundle.machines.values(),
                 exc_cb=partial(self._handle_exception, "ED"))
             self.is_add_machine_complete = True
 
