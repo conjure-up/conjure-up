@@ -35,6 +35,7 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.mock_bundle = MagicMock(name="bundle")
         self.mock_bundle.machines = {"1": sentinel.machine_1}
         self.mock_service_1 = MagicMock(name="s1")
+        self.mock_bundle.services = [self.mock_service_1]
         self.finish_patcher = patch(
             'conjureup.controllers.deploy.gui.DeployController.finish')
         self.mock_finish = self.finish_patcher.start()
