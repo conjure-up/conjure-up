@@ -286,6 +286,10 @@ def load_global_conf():
 def setup_metadata_controller():
     bundle_filename = os.path.join(app.config['spell-dir'], 'bundle.yaml')
     if not os.path.isfile(bundle_filename):
+        if 'bundle-location' not in app.config['metadata']:
+            raise Exception(
+                "Could not determine bundle location: no local bundle "
+                "was found and bundle-location not set in spell metadata.")
         bundle_filename = charm.get_bundle(
             app.config['metadata']['bundle-location'], True)
 
