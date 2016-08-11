@@ -11,39 +11,19 @@ Then **conjure-up** is for you!
 This is the runtime application for processing spells to get those **big software**
 solutions up and going with as little hindrance as possible.
 
+# installation
+
+> Xenial and above
+
+```
+$ sudo dpkg-reconfigure -p medium lxd
+$ lxc finger
+$ sudo snap install conjure-up --devmode
+```
+
 # how to use
 
-## Xenial and above
-
-It is included in the archive.
-
-## Bleeding edge
-
-Brave? Try the bleeding edge version and file bugs to keep us honest.
-
-```
-$ sudo apt-add-repository ppa:conjure-up/daily-git
-```
-
-Or install our **pre-releases**
-
-```
-$ sudo apt-add-repository ppa:conjure-up/next
-```
-
-Add the latest Juju
-
-```
-$ sudo apt-add-repository ppa:juju/devel
-```
-
-### Install the packages
-```
-$ sudo apt update
-$ sudo apt install conjure-up
-```
-
-### Run the installer interactively
+## Run the installer interactively
 
 You may want to learn a little bit about what you're installing, right? This
 method provides you with a tutorial like approach without being overburdening.
@@ -53,17 +33,17 @@ few config options before deploying. Or, just hold down the enter button and
 it'll choose sensible defaults for you.
 
 ```
-$ conjure-up openstack
+$ conjure-up
 ```
 
-### Run the installer non-interactively (headless mode)
+## Run the installer non-interactively (headless mode)
 
 Already been through the guided tour? Not keen on holding down the enter button
 on your keyboard? Not a problem, easily get your **big software** up and running
 with all the sensible defaults in place.
 
 ```
-$ conjure-up ~containers/observable-kubernetes to azure
+$ conjure-up observable-kubernetes aws
 ```
 
 # authors
