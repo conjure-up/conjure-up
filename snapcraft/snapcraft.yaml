@@ -26,7 +26,6 @@ parts:
       - bsdtar
       - coreutils
       - lxd-client
-      - lxd
       - jq
       - juju
     snap:
