@@ -28,19 +28,14 @@ parts:
       - lxd-client
       - lxd
       - jq
-      - charm-tools
-      - charm
-  juju:
-    plugin: nil
-    stage-packages:
       - juju
     snap:
-      - usr/bin/juju*
-      - usr/lib/juju*
+      - -usr/share
+      - -usr/include
+      - -home/*/Projects/conjure/snapcraft/parts
   conjure-configs:
     plugin: copy
     source: https://github.com/ubuntu/conjure-up.git
-    source-type: git
     files:
       etc/conjure-up.conf: etc/conjure-up.conf
       spells: spells
