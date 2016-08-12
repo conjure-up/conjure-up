@@ -29,9 +29,23 @@ parts:
       - jq
       - juju
     snap:
+      - usr/bin/bsdtar
+      - usr/bin/tail
+      - usr/bin/env
+      - usr/bin/pip*
+      - usr/bin/easy_install*
+      - usr/bin/lxc
+      - usr/bin/jq
+      - usr/bin/juju*
+      - usr/bin/py*
+      - usr/bin/conjure-up
+      - usr/lib/juju-2.0/bin/juju*
+      - usr/lib/python3
+      - usr/lib/python3.5/lib-dynload
+      - etc/python*
       - -usr/share
       - -usr/include
-      - -home/*/Projects/conjure/snapcraft/parts
+      - -home
   conjure-configs:
     plugin: copy
     source: https://github.com/ubuntu/conjure-up.git
