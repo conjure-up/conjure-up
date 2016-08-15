@@ -172,6 +172,7 @@ def main():
         # SpellPickerController.finish(), so nothing to do here.
         if len(spells) == 1:
             print("found spell {}".format(spells[0]))
+            spell_name = spells[0]
             utils.set_chosen_spell(spell_name,
                                    os.path.join(opts.cache_dir,
                                                 spell_name))
