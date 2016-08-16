@@ -19,7 +19,7 @@ apps:
 parts:
   conjure:
     plugin: python3
-    source: https://github.com/ubuntu/conjure-up.git
+    source: https://github.com/conjure-up/conjure-up.git
     source-type: git
     requirements: requirements.txt
     stage-packages:
@@ -47,13 +47,13 @@ parts:
       - -usr/include
       - -home
   conjure-configs:
-    plugin: copy
-    source: https://github.com/ubuntu/conjure-up.git
-    files:
+    plugin: dump
+    source: https://github.com/conjure-up/conjure-up.git
+    filesets:
       etc/conjure-up.conf: etc/conjure-up.conf
       spells: spells
   conjure-up-copy:
-    plugin: copy
+    plugin: dump
     source: .
-    files:
+    organize:
       conjure-up-wrapper: bin/conjure-up-wrapper
