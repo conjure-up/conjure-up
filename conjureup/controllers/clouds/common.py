@@ -7,7 +7,7 @@ def parse_whitelist():
     """
     current = []
     if 'cloud-whitelist' in app.config['metadata']:
-        for cloud in app.config['metadata']:
+        for cloud in app.config['metadata']['cloud-whitelist']:
             if cloud not in current:
                 current.append(cloud)
     return current
@@ -18,7 +18,7 @@ def parse_blacklist():
     """
     current = []
     if 'cloud-blacklist' in app.config['metadata']:
-        for cloud in app.config['metadata']:
+        for cloud in app.config['metadata']['cloud-blacklist']:
             if cloud not in current:
                 current.append(cloud)
 
