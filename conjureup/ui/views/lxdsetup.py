@@ -5,7 +5,7 @@ from ubuntui.widgets.hr import HR
 from urwid import (WidgetWrap, Pile, Text, Columns, Filler)
 from collections import OrderedDict
 from ubuntui.widgets.input import (StringEditor, YesNo)
-import os
+# import os
 
 # Network format
 #
@@ -106,11 +106,16 @@ class LXDSetupView(WidgetWrap):
                  "which usually means this is your first time running "
                  "LXD."),
             Padding.line_break(""),
+            # Text("If you wish to do so now pressing confirm will drop you out "  # noqa
+            #      "of the installer and walk you through configuring your "
+            #      "network for LXD. Once complete the installer will "
+            #      "start again from the beginning where you can choose "
+            #      "to deploy the bundle via LXD.")
             Text("If you wish to do so now pressing confirm will drop you out "
-                 "of the installer and walk you through configuring your "
-                 "network for LXD. Once complete the installer will "
-                 "start again from the beginning where you can choose "
-                 "to deploy the bundle via LXD.")
+                 "of the installer and you will be required to run "
+                 "`lxd init` to configure the network for LXD. Once complete "
+                 "re-run conjure-up and continue the installation.")
+
         ]
         return Pile(items)
 
@@ -140,7 +145,7 @@ class LXDSetupView(WidgetWrap):
         self.cb(back=True)
 
     def submit(self, result):
-        # self.cb(self.input_items)
-        os.execl("/usr/share/conjure-up/run-lxd-config",
-                 "/usr/share/conjure-up/run-lxd-config",
-                 self.app.config['spell'])
+        # os.execl("/usr/share/conjure-up/run-lxd-config",
+        #          "/usr/share/conjure-up/run-lxd-config",
+        #          self.app.config['spell'])
+        self.cb(needs_lxd_setup=True)
