@@ -15,11 +15,21 @@ solutions up and going with as little hindrance as possible.
 
 > Xenial and above
 
+We use snap's for packaging and installation, as of snapd 2.11 the following
+needs to be run
+
 ```
 $ sudo dpkg-reconfigure -p medium lxd
 $ lxc finger
 $ sudo snap install conjure-up --devmode
+$ sudo snap connect conjure-up:firewall-control ubuntu-core:firewall-control
+$ sudo snap connect conjure-up:network-control ubuntu-core:network-control
+$ sudo systemctl start snap.conjure-up.bridge.service
 ```
+
+These steps are required primarily for the **OpenStack** on a single machine
+case where we need access to a custom bridge for our deployment to function
+correctly.
 
 # how to use
 

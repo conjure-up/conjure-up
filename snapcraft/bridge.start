@@ -1,10 +1,12 @@
 #!/bin/sh
 
-ip link add dev conjureup0 type bridge
-ip addr add 10.99.0.1/24 dev conjureup0
-ip link set dev conjureup0 up
+set -x
 
-echo 1 > /proc/sys/net/ipv4/ip_foward
+ip link add dev conjureup0 type bridge && echo $?
+ip addr add 10.99.0.1/24 dev conjureup0 && echo $?
+ip link set dev conjureup0 up && echo $?
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
 
 iptables -I FORWARD -i conjureup0 -j ACCEPT
 iptables -I FORWARD -o conjureup0 -j ACCEPT

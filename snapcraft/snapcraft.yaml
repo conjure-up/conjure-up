@@ -14,6 +14,7 @@ apps:
   bridge:
     command: ./bridge.start
     stop-command: ./bridge.stop
+    restart-condition: never
     daemon: oneshot
     plugs: [network, network-bind, network-control, firewall-control]
   python3:
@@ -33,7 +34,11 @@ parts:
       - lxd-client
       - jq
       - juju
+      - iproute2
+      - iptables
     snap:
+      - sbin/ip
+      - sbin/iptables
       - usr/bin/bsdtar
       - usr/bin/tail
       - usr/bin/env
