@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -x
+
+ip addr flush dev conjureup0
+ip link set dev conjureup0 down
+
+iptables -D FORWARD -i conjureup0 -j ACCEPT
+iptables -D FORWARD -o conjureup0 -j ACCEPT
+
+iptables -D INPUT -i conjureup0 -p tcp -m tcp --dport 53 -j ACCEPT
+iptables -D INPUT -i conjureup0 -p udp -m udp --dport 53 -j ACCEPT
+iptables -D INPUT -i conjureup0 -p tcp -m tcp --dport 67 -j ACCEPT
+iptables -D INPUT -i conjureup0 -p udp -m udp --dport 67 -j ACCEPT
+
+iptables -t nat -D POSTROUTING -s 10.99.0.1/24 ! -d 10.99.0.1/24 -j MASQUERADE
