@@ -61,6 +61,13 @@ class NewCloudController:
                               "`juju add-credential {}`.".format(self.cloud))
                 sys.exit(1)
 
+        if self.cloud == 'localhost':
+            if not utils.check_bridge_exists():
+                return controllers.use('lxdsetup').render()
+
+            app.log.debug("Found an IPv4 address, "
+                          "assuming LXD is configured.")
+
         utils.info("Bootstrapping Juju controller")
         juju.bootstrap(controller=app.current_controller,
                        cloud=self.cloud,

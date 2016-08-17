@@ -4,6 +4,7 @@ from conjureup import controllers
 from conjureup.app_config import app
 from subprocess import run
 from tempfile import NamedTemporaryFile
+from ubuntui.ev import EventLoop
 
 
 class LXDSetupController:
@@ -37,15 +38,20 @@ class LXDSetupController:
             lines.append("{}={}".format(k, network[k]))
         return "\n".join(lines)
 
-    def finish(self, lxdnetwork=None, back=False):
+    def finish(self, needs_lxd_setup=False, lxdnetwork=None, back=False):
         """ Processes the new LXD setup and loads the controller to
         finish bootstrapping the model.
 
         Arguments:
         back: if true loads previous controller
+        needs_lxd_setup: if true prompt user to run lxd init
         """
         if back:
             return controllers.use('clouds').render()
+
+        if needs_lxd_setup:
+            EventLoop.remove_alarms()
+            EventLoop.exit(1)
 
         if lxdnetwork is None:
             return app.ui.show_exception_message(
