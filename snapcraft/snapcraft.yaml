@@ -11,6 +11,11 @@ apps:
   conjure-up:
     command: bin/conjure-up-wrapper
     plugs: [home, network, network-control, network-bind]
+  bridge:
+    command: ./bridge.start
+    stop-command: ./bridge.stop
+    daemon: oneshot
+    plugs: [network, network-bind, network-control, firewall-control]
   python3:
     command: python3
   shell:

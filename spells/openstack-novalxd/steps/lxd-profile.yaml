@@ -15,7 +15,7 @@ devices:
     mtu: "9000"
     name: eth1
     nictype: bridged
-    parent: openstack0
+    parent: conjureup0
     type: nic
   mem:
     path: /dev/mem
