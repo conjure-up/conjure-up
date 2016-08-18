@@ -1,38 +1,42 @@
                                  .
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
-     |  MySQL is a fast, stable and true multi-user, multi-threaded SQL database server.                                              |
-     |  SQL (Structured Query Language) is the most popular database query language in                                                |
-     |  the world. The main goals of MySQL are speed, robustness and ease of use.                                                     |
+     |  APPLICATION DEPLOY                                                                                                            |
      |                                                                                                                                |
      |--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
-     |    List of charms: (title to be fixed)                                                                                         |
+     |    List of Applications                                                                                                        |
      |                                                                                                                                |
-     | -  mysql --------------------  Units: 1 ------- m3.large ------------( currently selected )----------- [ Configure ] --------- |
+     |    mysql                       Units: 1         m3.large                                         [ Configure ] [ Deploy ]      |
      |                                                                                                                                |
-     |    glance                      Units: 1         x1.small                                               [ Configure ]           |
+     |    glance                      Units: 1         x1.small                                         [ Configure ] [ Deploy ]      |
      |                                                                                                                                |
-     |    ceph-osd                    Units: 3         x2.medium                                              [ Configure ]           |
+     |    ceph-osd                    Units: 3         x2.medium                                        [ Configure ] [ Deploy ]      |
      |                                                                                                                                |
-     |    ceph-mon                    Units: 3         x2.medium                                              [ Configure ]-          |
+     |    ceph-mon                    Units: 3         x2.medium                                        [ Configure ] [ Deploy ]      |
      |                                                                                                                                |
-     |    neutron-api                 Units: 1         m3.large                                               [ Configure ]           |
+     |    neutron-api                 Units: 1         m3.large                                         [ Configure ] [ Deploy ]      |
      |                                                                                                                                |
-     |    neutron-openvswitch         Units: 1         m3.large                                               [ Configure ]           |
+     |    neutron-openvswitch         Units: 1         m3.large                                         [ Configure ] [ Deploy ]      |
      |                                                                                                                                |
-     |    neutron-gateway             Units: 1         m3.large                                               [ Configure ]           |
+     |    neutron-gateway             Units: 1         m3.large                                         [ Configure ] [ Deploy ]      |
      |                                                                                                                                |
-     |    keystone                    Units: 1         m2.medium                                              [ Configure ]           |
+     |    keystone                    Units: 1         m2.medium                                        [ Configure ] [ Deploy ]      |
      |                                                                                                                                |
-     |    cinder                      Units: 1         m3.large                                               [ COnfigure ]           |
+     |    cinder                      Units: 1         m3.large                                         [ Configure ] [ Deploy ]      |
      |                                                                                                                                |
-     |    openstack-dashboard         Units: 1         m2.medium                                              [ Configure ]           |
+     |    openstack-dashboard         Units: 1         m2.medium                                        [ Configure ] [ Deploy ]      |
      |                                                                                                                                |
+     |   --------------------------------------------------------------------------------------------------------------------------   |
+     |   MySQL is a fast, stable and true multi-user, multi-threaded SQL database server.                                             |
+     |   SQL (Structured Query Language) is the most popular database query language in                                               |
+     |   the world. The main goals of MySQL are speed, robustness and ease of use.                                                    |
      |                                                                                                                                |
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
-     |                                                                                                        [ Deploy             ]  |
+     |                                                                                                                                |
+     |                                                                                        DEPLOY REMAINING APPLICATIONS           |
+     |                                                                                                                                |
      |                                                                                                                                |
      |                                                                                                                                |
      +--------------------------------------------------------------------------------------------------------------------------------+
@@ -66,7 +70,7 @@
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
      |                                                       QUIT                                                                     |
-     |                                                                                                                                | 
+     |                                                                                                                                |
      |                                                                                                                                |
      |                                                                                                                                |
      |                                        Press (R) to view the spell's README                                                    |
@@ -137,6 +141,41 @@
      |                                                                                                                                |
      |                                                                                                                                |
      |        BACK                                                                                                                    |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     +--------------------------------------------------------------------------------------------------------------------------------+
+
+     +--------------------------------------------------------------------------------------------------------------------------------+
+     |                                                                                                                                |
+     |   NEW CLOUD SETUP                                                                                                              |
+     |                                                                                                                                |
+     +--------------------------------------------------------------------------------------------------------------------------------+
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |         Enter your AWS credentials:                                                                                            |
+     |         -------------------------------------------------------------------------------------------------------------          |
+     |                                                                                                                                |
+     |                              access-key                                                                                        |
+     |                                                                                                                                |
+     |                              secret-key                                                                                        |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     +--------------------------------------------------------------------------------------------------------------------------------+
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |        BACK                                                                                       ADD CREDENTIAL               |
      |                                                                                                                                |
      |                                                                                                                                |
      |                                                                                                                                |
@@ -225,23 +264,21 @@
      +--------------------------------------------------------------------------------------------------------------------------------+
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
-     |  MySQL is a fast, stable and true multi-user, multi-threaded SQL database server.                                              |
-     |  SQL (Structured Query Language) is the most popular database query language in                                                |
-     |  the world. The main goals of MySQL are speed, robustness and ease of use.                                                     |
+     |  MySQL CONFIGURATION                                                                                                           |
      |                                                                                                                                |
      |--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
-     |    Units                       [ 1                  ]                                                                          |
+     |    Units                       [ 1                  ]                                                [ Reset to Default ]      |
      |                                                                                                                                |
      |     How many units to deploy for this application.                                                                             |
      |    -------------------------------------------------------------------------------------------------------------------------   |
      |                                                                                                                                |
-     |    Instance Type               [ m3.large           ]                                                                          |
+     |    Instance Type               [ m3.large           ]                                                [ Reset to Default ]      |
      |                                                                                                                                |
      |     Type of instance to create for current application.                                                                        |
      |    -------------------------------------------------------------------------------------------------------------------------   |
      |                                                                                                                                |
-     |    max-connections             [ 20000              ]                                                                          |
+     |    max-connections             [ 20000              ]                                                [ Reset to Default ]      |
      |                                                                                                                                |
      |     Maximum connections to allow. -1 means use the server's compiled in default.                                               |
      |   --------------------------------------------------------------------------------------------------------------------------   |
@@ -258,16 +295,19 @@
      |                                                                                                                                |
      |                                                                                                                                |
      |                                                                                                                                |
+     |   MySQL is a fast, stable and true multi-user, multi-threaded SQL database server.                                             |
+     |   SQL (Structured Query Language) is the most popular database query language in                                               |
+     |   the world. The main goals of MySQL are speed, robustness and ease of use.                                                    |
      |                                                                                                                                |
+     +--------------------------------------------------------------------------------------------------------------------------------+
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |    CANCEL                                                                                                    APPLY             |
      |                                                                                                                                |
      |                                                                                                                                |
      |                                                                                                                                |
      +--------------------------------------------------------------------------------------------------------------------------------+
-     |                                                                                                                                |
-     |                                                                                         [ Cancel      ] [ Apply              ] |
-     |                                                                                                                                |
-     |                                                                                                                                |
-     +--------------------------------------------------------------------------------------------------------------------------------+
+
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
      | POST DEPLOY ACTIONS                                                                                                            |
@@ -278,14 +318,14 @@
      |                                                                                                                                |
      |                                                                                                                                |
      |                                                                                                                                |
-     |       (X) Import Glance images                                                                                                 |
+     |       (X) Import Glance images                                                                                    [ Run ]      |
      |                                                                                                                                |
      |           This action imports bootable images into Glance for Ubuntu Trusty and Xenial.                                        |
      |                                                                                                                                |
      |       ------------------------------------------------------------------------------------------------------------------       |
      |                                                                                                                                |
      |                                                                                                                                |
-     |       ( ) Import SSH Keys                                                                          [ Configure ]               |
+     |       ( ) Import SSH Keys                                                                         [ Configure ]   [ Run ]      |  
      |                                                                                                                                |
      |           Import ssh keys for the user to log into deployed instances.                                                         |
      |                                                                                                                                |
@@ -303,10 +343,13 @@
      |                                                                                                                                |
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
-     |                                                                                                   [ Run all actions ]          |
      |                                                                                                                                |
      |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                     Press (Q) to quit to shell, actions not executed will need to be run from command line.                    | 
      +--------------------------------------------------------------------------------------------------------------------------------+
+
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
      | SUMMARY                                                                                                                        |
@@ -379,37 +422,3 @@
      |                                                                                                                                |
      |                                                                                                                                |
      +--------------------------------------------------------------------------------------------------------------------------------+
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
