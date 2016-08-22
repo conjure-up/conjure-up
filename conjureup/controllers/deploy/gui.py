@@ -8,7 +8,8 @@ from conjureup import controllers
 from conjureup import juju
 from conjureup import async
 from conjureup.app_config import app
-from conjureup.ui.views.service_walkthrough import ServiceWalkthroughView
+from conjureup.ui.views.applicationlist import ApplicationListView
+from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup import utils
 from conjureup.api.models import model_info
 
@@ -16,11 +17,7 @@ from conjureup.api.models import model_info
 class DeployController:
 
     def __init__(self):
-        self.is_add_machine_complete = False
-        self.services = []
-        self.svc_idx = 0
-        self.showing_error = False
-        self.is_predeploy_queued = False
+        self.applications = []
 
     def _handle_exception(self, tag, exc):
         utils.pollinate(app.session_id, tag)
@@ -72,73 +69,72 @@ class DeployController:
         else:
             app.ui.set_footer("Pre-deploy processing done.")
 
-    def finish(self, single_service=None):
-        """handles deployment
+    def do_configure(self, application, sender):
+        "shows configure view for application"
+        cv = ApplicationConfigureView(application,
+                                      app.metadata_controller,
+                                      self)
+        app.ui.set_header("Configure {}".format(application.service_name))
+        app.ui.set_body(cv)
 
-        Arguments:
+    def handle_configure_done(self):
+        app.ui.set_header(self.list_header)
+        app.ui.set_body(self.list_view)
 
-        single_service: a dict for the service that was just
-        configured. finish will schedule a deploy for it and
-        call render() again to display the next one.
+    def do_deploy(self, application, msg_cb):
+        "launches deploy in background for application"
+        self.undeployed_applications.remove(application)
 
-        if service is None, schedules deploys for all remaining services,
-        schedules relations, then continues to next controller
+        def msg_both(*args):
+            msg_cb(*args)
+            app.ui.set_footer(*args)
 
-        """
-        if single_service:
-            juju.deploy_service(single_service,
+        juju.deploy_service(application,
+                            msg_cb=msg_both,
+                            exc_cb=partial(self._handle_exception, "ED"))
+
+    def do_deploy_remaining(self, sender):
+        "deploys all un-deployed applications"
+        for application in self.undeployed_applications:
+            juju.deploy_service(application,
                                 app.ui.set_footer,
                                 partial(self._handle_exception, "ED"))
-            self.svc_idx += 1
-            return self.render()
+
+    def finish(self):
+        juju.set_relations(self.applications,
+                           app.ui.set_footer,
+                           partial(self._handle_exception, "ED"))
+
+        if app.bootstrap.running and not app.bootstrap.running.done():
+            return controllers.use('bootstrapwait').render()
         else:
-            for service in self.services[self.svc_idx:]:
-                juju.deploy_service(service,
-                                    app.ui.set_footer,
-                                    partial(self._handle_exception, "ED"))
-
-            juju.set_relations(self.services,
-                               app.ui.set_footer,
-                               partial(self._handle_exception, "ED"))
-
-            if app.bootstrap.running and not app.bootstrap.running.done():
-                return controllers.use('bootstrapwait').render()
-            else:
-                return controllers.use('deploystatus').render()
+            return controllers.use('deploystatus').render()
 
         utils.pollinate(app.session_id, 'PC')
 
     def render(self):
-        if not self.is_predeploy_queued:
-            try:
-                future = async.submit(self._pre_deploy_exec,
-                                      partial(self._handle_exception, 'E003'),
-                                      queue_name=juju.JUJU_ASYNC_QUEUE)
-                self.is_predeploy_queued = True
-                future.add_done_callback(self._pre_deploy_done)
-            except Exception as e:
-                return self._handle_exception('E003', e)
+        try:
+            future = async.submit(self._pre_deploy_exec,
+                                  partial(self._handle_exception, 'E003'),
+                                  queue_name=juju.JUJU_ASYNC_QUEUE)
+            self.is_predeploy_queued = True
+            future.add_done_callback(self._pre_deploy_done)
+        except Exception as e:
+            return self._handle_exception('E003', e)
 
-        if self.showing_error:
-            return
+        juju.add_machines(
+            list(app.metadata_controller.bundle.machines.values()),
+            exc_cb=partial(self._handle_exception, "ED"))
 
-        self.services = sorted(app.metadata_controller.bundle.services,
-                               key=attrgetter('service_name'))
-        if not self.is_add_machine_complete:
-            juju.add_machines(
-                list(app.metadata_controller.bundle.machines.values()),
-                exc_cb=partial(self._handle_exception, "ED"))
-            self.is_add_machine_complete = True
+        self.applications = sorted(app.metadata_controller.bundle.services,
+                                   key=attrgetter('service_name'))
+        self.undeployed_applications = self.applications[:]
 
-        n_total = len(self.services)
-        if self.svc_idx >= n_total:
-            return self.finish()
-
-        service = self.services[self.svc_idx]
-        wv = ServiceWalkthroughView(service, self.svc_idx, n_total,
-                                    app.metadata_controller, self.finish)
-
-        app.ui.set_header("Review and Configure Applications")
-        app.ui.set_body(wv)
+        self.list_view = ApplicationListView(self.applications,
+                                             app.metadata_controller,
+                                             self)
+        self.list_header = "Review and Configure Applications"
+        app.ui.set_header(self.list_header)
+        app.ui.set_body(self.list_view)
 
 _controller_class = DeployController
