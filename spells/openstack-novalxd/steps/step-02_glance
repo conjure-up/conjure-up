@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /usr/share/conjure-up/hooklib/common.sh
+. common.sh
 
 if [[ $JUJU_PROVIDERTYPE =~ "lxd" ]]; then
     imagetype=root.tar.xz
