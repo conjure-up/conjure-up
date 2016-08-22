@@ -43,8 +43,9 @@ class SpellPickerView(WidgetWrap):
         for spell in self.spells:
             total_items.append(Padding.center_60(
                 Color.body(
-                    menu_btn(label=spell,
-                             on_press=self.submit),
+                    menu_btn(label=spell['name'],
+                             on_press=self.submit,
+                             user_data=spell),
                     focus_map='menu_button focus'
                 )
             ))
@@ -54,8 +55,8 @@ class SpellPickerView(WidgetWrap):
         total_items.append(Padding.center_20(self._build_buttons()))
         return Filler(Pile(total_items), valign='top')
 
-    def submit(self, result):
-        self.cb(result.label)
+    def submit(self, btn, result):
+        self.cb(result['key'])
 
     def cancel(self, btn):
         EventLoop.exit(0)
