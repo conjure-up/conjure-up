@@ -47,8 +47,8 @@ class SpellPickerController:
                                self.finish)
 
         app.ui.set_header(
-            title="Choose a Spell",
-            excerpt="Choose the spell you want to conjure"
+            title="Spell Selection",
+            excerpt="Choose from this list of recommended spells"
         )
         app.ui.set_body(view)
 

@@ -5,25 +5,27 @@ openstack:
   spells:
     - key: openstack-novalxd
       name: OpenStack with NovaLXD
-  description: |
-    Quickly and reliably build an enterprise-scale cloud run on Ubuntu - the most popular operating system for OpenStack.
+      description: |
+        Quickly and reliably build an enterprise-scale cloud run on Ubuntu - the most popular operating system for OpenStack.
 kubernetes:
   spells:
     - key: observable-kubernetes
       name: Observable Kubernetes
-  description: |
-    Kubernetes is an open-source platform for deploying, scaling, and operations of application containers across a cluster of hosts. Kubernetes is portable in that it works with public, private, and hybrid clouds. Extensible through a pluggable infrastructure. Self healing in that it will automatically restart and place containers on healthy nodes if a node ever goes away.
+      description: |
+        Kubernetes is an open-source platform for deploying, scaling, and operations of application containers across a cluster of hosts. Kubernetes is portable in that it works with public, private, and hybrid clouds. Extensible through a pluggable infrastructure. Self healing in that it will automatically restart and place containers on healthy nodes if a node ever goes away.
 bigdata:
   spells:
     - key: apache-processing-mapreduce
       name: Apache Processing MapReduce
+      description: |
+        MapReduce is a software framework for easily writing applications which process vast amounts of data in-parallel on large clusters of machines.
     - key: realtime-syslog-analytics
       name: Realtime Syslog Analytics
-  description: |
-    Distributed computing infrastructure for processing vast amounts of data in parallel on large clusters of machines.
+      description: |
+        An end-to-end Big Data solution that enables ingestion, processing, and visualization of log data.
 analytics:
   spells:
     - key: elk-stack
       name: Elastic Stack
-  description: |
-    The Elastic Stack — that is Elasticsearch, Logstash, Kibana — are open source projects that help you take data from any source, any format and search, analyze, and visualize it in real time.
+      description: |
+        The Elastic Stack — that is Elasticsearch, Logstash, Kibana — are open source projects that help you take data from any source, any format and search, analyze, and visualize it in real time.
