@@ -5,7 +5,7 @@ NAME = conjure-up
 CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
-VERSION := $(shell ./tools/version)
+VERSION := 2.0.0.8
 
 PACKAGE_SHARE_PATH := /usr/share/conjure-up
 PACKAGE_SHARE_HOOKLIB_PATH := $(PACKAGE_SHARE_PATH)/hooklib
@@ -20,9 +20,13 @@ install-dependencies:
 uninstall-dependencies:
 	sudo apt-get remove conjure-build-deps
 
-update_version: git-sync-requirements
-	wrap-and-sort
+release: clean test
 	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjureup/__init__.py
+	@sed -i -r "s/(^version:\s)(.*)/\1$(VERSION)/" snapcraft/snapcraft.yaml
+	@(cd snapcraft && snapcraft)
+	@echo
+	@echo "Build complete, now run snapcraft push snapcraft/$(NAME)_$(VERSION)_amd64.snap --release stable"
+	@echo
 
 clean:
 	@-debian/rules clean
@@ -40,23 +44,21 @@ clean:
 	@rm -rf dist
 	@rm -rf conjure-dev
 	@if [ -L /usr/share/conjure-up/hooklib ]; then sudo unlink $(PACKAGE_SHARE_HOOKLIB_PATH) && sudo mv $(PACKAGE_SHARE_HOOKLIB_PATH).orig $(PACKAGE_SHARE_HOOKLIB_PATH); fi
+	@(cd snapcraft && snapcraft clean)
 
 .PHONY: test
 test:
 	@tox
 
 DPKGBUILDARGS = -us -uc -i'.git.*|.tox|.bzr.*|.editorconfig|.travis-yaml|macumba\/debian|maasclient\/debian'
-deb-src: clean update_version
+deb-src: clean
 	@debuild -S -sa $(DPKGBUILDARGS)
 
 deb-release:
 	@debuild -S -sd $(DPKGBUILDARGS)
 
-deb: clean update_version
+deb: clean
 	@debuild -b $(DPKGBUILDARGS)
-
-current_version:
-	@echo $(VERSION)
 
 git-sync-requirements:
 	if [ ! -f tools/sync-repo.py ]; then echo "Need to download sync-repo.py from https://git.io/v2mEw" && exit 1; fi
@@ -64,12 +66,6 @@ git-sync-requirements:
 
 git_rev:
 	@echo $(GIT_REV)
-
-pyflakes:
-	pyflakes conjure
-
-pep8:
-	pep8 conjure
 
 dev: clean
 	tox -e conjure-dev
@@ -87,4 +83,4 @@ install: ../conjure*.deb
 	sudo dpkg -i ../conjure-up_*deb
 	sudo apt-get -yy install -f
 
-all: deb
+all: release
