@@ -113,7 +113,7 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
     log: application logger
     credential: credentials key
     """
-    cmd = "juju bootstrap {} {} --upload-tools " \
+    cmd = "juju bootstrap {} {} " \
           "--config image-stream=daily ".format(
               controller, cloud)
     cmd += "--config enable-os-upgrade=false "
