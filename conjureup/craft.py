@@ -1,6 +1,7 @@
 """ conjure-craft entrypoint
 """
 
+from conjureup import __version__ as VERSION
 from conjureup import utils
 from conjureup import charm
 from conjureup.app_config import app
@@ -16,6 +17,8 @@ def parse_options(argv):
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug',
                         help='Enable debug logging.')
+    parser.add_argument(
+        '--version', action='version', version='%(prog)s {}'.format(VERSION))
 
     subparsers = parser.add_subparsers(help='conjure-craft subcommands help')
     # subparsers.add_parser('init',

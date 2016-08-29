@@ -20,7 +20,7 @@ install-dependencies:
 uninstall-dependencies:
 	sudo apt-get remove conjure-build-deps
 
-release: clean test
+release: clean clean-snapcraft test
 	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjureup/__init__.py
 	@sed -i -r "s/(^version:\s)(.*)/\1$(VERSION)/" snapcraft/snapcraft.yaml
 	@(cd snapcraft && snapcraft)
@@ -44,13 +44,15 @@ clean:
 	@rm -rf dist
 	@rm -rf conjure-dev
 	@if [ -L /usr/share/conjure-up/hooklib ]; then sudo unlink $(PACKAGE_SHARE_HOOKLIB_PATH) && sudo mv $(PACKAGE_SHARE_HOOKLIB_PATH).orig $(PACKAGE_SHARE_HOOKLIB_PATH); fi
+
+clean-snapcraft:
 	@(cd snapcraft && snapcraft clean)
 
 .PHONY: test
 test:
 	@tox
 
-DPKGBUILDARGS = -us -uc -i'.git.*|.tox|.bzr.*|.editorconfig|.travis-yaml|macumba\/debian|maasclient\/debian'
+DPKGBUILDARGS = -us -uc -i'.git.*|.tox|.bzr.*|.editorconfig|.travis-yaml|macumba\/debian|maasclient\/debian' -i'snapcraft'
 deb-src: clean
 	@debuild -S -sa $(DPKGBUILDARGS)
 

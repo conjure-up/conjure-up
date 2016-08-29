@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: conjure-up
-Source: https://github.com/ubuntu/conjure-up
+Source: https://github.com/conjure-up/conjure-up
 
 Files: *
 Copyright: 2015-2016, Canonical Ltd.

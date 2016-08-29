@@ -3,10 +3,10 @@
 PKGDIR=debian/conjure-up
 
 export PYBUILD_NAME=conjure-up
-export PYBUILD_INSTALL_DIR=usr/share/conjure-up
-export PYBUILD_INSTALL_ARGS_python3=--install-lib=usr/share/conjure-up \
-	--install-data=usr/ \
-	--install-scripts=usr/share/conjure-up \
+export PYTHONPATH=$(PKGDIR)/usr/lib/python3/dist-packages
+export PYBUILD_INSTALL_ARGS_python3=--install-data=usr/ \
+	--install-lib=usr/lib/python3/dist-packages \
+	--install-scripts=usr/bin \
 	--root=$(PKGDIR) \
 	--no-compile -O0
 
@@ -15,7 +15,7 @@ export PYBUILD_INSTALL_ARGS_python3=--install-lib=usr/share/conjure-up \
 
 override_dh_install:
 	mkdir -p $(PKGDIR)/usr/share/man/man1
-	help2man $(PKGDIR)/usr/share/conjure-up/conjure-up -n "apt install juju bundles" --no-info -o $(PKGDIR)/usr/share/man/man1/conjure-up.1
+	help2man $(PKGDIR)/usr/bin/conjure-up -n "conjure-up" --no-info -o $(PKGDIR)/usr/share/man/man1/conjure-up.1
 	dh_install
 
 override_dh_auto_test:
