@@ -43,7 +43,7 @@ class SpellPickerController:
             app.ui.show_exception_message(e)
 
         view = SpellPickerView(app,
-                               spells,
+                               sorted(spells, key=lambda kv: kv['name']),
                                self.finish)
 
         app.ui.set_header(
