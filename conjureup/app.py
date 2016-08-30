@@ -171,13 +171,13 @@ def main():
         # the picker UI and will defer the copy to
         # SpellPickerController.finish(), so nothing to do here.
         if len(spells) == 1:
-            print("found spell {}".format(spells[0]))
-            spell_name = spells[0]
+            app.log.debug("found spell {}".format(spells[0]))
+            spell = spells[0]
             utils.set_chosen_spell(spell_name,
                                    os.path.join(opts.cache_dir,
-                                                spell_name))
+                                                spell['key']))
             download_local(os.path.join(app.config['spells-dir'],
-                                        spell_name),
+                                        spell['key']),
                            app.config['spell-dir'])
             utils.set_spell_metadata()
             app.endpoint_type = EndpointType.LOCAL_DIR
