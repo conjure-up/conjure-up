@@ -31,6 +31,17 @@ These steps are required primarily for the **OpenStack** on a single machine
 case where we need access to a custom bridge for our deployment to function
 correctly.
 
+## Alternative installation
+
+We will eventually move to pure snap distribution, however, until that time
+packages are built and located at:
+
+```
+$ sudo apt-add-repository ppa:conjure-up/next
+$ sudo apt update
+$ sudo apt install conjure-up
+```
+
 # how to use
 
 ## Run the installer interactively
