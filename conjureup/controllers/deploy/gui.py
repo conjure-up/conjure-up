@@ -117,7 +117,6 @@ class DeployController:
             future = async.submit(self._pre_deploy_exec,
                                   partial(self._handle_exception, 'E003'),
                                   queue_name=juju.JUJU_ASYNC_QUEUE)
-            self.is_predeploy_queued = True
             future.add_done_callback(self._pre_deploy_done)
         except Exception as e:
             return self._handle_exception('E003', e)

@@ -56,13 +56,6 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.app_patcher.stop()
         self.juju_patcher.stop()
 
-    def test_queue_predeploy_skipping(self):
-        "Do not enqueue predeploy more than once"
-
-        self.controller.is_predeploy_queued = True
-        self.controller.render()
-        self.assertEqual(self.mock_submit.call_count, 0)
-
     def test_queue_predeploy_once(self):
         "Call submit to schedule predeploy if we haven't yet"
         self.controller.render()
@@ -74,11 +67,6 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.controller.render()
         self.mock_submit.assert_has_calls([self.predeploy_call],
                                           any_order=True)
-
-        self.mock_submit.reset_mock()
-        self.controller.is_predeploy_queued = True
-        self.controller.render()
-        self.assertEqual(self.mock_submit.call_count, 0)
         self.mock_juju.add_machines.assert_called_once_with(
             [sentinel.machine_1], exc_cb=ANY)
 
