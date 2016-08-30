@@ -427,14 +427,14 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
 
         app.log.debug("Deploying {}: {}".format(service, app_params))
 
-        deploy_message = "Deploying application: {}".format(
+        deploy_message = "Deploying {}... ".format(
             service.service_name)
         if msg_cb:
             msg_cb("{}".format(deploy_message))
         this.CLIENT.Application(request="Deploy",
                                 params=app_params)
         if msg_cb:
-            msg_cb("{}...done.".format(deploy_message))
+            msg_cb("{} deployed.".format(service.service_name))
 
     return async.submit(_deploy_async,
                         exc_cb,
