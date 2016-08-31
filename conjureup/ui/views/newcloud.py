@@ -2,6 +2,7 @@ from ubuntui.widgets.buttons import (confirm_btn, back_btn)
 from ubuntui.widgets.text import Instruction
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.hr import HR
+from ubuntui.widgets.input import StringEditor
 from urwid import (WidgetWrap, Pile, Text, Columns, Filler)
 
 
@@ -11,15 +12,26 @@ class NewCloudView(WidgetWrap):
         self.cloud = cloud
         self.input_items = schema
         self.cb = cb
+        self.confirm_button = Color.button_primary(
+            confirm_btn(on_press=self.submit,
+                        label="Add credential"),
+            focus_map='button_primary focus')
+        self.cancel_button = Color.button_secondary(
+            back_btn(on_press=self.cancel),
+            focus_map='button_secondary focus')
+
         _pile = [
             Padding.center_60(Instruction(
                 "Enter your {} credentials:".format(self.cloud.upper()))),
             Padding.center_60(HR()),
             Padding.center_60(self.build_inputs()),
             Padding.line_break(""),
-            Padding.center_20(self.buttons())
+            Text(""),  # confirm button placeholder
+            Padding.center_20(self.cancel_button)
         ]
-        super().__init__(Filler(Pile(_pile), valign="top"))
+        self.pile = Pile(_pile)
+        super().__init__(Filler(self.pile, valign="top"))
+        self.validate()
 
     def _swap_focus(self):
         if self._w.body.focus_position == 2:
@@ -30,17 +42,9 @@ class NewCloudView(WidgetWrap):
     def keypress(self, size, key):
         if key in ['tab', 'shift tab']:
             self._swap_focus()
-        return super().keypress(size, key)
-
-    def buttons(self):
-        confirm = confirm_btn(on_press=self.submit, label="Add credential")
-        cancel = back_btn(on_press=self.cancel)
-
-        buttons = [
-            Color.button_primary(confirm, focus_map='button_primary focus'),
-            Color.button_secondary(cancel, focus_map='button_secondary focus')
-        ]
-        return Pile(buttons)
+        rv = super().keypress(size, key)
+        self.validate()
+        return rv
 
     def build_inputs(self):
         items = []
@@ -62,6 +66,18 @@ class NewCloudView(WidgetWrap):
             items.append(col)
             items.append(Padding.line_break(""))
         return Pile(items)
+
+    def validate(self):
+        values = [i.value for i in self.input_items.values()
+                  if isinstance(i, StringEditor)]
+
+        if None in values:
+            self.pile.contents[-2] = (Padding.center_20(
+                Text("Please fill all required fields.")),
+                                      self.pile.options())
+        else:
+            self.pile.contents[-2] = (Padding.center_20(self.confirm_button),
+                                      self.pile.options())
 
     def cancel(self, btn):
         self.cb(back=True)
