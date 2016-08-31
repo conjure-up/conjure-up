@@ -1,0 +1,25 @@
+#!/bin/bash
+
+. common.sh
+
+imagetype=disk1.img
+diskformat=root-tar
+imagesuffix=""
+
+mkdir -p $HOME/glance-images || true
+if [ ! -f $HOME/glance-images/xenial-server-cloudimg-amd64-$imagetype ]; then
+    debug "Downloading xenial image..."
+    wget -qO ~/glance-images/xenial-server-cloudimg-amd64-$imagetype https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-$imagetype
+fi
+
+. $SCRIPTPATH/novarc
+if ! glance image-list --property-filter name="xenial$imagesuffix" | grep -q "xenial$imagesuffix" ; then
+    debug "Importing xenial$imagesuffix"
+    glance image-create --name="xenial$imagesuffix" \
+           --container-format=bare \
+           --disk-format=$diskformat \
+           --property architecture="x86_64" \
+           --visibility=public --file=$HOME/glance-images/xenial-server-cloudimg-amd64-$imagetype > /dev/null 2>&1
+fi
+
+exposeResult "Glance images are imported and can be accessible via Horizon." 0 "true"

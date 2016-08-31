@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+
+# Global imports
+import os
+import os.path as path
+from subprocess import run, DEVNULL, PIPE
+import logging
+# Conjure-up specific
+from conjureup.hooklib.writer import success, fail
+import utils
+
+log = logging.getLogger('conjureup')
+SCRIPTPATH = path.dirname(path.abspath(__file__))
+NOVARC = path.join(SCRIPTPATH, 'novarc')
+
+
+def ssh_genkey(ssh_privkey):
+    """ Generates sshkey
+    """
+    cmd = "ssh-keygen -N '' -f {0}".format(ssh_privkey)
+    out = run(cmd, shell=True, stdout=DEVNULL, stderr=PIPE)
+    if out.returncode != 0:
+            fail("Unable to generate key: {0}".format(out.stderr.decode()))
+
+
+credentials = utils.parse_openstack_creds(NOVARC)
+
+ssh_pubkey = path.expanduser(os.environ.get(
+    'SSHPUBLICKEY',
+    path.expanduser('~/.ssh/id_rsa.pub')))
+ssh_privkey = path.join(path.expanduser('~/.ssh'),
+                        path.splitext(ssh_pubkey)[0])
+
+if not path.isfile(ssh_privkey):
+    log.debug("No ssh private key found, generating our own.")
+    ssh_genkey(ssh_privkey)
+
+log.debug("Checking for ssh public key: {}".format(ssh_pubkey))
+if path.isfile(ssh_pubkey):
+    cmd = ("openstack keypair show ubuntu-keypair")
+    ret = run(cmd, shell=True,
+              stdout=DEVNULL,
+              stderr=PIPE,
+              env=credentials)
+    if ret.returncode == 0:
+        success("SSH keypair already available to "
+                "you in your OpenStack cloud.")
+
+    cmd = ("openstack keypair create --public-key {} "
+           "ubuntu-keypair".format(ssh_pubkey))
+    ret = run(cmd, shell=True,
+              stdout=DEVNULL,
+              stderr=PIPE,
+              env=credentials)
+    if ret.returncode > 0:
+        fail("Unable to add public ssh key, maybe "
+             "ssh-keygen needs to be run")
+    success("SSH Keypair complete")
+
+fail("Could not find any ssh keys to import, please run "
+     "ssh-keygen in another terminal before re-executing this step.")
