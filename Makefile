@@ -85,4 +85,10 @@ install: ../conjure*.deb
 	sudo dpkg -i ../conjure-up_*deb
 	sudo apt-get -yy install -f
 
+# Fix some of the python formatting preferred by pylint
+fix:
+	@tox -e py35 -- isort -rc -m 3 conjureup
+	@tox -e py35 -- autopep8 --in-place --recursive .
+
+
 all: release
