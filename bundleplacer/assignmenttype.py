@@ -43,6 +43,7 @@ def label_to_atype(labels):
 
 
 class OrderedEnum(Enum):
+
     def __ge__(self, other):
         if self.__class__ is other.__class__:
             return self.value >= other.value

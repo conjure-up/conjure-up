@@ -1,5 +1,6 @@
+from urwid import Columns, Filler, Pile, Text, WidgetWrap
+
 from ubuntui.utils import Padding
-from urwid import WidgetWrap, Text, Filler, Pile, Columns
 from ubuntui.widgets.hr import HR
 
 
@@ -29,12 +30,12 @@ class SummaryView(WidgetWrap):
         rows.append(Padding.line_break(""))
         for k, v in self.results.items():
             rows.append(
-                    Columns(
-                        [
-                            ('weight', 0.1, Text(k)),
-                            ('weight', 0.4, Text(v))
-                        ], dividechars=5
-                    )
+                Columns(
+                    [
+                        ('weight', 0.1, Text(k)),
+                        ('weight', 0.4, Text(v))
+                    ], dividechars=5
+                )
             )
             self.app.log.debug(rows)
         return rows

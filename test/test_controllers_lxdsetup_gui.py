@@ -13,6 +13,7 @@ from conjureup.controllers.lxdsetup.gui import LXDSetupController
 
 
 class LXDSetupGUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = LXDSetupController()
 
@@ -44,6 +45,7 @@ class LXDSetupGUIRenderTestCase(unittest.TestCase):
 
 
 class LXDSetupGUIFinishTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = LXDSetupController()
 

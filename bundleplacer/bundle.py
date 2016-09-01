@@ -26,6 +26,7 @@ log = logging.getLogger('bundleplacer')
 
 
 class keydict(dict):
+
     def __missing__(self, key):
         return key
 
@@ -96,6 +97,7 @@ class BundleMergeException(Exception):
 
 
 class Bundle:
+
     def __init__(self, filename=None, metadatafilename=None,
                  bundle_data=None, metadata=None):
         assert(filename or bundle_data)

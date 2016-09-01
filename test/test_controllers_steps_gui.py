@@ -13,6 +13,7 @@ from conjureup.controllers.steps.gui import StepsController
 
 
 class StepsGUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
 
         self.utils_patcher = patch(
@@ -51,6 +52,7 @@ class StepsGUIRenderTestCase(unittest.TestCase):
 
 
 class StepsGUIFinishTestCase(unittest.TestCase):
+
     def setUp(self):
 
         self.controllers_patcher = patch(

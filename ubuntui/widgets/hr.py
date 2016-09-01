@@ -15,4 +15,4 @@ def HR(top=1, bottom=1):
     bottom: padding bottom
     """
     return Color.divider_line(
-             Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", top, bottom))
+        Divider("\N{BOX DRAWINGS LIGHT HORIZONTAL}", top, bottom))

@@ -29,6 +29,7 @@ class ConfigException(Exception):
 
 
 class Config:
+
     def __init__(self, name, cfg_obj=None, save_backups=True):
         self.name = name
         if cfg_obj is None:

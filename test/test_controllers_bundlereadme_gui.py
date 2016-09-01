@@ -13,6 +13,7 @@ from conjureup.controllers.bundlereadme.gui import BundleReadmeController
 
 
 class BundleReadmeGUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = BundleReadmeController()
 
@@ -52,6 +53,7 @@ class BundleReadmeGUIRenderTestCase(unittest.TestCase):
 
 
 class BundleReadmeGUIFinishTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = BundleReadmeController()
 

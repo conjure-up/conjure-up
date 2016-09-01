@@ -12,6 +12,7 @@ from conjureup.controllers.deploy.gui import DeployController
 
 
 class DeployGUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = DeployController()
 
@@ -72,6 +73,7 @@ class DeployGUIRenderTestCase(unittest.TestCase):
 
 
 class DeployGUIFinishTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = DeployController()
 

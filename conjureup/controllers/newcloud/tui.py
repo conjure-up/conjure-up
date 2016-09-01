@@ -1,17 +1,19 @@
-from conjureup import controllers
-from conjureup import utils
-from conjureup.api.models import model_info
-from conjureup import juju
-from conjureup.app_config import app
-from . import common
-from subprocess import run, PIPE
 import json
 import os
 import sys
+from subprocess import PIPE, run
+
 import petname
+
+from conjureup import controllers, juju, utils
+from conjureup.api.models import model_info
+from conjureup.app_config import app
+
+from . import common
 
 
 class NewCloudController:
+
     def __init__(self):
         self.cloud = None
 

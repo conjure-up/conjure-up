@@ -27,6 +27,7 @@ log = logging.getLogger('bundleplacer')
 
 
 class PlacerView(WidgetWrap):
+
     def __init__(self, placement_controller, config, cb,
                  has_maas=False):
         self.placement_controller = placement_controller

@@ -1,10 +1,13 @@
-from ubuntui.widgets.buttons import (confirm_btn, cancel_btn)
-from ubuntui.widgets.text import Instruction
-from ubuntui.utils import Color, Padding
-from ubuntui.widgets.hr import HR
-from urwid import (WidgetWrap, Pile, Text, Columns, Filler)
 from collections import OrderedDict
-from ubuntui.widgets.input import (StringEditor, YesNo)
+
+from urwid import Columns, Filler, Pile, Text, WidgetWrap
+
+from ubuntui.utils import Color, Padding
+from ubuntui.widgets.buttons import cancel_btn, confirm_btn
+from ubuntui.widgets.hr import HR
+from ubuntui.widgets.input import StringEditor, YesNo
+from ubuntui.widgets.text import Instruction
+
 # import os
 
 # Network format
@@ -62,6 +65,7 @@ NETWORK = OrderedDict([
 
 
 class LXDSetupView(WidgetWrap):
+
     def __init__(self, app, cb):
         self.app = app
         self.input_items = NETWORK

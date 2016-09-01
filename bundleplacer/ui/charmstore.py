@@ -100,6 +100,7 @@ class CharmStoreSearchWidget(WidgetWrap):
 
 
 class CharmWidget(WidgetWrap):
+
     def __init__(self, charm_dict, add_cb, recommended=False):
         self.charm_dict = charm_dict
         self.add_cb = add_cb
@@ -140,6 +141,7 @@ class CharmWidget(WidgetWrap):
 
 
 class BundleWidget(WidgetWrap):
+
     def __init__(self, bundle_dict, add_cb):
         self.add_cb = add_cb
         self.bundle_source = bundle_dict['Id']
@@ -188,6 +190,7 @@ class CharmstoreColumnUIState(Enum):
 
 
 class CharmstoreColumn(WidgetWrap):
+
     def __init__(self, display_controller, placement_controller,
                  placement_view, metadata_controller):
         self.placement_controller = placement_controller
@@ -248,8 +251,8 @@ class CharmstoreColumn(WidgetWrap):
         if self.metadata_controller.loaded():
             recommended_widgets = self.get_filtered_recommendations()
             if len(recommended_widgets) > 0:
-                    top_w = recommended_widgets[0][0]
-                    top_w.set_header("Recommended Charms")
+                top_w = recommended_widgets[0][0]
+                top_w.set_header("Recommended Charms")
 
             self.loading = False
 

@@ -26,6 +26,7 @@ from bundleplacer.relationtype import RelationType
 
 
 class CharmStoreID:
+
     def __init__(self, id_string):
         if id_string.startswith("cs:"):
             id_string = id_string[3:]

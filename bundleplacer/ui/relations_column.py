@@ -78,6 +78,7 @@ class RelationWidget(WidgetWrap):
 
 
 class NoRelationWidget(WidgetWrap):
+
     def __init__(self, relname, iface, reltype):
         other_reltype = {RelationType.Requires: RelationType.Provides,
                          RelationType.Provides: RelationType.Requires}[reltype]

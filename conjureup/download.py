@@ -1,14 +1,19 @@
-from subprocess import run, CalledProcessError
-import shutil
 import os
-from conjureup.consts import UNSPECIFIED_SPELL
-from conjureup.app_config import app
-import requests
-from progressbar import (ProgressBar, Bar,
-                         Percentage, AnimatedMarker,
-                         UnknownLength)
-
+import shutil
 from enum import Enum
+from subprocess import CalledProcessError, run
+
+import requests
+from progressbar import (
+    AnimatedMarker,
+    Bar,
+    Percentage,
+    ProgressBar,
+    UnknownLength
+)
+
+from conjureup.app_config import app
+from conjureup.consts import UNSPECIFIED_SPELL
 
 
 class EndpointType(Enum):

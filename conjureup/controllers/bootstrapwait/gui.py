@@ -1,6 +1,6 @@
-from conjureup.ui.views.bootstrapwait import BootstrapWaitView
-from conjureup.app_config import app
 from conjureup import controllers
+from conjureup.app_config import app
+from conjureup.ui.views.bootstrapwait import BootstrapWaitView
 from ubuntui.ev import EventLoop
 
 

@@ -1,15 +1,16 @@
-from conjureup.ui.views.cloud import CloudView
-from conjureup import async
-from conjureup import utils
-from conjureup import controllers
-from conjureup.app_config import app
-from conjureup import juju
 import petname
-from conjureup.controllers.clouds.common import (get_controller_in_cloud,
-                                                 list_clouds)
+
+from conjureup import async, controllers, juju, utils
+from conjureup.app_config import app
+from conjureup.controllers.clouds.common import (
+    get_controller_in_cloud,
+    list_clouds
+)
+from conjureup.ui.views.cloud import CloudView
 
 
 class CloudsController:
+
     def __init__(self):
         self.view = None
 

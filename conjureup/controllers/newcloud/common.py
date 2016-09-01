@@ -1,8 +1,9 @@
 import os.path as path
-from conjureup import utils
-from conjureup.app_config import app
+
 import yaml
 
+from conjureup import utils
+from conjureup.app_config import app
 
 cred_path = path.join(utils.juju_path(), 'credentials.yaml')
 

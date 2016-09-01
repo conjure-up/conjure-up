@@ -13,6 +13,7 @@ class StringEditor(WidgetWrap):
     Initializes and Edit object and attachs its result
     to the `value` accessor.
     """
+
     def __init__(self, caption=None, default=None, **kwargs):
         if caption is None:
             caption = ""
@@ -46,6 +47,7 @@ class StringEditor(WidgetWrap):
 class PasswordEditor(StringEditor):
     """ Password input prompt with masking
     """
+
     def __init__(self, caption=None, mask="*"):
         super().__init__(caption, mask=mask)
 
@@ -101,6 +103,7 @@ class MountEditor(StringEditor):
 class IntegerEditor(WidgetWrap):
     """ IntEdit input class
     """
+
     def __init__(self, caption=None, default=0):
         if caption is None:
             caption = ""
@@ -115,6 +118,7 @@ class IntegerEditor(WidgetWrap):
 class Selector(WidgetWrap):
     """ Radio selection list of options
     """
+
     def __init__(self, opts):
         """
         :param list opts: list of options to display
@@ -162,6 +166,7 @@ class Selector(WidgetWrap):
 class YesNo(Selector):
     """ Yes/No selector
     """
+
     def __init__(self):
         opts = ['Yes', 'No']
         super().__init__(opts)

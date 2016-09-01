@@ -1,9 +1,10 @@
-from conjureup.app_config import app
-from conjureup import utils
-from subprocess import CalledProcessError
 import json
 import os
 import time
+from subprocess import CalledProcessError
+
+from conjureup import utils
+from conjureup.app_config import app
 
 
 def wait_for_applications(script, msg_cb):

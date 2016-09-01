@@ -1,12 +1,13 @@
-from conjureup.ui.views.summary import SummaryView
-from conjureup.app_config import app
-from ubuntui.ev import EventLoop
-from conjureup.controllers.summary import common
-
 import os
+
+from conjureup.app_config import app
+from conjureup.controllers.summary import common
+from conjureup.ui.views.summary import SummaryView
+from ubuntui.ev import EventLoop
 
 
 class SummaryController:
+
     def __init__(self):
         self.view = None
         self.save_path = os.path.join(app.config['spell-dir'],

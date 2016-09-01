@@ -1,29 +1,28 @@
 """ Application entrypoint
 """
 
-from conjureup import __version__ as VERSION
-from conjureup import async
-from conjureup import consts
-from conjureup import controllers
-from conjureup import juju
-from conjureup import utils
-from conjureup.app_config import app
-from conjureup.download import (EndpointType, download,
-                                download_local, get_remote_url,
-                                detect_endpoint)
-from conjureup.log import setup_logging
-from conjureup.ui import ConjureUI
-
-
-from ubuntui.ev import EventLoop
-from ubuntui.palette import STYLES
-
 import argparse
 import os
 import os.path as path
 import sys
 import uuid
+
 import yaml
+
+from conjureup import __version__ as VERSION
+from conjureup import async, consts, controllers, juju, utils
+from conjureup.app_config import app
+from conjureup.download import (
+    EndpointType,
+    detect_endpoint,
+    download,
+    download_local,
+    get_remote_url
+)
+from conjureup.log import setup_logging
+from conjureup.ui import ConjureUI
+from ubuntui.ev import EventLoop
+from ubuntui.palette import STYLES
 
 
 def parse_options(argv):

@@ -705,6 +705,7 @@ class PlacementController:
 
 
 class BundleWriter:
+
     def __init__(self, controller):
         self.controller = controller
 

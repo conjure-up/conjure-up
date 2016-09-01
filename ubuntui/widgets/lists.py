@@ -2,6 +2,7 @@ from urwid import ListBox, SimpleListWalker
 
 
 class SimpleList(ListBox):
+
     def __init__(self, contents, is_selectable=True):
         self.contents = contents
         self.is_selectable = is_selectable

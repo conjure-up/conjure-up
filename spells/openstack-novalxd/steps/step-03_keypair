@@ -20,7 +20,7 @@ def ssh_genkey(ssh_privkey):
     cmd = "ssh-keygen -N '' -f {0}".format(ssh_privkey)
     out = run(cmd, shell=True, stdout=DEVNULL, stderr=PIPE)
     if out.returncode != 0:
-            fail("Unable to generate key: {0}".format(out.stderr.decode()))
+        fail("Unable to generate key: {0}".format(out.stderr.decode()))
 
 
 credentials = utils.parse_openstack_creds(NOVARC)

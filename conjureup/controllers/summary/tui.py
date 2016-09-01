@@ -1,11 +1,12 @@
+import os
+
+from conjureup import utils
 from conjureup.app_config import app
 from conjureup.controllers.summary import common
-from conjureup import utils
-
-import os
 
 
 class SummaryController:
+
     def __init__(self):
         self.save_path = os.path.join(app.config['spell-dir'],
                                       'results.txt')

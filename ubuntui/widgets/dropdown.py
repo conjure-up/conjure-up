@@ -16,6 +16,7 @@ import urwid
 
 
 class DropDown(urwid.PopUpLauncher):
+
     def __init__(self, view):
         self.view = view
         super().__init__(self.view)

@@ -4,23 +4,24 @@ List out the updated bundle in a cleaner view showing what
 charms and their relations will be done.
 """
 
-from glob import glob
+import logging
 import os
+from glob import glob
+
 from urwid import BoxAdapter, Filler, ListBox, Pile, Text, WidgetWrap
 
 from conjureup import utils
 from conjureup.app_config import app
 from ubuntui.ev import EventLoop
+from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.hr import HR
-from ubuntui.utils import Color, Padding
-
-import logging
 
 log = logging.getLogger('conjure')
 
 
 class BundleReadmeView(WidgetWrap):
+
     def __init__(self, metadata_controller, done_callback, initial_height):
         self.metadata_controller = metadata_controller
         self.done_callback = done_callback

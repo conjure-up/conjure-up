@@ -1,22 +1,23 @@
-from . import common
-from conjureup import async
-from conjureup import controllers
-from conjureup import juju
-from conjureup import utils
+import json
+import os
+import os.path as path
+from functools import partial
+from subprocess import check_output
+
+import petname
+
+from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
 from conjureup.models.provider import Schema
 from conjureup.ui.views.newcloud import NewCloudView
-from functools import partial
-from subprocess import check_output
 from ubuntui.ev import EventLoop
-import json
-import os
-import os.path as path
-import petname
+
+from . import common
 
 
 class NewCloudController:
+
     def __init__(self):
         self.cloud = None
 

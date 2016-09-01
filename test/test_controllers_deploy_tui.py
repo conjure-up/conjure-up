@@ -13,6 +13,7 @@ from conjureup.controllers.deploy.tui import DeployController
 
 
 class DeployTUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
 
         self.utils_patcher = patch(
@@ -54,6 +55,7 @@ class DeployTUIRenderTestCase(unittest.TestCase):
 
 
 class DeployTUIFinishTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = DeployController()
 

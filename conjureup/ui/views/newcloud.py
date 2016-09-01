@@ -1,12 +1,14 @@
-from ubuntui.widgets.buttons import (confirm_btn, back_btn)
-from ubuntui.widgets.text import Instruction
+from urwid import Columns, Filler, Pile, Text, WidgetWrap
+
 from ubuntui.utils import Color, Padding
+from ubuntui.widgets.buttons import back_btn, confirm_btn
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.input import StringEditor
-from urwid import (WidgetWrap, Pile, Text, Columns, Filler)
+from ubuntui.widgets.text import Instruction
 
 
 class NewCloudView(WidgetWrap):
+
     def __init__(self, app, cloud, schema, cb):
         self.app = app
         self.cloud = cloud
@@ -74,7 +76,7 @@ class NewCloudView(WidgetWrap):
         if None in values:
             self.pile.contents[-2] = (Padding.center_20(
                 Text("Please fill all required fields.")),
-                                      self.pile.options())
+                self.pile.options())
         else:
             self.pile.contents[-2] = (Padding.center_20(self.confirm_button),
                                       self.pile.options())

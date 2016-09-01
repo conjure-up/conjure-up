@@ -1,7 +1,8 @@
-from ubuntui.utils import Padding, Color
-from ubuntui.widgets.hr import HR
+from urwid import Filler, Pile, WidgetWrap
+
+from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import done_btn
-from urwid import (WidgetWrap,  Filler, Pile)
+from ubuntui.widgets.hr import HR
 
 
 class StepsView(WidgetWrap):
@@ -31,7 +32,7 @@ class StepsView(WidgetWrap):
     def current_summary_button_index(self):
         """ Returns the pile index where the summary button is located
         """
-        return len(self.step_pile.contents)-1
+        return len(self.step_pile.contents) - 1
 
     def buttons(self):
         buttons = [

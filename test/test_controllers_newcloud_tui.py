@@ -13,6 +13,7 @@ from conjureup.controllers.newcloud.tui import NewCloudController
 
 
 class NewCloudTUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = NewCloudController()
         self.controller.do_post_bootstrap = MagicMock()
@@ -70,6 +71,7 @@ class NewCloudTUIRenderTestCase(unittest.TestCase):
 
 
 class NewCloudTUIFinishTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = NewCloudController()
 

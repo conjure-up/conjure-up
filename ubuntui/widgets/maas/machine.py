@@ -5,6 +5,7 @@ from urwid import WidgetWrap, Text
 
 
 class MachineWidget(WidgetWrap):
+
     def __init__(self, machine):
         """ Init
 

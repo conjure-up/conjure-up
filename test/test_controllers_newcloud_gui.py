@@ -13,6 +13,7 @@ from conjureup.controllers.newcloud.gui import NewCloudController
 
 
 class NewCloudGUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = NewCloudController()
 
@@ -44,6 +45,7 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
 
 
 class NewCloudGUIFinishTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = NewCloudController()
 

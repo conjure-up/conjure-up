@@ -1,13 +1,13 @@
 import os
 
-from conjureup.download import download_local, EndpointType
-from conjureup.ui.views.spellpicker import SpellPickerView
-from conjureup import utils
-from conjureup import controllers
+from conjureup import controllers, utils
 from conjureup.app_config import app
+from conjureup.download import EndpointType, download_local
+from conjureup.ui.views.spellpicker import SpellPickerView
 
 
 class SpellPickerController:
+
     def __init__(self):
         self.view = None
 

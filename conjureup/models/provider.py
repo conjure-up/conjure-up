@@ -1,5 +1,6 @@
 from collections import OrderedDict
-from ubuntui.widgets.input import (StringEditor, YesNo, PasswordEditor)
+
+from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
 
 """ Defining the schema
 

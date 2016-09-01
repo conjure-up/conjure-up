@@ -4,6 +4,7 @@ from conjureup.app_config import app
 
 
 class StepModel:
+
     def __init__(self, step, path):
         self.title = step.get('title', '')
         self.description = step.get('description', '')

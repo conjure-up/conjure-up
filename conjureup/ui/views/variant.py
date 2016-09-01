@@ -1,14 +1,16 @@
 from __future__ import unicode_literals
-from urwid import (WidgetWrap, Text, Pile,
-                   Columns, Filler)
-from ubuntui.widgets.buttons import (quit_btn, menu_btn)
-from ubuntui.utils import Color, Padding
-from ubuntui.ev import EventLoop
-from conjureup.utils import pollinate
+
+from urwid import Columns, Filler, Pile, Text, WidgetWrap
+
 from conjureup.app_config import app
+from conjureup.utils import pollinate
+from ubuntui.ev import EventLoop
+from ubuntui.utils import Color, Padding
+from ubuntui.widgets.buttons import menu_btn, quit_btn
 
 
 class VariantView(WidgetWrap):
+
     def __init__(self, cb):
         self.cb = cb
         self.fname_id_map = {}

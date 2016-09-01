@@ -12,6 +12,7 @@ class ErrorViewException(Exception):
 
 
 class ErrorView(WidgetWrap):
+
     def __init__(self, error):
         body = [
             Padding.center_60(

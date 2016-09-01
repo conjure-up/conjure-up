@@ -2,6 +2,7 @@
 """
 
 from conjureup import juju
+
 from .models import model_status
 
 

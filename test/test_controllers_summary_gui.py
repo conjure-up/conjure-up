@@ -13,6 +13,7 @@ from conjureup.controllers.summary.gui import SummaryController
 
 
 class SummaryGUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
 
         self.finish_patcher = patch(
@@ -43,6 +44,7 @@ class SummaryGUIRenderTestCase(unittest.TestCase):
 
 
 class SummaryGUIFinishTestCase(unittest.TestCase):
+
     def setUp(self):
 
         self.render_patcher = patch(
