@@ -1,5 +1,5 @@
 from subprocess import run, PIPE
-from writer import log  # noqa
+from conjureup.hooklib.writer import log  # noqa
 
 
 def slurp(path):
