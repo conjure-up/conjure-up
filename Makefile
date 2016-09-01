@@ -50,7 +50,7 @@ clean-snapcraft:
 
 .PHONY: test
 test:
-	@tox
+	@tox -e flake,isort
 
 DPKGBUILDARGS = -us -uc -i'.git.*|.tox|.bzr.*|.editorconfig|.travis-yaml|macumba\/debian|maasclient\/debian' -i'snapcraft'
 deb-src: clean
