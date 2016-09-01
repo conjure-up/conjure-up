@@ -13,6 +13,7 @@ from conjureup.controllers.clouds.tui import CloudsController
 
 
 class CloudsTUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = CloudsController()
 
@@ -54,6 +55,7 @@ class CloudsTUIRenderTestCase(unittest.TestCase):
 
 
 class CloudsTUIFinishTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = CloudsController()
 

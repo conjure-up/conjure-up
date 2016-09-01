@@ -1,21 +1,27 @@
-import shutil
-import os
-import yaml
-import pty
 import codecs
 import errno
-from termcolor import colored
-from subprocess import (run, check_call,
-                        CalledProcessError, DEVNULL,
-                        PIPE, Popen)
-from conjureup.async import submit
-from conjureup import charm
-from conjureup.app_config import app
+import os
+import pty
+import shutil
+from subprocess import (
+    DEVNULL,
+    PIPE,
+    CalledProcessError,
+    Popen,
+    check_call,
+    run
+)
+
+import yaml
 from configobj import ConfigObj
+from termcolor import colored
 
 from bundleplacer.bundle import Bundle
-from bundleplacer.config import Config
 from bundleplacer.charmstore_api import MetadataController
+from bundleplacer.config import Config
+from conjureup import charm
+from conjureup.app_config import app
+from conjureup.async import submit
 
 
 def run_script(path, stderr=PIPE, stdout=PIPE):

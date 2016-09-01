@@ -5,6 +5,7 @@ from urwid import Text
 
 
 class UnitWidget:
+
     def __init__(self, name, unit):
         """ Init
 

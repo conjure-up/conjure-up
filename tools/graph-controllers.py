@@ -33,7 +33,7 @@ def get_graph_string(filelist):
                     if use_indent <= scope_indent:
                         scopes.pop()
                     s += "[ {} ] - {} -> [ {} ]\n".format(
-                        src, "{}:{}".format(scopes[0], i+1),
+                        src, "{}:{}".format(scopes[0], i + 1),
                         use_match.group(2))
     return s
 

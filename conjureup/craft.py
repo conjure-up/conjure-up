@@ -1,15 +1,16 @@
 """ conjure-craft entrypoint
 """
 
-from conjureup import __version__ as VERSION
-from conjureup import utils
-from conjureup import charm
-from conjureup.app_config import app
-from conjureup.log import setup_logging
 import argparse
 import os
 import sys
+
 import yaml
+
+from conjureup import __version__ as VERSION
+from conjureup import charm, utils
+from conjureup.app_config import app
+from conjureup.log import setup_logging
 
 
 def parse_options(argv):

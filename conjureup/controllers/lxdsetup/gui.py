@@ -1,13 +1,14 @@
-from conjureup.ui.views.lxdsetup import LXDSetupView
-from conjureup import utils
-from conjureup import controllers
-from conjureup.app_config import app
 from subprocess import run
 from tempfile import NamedTemporaryFile
+
+from conjureup import controllers, utils
+from conjureup.app_config import app
+from conjureup.ui.views.lxdsetup import LXDSetupView
 from ubuntui.ev import EventLoop
 
 
 class LXDSetupController:
+
     def __init__(self):
         self.view = None
 

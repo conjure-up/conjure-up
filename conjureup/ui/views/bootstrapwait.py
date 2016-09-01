@@ -1,12 +1,11 @@
 import os
 import random
-from subprocess import check_output, CalledProcessError, DEVNULL
+from subprocess import DEVNULL, CalledProcessError, check_output
 
-from urwid import (WidgetWrap, Text, Filler, Pile, Columns)
-
-from ubuntui.utils import Padding
+from urwid import Columns, Filler, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
+from ubuntui.utils import Padding
 
 
 class BootstrapWaitView(WidgetWrap):

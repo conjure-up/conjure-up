@@ -1,13 +1,17 @@
 import json
 import os
 
-from ubuntui.utils import Padding, Color
-from ubuntui.widgets.hr import HR
-from ubuntui.widgets.buttons import submit_btn
-from ubuntui.widgets.input import (StringEditor, YesNo,
-                                   PasswordEditor, IntegerEditor)
+from urwid import Columns, Pile, Text, WidgetWrap
 
-from urwid import (WidgetWrap, Pile, Columns, Text)
+from ubuntui.utils import Color, Padding
+from ubuntui.widgets.buttons import submit_btn
+from ubuntui.widgets.hr import HR
+from ubuntui.widgets.input import (
+    IntegerEditor,
+    PasswordEditor,
+    StringEditor,
+    YesNo
+)
 
 
 class StepWidget(WidgetWrap):
@@ -107,7 +111,7 @@ class StepWidget(WidgetWrap):
     def current_button_index(self):
         """ Returns the pile index where the button is located
         """
-        return len(self.step_pile.contents)-2
+        return len(self.step_pile.contents) - 2
 
     @property
     def current_button_widget(self):

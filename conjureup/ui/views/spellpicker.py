@@ -1,12 +1,13 @@
-from urwid import (WidgetWrap, Pile,
-                   Filler)
-from ubuntui.utils import Color, Padding
-from ubuntui.widgets.hr import HR
-from ubuntui.widgets.buttons import quit_btn, menu_btn
+from urwid import Filler, Pile, WidgetWrap
+
 from ubuntui.ev import EventLoop
+from ubuntui.utils import Color, Padding
+from ubuntui.widgets.buttons import menu_btn, quit_btn
+from ubuntui.widgets.hr import HR
 
 
 class SpellPickerView(WidgetWrap):
+
     def __init__(self, app, spells, cb):
         self.app = app
         self.cb = cb

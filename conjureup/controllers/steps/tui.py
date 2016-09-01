@@ -1,16 +1,18 @@
-from conjureup.controllers.steps import common
-from collections import OrderedDict
-from conjureup import controllers
-from conjureup.app_config import app
-from conjureup.models.step import StepModel
-from conjureup import utils
-import os.path as path
 import os
+import os.path as path
 import sys
+from collections import OrderedDict
+
 import yaml
+
+from conjureup import controllers, utils
+from conjureup.app_config import app
+from conjureup.controllers.steps import common
+from conjureup.models.step import StepModel
 
 
 class StepsController:
+
     def __init__(self):
         self.bundle_scripts = path.join(
             app.config['spell-dir'], 'steps'

@@ -1,7 +1,9 @@
-from jinja2 import FileSystemLoader, Environment
-from conjureup.utils import spew
 from tempfile import NamedTemporaryFile
+
 import yaml
+from jinja2 import Environment, FileSystemLoader
+
+from conjureup.utils import spew
 
 
 def render_charm_conf(name, options):

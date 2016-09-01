@@ -5,6 +5,7 @@ from ubuntui.widgets.hr import HR
 
 
 class Table:
+
     def __init__(self):
         self._rows = []
         self._row_id = []

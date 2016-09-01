@@ -1,20 +1,21 @@
-from conjureup.ui.views.steps import StepsView
-from ubuntui.ev import EventLoop
-from functools import partial
-from conjureup import async
-from conjureup.app_config import app
-from conjureup import utils
-from conjureup import controllers
-from conjureup.models.step import StepModel
-from conjureup.controllers.steps import common
-import os.path as path
 import os
-import yaml
+import os.path as path
 from collections import OrderedDict, deque
+from functools import partial
+
+import yaml
+
+from conjureup import async, controllers, utils
+from conjureup.app_config import app
+from conjureup.controllers.steps import common
+from conjureup.models.step import StepModel
+from conjureup.ui.views.steps import StepsView
 from conjureup.ui.widgets.step import StepWidget
+from ubuntui.ev import EventLoop
 
 
 class StepsController:
+
     def __init__(self):
         self.view = None
         self.bundle_scripts = path.join(

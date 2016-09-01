@@ -1,9 +1,7 @@
-from ubuntui.ev import EventLoop
-
-from conjureup import controllers
+from conjureup import controllers, utils
 from conjureup.app_config import app
 from conjureup.ui.views.bundle_readme_view import BundleReadmeView
-from conjureup import utils
+from ubuntui.ev import EventLoop
 
 
 class BundleReadmeController:

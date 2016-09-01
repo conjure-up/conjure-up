@@ -13,6 +13,7 @@ from conjureup.controllers.summary.tui import SummaryController
 
 
 class SummaryTUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
 
         self.utils_patcher = patch(

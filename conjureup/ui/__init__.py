@@ -8,6 +8,7 @@ import errno
 
 
 class ConjureUI(Frame):
+
     def show_exception_message(self, ex):
 
         if isinstance(ex, async.ThreadCancelledException):

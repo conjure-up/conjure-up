@@ -1,20 +1,25 @@
 """ Juju helpers
 """
-from concurrent import futures
-from functools import wraps, partial
 import os
 import sys
-from subprocess import (run, PIPE, DEVNULL, CalledProcessError, Popen,
-                        TimeoutExpired)
+from concurrent import futures
+from functools import partial, wraps
+from subprocess import (
+    DEVNULL,
+    PIPE,
+    CalledProcessError,
+    Popen,
+    TimeoutExpired,
+    run
+)
+
 import yaml
-from bundleplacer.charmstore_api import CharmStoreID
-
-from conjureup import async
-from conjureup.utils import juju_path
-from conjureup.app_config import app
-
 
 import macumba
+from bundleplacer.charmstore_api import CharmStoreID
+from conjureup import async
+from conjureup.app_config import app
+from conjureup.utils import juju_path
 from macumba.v2 import JujuClient
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"

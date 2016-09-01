@@ -92,12 +92,12 @@ class SimpleServiceWidget(WidgetWrap):
         pd = self.placement_controller.get_assignments(self.service)
         nplaced = sum([len(pd[k]) for k in pd])
 
-        if nr-nplaced > 0:
+        if nr - nplaced > 0:
             pl = ""
-            if nr-nplaced > 1:
+            if nr - nplaced > 1:
                 pl = "s"
             info_str = ("  {} unit{} will be auto-placed "
-                        "by Juju\n".format(nr-nplaced, pl))
+                        "by Juju\n".format(nr - nplaced, pl))
 
             info_markup.append(info_str)
 

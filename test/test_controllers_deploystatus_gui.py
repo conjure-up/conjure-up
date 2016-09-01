@@ -13,6 +13,7 @@ from conjureup.controllers.deploystatus.gui import DeployStatusController
 
 
 class DeployStatusGUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
 
         self.utils_patcher = patch(
@@ -50,6 +51,7 @@ class DeployStatusGUIRenderTestCase(unittest.TestCase):
 
 
 class DeployStatusGUIFinishTestCase(unittest.TestCase):
+
     def setUp(self):
 
         self.controllers_patcher = patch(

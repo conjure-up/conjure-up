@@ -1,13 +1,14 @@
-from urwid import (WidgetWrap, Pile,
-                   Filler)
+from urwid import Filler, Pile, WidgetWrap
+
+from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
+from ubuntui.widgets.buttons import menu_btn, quit_btn
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.text import Instruction
-from ubuntui.widgets.buttons import quit_btn, menu_btn
-from ubuntui.ev import EventLoop
 
 
 class CloudView(WidgetWrap):
+
     def __init__(self, app, clouds, cb):
         self.app = app
         self.cb = cb

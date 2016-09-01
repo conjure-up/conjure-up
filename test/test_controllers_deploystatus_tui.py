@@ -13,6 +13,7 @@ from conjureup.controllers.deploystatus.tui import DeployStatusController
 
 
 class DeployStatusTUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
 
         self.utils_patcher = patch(
@@ -42,6 +43,7 @@ class DeployStatusTUIRenderTestCase(unittest.TestCase):
 
 
 class DeployStatusTUIFinishTestCase(unittest.TestCase):
+
     def setUp(self):
 
         self.controllers_patcher = patch(

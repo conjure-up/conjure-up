@@ -1,8 +1,10 @@
-from conjureup import utils
 import sys
+
+from conjureup import utils
 
 
 class LXDSetupController:
+
     def render(self):
         utils.info("")
         utils.info("Unable to find a LXD bridge, please run `lxd init` "

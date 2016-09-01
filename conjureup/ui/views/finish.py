@@ -1,9 +1,11 @@
-from urwid import WidgetWrap, Text, Filler, Pile
-from ubuntui.utils import Padding, Color
-from ubuntui.widgets.buttons import (cancel_btn)
+from urwid import Filler, Pile, Text, WidgetWrap
+
+from ubuntui.utils import Color, Padding
+from ubuntui.widgets.buttons import cancel_btn
 
 
 class FinishView(WidgetWrap):
+
     def __init__(self, app, cb):
         self.app = app
         self.cb = cb

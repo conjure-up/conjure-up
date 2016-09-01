@@ -2,12 +2,14 @@
 urwid Text widgets
 """
 import logging
-from urwid import WidgetWrap, Text
+
+from urwid import Text, WidgetWrap
 
 log = logging.getLogger('serviceinfo_w')
 
 
 class UnitInfoWidget(WidgetWrap):
+
     def __init__(self, name, unit):
         self.name = Text(name)
         self.machine = Text(unit.get('machine', ''))
@@ -16,6 +18,7 @@ class UnitInfoWidget(WidgetWrap):
 
 
 class ServiceStatusWidget(WidgetWrap):
+
     def __init__(self, service_status):
         self.current = Text(service_status.get('current', ''))
         self.message = Text(service_status.get('message', ''))
@@ -23,6 +26,7 @@ class ServiceStatusWidget(WidgetWrap):
 
 
 class ServiceInfoWidget(WidgetWrap):
+
     def __init__(self, name, service):
         self.name = name
         for k in service.keys():

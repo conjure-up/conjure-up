@@ -2,21 +2,21 @@
 
 """
 
-from urwid import Filler, WidgetWrap, Pile, Text
+import logging
+
+from urwid import Filler, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
 from conjureup.ui.widgets.option_widget import OptionWidget
-
+from ubuntui.utils import Padding
 from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.hr import HR
-from ubuntui.utils import Padding
-
-import logging
 
 log = logging.getLogger('conjure')
 
 
 class ApplicationConfigureView(WidgetWrap):
+
     def __init__(self, application, metadata_controller, controller):
         self.controller = controller
         self.application = application

@@ -13,6 +13,7 @@ from conjureup.controllers.bootstrapwait.gui import BootstrapWaitController
 
 
 class BootstrapwaitGUIRenderTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = BootstrapWaitController()
 
@@ -45,6 +46,7 @@ class BootstrapwaitGUIRenderTestCase(unittest.TestCase):
 
 
 class BootstrapwaitGUIFinishTestCase(unittest.TestCase):
+
     def setUp(self):
         self.controller = BootstrapWaitController()
 

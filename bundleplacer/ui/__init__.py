@@ -298,7 +298,7 @@ class PlacementView(WidgetWrap):
             self.placement_edit_body_pile,
             align='center',
             width=('relative', 95)),
-                                          valign='top')
+            valign='top')
         self.bundle_graph_text = Text("No graph to display yet.")
         self.bundle_graph_widget = Padding(self.bundle_graph_text,
                                            'center', 'pack')

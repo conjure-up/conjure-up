@@ -3,14 +3,16 @@
 Api for the charmstore:
 https://github.com/juju/charmstore/blob/v5/docs/API.md
 """
-from conjureup.app_config import app
-from subprocess import run, CalledProcessError, DEVNULL, PIPE
-from tempfile import NamedTemporaryFile
 import json
 import os.path as path
-import requests
 import shutil
+from subprocess import DEVNULL, PIPE, CalledProcessError, run
+from tempfile import NamedTemporaryFile
+
+import requests
 import yaml
+
+from conjureup.app_config import app
 
 cs = 'https://api.jujucharms.com/v5'
 

@@ -4,10 +4,11 @@ work.
 """
 
 import logging
+import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
-import time
+
 log = logging.getLogger("async")
 
 

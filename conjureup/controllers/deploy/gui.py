@@ -1,17 +1,15 @@
-from functools import partial
 import json
 import os
+from functools import partial
 from operator import attrgetter
-from ubuntui.ev import EventLoop
-from subprocess import run, PIPE
-from conjureup import controllers
-from conjureup import juju
-from conjureup import async
-from conjureup.app_config import app
-from conjureup.ui.views.applicationlist import ApplicationListView
-from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
-from conjureup import utils
+from subprocess import PIPE, run
+
+from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
+from conjureup.app_config import app
+from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
+from conjureup.ui.views.applicationlist import ApplicationListView
+from ubuntui.ev import EventLoop
 
 
 class DeployController:

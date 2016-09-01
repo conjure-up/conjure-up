@@ -14,6 +14,7 @@ class Header(WidgetWrap):
     excerpt: Additional header text
     align: Text alignment, defaults=left
     """
+
     def __init__(self, title=None, excerpt=None, subheader="", align="left"):
         self._title = title
         self._excerpt = excerpt

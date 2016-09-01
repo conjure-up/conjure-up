@@ -6,6 +6,7 @@ from .anchors import Header, Footer, Body
 
 
 class Frame(WidgetWrap):
+
     def __init__(self, header=None, body=None, footer=None):
         self.header = header if header else Header("Welcome")
         self.body = body if body else Body()

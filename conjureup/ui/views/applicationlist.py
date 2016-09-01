@@ -1,17 +1,16 @@
 """ Application List view
 
 """
+import logging
 from functools import partial
 
-from urwid import Filler, WidgetWrap, Pile, Text, Columns
+from urwid import Columns, Filler, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
 from ubuntui.ev import EventLoop
+from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.hr import HR
-from ubuntui.utils import Color, Padding
-
-import logging
 
 log = logging.getLogger('conjure')
 
@@ -38,23 +37,23 @@ class ApplicationWidget(WidgetWrap):
         col_pad = 6
 
         cws = [
-                (maxlen + col_pad,
-                 Text(self.application.service_name)),
-                (7 + len(num_str), Text('Units: {}'.format(num_str),
-                                        align='right')),
-                # placeholder for instance type
-                ('weight', 1, Text(" ")),
-                (20, Color.button_secondary(
-                    PlainButton("Configure",
-                                partial(self.controller.do_configure,
-                                        self.application)),
-                    focus_map='button_secondary focus')),
-                (20, Color.button_primary(
-                    PlainButton("Deploy",
-                                partial(self.deploy_cb,
-                                        self.application)),
-                    focus_map='button_primary focus'))
-            ]
+            (maxlen + col_pad,
+             Text(self.application.service_name)),
+            (7 + len(num_str), Text('Units: {}'.format(num_str),
+                                    align='right')),
+            # placeholder for instance type
+            ('weight', 1, Text(" ")),
+            (20, Color.button_secondary(
+                PlainButton("Configure",
+                            partial(self.controller.do_configure,
+                                    self.application)),
+                focus_map='button_secondary focus')),
+            (20, Color.button_primary(
+                PlainButton("Deploy",
+                            partial(self.deploy_cb,
+                                    self.application)),
+                focus_map='button_primary focus'))
+        ]
         self.columns = Columns(cws, dividechars=1)
         return self.columns
 
@@ -62,7 +61,7 @@ class ApplicationWidget(WidgetWrap):
         self._selectable = False
         self.columns.contents = self.columns.contents[:-2]
         self.columns.contents.append((Text(""),
-                                     self.columns.options()))
+                                      self.columns.options()))
 
     def set_progress(self, progress_str):
         self.columns.contents[-1] = (Text(progress_str, align='right'),
@@ -70,6 +69,7 @@ class ApplicationWidget(WidgetWrap):
 
 
 class ApplicationListView(WidgetWrap):
+
     def __init__(self, applications, metadata_controller, controller):
         self.controller = controller
         self.applications = applications
@@ -121,13 +121,13 @@ class ApplicationListView(WidgetWrap):
         rls = [l for l in rls if not l.startswith("#")]
         nrls = []
         for i in range(len(rls)):
-            if i+1 == len(rls):
+            if i + 1 == len(rls):
                 break
             if len(rls[i]) > 0:
                 if rls[i][0] in ['-', '#', '=']:
                     continue
-            if len(rls[i+1]) > 0:
-                if rls[i+1][0] in ['-', '=']:
+            if len(rls[i + 1]) > 0:
+                if rls[i + 1][0] in ['-', '=']:
                     continue
             nrls.append(rls[i])
 

@@ -1,17 +1,17 @@
+import os
+import os.path as path
+from functools import partial
+
+from conjureup import async, controllers, juju, utils
+from conjureup.app_config import app
 from conjureup.ui.views.deploystatus import DeployStatusView
 from ubuntui.ev import EventLoop
-from conjureup.app_config import app
-from conjureup import utils
-from conjureup import controllers
-from conjureup import async
-from conjureup import juju
-from functools import partial
+
 from . import common
-import os.path as path
-import os
 
 
 class DeployStatusController:
+
     def __init__(self):
         self.view = None
         self.pre_exec_pollinate = False

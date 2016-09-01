@@ -1,18 +1,17 @@
-import sys
-import os
-import json
 import concurrent
+import json
+import os
+import sys
 from functools import partial
+from subprocess import PIPE, run
 
-from conjureup import controllers
-from conjureup import utils
+from conjureup import controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
-from conjureup import juju
-from subprocess import run, PIPE
 
 
 class DeployController:
+
     def __init__(self):
         self.bundle_filename = None
         self.bundle = None

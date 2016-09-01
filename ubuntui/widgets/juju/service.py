@@ -6,6 +6,7 @@ from ubuntui.widgets.juju.unit import UnitWidget
 
 
 class ServiceWidget:
+
     def __init__(self, name, service):
         """ Init
 

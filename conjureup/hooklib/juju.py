@@ -1,8 +1,11 @@
-from subprocess import run, PIPE, CalledProcessError
-import yaml
 import logging
 import time
+from subprocess import PIPE, CalledProcessError, run
+
+import yaml
+
 from .writer import fail, success
+
 log = logging.getLogger('conjureup')
 
 

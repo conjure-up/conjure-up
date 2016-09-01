@@ -1,15 +1,15 @@
-from . import common
-from conjureup import utils
-from conjureup import controllers
-from conjureup import async
-from conjureup import juju
-from conjureup.app_config import app
-from functools import partial
 import os
 import sys
+from functools import partial
+
+from conjureup import async, controllers, juju, utils
+from conjureup.app_config import app
+
+from . import common
 
 
 class DeployStatusController:
+
     def __init__(self):
         self.bundle_scripts = os.path.join(
             app.config['spell-dir'], 'steps'

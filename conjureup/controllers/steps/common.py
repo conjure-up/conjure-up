@@ -1,9 +1,10 @@
-from conjureup.app_config import app
-from conjureup.api.models import model_info
-from conjureup import utils
 import json
 import os
 from glob import glob
+
+from conjureup import utils
+from conjureup.api.models import model_info
+from conjureup.app_config import app
 
 
 def set_env(inputs):
@@ -77,10 +78,10 @@ def do_step(step_model, step_widget, message_cb, gui=False):
         step_widget.set_icon_state('waiting')
     app.log.debug("Executing script: {}".format(step_model.path))
     with open(step_model.path + ".out", 'w') as outf:
-            with open(step_model.path + ".err", 'w') as errf:
-                utils.run_script(step_model.path,
-                                 stderr=errf,
-                                 stdout=outf)
+        with open(step_model.path + ".err", 'w') as errf:
+            utils.run_script(step_model.path,
+                             stderr=errf,
+                             stdout=outf)
     try:
         with open(step_model.path + ".out") as outf:
             lines = outf.readlines()

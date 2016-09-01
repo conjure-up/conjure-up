@@ -22,6 +22,7 @@ log = logging.getLogger('bundleplacer')
 
 
 class FilterBox(WidgetWrap):
+
     def __init__(self, edit_changed_cb, label="", info_text=""):
         self.label = Text(label)
         self.info_text = Text(info_text)

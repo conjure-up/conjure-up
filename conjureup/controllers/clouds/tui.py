@@ -1,15 +1,15 @@
-from conjureup import controllers
-from conjureup import juju
-from conjureup import utils
+import os
+import sys
+
+import petname
+
+from conjureup import controllers, juju, utils
 from conjureup.app_config import app
 from conjureup.controllers.clouds.common import get_controller_in_cloud
 
-import petname
-import sys
-import os
-
 
 class CloudsController:
+
     def finish(self):
         if app.argv.cloud == "localhost":
             if not utils.check_bridge_exists():
