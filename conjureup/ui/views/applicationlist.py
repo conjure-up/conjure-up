@@ -165,7 +165,7 @@ class ApplicationListView(WidgetWrap):
 
         self.skip_rest_button = PlainButton(
             "Deploy all",
-            self.controller.do_deploy_remaining
+            self.do_deploy_remaining
         )
         cws = [('weight', 1, Text(" ")),
                (20, Color.button_secondary(
@@ -198,6 +198,10 @@ class ApplicationListView(WidgetWrap):
             self.pile.focus_position = ni
         else:
             self.controller.finish()
+
+    def do_deploy_remaining(self, sender):
+        self.controller.do_deploy_remaining()
+        self.controller.finish()
 
     def update_skip_rest_button(self):
         t = "Deploy all {} Remaining Applications".format(

@@ -93,7 +93,7 @@ class DeployController:
                             msg_cb=msg_both,
                             exc_cb=partial(self._handle_exception, "ED"))
 
-    def do_deploy_remaining(self, sender):
+    def do_deploy_remaining(self):
         "deploys all un-deployed applications"
         for application in self.undeployed_applications:
             juju.deploy_service(application,
