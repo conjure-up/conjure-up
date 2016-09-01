@@ -1,0 +1,12 @@
+cloud-whitelist:
+- maas
+friendly-name: OpenStack Base for MAAS
+options-whitelist:
+  keystone:
+  - admin-password
+  mysql:
+  - max-connections
+  neutron-gateway:
+  - ext-port
+  nova-compute:
+  - virt-type

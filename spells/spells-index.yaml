@@ -3,6 +3,10 @@ _unassigned_spells:
   spells: []
 openstack:
   spells:
+    - key: openstack-base
+      name: OpenStack Base for MAAS
+      description: |
+        Deploys a basic OpenStack Cloud (Mitaka release) on Ubuntu 16.04 LTS, providing Dashboard, Compute, Network, Block Storage, Object Storage, Identity and Image services, using a minimum of 4 physical servers in MAAS.
     - key: openstack-novalxd
       name: OpenStack with NovaLXD
       description: |

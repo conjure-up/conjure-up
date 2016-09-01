@@ -1,0 +1,5 @@
+export OS_USERNAME=admin
+export OS_PASSWORD=openstack
+export OS_TENANT_NAME=admin
+export OS_REGION_NAME=RegionOne
+export OS_AUTH_URL=${OS_AUTH_PROTOCOL:-http}://`juju run --unit  keystone/0 "unit-get private-address"`:5000/v2.0

@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+
+from conjureup.hooklib.writer import success, fail
+from conjureup.hooklib import juju
+
+
+status = juju.status()
+applications = status['applications']['openstack-dashboard']
+horizon_ip = applications['units']['openstack-dashboard/0']['public-address']
+
+if horizon_ip:
+    success(
+        "Login to Horizon: http://{}/horizon l: admin p: openstack".format(
+            horizon_ip))
+fail("Unable to determine Horizon URL")
