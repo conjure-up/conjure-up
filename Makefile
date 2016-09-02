@@ -50,7 +50,7 @@ clean-snapcraft:
 
 .PHONY: test
 test:
-	@tox -e flake,isort
+	@tox -e py35,flake,isort
 
 DPKGBUILDARGS = -us -uc -i'.git.*|.tox|.bzr.*|.editorconfig|.travis-yaml|macumba\/debian|maasclient\/debian' -i'snapcraft'
 deb-src: clean
@@ -87,8 +87,8 @@ install: ../conjure*.deb
 
 # Fix some of the python formatting preferred by pylint
 auto-format:
-	@tox -e py35 -- isort -rc -m 3 conjureup
-	@tox -e py35 -- autopep8 --in-place --recursive .
+	@tox -e py35 -- isort -rc -m 3 conjureup test tools
+	@tox -e py35 -- autopep8 --in-place --recursive conjureup test tools
 
 
 all: release

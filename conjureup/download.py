@@ -148,3 +148,23 @@ def get_remote_url(path):
         if remote_exists(r):
             return r
     return None
+
+
+def download_or_sync_registry(remote_registry, spells_dir, update=False):
+    """ If first time run this git clones the spell registry, otherwise
+    will pull the latest spells down.
+
+    Arguments:
+    remote_registry: git location of spells registry
+    spells_dir: cache location of local spells directory
+
+    Returns:
+    True if successful, False otherwise
+    """
+    if not os.path.exists(spells_dir):
+        run("git clone -q --depth 1 {} {}".format(remote_registry, spells_dir),
+            shell=True, check=True)
+    if os.path.exists(spells_dir) and update:
+        run("cd {} && git pull -q".format(spells_dir),
+            shell=True, check=True)
+    return False

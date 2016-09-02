@@ -7,7 +7,7 @@
 
 import unittest
 #  from unittest.mock import ANY, call, MagicMock, patch, sentinel
-from unittest.mock import patch, MagicMock, sentinel
+from unittest.mock import MagicMock, patch, sentinel
 
 from conjureup.controllers.steps.gui import StepsController
 

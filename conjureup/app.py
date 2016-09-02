@@ -17,6 +17,7 @@ from conjureup.download import (
     detect_endpoint,
     download,
     download_local,
+    download_or_sync_registry,
     get_remote_url
 )
 from conjureup.log import setup_logging
@@ -46,8 +47,9 @@ def parse_options(argv):
                         help='Download directory for spells',
                         default=os.path.expanduser("~/.cache/conjure-up"))
     parser.add_argument('--spells-dir', dest='spells_dir',
-                        help='Location of readonly packaged spells directory',
-                        default='/usr/share/conjure-up/spells')
+                        help='Location of conjure-up managed spells directory',
+                        default=os.path.expanduser(
+                            "~/.cache/conjure-up-spells"))
     parser.add_argument('--apt-proxy', dest='apt_http_proxy',
                         help='Specify APT proxy')
     parser.add_argument('--apt-https-proxy', dest='apt_https_proxy',
@@ -144,11 +146,17 @@ def main():
         app.global_config = global_conf
 
     spells_dir = app.argv.spells_dir
-    if not os.path.exists(spells_dir):
-        spells_dir = os.path.join(os.path.dirname(__file__),
-                                  "../spells")
 
     app.config['spells-dir'] = spells_dir
+    if not os.path.exists(spells_dir):
+        utils.info("No spells found, syncing from registry, please wait.")
+        download_or_sync_registry(app.global_config['registry']['repo'],
+                                  spells_dir)
+    else:
+        app.log.debug("Refreshing spell registry")
+        download_or_sync_registry(app.global_config['registry']['repo'],
+                                  spells_dir, True)
+
     spells_index_path = os.path.join(app.config['spells-dir'],
                                      'spells-index.yaml')
     with open(spells_index_path) as fp:

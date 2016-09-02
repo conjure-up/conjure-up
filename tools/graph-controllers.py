@@ -2,7 +2,7 @@
 
 import os
 import re
-from subprocess import run, PIPE
+from subprocess import PIPE, run
 
 controllers_use_re = re.compile("(\s*)\S*\s*controllers\.use\('(.*)'\).render")
 scope_re = re.compile("^(\s*)def (\w*)\(")
