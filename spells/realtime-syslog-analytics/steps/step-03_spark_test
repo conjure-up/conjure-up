@@ -1,4 +1,0 @@
-#!/usr/bin/env python3
-from conjureup.hooklib import juju
-
-juju.run_action('spark/0', 'smoke-test')

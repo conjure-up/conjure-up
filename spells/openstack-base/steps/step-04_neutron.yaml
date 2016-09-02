@@ -1,4 +1,0 @@
-title: Neutron
-description: |
-  Configure Neutron networking. This step will setup a usable OpenStack network so that your instances may communicate with the outside world.
-viewable: True
