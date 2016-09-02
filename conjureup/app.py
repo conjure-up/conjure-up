@@ -185,8 +185,7 @@ def main():
                                                 spell['key']))
             download_local(os.path.join(app.config['spells-dir'],
                                         spell['key']),
-                           os.path.join(opts.cache_dir,
-                                        spell['key']))
+                           app.config['spell-dir'])
             utils.set_spell_metadata()
             app.endpoint_type = EndpointType.LOCAL_DIR
 
@@ -199,8 +198,7 @@ def main():
         spell_name = os.path.basename(os.path.abspath(spell))
         utils.set_chosen_spell(spell_name,
                                path.join(opts.cache_dir, spell_name))
-        download_local(opts.spell, os.path.join(opts.cache_dir,
-                                                spell_name))
+        download_local(opts.spell, app.config['spell-dir'])
         utils.set_spell_metadata()
 
     elif app.endpoint_type in [EndpointType.VCS, EndpointType.HTTP]:
@@ -212,7 +210,7 @@ def main():
             utils.warning("Can't guess URL matching '{}'".format(opts.spell))
             sys.exit(1)
 
-        download(remote, opts.cache_dir, True)
+        download(remote, app.config['spell-dir'], True)
         utils.set_spell_metadata()
 
     if app.argv.status_only:
