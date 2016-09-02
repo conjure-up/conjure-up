@@ -15,24 +15,23 @@ solutions up and going with as little hindrance as possible.
 
 > Xenial and above
 
-We use snap's for packaging and installation, as of snapd 2.11 the following
-needs to be run
+## pre-reqs
 
+If you plan to use conjure-up to deploy onto LXD containers on your local
+machine (aka the _localhost_ cloud type), you will need to set up LXD
+beforehand, as this requires **sudo**. If you haven't done that, you can configure
+storage and networking with:
 ```
 $ sudo dpkg-reconfigure -p medium lxd
-$ lxc finger
-$ sudo snap install conjure-up --devmode
-$ sudo snap connect conjure-up:firewall-control ubuntu-core:firewall-control
-$ sudo snap connect conjure-up:network-control ubuntu-core:network-control
-$ sudo systemctl start snap.conjure-up.bridge.service
 ```
 
-These steps are required primarily for the **OpenStack** on a single machine
-case where we need access to a custom bridge for our deployment to function
-correctly.
+..and wake up the lxd daemon with:
 
-## Alternative installation
+```
+$ lxc finger
+```
 
+## recommended installation
 We will eventually move to pure snap distribution, however, until that time
 packages are built and located at:
 
@@ -40,6 +39,17 @@ packages are built and located at:
 $ sudo apt-add-repository ppa:conjure-up/next
 $ sudo apt update
 $ sudo apt install conjure-up
+```
+
+## alternative installation
+If you want to try the snap distribution, you can install it with `sudo snap install conjure-up --devmode`,
+and if you want to use it for the _openstack-nclxd_ spell to run openstack in LXD containers on localhost,
+you also need to run the following three commands:
+
+```
+$ sudo snap connect conjure-up:firewall-control ubuntu-core:firewall-control
+$ sudo snap connect conjure-up:network-control ubuntu-core:network-control
+$ sudo systemctl start snap.conjure-up.bridge.service
 ```
 
 # how to use
