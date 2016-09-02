@@ -2,14 +2,14 @@
 #
 # Sync's upstream git repositories into project directory.
 
+import argparse
+import glob
 import json
 import os
+import shutil
 import subprocess
-import argparse
 import sys
 import tempfile
-import shutil
-import glob
 from contextlib import contextmanager
 
 

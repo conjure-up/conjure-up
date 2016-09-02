@@ -6,8 +6,7 @@
 
 
 import unittest
-
-from unittest.mock import call, patch, MagicMock, sentinel
+from unittest.mock import MagicMock, call, patch, sentinel
 
 from conjureup.controllers.summary.gui import SummaryController
 

@@ -6,8 +6,7 @@
 
 
 import unittest
-
-from unittest.mock import ANY, patch, MagicMock
+from unittest.mock import ANY, MagicMock, patch
 
 from conjureup.controllers.bundlereadme.gui import BundleReadmeController
 

@@ -6,8 +6,7 @@
 
 
 import unittest
-
-from unittest.mock import call, patch, MagicMock
+from unittest.mock import MagicMock, call, patch
 
 from conjureup.controllers.clouds.tui import CloudsController
 

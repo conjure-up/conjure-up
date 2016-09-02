@@ -7,7 +7,7 @@
 
 import unittest
 #  from unittest.mock import ANY, call, MagicMock, patch
-from unittest.mock import patch, MagicMock, sentinel
+from unittest.mock import MagicMock, patch, sentinel
 
 from conjureup.controllers.newcloud.tui import NewCloudController
 
