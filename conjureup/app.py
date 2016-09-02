@@ -37,9 +37,6 @@ def parse_options(argv):
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug',
                         help='Enable debug logging.')
-    parser.add_argument('-u', '--update', action='store_true',
-                        dest='update_registry',
-                        help='Sync spells from registry')
     parser.add_argument('-s', '--status', action='store_true',
                         dest='status_only',
                         help='Display the summary of the conjuring')
@@ -155,8 +152,8 @@ def main():
         utils.info("No spells found, syncing from registry, please wait.")
         download_or_sync_registry(app.global_config['registry']['repo'],
                                   spells_dir)
-
-    if opts.update_registry:
+    else:
+        app.log.debug("Refreshing spell registry")
         download_or_sync_registry(app.global_config['registry']['repo'],
                                   spells_dir, True)
 
