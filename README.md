@@ -15,12 +15,30 @@ solutions up and going with as little hindrance as possible.
 
 > Xenial and above
 
-We use snap's for packaging and installation, as of snapd 2.11 the following
-needs to be run
+## pre-reqs
+
+Some spells require that LXD be available and ready:
 
 ```
 $ sudo dpkg-reconfigure -p medium lxd
 $ lxc finger
+```
+
+## recommended installation
+We will eventually move to pure snap distribution, however, until that time
+packages are built and located at:
+
+```
+$ sudo apt-add-repository ppa:conjure-up/next
+$ sudo apt update
+$ sudo apt install conjure-up
+```
+
+## alternative installation
+We use snap's for packaging and installation, as of snapd 2.11 the following
+needs to be run
+
+```
 $ sudo snap install conjure-up --devmode
 $ sudo snap connect conjure-up:firewall-control ubuntu-core:firewall-control
 $ sudo snap connect conjure-up:network-control ubuntu-core:network-control
@@ -31,16 +49,6 @@ These steps are required primarily for the **OpenStack** on a single machine
 case where we need access to a custom bridge for our deployment to function
 correctly.
 
-## Alternative installation
-
-We will eventually move to pure snap distribution, however, until that time
-packages are built and located at:
-
-```
-$ sudo apt-add-repository ppa:conjure-up/next
-$ sudo apt update
-$ sudo apt install conjure-up
-```
 
 # how to use
 
