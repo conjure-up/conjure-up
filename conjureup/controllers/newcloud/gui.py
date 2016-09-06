@@ -109,7 +109,7 @@ class NewCloudController:
         app.log.debug("Switching to controller: {}".format(
             app.current_controller))
         juju.switch_controller(app.current_controller)
-        controllers.use('bundlereadme').render()
+        controllers.use('deploy').render()
 
     def finish(self, credentials=None, back=False):
         """ Load the Model controller passing along the selected cloud.
@@ -133,7 +133,7 @@ class NewCloudController:
 
         self.__do_bootstrap(credential=credentials_key)
 
-        return controllers.use('bundlereadme').render()
+        return controllers.use('deploy').render()
 
     def render(self, cloud):
         """ Render
@@ -160,14 +160,14 @@ class NewCloudController:
 
             self.__do_bootstrap()
 
-            return controllers.use('bundlereadme').render()
+            return controllers.use('deploy').render()
 
         # XXX: always prompt for maas information for now as there is no way to
         # logically store the maas server ip for future sessions.
         if common.try_get_creds(self.cloud) \
            is not None and self.cloud != 'maas':
             self.__do_bootstrap(credential=common.try_get_creds(self.cloud))
-            return controllers.use('bundlereadme').render()
+            return controllers.use('deploy').render()
 
         # show credentials editor otherwise
         try:

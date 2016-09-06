@@ -41,7 +41,7 @@ class CloudsController:
                      self.__handle_exception,
                      queue_name=juju.JUJU_ASYNC_QUEUE)
 
-        return controllers.use('bundlereadme').render()
+        return controllers.use('deploy').render()
 
     def render(self):
         clouds = list_clouds()
