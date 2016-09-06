@@ -28,7 +28,7 @@ class DeployController:
         app.env['JUJU_PROVIDERTYPE'] = model_info('default')['provider-type']
 
         pre_deploy_sh = os.path.join(app.config['spell-dir'],
-                                     'conjure/steps/00_pre-deploy')
+                                     'steps/00_pre-deploy')
         if os.path.isfile(pre_deploy_sh) \
            and os.access(pre_deploy_sh, os.X_OK):
             utils.pollinate(app.session_id, 'J001')

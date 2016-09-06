@@ -24,7 +24,7 @@ class NewCloudController:
         app.env['JUJU_PROVIDERTYPE'] = model_info('default')['provider-type']
 
         post_bootstrap_sh = os.path.join(app.config['spell-dir'],
-                                         'conjure/steps/00_post-bootstrap')
+                                         'steps/00_post-bootstrap')
         if os.path.isfile(post_bootstrap_sh) \
            and os.access(post_bootstrap_sh, os.X_OK):
             utils.pollinate(app.session_id, 'J001')
