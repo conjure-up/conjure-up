@@ -72,7 +72,7 @@ class NewCloudController:
         app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
 
         _post_bootstrap_sh = path.join(app.config['spell-dir'],
-                                       'conjure/steps/00_post-bootstrap')
+                                       'steps/00_post-bootstrap')
         app.log.debug(
             'Checking for post bootstrap task: {}'.format(_post_bootstrap_sh))
         if path.isfile(_post_bootstrap_sh) \
