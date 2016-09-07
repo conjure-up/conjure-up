@@ -63,10 +63,11 @@ class SpellPickerView(WidgetWrap):
     def _swap_focus(self):
         if not self.buttons_pile_selected:
             self.buttons_pile_selected = True
-            self.buttons_pile.focus_position = 0
+            self.frame.focus_position = 'footer'
+            self.buttons_pile.focus_position = 1
         else:
             self.buttons_pile_selected = False
-            self.pile.focus_position = 1
+            self.frame.focus_position = 'body'
 
     def _build_buttons(self):
         cancel = menu_btn(on_press=self.cancel,
