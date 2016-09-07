@@ -1,4 +1,4 @@
-from urwid import Filler, Pile, WidgetWrap, Frame, Text, Columns
+from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
@@ -7,6 +7,7 @@ from ubuntui.widgets.hr import HR
 
 
 class SpellPickerWidget(WidgetWrap):
+
     def __init__(self, spell, cb):
         self._spell = spell
         self.cb = cb
