@@ -34,6 +34,9 @@ class SpellPickerView(WidgetWrap):
         self.config = self.app.config
         self.frame = Frame(body=self._build_widget(),
                            footer=self._build_footer())
+
+        self.buttons_pile_selected = False
+
         super().__init__(self.frame)
         self.handle_focus_changed()
 
@@ -58,13 +61,12 @@ class SpellPickerView(WidgetWrap):
                 self.spell_description.set_text(fw._spell['description'])
 
     def _swap_focus(self):
-        self.current_focused_frame = None
-        if self.current_focused_frame is None:
-            self.current_focused_frame = self.frame.footer
-            self.frame.footer.focus_position = 0
+        if not self.buttons_pile_selected:
+            self.buttons_pile_selected = True
+            self.buttons_pile.focus_position = 0
         else:
-            self.current_focused_frame = self.body.footer
-            self.frame.body.focus_position = 0
+            self.buttons_pile_selected = False
+            self.pile.focus_position = 1
 
     def _build_buttons(self):
         cancel = menu_btn(on_press=self.cancel,
@@ -74,7 +76,8 @@ class SpellPickerView(WidgetWrap):
             Color.menu_button(cancel,
                               focus_map='button_primary focus')
         ]
-        return Pile(buttons)
+        self.buttons_pile = Pile(buttons)
+        return self.buttons_pile
 
     def _build_footer(self):
         self.spell_description = Text("")
