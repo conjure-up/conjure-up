@@ -57,6 +57,8 @@ class CloudsController:
             excerpt=excerpt
         )
         app.ui.set_body(view)
+        app.ui.set_footer('Please press [ENTER] on highlighted '
+                          'Cloud to proceed.')
 
 
 _controller_class = CloudsController

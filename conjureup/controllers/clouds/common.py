@@ -29,9 +29,10 @@ def list_clouds():
     """ Returns list of clouds filtering out any results
     """
     clouds = set(juju.get_clouds().keys())
-    # Add support for maas here since juju doesn't display
-    # this as a typical public cloud.
-    clouds.add('maas')
+
+    # Remove localhost as this will be added in the configure a new
+    # cloud section.
+    clouds.remove('localhost')
 
     if len(parse_whitelist()) > 0:
         whitelist = set(parse_whitelist())
