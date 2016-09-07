@@ -1,10 +1,9 @@
-from urwid import Filler, Pile, WidgetWrap
+from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import menu_btn, quit_btn
+from ubuntui.widgets.buttons import menu_btn
 from ubuntui.widgets.hr import HR
-from ubuntui.widgets.text import Instruction
 
 
 class CloudView(WidgetWrap):
@@ -14,7 +13,10 @@ class CloudView(WidgetWrap):
         self.cb = cb
         self.clouds = clouds
         self.config = self.app.config
-        super().__init__(self._build_widget())
+        self.buttons_pile_selected = False
+        self.frame = Frame(body=self._build_widget(),
+                           footer=self._build_footer())
+        super().__init__(self.frame)
 
     def keypress(self, size, key):
         if key in ['tab', 'shift tab']:
@@ -22,40 +24,61 @@ class CloudView(WidgetWrap):
         return super().keypress(size, key)
 
     def _swap_focus(self):
-        w_count = len(self._w.body.contents) - 1
-        if self._w.body.focus_position >= 2 and \
-           self._w.body.focus_position < w_count:
-            self._w.body.focus_position = w_count
+        if not self.buttons_pile_selected:
+            self.buttons_pile_selected = True
+            self.frame.focus_position = 'footer'
+            self.buttons_pile.focus_position = 1
         else:
-            self._w.body.focus_position = 2
+            self.buttons_pile_selected = False
+            self.frame.focus_position = 'body'
 
     def _build_buttons(self):
-        cancel = quit_btn(on_press=self.cancel)
+        cancel = menu_btn(on_press=self.cancel,
+                          label="\n  QUIT\n")
         buttons = [
             Padding.line_break(""),
-            Color.button_secondary(cancel,
-                                   focus_map='button_secondary focus'),
+            Color.menu_button(cancel,
+                              focus_map='button_primary focus'),
         ]
-        return Pile(buttons)
+        self.buttons_pile = Pile(buttons)
+        return self.buttons_pile
+
+    def _build_footer(self):
+        footer_pile = Pile([
+            Padding.line_break(""),
+            Color.frame_footer(
+                Columns([
+                    ('fixed', 2, Text("")),
+                    ('fixed', 13, self._build_buttons())
+                ]))
+        ])
+        return footer_pile
 
     def _build_widget(self):
         total_items = [
-            Padding.center_60(Instruction("Choose a Cloud")),
-            Padding.center_60(HR())
+            Text("Choose a Cloud"),
+            HR()
         ]
         for item in self.clouds:
-            total_items.append(Padding.center_60(
+            total_items.append(
                 Color.body(
                     menu_btn(label=item,
                              on_press=self.submit),
                     focus_map='menu_button focus'
                 )
-            ))
-
-        total_items.append(
-            Padding.center_60(HR()))
-        total_items.append(Padding.center_20(self._build_buttons()))
-        return Filler(Pile(total_items), valign='top')
+            )
+        total_items.append(Padding.line_break(""))
+        total_items.append(Text("Configure a New Cloud"))
+        total_items.append(HR())
+        for item in ['localhost', 'maas']:
+            total_items.append(
+                Color.body(
+                    menu_btn(label=item,
+                             on_press=self.submit),
+                    focus_map='menu_button focus'
+                )
+            )
+        return Padding.center_80(Filler(Pile(total_items), valign='top'))
 
     def submit(self, result):
         self.cb(result.label)
