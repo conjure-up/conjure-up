@@ -71,7 +71,7 @@ class SpellPickerView(WidgetWrap):
 
     def _build_buttons(self):
         cancel = menu_btn(on_press=self.cancel,
-                          label="\nQUIT\n")
+                          label="\n  QUIT\n")
         buttons = [
             Padding.line_break(""),
             Color.menu_button(cancel,
@@ -83,7 +83,7 @@ class SpellPickerView(WidgetWrap):
     def _build_footer(self):
         self.spell_description = Text("")
         footer_pile = Pile([
-            Padding.center_80(self.spell_description),
+            Padding.center_60(self.spell_description),
             Padding.line_break(""),
             Color.frame_footer(
                 Columns([
