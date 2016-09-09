@@ -1,10 +1,7 @@
 import logging
-from logging.handlers import TimedRotatingFileHandler
-
-try:
-    from systemd.journal import JournalHandler
-except ImportError:
-    from systemd.journal import JournalLogHandler as JournalHandler
+import os
+import stat
+from logging.handlers import SysLogHandler, TimedRotatingFileHandler
 
 
 def setup_logging(app, logfile, debug=False):
@@ -26,6 +23,11 @@ def setup_logging(app, logfile, debug=False):
     logger = logging.getLogger(app)
     logger.setLevel(env)
     logger.addHandler(cmdslog)
-    logger.addHandler(JournalHandler(SYSLOG_IDENTIFIER=app))
+    if os.path.exists('/dev/log'):
+        st_mode = os.stat('/dev/log').st_mode
+        if stat.S_ISSOCK(st_mode):
+            syslog_h = SysLogHandler(address='/dev/log')
+            syslog_h.set_name(app)
+            logger.addHandler(syslog_h)
 
     return logger

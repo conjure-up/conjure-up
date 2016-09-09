@@ -1,25 +1,15 @@
 import json
-import logging
 import os
 import sys
 
-try:
-    from systemd.journal import JournalHandler
-except ImportError:
-    from systemd.journal import JournalLogHandler as JournalHandler
+from conjureup.log import setup_logging
 
+CACHEDIR = os.getenv('CONJURE_UP_CACHEDIR',
+                     os.path.expanduser('~/.cache/conjure-up'))
+SPELL_NAME = os.getenv('CONJURE_UP_SPELL', '_unspecified_spell')
+LOGFILE = os.path.join(CACHEDIR, '{spell}.log'.format(spell=SPELL_NAME))
 
-def log(msg, level='DEBUG'):
-    """ Provides a logging mechanism for spell steps to write to journald
-    """
-    spell_name = os.getenv('CONJURE_UP_SPELL', '_unspecified_spell')
-    logger = logging.getLogger('conjure-up/{}'.format(spell_name))
-    level_num = logging.getLevelName(level.upper())
-
-    logger.setLevel(level_num)
-    logger.addHandler(JournalHandler(
-        SYSLOG_IDENTIFIER='conjure-up/{}'.format(spell_name)))
-    logger.log(level_num, msg)
+log = setup_logging(SPELL_NAME, LOGFILE, True)
 
 
 def success(msg):
