@@ -1,5 +1,7 @@
 import logging
-from logging.handlers import TimedRotatingFileHandler
+import os
+import stat
+from logging.handlers import SysLogHandler, TimedRotatingFileHandler
 
 
 def setup_logging(app, logfile, debug=False):
@@ -21,4 +23,11 @@ def setup_logging(app, logfile, debug=False):
     logger = logging.getLogger(app)
     logger.setLevel(env)
     logger.addHandler(cmdslog)
+    if os.path.exists('/dev/log'):
+        st_mode = os.stat('/dev/log').st_mode
+        if stat.S_ISSOCK(st_mode):
+            syslog_h = SysLogHandler(address='/dev/log')
+            syslog_h.set_name(app)
+            logger.addHandler(syslog_h)
+
     return logger

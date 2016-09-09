@@ -20,7 +20,8 @@ Build-Depends: debhelper (>= 9),
                python3-urwid,
                python3-ws4py,
                python3-yaml,
-               python3-progressbar
+               python3-progressbar,
+               python3-systemd
 Standards-Version: 3.9.7
 Homepage: https://github.com/ubuntu/conjure-up
 X-Python3-Version: >= 3.5
@@ -47,6 +48,7 @@ Depends: bsdtar,
          python3-ws4py,
          python3-yaml,
          python3-progressbar,
+         python3-systemd,
          rsyslog,
          ${misc:Depends},
          ${python3:Depends},
