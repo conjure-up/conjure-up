@@ -11,6 +11,10 @@ notifications:
     skip_join: true
     on_failure: change
     on_success: never
+addons:
+  apt:
+    packages:
+      - libsystemd-dev
 install:
   - travis_retry pip install tox
 script:

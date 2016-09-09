@@ -1,5 +1,6 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
+
 try:
     from systemd.journal import JournalHandler
 except ImportError:

@@ -1,7 +1,8 @@
 import json
-import sys
 import logging
 import os
+import sys
+
 try:
     from systemd.journal import JournalHandler
 except ImportError:
