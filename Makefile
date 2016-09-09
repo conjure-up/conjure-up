@@ -13,7 +13,7 @@ PACKAGE_SHARE_HOOKLIB_PATH := $(PACKAGE_SHARE_PATH)/hooklib
 
 .PHONY: install-dependencies
 install-dependencies:
-	sudo apt-get -yy install devscripts equivs pandoc bsdtar charm charm-tools jq
+	sudo apt-get -yy install devscripts equivs pandoc bsdtar charm charm-tools jq libsystemd-dev
 	sudo mk-build-deps -i -t "apt-get --no-install-recommends -y" debian/control
 
 .PHONY: uninstall-dependencies
@@ -43,7 +43,6 @@ clean:
 	@rm -rf conjure-up
 	@rm -rf dist
 	@rm -rf conjure-dev
-	@if [ -L /usr/share/conjure-up/hooklib ]; then sudo unlink $(PACKAGE_SHARE_HOOKLIB_PATH) && sudo mv $(PACKAGE_SHARE_HOOKLIB_PATH).orig $(PACKAGE_SHARE_HOOKLIB_PATH); fi
 
 clean-snapcraft:
 	@(cd snapcraft && snapcraft clean)
