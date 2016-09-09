@@ -88,7 +88,12 @@ def download_requests_stream(request_stream, destination, message=None):
         for buf in request_stream.iter_content(1024):
             destination_file.write(buf)
             total_read += len(buf)
-            progress_bar.update(total_read)
+            try:
+                progress_bar.update(total_read)
+            except ValueError as e:
+                app.log.exception(
+                    "Failed on total_read({}) "
+                    "is not between 0-100: {}".format(total_read, e))
     progress_bar.finish()
 
 
