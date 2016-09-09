@@ -222,6 +222,7 @@ def main():
             sys.exit(1)
 
     app.env = os.environ.copy()
+    app.env['CONJURE_UP_CACHEDIR'] = app.argv.cache_dir
     app.env['CONJURE_UP_SPELL'] = spell_name
 
     if app.argv.cloud:
