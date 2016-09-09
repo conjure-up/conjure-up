@@ -1,5 +1,5 @@
 language: python
-sudo: false
+sudo: true
 python:
   - "3.5"
 notifications:
@@ -11,10 +11,9 @@ notifications:
     skip_join: true
     on_failure: change
     on_success: never
-addons:
-  apt:
-    packages:
-      - libsystemd-dev
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libsystemd-dev
 install:
   - travis_retry pip install tox
 script:
