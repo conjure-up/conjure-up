@@ -21,7 +21,7 @@ class ConjureUI(Frame):
         else:
             errmsg = ex.args[0]
         errmsg += ("\n\n"
-                   "Review log messages at /var/log/conjure-up/combined.log "
+                   "Review log messages at ~/.cache/conjure-up/conjure-up.log "
                    "If appropriate, please submit a bug here: "
                    "https://bugs.launchpad.net/conjure-up/+filebug")
 
