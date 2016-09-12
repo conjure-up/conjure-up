@@ -1,0 +1,15 @@
+[Unit]
+Description=conjure-up - network bridge
+Documentation=man:conjure-up(1)
+After=network-online.target
+Before=lxd.service
+Requires=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/conjure-up/bridge.start
+ExecStop=/usr/lib/conjure-up/bridge.stop
+
+[Install]
+WantedBy=multi-user.target
