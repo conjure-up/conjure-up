@@ -55,19 +55,19 @@ class CloudView(WidgetWrap):
         return footer_pile
 
     def _build_widget(self):
-        total_items = [
-            Text("Choose a Cloud"),
-            HR()
-        ]
-        for item in self.clouds:
-            total_items.append(
-                Color.body(
-                    menu_btn(label=item,
-                             on_press=self.submit),
-                    focus_map='menu_button focus'
+        total_items = []
+        if len(self.clouds) > 0:
+            total_items.append(Text("Choose a Cloud"))
+            total_items.append(HR())
+            for item in self.clouds:
+                total_items.append(
+                    Color.body(
+                        menu_btn(label=item,
+                                 on_press=self.submit),
+                        focus_map='menu_button focus'
+                    )
                 )
-            )
-        total_items.append(Padding.line_break(""))
+            total_items.append(Padding.line_break(""))
         total_items.append(Text("Configure a New Cloud"))
         total_items.append(HR())
         for item in ['localhost', 'maas']:
