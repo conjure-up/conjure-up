@@ -3,6 +3,7 @@ import json
 import os
 import sys
 from functools import partial
+from operator import attrgetter
 from subprocess import PIPE, run
 
 from conjureup import controllers, juju, utils
@@ -15,7 +16,7 @@ class DeployController:
     def __init__(self):
         self.bundle_filename = None
         self.bundle = None
-        self.services = []
+        self.applications = []
 
     def __handle_exception(self, tag, exc):
         utils.error("Error deploying services: {}".format(exc))
@@ -54,11 +55,11 @@ class DeployController:
     def finish(self):
         """ handles deployment
         """
-        for service in self.services:
+        for service in self.applications:
             juju.deploy_service(service, utils.info,
                                 partial(self.__handle_exception, "ED"))
 
-        f = juju.set_relations(self.services,
+        f = juju.set_relations(self.applications,
                                utils.info,
                                partial(self.__handle_exception, "ED"))
         concurrent.futures.wait([f])
@@ -71,6 +72,9 @@ class DeployController:
         juju.add_machines(
             list(app.metadata_controller.bundle.machines.values()),
             exc_cb=partial(self.__handle_exception, "ED"))
+        self.applications = sorted(app.metadata_controller.bundle.services,
+                                   key=attrgetter('service_name'))
+
         self.finish()
 
 _controller_class = DeployController
