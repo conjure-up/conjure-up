@@ -3,8 +3,9 @@ import json
 import os
 import sys
 from functools import partial
-from subprocess import PIPE, run
 from operator import attrgetter
+from subprocess import PIPE, run
+
 from conjureup import controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
