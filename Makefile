@@ -5,10 +5,7 @@ NAME = conjure-up
 CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
-VERSION := 2.0.0.8
-
-PACKAGE_SHARE_PATH := /usr/share/conjure-up
-PACKAGE_SHARE_HOOKLIB_PATH := $(PACKAGE_SHARE_PATH)/hooklib
+VERSION := 2.0.1~beta1
 
 
 .PHONY: install-dependencies
@@ -20,9 +17,14 @@ install-dependencies:
 uninstall-dependencies:
 	sudo apt-get remove conjure-build-deps
 
-release: clean clean-snapcraft test
+release: update-version clean test
+
+update-version:
 	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjureup/__init__.py
+	@sed -i -r "1 s/(^conjure-up\s)\(([a-zA-Z0-9\.~\-\+]+)\)/\1\($(VERSION)\)/g" debian/changelog
 	@sed -i -r "s/(^version:\s)(.*)/\1$(VERSION)/" snapcraft/snapcraft.yaml
+
+release-snap: update-version clean clean-snapcraft test
 	@(cd snapcraft && snapcraft)
 	@echo
 	@echo "Build complete, now run snapcraft push snapcraft/$(NAME)_$(VERSION)_amd64.snap --release stable"
