@@ -70,8 +70,6 @@ git_rev:
 
 dev: clean
 	tox -e conjure-dev
-	if [ -d $(PACKAGE_SHARE_HOOKLIB_PATH) ]; then sudo mv $(PACKAGE_SHARE_HOOKLIB_PATH) $(PACKAGE_SHARE_HOOKLIB_PATH).orig; fi
-	sudo ln -s $(CURRENT_DIR)/share/hooklib $(PACKAGE_SHARE_PATH)
 	@echo "Run 'source conjure-dev/bin/activate' to enter the dev venv"
 
 # Indirection to allow 'make run' to build deb automatically, but
