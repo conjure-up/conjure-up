@@ -5,7 +5,7 @@ NAME = conjure-up
 CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
-VERSION := 2.0.0.8
+VERSION := 2.0.0.9
 
 PACKAGE_SHARE_PATH := /usr/share/conjure-up
 PACKAGE_SHARE_HOOKLIB_PATH := $(PACKAGE_SHARE_PATH)/hooklib
