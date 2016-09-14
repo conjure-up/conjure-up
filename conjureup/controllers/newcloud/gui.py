@@ -185,6 +185,7 @@ class NewCloudController:
             title="New cloud setup",
         )
         app.ui.set_body(view)
+        app.ui.set_footer("")
 
 
 _controller_class = NewCloudController
