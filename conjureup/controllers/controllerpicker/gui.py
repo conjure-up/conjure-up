@@ -2,11 +2,10 @@ import petname
 
 from conjureup import async, controllers, juju, utils
 from conjureup.app_config import app
-from conjureup.controllers.clouds.common import list_clouds
-from conjureup.ui.views.cloud import CloudView
+from conjureup.ui.views.ControllerListView import ControllerListView
 
 
-class CloudsController:
+class ControllerPicker:
 
     def __init__(self):
         self.view = None
@@ -20,19 +19,12 @@ class CloudsController:
         juju.add_model(app.current_model)
         juju.switch_model(app.current_model)
 
-    def finish(self, cloud):
-        """ Load the Model controller passing along the selected cloud.
-
-        Arguments:
-        cloud: Cloud to create the controller/model on.
-        """
+    def finish(self, controller):
         utils.pollinate(app.session_id, 'CS')
-        existing_controller = juju.get_controller_in_cloud(cloud)
+        if controller is None:
+            return controllers.use('clouds').render()
 
-        if existing_controller is None:
-            return controllers.use('newcloud').render(cloud)
-
-        app.current_controller = existing_controller
+        app.current_controller = controller
         app.current_model = petname.Name()
         async.submit(self.__add_model,
                      self.__handle_exception,
@@ -41,21 +33,22 @@ class CloudsController:
         return controllers.use('deploy').render()
 
     def render(self):
-        clouds = list_clouds()
+        controllers = juju.get_controllers()['controllers']
+        if len(controllers) == 0:
+            return controllers.use('clouds').render()
+
         excerpt = app.config.get(
             'description',
-            "Please select from a list of available clouds")
-        view = CloudView(app,
-                         clouds,
-                         self.finish)
+            "Please select an existing controller,"
+            " or choose to bootstrap a new one.")
+        view = ControllerListView(app,
+                                  controllers,
+                                  self.finish)
 
         app.ui.set_header(
-            title="Choose a Cloud",
+            title="Choose a Controller or Create new",
             excerpt=excerpt
         )
         app.ui.set_body(view)
-        app.ui.set_footer('Please press [ENTER] on highlighted '
-                          'Cloud to proceed.')
 
-
-_controller_class = CloudsController
+_controller_class = ControllerPicker

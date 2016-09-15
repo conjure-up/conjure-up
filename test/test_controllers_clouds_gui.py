@@ -75,7 +75,7 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
         self.mock_juju = self.juju_patcher.start()
 
         self.gcc_patcher = patch(
-            'conjureup.controllers.clouds.gui.get_controller_in_cloud')
+            'conjureup.controllers.clouds.gui.juju.get_controller_in_cloud')
         self.mock_gcc = self.gcc_patcher.start()
 
     def tearDown(self):
