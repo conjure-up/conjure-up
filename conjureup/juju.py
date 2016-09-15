@@ -77,6 +77,22 @@ def get_controller(id):
     return None
 
 
+def get_controller_in_cloud(cloud):
+    """ Returns a controller that is bootstrapped on the named cloud
+
+    Arguments:
+    cloud: cloud to check for
+
+    Returns:
+    available controller or None if nothing available
+    """
+    controllers = get_controllers()['controllers'].items()
+    for controller_name, controller in controllers:
+        if cloud == controller['cloud']:
+            return controller_name
+    return None
+
+
 def login(force=False):
     """ Login to Juju API server
     """

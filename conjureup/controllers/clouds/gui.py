@@ -3,7 +3,6 @@ import petname
 from conjureup import async, controllers, juju, utils
 from conjureup.app_config import app
 from conjureup.controllers.clouds.common import (
-    get_controller_in_cloud,
     list_clouds
 )
 from conjureup.ui.views.cloud import CloudView
@@ -30,7 +29,7 @@ class CloudsController:
         cloud: Cloud to create the controller/model on.
         """
         utils.pollinate(app.session_id, 'CS')
-        existing_controller = get_controller_in_cloud(cloud)
+        existing_controller = juju.get_controller_in_cloud(cloud)
 
         if existing_controller is None:
             return controllers.use('newcloud').render(cloud)
