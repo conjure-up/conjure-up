@@ -88,8 +88,13 @@ def _start(*args, **kwargs):
 
     if app.argv.status_only:
         controllers.use('deploystatus').render()
-    else:
+        return
+
+    if app.argv.cloud:
         controllers.use('clouds').render()
+        return
+
+    controllers.use('controllerpicker').render()
 
 
 def apply_proxy():
