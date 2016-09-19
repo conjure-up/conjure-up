@@ -33,8 +33,8 @@ class ControllerPicker:
         return controllers.use('deploy').render()
 
     def render(self):
-        controllers = juju.get_controllers()['controllers']
-        if len(controllers) == 0:
+        existing_controllers = juju.get_controllers()['controllers']
+        if len(existing_controllers) == 0:
             return controllers.use('clouds').render()
 
         excerpt = app.config.get(
