@@ -4,12 +4,12 @@
 import logging
 from functools import partial
 
-from urwid import Columns, Filler, Pile, Text, WidgetWrap
+from urwid import Columns, Filler, Pile, Text, WidgetWrap, Frame
 
 from conjureup.app_config import app
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import PlainButton
+from ubuntui.widgets.buttons import PlainButton, menu_btn
 from ubuntui.widgets.hr import HR
 
 log = logging.getLogger('conjure')
@@ -76,9 +76,18 @@ class ApplicationListView(WidgetWrap):
         assert(len(applications) > 0)
         self.metadata_controller = metadata_controller
         self.n_remaining = len(self.applications)
-        self.widgets = self.build_widgets()
-        super().__init__(self.widgets)
-        self.pile.focus_position = 2
+
+        self.buttons_selected = False
+        self.skip_rest_button = menu_btn(
+            label="\n  Deploy all\n",
+            on_press=self.do_deploy_remaining
+        )
+
+        self.frame = Frame(body=self.build_widgets(),
+                           footer=self.build_footer())
+
+        super().__init__(self.frame)
+
         self.selected_app_w = None
         self.handle_focus_changed()
         self.update_skip_rest_button()
@@ -89,8 +98,46 @@ class ApplicationListView(WidgetWrap):
     def keypress(self, size, key):
         # handle keypress first, then get new focus widget
         rv = super().keypress(size, key)
+        if key in ['tab', 'shift tab']:
+            self._swap_focus()
         self.handle_focus_changed()
         return rv
+
+    def _swap_focus(self):
+        if not self.buttons_selected:
+            self.buttons_selected = True
+            self.frame.focus_position = 'footer'
+            self.buttons.focus_position = 2
+        else:
+            self.buttons_selected = False
+            self.frame.focus_position = 'body'
+
+    def build_footer(self):
+        # cancel = menu_btn(on_press=self.cancel,
+        #                   label="\n  BACK\n")
+
+        self.buttons = Columns([
+            ('fixed', 2, Text("")),
+            # ('fixed', 13, Color.menu_button(
+            #     cancel,
+            #     focus_map='button_primary focus')),
+            Text(""),
+            ('fixed', 40, Color.menu_button(
+                self.skip_rest_button,
+                focus_map='button_primary focus'
+            )),
+            ('fixed', 2, Text(""))
+        ])
+
+        footer = Pile([
+            HR(top=0),
+            Padding.center_90(self.description_w),
+            Padding.line_break(""),
+            Color.frame_footer(Pile([
+                Padding.line_break(""),
+                self.buttons]))
+        ])
+        return footer
 
     def handle_focus_changed(self):
         "Check if focused widget changed, then update readme."
@@ -161,19 +208,6 @@ class ApplicationListView(WidgetWrap):
                                         self.do_deploy))
 
         self.description_w = Text("App description")
-        ws += [HR(), self.description_w]
-
-        self.skip_rest_button = PlainButton(
-            "Deploy all",
-            self.do_deploy_remaining
-        )
-        cws = [('weight', 1, Text(" ")),
-               (20, Color.button_secondary(
-                   self.skip_rest_button,
-                   focus_map='button_secondary focus'))]
-        self.button_columns = Columns(cws, dividechars=1)
-
-        ws += [HR(), self.button_columns]
         self.pile = Pile(ws)
         return Padding.center_90(Filler(self.pile, valign="top"))
 
@@ -204,6 +238,6 @@ class ApplicationListView(WidgetWrap):
         self.controller.finish()
 
     def update_skip_rest_button(self):
-        t = "Deploy all {} Remaining Applications".format(
+        t = "\nDeploy all {} Remaining Applications\n".format(
             self.n_remaining)
         self.skip_rest_button.set_label(t)
