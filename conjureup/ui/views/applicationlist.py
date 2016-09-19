@@ -4,7 +4,7 @@
 import logging
 from functools import partial
 
-from urwid import Columns, Filler, Pile, Text, WidgetWrap, Frame
+from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
 from ubuntui.ev import EventLoop
