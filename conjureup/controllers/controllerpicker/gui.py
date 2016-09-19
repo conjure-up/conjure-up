@@ -42,7 +42,7 @@ class ControllerPicker:
             "Please select an existing controller,"
             " or choose to bootstrap a new one.")
         view = ControllerListView(app,
-                                  controllers,
+                                  existing_controllers,
                                   self.finish)
 
         app.ui.set_header(
