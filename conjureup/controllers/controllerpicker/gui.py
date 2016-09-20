@@ -37,12 +37,29 @@ class ControllerPicker:
         if len(existing_controllers) == 0:
             return controllers.use('clouds').render()
 
+        metadata = app.config['metadata']
+        whitelisted_clouds = [c for c in metadata.get('cloud-whitelist', [])]
+        blacklisted_clouds = [c for c in metadata.get('cloud-blacklist', [])]
+        if len(whitelisted_clouds) > 0:
+            filtered_controllers = {n: d for n, d
+                                    in existing_controllers.items()
+                                    if d['cloud'] in whitelisted_clouds}
+        elif len(blacklisted_clouds) > 0:
+            filtered_controllers = {n: d for n, d
+                                    in existing_controllers.items()
+                                    if d['cloud'] not in blacklisted_clouds}
+        else:
+            filtered_controllers = existing_controllers
+
+        if len(filtered_controllers) == 0:
+            return controllers.use('clouds').render()
+
         excerpt = app.config.get(
             'description',
             "Please select an existing controller,"
             " or choose to bootstrap a new one.")
         view = ControllerListView(app,
-                                  existing_controllers,
+                                  filtered_controllers,
                                   self.finish)
 
         app.ui.set_header(
