@@ -165,7 +165,7 @@ class StepWidget(WidgetWrap):
                 (Columns(column_input, dividechars=3),
                  self.step_pile.options()))
 
-            self.button = submit_btn(on_press=self.submit)
+            self.button = submit_btn(label="Run", on_press=self.submit)
             self.step_pile.contents.append(
                 (Padding.right_20(
                     Color.button_primary(self.button,
