@@ -6,7 +6,7 @@ import logging
 
 from urwid import Filler, Pile, Text, WidgetWrap
 
-from conjureup.app_config import app
+from conjureup import utils
 from conjureup.ui.widgets.option_widget import OptionWidget
 from ubuntui.utils import Padding
 from ubuntui.widgets.buttons import PlainButton
@@ -42,18 +42,9 @@ class ApplicationConfigureView(WidgetWrap):
         ws = []
         service_id = self.application.csid.as_str_without_rev()
         options = self.metadata_controller.get_options(service_id)
-        metadata = app.config.get('metadata', None)
-        if metadata is None:
-            return []
 
-        options_whitelist = metadata.get('options-whitelist', None)
-        if options_whitelist is None:
-            return []
-
-        svc_opts_whitelist = options_whitelist.get(
-            self.application.service_name,
-            [])
-
+        svc_opts_whitelist = utils.get_options_whitelist(
+            self.application.service_name)
         hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
         log.info("Hiding options not in the whitelist: {}".format(hidden))
         for opname in svc_opts_whitelist:

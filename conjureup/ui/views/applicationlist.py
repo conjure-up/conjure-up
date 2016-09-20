@@ -7,6 +7,7 @@ from functools import partial
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
+from conjureup.utils import get_options_whitelist
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import PlainButton, menu_btn
@@ -17,10 +18,12 @@ log = logging.getLogger('conjure')
 
 class ApplicationWidget(WidgetWrap):
 
-    def __init__(self, application, maxlen, controller, deploy_cb):
+    def __init__(self, application, maxlen, controller, deploy_cb,
+                 show_config=True):
         self.application = application
         self.controller = controller
         self.deploy_cb = deploy_cb
+        self.show_config = show_config
         self._selectable = True
         super().__init__(self.build_widgets(maxlen))
         self.columns.focus_position = len(self.columns.contents) - 1
@@ -43,17 +46,21 @@ class ApplicationWidget(WidgetWrap):
                                     align='right')),
             # placeholder for instance type
             ('weight', 1, Text(" ")),
-            (20, Color.button_secondary(
-                PlainButton("Configure",
-                            partial(self.controller.do_configure,
-                                    self.application)),
-                focus_map='button_secondary focus')),
+            # placeholder for configure button
+            ('weight', 1, Text(" ")),
             (20, Color.button_primary(
                 PlainButton("Deploy",
                             partial(self.deploy_cb,
                                     self.application)),
                 focus_map='button_primary focus'))
         ]
+        if self.show_config:
+            cws[3] = (20, Color.button_secondary(
+                PlainButton("Configure",
+                            partial(self.controller.do_configure,
+                                    self.application)),
+                focus_map='button_secondary focus'))
+
         self.columns = Columns(cws, dividechars=1)
         return self.columns
 
@@ -203,9 +210,12 @@ class ApplicationListView(WidgetWrap):
 
         for a in self.applications:
             ws.append(Text(""))
+            wl = get_options_whitelist(a.service_name)
+            show_config = len(wl) > 0
             ws.append(ApplicationWidget(a, max_app_name_len,
                                         self.controller,
-                                        self.do_deploy))
+                                        self.do_deploy,
+                                        show_config=show_config))
 
         self.description_w = Text("App description")
         self.pile = Pile(ws)

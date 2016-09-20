@@ -336,3 +336,20 @@ def find_spells_matching(key):
             if spell['key'] == key:
                 return [spell]
     return []
+
+
+def get_options_whitelist(service_name):
+    """returns list of whitelisted option names.
+    If there is no whitelist, returns []
+    """
+    metadata = app.config.get('metadata', None)
+    if metadata is None:
+        return []
+
+    options_whitelist = metadata.get('options-whitelist', None)
+    if options_whitelist is None:
+        return []
+
+    svc_opts_whitelist = options_whitelist.get(service_name, [])
+
+    return svc_opts_whitelist
