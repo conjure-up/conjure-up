@@ -19,11 +19,11 @@ log = logging.getLogger('conjure')
 class ApplicationWidget(WidgetWrap):
 
     def __init__(self, application, maxlen, controller, deploy_cb,
-                 show_config=True):
+                 hide_config=False):
         self.application = application
         self.controller = controller
         self.deploy_cb = deploy_cb
-        self.show_config = show_config
+        self.hide_config = hide_config
         self._selectable = True
         super().__init__(self.build_widgets(maxlen))
         self.columns.focus_position = len(self.columns.contents) - 1
@@ -54,7 +54,7 @@ class ApplicationWidget(WidgetWrap):
                                     self.application)),
                 focus_map='button_primary focus'))
         ]
-        if self.show_config:
+        if not self.hide_config:
             cws[3] = (20, Color.button_secondary(
                 PlainButton("Configure",
                             partial(self.controller.do_configure,
@@ -211,11 +211,11 @@ class ApplicationListView(WidgetWrap):
         for a in self.applications:
             ws.append(Text(""))
             wl = get_options_whitelist(a.service_name)
-            show_config = len(wl) > 0
+            hide_config = a.subordinate and len(wl) == 0
             ws.append(ApplicationWidget(a, max_app_name_len,
                                         self.controller,
                                         self.do_deploy,
-                                        show_config=show_config))
+                                        hide_config=hide_config))
 
         self.description_w = Text("App description")
         self.pile = Pile(ws)
