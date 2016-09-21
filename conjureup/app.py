@@ -37,9 +37,6 @@ def parse_options(argv):
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug',
                         help='Enable debug logging.')
-    parser.add_argument('-s', '--status', action='store_true',
-                        dest='status_only',
-                        help='Display the summary of the conjuring')
     parser.add_argument('-c', dest='global_config_file',
                         help='Location of conjure-up.conf',
                         default='/etc/conjure-up.conf')
@@ -90,7 +87,7 @@ def _start(*args, **kwargs):
 
     utils.setup_metadata_controller()
 
-    if app.argv.status_only:
+    if os.getenv('CONJURE_STATUS_ONLY'):
         controllers.use('deploystatus').render()
         return
 
