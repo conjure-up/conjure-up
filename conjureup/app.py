@@ -64,6 +64,10 @@ def parse_options(argv):
     parser.add_argument('--bootstrap-timeout', dest='bootstrap_timeout',
                         help='Amount of time to wait for initial controller '
                         'creation. Useful for slower network connections.')
+    parser.add_argument('--bootstrap-to', dest='bootstrap_to',
+                        help='The MAAS node hostname to deploy to. Useful '
+                        'for using lower end hardware as the Juju admin '
+                        'controller.', metavar='<host>.maas')
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
 
