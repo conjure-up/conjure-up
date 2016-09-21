@@ -89,6 +89,7 @@ class JujuClient(Base):
     jujuc.Client(request="FullStatus")
     """
     API_VERSION = 2
+    CREDS_VERSION = 3
 
     def __init__(self, url, password, user='user-admin'):
         for name, version in _FACADE_VERSIONS.items():

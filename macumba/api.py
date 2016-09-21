@@ -25,21 +25,31 @@ def query_cs(charm):
         series, charm = charm.split('/')
     except ValueError:
         series = 'trusty'
-    charm_store_url = 'https://manage.jujucharms.com/api/3/charm'
-    url = path.join(charm_store_url, series, charm)
+    charm_id = "{}/{}".format(series, charm)
+    base_url = "https://api.jujucharms.com/charmstore/v5/meta/any?id={}"
+    url = base_url.format(charm_id)
     r = requests.get(url)
     if r.status_code != 200:
-        log.error("could not find charm store URL for charm '{}'".format(url))
-        rj = r.json()
-        raise CharmNotFoundError("{type} {charm_id}".format(**rj))
+        log.error("error accessing charm store API: '{}'".format(url))
+        raise CharmNotFoundError("Unknown Error accessing Juju Charm Store")
+    results = r.json()
+    if len(results) == 0:
+        raise CharmNotFoundError("Charm {} not found on Juju Charm"
+                                 " Store.".format(charm))
+    result = r.json()[charm_id]
 
-    return r.json()
+    # ensure that series is in the charm Id:
+    revno = result['Id'].split('-')[-1]
+    result['Id'] = "cs:{}-{}".format(charm_id, revno)
+    return result
 
 
 class Base:
     """ Base api class
     """
+    # define these in subclasses:
     API_VERSION = None
+    CREDS_VERSION = None
     FACADE_VERSIONS = {}
 
     def __init__(self, url, password, user='user-admin'):
@@ -57,7 +67,7 @@ class Base:
             self.conn = JujuWS(url, password)
 
         self.creds = {'Type': 'Admin',
-                      'Version': 3,
+                      'Version': self.CREDS_VERSION,
                       'Request': 'Login',
                       'RequestId': 1,
                       'Params': {'auth-tag': user,
