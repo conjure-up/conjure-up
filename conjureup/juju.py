@@ -151,6 +151,8 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
     if app.argv.bootstrap_timeout:
         cmd += "--config bootstrap-timeout={} ".format(
             app.argv.bootstrap_timeout)
+    if app.argv.bootstrap_to:
+        cmd += "--to {} ".format(app.argv.bootstrap_to)
 
     cmd += "--bootstrap-series={} ".format(series)
     if cloud != "localhost":
