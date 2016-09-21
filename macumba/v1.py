@@ -58,6 +58,7 @@ _FACADE_VERSIONS = {
 
 class JujuClient(Base):
     API_VERSION = 1
+    CREDS_VERSION = 2
     FACADE_VERSIONS = _FACADE_VERSIONS
 
     def status(self):
@@ -179,7 +180,7 @@ class JujuClient(Base):
     def remove_relation(self, endpoint_a, endpoint_b):
         """ Removes relation """
         return self.call(dict(Type="Client",
-                              Request="DestroyRelaiton",
+                              Request="DestroyRelation",
                               Params=dict(Endpoints=[endpoint_a,
                                                      endpoint_b])))
 
@@ -197,8 +198,8 @@ class JujuClient(Base):
         """
         params = {'ServiceName': service_name}
 
-        _url = query_cs(charm)
-        params['CharmUrl'] = _url['charm']['url']
+        charm_info = query_cs(charm)
+        params['CharmUrl'] = charm_info['Id']
         params['NumUnits'] = num_units
         params['ConfigYAML'] = config_yaml
 
