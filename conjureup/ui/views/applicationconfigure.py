@@ -32,6 +32,12 @@ class ApplicationConfigureView(WidgetWrap):
     def build_widgets(self):
         ws = [Text("Configure {}".format(
             self.application.service_name))]
+        num_unit_ow = OptionWidget("Units", "int",
+                                   "How many units to deploy.",
+                                   self.application.orig_num_units,
+                                   current_value=self.application.num_units,
+                                   value_changed_callback=self.handle_scale)
+        ws.append(num_unit_ow)
         ws += self.get_option_widgets()
         ws += [HR(), PlainButton("Cancel", self.do_cancel),
                PlainButton("Accept Changes", self.do_commit)]
@@ -61,6 +67,9 @@ class ApplicationConfigureView(WidgetWrap):
 
     def handle_edit(self, opname, value):
         self.options_copy[opname] = value
+
+    def handle_scale(self, opname, scale):
+        self.application.num_units = scale
 
     def do_cancel(self, sender):
         self.controller.handle_configure_done()

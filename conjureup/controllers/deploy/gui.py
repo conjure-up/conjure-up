@@ -77,6 +77,7 @@ class DeployController:
 
     def handle_configure_done(self):
         app.ui.set_header(self.list_header)
+        self.list_view.update()
         app.ui.set_body(self.list_view)
 
     def do_deploy(self, application, msg_cb):
