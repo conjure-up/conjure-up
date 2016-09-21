@@ -39,6 +39,7 @@ class Service:
         self.conflicts = conflicts
         self.allowed_assignment_types = allowed_assignment_types
         self.num_units = num_units
+        self.orig_num_units = num_units
         self.options = options
         self.allow_multi_units = allow_multi_units
         self.subordinate = subordinate
