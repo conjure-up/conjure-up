@@ -32,8 +32,6 @@ Vcs-Git: https://github.com/ubuntu/conjure-up.git
 Package: conjure-up
 Architecture: all
 Depends: bsdtar,
-         charm,
-         charm-tools,
          jq,
          juju (>= 2.0~),
          lxd,

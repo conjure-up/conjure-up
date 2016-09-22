@@ -3,16 +3,12 @@
 Api for the charmstore:
 https://github.com/juju/charmstore/blob/v5/docs/API.md
 """
-import json
 import os.path as path
 import shutil
-from subprocess import DEVNULL, PIPE, CalledProcessError, run
 from tempfile import NamedTemporaryFile
 
 import requests
 import yaml
-
-from conjureup.app_config import app
 
 cs = 'https://api.jujucharms.com/v5'
 
@@ -88,55 +84,3 @@ def search(tags, promulgated=True):
         raise Exception(
             "Problem getting tagged bundles: {}".format(req))
     return req.json()
-
-
-def set_metadata(bundle_path, data):
-    """ Sets the proper extra-info metadata for a conjure-enabled
-    bundle.
-
-    Arguments:
-    bundle_path: remote path to bundle
-    data: dictionary of fields
-    """
-    try:
-        cmd = ("charm set {} conjure-up:='{}'".format(bundle_path,
-                                                      json.dumps(data)))
-        app.log.debug(cmd)
-        run(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
-    except CalledProcessError as e:
-        app.log.warning("Could not set metadata: {}".format(e))
-
-
-def grant(bundle_path):
-    """ grant read access to spell
-    """
-    try:
-        cmd = ("charm grant {} everyone".format(bundle_path))
-        run(cmd, shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)
-    except CalledProcessError as e:
-        app.log.exception("Could not grant access to registry: {}".format(e))
-        raise e
-
-
-def publish(bundle_path):
-    """ publishes bundle to charmstore
-    """
-    try:
-        cmd = ("charm publish {} -c stable".format(bundle_path))
-        run(cmd, shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)
-    except CalledProcessError as e:
-        app.log.exception("Could not publish to registry: {}".format(e))
-        raise e
-
-
-def push(bundle_path):
-    cmd = ("charm push . {}".format(bundle_path))
-    sh = run(cmd, shell=True, stdout=PIPE, stderr=PIPE)
-    if sh.returncode > 0:
-        raise Exception("Failed to push to registry: {}".format(
-            sh.stderr.decode('utf8')))
-    output = yaml.safe_load(sh.stdout.decode('utf8'))
-    if 'url' in output.keys():
-        return output['url']
-    raise LookupError('Unable to parse registry URL: {}'.format(
-        sh.stderr.decode('utf8')))
