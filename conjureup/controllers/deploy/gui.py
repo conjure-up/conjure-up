@@ -2,7 +2,7 @@ import json
 import os
 from functools import partial
 from operator import attrgetter
-from subprocess import PIPE, run
+from subprocess import PIPE
 
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
@@ -37,11 +37,11 @@ class DeployController:
             msg = "Running pre-deployment tasks."
             app.log.debug(msg)
             app.ui.set_footer(msg)
-            return run(pre_deploy_sh,
-                       shell=True,
-                       stdout=PIPE,
-                       stderr=PIPE,
-                       env=app.env)
+            return utils.run(pre_deploy_sh,
+                             shell=True,
+                             stdout=PIPE,
+                             stderr=PIPE,
+                             env=app.env)
         return json.dumps({'message': 'No pre deploy necessary',
                            'returnCode': 0,
                            'isComplete': True})
