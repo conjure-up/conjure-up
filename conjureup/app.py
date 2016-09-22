@@ -8,9 +8,12 @@ import sys
 import uuid
 
 import yaml
+from prettytable import PrettyTable
+import textwrap
+from termcolor import colored
 
 from conjureup import __version__ as VERSION
-from conjureup import async, consts, controllers, juju, utils
+from conjureup import async, consts, controllers, utils
 from conjureup.app_config import app
 from conjureup.download import (
     EndpointType,
@@ -22,6 +25,7 @@ from conjureup.download import (
 )
 from conjureup.log import setup_logging
 from conjureup.ui import ConjureUI
+from conjureup.controllers.steps.common import get_step_metadata_filenames
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 
@@ -37,6 +41,12 @@ def parse_options(argv):
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug',
                         help='Enable debug logging.')
+    parser.add_argument('--show-env', action='store_true',
+                        dest='show_env',
+                        help='Shows what environment variables are used '
+                        'during post deployment actions. This is useful '
+                        'for headless installs allowing you to set those '
+                        'variables to further customize your deployment.')
     parser.add_argument('-c', dest='global_config_file',
                         help='Location of conjure-up.conf',
                         default='/etc/conjure-up.conf')
@@ -108,6 +118,38 @@ def apply_proxy():
     if app.argv.https_proxy:
         os.environ['HTTPS_PROXY'] = app.argv.https_proxy
         os.environ['https_proxy'] = app.argv.https_proxy
+
+
+def show_env():
+    """ Shows environment variables from post deploy actions
+    """
+    step_scripts = os.path.join(
+        app.config['spell-dir'], 'steps'
+    )
+    step_metas = get_step_metadata_filenames(step_scripts)
+    print("Available environment variables: \n")
+    table = PrettyTable()
+    table.field_names = ["ENV", "DEFAULT",
+                         ""]
+    table.align = 'l'
+    for step_meta_path in step_metas:
+        with open(step_meta_path) as fp:
+            step_metadata = yaml.load(fp.read())
+        if 'additional-input' in step_metadata:
+            for x in step_metadata['additional-input']:
+                default = colored(x['default'], 'green', attrs=['bold'])
+                key = colored(x['key'], 'blue', attrs=['bold'])
+                table.add_row([key, default,
+                               textwrap.fill(step_metadata['description'],
+                                             width=55)])
+    print(table)
+    print("")
+    print(
+        textwrap.fill(
+            "See http://conjure-up.io/docs/en/users/#running-in-headless-mode "
+            "for more information on using these variables to further "
+            "customize your deployment.", width=79))
+    sys.exit(0)
 
 
 def main():
@@ -219,17 +261,19 @@ def main():
         download(remote, app.config['spell-dir'], True)
         utils.set_spell_metadata()
 
-    if app.argv.status_only:
-        if not juju.model_available():
-            utils.error("Attempted to access the status screen without "
-                        "an available Juju model.\n"
-                        "Please select a model using 'juju switch' or "
-                        "create a new controller using 'juju bootstrap'.")
-            sys.exit(1)
-
     app.env = os.environ.copy()
     app.env['CONJURE_UP_CACHEDIR'] = app.argv.cache_dir
     app.env['CONJURE_UP_SPELL'] = spell_name
+
+    if app.argv.show_env:
+        if not app.argv.cloud:
+            utils.error("You must specify a cloud for headless mode.")
+            sys.exit(1)
+        if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
+            utils.error("Please specify a spell for headless mode.")
+            sys.exit(1)
+
+        show_env()
 
     if app.argv.cloud:
         if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
