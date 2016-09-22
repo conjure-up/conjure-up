@@ -1,4 +1,5 @@
 import codecs
+import configparser
 import errno
 import os
 import pty
@@ -13,7 +14,6 @@ from subprocess import (
 )
 
 import yaml
-from configobj import ConfigObj
 from termcolor import colored
 
 from bundleplacer.bundle import Bundle
@@ -95,13 +95,15 @@ def run_attach(cmd, output_cb=None):
 def check_bridge_exists():
     """ Checks that an LXD network bridge exists
     """
+    config_string = "[dummy]\n"
     if os.path.isfile('/etc/default/lxd-bridge'):
-        cfg = ConfigObj('/etc/default/lxd-bridge')
-    else:
-        cfg = ConfigObj()
+        with open('/etc/default/lxd-bridge') as f:
+            config_string = config_string + f.read()
+    cfg = configparser.ConfigParser()
+    cfg.read_string(config_string)
 
-    ready = cfg.get('LXD_IPV4_ADDR', None)
-    if not ready:
+    ready = cfg.get('dummy', 'LXD_IPV4_ADDR')
+    if not ready.strip('"'):
         return False
     return True
 
