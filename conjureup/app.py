@@ -87,7 +87,7 @@ def _start(*args, **kwargs):
 
     utils.setup_metadata_controller()
 
-    if os.getenv('CONJURE_STATUS_ONLY'):
+    if os.getenv('CONJUREUP_STATUS_ONLY'):
         controllers.use('deploystatus').render()
         return
 
