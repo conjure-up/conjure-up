@@ -5,16 +5,16 @@ import argparse
 import os
 import os.path as path
 import sys
+import textwrap
 import uuid
 
 import yaml
-from prettytable import PrettyTable
-import textwrap
 from termcolor import colored
 
 from conjureup import __version__ as VERSION
 from conjureup import async, consts, controllers, utils
 from conjureup.app_config import app
+from conjureup.controllers.steps.common import get_step_metadata_filenames
 from conjureup.download import (
     EndpointType,
     detect_endpoint,
@@ -25,7 +25,7 @@ from conjureup.download import (
 )
 from conjureup.log import setup_logging
 from conjureup.ui import ConjureUI
-from conjureup.controllers.steps.common import get_step_metadata_filenames
+from prettytable import PrettyTable
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 
