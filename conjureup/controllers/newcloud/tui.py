@@ -1,7 +1,7 @@
 import json
 import os
 import sys
-from subprocess import PIPE, run
+from subprocess import PIPE
 
 import petname
 
@@ -30,10 +30,10 @@ class NewCloudController:
             utils.pollinate(app.session_id, 'J001')
             utils.info("Running post-bootstrap tasks.")
             try:
-                sh = run(post_bootstrap_sh, shell=True,
-                         stdout=PIPE,
-                         stderr=PIPE,
-                         env=app.env)
+                sh = utils.run(post_bootstrap_sh, shell=True,
+                               stdout=PIPE,
+                               stderr=PIPE,
+                               env=app.env)
                 result = json.loads(sh.stdout.decode('utf8'))
                 utils.info("Finished post bootstrap task: {}".format(
                     result['message']))

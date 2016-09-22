@@ -1,6 +1,7 @@
 import logging
 import time
-from subprocess import PIPE, CalledProcessError, run
+from subprocess import PIPE, CalledProcessError
+from conjureup.utils import run
 
 import yaml
 
@@ -13,7 +14,7 @@ def status():
     """ Get juju status
     """
     try:
-        sh = run('juju status --format yaml', shell=True, check=True,
+        sh = run('juju-2.0 status --format yaml', shell=True, check=True,
                  stdout=PIPE)
     except CalledProcessError:
         return None
@@ -28,7 +29,7 @@ def leader(application):
     """
     try:
         sh = run(
-            'juju run --application {} is-leader --format yaml'.format(
+            'juju-2.0 run --application {} is-leader --format yaml'.format(
                 application),
             shell=True, stdout=PIPE, check=True)
     except CalledProcessError:
@@ -74,7 +75,7 @@ def run_action(unit, action):
     """ runs an action on a unit, waits for result
     """
     is_complete = False
-    sh = run('juju run-action {} {}'.format(unit, action),
+    sh = run('juju-2.0 run-action {} {}'.format(unit, action),
              shell=True,
              stdout=PIPE)
     run_action_output = yaml.load(sh.stdout.decode())
@@ -85,7 +86,7 @@ def run_action(unit, action):
         fail("Could not determine action id for test")
 
     while not is_complete:
-        sh = run('juju show-action-output {}'.format(action_id),
+        sh = run('juju-2.0 show-action-output {}'.format(action_id),
                  shell=True,
                  stderr=PIPE,
                  stdout=PIPE)

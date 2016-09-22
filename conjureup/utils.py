@@ -9,7 +9,7 @@ from subprocess import (
     CalledProcessError,
     Popen,
     check_call,
-    run
+    check_output
 )
 
 import yaml
@@ -22,6 +22,20 @@ from bundleplacer.config import Config
 from conjureup import charm
 from conjureup.app_config import app
 from conjureup.async import submit
+
+
+def run(cmd, **kwargs):
+    """ Compatibility function to support python 3.4
+    """
+    try:
+        from subprocess import run as _run
+        return _run(cmd, **kwargs)
+    except ImportError:
+        if 'check' in kwargs:
+            del kwargs['check']
+            return check_call(cmd, **kwargs)
+        else:
+            return check_output(cmd, **kwargs)
 
 
 def run_script(path, stderr=PIPE, stdout=PIPE):

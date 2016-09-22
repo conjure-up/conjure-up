@@ -1,7 +1,7 @@
 import os
 import shutil
 from enum import Enum
-from subprocess import CalledProcessError, run
+from subprocess import CalledProcessError
 
 import requests
 from progressbar import (
@@ -13,6 +13,7 @@ from progressbar import (
 )
 
 from conjureup.app_config import app
+from conjureup.utils import run
 from conjureup.consts import UNSPECIFIED_SPELL
 
 

@@ -9,8 +9,7 @@ from subprocess import (
     PIPE,
     CalledProcessError,
     Popen,
-    TimeoutExpired,
-    run
+    TimeoutExpired
 )
 
 import yaml
@@ -19,7 +18,7 @@ import macumba
 from bundleplacer.charmstore_api import CharmStoreID
 from conjureup import async
 from conjureup.app_config import app
-from conjureup.utils import juju_path
+from conjureup.utils import juju_path, run
 from macumba.v2 import JujuClient
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
@@ -134,7 +133,7 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
     log: application logger
     credential: credentials key
     """
-    cmd = "juju bootstrap {} {} " \
+    cmd = "juju-2.0 bootstrap {} {} " \
           "--config image-stream=daily ".format(
               controller, cloud)
     cmd += "--config enable-os-upgrade=false "
@@ -199,7 +198,7 @@ def model_available():
     True/False if juju status was successful and a working model is found
     """
     try:
-        run('juju status', shell=True,
+        run('juju-2.0 status', shell=True,
             check=True, stderr=DEVNULL, stdout=DEVNULL)
     except CalledProcessError:
         return False
@@ -210,7 +209,7 @@ def autoload_credentials():
     """ Automatically checks known places for cloud credentials
     """
     try:
-        run('juju autoload-credentials', shell=True, check=True)
+        run('juju-2.0 autoload-credentials', shell=True, check=True)
     except CalledProcessError:
         return False
     return True
@@ -264,7 +263,7 @@ def get_clouds():
     Returns:
     Dictionary of all known clouds including newly created MAAS/Local
     """
-    sh = run('juju list-clouds --format yaml',
+    sh = run('juju-2.0 list-clouds --format yaml',
              shell=True, stdout=PIPE, stderr=PIPE)
     if sh.returncode > 0:
         raise Exception(
@@ -289,7 +288,7 @@ def get_cloud(name):
 def _do_switch(target):
     try:
         app.log.debug('calling juju switch {}'.format(target))
-        run('juju switch {}'.format(target),
+        run('juju-2.0 switch {}'.format(target),
             shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)
     except CalledProcessError as e:
         raise LookupError("Unable to switch: {}".format(e))
@@ -340,7 +339,7 @@ def deploy(bundle):
             charmstore path.
     """
     try:
-        return run('juju deploy {}'.format(bundle), shell=True,
+        return run('juju-2.0 deploy {}'.format(bundle), shell=True,
                    stdout=DEVNULL, stderr=PIPE)
     except CalledProcessError as e:
         raise e
@@ -506,7 +505,7 @@ def get_controller_info(name=None):
     Arguments:
     name: if set shows info controller, otherwise displays current.
     """
-    cmd = 'juju show-controller --format yaml'
+    cmd = 'juju-2.0 show-controller --format yaml'
     if name is not None:
         cmd += ' {}'.format(name)
     sh = run(cmd, shell=True, stdout=PIPE, stderr=PIPE)
@@ -527,7 +526,7 @@ def get_controllers():
     Returns:
     List of known controllers
     """
-    sh = run('juju list-controllers --format yaml',
+    sh = run('juju-2.0 list-controllers --format yaml',
              shell=True, stdout=PIPE, stderr=PIPE)
     if sh.returncode > 0:
         raise LookupError(
@@ -605,7 +604,7 @@ def get_model(name):
 def add_model(name):
     """ Adds a model to current controller
     """
-    sh = run('juju add-model {}'.format(name),
+    sh = run('juju-2.0 add-model {}'.format(name),
              shell=True, stdout=DEVNULL, stderr=PIPE)
     if sh.returncode > 0:
         raise Exception(
@@ -618,7 +617,7 @@ def get_models():
     Returns:
     List of known models
     """
-    sh = run('juju list-models --format yaml',
+    sh = run('juju-2.0 list-models --format yaml',
              shell=True, stdout=PIPE, stderr=PIPE)
     if sh.returncode > 0:
         raise LookupError(
@@ -637,7 +636,7 @@ def get_current_model():
 def version():
     """ Returns version of Juju
     """
-    sh = run('juju version', shell=True, stdout=PIPE, stderr=PIPE)
+    sh = run('juju-2.0 version', shell=True, stdout=PIPE, stderr=PIPE)
     if sh.returncode > 0:
         raise Exception(
             "Unable to get Juju Version".format(sh.stderr.decode('utf8')))

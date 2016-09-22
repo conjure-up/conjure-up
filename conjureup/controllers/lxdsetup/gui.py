@@ -1,4 +1,3 @@
-from subprocess import run
 from tempfile import NamedTemporaryFile
 
 from conjureup import controllers, utils
@@ -67,7 +66,7 @@ class LXDSetupController:
                                 delete=False) as tempf:
             app.log.debug("Saving LXD config to {}".format(tempf.name))
             utils.spew(tempf.name, out)
-            sh = run('sudo mv {} /etc/default/lxd-bridge'.format(
+            sh = utils.run('sudo mv {} /etc/default/lxd-bridge'.format(
                 tempf.name), shell=True)
             if sh.returncode > 0:
                 return app.ui.show_exception_message(
@@ -75,7 +74,7 @@ class LXDSetupController:
                         sh.stderr.decode('utf8'))))
 
         app.log.debug("Restarting lxd-bridge")
-        run("sudo systemctl restart lxd-bridge.service", shell=True)
+        utils.run("sudo systemctl restart lxd-bridge.service", shell=True)
 
         utils.pollinate(app.session_id, 'L002')
         controllers.use('newcloud').render(

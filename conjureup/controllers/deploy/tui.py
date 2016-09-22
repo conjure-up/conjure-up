@@ -4,7 +4,7 @@ import os
 import sys
 from functools import partial
 from operator import attrgetter
-from subprocess import PIPE, run
+from subprocess import PIPE
 
 from conjureup import controllers, juju, utils
 from conjureup.api.models import model_info
@@ -35,10 +35,10 @@ class DeployController:
             utils.pollinate(app.session_id, 'J001')
             utils.info("Running pre deployment tasks.")
             try:
-                sh = run(pre_deploy_sh, shell=True,
-                         stdout=PIPE,
-                         stderr=PIPE,
-                         env=app.env)
+                sh = utils.run(pre_deploy_sh, shell=True,
+                               stdout=PIPE,
+                               stderr=PIPE,
+                               env=app.env)
                 result = json.loads(sh.stdout.decode('utf8'))
                 if result['returnCode'] > 0:
                     utils.error("Failed to run pre-deploy task: "
