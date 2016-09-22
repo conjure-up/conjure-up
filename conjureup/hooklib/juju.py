@@ -1,9 +1,10 @@
 import logging
 import time
 from subprocess import PIPE, CalledProcessError
-from conjureup.utils import run
 
 import yaml
+
+from conjureup.utils import run
 
 from .writer import fail, success
 

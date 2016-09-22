@@ -4,13 +4,7 @@ import os
 import sys
 from concurrent import futures
 from functools import partial, wraps
-from subprocess import (
-    DEVNULL,
-    PIPE,
-    CalledProcessError,
-    Popen,
-    TimeoutExpired
-)
+from subprocess import DEVNULL, PIPE, CalledProcessError, Popen, TimeoutExpired
 
 import yaml
 

@@ -6,14 +6,13 @@ https://github.com/juju/charmstore/blob/v5/docs/API.md
 import json
 import os.path as path
 import shutil
-from subprocess import DEVNULL, PIPE, CalledProcessError
+from subprocess import DEVNULL, PIPE, CalledProcessError, run
 from tempfile import NamedTemporaryFile
 
 import requests
 import yaml
 
 from conjureup.app_config import app
-from conjureup.utils import run
 
 cs = 'https://api.jujucharms.com/v5'
 
