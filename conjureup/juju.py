@@ -29,7 +29,7 @@ this.USER_TAG = None
 def requires_login(f):
     def _decorator(*args, **kwargs):
         if not this.IS_AUTHENTICATED:
-            login(True)
+            login(force=True)
         return f(*args, **kwargs)
     return wraps(f)(_decorator)
 
@@ -511,26 +511,6 @@ def get_accounts():
         env = yaml.load(c)
         return env['controllers']
     raise Exception("Unable to find accounts")
-
-
-def model_by_owner(controller, user):
-    """ List model associated with user
-
-    Arguments:
-    user: username to query
-    controller: controller to work in
-
-    Returns:
-    Dictionary containing model information for user
-    """
-    models = get_models(controller)
-    for m in models:
-        if m['owner'] == user:
-            return m
-    raise LookupError(
-        "Unable to find user: {}".format(
-            user
-        ))
 
 
 def get_model(controller, name):
