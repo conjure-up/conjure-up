@@ -52,7 +52,7 @@ class NewCloudController:
             app.current_controller = petname.Name()
 
         if app.current_model is None:
-            app.current_model = 'default'
+            app.current_model = 'conjure-up'
 
         if self.cloud != 'localhost':
             if not common.try_get_creds(self.cloud):
