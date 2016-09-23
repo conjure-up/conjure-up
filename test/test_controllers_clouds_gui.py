@@ -78,6 +78,10 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.clouds.gui.juju.get_controller_in_cloud')
         self.mock_gcc = self.gcc_patcher.start()
 
+        self.petname_patcher = patch(
+            'conjureup.controllers.clouds.gui.petname')
+        self.mock_petname = self.petname_patcher.start()
+
     def tearDown(self):
         self.controllers_patcher.stop()
         self.utils_patcher.stop()
@@ -85,13 +89,15 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
         self.app_patcher.stop()
         self.juju_patcher.stop()
         self.gcc_patcher.stop()
+        self.mock_petname.stop()
 
     def test_finish_w_controller(self):
         "clouds.finish with an existing controller"
         self.mock_gcc.return_value = 'testcontroller'
+        self.mock_petname.Name.return_value = 'moo'
         self.controller.finish('testcloud')
-        self.mock_juju.assert_has_calls([
-            call.switch_controller('testcontroller')])
+        self.mock_juju.add_model.assert_called_once_with('moo',
+                                                         'testcontroller')
 
     def test_finish_no_controller(self):
         "clouds.finish without existing controller"

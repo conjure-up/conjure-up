@@ -39,7 +39,6 @@ class NewCloudController:
         utils.pollinate(app.session_id, 'J004')
         EventLoop.remove_alarms()
         app.ui.set_footer('Bootstrap complete...')
-        juju.switch_controller(app.current_controller)
         self.__post_bootstrap_exec()
 
     def __do_bootstrap(self, cloud=None, credential=None):
@@ -66,7 +65,7 @@ class NewCloudController:
     def __post_bootstrap_exec(self):
         """ Executes post-bootstrap.sh if exists
         """
-        info = model_info(juju.get_current_model())
+        info = model_info(app.current_model)
         # Set our provider type environment var so that it is
         # exposed in future processing tasks
         app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
@@ -106,9 +105,6 @@ class NewCloudController:
                 'bootstrap processing phase: {}.'.format(result)))
         utils.pollinate(app.session_id, 'J002')
         app.ui.set_footer('')
-        app.log.debug("Switching to controller: {}".format(
-            app.current_controller))
-        juju.switch_controller(app.current_controller)
         controllers.use('deploy').render()
 
     def finish(self, credentials=None, back=False):
