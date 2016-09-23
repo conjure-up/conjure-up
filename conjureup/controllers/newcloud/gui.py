@@ -142,6 +142,9 @@ class NewCloudController:
         if app.current_controller is None:
             app.current_controller = petname.Name()
 
+        if app.current_model is None:
+            app.current_model = 'default'
+
         # LXD is a special case as we want to make sure a bridge
         # is configured. If not we'll bring up a new view to allow
         # a user to configure a LXD bridge with suggested network
