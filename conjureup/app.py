@@ -243,6 +243,13 @@ def main():
             utils.warning("Could not find spell {}".format(opts.spell))
             sys.exit(1)
 
+        if not os.path.exists(os.path.join(opts.spell,
+                                           "metadata.yaml")):
+            utils.warning("'{}' does not appear to be a spell. "
+                          "{}/metadata.yaml was not found.".format(
+                              opts.spell, opts.spell))
+            sys.exit(1)
+
         spell_name = os.path.basename(os.path.abspath(spell))
         utils.set_chosen_spell(spell_name,
                                path.join(opts.cache_dir, spell_name))
