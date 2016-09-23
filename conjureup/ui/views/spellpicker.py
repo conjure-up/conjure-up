@@ -1,5 +1,6 @@
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
+from conjureup.ui.views.bundle_readme_view import BundleReadmeView
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
@@ -9,7 +10,7 @@ from ubuntui.widgets.hr import HR
 class SpellPickerWidget(WidgetWrap):
 
     def __init__(self, spell, cb):
-        self._spell = spell
+        self.spell = spell
         self.cb = cb
         super().__init__(self.build_widget())
 
@@ -17,9 +18,9 @@ class SpellPickerWidget(WidgetWrap):
         """ Provides a rendered spell widget suitable for pile
         """
         return Color.body(
-            menu_btn(label=self._spell['name'],
+            menu_btn(label=self.spell['name'],
                      on_press=self.cb,
-                     user_data=self._spell),
+                     user_data=self.spell),
             focus_map='menu_button focus'
         )
 
@@ -45,7 +46,21 @@ class SpellPickerView(WidgetWrap):
         if key in ['tab', 'shift tab']:
             self._swap_focus()
         self.handle_focus_changed()
+        if key in ['r'] and self.selected_spell_w is not None:
+            _, rows = EventLoop.screen_size()
+            cur_spell = self.selected_spell_w.spell
+            spellname = cur_spell['name']
+            spelldir = cur_spell['spell-dir']
+            brmv = BundleReadmeView(self.app.metadata_controller,
+                                    spellname, spelldir,
+                                    self.handle_readme_done,
+                                    int(rows * .75))
+            self.app.ui.set_header("Spell Readme")
+            self.app.ui.set_body(brmv)
         return rv
+
+    def handle_readme_done(self):
+        self.app.ui.set_body(self)
 
     def handle_focus_changed(self):
         self.selected_spell_w = None
@@ -58,7 +73,7 @@ class SpellPickerView(WidgetWrap):
             if fw is None:
                 self.spell_description.set_text("No spell selected")
             else:
-                self.spell_description.set_text(fw._spell['description'])
+                self.spell_description.set_text(fw.spell['description'])
 
     def _swap_focus(self):
         if not self.buttons_pile_selected:
