@@ -1,7 +1,5 @@
-""" Service Walkthrough view
+""" Readme View
 
-List out the updated bundle in a cleaner view showing what
-charms and their relations will be done.
 """
 
 import logging
@@ -11,7 +9,6 @@ from glob import glob
 from urwid import BoxAdapter, Filler, ListBox, Pile, Text, WidgetWrap
 
 from conjureup import utils
-from conjureup.app_config import app
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import PlainButton
@@ -22,8 +19,11 @@ log = logging.getLogger('conjure')
 
 class BundleReadmeView(WidgetWrap):
 
-    def __init__(self, metadata_controller, done_callback, initial_height):
+    def __init__(self, metadata_controller, spell_name, spell_dir,
+                 done_callback, initial_height):
         self.metadata_controller = metadata_controller
+        self.spell_name = spell_name
+        self.spell_dir = spell_dir
         self.done_callback = done_callback
         self.initial_height = initial_height
 
@@ -43,7 +43,7 @@ class BundleReadmeView(WidgetWrap):
             return super(BundleReadmeView, self).keypress(size, key)
 
     def build_widgets(self):
-        readme_files = glob(os.path.join(app.config['spell-dir'], 'README.*'))
+        readme_files = glob(os.path.join(self.spell_dir, 'README.*'))
         if len(readme_files) == 0:
             self.readme_w = Text("No README found for bundle.")
         else:
@@ -57,7 +57,7 @@ class BundleReadmeView(WidgetWrap):
                 self.readme_w = BoxAdapter(ListBox(rlines),
                                            self.initial_height)
 
-        ws = [Text("About {}:".format(app.config['spell'])),
+        ws = [Text("About {}:".format(self.spell_name)),
               Padding.right_50(Color.button_primary(
                   PlainButton("Continue",
                               self.do_continue),

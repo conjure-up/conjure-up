@@ -42,6 +42,10 @@ class SpellPickerController:
                 app.endpoint_type))
             app.ui.show_exception_message(e)
 
+        # add subdir of spells-dir to spell dict for bundle readme view:
+        for spell in spells:
+            spell['spell-dir'] = os.path.join(app.config['spells-dir'],
+                                              spell['key'])
         view = SpellPickerView(app,
                                sorted(spells, key=lambda kv: kv['name']),
                                self.finish)
