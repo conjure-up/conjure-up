@@ -9,7 +9,7 @@ CACHEDIR = os.getenv('CONJURE_UP_CACHEDIR',
 SPELL_NAME = os.getenv('CONJURE_UP_SPELL', '_unspecified_spell')
 LOGFILE = os.path.join(CACHEDIR, '{spell}.log'.format(spell=SPELL_NAME))
 
-log = setup_logging(SPELL_NAME, LOGFILE, True)
+log = setup_logging("conjure-up/{}".format(SPELL_NAME), LOGFILE, True)
 
 
 def success(msg):

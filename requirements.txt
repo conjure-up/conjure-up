@@ -11,3 +11,4 @@ petname
 six
 configobj
 progressbar2
+prettytable

@@ -4,6 +4,25 @@ import stat
 from logging.handlers import SysLogHandler, TimedRotatingFileHandler
 
 
+class _log:
+
+    def __init__(self, app, logger):
+        self.app = app
+        self.logger = logger
+
+    def debug(self, msg):
+        self.logger.debug("{}: {}".format(self.app, msg))
+
+    def error(self, msg):
+        self.logger.error("{}: {}".format(self.app, msg))
+
+    def info(self, msg):
+        self.logger.info("{}: {}".format(self.app, msg))
+
+    def exception(self, msg):
+        self.logger.exception("{}: {}".format(self.app, msg))
+
+
 def setup_logging(app, logfile, debug=False):
     cmdslog = TimedRotatingFileHandler(logfile,
                                        when='D',
@@ -30,4 +49,4 @@ def setup_logging(app, logfile, debug=False):
             syslog_h.set_name(app)
             logger.addHandler(syslog_h)
 
-    return logger
+    return _log(app, logger)
