@@ -11,7 +11,7 @@ from conjureup import utils
 from conjureup.ui.widgets.option_widget import OptionWidget
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import menu_btn
+from ubuntui.widgets.buttons import menu_btn, PlainButton
 from ubuntui.widgets.hr import HR
 
 log = logging.getLogger('conjure')
@@ -26,6 +26,7 @@ class ApplicationConfigureView(WidgetWrap):
         self.metadata_controller = metadata_controller
         self.widgets = self.build_widgets()
         self.description_w = Text("")
+        self.showing_all = False
         self.buttons_selected = False
         self.frame = Frame(body=self.build_widgets(),
                            footer=self.build_footer())
@@ -104,7 +105,15 @@ class ApplicationConfigureView(WidgetWrap):
                                    current_value=self.application.num_units,
                                    value_changed_callback=self.handle_scale)
         ws.append(num_unit_ow)
-        ws += self.get_option_widgets()
+        ws += self.get_whitelisted_option_widgets()
+        self.toggle_show_all_button_index = len(ws) + 1
+        self.toggle_show_all_button = PlainButton(
+            "Show Advanced Configuration",
+            self.do_toggle_show_all_config)
+        ws += [HR(),
+               Columns([('weight', 1, Text(" ")),
+                        (36, Color.button_secondary(
+                            self.toggle_show_all_button))])]
         self.pile = Pile(ws)
         return Padding.center_90(Filler(self.pile, valign="top"))
 
@@ -136,8 +145,7 @@ class ApplicationConfigureView(WidgetWrap):
 
         return footer
 
-    def get_option_widgets(self):
-        ws = []
+    def get_whitelisted_option_widgets(self):
         service_id = self.application.csid.as_str_without_rev()
         options = self.metadata_controller.get_options(service_id)
 
@@ -145,7 +153,21 @@ class ApplicationConfigureView(WidgetWrap):
             self.application.service_name)
         hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
         log.info("Hiding options not in the whitelist: {}".format(hidden))
-        for opname in svc_opts_whitelist:
+
+        return self._get_option_widgets(svc_opts_whitelist, options)
+
+    def get_non_whitelisted_option_widgets(self):
+        service_id = self.application.csid.as_str_without_rev()
+        options = self.metadata_controller.get_options(service_id)
+
+        svc_opts_whitelist = utils.get_options_whitelist(
+            self.application.service_name)
+        hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
+        return self._get_option_widgets(hidden, options)
+
+    def _get_option_widgets(self, opnames, options):
+        ws = []
+        for opname in opnames:
             opdict = options[opname]
             cv = self.application.options.get(opname, None)
             ow = OptionWidget(opname,
@@ -156,6 +178,24 @@ class ApplicationConfigureView(WidgetWrap):
                               value_changed_callback=self.handle_edit)
             ws.append(ow)
         return ws
+
+    def do_toggle_show_all_config(self, sender):
+        if not self.showing_all:
+            new_ows = self.get_non_whitelisted_option_widgets()
+            header = Text("Advanced Configuration Options")
+            opts = self.pile.options()
+            self.pile.contents.append((header, opts))
+            for ow in new_ows:
+                self.pile.contents.append((ow, opts))
+            self.toggle_show_all_button.set_label(
+                "Hide Advanced Configuration")
+            self.showing_all = True
+        else:
+            i = self.toggle_show_all_button_index
+            self.pile.contents = self.pile.contents[:i+1]
+            self.toggle_show_all_button.set_label(
+                "Show Advanced Configuration")
+            self.showing_all = False
 
     def handle_edit(self, opname, value):
         self.options_copy[opname] = value
