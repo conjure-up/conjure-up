@@ -131,6 +131,7 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
           "--config image-stream=daily ".format(
               controller, cloud)
     cmd += "--config enable-os-upgrade=false "
+    cmd += "--default-model conjure-up "
     if app.argv.http_proxy:
         cmd += "--config http-proxy={} ".format(app.argv.http_proxy)
     if app.argv.https_proxy:
