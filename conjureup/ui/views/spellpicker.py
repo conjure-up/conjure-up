@@ -1,11 +1,10 @@
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
+from conjureup.ui.views.bundle_readme_view import BundleReadmeView
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
 from ubuntui.widgets.hr import HR
-
-from conjureup.ui.views.bundle_readme_view import BundleReadmeView
 
 
 class SpellPickerWidget(WidgetWrap):
