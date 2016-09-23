@@ -11,7 +11,7 @@ from conjureup import utils
 from conjureup.ui.widgets.option_widget import OptionWidget
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import menu_btn, PlainButton
+from ubuntui.widgets.buttons import PlainButton, menu_btn
 from ubuntui.widgets.hr import HR
 
 log = logging.getLogger('conjure')
@@ -192,7 +192,7 @@ class ApplicationConfigureView(WidgetWrap):
             self.showing_all = True
         else:
             i = self.toggle_show_all_button_index
-            self.pile.contents = self.pile.contents[:i+1]
+            self.pile.contents = self.pile.contents[:i + 1]
             self.toggle_show_all_button.set_label(
                 "Show Advanced Configuration")
             self.showing_all = False
