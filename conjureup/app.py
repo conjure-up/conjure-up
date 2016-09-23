@@ -9,7 +9,6 @@ import textwrap
 import uuid
 
 import yaml
-from prettytable import PrettyTable
 from termcolor import colored
 
 from conjureup import __version__ as VERSION
@@ -26,6 +25,7 @@ from conjureup.download import (
 )
 from conjureup.log import setup_logging
 from conjureup.ui import ConjureUI
+from prettytable import PrettyTable
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 
