@@ -22,12 +22,10 @@ class CloudsController:
             return controllers.use('newcloud').render(app.argv.cloud)
 
         app.current_controller = existing_controller
-        juju.switch_controller(app.current_controller)
         app.current_model = petname.Name()
         utils.info("Creating new juju model named '{}', "
                    "please wait.".format(app.current_model))
-        juju.add_model(app.current_model)
-        juju.switch_model(app.current_model)
+        juju.add_model(app.current_model, app.current_controller)
 
         return controllers.use('deploy').render()
 

@@ -29,7 +29,7 @@ this.USER_TAG = None
 def requires_login(f):
     def _decorator(*args, **kwargs):
         if not this.IS_AUTHENTICATED:
-            login()
+            login(True)
         return f(*args, **kwargs)
     return wraps(f)(_decorator)
 
@@ -92,15 +92,15 @@ def login(force=False):
     if this.IS_AUTHENTICATED is True and not force:
         return
 
-    if not get_current_controller():
+    if app.current_controller is None:
         raise Exception("Unable to determine current controller")
 
-    if not get_current_model():
+    if app.current_model is None:
         raise Exception("Tried to login with no current model set.")
 
-    env = get_controller(get_current_controller())
-    account = get_account(get_current_controller())
-    uuid = get_model(get_current_model())['model-uuid']
+    env = get_controller(app.current_controller)
+    account = get_account(app.current_controller)
+    uuid = get_model(app.current_controller, app.current_model)['model-uuid']
     server = env['api-endpoints'][0]
     this.USER_TAG = "user-{}".format(account['user'].split("@")[0])
     url = os.path.join('wss://', server, 'model', uuid, 'api')
@@ -277,52 +277,6 @@ def get_cloud(name):
     if name in get_clouds().keys():
         return get_clouds()[name]
     raise LookupError("Unable to locate cloud: {}".format(name))
-
-
-def _do_switch(target):
-    try:
-        app.log.debug('calling juju switch {}'.format(target))
-        run('juju-2.0 switch {}'.format(target),
-            shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)
-    except CalledProcessError as e:
-        raise LookupError("Unable to switch: {}".format(e))
-
-
-def switch_model(model):
-    """Switch
-
-    Arguments:
-    model: Model to select
-
-    Returns: Raises exception if model is not a model in the current
-    controller, or if we otherwise failed to switch models.
-    """
-
-    if model not in [m['name'] for m in get_models()['models']]:
-        raise Exception("model '{}' not found in controller '{}'.".format(
-            model, get_current_controller()))
-    _do_switch(model)
-
-
-def switch_controller(controller):
-    """ switch controllers
-
-    Arguments:
-    controller: controller to switch to
-
-    Returns None.
-    Raises exception if failed to switch.
-    """
-    assert controller is not None
-
-    cinfo = get_controllers()
-    prev_controller = cinfo.get('current-controller', None)
-    if prev_controller == controller:
-        return
-    if controller not in cinfo.get('controllers', {}).keys():
-        raise Exception("Could not find controller '{}'".format(controller))
-    _do_switch(controller)
-    login(True)
 
 
 def deploy(bundle):
@@ -559,16 +513,17 @@ def get_accounts():
     raise Exception("Unable to find accounts")
 
 
-def model_by_owner(user):
+def model_by_owner(controller, user):
     """ List model associated with user
 
     Arguments:
     user: username to query
+    controller: controller to work in
 
     Returns:
     Dictionary containing model information for user
     """
-    models = get_models()
+    models = get_models(controller)
     for m in models:
         if m['owner'] == user:
             return m
@@ -578,16 +533,17 @@ def model_by_owner(user):
         ))
 
 
-def get_model(name):
+def get_model(controller, name):
     """ List information for model
 
     Arguments:
     name: model name
+    controller: name of controller to work in
 
     Returns:
     Dictionary of model information
     """
-    models = get_models()['models']
+    models = get_models(controller)['models']
     for m in models:
         if m['name'] == name:
             return m
@@ -595,23 +551,29 @@ def get_model(name):
         "Unable to find model: {}".format(name))
 
 
-def add_model(name):
+def add_model(name, controller):
     """ Adds a model to current controller
+
+    Arguments:
+    controller: controller to add model in
     """
-    sh = run('juju-2.0 add-model {}'.format(name),
+    sh = run('juju-2.0 add-model {} -c {}'.format(name, controller),
              shell=True, stdout=DEVNULL, stderr=PIPE)
     if sh.returncode > 0:
         raise Exception(
             "Unable to create model: {}".format(sh.stderr.decode('utf8')))
 
 
-def get_models():
+def get_models(controller):
     """ List available models
+
+    Arguments:
+    controller: existing controller to get models for
 
     Returns:
     List of known models
     """
-    sh = run('juju-2.0 list-models --format yaml',
+    sh = run('juju-2.0 list-models --format yaml -c {}'.format(controller),
              shell=True, stdout=PIPE, stderr=PIPE)
     if sh.returncode > 0:
         raise LookupError(

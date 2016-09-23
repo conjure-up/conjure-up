@@ -6,7 +6,7 @@
 
 
 import unittest
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import ANY, MagicMock, call, patch
 
 from conjureup.controllers.clouds.gui import CloudsController
 
@@ -91,7 +91,9 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
         self.mock_gcc.return_value = 'testcontroller'
         self.controller.finish('testcloud')
         self.mock_juju.assert_has_calls([
-            call.switch_controller('testcontroller')])
+            ANY,
+            ANY,
+            call.add_model(ANY, 'testcontroller')])
 
     def test_finish_no_controller(self):
         "clouds.finish without existing controller"

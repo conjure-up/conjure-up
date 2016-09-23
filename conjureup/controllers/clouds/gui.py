@@ -16,9 +16,7 @@ class CloudsController:
         app.ui.show_exception_message(exc)
 
     def __add_model(self):
-        juju.switch_controller(app.current_controller)
-        juju.add_model(app.current_model)
-        juju.switch_model(app.current_model)
+        juju.add_model(app.current_model, app.current_controller)
 
     def finish(self, cloud):
         """ Load the Model controller passing along the selected cloud.

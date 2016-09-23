@@ -27,7 +27,7 @@ class DeployController:
         """ runs pre deploy script if exists
         """
         app.env['JUJU_PROVIDERTYPE'] = model_info(
-            juju.get_current_model())['provider-type']
+            app.current_model)['provider-type']
 
         pre_deploy_sh = os.path.join(app.config['spell-dir'],
                                      'steps/00_pre-deploy')
