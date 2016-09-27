@@ -89,6 +89,7 @@ class DeployController:
             app.ui.set_footer(*args)
 
         juju.deploy_service(application,
+                            app.metadata_controller.series,
                             msg_cb=msg_both,
                             exc_cb=partial(self._handle_exception, "ED"))
 
@@ -96,6 +97,7 @@ class DeployController:
         "deploys all un-deployed applications"
         for application in self.undeployed_applications:
             juju.deploy_service(application,
+                                app.metadata_controller.series,
                                 app.ui.set_footer,
                                 partial(self._handle_exception, "ED"))
 

@@ -57,7 +57,9 @@ class DeployController:
         """ handles deployment
         """
         for service in self.applications:
-            juju.deploy_service(service, utils.info,
+            juju.deploy_service(service,
+                                app.metadata_controller.series,
+                                utils.info,
                                 partial(self.__handle_exception, "ED"))
 
         f = juju.set_relations(self.applications,
