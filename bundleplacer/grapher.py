@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
-from functools import lru_cache
 from collections import defaultdict
-from subprocess import run, PIPE
+from functools import lru_cache
+from subprocess import PIPE, run
 
 from bundleplacer.charmstore_api import CharmStoreID
 from bundleplacer.tarjan import strongly_connected_components

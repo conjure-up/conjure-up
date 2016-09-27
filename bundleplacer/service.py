@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+
 import yaml
 
 from bundleplacer.charmstore_api import CharmStoreID

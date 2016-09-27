@@ -13,12 +13,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
 from collections import defaultdict
 from concurrent.futures import Future
 from functools import partial
-import json
-import requests
 from threading import RLock
+
+import requests
 
 from bundleplacer.async import submit
 from bundleplacer.consts import DEFAULT_SERIES

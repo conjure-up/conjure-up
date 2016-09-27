@@ -15,13 +15,10 @@
 
 from enum import Enum
 
-
-from urwid import (AttrMap, Divider, Pile, WidgetWrap,
-                   Padding, Text, Columns)
-
-from ubuntui.widgets.buttons import MenuSelectButton, PlainButton
+from urwid import AttrMap, Columns, Divider, Padding, Pile, Text, WidgetWrap
 
 from bundleplacer.assignmenttype import AssignmentType
+from ubuntui.widgets.buttons import MenuSelectButton, PlainButton
 
 
 class ServiceWidgetState(Enum):

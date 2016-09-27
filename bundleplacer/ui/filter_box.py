@@ -15,8 +15,15 @@
 
 import logging
 
-from urwid import (AttrMap, Columns, connect_signal, Edit, Pile, Text,
-                   WidgetWrap)
+from urwid import (
+    AttrMap,
+    Columns,
+    Edit,
+    Pile,
+    Text,
+    WidgetWrap,
+    connect_signal
+)
 
 log = logging.getLogger('bundleplacer')
 

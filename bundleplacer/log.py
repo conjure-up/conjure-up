@@ -17,10 +17,10 @@
 """
 
 from __future__ import unicode_literals
+
 import logging
 import os
 import pprint
-
 from logging.handlers import TimedRotatingFileHandler
 
 

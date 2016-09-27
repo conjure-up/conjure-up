@@ -14,10 +14,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+
 from urwid import Divider, Pile, Text, WidgetWrap
 
-from bundleplacer.maas import satisfies, MaasMachineStatus
-
+from bundleplacer.maas import MaasMachineStatus, satisfies
 from bundleplacer.ui.filter_box import FilterBox
 from bundleplacer.ui.simple_machine_widget import SimpleMachineWidget
 

@@ -19,9 +19,9 @@ work.
 """
 
 import logging
+import time
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
-import time
 
 log = logging.getLogger("bundleplacer.async")
 

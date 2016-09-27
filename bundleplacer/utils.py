@@ -13,32 +13,40 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from subprocess import (Popen, PIPE, call,
-                        check_call, DEVNULL, CalledProcessError)
+import configparser
+import errno
+import fnmatch
+import itertools
+import json
+import logging
+import os
+import random
+import re
+import shutil
+import string
+import sys
+import time
 from contextlib import contextmanager
+from subprocess import (
+    DEVNULL,
+    PIPE,
+    CalledProcessError,
+    Popen,
+    call,
+    check_call
+)
+from urllib.parse import urlparse
+
+import requests
+import urwid
+import yaml
+from jinja2 import Environment, FileSystemLoader
+
 try:
     from collections import Mapping
 except ImportError:
     Mapping = dict
 
-from jinja2 import Environment, FileSystemLoader
-import os
-import re
-import string
-import random
-import fnmatch
-import logging
-import urwid
-import itertools
-import configparser
-import time
-import sys
-import errno
-import shutil
-import json
-import yaml
-import requests
-from urllib.parse import urlparse
 
 log = logging.getLogger('bundleplacer')
 

@@ -20,7 +20,6 @@ from urwid import Divider, Pile, WidgetWrap
 from bundleplacer.ui.services_list import ServicesList
 from bundleplacer.ui.simple_service_widget import ServiceWidgetState
 
-
 log = logging.getLogger('bundleplacer')
 
 

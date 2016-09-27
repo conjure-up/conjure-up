@@ -15,12 +15,13 @@
 
 import logging
 import os
+
 import yaml
 
 from bundleplacer.assignmenttype import AssignmentType, label_to_atype
+from bundleplacer.charmstore_api import CharmStoreID
 from bundleplacer.consts import DEFAULT_SERIES
 from bundleplacer.service import Service
-from bundleplacer.charmstore_api import CharmStoreID
 
 log = logging.getLogger('bundleplacer')
 
@@ -122,14 +123,18 @@ class Bundle:
         else:
             self._metadata = {}
 
+        self.application_key = 'services'
+        if 'applications' in self._bundle.keys():
+            self.application_key = 'applications'
+
         self._bundle = {k.lower(): v for
                         k, v in self._bundle.items()}
-        for k in ['machines', 'services']:
+        for k in ['machines', self.application_key]:
             for name, val in self._bundle.get(k, {}).items():
                 self._bundle[k][name] = {key.lower(): v for
                                          key, v in val.items()}
 
-        if 'services' not in self._bundle.keys():
+        if self.application_key not in self._bundle.keys():
             raise Exception("Invalid Bundle.")
 
     def add_new_service(self, charm_name, charm_dict, service_name=None,
@@ -137,18 +142,18 @@ class Bundle:
         if service_name is None:
             i = 1
             service_name = charm_name
-            while service_name in self._bundle['services']:
+            while service_name in self._bundle[self.application_key]:
                 service_name = "{}-{}".format(charm_name, i)
                 i += 1
 
         new_dict = {'charm': charm_dict['Id'],
                     'num_units': 0 if is_subordinate else 1}
-        self._bundle['services'][service_name] = new_dict
+        self._bundle[self.application_key][service_name] = new_dict
         return service_name
 
     def remove_service(self, service_name):
-        if service_name in self._bundle['services']:
-            del self._bundle['services'][service_name]
+        if service_name in self._bundle[self.application_key]:
+            del self._bundle[self.application_key][service_name]
 
         for r1, r2 in self._bundle['relations']:
             s1 = r1.split(':')[0]
@@ -157,7 +162,7 @@ class Bundle:
                 self._bundle['relations'].remove([r1, r2])
 
     def scale_service(self, service_name, amount):
-        sd = self._bundle['services'][service_name]
+        sd = self._bundle[self.application_key][service_name]
         new = sd.get('num_units', 0) + amount
         if new > 0:
             sd['num_units'] = new
@@ -188,15 +193,15 @@ class Bundle:
         return None
 
     def set_option(self, service_name, opname, value):
-        sd = self._bundle['services'][service_name]
+        sd = self._bundle[self.application_key][service_name]
         opts = sd.setdefault('options', {})
         opts[opname] = value
 
     @property
     def services(self):
         services = []
-        metadata = self._metadata.get('services', {})
-        bundle_services = self._bundle.get('services', {})
+        metadata = self._metadata.get(self.application_key, {})
+        bundle_services = self._bundle.get(self.application_key, {})
         relations = self._bundle.get('relations', [])
         for servicename, sd in bundle_services.items():
             sm = metadata.get(servicename, {})
@@ -229,23 +234,23 @@ class Bundle:
 
     def clear_machines_and_placement(self):
         self._bundle['machines'] = {}
-        for sname, sd in self._bundle['services'].items():
+        for sname, sd in self._bundle[self.application_key].items():
             if 'to' in sd:
                 del(sd['to'])
 
     @property
     def assignments(self):
         """returns a dict of service_name: [to-strings]"""
-        assert 'services' in self._bundle
+        assert self.application_key in self._bundle
         assignments = {}
-        for sname, sd in self._bundle['services'].items():
+        for sname, sd in self._bundle[self.application_key].items():
             if 'to' in sd:
                 assignments[sname] = sd['to']
         return assignments
 
     def extra_items(self):
         return {k: v for k, v in self._bundle.items()
-                if k not in ['services', 'machines', 'relations']}
+                if k not in [self.application_key, 'machines', 'relations']}
 
     def update(self, other_bundle):
         """Merges one bundle with another, renaming any duplicate service
@@ -257,11 +262,11 @@ class Bundle:
         new_service_names = []
         new_assignments = {}
 
-        assert 'services' in self._bundle
+        assert self.application_key in self._bundle
 
         # check for conflicts that can't be resolved by renaming
         for k, v in self._bundle.items():
-            if k in ['services', 'machines', 'relations']:
+            if k in [self.application_key, 'machines', 'relations']:
                 continue
             if self._bundle[k] != other_bundle._bundle[k]:
                 m = ("Can't merge top level key '{}': "
@@ -270,10 +275,10 @@ class Bundle:
                 raise BundleMergeException(m)
 
         service_renames = keydict()
-        for sname, sd in other_bundle._bundle['services'].items():
+        for sname, sd in other_bundle._bundle[self.application_key].items():
             newname = sname
             idx = 1
-            while newname in self._bundle['services']:
+            while newname in self._bundle[self.application_key]:
                 newname = sname + "-{}".format(idx)
                 idx += 1
             service_renames[sname] = newname
@@ -315,12 +320,12 @@ class Bundle:
             else:
                 return md[parts[0]]
 
-        for sname, sd in other_bundle._bundle['services'].items():
+        for sname, sd in other_bundle._bundle[self.application_key].items():
             new_sd = sd.copy()
             if 'to' in sd:
                 new_sd['to'] = [rename_machine(to, machine_renames)
                                 for to in sd['to']]
-            self._bundle['services'][service_renames[sname]] = new_sd
+            self._bundle[self.application_key][service_renames[sname]] = new_sd
             new_service_names.append(service_renames[sname])
             if 'to' in sd:
                 new_assignments[service_renames[sname]] = new_sd['to']

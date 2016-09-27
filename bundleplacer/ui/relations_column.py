@@ -13,13 +13,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+
 from urwid import AttrMap, Divider, Pile, Text, WidgetWrap
 
-from ubuntui.widgets.buttons import MenuSelectButton
-
 from bundleplacer.relationtype import RelationType
-
-import logging
+from ubuntui.widgets.buttons import MenuSelectButton
 
 log = logging.getLogger('bundleplacer')
 

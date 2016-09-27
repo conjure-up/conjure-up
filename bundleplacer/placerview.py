@@ -18,10 +18,10 @@
 import logging
 
 from urwid import WidgetWrap
-from bundleplacer.ui import PlacementView
-from ubuntui.ev import EventLoop
 
 from bundleplacer.assignmenttype import AssignmentType
+from bundleplacer.ui import PlacementView
+from ubuntui.ev import EventLoop
 
 log = logging.getLogger('bundleplacer')
 

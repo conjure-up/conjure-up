@@ -13,12 +13,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
 from enum import Enum
-from urwid import (CheckBox, connect_signal, Divider, GridFlow,
-                   IntEdit, Pile, Text, WidgetWrap)
+
+from urwid import (
+    CheckBox,
+    Divider,
+    GridFlow,
+    IntEdit,
+    Pile,
+    Text,
+    WidgetWrap,
+    connect_signal
+)
+
 from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.input import StringEditor
-import logging
 
 log = logging.getLogger('bundleplacer')
 

@@ -13,17 +13,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from enum import Enum
 import logging
+from enum import Enum
 
-
-from urwid import (AttrMap, connect_signal, Edit, Padding,
-                   Pile, Text, WidgetWrap)
-
-from ubuntui.ev import EventLoop
-from ubuntui.widgets.buttons import MenuSelectButton
+from urwid import (
+    AttrMap,
+    Edit,
+    Padding,
+    Pile,
+    Text,
+    WidgetWrap,
+    connect_signal
+)
 
 from bundleplacer.charmstore_api import CharmStoreAPI, CharmStoreID
+from ubuntui.ev import EventLoop
+from ubuntui.widgets.buttons import MenuSelectButton
 
 log = logging.getLogger('bundleplacer')
 

@@ -15,12 +15,10 @@
 
 import logging
 
-
 from urwid import AttrMap, Columns, Divider, Pile, Text, WidgetWrap
 
-from ubuntui.widgets.buttons import MenuSelectButton, PlainButton
-
 from bundleplacer.assignmenttype import AssignmentType
+from ubuntui.widgets.buttons import MenuSelectButton, PlainButton
 
 log = logging.getLogger('bundleplacer')
 

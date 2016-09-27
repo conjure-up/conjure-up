@@ -18,7 +18,6 @@
 
 import logging
 
-
 log = logging.getLogger('bundleplacer')
 
 

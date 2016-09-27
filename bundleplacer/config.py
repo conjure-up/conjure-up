@@ -18,8 +18,8 @@
 import datetime
 import logging
 import os
-import yaml
 
+import yaml
 
 log = logging.getLogger('bundleplacer')
 

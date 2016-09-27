@@ -13,18 +13,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict, Counter
 import copy
 import logging
-import yaml
+from collections import Counter, defaultdict
 from multiprocessing import cpu_count
 
-from bundleplacer.maas import (satisfies, MaasMachineStatus)
-from bundleplacer.state import ServiceState
+import yaml
 
 from bundleplacer.assignmenttype import AssignmentType, label_to_atype
 from bundleplacer.bundle import Bundle
-
+from bundleplacer.maas import MaasMachineStatus, satisfies
+from bundleplacer.state import ServiceState
 
 log = logging.getLogger('bundleplacer')
 

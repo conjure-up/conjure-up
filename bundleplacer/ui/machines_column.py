@@ -19,7 +19,6 @@ from urwid import Divider, Pile, Text, WidgetWrap
 
 from bundleplacer.ui.machines_list import MachinesList
 
-
 log = logging.getLogger('bundleplacer')
 
 

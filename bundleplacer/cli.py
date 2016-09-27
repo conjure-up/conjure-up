@@ -18,19 +18,19 @@ import logging
 import os
 import shutil
 import sys
+
 import urwid
 
 from bundleplacer import async
-from bundleplacer.maas import connect_to_maas
-
 from bundleplacer.config import Config
 from bundleplacer.controller import BundleWriter, PlacementController
-from bundleplacer.log import setup_logger
-from bundleplacer.placerview import PlacerView
 from bundleplacer.fixtures.maas import FakeMaasState
+from bundleplacer.log import setup_logger
+from bundleplacer.maas import connect_to_maas
+from bundleplacer.placerview import PlacerView
+from ubuntui.anchors import Footer, Header
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
-from ubuntui.anchors import Header, Footer
 
 log = None
 

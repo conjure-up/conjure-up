@@ -409,7 +409,8 @@ class PlacementView(WidgetWrap):
         def done_cb(f):
             csid = CharmStoreID(charm_dict['Id'])
             id_no_rev = csid.as_str_without_rev()
-            info = self.metadata_controller.get_charm_info(id_no_rev)
+            info = self.metadata_controller.get_charm_info(id_no_rev,
+                                                           lambda _: None)
             is_subordinate = info["Meta"]["charm-metadata"].get(
                 "Subordinate", False)
             service_name = self.placement_controller.add_new_service(

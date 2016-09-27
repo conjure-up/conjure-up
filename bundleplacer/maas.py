@@ -16,19 +16,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+import time
 from collections import Counter
 from enum import Enum
-import logging
 from threading import RLock
-import time
-
-from maasclient.auth import MaasAuth
-from maasclient import MaasClient
 
 from bundleplacer.async import submit
 from bundleplacer.machine import Machine
 from bundleplacer.utils import human_to_mb
-
+from maasclient import MaasClient
+from maasclient.auth import MaasAuth
 
 log = logging.getLogger('bundleplacer')
 
