@@ -346,11 +346,14 @@ def add_machines(machines, msg_cb=None, exc_cb=None):
                         queue_name=JUJU_ASYNC_QUEUE)
 
 
-def deploy_service(service, msg_cb=None, exc_cb=None):
+def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
     """Juju deploy service.
 
     If the service's charm ID doesn't have a revno, will query charm
-    store to get latest revno for the charm
+    store to get latest revno for the charm.
+
+    If the service's charm ID has a series, use that, otherwise use
+    the provided default series.
 
     Arguments:
     service: Service to deploy
@@ -364,6 +367,8 @@ def deploy_service(service, msg_cb=None, exc_cb=None):
 
     @requires_login
     def _deploy_async():
+        if service.csid.series == "":
+            service.csid.series = default_series
         if service.csid.rev == "":
             id_no_rev = service.csid.as_str_without_rev()
             mc = app.metadata_controller
