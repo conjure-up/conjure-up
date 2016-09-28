@@ -403,7 +403,9 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
                 application_to_resource_map[resource['Name']] = pid
             service.resources = application_to_resource_map
 
-        app_params = {"applications": [service.as_deployargs()]}
+        deploy_args = service.as_deployargs()
+        deploy_args['series'] = service.csid.series
+        app_params = {"applications": [deploy_args]}
 
         app.log.debug("Deploying {}: {}".format(service, app_params))
 
