@@ -28,7 +28,7 @@ from bundleplacer.relationtype import RelationType
 
 class CharmStoreID:
 
-    def __init__(self, id_string):
+    def __init__(self, id_string, use_default_series=False):
         if id_string.startswith("cs:"):
             id_string = id_string[3:]
         cs = id_string.split('/')
@@ -37,11 +37,17 @@ class CharmStoreID:
         self.owner = ""
 
         if len(cs) == 1:
-            self.series = DEFAULT_SERIES
+            if use_default_series:
+                self.series = DEFAULT_SERIES
             self.name, self.rev = self.parse_namerev(cs[0])
 
         elif len(cs) == 2:
-            self.series = cs[0]
+            if cs[0].startswith("~"):
+                if use_default_series:
+                    self.series = DEFAULT_SERIES
+                self.owner = cs[0][1:]
+            else:
+                self.series = cs[0]
             self.name, self.rev = self.parse_namerev(cs[1])
 
         elif len(cs) == 3:
