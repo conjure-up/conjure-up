@@ -328,10 +328,11 @@ def add_machines(machines, msg_cb=None, exc_cb=None):
                                m.get('constraints', "")),
                            "jobs": ["JobHostUnits"]}
                           for m in machines]
-        app.log.debug(machine_params)
+        app.log.debug("AddMachines: {}".format(machine_params))
         try:
             machine_response = this.CLIENT.Client(
                 request="AddMachines", params={"params": machine_params})
+            app.log.debug("AddMachines returned {}".format(machine_response))
         except Exception as e:
             if exc_cb:
                 exc_cb(e)
@@ -377,8 +378,10 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
             service.csid = CharmStoreID(info["Id"])
 
         # Add charm to Juju
-        this.CLIENT.Client(request="AddCharm",
-                           params={"url": service.csid.as_str()})
+        app.log.debug("Adding Charm {}".format(service.csid.as_str()))
+        rv = this.CLIENT.Client(request="AddCharm",
+                                params={"url": service.csid.as_str()})
+        app.log.debug("AddCharm returned {}".format(rv))
 
         # We must load any resources prior to deploying
         resources = app.metadata_controller.get_resources(
@@ -388,18 +391,21 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
             params = {"tag": "application-{}".format(service.csid.name),
                       "url": service.csid.as_str(),
                       "resources": resources}
-            app.log.debug("Adding pending resources: {}".format(params))
+            app.log.debug("AddPendingResources: {}".format(params))
             resource_ids = this.CLIENT.Resources(
                 request="AddPendingResources",
                 params=params)
-            app.log.debug("Pending resources IDs: {}".format(resource_ids))
+            app.log.debug("AddPendingResources returned: {}".format(
+                resource_ids))
             application_to_resource_map = {}
             for idx, resource in enumerate(resources):
                 pid = resource_ids['pending-ids'][idx]
                 application_to_resource_map[resource['Name']] = pid
             service.resources = application_to_resource_map
 
-        app_params = {"applications": [service.as_deployargs()]}
+        deploy_args = service.as_deployargs()
+        deploy_args['series'] = service.csid.series
+        app_params = {"applications": [deploy_args]}
 
         app.log.debug("Deploying {}: {}".format(service, app_params))
 
@@ -407,8 +413,9 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
             service.service_name)
         if msg_cb:
             msg_cb("{}".format(deploy_message))
-        this.CLIENT.Application(request="Deploy",
-                                params=app_params)
+        rv = this.CLIENT.Application(request="Deploy",
+                                     params=app_params)
+        app.log.debug("Deploy returned {}".format(rv))
         if msg_cb:
             msg_cb("{} deployed.".format(service.service_name))
 
@@ -439,8 +446,10 @@ def set_relations(services, msg_cb=None, exc_cb=None):
         for a, b in list(relations):
             params = {"Endpoints": [a, b]}
             try:
-                this.CLIENT.Application(request="AddRelation",
-                                        params=params)
+                app.log.debug("AddRelation: {}".format(params))
+                rv = this.CLIENT.Application(request="AddRelation",
+                                             params=params)
+                app.log.debug("AddRelation returned: {}".format(rv))
             except Exception as e:
                 if exc_cb:
                     exc_cb(e)
