@@ -417,7 +417,7 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
                                      params=app_params)
         app.log.debug("Deploy returned {}".format(rv))
         if msg_cb:
-            msg_cb("{} deployed.".format(service.service_name))
+            msg_cb("{}: deployed, installing.".format(service.service_name))
 
     return async.submit(_deploy_async,
                         exc_cb,
