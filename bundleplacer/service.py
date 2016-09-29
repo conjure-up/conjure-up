@@ -28,7 +28,7 @@ class Service:
                  constraints, depends, conflicts,
                  allowed_assignment_types, num_units, options,
                  allow_multi_units, subordinate, required, relations,
-                 placement_spec):
+                 placement_spec, expose):
         self.service_name = service_name
         self.charm_source = charm_source
         self.csid = CharmStoreID(charm_source)
@@ -49,6 +49,7 @@ class Service:
         self.relations = relations
         self.placement_spec = placement_spec
         self.resources = None
+        self.expose = expose
 
     @property
     def summary(self):
@@ -89,6 +90,7 @@ class Service:
         rd = {"charm-url": self.csid.as_str(),
               "application": self.service_name,
               "num-units": self.num_units,
+              "expose": self.expose,
               "constraints": self.constraints}
 
         if self.resources:

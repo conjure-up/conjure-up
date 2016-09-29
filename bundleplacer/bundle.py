@@ -83,7 +83,8 @@ def create_service(servicename, service_dict, servicemeta, relations):
                       subordinate=is_subordinate,
                       required=servicemeta.get('required', True),
                       relations=myrelations,
-                      placement_spec=service_dict.get('to', None))
+                      placement_spec=service_dict.get('to', None),
+                      expose=service_dict.get('expose', False))
 
     # Make sure to map any strings to an assignment type enum
     if any(isinstance(atype, str)
