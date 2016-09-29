@@ -419,6 +419,14 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
         if msg_cb:
             msg_cb("{}: deployed, installing.".format(service.service_name))
 
+        if service.expose:
+            expose_params = {"application": service.service_name}
+            app.log.debug("Expose: {}".format(expose_params))
+            rv = this.CLIENT.Application(
+                    request="Expose",
+                    params=expose_params)
+            app.log.debug("Expose returned: {}".format(rv))
+
     return async.submit(_deploy_async,
                         exc_cb,
                         queue_name=JUJU_ASYNC_QUEUE)
