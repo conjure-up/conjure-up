@@ -11,9 +11,14 @@ def set_env(inputs):
     """ Sets the application environment with the key/value from the steps
     input so they can be made available in the step shell scripts
     """
+    app.log.debug("Set_env inputs: {}".format(inputs))
     for i in inputs:
         env_key = i['key'].upper()
-        app.env[env_key] = i['input']
+        try:
+            input_key = i['input']
+        except KeyError:
+            input_key = i.get('default', '')
+        app.env[env_key] = input_key
         app.log.debug("Setting environment var: {}={}".format(
             env_key,
             app.env[env_key]))
@@ -65,10 +70,8 @@ def do_step(step_model, step_widget, message_cb, gui=False):
     # exposed in future processing tasks
     app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
 
-    if gui:
-        # These environment variables must be set on the CLI or exported
-        # in shell
-        set_env(step_model.additional_input)
+    # Set environment variables so they can be accessed from the step scripts
+    set_env(step_model.additional_input)
 
     if not os.access(step_model.path, os.X_OK):
         app.log.error("Step {} not executable".format(step_model.path))

@@ -98,6 +98,16 @@ def _start(*args, **kwargs):
     utils.setup_metadata_controller()
 
     if os.getenv('CONJUREUP_STATUS_ONLY'):
+        # Developer tool only
+        # format is: CONJUREUP_STATUS_ONLY=1/<controller>/<model>
+        try:
+            _, controller, model = os.getenv(
+                'CONJUREUP_STATUS_ONLY').split('/')
+            app.current_controller = controller
+            app.current_model = model
+        except ValueError:
+            utils.error("Unable to parse the controller and model to access")
+            sys.exit(1)
         controllers.use('deploystatus').render()
         return
 
