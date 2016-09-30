@@ -13,6 +13,8 @@ from conjureup.ui.views.steps import StepsView
 from conjureup.ui.widgets.step import StepWidget
 from ubuntui.ev import EventLoop
 
+ASYNC_STEPS_QUEUE = 'async-steps-queue'
+
 
 class StepsController:
 
@@ -63,24 +65,26 @@ class StepsController:
 
         # Set next button focus here now that the step is complete.
         self.view.steps.popleft()
+
         if len(self.view.steps) > 0:
             next_step = self.view.steps[0]
             next_step.generate_additional_input()
             self.view.step_pile.focus_position = self.view.step_pile.focus_position + 1  # noqa
         else:
             app.log.debug(
-                "End of step list setting the view "
-                "summary button in focus.")
-            index = self.view.current_summary_button_index
-            app.log.debug("Next focused button: {}".format(index))
-            self.view.step_pile.focus_position = index
+                "End of step list waiting for last step to complete "
+                "then rendering summary.")
+            async.submit(partial(self.finish, None, None, done=True),
+                         partial(self.__handle_exception, 'E002'),
+                         queue_name=ASYNC_STEPS_QUEUE)
 
         future = async.submit(partial(common.do_step,
                                       step_model,
                                       step_widget,
                                       app.ui.set_footer,
                                       gui=True),
-                              partial(self.__handle_exception, 'E002'))
+                              partial(self.__handle_exception, 'E002'),
+                              queue_name=ASYNC_STEPS_QUEUE)
         future.add_done_callback(self.get_result)
 
     def update(self, *args):
