@@ -51,6 +51,14 @@ class StepsController:
         app.log.debug("Storing step result for: {}={}".format(
             step_model.title, step_model.result))
         self.results[step_model.title] = step_model.result
+        if len(self.view.steps) == 0:
+            app.log.debug(
+                "End of step list waiting for last step to complete "
+                "then rendering summary.")
+
+            async.submit(partial(self.finish, None, None, done=True),
+                         partial(self.__handle_exception, 'E002'),
+                         queue_name=ASYNC_STEPS_QUEUE)
 
     def finish(self, step_model, step_widget, done=False):
         """ handles processing step with input data
@@ -70,13 +78,6 @@ class StepsController:
             next_step = self.view.steps[0]
             next_step.generate_additional_input()
             self.view.step_pile.focus_position = self.view.step_pile.focus_position + 1  # noqa
-        else:
-            app.log.debug(
-                "End of step list waiting for last step to complete "
-                "then rendering summary.")
-            async.submit(partial(self.finish, None, None, done=True),
-                         partial(self.__handle_exception, 'E002'),
-                         queue_name=ASYNC_STEPS_QUEUE)
 
         future = async.submit(partial(common.do_step,
                                       step_model,
