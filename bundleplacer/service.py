@@ -90,7 +90,6 @@ class Service:
         rd = {"charm-url": self.csid.as_str(),
               "application": self.service_name,
               "num-units": self.num_units,
-              "expose": self.expose,
               "constraints": self.constraints}
 
         if self.resources:
