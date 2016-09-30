@@ -206,8 +206,11 @@ class Bundle:
         relations = self._bundle.get('relations', [])
         for servicename, sd in bundle_services.items():
             sm = metadata.get(servicename, {})
-            services.append(create_service(servicename, sd,
-                                           sm, relations))
+            service = create_service(servicename, sd,
+                                     sm, relations)
+            if service.csid.series == "":
+                service.csid.series = self.series
+            services.append(service)
         return services
 
     @property
