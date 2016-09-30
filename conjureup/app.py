@@ -206,14 +206,17 @@ def main():
     spells_dir = app.argv.spells_dir
 
     app.config['spells-dir'] = spells_dir
+    spells_registry_branch = os.getenv('CONJUREUP_REGISTRY_BRANCH', 'master')
     if not os.path.exists(spells_dir):
         utils.info("No spells found, syncing from registry, please wait.")
-        download_or_sync_registry(app.global_config['registry']['repo'],
-                                  spells_dir)
+        download_or_sync_registry(
+            app.global_config['registry']['repo'],
+            spells_dir, branch=spells_registry_branch)
     else:
         app.log.debug("Refreshing spell registry")
-        download_or_sync_registry(app.global_config['registry']['repo'],
-                                  spells_dir, True)
+        download_or_sync_registry(
+            app.global_config['registry']['repo'],
+            spells_dir, update=True, branch=spells_registry_branch)
 
     spells_index_path = os.path.join(app.config['spells-dir'],
                                      'spells-index.yaml')

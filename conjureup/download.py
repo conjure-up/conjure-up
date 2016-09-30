@@ -156,21 +156,31 @@ def get_remote_url(path):
     return None
 
 
-def download_or_sync_registry(remote_registry, spells_dir, update=False):
+def download_or_sync_registry(remote_registry, spells_dir,
+                              update=False, branch='master'):
     """ If first time run this git clones the spell registry, otherwise
     will pull the latest spells down.
+
+    To specify a different branch to use you must set the environment variable
+    CONJUREUP_REGISTRY_BRANCH=<branchname>. This should be used for testing
+    new spells before they make it into the master branch.
 
     Arguments:
     remote_registry: git location of spells registry
     spells_dir: cache location of local spells directory
+    update: update the source directory
+    branch: switch to branch
 
     Returns:
     True if successful, False otherwise
     """
     if not os.path.exists(spells_dir):
-        run("git clone -q --depth 1 {} {}".format(remote_registry, spells_dir),
+        run("git clone -q --depth 1 --no-single-branch {} {}".format(
+            remote_registry, spells_dir),
             shell=True, check=True)
     if os.path.exists(spells_dir) and update:
         run("cd {} && git pull -q".format(spells_dir),
             shell=True, check=True)
+    run("cd {} && git checkout -q {}".format(spells_dir, branch),
+        shell=True)
     return False
