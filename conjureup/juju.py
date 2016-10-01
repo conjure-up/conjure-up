@@ -368,8 +368,7 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
 
     @requires_login
     def _deploy_async():
-        if service.csid.series == "":
-            service.csid.series = default_series
+
         if service.csid.rev == "":
             id_no_rev = service.csid.as_str_without_rev()
             mc = app.metadata_controller
