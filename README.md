@@ -74,7 +74,7 @@ on your keyboard? Not a problem, easily get your **big software** up and running
 with all the sensible defaults in place.
 
 ```
-$ conjure-up observable-kubernetes aws
+$ conjure-up canonical-kubernetes aws
 ```
 
 # authors
