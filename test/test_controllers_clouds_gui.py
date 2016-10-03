@@ -16,10 +16,6 @@ class CloudsGUIRenderTestCase(unittest.TestCase):
     def setUp(self):
         self.controller = CloudsController()
 
-        self.utils_patcher = patch(
-            'conjureup.controllers.clouds.gui.utils')
-        self.mock_utils = self.utils_patcher.start()
-
         self.finish_patcher = patch(
             'conjureup.controllers.clouds.gui.CloudsController.finish')
         self.mock_finish = self.finish_patcher.start()
@@ -37,7 +33,6 @@ class CloudsGUIRenderTestCase(unittest.TestCase):
         self.mock_list_clouds.return_value = ['test1', 'test2']
 
     def tearDown(self):
-        self.utils_patcher.stop()
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
@@ -57,10 +52,6 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.clouds.gui.controllers')
         self.mock_controllers = self.controllers_patcher.start()
 
-        self.utils_patcher = patch(
-            'conjureup.controllers.clouds.gui.utils')
-        self.mock_utils = self.utils_patcher.start()
-
         self.render_patcher = patch(
             'conjureup.controllers.clouds.gui.CloudsController.render')
         self.mock_render = self.render_patcher.start()
@@ -70,38 +61,14 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
         self.mock_app.ui = MagicMock(name="app.ui")
 
         self.cloudname = 'testcloudname'
-        self.juju_patcher = patch(
-            'conjureup.controllers.clouds.gui.juju')
-        self.mock_juju = self.juju_patcher.start()
-
-        self.gcc_patcher = patch(
-            'conjureup.controllers.clouds.gui.juju.get_controller_in_cloud')
-        self.mock_gcc = self.gcc_patcher.start()
-
-        self.petname_patcher = patch(
-            'conjureup.controllers.clouds.gui.petname')
-        self.mock_petname = self.petname_patcher.start()
 
     def tearDown(self):
         self.controllers_patcher.stop()
-        self.utils_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
-        self.juju_patcher.stop()
-        self.gcc_patcher.stop()
-        self.mock_petname.stop()
-
-    def test_finish_w_controller(self):
-        "clouds.finish with an existing controller"
-        self.mock_gcc.return_value = 'testcontroller'
-        self.mock_petname.Name.return_value = 'moo'
-        self.controller.finish('testcloud')
-        self.mock_juju.add_model.assert_called_once_with('moo',
-                                                         'testcontroller')
 
     def test_finish_no_controller(self):
         "clouds.finish without existing controller"
-        self.mock_gcc.return_value = None
         self.controller.finish('testcloud')
         self.mock_controllers.use.assert_has_calls([
             call('newcloud'), call().render('testcloud')])
