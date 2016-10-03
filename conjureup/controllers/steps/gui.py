@@ -56,9 +56,11 @@ class StepsController:
                 "End of step list waiting for last step to complete "
                 "then rendering summary.")
 
-            async.submit(partial(self.finish, None, None, done=True),
-                         partial(self.__handle_exception, 'E002'),
-                         queue_name=ASYNC_STEPS_QUEUE)
+            self.view.step_pile.contents.append(
+                (self.view.buttons(),
+                 self.view.step_pile.options()))
+            index = self.view.current_summary_button_index
+            self.view.step_pile.focus_position = index
 
     def finish(self, step_model, step_widget, done=False):
         """ handles processing step with input data
