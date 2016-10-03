@@ -49,6 +49,16 @@ class StepsController:
         app.log.debug("Storing step result for: {}={}".format(
             step_model.title, step_model.result))
         self.results[step_model.title] = step_model.result
+        if len(self.view.steps) == 0:
+            app.log.debug(
+                "End of step list waiting for last step to complete "
+                "then rendering summary.")
+
+            self.view.step_pile.contents.append(
+                (self.view.buttons(),
+                 self.view.step_pile.options()))
+            index = self.view.current_summary_button_index
+            self.view.step_pile.focus_position = index
 
     def finish(self, step_model, step_widget, done=False):
         """ handles processing step with input data
@@ -63,17 +73,11 @@ class StepsController:
 
         # Set next button focus here now that the step is complete.
         self.view.steps.popleft()
+
         if len(self.view.steps) > 0:
             next_step = self.view.steps[0]
             next_step.generate_additional_input()
             self.view.step_pile.focus_position = self.view.step_pile.focus_position + 1  # noqa
-        else:
-            app.log.debug(
-                "End of step list setting the view "
-                "summary button in focus.")
-            index = self.view.current_summary_button_index
-            app.log.debug("Next focused button: {}".format(index))
-            self.view.step_pile.focus_position = index
 
         future = async.submit(partial(common.do_step,
                                       step_model,
