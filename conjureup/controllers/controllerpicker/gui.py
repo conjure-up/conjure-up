@@ -18,10 +18,10 @@ class ControllerPicker:
         juju.add_model(app.current_model, app.current_controller)
 
     def finish(self, controller):
-        utils.pollinate(app.session_id, 'CS')
         if controller is None:
             return controllers.use('clouds').render()
 
+        utils.pollinate(app.session_id, 'CS')
         app.current_controller = controller
         app.current_model = petname.Name()
         async.submit(self.__add_model,
