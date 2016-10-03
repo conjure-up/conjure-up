@@ -13,8 +13,6 @@ from conjureup.ui.views.steps import StepsView
 from conjureup.ui.widgets.step import StepWidget
 from ubuntui.ev import EventLoop
 
-ASYNC_STEPS_QUEUE = 'async-steps-queue'
-
 
 class StepsController:
 
@@ -86,8 +84,7 @@ class StepsController:
                                       step_widget,
                                       app.ui.set_footer,
                                       gui=True),
-                              partial(self.__handle_exception, 'E002'),
-                              queue_name=ASYNC_STEPS_QUEUE)
+                              partial(self.__handle_exception, 'E002'))
         future.add_done_callback(self.get_result)
 
     def update(self, *args):
