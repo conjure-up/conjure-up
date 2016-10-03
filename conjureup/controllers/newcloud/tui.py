@@ -71,9 +71,18 @@ class NewCloudController:
                           "assuming LXD is configured.")
 
         utils.info("Bootstrapping Juju controller")
-        juju.bootstrap(controller=app.current_controller,
-                       cloud=self.cloud,
-                       credential=common.try_get_creds(self.cloud))
+        p = juju.bootstrap(controller=app.current_controller,
+                           cloud=self.cloud,
+                           credential=common.try_get_creds(self.cloud))
+        if p.returncode != 0:
+            pathbase = os.path.join(
+                app.config['spell-dir'],
+                '{}-bootstrap').format(app.current_controller)
+            with open(pathbase + ".err") as errf:
+                utils.error("Error bootstrapping controller: "
+                            "{}".format("".join(errf.readlines())))
+            sys.exit(1)
+
         self.do_post_bootstrap()
         self.finish()
 
