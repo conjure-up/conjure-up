@@ -79,8 +79,12 @@ def parse_options(argv):
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
 
     parser.add_argument('cloud', nargs='?',
-                        help="Name of a Juju controller type to "
-                        "target, such as ['aws', 'localhost' ...]")
+                        help="Name of a Juju cloud to "
+                        "target, such as ['aws', 'localhost' ...]. "
+                        "If no controller exists there, one may be created")
+    parser.add_argument('controller', nargs='?',
+                        help="Name of a juju controller to target. "
+                        "If not provided, a new one is created.")
     return parser.parse_args(argv)
 
 

@@ -16,10 +16,20 @@ class CloudsController:
                 os.execl("/usr/share/conjure-up/run-lxd-config",
                          "/usr/share/conjure-up/run-lxd-config",
                          back)
+        if app.argv.controller:
+            existing_controller = app.argv.controller
+            if juju.get_controller(existing_controller) is None:
+                utils.error("Specified controller '{}' "
+                            "could not be found in cloud '{}'.".format(
+                                existing_controller, app.argv.cloud))
+                sys.exit(1)
+        else:
+            existing_controller = juju.get_controller_in_cloud(app.argv.cloud)
 
-        existing_controller = juju.get_controller_in_cloud(app.argv.cloud)
         if existing_controller is None:
             return controllers.use('newcloud').render(app.argv.cloud)
+
+        utils.info("Using controller '{}'".format(existing_controller))
 
         app.current_controller = existing_controller
         app.current_model = petname.Name()
