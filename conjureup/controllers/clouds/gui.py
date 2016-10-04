@@ -1,6 +1,10 @@
 from conjureup import controllers
 from conjureup.app_config import app
-from conjureup.controllers.clouds.common import list_clouds
+from conjureup.controllers.clouds.common import (
+    list_clouds,
+    parse_blacklist,
+    parse_whitelist
+)
 from conjureup.ui.views.cloud import CloudView
 
 
@@ -28,7 +32,9 @@ class CloudsController:
             "Please select from a list of available clouds")
         view = CloudView(app,
                          clouds,
-                         self.finish)
+                         blacklist=parse_blacklist,
+                         whitelist=parse_whitelist,
+                         cb=self.finish)
 
         app.ui.set_header(
             title="Choose a Cloud",

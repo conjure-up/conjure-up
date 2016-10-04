@@ -8,10 +8,12 @@ from ubuntui.widgets.hr import HR
 
 class CloudView(WidgetWrap):
 
-    def __init__(self, app, clouds, cb):
+    def __init__(self, app, clouds, blacklist=None, whitelist=None, cb=None):
         self.app = app
         self.cb = cb
         self.clouds = clouds
+        self.blacklist = blacklist
+        self.whitelist = whitelist
         self.config = self.app.config
         self.buttons_pile_selected = False
         self.frame = Frame(body=self._build_widget(),
@@ -56,10 +58,14 @@ class CloudView(WidgetWrap):
 
     def _build_widget(self):
         total_items = []
-        if len(self.clouds) > 0:
+        clouds = [x for x in self.clouds if 'localhost' != x]
+        if len(clouds) > 0:
             total_items.append(Text("Choose a Cloud"))
             total_items.append(HR())
             for item in self.clouds:
+                # Skip localhost for public cloud
+                if item == 'localhost':
+                    continue
                 total_items.append(
                     Color.body(
                         menu_btn(label=item,
@@ -70,14 +76,21 @@ class CloudView(WidgetWrap):
             total_items.append(Padding.line_break(""))
         total_items.append(Text("Configure a New Cloud"))
         total_items.append(HR())
-        for item in ['localhost', 'maas']:
-            total_items.append(
-                Color.body(
-                    menu_btn(label=item,
-                             on_press=self.submit),
-                    focus_map='menu_button focus'
+        if self.whitelist():
+            new_clouds = self.whitelist()
+        elif self.blacklist():
+            new_clouds = set(['localhost', 'maas']) ^ set(self.blacklist())
+        else:
+            new_clouds = ['localhost', 'maas']
+        for item in new_clouds:
+            if item not in self.blacklist() or item in self.whitelist():
+                total_items.append(
+                    Color.body(
+                        menu_btn(label=item,
+                                 on_press=self.submit),
+                        focus_map='menu_button focus'
+                    )
                 )
-            )
         return Padding.center_80(Filler(Pile(total_items), valign='top'))
 
     def submit(self, result):
