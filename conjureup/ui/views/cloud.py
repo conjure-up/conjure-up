@@ -62,10 +62,7 @@ class CloudView(WidgetWrap):
         if len(clouds) > 0:
             total_items.append(Text("Choose a Cloud"))
             total_items.append(HR())
-            for item in self.clouds:
-                # Skip localhost for public cloud
-                if item == 'localhost':
-                    continue
+            for item in clouds:
                 total_items.append(
                     Color.body(
                         menu_btn(label=item,
