@@ -1,5 +1,9 @@
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
+from conjureup.controllers.clouds.common import (
+    parse_blacklist,
+    parse_whitelist
+)
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
@@ -8,12 +12,12 @@ from ubuntui.widgets.hr import HR
 
 class CloudView(WidgetWrap):
 
-    def __init__(self, app, clouds, blacklist=None, whitelist=None, cb=None):
+    def __init__(self, app, clouds, cb=None):
         self.app = app
         self.cb = cb
         self.clouds = clouds
-        self.blacklist = blacklist
-        self.whitelist = whitelist
+        self.blacklist = parse_blacklist()
+        self.whitelist = parse_whitelist()
         self.config = self.app.config
         self.buttons_pile_selected = False
         self.frame = Frame(body=self._build_widget(),
