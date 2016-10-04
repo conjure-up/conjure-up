@@ -37,6 +37,7 @@ class StepWidget(WidgetWrap):
         self.result = Text(step_model.result)
         self.output = Text(('info_minor', ''))
         self.icon = Text(("info_minor", "\N{BALLOT BOX}"))
+        self.has_error = False
 
         self.additional_input = []
         if len(step_model.additional_input) > 0:
@@ -44,7 +45,7 @@ class StepWidget(WidgetWrap):
                 widget = {
                     "label": Text(('body', i['label'])),
                     "key": i['key'],
-                    "input": self.INPUT_TYPES.get(i['type'])
+                    "input": self.INPUT_TYPES.get(i['type']),
                 }
                 if 'default' in i:
                     widget['input'] = StringEditor(default=i['default'])
@@ -85,6 +86,10 @@ class StepWidget(WidgetWrap):
     def set_description(self, description, color='info_minor'):
         self.description.set_text(
             (color, description))
+
+    def set_error(self, error_msg):
+        self.error.set_text(
+            ('error_major', error_msg))
 
     def set_icon_state(self, result_code):
         """ updates status icon
@@ -175,6 +180,19 @@ class StepWidget(WidgetWrap):
         self.step_pile.focus_position = self.current_button_index
 
     def submit(self, btn):
+        for i in self.additional_input:
+            if i['input'] and (
+                    i['input'].value is None and self.model.required):
+                self.app.log.debug("Missing default: {}".format(i))
+                self.has_error = True
+                self.step_pile.contents.insert(
+                    1,
+                    (Text(('error_major', 'Missing required input.')),
+                     self.step_pile.options()))
+                return
         self.set_icon_state('waiting')
+        if self.has_error:
+            del self.step_pile.contents[1]
+            self.has_error = False
         self.clear_button()
         self.cb(self.model, self)
