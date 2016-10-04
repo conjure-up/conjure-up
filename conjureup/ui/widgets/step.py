@@ -87,10 +87,6 @@ class StepWidget(WidgetWrap):
         self.description.set_text(
             (color, description))
 
-    def set_error(self, error_msg):
-        self.error.set_text(
-            ('error_major', error_msg))
-
     def set_icon_state(self, result_code):
         """ updates status icon
 
