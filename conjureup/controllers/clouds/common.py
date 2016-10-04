@@ -30,10 +30,6 @@ def list_clouds():
     """
     clouds = set(juju.get_clouds().keys())
 
-    # Remove localhost as this will be added in the configure a new
-    # cloud section.
-    clouds.remove('localhost')
-
     if len(parse_whitelist()) > 0:
         whitelist = set(parse_whitelist())
         return sorted(list(clouds & whitelist))

@@ -1,5 +1,9 @@
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
+from conjureup.controllers.clouds.common import (
+    parse_blacklist,
+    parse_whitelist
+)
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
@@ -8,10 +12,12 @@ from ubuntui.widgets.hr import HR
 
 class CloudView(WidgetWrap):
 
-    def __init__(self, app, clouds, cb):
+    def __init__(self, app, clouds, cb=None):
         self.app = app
         self.cb = cb
         self.clouds = clouds
+        self.blacklist = parse_blacklist()
+        self.whitelist = parse_whitelist()
         self.config = self.app.config
         self.buttons_pile_selected = False
         self.frame = Frame(body=self._build_widget(),
@@ -56,10 +62,11 @@ class CloudView(WidgetWrap):
 
     def _build_widget(self):
         total_items = []
-        if len(self.clouds) > 0:
+        clouds = [x for x in self.clouds if 'localhost' != x]
+        if len(clouds) > 0:
             total_items.append(Text("Choose a Cloud"))
             total_items.append(HR())
-            for item in self.clouds:
+            for item in clouds:
                 total_items.append(
                     Color.body(
                         menu_btn(label=item,
@@ -70,7 +77,13 @@ class CloudView(WidgetWrap):
             total_items.append(Padding.line_break(""))
         total_items.append(Text("Configure a New Cloud"))
         total_items.append(HR())
-        for item in ['localhost', 'maas']:
+        if self.whitelist:
+            new_clouds = self.whitelist
+        elif self.blacklist:
+            new_clouds = set(['localhost', 'maas']) ^ set(self.blacklist)
+        else:
+            new_clouds = ['localhost', 'maas']
+        for item in new_clouds:
             total_items.append(
                 Color.body(
                     menu_btn(label=item,

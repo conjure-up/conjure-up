@@ -28,7 +28,7 @@ class CloudsController:
             "Please select from a list of available clouds")
         view = CloudView(app,
                          clouds,
-                         self.finish)
+                         cb=self.finish)
 
         app.ui.set_header(
             title="Choose a Cloud",

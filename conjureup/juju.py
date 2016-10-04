@@ -422,8 +422,8 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
             expose_params = {"application": service.service_name}
             app.log.debug("Expose: {}".format(expose_params))
             rv = this.CLIENT.Application(
-                    request="Expose",
-                    params=expose_params)
+                request="Expose",
+                params=expose_params)
             app.log.debug("Expose returned: {}".format(rv))
 
     return async.submit(_deploy_async,
