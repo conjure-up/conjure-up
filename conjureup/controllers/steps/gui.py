@@ -24,7 +24,6 @@ class StepsController:
         self.step_metas = common.get_step_metadata_filenames(
             self.bundle_scripts)
 
-        self.summary_button_exposed = False
         self.results = OrderedDict()
 
     def __handle_exception(self, tag, exc):
@@ -50,8 +49,8 @@ class StepsController:
         app.log.debug("Storing step result for: {}={}".format(
             step_model.title, step_model.result))
         self.results[step_model.title] = step_model.result
-        if len(self.view.steps) == 0 and not self.summary_button_exposed:
-            self.summary_button_exposed = True
+        self.n_completed_steps += 1
+        if self.n_completed_steps == len(self.all_step_widgets):
             app.log.debug(
                 "End of step list waiting for last step to complete "
                 "then rendering summary.")
@@ -101,7 +100,7 @@ class StepsController:
             return
 
         step_widgets = deque()
-
+        self.n_completed_steps = 0
         for step_meta_path in self.step_metas:
             step_ex_path, ext = path.splitext(step_meta_path)
             if not path.isfile(step_ex_path) or \
