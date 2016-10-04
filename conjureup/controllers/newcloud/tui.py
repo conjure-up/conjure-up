@@ -21,7 +21,8 @@ class NewCloudController:
         """ runs post bootstrap script if exists
         """
         # Set provider type for post-bootstrap
-        app.env['JUJU_PROVIDERTYPE'] = model_info('default')['provider-type']
+        info = model_info(app.current_model)
+        app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
 
         post_bootstrap_sh = os.path.join(app.config['spell-dir'],
                                          'steps/00_post-bootstrap')
