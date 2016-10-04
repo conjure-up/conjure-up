@@ -100,7 +100,6 @@ def do_step(step_model, step_widget, message_cb, gui=False):
         raise Exception(result['message'])
 
     step_model.result = result['message']
-    message_cb("{} done, result: {}".format(step_model.title,
-                                            step_model.result))
+    message_cb("{} completed.".format(step_model.title))
 
     return (step_model, step_widget)
