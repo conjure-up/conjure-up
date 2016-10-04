@@ -80,14 +80,13 @@ class CloudView(WidgetWrap):
         else:
             new_clouds = ['localhost', 'maas']
         for item in new_clouds:
-            if item not in self.blacklist() or item in self.whitelist():
-                total_items.append(
-                    Color.body(
-                        menu_btn(label=item,
-                                 on_press=self.submit),
-                        focus_map='menu_button focus'
-                    )
+            total_items.append(
+                Color.body(
+                    menu_btn(label=item,
+                             on_press=self.submit),
+                    focus_map='menu_button focus'
                 )
+            )
         return Padding.center_80(Filler(Pile(total_items), valign='top'))
 
     def submit(self, result):
