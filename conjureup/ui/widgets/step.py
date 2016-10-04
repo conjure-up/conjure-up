@@ -45,7 +45,7 @@ class StepWidget(WidgetWrap):
                 widget = {
                     "label": Text(('body', i['label'])),
                     "key": i['key'],
-                    "input": self.INPUT_TYPES.get(i['type']),
+                    "input": self.INPUT_TYPES.get(i['type'])
                 }
                 if 'default' in i:
                     widget['input'] = StringEditor(default=i['default'])
