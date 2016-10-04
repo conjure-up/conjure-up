@@ -32,9 +32,15 @@ class NewCloudController:
             # bootstrap killed via user signal, we're quitting
             return
         if result.returncode > 0:
-            err = result.stderr.read().decode()
-            app.log.error(err)
-            return self.__handle_exception(Exception("error "))
+            pathbase = os.path.join(
+                app.config['spell-dir'],
+                '{}-bootstrap').format(app.current_controller)
+
+            with open(pathbase + ".err") as errf:
+                err = "\n".join(errf.readlines())
+                app.log.error(err)
+            e = Exception("Bootstrap error: {}".format(err))
+            return self.__handle_exception(e)
 
         utils.pollinate(app.session_id, 'J004')
         EventLoop.remove_alarms()
@@ -128,8 +134,6 @@ class NewCloudController:
         utils.pollinate(app.session_id, 'CA')
 
         self.__do_bootstrap(credential=credentials_key)
-
-        return controllers.use('deploy').render()
 
     def render(self, cloud):
         """ Render
