@@ -73,10 +73,10 @@ class CloudView(WidgetWrap):
             total_items.append(Padding.line_break(""))
         total_items.append(Text("Configure a New Cloud"))
         total_items.append(HR())
-        if self.whitelist():
-            new_clouds = self.whitelist()
-        elif self.blacklist():
-            new_clouds = set(['localhost', 'maas']) ^ set(self.blacklist())
+        if self.whitelist:
+            new_clouds = self.whitelist
+        elif self.blacklist:
+            new_clouds = set(['localhost', 'maas']) ^ set(self.blacklist)
         else:
             new_clouds = ['localhost', 'maas']
         for item in new_clouds:

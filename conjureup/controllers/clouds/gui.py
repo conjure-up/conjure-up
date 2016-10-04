@@ -30,10 +30,12 @@ class CloudsController:
         excerpt = app.config.get(
             'description',
             "Please select from a list of available clouds")
+        blacklist = parse_blacklist()
+        whitelist = parse_whitelist()
         view = CloudView(app,
                          clouds,
-                         blacklist=parse_blacklist,
-                         whitelist=parse_whitelist,
+                         blacklist=blacklist,
+                         whitelist=whitelist,
                          cb=self.finish)
 
         app.ui.set_header(
