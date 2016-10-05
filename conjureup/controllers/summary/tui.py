@@ -1,6 +1,8 @@
 import os
+
 from prettytable import PrettyTable
 from termcolor import colored
+
 from conjureup import utils
 from conjureup.app_config import app
 from conjureup.controllers.summary import common
