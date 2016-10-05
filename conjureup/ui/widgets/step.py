@@ -175,6 +175,15 @@ class StepWidget(WidgetWrap):
         self.step_pile.focus_position = self.current_button_index
 
     def submit(self, btn):
+        for i in self.additional_input:
+            if i['input'] and (
+                    i['input'].value is None and self.model.required):
+                self.app.log.debug("Missing required input: {}".format(i))
+                current_label = i['label'].get_text()[0]
+                i['label'].set_text(
+                    ('error_major',
+                     "{}: Missing required input.".format(current_label)))
+                return
         self.set_icon_state('waiting')
         self.clear_button()
         self.cb(self.model, self)
