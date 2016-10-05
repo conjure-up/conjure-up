@@ -75,7 +75,8 @@ class NewCloudController:
         # Set our provider type environment var so that it is
         # exposed in future processing tasks
         app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
-
+        app.env['JUJU_CONTROLLER'] = app.current_controller
+        app.env['JUJU_MODEL'] = app.current_model
         _post_bootstrap_sh = path.join(app.config['spell-dir'],
                                        'steps/00_post-bootstrap')
         app.log.debug(

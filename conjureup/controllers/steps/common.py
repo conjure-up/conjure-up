@@ -70,6 +70,10 @@ def do_step(step_model, step_widget, message_cb, gui=False):
     # exposed in future processing tasks
     app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
 
+    # Set current juju controller and model
+    app.env['JUJU_CONTROLLER'] = app.current_controller
+    app.env['JUJU_MODEL'] = app.current_model
+
     # Set environment variables so they can be accessed from the step scripts
     set_env(step_model.additional_input)
 

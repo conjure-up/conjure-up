@@ -1,4 +1,4 @@
-import logging
+import os
 import time
 from subprocess import PIPE, CalledProcessError
 
@@ -6,17 +6,20 @@ import yaml
 
 from conjureup.utils import run
 
-from .writer import fail, success
+from .writer import fail, log, success
 
-log = logging.getLogger('conjureup')
+JUJU_CONTROLLER = os.environ['JUJU_CONTROLLER']
+JUJU_MODEL = os.environ['JUJU_MODEL']
+JUJU_CM_STR = "{}:{}".format(JUJU_CONTROLLER, JUJU_MODEL)
 
 
 def status():
     """ Get juju status
     """
     try:
-        sh = run('juju-2.0 status --format yaml', shell=True, check=True,
-                 stdout=PIPE)
+        sh = run(
+            'juju-2.0 status -m {} --format yaml'.format(JUJU_CM_STR),
+            shell=True, check=True, stdout=PIPE)
     except CalledProcessError:
         return None
     return yaml.load(sh.stdout.decode())
@@ -30,8 +33,9 @@ def leader(application):
     """
     try:
         sh = run(
-            'juju-2.0 run --application {} is-leader --format yaml'.format(
-                application),
+            'juju-2.0 run -m {} '
+            '--application {} is-leader --format yaml'.format(
+                JUJU_CM_STR, application),
             shell=True, stdout=PIPE, check=True)
     except CalledProcessError:
         return None
@@ -76,9 +80,11 @@ def run_action(unit, action):
     """ runs an action on a unit, waits for result
     """
     is_complete = False
-    sh = run('juju-2.0 run-action {} {}'.format(unit, action),
-             shell=True,
-             stdout=PIPE)
+    sh = run(
+        'juju-2.0 run-action -m {} {} {}'.format(
+            JUJU_CM_STR, unit, action),
+        shell=True,
+        stdout=PIPE)
     run_action_output = yaml.load(sh.stdout.decode())
     log.debug("{}: {}".format(sh.args, run_action_output))
     action_id = run_action_output.get('Action queued with id', None)
@@ -87,10 +93,12 @@ def run_action(unit, action):
         fail("Could not determine action id for test")
 
     while not is_complete:
-        sh = run('juju-2.0 show-action-output {}'.format(action_id),
-                 shell=True,
-                 stderr=PIPE,
-                 stdout=PIPE)
+        sh = run(
+            'juju-2.0 show-action-output -m {} {}'.format(
+                JUJU_CM_STR, action_id),
+            shell=True,
+            stderr=PIPE,
+            stdout=PIPE)
         log.debug(sh)
         try:
             output = yaml.load(sh.stdout.decode())
