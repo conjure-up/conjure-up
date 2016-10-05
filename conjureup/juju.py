@@ -415,6 +415,12 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
         rv = this.CLIENT.Application(request="Deploy",
                                      params=app_params)
         app.log.debug("Deploy returned {}".format(rv))
+
+        for result in rv.get('results', []):
+            if 'error' in result:
+                raise Exception("Error deploying: {}".format(
+                    result['error'].get('message', 'error')))
+
         if msg_cb:
             msg_cb("{}: deployed, installing.".format(service.service_name))
 
