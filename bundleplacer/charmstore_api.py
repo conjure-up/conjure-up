@@ -297,7 +297,9 @@ class MetadataController:
             for r in resources:
                 r['Origin'] = 'store'
             return resources
-        return None
+        else:
+            raise Exception("API error getting resource info for "
+                            "charm={} url={}".format(charm, resource_url))
 
     def handle_search_error(self, e):
         self.error_cb(e)
