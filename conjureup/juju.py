@@ -376,16 +376,16 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
             info = mc.get_charm_info(id_no_rev, lambda _: None)
             service.csid = CharmStoreID(info["Id"])
 
-        # Add charm to Juju
         app.log.debug("Adding Charm {}".format(service.csid.as_str()))
         rv = this.CLIENT.Client(request="AddCharm",
                                 params={"url": service.csid.as_str()})
         app.log.debug("AddCharm returned {}".format(rv))
 
-        # We must load any resources prior to deploying
-        resources = app.metadata_controller.get_resources(
-            service.csid.as_str_without_rev())
-        app.log.debug("Resources: {}".format(resources))
+        charm_id = service.csid.as_str()
+        resources = app.metadata_controller.get_resources(charm_id)
+
+        app.log.debug("Resources for charm id '{}': {}".format(charm_id,
+                                                               resources))
         if resources:
             params = {"tag": "application-{}".format(service.csid.name),
                       "url": service.csid.as_str(),
