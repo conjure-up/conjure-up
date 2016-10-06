@@ -109,6 +109,8 @@ def _start(*args, **kwargs):
                 'CONJUREUP_STATUS_ONLY').split('/')
             app.current_controller = controller
             app.current_model = model
+            app.env['JUJU_CONTROLLER'] = app.current_controller
+            app.env['JUJU_MODEL'] = app.current_model
         except ValueError:
             utils.error("Unable to parse the controller and model to access")
             sys.exit(1)
