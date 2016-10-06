@@ -67,6 +67,7 @@ class NewCloudController:
 
         future.add_done_callback(
             self.__handle_bootstrap_done)
+        controllers.use('deploy').render()
 
     def __post_bootstrap_exec(self):
         """ Executes post-bootstrap.sh if exists
@@ -112,7 +113,6 @@ class NewCloudController:
                 'bootstrap processing phase: {}.'.format(result)))
         utils.pollinate(app.session_id, 'J002')
         app.ui.set_footer('')
-        controllers.use('deploy').render()
 
     def finish(self, credentials=None, back=False):
         """ Load the Model controller passing along the selected cloud.
