@@ -4,7 +4,6 @@ conjure-up (2.0.1) yakkety-proposed; urgency=medium
   * autopkgtest support
   * Full Juju 2.0 support
   * Full MAAS 2.0 support
-  * Native Juju bundle support
   * Extensive post deployment operations that are fully customizable
 
  -- Adam Stokes <adam.stokes@ubuntu.com>  Thu, 06 Oct 2016 15:24:01 -0400
