@@ -1,5 +1,6 @@
 import os
 import random
+import unicodedata
 from subprocess import DEVNULL, CalledProcessError, check_output
 
 from urwid import Columns, Filler, Pile, Text, WidgetWrap
@@ -25,6 +26,21 @@ class BootstrapWaitView(WidgetWrap):
         self.loading_boxes = [Text(x) for x in self.load_attributes]
         super().__init__(self._build_node_waiting())
 
+    def _clear_control_characters(self, text):
+        text = text.decode().splitlines()
+        new_out = []
+        for t in text:
+            sanitize = "".join(ch for ch
+                               in t if unicodedata.category(ch)[0] != "C")
+            if sanitize.endswith("%"):
+                new_out.append(sanitize.split("%")[0])
+            else:
+                new_out.append(sanitize)
+        if len(new_out) >= 10:
+            return "\n".join(new_out[-10:])
+        else:
+            return "\n".join(new_out)
+
     def redraw_kitt(self):
         """ Redraws the KITT bar
         """
@@ -41,7 +57,7 @@ class BootstrapWaitView(WidgetWrap):
         try:
             out = check_output("tail -n 10 {}".format(bootstrap_stderrpath),
                                shell=True, stderr=DEVNULL)
-            self.output.set_text(out)
+            self.output.set_text(self._clear_control_characters(out))
         except CalledProcessError:
             self.output.set_text("Waiting")
 
