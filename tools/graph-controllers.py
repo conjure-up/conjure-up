@@ -29,7 +29,7 @@ def get_graph_string(filelist, opts):
     if opts.mapnames:
         name_map = default_name_map
     else:
-        name_map = defaultdict(lambda x: x)
+        name_map = {}
 
     for fn in filelist:
         if os.path.basename(fn) == 'app.py':
@@ -56,8 +56,9 @@ def get_graph_string(filelist, opts):
                     if not opts.nolabels:
                         label = "{}:{}".format(scopes[0], i+1)
                     s += "[ {} ] - {} -> [ {} ]\n".format(
-                        name_map[src], label,
-                        name_map[use_match.group(2)])
+                        name_map.get(src, src), label,
+                        name_map.get(use_match.group(2),
+                                     use_match.group(2)))
     if opts.condense:
         return "\n".join(set(s.splitlines()))
     return s
