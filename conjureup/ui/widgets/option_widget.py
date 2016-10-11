@@ -38,6 +38,7 @@ class OptionType(Enum):
     BOOLEAN = 0
     STRING = 1
     INT = 2
+    FLOAT = 3
 
 
 def strip_solo_dots(s):
@@ -84,6 +85,11 @@ class OptionWidget(WidgetWrap):
             self.control = StringEditor(edit_text=edit_text)
             self.wrapped_control = Color.string_input(
                 self.control, focus_map='string_input focus')
+        elif self.optype == OptionType.FLOAT:
+            edit_text = str(self.current_value)
+            self.control = StringEditor(edit_text=edit_text)
+            self.wrapped_control = Color.string_input(
+                self.control, focus_map='string_input focus')
         else:
             raise Exception("Unknown option type")
 
@@ -95,7 +101,7 @@ class OptionWidget(WidgetWrap):
             dividechars=1
         )
 
-        if self.optype == OptionType.STRING:
+        if self.optype in [OptionType.STRING, OptionType.FLOAT]:
             connect_signal(self.control._edit, 'change',
                            self.handle_value_changed)
         else:
@@ -119,6 +125,13 @@ class OptionWidget(WidgetWrap):
             if value not in ['', '-']:
                 v = int(value)
             self.value_changed_callback(self.name, v)
+        elif self.optype == OptionType.FLOAT:
+            try:
+                v = float(value)
+            except:
+                pass
+            else:
+                self.value_changed_callback(self.name, v)
         else:
             self.value_changed_callback(self.name, self.current_value)
 
@@ -133,6 +146,8 @@ class OptionWidget(WidgetWrap):
         elif self.optype == OptionType.STRING:
             edit_text = self.current_value or ""
             self.control.value = edit_text
+        elif self.optype == OptionType.FLOAT:
+            self.control.value = self.current_value
 
     def update(self):
         pass
