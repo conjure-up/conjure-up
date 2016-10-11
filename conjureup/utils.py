@@ -14,9 +14,9 @@ from subprocess import (
 )
 
 import yaml
-import semver
 from termcolor import colored
 
+import semver
 from bundleplacer.bundle import Bundle
 from bundleplacer.charmstore_api import MetadataController
 from bundleplacer.config import Config
