@@ -13,10 +13,10 @@ from subprocess import (
     check_output
 )
 
+import semver
 import yaml
 from termcolor import colored
 
-import semver
 from bundleplacer.bundle import Bundle
 from bundleplacer.charmstore_api import MetadataController
 from bundleplacer.config import Config
@@ -134,8 +134,7 @@ def check_bridge_exists():
             if not ready.strip('"'):
                 return False
             return True
-    else:
-        return False
+    return False
 
 
 def check_deb_installed(pkg):
