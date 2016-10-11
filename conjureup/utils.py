@@ -118,12 +118,14 @@ def check_bridge_exists():
         ready = cfg.get('dummy', 'LXD_IPV4_ADDR')
         if not ready.strip('"'):
             return False
+        return True
+
     try:
         run('lxc network list|grep bridge',
             shell=True, check=True)
+        return True
     except CalledProcessError:
         return False
-    return True
 
 
 def check_deb_installed(pkg):
