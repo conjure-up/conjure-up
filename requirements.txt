@@ -13,3 +13,4 @@ configobj
 progressbar2
 prettytable
 q
+semver
