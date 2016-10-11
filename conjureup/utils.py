@@ -14,6 +14,7 @@ from subprocess import (
 )
 
 import yaml
+import semver
 from termcolor import colored
 
 from bundleplacer.bundle import Bundle
@@ -109,22 +110,31 @@ def run_attach(cmd, output_cb=None):
 def check_bridge_exists():
     """ Checks that an LXD network bridge exists
     """
-    if os.path.isfile('/etc/default/lxd-bridge'):
-        config_string = "[dummy]\n"
-        with open('/etc/default/lxd-bridge') as f:
-            config_string = config_string + f.read()
-        cfg = configparser.ConfigParser()
-        cfg.read_string(config_string)
-        ready = cfg.get('dummy', 'LXD_IPV4_ADDR')
-        if not ready.strip('"'):
+    cmd = run_script('lxc version')
+    if cmd.returncode == 0:
+        lxd_version = cmd.stdout.decode().strip()
+    else:
+        raise Exception("Could not determine LXD version.")
+
+    if semver.match(lxd_version, ">=2.4.0"):
+        try:
+            run('lxc network list|grep -q bridge',
+                shell=True, check=True)
+        except CalledProcessError:
             return False
         return True
-
-    try:
-        run('lxc network list|grep bridge',
-            shell=True, check=True)
-        return True
-    except CalledProcessError:
+    elif semver.match(lxd_version, "<2.4.0"):
+        if os.path.isfile('/etc/default/lxd-bridge'):
+            config_string = "[dummy]\n"
+            with open('/etc/default/lxd-bridge') as f:
+                config_string = config_string + f.read()
+            cfg = configparser.ConfigParser()
+            cfg.read_string(config_string)
+            ready = cfg.get('dummy', 'LXD_IPV4_ADDR')
+            if not ready.strip('"'):
+                return False
+            return True
+    else:
         return False
 
 
