@@ -1,7 +1,9 @@
 conjure-up (2.0.2) UNRELEASED; urgency=medium
 
-  * Fix failure to find LXD network bridge on LXD versions 2.4 and above (LP: #1632456)
-  * Fix traceback during advanced configuration screen on invalid key (LP: #1631770)
+  * Fix failure to find LXD network bridge on LXD versions
+    2.4 and above (LP: #1632456)
+  * Fix traceback during advanced configuration screen on
+    invalid key (LP: #1631770)
 
  -- Adam Stokes <adam.stokes@ubuntu.com>  Tue, 11 Oct 2016 16:42:12 -0400
 
