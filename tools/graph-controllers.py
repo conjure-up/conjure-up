@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from collections import defaultdict
 import argparse
 import os
 import re
@@ -54,7 +53,7 @@ def get_graph_string(filelist, opts):
                         scopes.pop()
                     label = ""
                     if not opts.nolabels:
-                        label = "{}:{}".format(scopes[0], i+1)
+                        label = "{}:{}".format(scopes[0], i + 1)
                     s += "[ {} ] - {} -> [ {} ]\n".format(
                         name_map.get(src, src), label,
                         name_map.get(use_match.group(2),
