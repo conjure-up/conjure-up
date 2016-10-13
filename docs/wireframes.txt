@@ -7,25 +7,25 @@
      |                                                                                                                                |
      |    List of Applications                                                                                                        |
      |                                                                                                                                |
-     |    mysql                       Units: 1         m3.large                                         [ Configure ] [ Deploy ]      |
+     |    mysql                       Units: 1                                         [ Configure ] [ Architecture ] [ Deploy ]      |
      |                                                                                                                                |
-     |    glance                      Units: 1         x1.small                                         [ Configure ] [ Deploy ]      |
+     |    glance                      Units: 1                                         [ Configure ] [ Architecture ] [ Deploy ]      |
      |                                                                                                                                |
-     |    ceph-osd                    Units: 3         x2.medium                                        [ Configure ] [ Deploy ]      |
+     |    ceph-osd                    Units: 3                                         [ Configure ] [ Architecture ] [ Deploy ]      |
      |                                                                                                                                |
-     |    ceph-mon                    Units: 3         x2.medium                                        [ Configure ] [ Deploy ]      |
+     |    ceph-mon                    Units: 3                                         [ Configure ] [ Architecture ] [ Deploy ]      |
      |                                                                                                                                |
-     |    neutron-api                 Units: 1         m3.large                                         [ Configure ] [ Deploy ]      |
+     |    neutron-api                 Units: 1                                         [ Configure ] [ Architecture ] [ Deploy ]      |
      |                                                                                                                                |
-     |    neutron-openvswitch         Units: 1         m3.large                                         [ Configure ] [ Deploy ]      |
+     |    neutron-openvswitch         Units: 1                                         [ Configure ] [ Architecture ] [ Deploy ]      |
      |                                                                                                                                |
-     |    neutron-gateway             Units: 1         m3.large                                         [ Configure ] [ Deploy ]      |
+     |    neutron-gateway             Units: 1                                         [ Configure ] [ Architecture ] [ Deploy ]      |
      |                                                                                                                                |
-     |    keystone                    Units: 1         m2.medium                                        [ Configure ] [ Deploy ]      |
+     |    keystone                    Units: 1                                         [ Configure ] [ Architecture ] [ Deploy ]      |
      |                                                                                                                                |
-     |    cinder                      Units: 1         m3.large                                         [ Configure ] [ Deploy ]      |
+     |    cinder                      Units: 1                                         [ Configure ] [ Architecture ] [ Deploy ]      |
      |                                                                                                                                |
-     |    openstack-dashboard         Units: 1         m2.medium                                        [ Configure ] [ Deploy ]      |
+     |    openstack-dashboard         Units: 1                                         [ Configure ] [ Architecture ] [ Deploy ]      |
      |                                                                                                                                |
      |   --------------------------------------------------------------------------------------------------------------------------   |
      |   MySQL is a fast, stable and true multi-user, multi-threaded SQL database server.                                             |
@@ -185,7 +185,6 @@
      |                                                                                                                                |
      |  BOOTSTRAP JUJU CONTROLLER                                                                                                     |
      |                                                                                                                                |
-     |                                                                                                                                |
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
      |                                                                                                                                |
@@ -221,7 +220,6 @@
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
      | DEPLOYING APPLICATIONS                                                                                                         |
-     |                                                                                                                                |
      |                                                                                                                                |
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
@@ -305,13 +303,11 @@
      |    CANCEL                                                                                                    APPLY             |
      |                                                                                                                                |
      |                                                                                                                                |
-     |                                                                                                                                |
      +--------------------------------------------------------------------------------------------------------------------------------+
 
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
      | POST DEPLOY ACTIONS                                                                                                            |
-     |                                                                                                                                |
      |                                                                                                                                |
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
@@ -325,7 +321,7 @@
      |       ------------------------------------------------------------------------------------------------------------------       |
      |                                                                                                                                |
      |                                                                                                                                |
-     |       ( ) Import SSH Keys                                                                         [ Configure ]   [ Run ]      |  
+     |       ( ) Import SSH Keys                                                                         [ Configure ]   [ Run ]      |
      |                                                                                                                                |
      |           Import ssh keys for the user to log into deployed instances.                                                         |
      |                                                                                                                                |
@@ -347,13 +343,12 @@
      |                                                                                                                                |
      |                                                                                                                                |
      |                                                                                                                                |
-     |                     Press (Q) to quit to shell, actions not executed will need to be run from command line.                    | 
+     |                     Press (Q) to quit to shell, actions not executed will need to be run from command line.                    |
      +--------------------------------------------------------------------------------------------------------------------------------+
 
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
      | SUMMARY                                                                                                                        |
-     |                                                                                                                                |
      |                                                                                                                                |
      +--------------------------------------------------------------------------------------------------------------------------------+
      |                                                                                                                                |
@@ -418,6 +413,45 @@
      |                                                                                                                                |
      |                                                                                                                                |
      |    BACK                                                                                                                        |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     +--------------------------------------------------------------------------------------------------------------------------------+
+
+     +--------------------------------------------------------------------------------------------------------------------------------+
+     |                                                                                                                                |
+     |  ARCHITECTURE                                                                                                                  |
+     |                                                                                                                                |
+     +--------------------------------------------------------------------------------------------------------------------------------+
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |    Choose where to place MySQL:                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                      Cores       Memory(GB)        Storage(GB)   NICS                                                          |
+     |    jarjar.maas           2               32     500(1), 250(1)     4                                         [ Select ]        |
+     |                                                                                                                                |
+     |    scuba.maas            4               32             500(4)     4                                         [ Select ]        |
+     |                                                                                                                                |
+     |    bigbox.maas           8               32     500(1), 250(1)     4                                         [ Select ]        |
+     |                                                                                                                                |
+     |    eastla.maas          32               32     500(1), 250(1)     4                                         [ Select ]        |
+     |                                                                                                                                |
+     |    sharky.maas          16               32     500(1), 250(1)     4                                         [ Select ]        |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |                                                                                                                                |
+     +--------------------------------------------------------------------------------------------------------------------------------+
+     |                                                                                                                                |
+     |                                                                                                                                |
+     |    BACK                                                                                                           APPLY        |
      |                                                                                                                                |
      |                                                                                                                                |
      |                                                                                                                                |
