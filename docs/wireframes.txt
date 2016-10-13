@@ -428,8 +428,8 @@
      |    Choose where to place MySQL:                                                                                                |
      |                                                                                                                                |
      |                                                                                                                                |
-     |                      Cores       Memory(GB)        Storage(GB)   NICS                                                          |
-     |    jarjar.maas           2               32     500(1), 250(1)     4                                         [ Select ]        |
+     |                      Cores       Memory(GB)        Storage(GB)   NICS     SPACE                                                |
+     |    jarjar.maas           2               32     500(1), 250(1)     4      [ space-0 ]                        [ Select ]        |
      |                                                                                                                                |
      |    scuba.maas            4               32             500(4)     4                                         [ Select ]        |
      |                                                                                                                                |
