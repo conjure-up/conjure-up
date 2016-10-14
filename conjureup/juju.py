@@ -129,7 +129,7 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
     """
     cmd = "juju-2.0 bootstrap {} {} " \
           "--config image-stream=daily ".format(
-              controller, cloud)
+              cloud, controller)
     cmd += "--config enable-os-upgrade=false "
     cmd += "--default-model conjure-up "
     if app.argv.http_proxy:
