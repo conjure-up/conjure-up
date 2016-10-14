@@ -65,7 +65,7 @@ def parse_options(argv):
                         help='Specify HTTP proxy')
     parser.add_argument('--https-proxy', dest='https_proxy',
                         help='Specify HTTPS proxy')
-    parser.add_argument('--proxy-proxy', dest='no_proxy',
+    parser.add_argument('--no-proxy', dest='no_proxy',
                         help='Comma separated list of IPs to not '
                         'filter through a proxy')
     parser.add_argument('--bootstrap-timeout', dest='bootstrap_timeout',
