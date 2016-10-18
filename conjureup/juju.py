@@ -49,6 +49,17 @@ def read_config(name):
     return yaml.safe_load(open(abs_path))
 
 
+def get_bootstrap_config(controller_name):
+    bootstrap_config = read_config("bootstrap-config")
+    if 'controllers' not in bootstrap_config:
+        raise Exception("Could not read Juju's bootstrap-config.yaml")
+    cd = bootstrap_config['controllers'].get(controller_name, None)
+    if cd is None:
+        raise Exception("'{}' not found in Juju's "
+                        "bootstrap-config.yaml".format(controller_name))
+    return cd
+
+
 def get_current_controller():
     """ Grabs the current default controller
     """
