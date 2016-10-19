@@ -53,7 +53,7 @@ clean-snapcraft:
 test:
 	@tox -e py35,flake,isort
 
-DPKGBUILDARGS = -us -uc -i'.git.*|.tox|.bzr.*|.editorconfig|.travis-yaml|macumba\/debian|maasclient\/debian' -i'snapcraft'
+DPKGBUILDARGS = -us -uc -i'.git.*|.tox|.bzr.*|.editorconfig|.travis-yaml|macumba\/debian|' -i'snapcraft'
 deb-src: clean
 	@debuild -S -sa $(DPKGBUILDARGS)
 
