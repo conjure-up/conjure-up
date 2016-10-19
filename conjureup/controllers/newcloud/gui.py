@@ -7,9 +7,9 @@ from subprocess import check_output
 import petname
 
 from conjureup import async, controllers, juju, utils
-from conjureup.maas import MaasClient
 from conjureup.api.models import model_info
 from conjureup.app_config import app
+from conjureup.maas import MaasClient
 from conjureup.models.provider import Schema
 from conjureup.ui.views.newcloud import NewCloudView
 from ubuntui.ev import EventLoop

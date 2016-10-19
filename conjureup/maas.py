@@ -1,8 +1,8 @@
 """ simple maas client
 """
 
-from requests_oauthlib import OAuth1
 import requests
+from requests_oauthlib import OAuth1
 
 
 class MaasClient:
