@@ -87,7 +87,7 @@ def parse_maas_apikey(api_key):
     Tuple containing (consumer_secret, token_key, token_secret)
     """
     try:
-        consumer_secret, token_key, token_secret = api_key.split(':')
+        return api_key.split(':')
     except Exception as e:
         raise Exception(
             "Problem parsing MAAS apikey, please verify it was "
