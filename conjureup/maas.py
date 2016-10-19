@@ -38,6 +38,7 @@ class MaasClient:
         params: extra data sent with the HTTP request
         """
         return requests.get(url=self._prepare_url(url),
+                            headers={'Accept': 'application/json'},
                             auth=self.oauth,
                             params=params)
 
@@ -49,6 +50,7 @@ class MaasClient:
         params: extra data sent with the HTTP request
         """
         return requests.post(url=self._prepare_url(url),
+                             headers={'Accept': 'application/json'},
                              auth=self.oauth,
                              data=params)
 
@@ -60,6 +62,7 @@ class MaasClient:
         params: extra data sent with the HTTP request
         """
         return requests.put(url=self._prepare_url(url),
+                            headers={'Accept': 'application/json'},
                             auth=self.oauth,
                             data=params)
 
@@ -71,6 +74,7 @@ class MaasClient:
         params: extra data sent with the HTTP request
         """
         return requests.delete(url=self._prepare_url(url),
+                               headers={'Accept': 'application/json'},
                                auth=self.oauth)
 
 
