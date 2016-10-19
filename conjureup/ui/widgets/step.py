@@ -165,13 +165,13 @@ class StepWidget(WidgetWrap):
                 (Columns(column_input, dividechars=3),
                  self.step_pile.options()))
 
-            self.button = submit_btn(label="Run", on_press=self.submit)
-            self.step_pile.contents.append(
-                (Padding.right_20(
-                    Color.button_primary(self.button,
-                                         focus_map='button_primary focus')),
-                 self.step_pile.options()))
-            self.step_pile.contents.append((HR(), self.step_pile.options()))
+        self.button = submit_btn(label="Run", on_press=self.submit)
+        self.step_pile.contents.append(
+            (Padding.right_20(
+                Color.button_primary(self.button,
+                                     focus_map='button_primary focus')),
+             self.step_pile.options()))
+        self.step_pile.contents.append((HR(), self.step_pile.options()))
         self.step_pile.focus_position = self.current_button_index
 
     def submit(self, btn):
