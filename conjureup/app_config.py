@@ -10,9 +10,17 @@ bootstrap = SimpleNamespace(
     output=None
 )
 
+maas = SimpleNamespace(
+    # Client
+    client=None
+)
+
 app = SimpleNamespace(
     # Juju bootstrap details
     bootstrap=bootstrap,
+
+    # MAAS client
+    maas=maas,
 
     # The conjure-up UI framework
     ui=None,

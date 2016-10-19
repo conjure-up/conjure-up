@@ -6,11 +6,6 @@
             "directories": "macumba"
         },
         {
-            "url": "https://github.com/Ubuntu-Solutions-Engineering/maasclient.git",
-            "version": "master",
-            "directories": "maasclient"
-        },
-        {
             "url": "https://github.com/Ubuntu-Solutions-Engineering/urwid-ubuntu.git",
             "version": "master",
             "directories": "ubuntui"
