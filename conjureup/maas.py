@@ -25,6 +25,11 @@ class MaasClient:
                             resource_owner_secret=token_secret,
                             signature_method='PLAINTEXT')
 
+    def _prepare_url(self, url):
+        if not url.endswith('/'):
+            url = url + '/'
+        return self.api_url + url
+
     def get(self, url, params=None):
         """ Performs a authenticated GET against a MAAS endpoint
 
@@ -32,8 +37,7 @@ class MaasClient:
         url: MAAS endpoint
         params: extra data sent with the HTTP request
         """
-        print(self.api_url + url)
-        return requests.get(url=self.api_url + url,
+        return requests.get(url=self._prepare_url(url),
                             auth=self.oauth,
                             params=params)
 
@@ -44,7 +48,7 @@ class MaasClient:
         url: MAAS endpoint
         params: extra data sent with the HTTP request
         """
-        return requests.post(url=self.api_url + url,
+        return requests.post(url=self._prepare_url(url),
                              auth=self.oauth,
                              data=params)
 
@@ -55,7 +59,7 @@ class MaasClient:
         url: MAAS endpoint
         params: extra data sent with the HTTP request
         """
-        return requests.put(url=self.api_url + url,
+        return requests.put(url=self._prepare_url(url),
                             auth=self.oauth,
                             data=params)
 
@@ -66,7 +70,7 @@ class MaasClient:
         url: MAAS endpoint
         params: extra data sent with the HTTP request
         """
-        return requests.delete(url=self.api_url + url,
+        return requests.delete(url=self._prepare_url(url),
                                auth=self.oauth)
 
 
