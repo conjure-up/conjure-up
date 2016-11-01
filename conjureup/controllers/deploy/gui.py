@@ -1,3 +1,5 @@
+import q
+
 import json
 import os
 from collections import defaultdict
@@ -5,12 +7,14 @@ from functools import partial
 from operator import attrgetter
 from subprocess import PIPE
 
-from bundleplacer.assignmenttype import atype_to_label
+from bundleplacer.assignmenttype import atype_to_label, AssignmentType
 
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
+from conjureup.maas import setup_maas
 from conjureup.telemetry import track_event, track_exception, track_screen
+from conjureup.juju import get_controller_info
 from conjureup.ui.views.app_architecture_view import AppArchitectureView
 from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView
@@ -21,8 +25,10 @@ class DeployController:
 
     def __init__(self):
         self.applications = []
-        self.placements = defaultdict(list)
-        self.machine_id_map = {}
+        self.assignments = defaultdict(list)
+        self.maas_machine_map = {}
+        c_info = get_controller_info(app.current_controller)
+        self.cloud_type = c_info['details']['cloud']
 
     def _handle_exception(self, tag, exc):
         track_exception(exc.args[0])
@@ -84,82 +90,95 @@ class DeployController:
         app.ui.set_header("Configure {}".format(application.service_name))
         app.ui.set_body(cv)
 
-    def do_placement(self, application, sender):
+    def do_architecture(self, application, sender):
+
+        # TODO - do we really always want to do this?
+
+        # If no machines are specified, add a machine for each app:
+        bundle = app.metadata_controller.bundle
+        if len(bundle.machines) == 0:
+            self.generate_juju_machines()
+
         av = AppArchitectureView(application,
                                  self)
-        app.ui.set_header("Architecture")
+        app.ui.set_header(av.header)
         app.ui.set_body(av)
 
-    def add_placement(self, application, machine, atype):
-        self.placements[machine].append((application, atype))
+    def generate_juju_machines(self):
+        """ Add a separate juju machine for each app.
+        Intended for bundles with no machines defined.
+        """
+        bundle = app.metadata_controller.bundle
+        midx = 0
+        for bundle_application in bundle.services:
+            for n in range(bundle_application.num_units):
+                bundle.add_machine(dict(series=bundle.series),
+                                   str(midx))
+                self.add_assignment(bundle_application, str(midx),
+                                    AssignmentType.DEFAULT)
+                midx += 1
 
-    def remove_placement(self, application, machine):
+    def add_assignment(self, application, juju_machine_id, atype):
+        self.assignments[juju_machine_id].append((application, atype))
+
+    def remove_assignment(self, application, machine):
         np = []
-        np = [(app, at) for app, at in self.placements[machine]
+        np = [(app, at) for app, at in self.assignments[machine]
               if app != application]
-        self.placements[machine] = np
+        self.assignments[machine] = np
 
-    def get_placements(self, application, machine):
-        return [(app, at) for app, at in self.placements[machine]
+    def get_assignments(self, application, machine):
+        return [(app, at) for app, at in self.assignments[machine]
                 if app == application]
 
-    def get_all_placements(self, application):
+    def get_all_assignments(self, application):
 
-        app_placements = []
-        for machine, alist in self.placements.items():
+        app_assignments = []
+        for juju_machine_id, alist in self.assignments.items():
             for a, at in alist:
                 if a == application:
-                    app_placements.append((machine, at))
-        return app_placements
+                    app_assignments.append((juju_machine_id, at))
+        return app_assignments
 
-    def clear_placements(self, application):
+    def clear_assignments(self, application):
         np = defaultdict(list)
-        for m, al in self.placements.items():
+        for m, al in self.assignments.items():
             al = [(app, at) for app, at in al if app != application]
             np[m] = al
-        self.placements = np
+        self.assignments = np
 
     def handle_sub_view_done(self):
         app.ui.set_header(self.list_header)
         self.list_view.update()
         app.ui.set_body(self.list_view)
 
-    def ensure_machines(self, application, done_cb):
-        """add machines if required to fulfill placement directives
+    def set_machine_pin(self, juju_machine_id, maas_machine_id):
+        """store the mapping between a juju machine and maas machine.
 
-        Only useful for maas clouds. others will have no placements
-        and this will be a noop.
+        Also ensure that the juju machine has constraints that
+        uniquely id the maas machine
+
         """
+        bundle = app.metadata_controller.bundle
+        juju_machine = bundle.machines[juju_machine_id]
+        tagstr = "tags={}".format(maas_machine_id)
+        if 'constraints' in juju_machine:
+            juju_machine['constraints'] += "," + tagstr
+        else:
+            juju_machine['constraints'] = tagstr
 
-        # TODO: call tag_names if we haven't yet
+        self.maas_machine_map[juju_machine_id] = maas_machine_id
 
-        new_machine_list = []
-        pending_machines = []
-        placements = self.get_all_placements(application)
-        for machine, _ in placements:
-            if machine not in self.machine_id_map:
-                pending_machines.append(machine)
-                machine_tag = machine.instance_id.split('/')[-2]
-                cons = "tags={}".format(machine_tag)
-                machine_attrs = {'series': application.csid.series,
-                                 'constraints': cons}
-                new_machine_list.append(machine_attrs)
-                f = juju.add_machines([machine_attrs])
-                result = f.result()
-                # TODO here update machine placement map
-                self.machine_id_map[machine] = 4747
-        done_cb()
-
-    def translate_machine_ids(self, application):
-        new_placements = []
-        for machine, at in self.get_all_placements(application):
-            label = atype_to_label(at)
+    def apply_assignments(self, application):
+        new_assignments = []
+        for juju_machine_id, at in self.get_all_assignments(application):
+            label = atype_to_label([at])[0]
             plabel = ""
             if label != "":
                 plabel += "{}".format(label)
-            plabel += str(self.machine_id_map[machine])
-            new_placements.append(plabel)
-        application.placement_spec = new_placements
+            plabel += juju_machine_id
+            new_assignments.append(plabel)
+        application.placement_spec = new_assignments
 
     def do_deploy(self, application, msg_cb):
         "launches deploy in background for application"
@@ -169,27 +188,21 @@ class DeployController:
             msg_cb(*args)
             app.ui.set_footer(*args)
 
-        def _do_deploy():
-            self.translate_machine_ids(application)
-            juju.deploy_service(application,
-                                app.metadata_controller.series,
-                                msg_cb=msg_both,
-                                exc_cb=partial(self._handle_exception, "ED"))
-
-        self.ensure_machines(application, _do_deploy)
+        self.apply_assignments(application)
+        juju.deploy_service(application,
+                            app.metadata_controller.series,
+                            msg_cb=msg_both,
+                            exc_cb=partial(self._handle_exception, "ED"))
 
     def do_deploy_remaining(self):
         "deploys all un-deployed applications"
-        def _do_deploy(application):
-            self.translate_machine_ids(application)
+
+        for application in self.undeployed_applications:
+            self.apply_assignments(application)
             juju.deploy_service(application,
                                 app.metadata_controller.series,
                                 app.ui.set_footer,
                                 partial(self._handle_exception, "ED"))
-
-        for application in self.undeployed_applications:
-            self.ensure_machines(application,
-                                 partial(_do_deploy, application))
 
     def finish(self):
         juju.set_relations(self.applications,
@@ -212,13 +225,16 @@ class DeployController:
             return self._handle_exception('E003', e)
 
         #  TODO - maybe don't do this here for MAAS?
-        juju.add_machines(
-            list(app.metadata_controller.bundle.machines.values()),
-            exc_cb=partial(self._handle_exception, "ED"))
+        # juju.add_machines(
+        #     list(app.metadata_controller.bundle.machines.values()),
+        #     exc_cb=partial(self._handle_exception, "ED"))
 
         self.applications = sorted(app.metadata_controller.bundle.services,
                                    key=attrgetter('service_name'))
         self.undeployed_applications = self.applications[:]
+
+        if self.cloud_type == 'maas':
+            setup_maas()
 
         self.list_view = ApplicationListView(self.applications,
                                              app.metadata_controller,

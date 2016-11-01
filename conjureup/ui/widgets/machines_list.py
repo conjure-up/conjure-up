@@ -30,14 +30,12 @@ class MachinesList(WidgetWrap):
     """A list of machines with configurable action buttons for each
     machine.
 
-    application - an application
-
     select_cb - a function that takes a machine and assignmenttype to
     perform the button action
 
     unselect_cb - a function that takes a machine and clears assignments
 
-    controller - deploy/gui controller
+    context_string - a string that describes what you're picking a machine for
 
     constraints - a dict of constraints to filter the machines list.
     only machines matching all the constraints will be shown.
@@ -48,33 +46,26 @@ class MachinesList(WidgetWrap):
     title_widgets - A Text Widget to be used in place of the default
     title.
 
-    show_assignments - bool, whether or not to show the assignments
-    for each of the machines.
-
     show_only_ready - bool, only show machines with a ready state.
 
     show_filter_box - bool, show text box to filter listed machines
 
     """
 
-    def __init__(self, application, select_cb, unselect_cb,
-                 controller,
+    def __init__(self, select_cb, unselect_cb, context_string,
                  constraints=None, show_hardware=False,
-                 title_widgets=None, show_assignments=True,
-                 show_only_ready=False,
+                 title_widgets=None, show_only_ready=False,
                  show_filter_box=False):
-        self.application = application
         self.select_cb = select_cb
         self.unselect_cb = unselect_cb
-        self.controller = controller
-        self.all_assigned = False
+        self.context_string = context_string
+        self.n_selected = 0
         self.machine_widgets = []
         if constraints is None:
             self.constraints = {}
         else:
             self.constraints = constraints
         self.show_hardware = show_hardware
-        self.show_assignments = show_assignments
         self.show_only_ready = show_only_ready
         self.show_filter_box = show_filter_box
         self.filter_string = ""
@@ -107,11 +98,7 @@ class MachinesList(WidgetWrap):
 
         if self.show_filter_box:
             header_widgets += [self.filter_edit_box, Divider()]
-        labels = ["FQDN", "Cores", "Memory", "Storage"]
-        if self.show_assignments:
-            labels += ["Assignments", ""]
-        else:
-            labels += [""]
+        labels = ["FQDN", "Cores", "Memory", "Storage", ""]
         header_label_col = Columns([Text(m) for m in labels])
         header_widgets.append(header_label_col)
         self.header_padding = len(header_widgets)
@@ -173,7 +160,10 @@ class MachinesList(WidgetWrap):
             mw = self.find_machine_widget(m)
             if mw is None:
                 mw = self.add_machine_widget(m)
-            mw.all_assigned = self.all_assigned
+            if not mw.is_selected and self.n_selected > 0:
+                mw.can_select = False
+            else:
+                mw.can_select = True
             mw.update()
 
         self.filter_edit_box.set_info(len(self.machine_widgets),
@@ -183,11 +173,10 @@ class MachinesList(WidgetWrap):
 
     def add_machine_widget(self, machine):
         mw = MachineWidget(machine,
-                           self.application,
-                           self.select_cb,
-                           self.unselect_cb,
-                           self.controller,
-                           self.show_assignments)
+                           self.handle_select,
+                           self.handle_unselect,
+                           self.context_string)
+
         self.machine_widgets.append(mw)
         options = self.machine_pile.options()
         self.machine_pile.contents.append((mw, options))
@@ -237,3 +226,13 @@ class MachinesList(WidgetWrap):
                 self.machine_pile.focus_position = self.header_padding
         except IndexError:
             log.debug("index error in machines_list focus_top")
+
+    def handle_select(self, machine):
+        self.select_cb(machine)
+        self.n_selected += 1
+        self.update()
+
+    def handle_unselect(self, machine):
+        self.unselect_cb(machine)
+        self.n_selected -= 1
+        self.update()

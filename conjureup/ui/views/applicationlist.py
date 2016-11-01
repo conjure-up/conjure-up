@@ -7,8 +7,6 @@ from functools import partial
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
-from conjureup.juju import get_controller_info
-from conjureup.maas import setup_maas
 from conjureup.utils import get_options_whitelist
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
@@ -66,18 +64,13 @@ class ApplicationWidget(WidgetWrap):
                                     self.application)),
                 focus_map='button_secondary focus'))
 
-        c_info = get_controller_info(app.current_controller)
-        cloud_type = c_info['details']['cloud']
-
-        if cloud_type == 'maas'and self.application.num_units > 0:
+        if self.application.num_units > 0:
             arch_button = (20, Color.button_secondary(
                 PlainButton("Architecture",
-                            partial(self.controller.do_placement,
+                            partial(self.controller.do_architecture,
                                     self.application)),
                 focus_map='button_secondary focus'))
             cws.insert(4, arch_button)
-
-            setup_maas()
 
         self.columns = Columns(cws, dividechars=1)
         return self.columns

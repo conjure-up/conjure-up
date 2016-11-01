@@ -291,6 +291,30 @@ def get_cloud(name):
     raise LookupError("Unable to locate cloud: {}".format(name))
 
 
+def constraints_to_dict(constraints):
+    """Parses a constraint string into a dict"""
+    new_constraints = {}
+    if not isinstance(constraints, str):
+        app.log.debug(
+            "Invalid constraints: {}, skipping".format(
+                constraints))
+        return new_constraints
+
+    list_constraints = [c for c in constraints.split(' ')
+                        if c != ""]
+    for c in list_constraints:
+        try:
+            constraint, constraint_value = c.split('=')
+            new_constraints[constraint] = constraint_value
+        except ValueError as e:
+            app.log.debug("Skipping constraint: {} ({})".format(c, e))
+    return new_constraints
+
+
+def constraints_from_dict(cdict):
+    return " ".join(["{}={}".format(k, v) for k, v in cdict.items()])
+
+
 def deploy(bundle):
     """ Juju deploy bundle
 
@@ -315,27 +339,11 @@ def add_machines(machines, msg_cb=None, exc_cb=None):
     supported key
 
     """
-    def _prepare_constraints(constraints):
-        new_constraints = {}
-        if not isinstance(constraints, str):
-            app.log.debug(
-                "Invalid constraints: {}, skipping".format(
-                    constraints))
-            return new_constraints
-
-        list_constraints = constraints.split(' ')
-        for c in list_constraints:
-            try:
-                constraint, constraint_value = c.split('=')
-                new_constraints[constraint] = constraint_value
-            except ValueError as e:
-                app.log.debug("Skipping constraint: {} ({})".format(c, e))
-        return new_constraints
 
     @requires_login
     def _add_machines_async():
         machine_params = [{"series": m['series'],
-                           "constraints": _prepare_constraints(
+                           "constraints": constraints_to_dict(
                                m.get('constraints', "")),
                            "jobs": ["JobHostUnits"]}
                           for m in machines]
