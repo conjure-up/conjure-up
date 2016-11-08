@@ -1,6 +1,7 @@
 from conjureup import controllers
 from conjureup.app_config import app
 from conjureup.controllers.clouds.common import list_clouds
+from conjureup.telemetry import track_screen
 from conjureup.ui.views.cloud import CloudView
 
 
@@ -22,6 +23,7 @@ class CloudsController:
 
     def render(self):
         "Pick or create a cloud to bootstrap a new controller on"
+        track_screen("Cloud Select")
         clouds = list_clouds()
         excerpt = app.config.get(
             'description',

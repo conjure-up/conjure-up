@@ -2,6 +2,7 @@ from tempfile import NamedTemporaryFile
 
 from conjureup import controllers, utils
 from conjureup.app_config import app
+from conjureup.telemetry import track_screen
 from conjureup.ui.views.lxdsetup import LXDSetupView
 from ubuntui.ev import EventLoop
 
@@ -76,14 +77,13 @@ class LXDSetupController:
         app.log.debug("Restarting lxd-bridge")
         utils.run("sudo systemctl restart lxd-bridge.service", shell=True)
 
-        utils.pollinate(app.session_id, 'L002')
         controllers.use('newcloud').render(
             cloud='localhost', bootstrap=True)
 
     def render(self):
         """ Render
         """
-        utils.pollinate(app.session_id, 'L001')
+        track_screen("LXD Setup")
         self.view = LXDSetupView(app,
                                  self.finish)
 

@@ -2,6 +2,7 @@ import os
 
 from conjureup.app_config import app
 from conjureup.controllers.summary import common
+from conjureup.telemetry import track_screen
 from conjureup.ui.views.summary import SummaryView
 from ubuntui.ev import EventLoop
 
@@ -18,6 +19,7 @@ class SummaryController:
         EventLoop.exit(0)
 
     def render(self, results):
+        track_screen("Summary")
         app.log.debug("Rendering summary results: {}".format(results))
 
         common.write_results(results, self.save_path)

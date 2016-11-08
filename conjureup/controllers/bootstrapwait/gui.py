@@ -1,5 +1,6 @@
 from conjureup import controllers
 from conjureup.app_config import app
+from conjureup.telemetry import track_screen
 from conjureup.ui.views.bootstrapwait import BootstrapWaitView
 from ubuntui.ev import EventLoop
 
@@ -22,6 +23,7 @@ class BootstrapWaitController:
             self.__refresh)
 
     def render(self):
+        track_screen("Bootstrap wait")
         app.log.debug("Rendering bootstrap wait")
 
         self.view = BootstrapWaitView(

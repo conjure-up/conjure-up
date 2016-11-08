@@ -77,6 +77,10 @@ def parse_options(argv):
                         'controller.', metavar='<host>.maas')
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
+    parser.add_argument('--notrack', action='store_true',
+                        dest='notrack',
+                        help='Opt out of sending anonymous usage '
+                        'information to Canonical.')
 
     parser.add_argument('cloud', nargs='?',
                         help="Name of a Juju cloud to "
@@ -192,9 +196,7 @@ def main():
     apply_proxy()
 
     app.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
-                               '{}/{}'.format(
-                                   spell,
-                                   str(uuid.uuid4())))
+                               str(uuid.uuid4()))
 
     global_config_filename = app.argv.global_config_file
     if not os.path.exists(global_config_filename):

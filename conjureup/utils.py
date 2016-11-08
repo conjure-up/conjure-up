@@ -22,7 +22,7 @@ from bundleplacer.charmstore_api import MetadataController
 from bundleplacer.config import Config
 from conjureup import charm
 from conjureup.app_config import app
-from conjureup.async import submit
+from conjureup.telemetry import track_event
 
 
 def run(cmd, **kwargs):
@@ -247,62 +247,6 @@ def install_user():
     return user
 
 
-def pollinate(session, tag):
-    """ fetches random seed
-
-    Tag definitions:
-        W001 - welcome shown
-        B001 - bundle selected
-        CS - cloud selected
-        CC - cloud creation started
-        CA - cloud credentials added
-        L001 - LXD Setup started
-        L002 - LXD Setup completed
-        J001 - juju post-bootstrap started
-        J002 - juju post-bootstrap completed
-        J003 - juju bootstrap started
-        J004 - juju bootstrap completed
-        CS - controller selected
-        PM - placement/bundle editor shown (maas)
-        PS - placement/bundle editor shown (other)
-        PC - placements committed
-        SS - deploy summary shown
-        DS - deploy started
-        DC - deploy complete
-        XA - pre processing started
-        XB - post processing started
-
-        UC - user cancelled
-        EC - error getting credentials
-        EP - error in placement/bundle editor
-        EB - error juju bootstrap
-        ED - error deploying
-        E001 - error in post bootstrap phase
-        E002 - error in post processor
-        E003 - error in pre processor
-        E004 - error creating model in existing controller
-        E005 - error in picking spells
-
-    Arguments:
-    session: randomly generated session id
-    tag: custom tag
-    """
-    agent_str = 'conjure/{}/{}'.format(session, tag)
-
-    def do_pollinate():
-        try:
-            cmd = ("curl -A {} --connect-timeout 3 --max-time 3 "
-                   "--data /dev/null https://entropy.ubuntu.com "
-                   "> /dev/null 2>&1".format(
-                       agent_str))
-            app.log.debug("pollinate: {}".format(cmd))
-            check_call(cmd, shell=True)
-        except CalledProcessError as e:
-            app.log.warning("Generating random seed failed: {}".format(e))
-    if not app.argv.debug:
-        submit(do_pollinate, lambda _: None)
-
-
 def load_global_conf():
     """ loads global configuration
 
@@ -342,6 +286,7 @@ def setup_metadata_controller():
 
 
 def set_chosen_spell(spell_name, spell_dir):
+    track_event("Spell Choice", spell_name, "")
     app.env = os.environ.copy()
     app.env['CONJURE_UP_SPELL'] = spell_name
     app.config.update({'spell-dir': spell_dir,

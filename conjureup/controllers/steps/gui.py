@@ -5,10 +5,11 @@ from functools import partial
 
 import yaml
 
-from conjureup import async, controllers, utils
+from conjureup import async, controllers
 from conjureup.app_config import app
 from conjureup.controllers.steps import common
 from conjureup.models.step import StepModel
+from conjureup.telemetry import track_exception, track_screen
 from conjureup.ui.views.steps import StepsView
 from conjureup.ui.widgets.step import StepWidget
 from ubuntui.ev import EventLoop
@@ -27,7 +28,7 @@ class StepsController:
         self.results = OrderedDict()
 
     def __handle_exception(self, tag, exc):
-        utils.pollinate(app.session_id, tag)
+        track_exception(exc.args[0], is_fatal=True)
         EventLoop.remove_alarms()
         app.ui.show_exception_message(exc)
 
@@ -94,7 +95,7 @@ class StepsController:
         EventLoop.set_alarm_in(1, self.update)
 
     def render(self):
-
+        track_screen("Steps")
         if len(self.step_metas) == 0:
             self.finish(None, None, done=True)
             return

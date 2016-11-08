@@ -16,7 +16,6 @@ class DeployStatusController:
         )
 
     def __handle_exception(self, tag, exc):
-        utils.pollinate(app.session_id, tag)
         utils.error(exc)
         sys.exit(1)
 
