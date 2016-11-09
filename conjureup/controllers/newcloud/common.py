@@ -92,3 +92,4 @@ def parse_maas_apikey(api_key):
         raise Exception(
             "Problem parsing MAAS apikey, please verify it was "
             "entered correctly: {}".format(e))
+    return consumer_secret, token_key, token_secret
