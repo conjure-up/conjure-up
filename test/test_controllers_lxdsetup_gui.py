@@ -32,12 +32,16 @@ class LXDSetupGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.lxdsetup.gui.app')
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
+        self.track_screen_patcher = patch(
+            'conjureup.controllers.lxdsetup.gui.track_screen')
+        self.mock_track_screen = self.track_screen_patcher.start()
 
     def tearDown(self):
         self.utils_patcher.stop()
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
+        self.track_screen_patcher.stop()
 
     def test_render(self):
         "call render"

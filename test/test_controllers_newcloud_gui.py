@@ -32,16 +32,20 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.newcloud.gui.app')
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
+        self.track_screen_patcher = patch(
+            'conjureup.controllers.newcloud.gui.track_screen')
+        self.mock_track_screen = self.track_screen_patcher.start()
 
     def tearDown(self):
         self.utils_patcher.stop()
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
+        self.track_screen_patcher.stop()
 
     def test_render(self):
         "call render"
-        self.controller.render('cloudname')
+        self.controller.render('maas')
 
 
 class NewCloudGUIFinishTestCase(unittest.TestCase):
@@ -64,12 +68,20 @@ class NewCloudGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.newcloud.gui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.track_screen_patcher = patch(
+            'conjureup.controllers.newcloud.gui.track_screen')
+        self.mock_track_screen = self.track_screen_patcher.start()
+        self.track_event_patcher = patch(
+            'conjureup.controllers.newcloud.gui.track_event')
+        self.mock_track_event = self.track_event_patcher.start()
 
     def tearDown(self):
         self.controllers_patcher.stop()
         self.utils_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.track_screen_patcher.stop()
+        self.track_event_patcher.stop()
 
     def test_finish(self):
         "call finish"

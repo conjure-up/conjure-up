@@ -49,6 +49,10 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.mock_juju = self.juju_patcher.start()
         self.mock_juju.JUJU_ASYNC_QUEUE = sentinel.JUJU_ASYNC_QUEUE
 
+        self.track_screen_patcher = patch(
+            'conjureup.controllers.deploy.gui.track_screen')
+        self.mock_track_screen = self.track_screen_patcher.start()
+
     def tearDown(self):
         self.utils_patcher.stop()
         self.finish_patcher.stop()
@@ -56,6 +60,7 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.juju_patcher.stop()
+        self.track_screen_patcher.stop()
 
     def test_queue_predeploy_once(self):
         "Call submit to schedule predeploy if we haven't yet"

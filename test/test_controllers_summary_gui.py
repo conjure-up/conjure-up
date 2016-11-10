@@ -27,6 +27,10 @@ class SummaryGUIRenderTestCase(unittest.TestCase):
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
 
+        self.track_screen_patcher = patch(
+            'conjureup.controllers.summary.gui.track_screen')
+        self.mock_track_screen = self.track_screen_patcher.start()
+
         self.controller = SummaryController()
         self.controller.save_path = sentinel.savepath
 
@@ -34,6 +38,7 @@ class SummaryGUIRenderTestCase(unittest.TestCase):
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
+        self.track_screen_patcher.stop()
 
     def test_render_empty(self):
         "call render with no results"

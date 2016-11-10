@@ -16,10 +16,6 @@ class DeployStatusGUIRenderTestCase(unittest.TestCase):
 
     def setUp(self):
 
-        self.utils_patcher = patch(
-            'conjureup.controllers.deploystatus.gui.utils')
-        self.mock_utils = self.utils_patcher.start()
-
         self.finish_patcher = patch(
             'conjureup.controllers.deploystatus.gui.'
             'DeployStatusController.finish')
@@ -37,13 +33,16 @@ class DeployStatusGUIRenderTestCase(unittest.TestCase):
         self.mock_eventloop = self.eventloop_patcher.start()
 
         self.controller = DeployStatusController()
+        self.track_screen_patcher = patch(
+            'conjureup.controllers.deploystatus.gui.track_screen')
+        self.mock_track_screen = self.track_screen_patcher.start()
 
     def tearDown(self):
-        self.utils_patcher.stop()
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.eventloop_patcher.stop()
+        self.track_screen_patcher.stop()
 
     def test_render(self):
         "call render"
@@ -58,10 +57,6 @@ class DeployStatusGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.deploystatus.gui.controllers')
         self.mock_controllers = self.controllers_patcher.start()
 
-        self.utils_patcher = patch(
-            'conjureup.controllers.deploystatus.gui.utils')
-        self.mock_utils = self.utils_patcher.start()
-
         self.render_patcher = patch(
             'conjureup.controllers.deploystatus.gui.'
             'DeployStatusController.render')
@@ -73,11 +68,15 @@ class DeployStatusGUIFinishTestCase(unittest.TestCase):
 
         self.controller = DeployStatusController()
 
+        self.track_screen_patcher = patch(
+            'conjureup.controllers.deploystatus.gui.track_screen')
+        self.mock_track_screen = self.track_screen_patcher.start()
+
     def tearDown(self):
         self.controllers_patcher.stop()
-        self.utils_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.track_screen_patcher.stop()
 
     def test_finish_ok(self):
         "finish with no exception calls steps"
