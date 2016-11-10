@@ -2,8 +2,9 @@ import os
 import os.path as path
 from functools import partial
 
-from conjureup import async, controllers, juju, utils
+from conjureup import async, controllers, juju
 from conjureup.app_config import app
+from conjureup.telemetry import track_exception, track_screen
 from conjureup.ui.views.deploystatus import DeployStatusView
 from ubuntui.ev import EventLoop
 
@@ -14,13 +15,12 @@ class DeployStatusController:
 
     def __init__(self):
         self.view = None
-        self.pre_exec_pollinate = False
         self.bundle_scripts = path.join(
             app.config['spell-dir'], 'steps'
         )
 
-    def __handle_exception(self, tag, exc):
-        utils.pollinate(app.session_id, tag)
+    def __handle_exception(self, msg, exc):
+        track_exception(msg)
         return app.ui.show_exception_message(exc)
 
     def __wait_for_applications(self, *args):
@@ -46,6 +46,7 @@ class DeployStatusController:
     def render(self):
         """ Render deploy status view
         """
+        track_screen("Deploy Status")
         self.view = DeployStatusView(app)
 
         try:

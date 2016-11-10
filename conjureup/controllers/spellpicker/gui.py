@@ -3,6 +3,7 @@ import os
 from conjureup import controllers, utils
 from conjureup.app_config import app
 from conjureup.download import EndpointType, download_local
+from conjureup.telemetry import track_screen
 from conjureup.ui.views.spellpicker import SpellPickerView
 
 
@@ -11,14 +12,7 @@ class SpellPickerController:
     def __init__(self):
         self.view = None
 
-    def __handle_exception(self, exc):
-        utils.pollinate(app.session_id, "E005")
-        app.ui.show_exception_message(exc)
-
     def finish(self, spellname):
-
-        utils.pollinate(app.session_id, 'CS')
-
         utils.set_chosen_spell(spellname,
                                os.path.join(app.argv.cache_dir,
                                             spellname))
@@ -31,7 +25,7 @@ class SpellPickerController:
 
     def render(self):
         spells = []
-
+        track_screen("Spell Picker")
         if app.endpoint_type is None:
             for _, kd in app.spells_index.items():
                 spells += kd['spells']

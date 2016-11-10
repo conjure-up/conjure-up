@@ -16,10 +16,6 @@ class StepsGUIRenderTestCase(unittest.TestCase):
 
     def setUp(self):
 
-        self.utils_patcher = patch(
-            'conjureup.controllers.steps.gui.utils')
-        self.mock_utils = self.utils_patcher.start()
-
         self.finish_patcher = patch(
             'conjureup.controllers.steps.gui.StepsController.finish')
         self.mock_finish = self.finish_patcher.start()
@@ -36,14 +32,18 @@ class StepsGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.steps.gui.common')
         self.mock_common = self.common_patcher.start()
 
+        self.track_screen_patcher = patch(
+            'conjureup.controllers.steps.gui.track_screen')
+        self.mock_track_screen = self.track_screen_patcher.start()
+
         self.controller = StepsController()
 
     def tearDown(self):
-        self.utils_patcher.stop()
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.common_patcher.stop()
+        self.track_screen_patcher.stop()
 
     def test_render(self):
         "call render"
@@ -58,10 +58,6 @@ class StepsGUIFinishTestCase(unittest.TestCase):
         self.controllers_patcher = patch(
             'conjureup.controllers.steps.gui.controllers')
         self.mock_controllers = self.controllers_patcher.start()
-
-        self.utils_patcher = patch(
-            'conjureup.controllers.steps.gui.utils')
-        self.mock_utils = self.utils_patcher.start()
 
         self.render_patcher = patch(
             'conjureup.controllers.steps.gui.StepsController.render')
@@ -87,7 +83,6 @@ class StepsGUIFinishTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.controllers_patcher.stop()
-        self.utils_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
         self.common_patcher.stop()

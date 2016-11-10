@@ -32,11 +32,16 @@ class CloudsGUIRenderTestCase(unittest.TestCase):
         self.mock_list_clouds = self.list_clouds_patcher.start()
         self.mock_list_clouds.return_value = ['test1', 'test2']
 
+        self.track_screen_patcher = patch(
+            'conjureup.controllers.clouds.gui.track_screen')
+        self.mock_track_screen = self.track_screen_patcher.start()
+
     def tearDown(self):
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
-        self.list_clouds_patcher.start()
+        self.list_clouds_patcher.stop()
+        self.track_screen_patcher.stop()
 
     def test_render(self):
         "call render"

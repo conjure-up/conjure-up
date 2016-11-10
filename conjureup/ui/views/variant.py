@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from urwid import Columns, Filler, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
-from conjureup.utils import pollinate
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn, quit_btn
@@ -74,7 +73,6 @@ class VariantView(WidgetWrap):
         return Pile(cols)
 
     def cancel(self, button):
-        pollinate(app.session_id, 'UC')
         EventLoop.exit(0)
 
     def done(self, result):

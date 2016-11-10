@@ -11,6 +11,7 @@ from conjureup.api.models import model_info
 from conjureup.app_config import app
 from conjureup.maas import MaasClient
 from conjureup.models.provider import Schema
+from conjureup.telemetry import track_event, track_exception, track_screen
 from conjureup.ui.views.newcloud import NewCloudView
 from ubuntui.ev import EventLoop
 
@@ -23,7 +24,7 @@ class NewCloudController:
         self.cloud = None
 
     def __handle_exception(self, exc):
-        utils.pollinate(app.session_id, 'EB')
+        track_exception(exc.args[0])
         return app.ui.show_exception_message(exc)
 
     def __handle_bootstrap_done(self, future):
@@ -43,7 +44,7 @@ class NewCloudController:
             e = Exception("Bootstrap error: {}".format(err))
             return self.__handle_exception(e)
 
-        utils.pollinate(app.session_id, 'J004')
+        track_event("Juju Bootstrap", "Done", "")
         EventLoop.remove_alarms()
         app.ui.set_footer('Bootstrap complete...')
         self.__post_bootstrap_exec()
@@ -86,7 +87,7 @@ class NewCloudController:
         if path.isfile(_post_bootstrap_sh) \
            and os.access(_post_bootstrap_sh, os.X_OK):
             app.ui.set_footer('Running post-bootstrap tasks...')
-            utils.pollinate(app.session_id, 'J001')
+            track_event("Juju Post-Bootstrap", "Started", "")
             app.log.debug("post_bootstrap running: {}".format(
                 _post_bootstrap_sh
             ))
@@ -108,11 +109,11 @@ class NewCloudController:
 
         app.log.debug("post_bootstrap_done: {}".format(result))
         if result['returnCode'] > 0:
-            utils.pollinate(app.session_id, 'E001')
+            track_exception("Error in Post-Bootstrap")
             return self.__handle_exception(Exception(
                 'There was an error during the post '
                 'bootstrap processing phase: {}.'.format(result)))
-        utils.pollinate(app.session_id, 'J002')
+        track_event("Juju Post-Bootstrap", "Done", "")
         app.ui.set_footer('')
 
     def finish(self, credentials=None, back=False):
@@ -141,7 +142,7 @@ class NewCloudController:
                 consumer_key=maas_api_key[0],
                 token_key=maas_api_key[1],
                 token_secret=maas_api_key[2])
-        utils.pollinate(app.session_id, 'CA')
+        track_event("Credentials", "Added", "")
 
         self.__do_bootstrap(credential=credentials_key)
 
@@ -151,7 +152,7 @@ class NewCloudController:
         Arguments:
         cloud: The cloud to create credentials for
         """
-
+        track_screen("Cloud Creation")
         self.cloud = cloud
         if app.current_controller is None:
             app.current_controller = petname.Name()
@@ -186,7 +187,7 @@ class NewCloudController:
         try:
             creds = Schema[self.cloud]
         except KeyError as e:
-            utils.pollinate(app.session_id, 'EC')
+            track_exception("Credentials Error")
             return app.ui.show_exception_message(e)
 
         view = NewCloudView(app,

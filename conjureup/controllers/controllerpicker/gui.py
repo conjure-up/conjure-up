@@ -1,7 +1,8 @@
 import petname
 
-from conjureup import async, controllers, juju, utils
+from conjureup import async, controllers, juju
 from conjureup.app_config import app
+from conjureup.telemetry import track_exception, track_screen
 from conjureup.ui.views.ControllerListView import ControllerListView
 
 
@@ -11,7 +12,7 @@ class ControllerPicker:
         self.view = None
 
     def __handle_exception(self, exc):
-        utils.pollinate(app.session_id, "E004")
+        track_exception(exc.args[0])
         app.ui.show_exception_message(exc)
 
     def __add_model(self):
@@ -21,7 +22,6 @@ class ControllerPicker:
         if controller is None:
             return controllers.use('clouds').render()
 
-        utils.pollinate(app.session_id, 'CS')
         app.current_controller = controller
         app.current_model = petname.Name()
         async.submit(self.__add_model,
@@ -52,6 +52,7 @@ class ControllerPicker:
         if len(filtered_controllers) == 0:
             return controllers.use('clouds').render()
 
+        track_screen("Controller Picker")
         excerpt = app.config.get(
             'description',
             "Please select an existing controller,"

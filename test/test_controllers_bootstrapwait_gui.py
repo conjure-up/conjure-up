@@ -34,11 +34,16 @@ class BootstrapwaitGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.bootstrapwait.gui.EventLoop')
         self.mock_eventloop = self.eventloop_patcher.start()
 
+        self.track_screen_patcher = patch(
+            'conjureup.controllers.bootstrapwait.gui.track_screen')
+        self.mock_track_screen = self.track_screen_patcher.start()
+
     def tearDown(self):
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.eventloop_patcher.stop()
+        self.track_screen_patcher.stop()
 
     def test_render(self):
         "call render"

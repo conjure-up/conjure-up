@@ -35,7 +35,6 @@ class DeployController:
                                      'steps/00_pre-deploy')
         if os.path.isfile(pre_deploy_sh) \
            and os.access(pre_deploy_sh, os.X_OK):
-            utils.pollinate(app.session_id, 'J001')
             utils.info("Running pre deployment tasks.")
             try:
                 sh = utils.run(pre_deploy_sh, shell=True,
@@ -69,7 +68,6 @@ class DeployController:
                                partial(self.__handle_exception, "ED"))
         concurrent.futures.wait([f])
 
-        utils.pollinate(app.session_id, 'PC')
         controllers.use('deploystatus').render()
 
     def render(self):

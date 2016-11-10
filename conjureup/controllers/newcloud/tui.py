@@ -30,7 +30,6 @@ class NewCloudController:
                                          'steps/00_post-bootstrap')
         if os.path.isfile(post_bootstrap_sh) \
            and os.access(post_bootstrap_sh, os.X_OK):
-            utils.pollinate(app.session_id, 'J001')
             utils.info("Running post-bootstrap tasks.")
             try:
                 sh = utils.run(post_bootstrap_sh, shell=True,

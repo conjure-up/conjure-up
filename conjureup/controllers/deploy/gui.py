@@ -7,6 +7,7 @@ from subprocess import PIPE
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
+from conjureup.telemetry import track_event, track_exception, track_screen
 from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView
 from ubuntui.ev import EventLoop
@@ -18,7 +19,7 @@ class DeployController:
         self.applications = []
 
     def _handle_exception(self, tag, exc):
-        utils.pollinate(app.session_id, tag)
+        track_exception(exc.args[0])
         app.ui.show_exception_message(exc)
         self.showing_error = True
         EventLoop.remove_alarms()
@@ -35,7 +36,7 @@ class DeployController:
                                      'steps/00_pre-deploy')
         if os.path.isfile(pre_deploy_sh) \
            and os.access(pre_deploy_sh, os.X_OK):
-            utils.pollinate(app.session_id, 'J001')
+            track_event("Juju Pre-Deploy", "Started", "")
             msg = "Running pre-deployment tasks."
             app.log.debug(msg)
             app.ui.set_footer(msg)
@@ -62,7 +63,7 @@ class DeployController:
 
         app.log.debug("pre_deploy_done: {}".format(result))
         if result['returnCode'] > 0:
-            utils.pollinate(app.session_id, 'E003')
+            track_exception("Pre-deploy error")
             return self._handle_exception('E003', Exception(
                 'There was an error during the pre '
                 'deploy processing phase: {}.'.format(result)))
@@ -113,9 +114,8 @@ class DeployController:
         else:
             return controllers.use('deploystatus').render()
 
-        utils.pollinate(app.session_id, 'PC')
-
     def render(self):
+        track_screen("Deploy")
         try:
             future = async.submit(self._pre_deploy_exec,
                                   partial(self._handle_exception, 'E003'),
