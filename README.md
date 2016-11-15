@@ -36,6 +36,7 @@ We will eventually move to pure snap distribution, however, until that time
 packages are built and located at:
 
 ```
+$ sudo apt-add-repository ppa:juju/stable
 $ sudo apt-add-repository ppa:conjure-up/next
 $ sudo apt update
 $ sudo apt install conjure-up
