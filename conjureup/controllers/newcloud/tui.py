@@ -88,4 +88,5 @@ class NewCloudController:
         self.do_post_bootstrap()
         self.finish()
 
+
 _controller_class = NewCloudController

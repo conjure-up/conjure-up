@@ -51,4 +51,5 @@ class CloudsController:
             "Summoning {} to {}".format(app.argv.spell, app.argv.cloud))
         self.finish()
 
+
 _controller_class = CloudsController

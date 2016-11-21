@@ -31,4 +31,5 @@ class SummaryController:
         app.ui.set_footer("Your big software is deployed, press "
                           "(Q) key to return to shell.")
 
+
 _controller_class = SummaryController

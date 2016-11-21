@@ -26,4 +26,5 @@ class SummaryController:
         print(table)
         utils.info("Installation of your big software is now complete.")
 
+
 _controller_class = SummaryController

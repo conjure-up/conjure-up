@@ -92,6 +92,7 @@ class vocab(dict):
             if v == value:
                 return k
 
+
 MAAS_STATES = vocab(
     DECLARED=0,
     COMMISSIONING=1,

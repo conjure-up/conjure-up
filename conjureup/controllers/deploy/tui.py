@@ -80,4 +80,5 @@ class DeployController:
 
         self.finish()
 
+
 _controller_class = DeployController

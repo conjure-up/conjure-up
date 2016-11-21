@@ -33,4 +33,5 @@ class DeployStatusController:
                               queue_name=juju.JUJU_ASYNC_QUEUE)
         future.add_done_callback(self.finish)
 
+
 _controller_class = DeployStatusController

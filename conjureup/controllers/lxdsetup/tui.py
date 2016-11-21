@@ -12,4 +12,5 @@ class LXDSetupController:
         utils.info("")
         sys.exit(1)
 
+
 _controller_class = LXDSetupController
