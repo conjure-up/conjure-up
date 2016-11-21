@@ -18,7 +18,7 @@ def status():
     """
     try:
         sh = run(
-            'juju-2.0 status -m {} --format yaml'.format(JUJU_CM_STR),
+            'juju status -m {} --format yaml'.format(JUJU_CM_STR),
             shell=True, check=True, stdout=PIPE)
     except CalledProcessError:
         return None
@@ -33,7 +33,7 @@ def leader(application):
     """
     try:
         sh = run(
-            'juju-2.0 run -m {} '
+            'juju run -m {} '
             '--application {} is-leader --format yaml'.format(
                 JUJU_CM_STR, application),
             shell=True, stdout=PIPE, check=True)
@@ -81,7 +81,7 @@ def run_action(unit, action):
     """
     is_complete = False
     sh = run(
-        'juju-2.0 run-action -m {} {} {}'.format(
+        'juju run-action -m {} {} {}'.format(
             JUJU_CM_STR, unit, action),
         shell=True,
         stdout=PIPE)
@@ -94,7 +94,7 @@ def run_action(unit, action):
 
     while not is_complete:
         sh = run(
-            'juju-2.0 show-action-output -m {} {}'.format(
+            'juju show-action-output -m {} {}'.format(
                 JUJU_CM_STR, action_id),
             shell=True,
             stderr=PIPE,
