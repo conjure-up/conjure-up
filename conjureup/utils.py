@@ -13,7 +13,6 @@ from subprocess import (
     check_output
 )
 
-import semver
 import yaml
 from termcolor import colored
 
@@ -116,14 +115,14 @@ def check_bridge_exists():
     else:
         raise Exception("Could not determine LXD version.")
 
-    if semver.match(lxd_version, ">=2.4.0"):
+    if lxd_version >= "2.4.0":
         try:
             run('lxc network list|grep -q bridge',
                 shell=True, check=True)
         except CalledProcessError:
             return False
         return True
-    elif semver.match(lxd_version, "<2.4.0"):
+    elif lxd_version < "2.4.0":
         if os.path.isfile('/etc/default/lxd-bridge'):
             config_string = "[dummy]\n"
             with open('/etc/default/lxd-bridge') as f:
