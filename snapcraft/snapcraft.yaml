@@ -48,7 +48,7 @@ parts:
       - usr/bin/jq
       - usr/bin/juju*
       - usr/bin/py*
-      - usr/bin/conjure-up
+      - bin/conjure-up
       - usr/lib/juju-2.0/bin/juju*
       - usr/lib/python3
       - usr/lib/python3.5/lib-dynload
