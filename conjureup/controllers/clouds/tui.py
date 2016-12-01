@@ -1,4 +1,3 @@
-import os
 import sys
 
 import petname
@@ -10,12 +9,6 @@ from conjureup.app_config import app
 class CloudsController:
 
     def finish(self):
-        if app.argv.cloud == "localhost":
-            if not utils.check_bridge_exists():
-                back = "{} to localhost".format(app.argv.config['spell'])
-                os.execl("/usr/share/conjure-up/run-lxd-config",
-                         "/usr/share/conjure-up/run-lxd-config",
-                         back)
         if app.argv.controller:
             existing_controller = app.argv.controller
             if juju.get_controller(existing_controller) is None:
