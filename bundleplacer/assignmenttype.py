@@ -42,6 +42,16 @@ def label_to_atype(labels):
     return atypes
 
 
+def atype_to_label(atypes):
+    """ Maps assignmenttypes to api labels"""
+    pd = {AssignmentType.DEFAULT: "",
+          AssignmentType.BareMetal: "",
+          AssignmentType.KVM: "kvm:",
+          AssignmentType.LXD: "lxd:",
+          AssignmentType.LXC: "lxc:"}
+    return [pd[atype] for atype in atypes]
+
+
 class OrderedEnum(Enum):
 
     def __ge__(self, other):
