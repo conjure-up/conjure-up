@@ -237,7 +237,9 @@ class Bundle:
         self._bundle['machines'] = new_machines
 
     def add_machine(self, md, idx):
-        self._bundle[idx] = md
+        if 'machines' not in self._bundle:
+            self._bundle['machines'] = {}
+        self._bundle['machines'][idx] = md
 
     @property
     def series(self):
