@@ -112,6 +112,46 @@ class MaasClient:
 
         return c_val
 
+    def tag_new(self, tag):
+        """ Create tag if it doesn't exist.
+
+        :param tag: Tag name
+        :returns: Success/Fail boolean
+        """
+        tags = {tagmd['name'] for tagmd in self.tags}
+        if tag not in tags:
+            res = self.post('/tags/', dict(op='new', name=tag))
+            return res.ok
+        return False
+
+    def tag_machine(self, tag, system_id):
+        """ Tag the machine with the specified tag.
+
+        :param tag: Tag name
+        :type tag: str
+        :param system_id: ID of node
+        :type system_id: str
+        :returns: Success or Fail
+        :rtype: bool
+        """
+
+        res = self.post('/tags/%s/' % (tag,),
+                        dict(op='update_nodes',
+                             add=system_id))
+        if res.ok:
+            return True
+        return False
+
+    def assign_id_tags(self, nodes):
+        """ Tag each managed node with its unique system id
+        """
+        for machine in nodes:
+            system_id = machine['system_id']
+            if 'tag_names' not in machine['tag_names'] or \
+               system_id not in machine['tag_names']:
+                self.tag_new(system_id)
+                self.tag_machine(system_id, system_id)
+
 
 class MaasMachineStatus(Enum):
     """Symbolic names for maas API status numbers.
