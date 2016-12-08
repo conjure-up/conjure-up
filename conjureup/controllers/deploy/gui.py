@@ -91,9 +91,6 @@ class DeployController:
         app.ui.set_body(cv)
 
     def do_architecture(self, application, sender):
-
-        # TODO - do we really always want to do this?
-
         # If no machines are specified, add a machine for each app:
         bundle = app.metadata_controller.bundle
         if len(bundle.machines) == 0:
@@ -133,7 +130,6 @@ class DeployController:
                 if app == application]
 
     def get_all_assignments(self, application):
-
         app_assignments = []
         for juju_machine_id, alist in self.assignments.items():
             for a, at in alist:
@@ -155,6 +151,7 @@ class DeployController:
 
     def set_machine_pin(self, juju_machine_id, maas_machine_id):
         """store the mapping between a juju machine and maas machine.
+
 
         Also ensure that the juju machine has constraints that
         uniquely id the maas machine
@@ -224,11 +221,6 @@ class DeployController:
             future.add_done_callback(self._pre_deploy_done)
         except Exception as e:
             return self._handle_exception('E003', e)
-
-        #  TODO - maybe don't do this here for MAAS?
-        # juju.add_machines(
-        #     list(app.metadata_controller.bundle.machines.values()),
-        #     exc_cb=partial(self._handle_exception, "ED"))
 
         self.applications = sorted(app.metadata_controller.bundle.services,
                                    key=attrgetter('service_name'))
