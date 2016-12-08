@@ -149,7 +149,7 @@ class DeployController:
         self.list_view.update()
         app.ui.set_body(self.list_view)
 
-    def set_machine_pin(self, juju_machine_id, maas_machine_id):
+    def set_machine_pin(self, juju_machine_id, maas_machine):
         """store the mapping between a juju machine and maas machine.
 
 
@@ -159,13 +159,14 @@ class DeployController:
         """
         bundle = app.metadata_controller.bundle
         juju_machine = bundle.machines[juju_machine_id]
-        tagstr = "tags={}".format(maas_machine_id)
+        tag = maas_machine.instance_id.split('/')[-2]
+        tagstr = "tags={}".format(tag)
         if 'constraints' in juju_machine:
             juju_machine['constraints'] += "," + tagstr
         else:
             juju_machine['constraints'] = tagstr
 
-        self.maas_machine_map[juju_machine_id] = maas_machine_id
+        self.maas_machine_map[juju_machine_id] = maas_machine
 
     def apply_assignments(self, application):
         new_assignments = []
