@@ -110,7 +110,8 @@ class DeployController:
         """
         bundle = app.metadata_controller.bundle
         midx = 0
-        for bundle_application in bundle.services:
+        for bundle_application in sorted(bundle.services,
+                                         key=attrgetter('service_name')):
             for n in range(bundle_application.num_units):
                 bundle.add_machine(dict(series=bundle.series),
                                    str(midx))
