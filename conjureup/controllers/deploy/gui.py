@@ -1,5 +1,3 @@
-import q
-
 import json
 import os
 from collections import defaultdict
@@ -26,6 +24,7 @@ class DeployController:
     def __init__(self):
         self.applications = []
         self.assignments = defaultdict(list)
+        self.deployed_juju_machines = {}
         self.maas_machine_map = {}
         c_info = get_controller_info(app.current_controller)
         self.cloud_type = c_info['details']['cloud']
@@ -175,9 +174,68 @@ class DeployController:
             plabel = ""
             if label != "":
                 plabel += "{}".format(label)
-            plabel += juju_machine_id
+            plabel += self.deployed_juju_machines.get(juju_machine_id,
+                                                      juju_machine_id)
             new_assignments.append(plabel)
         application.placement_spec = new_assignments
+
+    def ensure_machines(self, application, done_cb):
+        """If 'application' is assigned to any machine that haven't been added yet,
+        first add the machines then call done_cb
+        """
+
+        if self.cloud_type == 'maas':
+            self.ensure_machines_maas(application, done_cb)
+        else:
+            self.ensure_machines_nonmaas(application, done_cb)
+
+    def ensure_machines_maas(self, application, done_cb):
+        app_placements = self.get_all_assignments(application)
+        for juju_machine_id in [j_id for j_id, _ in app_placements
+                                if j_id not in self.deployed_juju_machines]:
+            machine_attrs = {'series': application.csid.series}
+
+            if juju_machine_id in self.maas_machine_map:
+                maas_machine = self.maas_machine_map[juju_machine_id]
+                app.maas.client.assign_id_tags([maas_machine])
+                machine_tag = maas_machine.instance_id.split('/')[-2]
+                cons = "tags={}".format(machine_tag)
+                machine_attrs['constraints'] = cons
+
+            f = juju.add_machines([machine_attrs],
+                                  msg_cb=app.ui.set_footer,
+                                  exc_cb=partial(self._handle_exception, "ED"))
+            add_machines_result = f.result()
+            self._handle_add_machines_return(juju_machine_id,
+                                             add_machines_result)
+        done_cb()
+
+    def ensure_machines_nonmaas(self, application, done_cb):
+        juju_machines = app.metadata_controller.bundle.machines
+        app_placements = self.get_all_assignments(application)
+        for juju_machine_id in [j_id for j_id, _ in app_placements
+                                if j_id not in self.deployed_juju_machines]:
+            juju_machine = juju_machines[juju_machine_id]
+            f = juju.add_machines([juju_machine])
+            result = f.result()
+            self._handle_add_machines_return(juju_machine_id, result)
+        done_cb()
+
+    def _handle_add_machines_return(self, juju_machine_id,
+                                    add_machines_return):
+        new_machines_list = add_machines_return['machines']
+        if len(new_machines_list) != 1:
+            raise Exception("Unexpected return value from "
+                            "add_machines: {}".format(add_machines_return))
+        new_machine_id = new_machines_list[0]['machine']
+        self.deployed_juju_machines[juju_machine_id] = new_machine_id
+
+    def _do_deploy_one(self, application, msg_cb):
+        self.apply_assignments(application)
+        juju.deploy_service(application,
+                            app.metadata_controller.series,
+                            msg_cb=msg_cb,
+                            exc_cb=partial(self._handle_exception, "ED"))
 
     def do_deploy(self, application, msg_cb):
         "launches deploy in background for application"
@@ -187,21 +245,16 @@ class DeployController:
             msg_cb(*args)
             app.ui.set_footer(*args)
 
-        self.apply_assignments(application)
-        juju.deploy_service(application,
-                            app.metadata_controller.series,
-                            msg_cb=msg_both,
-                            exc_cb=partial(self._handle_exception, "ED"))
+        self.ensure_machines(application, partial(self._do_deploy_one,
+                                                  application, msg_both))
 
     def do_deploy_remaining(self):
         "deploys all un-deployed applications"
 
         for application in self.undeployed_applications:
-            self.apply_assignments(application)
-            juju.deploy_service(application,
-                                app.metadata_controller.series,
-                                app.ui.set_footer,
-                                partial(self._handle_exception, "ED"))
+            self.ensure_machines(application, partial(self._do_deploy_one,
+                                                      application,
+                                                      app.ui.set_footer))
 
     def finish(self):
         juju.set_relations(self.applications,

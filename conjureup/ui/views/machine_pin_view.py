@@ -3,10 +3,8 @@
 """
 import logging
 
-import q
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
-from conjureup.app_config import app
 from conjureup.ui.widgets.machines_list import MachinesList
 
 from ubuntui.utils import Color, Padding
