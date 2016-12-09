@@ -50,12 +50,13 @@ class JujuMachineWidget(WidgetWrap):
     show_assignments - display info about which charms are assigned
     and what assignment type (LXC, KVM, etc) they have.
 
-    show_pin - show whether a machine has been pinned to a maas machine.
+    show_pin - show button to pin juju machine to a maas machine
 
     """
 
-    def __init__(self, juju_machine_id, md, application, assign_cb, unassign_cb,
-                 controller, show_assignments=True, show_pin=False):
+    def __init__(self, juju_machine_id, md, application, assign_cb,
+                 unassign_cb, controller, show_assignments=True,
+                 show_pin=False):
         self.juju_machine_id = juju_machine_id
         self.md = md
         self.application = application
@@ -90,6 +91,8 @@ class JujuMachineWidget(WidgetWrap):
 
         self.juju_machine_id_button = MenuSelectButton(
             '{:20s}'.format(self.juju_machine_id), self.show_pin_chooser)
+        self.juju_machine_id_label = Text(
+            "{:20s}".format(self.juju_machine_id))
         self.cores_field = Edit('', cdict.get('cores', ''))
         connect_signal(self.cores_field, 'change', self.handle_cores_changed)
         self.mem_field = Edit('', cdict.get('mem', ''))
@@ -97,7 +100,11 @@ class JujuMachineWidget(WidgetWrap):
         self.disk_field = Edit('', cdict.get('root-disk', ''))
         connect_signal(self.disk_field, 'change', self.handle_disk_changed)
 
-        cols = [self.juju_machine_id_button, self.cores_field,
+        if self.show_pin:
+            machine_id_w = self.juju_machine_id_button
+        else:
+            machine_id_w = self.juju_machine_id_label
+        cols = [machine_id_w, self.cores_field,
                 self.mem_field, self.disk_field, Text("placeholder")]
         self.unselected_columns = Columns(cols)
         self.update_assignments()
@@ -170,7 +177,7 @@ class JujuMachineWidget(WidgetWrap):
             self.juju_machine_id_button.set_label('{:20s} {}'.format(
                 self.juju_machine_id, pin_label))
         else:
-            self.juju_machine_id_button.set_label('{:20s}'.format(
+            self.juju_machine_id_label.set_text('{:20s}'.format(
                 self.juju_machine_id))
 
         self.pile.contents = [(self.unselected_columns, self.pile.options()),
