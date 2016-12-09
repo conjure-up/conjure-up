@@ -1,6 +1,7 @@
 """ simple maas client
 """
 
+from functools import partial
 import requests
 from requests_oauthlib import OAuth1
 from enum import Enum
@@ -86,31 +87,40 @@ class MaasClient:
                                auth=self.oauth)
 
     # Higher level API
-    def _get_machines_async(self):
-        r = self.get("/machines/")
+    def _get_key_sync(self, key):
+        r = self.get("/{}/".format(key))
         if r.status_code != 200:
-            raise Exception("Error in MAAS API")
-        return [MaasMachine(d) for d in r.json()]
+            raise Exception("Error in MAAS API: {}".format(r.text))
+        return r.json()
 
-    def _update_machine_cache(self, future):
+    def _update_cache(self, key, future):
         val = future.result()
-        self.CACHE['machines'] = (val, time.time())
+        self.CACHE[key] = (val, time.time())
 
-    def get_machines(self):
-        """cached API call, refreshes in background every 5 sec
+    def get_cached(self, key):
+        """cached API GET call, refreshes in background every 5 seconds
 
         returns None on the first call so you know it's just loading
-        instead of an actual empty list of machines.
-
+        instead of an actual empty list
         """
+
         now = time.time()
-        c_val, c_ts = self.CACHE.get('machines', (None, now))
+        c_val, c_ts = self.CACHE.get(key, (None, now))
         if c_val is None or now - c_ts > 5:
-            f = submit(self._get_machines_async,
+            f = submit(partial(self._get_key_sync, key),
                        lambda _: None)
-            f.add_done_callback(self._update_machine_cache)
+            f.add_done_callback(partial(self._update_cache, key))
 
         return c_val
+
+    def get_machines(self):
+        """
+        cached get of /machines/
+        """
+        cval = self.get_cached('machines')
+        if cval is None:
+            return []
+        return [MaasMachine(d) for d in cval]
 
     def tag_new(self, tag):
         """ Create tag if it doesn't exist.
@@ -118,9 +128,16 @@ class MaasClient:
         :param tag: Tag name
         :returns: Success/Fail boolean
         """
-        tags = {tagmd['name'] for tagmd in self.tags}
-        if tag not in tags:
-            res = self.post('/tags/', dict(op='new', name=tag))
+        tags = self.get_cached('tags')
+
+        # ensure that we get the actual result if cache is empty
+        if tags is None:
+            tags = self._get_key_sync('tags')
+
+        comment = "Machine-generated"
+        if tag not in [t['name'] for t in tags]:
+            res = self.post('/tags/', dict(comment=comment,
+                                           name=tag))
             return res.ok
         return False
 
@@ -135,9 +152,9 @@ class MaasClient:
         :rtype: bool
         """
 
-        res = self.post('/tags/%s/' % (tag,),
+        res = self.post('/tags/{}/'.format(system_id),
                         dict(op='update_nodes',
-                             add=system_id))
+                             add=[system_id]))
         if res.ok:
             return True
         return False
@@ -146,9 +163,9 @@ class MaasClient:
         """ Tag each managed node with its unique system id
         """
         for machine in nodes:
-            system_id = machine['system_id']
-            if 'tag_names' not in machine['tag_names'] or \
-               system_id not in machine['tag_names']:
+            system_id = machine.system_id
+            if 'tag_names' not in machine.tag_names or \
+               system_id not in machine.tag_names:
                 self.tag_new(system_id)
                 self.tag_machine(system_id, system_id)
 
