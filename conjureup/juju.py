@@ -304,8 +304,10 @@ def constraints_to_dict(constraints):
                         if c != ""]
     for c in list_constraints:
         try:
-            constraint, constraint_value = c.split('=')
-            new_constraints[constraint] = constraint_value
+            constraint, value = c.split('=')
+            if constraint in ['tags', 'spaces']:
+                value = value.split(',')
+            new_constraints[constraint] = value
         except ValueError as e:
             app.log.debug("Skipping constraint: {} ({})".format(c, e))
     return new_constraints
