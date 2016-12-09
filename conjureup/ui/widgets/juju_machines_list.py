@@ -122,7 +122,7 @@ class JujuMachinesList(WidgetWrap):
 
     def remove_machine(self, sender):
         self.remove_machine_cb()
-        raise Exception("TODO")
+        self.update()
 
     def handle_filter_change(self, edit_button, userdata):
         self.filter_string = userdata
@@ -134,19 +134,13 @@ class JujuMachinesList(WidgetWrap):
 
     def update(self):
 
-        # don't need this?
-        # for mw in self.machine_widgets:
-        #     machine = next((m for m in machines if
-        #                     mw.machine.instance_id == m.instance_id), None)
-        #     if machine is None:
-        #         self.remove_machine_widget(mw.machine)
-
         for midx, md in sorted(self.machines.items()):
-            # filter_label = m.filter_label()
-            # if self.filter_string != "" and \
-            #    self.filter_string not in filter_label:
-            #     self.remove_machine_widget(m)
-            #     continue
+            allvalues = ["{}={}".format(k, v) for k, v in md.items()]
+            filter_label = midx + " " + " ".join(allvalues)
+            if self.filter_string != "" and \
+               self.filter_string not in filter_label:
+                self.remove_machine_widget(midx)
+                continue
 
             mw = self.find_machine_widget(midx)
             if mw is None:
@@ -174,7 +168,7 @@ class JujuMachinesList(WidgetWrap):
 
         return mw
 
-    def remove_machine_widget(self, midx, md):
+    def remove_machine_widget(self, midx):
         mw = self.find_machine_widget(midx)
         if mw is None:
             return
