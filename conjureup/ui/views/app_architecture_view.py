@@ -1,4 +1,3 @@
-import q
 """ Application Architecture View
 
 """
@@ -83,16 +82,17 @@ class AppArchitectureView(WidgetWrap):
             self.application.service_name))]
 
         controller_is_maas = self.controller.cloud_type == 'maas'
-        self.machines_list = JujuMachinesList(self.application,
-                                              self._machines,
-                                              self.do_assign,
-                                              self.do_unassign,
-                                              self.add_machine,
-                                              self.remove_machine,
-                                              self,
-                                              show_filter_box=True,
-                                              show_pins=controller_is_maas)
-        ws.append(self.machines_list)
+        self.juju_machines_list = JujuMachinesList(
+            self.application,
+            self._machines,
+            self.do_assign,
+            self.do_unassign,
+            self.add_machine,
+            self.remove_machine,
+            self,
+            show_filter_box=True,
+            show_pins=controller_is_maas)
+        ws.append(self.juju_machines_list)
 
         self.pile = Pile(ws)
         return Padding.center_90(Filler(self.pile, valign="top"))

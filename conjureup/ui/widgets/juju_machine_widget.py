@@ -1,4 +1,3 @@
-import q
 # Copyright 2016 Canonical, Ltd.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -254,13 +253,13 @@ class JujuMachineWidget(WidgetWrap):
         self._do_select_assignment(AssignmentType.KVM)
 
     def handle_cores_changed(self, sender, val):
-        q.q(val)
+        raise Exception("TODO")
 
     def handle_mem_changed(self, sender, val):
-        q.q(val)
+        raise Exception("TODO")
 
     def handle_disk_changed(self, sender, val):
-        q.q(val)
+        raise Exception("TODO")
 
     def show_pin_chooser(self, sender):
         self.controller.show_pin_chooser(self.juju_machine_id)
