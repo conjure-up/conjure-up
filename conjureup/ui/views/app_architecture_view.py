@@ -130,11 +130,12 @@ class AppArchitectureView(WidgetWrap):
             self.machine_pin_view.update()
             return
 
-        if len(self.shadow_assignments) == self.application.num_units:
-            self.machines_list.all_assigned = True
+        n_assigned = len(self.get_all_shadow_assignments(self.application))
+        if n_assigned == self.application.num_units:
+            self.juju_machines_list.all_assigned = True
         else:
-            self.machines_list.all_assigned = False
-        self.machines_list.update()
+            self.juju_machines_list.all_assigned = False
+        self.juju_machines_list.update()
 
     def update(self, *args):
         self.update_now()
@@ -164,6 +165,13 @@ class AppArchitectureView(WidgetWrap):
 
     def get_shadow_assignments(self, application, juju_machine_id):
         return self.shadow_assignments[juju_machine_id]
+
+    def get_all_shadow_assignments(self, application):
+        all_assignments = []
+        for j_m_id, al in self.shadow_assignments.items():
+            all_assignments += al
+        return [(a, at) for (a, at)
+                in all_assignments if a == application]
 
     def add_machine(self):
         md = dict(series=app.metadata_controller.bundle.series)

@@ -70,6 +70,7 @@ class JujuMachinesList(WidgetWrap):
         self.controller = controller
         self.machine_widgets = []
         self.show_assignments = show_assignments
+        self.all_assigned = False
         self.show_filter_box = show_filter_box
         self.show_pins = show_pins
         self.filter_string = ""
@@ -144,6 +145,7 @@ class JujuMachinesList(WidgetWrap):
             mw = self.find_machine_widget(midx)
             if mw is None:
                 mw = self.add_machine_widget(midx, md)
+            mw.all_assigned = self.all_assigned
             mw.update()
 
         n = len(self.machine_widgets)
