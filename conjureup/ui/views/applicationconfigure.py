@@ -204,8 +204,8 @@ class ApplicationConfigureView(WidgetWrap):
         self.application.num_units = scale
 
     def do_cancel(self, sender):
-        self.controller.handle_configure_done()
+        self.controller.handle_sub_view_done()
 
     def do_commit(self, sender):
         self.application.options = self.options_copy
-        self.controller.handle_configure_done()
+        self.controller.handle_sub_view_done()

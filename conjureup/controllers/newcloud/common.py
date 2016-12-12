@@ -75,21 +75,3 @@ def save_creds(cloud, credentials):
     with open(cred_path, 'w') as cred_f:
         cred_f.write(yaml.safe_dump(existing_creds,
                                     default_flow_style=False))
-
-
-def parse_maas_apikey(api_key):
-    """ Parses the api key and splitting it up accordingly
-
-    Arguments:
-    api_key: colon seperated maas apikey
-
-    Returns:
-    Tuple containing (consumer_secret, token_key, token_secret)
-    """
-    try:
-        consumer_secret, token_key, token_secret = api_key.split(':')
-    except Exception as e:
-        raise Exception(
-            "Problem parsing MAAS apikey, please verify it was "
-            "entered correctly: {}".format(e))
-    return consumer_secret, token_key, token_secret

@@ -14,6 +14,13 @@ from conjureup.controllers.deploy.gui import DeployController
 class DeployGUIRenderTestCase(unittest.TestCase):
 
     def setUp(self):
+
+        self.get_c_info_patcher = patch(
+            'conjureup.controllers.deploy.gui.get_controller_info')
+        self.mock_get_controller_info = self.get_c_info_patcher.start()
+        self.mock_get_controller_info.return_value = dict(
+            details=dict(cloud='testcloud'))
+
         self.controller = DeployController()
 
         self.utils_patcher = patch(
@@ -43,6 +50,7 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
         mock_app.metadata_controller.bundle = self.mock_bundle
+        mock_app.current_controller = 'testcontroller'
 
         self.juju_patcher = patch(
             'conjureup.controllers.deploy.gui.juju')
@@ -60,6 +68,7 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.juju_patcher.stop()
+        self.get_c_info_patcher.stop()
         self.track_screen_patcher.stop()
 
     def test_queue_predeploy_once(self):
@@ -68,18 +77,17 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.mock_submit.assert_has_calls([self.predeploy_call],
                                           any_order=True)
 
-    def test_call_add_machines_once_only(self):
-        "Call add_machines once"
-        self.controller.render()
-        self.mock_submit.assert_has_calls([self.predeploy_call],
-                                          any_order=True)
-        self.mock_juju.add_machines.assert_called_once_with(
-            [sentinel.machine_1], exc_cb=ANY)
-
 
 class DeployGUIFinishTestCase(unittest.TestCase):
 
     def setUp(self):
+
+        self.get_c_info_patcher = patch(
+            'conjureup.controllers.deploy.gui.get_controller_info')
+        self.mock_get_controller_info = self.get_c_info_patcher.start()
+        self.mock_get_controller_info.return_value = dict(
+            details=dict(cloud='testcloud'))
+
         self.controller = DeployController()
 
         self.controllers_patcher = patch(
@@ -108,6 +116,7 @@ class DeployGUIFinishTestCase(unittest.TestCase):
         self.juju_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.get_c_info_patcher.stop()
 
     def test_show_bootstrap_wait(self):
         "Go to bootstrap wait controller if bootstrap pending"

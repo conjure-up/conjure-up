@@ -9,7 +9,6 @@ import petname
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
-from conjureup.maas import MaasClient
 from conjureup.models.provider import Schema
 from conjureup.telemetry import track_event, track_exception, track_screen
 from conjureup.ui.views.newcloud import NewCloudView
@@ -134,16 +133,7 @@ class NewCloudController:
         if self.cloud == 'maas':
             self.cloud = '{}/{}'.format(self.cloud,
                                         credentials['@maas-server'].value)
-            # Store the MAAS information for the api client
-            maas_api_key = common.parse_maas_apikey(
-                credentials['maas-oauth'].value)
-            app.maas.client = MaasClient(
-                server_address=credentials['@maas-server'].value,
-                consumer_key=maas_api_key[0],
-                token_key=maas_api_key[1],
-                token_secret=maas_api_key[2])
-        track_event("Credentials", "Added", "")
-
+        utils.pollinate(app.session_id, 'CA')
         self.__do_bootstrap(credential=credentials_key)
 
     def render(self, cloud):

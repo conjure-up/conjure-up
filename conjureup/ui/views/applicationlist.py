@@ -64,12 +64,20 @@ class ApplicationWidget(WidgetWrap):
                                     self.application)),
                 focus_map='button_secondary focus'))
 
+        if self.application.num_units > 0:
+            arch_button = (20, Color.button_secondary(
+                PlainButton("Architecture",
+                            partial(self.controller.do_architecture,
+                                    self.application)),
+                focus_map='button_secondary focus'))
+            cws.insert(4, arch_button)
+
         self.columns = Columns(cws, dividechars=1)
         return self.columns
 
     def remove_buttons(self):
         self._selectable = False
-        self.columns.contents = self.columns.contents[:-2]
+        self.columns.contents = self.columns.contents[:-3]
         self.columns.contents.append((Text(""),
                                       self.columns.options()))
 

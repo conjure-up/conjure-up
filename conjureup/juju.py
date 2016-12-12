@@ -49,6 +49,17 @@ def read_config(name):
     return yaml.safe_load(open(abs_path))
 
 
+def get_bootstrap_config(controller_name):
+    bootstrap_config = read_config("bootstrap-config")
+    if 'controllers' not in bootstrap_config:
+        raise Exception("Could not read Juju's bootstrap-config.yaml")
+    cd = bootstrap_config['controllers'].get(controller_name, None)
+    if cd is None:
+        raise Exception("'{}' not found in Juju's "
+                        "bootstrap-config.yaml".format(controller_name))
+    return cd
+
+
 def get_current_controller():
     """ Grabs the current default controller
     """
@@ -280,6 +291,32 @@ def get_cloud(name):
     raise LookupError("Unable to locate cloud: {}".format(name))
 
 
+def constraints_to_dict(constraints):
+    """Parses a constraint string into a dict"""
+    new_constraints = {}
+    if not isinstance(constraints, str):
+        app.log.debug(
+            "Invalid constraints: {}, skipping".format(
+                constraints))
+        return new_constraints
+
+    list_constraints = [c for c in constraints.split(' ')
+                        if c != ""]
+    for c in list_constraints:
+        try:
+            constraint, value = c.split('=')
+            if constraint in ['tags', 'spaces']:
+                value = value.split(',')
+            new_constraints[constraint] = value
+        except ValueError as e:
+            app.log.debug("Skipping constraint: {} ({})".format(c, e))
+    return new_constraints
+
+
+def constraints_from_dict(cdict):
+    return " ".join(["{}={}".format(k, v) for k, v in cdict.items()])
+
+
 def deploy(bundle):
     """ Juju deploy bundle
 
@@ -304,27 +341,11 @@ def add_machines(machines, msg_cb=None, exc_cb=None):
     supported key
 
     """
-    def _prepare_constraints(constraints):
-        new_constraints = {}
-        if not isinstance(constraints, str):
-            app.log.debug(
-                "Invalid constraints: {}, skipping".format(
-                    constraints))
-            return new_constraints
-
-        list_constraints = constraints.split(' ')
-        for c in list_constraints:
-            try:
-                constraint, constraint_value = c.split('=')
-                new_constraints[constraint] = constraint_value
-            except ValueError as e:
-                app.log.debug("Skipping constraint: {} ({})".format(c, e))
-        return new_constraints
 
     @requires_login
     def _add_machines_async():
         machine_params = [{"series": m['series'],
-                           "constraints": _prepare_constraints(
+                           "constraints": constraints_to_dict(
                                m.get('constraints', "")),
                            "jobs": ["JobHostUnits"]}
                           for m in machines]
