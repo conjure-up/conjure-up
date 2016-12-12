@@ -81,7 +81,10 @@ class MachineWidget(WidgetWrap):
         Assumes that machine exists - machines going away is handled
         in machineslist.update().
         """
-        self.machine = next((m for m in app.maas.client.get_machines()
+        machines = app.maas.client.get_machines()
+        if machines is None:
+            return
+        self.machine = next((m for m in machines
                              if m.instance_id == self.machine.instance_id),
                             None)
 
