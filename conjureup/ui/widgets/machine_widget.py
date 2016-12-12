@@ -13,12 +13,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict
 import logging
 
-from urwid import AttrMap, Columns, Divider, Pile, Text, WidgetWrap
+from urwid import AttrMap, Columns, Text, WidgetWrap
 
-from bundleplacer.assignmenttype import AssignmentType, atype_to_label
 from conjureup.app_config import app
 from ubuntui.widgets.buttons import PlainButton
 
