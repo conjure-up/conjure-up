@@ -35,7 +35,12 @@ class MachinesList(WidgetWrap):
 
     unselect_cb - a function that takes a machine and clears assignments
 
-    context_string - a string that describes what you're picking a machine for
+    target_info - a string that describes what you're picking a machine for
+
+    current_pin_cb - a function that takes a machine and returns
+    None if the machine is not currently selected, or returns a
+    context value to show the user about the current selection (like a
+    juju machine ID that represents the current pin)
 
     constraints - a dict of constraints to filter the machines list.
     only machines matching all the constraints will be shown.
@@ -52,13 +57,16 @@ class MachinesList(WidgetWrap):
 
     """
 
-    def __init__(self, select_cb, unselect_cb, context_string,
+    def __init__(self, select_cb, unselect_cb, target_info,
+                 current_pin_cb,
                  constraints=None, show_hardware=False,
                  title_widgets=None, show_only_ready=False,
                  show_filter_box=False):
         self.select_cb = select_cb
         self.unselect_cb = unselect_cb
-        self.context_string = context_string
+        self.target_info = target_info
+        self.current_pin_cb = current_pin_cb
+
         self.n_selected = 0
         self.machine_widgets = []
         if constraints is None:
@@ -160,10 +168,7 @@ class MachinesList(WidgetWrap):
             mw = self.find_machine_widget(m)
             if mw is None:
                 mw = self.add_machine_widget(m)
-            if not mw.is_selected and self.n_selected > 0:
-                mw.can_select = False
-            else:
-                mw.can_select = True
+
             mw.update()
 
         self.filter_edit_box.set_info(len(self.machine_widgets),
@@ -175,7 +180,8 @@ class MachinesList(WidgetWrap):
         mw = MachineWidget(machine,
                            self.handle_select,
                            self.handle_unselect,
-                           self.context_string)
+                           self.target_info,
+                           self.current_pin_cb)
 
         self.machine_widgets.append(mw)
         options = self.machine_pile.options()

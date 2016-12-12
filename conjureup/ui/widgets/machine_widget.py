@@ -35,21 +35,24 @@ class MachineWidget(WidgetWrap):
 
     unselect_cb - a function that takes a machine to un-select
 
-    context_string - a string to show in the label for context
+    target_info - a string describing what we're pinning to
+
+    current_pin_cb - a function that takes a machine and returns a
+    string if it's already pinned or None if it is not
 
     """
 
     def __init__(self, machine, select_cb, unselect_cb,
-                 context_string):
+                 target_info, current_pin_cb):
         self.machine = machine
-        self.is_selected = False
         self.select_cb = select_cb
         self.unselect_cb = unselect_cb
-        self.context_string = context_string
-        self.can_select = True
+        self.target_info = target_info
+        self.current_pin_cb = current_pin_cb
 
         w = self.build_widgets()
         super().__init__(w)
+        self.update()
 
     def selectable(self):
         return True
@@ -62,19 +65,15 @@ class MachineWidget(WidgetWrap):
              '{:10s}'.format(m.storage)]
 
         self.select_button_label = "Pin {} to {}".format(m.hostname,
-                                                         self.context_string)
-        self.unselect_button_label = "Un-pin {} from {}".format(
-            m.hostname, self.context_string)
+                                                         self.target_info)
+        self.unselect_button_label = "Un-pin {} from ".format(
+            m.hostname) + "{}"
 
         self.select_button = PlainButton(self.select_button_label,
                                          self.handle_button)
         cols = [Text(m) for m in l]
-
-        if self.can_select:
-            cols += [AttrMap(self.select_button, 'text',
-                             'button_secondary focus')]
-        else:
-            cols.append(Text(""))
+        cols += [AttrMap(self.select_button, 'text',
+                         'button_secondary focus')]
 
         self.columns = Columns(cols)
         return self.columns
@@ -93,24 +92,17 @@ class MachineWidget(WidgetWrap):
 
     def update(self):
         self.update_machine()
-        if self.is_selected:
-            self.select_button.set_label(self.unselect_button_label)
+        current_pin = self.current_pin_cb(self.machine)
+        if current_pin:
+            l = self.unselect_button_label.format(current_pin)
+            self.select_button.set_label(l)
         else:
             self.select_button.set_label(self.select_button_label)
 
-        opts = self.columns.options()
-        if self.can_select:
-            self.columns.contents[-1] = (self.select_button,
-                                         opts)
-        else:
-            self.columns.contents[-1] = (Text(""), opts)
-
     def handle_button(self, sender):
-        if self.is_selected:
-            self.is_selected = False
+        if self.current_pin_cb(self.machine):
             self.unselect_cb(self.machine)
         else:
-            self.is_selected = True
             self.select_cb(self.machine)
 
         self.update()

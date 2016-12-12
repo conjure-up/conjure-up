@@ -59,6 +59,10 @@ class AppArchitectureView(WidgetWrap):
     def selectable(self):
         return True
 
+    def __repr__(self):
+        return "App Architecture View for {}".format(
+            self.application.service_name)
+
     def keypress(self, size, key):
         # handle keypress first, then get new focus widget
         rv = super().keypress(size, key)
@@ -184,6 +188,12 @@ class AppArchitectureView(WidgetWrap):
         return self.shadow_pins.get(juju_machine_id, None)
 
     get_pin = get_shadow_pin
+
+    def get_pin_for_maas_machine(self, maas_machine):
+        for j_id, m in self.shadow_pins.items():
+            if m == maas_machine:
+                return j_id
+        return None
 
     def show_pin_chooser(self, juju_machine_id):
         app.ui.set_header("Pin Machine {}".format(juju_machine_id))
