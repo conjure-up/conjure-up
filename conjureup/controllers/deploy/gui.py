@@ -5,14 +5,13 @@ from functools import partial
 from operator import attrgetter
 from subprocess import PIPE
 
-from bundleplacer.assignmenttype import atype_to_label, AssignmentType
-
+from bundleplacer.assignmenttype import AssignmentType, atype_to_label
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
+from conjureup.juju import get_controller_info
 from conjureup.maas import setup_maas
 from conjureup.telemetry import track_event, track_exception, track_screen
-from conjureup.juju import get_controller_info
 from conjureup.ui.views.app_architecture_view import AppArchitectureView
 from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView

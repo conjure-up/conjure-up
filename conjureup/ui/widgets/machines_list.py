@@ -17,8 +17,8 @@ import logging
 
 from urwid import Columns, Divider, Pile, Text, WidgetWrap
 
-from conjureup.maas import MaasMachineStatus, satisfies
 from conjureup.app_config import app
+from conjureup.maas import MaasMachineStatus, satisfies
 from conjureup.ui.widgets.filter_box import FilterBox
 from conjureup.ui.widgets.machine_widget import MachineWidget
 

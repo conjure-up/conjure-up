@@ -13,17 +13,23 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict
 import logging
+from collections import defaultdict
 
-from urwid import (AttrMap, Columns, connect_signal, Divider, Edit,
-                   Pile, Text, WidgetWrap)
+from urwid import (
+    AttrMap,
+    Columns,
+    Divider,
+    Edit,
+    Pile,
+    Text,
+    WidgetWrap,
+    connect_signal
+)
 
 from bundleplacer.assignmenttype import AssignmentType, atype_to_label
-
 from conjureup import juju
-from ubuntui.widgets.buttons import PlainButton, MenuSelectButton
-
+from ubuntui.widgets.buttons import MenuSelectButton, PlainButton
 
 log = logging.getLogger('bundleplacer')
 
@@ -122,7 +128,7 @@ class JujuMachineWidget(WidgetWrap):
                     atype_to_label([atype])[0],
                     ",".join([application.service_name
                               for application in al]))
-                                 for atype, al in ad.items()])
+                    for atype, al in ad.items()])
                 assignments.append(astr)
         else:
             if self.show_assignments:

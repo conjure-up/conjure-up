@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses>.
 
-from operator import attrgetter
 import logging
+from operator import attrgetter
 
 from urwid import AttrMap, Columns, Divider, Pile, Text, WidgetWrap
 

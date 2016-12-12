@@ -2,15 +2,14 @@
 
 """
 import copy
-from collections import defaultdict
 import logging
+from collections import defaultdict
 
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
-from conjureup.ui.widgets.juju_machines_list import JujuMachinesList
 from conjureup.ui.views.machine_pin_view import MachinePinView
-
+from conjureup.ui.widgets.juju_machines_list import JujuMachinesList
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn

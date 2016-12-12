@@ -1,16 +1,17 @@
 """ simple maas client
 """
 
+import time
+from enum import Enum
 from functools import partial
+
 import requests
 from requests_oauthlib import OAuth1
-from enum import Enum
-import time
 
+from conjureup import juju
 from conjureup.app_config import app
 from conjureup.async import submit
 from conjureup.units import human_to_mb
-from conjureup import juju
 
 
 class MaasClient:

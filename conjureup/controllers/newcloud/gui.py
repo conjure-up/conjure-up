@@ -9,7 +9,6 @@ import petname
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
-
 from conjureup.models.provider import Schema
 from conjureup.telemetry import track_event, track_exception, track_screen
 from conjureup.ui.views.newcloud import NewCloudView
