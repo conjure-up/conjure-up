@@ -130,6 +130,7 @@ class MachinesList(WidgetWrap):
                      self.machine_pile.options())
                 self.machine_pile.contents.append(p)
             return
+
         if self.loading:
             self.loading = False
             self.machine_pile.contents = self.machine_pile.contents[:-1]

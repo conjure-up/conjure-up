@@ -120,7 +120,7 @@ class MaasClient:
         """
         cval = self.get_cached('machines')
         if cval is None:
-            return []
+            return cval
         return [MaasMachine(d) for d in cval]
 
     def tag_new(self, tag):
