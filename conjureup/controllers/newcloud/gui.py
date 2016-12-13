@@ -133,7 +133,6 @@ class NewCloudController:
         if self.cloud == 'maas':
             self.cloud = '{}/{}'.format(self.cloud,
                                         credentials['@maas-server'].value)
-        utils.pollinate(app.session_id, 'CA')
         self.__do_bootstrap(credential=credentials_key)
 
     def render(self, cloud):
