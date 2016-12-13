@@ -62,6 +62,8 @@ class MachinePinView(WidgetWrap):
             unselect_cb=self.unselect_machine,
             target_info=str(self.juju_machine_id),
             current_pin_cb=self.controller.get_pin_for_maas_machine,
+            constraints=self.controller.get_constraints(
+                self.juju_machine_id),
             show_hardware=True,
             show_only_ready=True,
             show_filter_box=True

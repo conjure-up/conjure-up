@@ -94,7 +94,7 @@ class MachinesList(WidgetWrap):
     def build_widgets(self, title_widgets):
         if title_widgets is None:
             if len(self.constraints) > 0:
-                cstr = " matching constraints"
+                cstr = " matching constraints " + str(self.constraints)
             else:
                 cstr = ""
 
@@ -106,7 +106,7 @@ class MachinesList(WidgetWrap):
 
         if self.show_filter_box:
             header_widgets += [self.filter_edit_box, Divider()]
-        labels = ["FQDN", "Cores", "Memory", "Storage", ""]
+        labels = ["FQDN", "Cores", "Memory (GiB)", "Storage (GiB)", ""]
         header_label_col = Columns([Text(m) for m in labels])
         header_widgets.append(header_label_col)
         self.header_padding = len(header_widgets)

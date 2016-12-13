@@ -259,13 +259,29 @@ class JujuMachineWidget(WidgetWrap):
         self._do_select_assignment(AssignmentType.KVM)
 
     def handle_cores_changed(self, sender, val):
-        raise Exception("TODO")
+        if val == '':
+            self.md = self.controller.clear_constraint(self.juju_machine_id,
+                                                       'cores')
+        else:
+            self.md = self.controller.set_constraint(self.juju_machine_id,
+                                                     'cores', int(val))
 
     def handle_mem_changed(self, sender, val):
-        raise Exception("TODO")
+        if val == '':
+            self.md = self.controller.clear_constraint(self.juju_machine_id,
+                                                       'mem')
+        else:
+            self.md = self.controller.set_constraint(self.juju_machine_id,
+                                                     'mem', float(val) * 1024)
 
     def handle_disk_changed(self, sender, val):
-        raise Exception("TODO")
+        if val == '':
+            self.md = self.controller.clear_constraint(self.juju_machine_id,
+                                                       'root-disk')
+        else:
+            self.md = self.controller.set_constraint(self.juju_machine_id,
+                                                     'root-disk',
+                                                     float(val) * 1024)
 
     def show_pin_chooser(self, sender):
         self.controller.show_pin_chooser(self.juju_machine_id)

@@ -97,7 +97,7 @@ class JujuMachinesList(WidgetWrap):
 
         if self.show_filter_box:
             header_widgets += [self.filter_edit_box, Divider()]
-        labels = ["ID", "Cores", "Memory", "Storage"]
+        labels = ["ID", "Cores", "Memory (GiB)", "Storage (GiB)"]
         if self.show_assignments:
             labels += ["Assignments", ""]
         else:
