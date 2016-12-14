@@ -18,6 +18,7 @@ import logging
 from urwid import Columns, Divider, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
+from conjureup.juju import constraints_from_dict
 from conjureup.maas import MaasMachineStatus, satisfies
 from conjureup.ui.widgets.filter_box import FilterBox
 from conjureup.ui.widgets.machine_widget import MachineWidget
@@ -94,7 +95,8 @@ class MachinesList(WidgetWrap):
     def build_widgets(self, title_widgets):
         if title_widgets is None:
             if len(self.constraints) > 0:
-                cstr = " matching constraints"
+                cstr = " matching constraints '{}'".format(
+                    constraints_from_dict(self.constraints))
             else:
                 cstr = ""
 
@@ -106,7 +108,7 @@ class MachinesList(WidgetWrap):
 
         if self.show_filter_box:
             header_widgets += [self.filter_edit_box, Divider()]
-        labels = ["FQDN", "Cores", "Memory", "Storage", ""]
+        labels = ["FQDN", "Cores", "Memory (GiB)", "Storage (GiB)", ""]
         header_label_col = Columns([Text(m) for m in labels])
         header_widgets.append(header_label_col)
         self.header_padding = len(header_widgets)

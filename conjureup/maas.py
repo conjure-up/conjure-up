@@ -11,7 +11,7 @@ from requests_oauthlib import OAuth1
 from conjureup import juju
 from conjureup.app_config import app
 from conjureup.async import submit
-from conjureup.units import human_to_mb
+from conjureup.units import human_to_gb
 
 
 class MaasClient:
@@ -256,7 +256,7 @@ class MaasMachine:
 
     @property
     def storage(self):
-        """ Return storage
+        """ Return storage in gigabytes
 
         :returns: storage size
         :rtype: str
@@ -428,11 +428,13 @@ def satisfies(machine, constraints):
     :returns: (bool, [list-of-failed constraint keys])
 
     """
-    kmap = dict(mem='memory',
-                arch='architecture',
-                storage='storage',
-                cpu_cores='cpu_count')
-    kmap['root-disk'] = 'storage'
+    kmap = {'mem': 'memory',
+            'arch': 'architecture',
+            'storage': 'storage',
+            'cpu_cores': 'cpu_count',
+            'cores': 'cpu_count',
+            'cpu-cores': 'cpu_count',
+            'root-disk': 'storage'}
 
     cons_checks = []
 
@@ -445,15 +447,17 @@ def satisfies(machine, constraints):
             if mval != '*' and mval != v:
                 cons_checks.append(k)
         else:
-            mval = machine.machine[kmap[k]]
+            if kmap[k] == 'storage':
+                mval = machine.storage
+            else:
+                mval = machine.machine[kmap[k]]
 
             if mval == '*':
                 # '*' always satisfies.
                 continue
 
-            if not str(v).isdecimal():
-                v = human_to_mb(v)
-
+            mval = human_to_gb(mval)
+            v = human_to_gb(v)
             if mval < v:
                 cons_checks.append(k)
 

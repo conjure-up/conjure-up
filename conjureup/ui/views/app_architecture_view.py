@@ -8,6 +8,7 @@ from collections import defaultdict
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
+from conjureup.juju import constraints_from_dict, constraints_to_dict
 from conjureup.ui.views.machine_pin_view import MachinePinView
 from conjureup.ui.widgets.juju_machines_list import JujuMachinesList
 from ubuntui.ev import EventLoop
@@ -214,6 +215,26 @@ class AppArchitectureView(WidgetWrap):
         self.shadow_pins = {j_m_id: m for j_m_id, m in
                             self.shadow_pins.items()
                             if m != maas_machine}
+
+    def get_constraints(self, juju_machine_id):
+        cstr = self._machines[juju_machine_id].get(
+            'constraints', {})
+        return constraints_to_dict(cstr)
+
+    def set_constraint(self, juju_machine_id, key, value):
+        md = self._machines[juju_machine_id]
+        cd = constraints_to_dict(md.get('constraints', ""))
+        cd[key] = value
+        md['constraints'] = constraints_from_dict(cd)
+        return md
+
+    def clear_constraint(self, juju_machine_id, key):
+        md = self._machines[juju_machine_id]
+        cd = constraints_to_dict(md.get('constraints', ""))
+        if key in cd:
+            del cd[key]
+        md['constraints'] = constraints_from_dict(cd)
+        return md
 
     def do_cancel(self, sender):
         self.controller.handle_sub_view_done()

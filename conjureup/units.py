@@ -2,11 +2,19 @@
 def human_to_mb(s):
     """Translates human-readable strings like '10G' to numeric
     megabytes"""
+    md = dict(M=1, G=1024, T=1024 * 1024, P=1024 * 1024 * 1024)
+    return _human_to(s, md)
 
+
+def human_to_gb(s):
+    md = dict(M=1 / 1024, G=1, T=1024, P=1024 * 1024)
+    return _human_to(s, md)
+
+
+def _human_to(s, md):
     if len(s) == 0:
         raise Exception("unexpected empty string")
 
-    md = dict(M=1, G=1024, T=1024 * 1024, P=1024 * 1024 * 1024)
     suffix = s[-1]
     if suffix.isalpha():
         return float(s[:-1]) * md[suffix]
@@ -17,6 +25,16 @@ def human_to_mb(s):
 def mb_to_human(num):
     """Translates float number of bytes into human readable strings."""
     suffixes = ['M', 'G', 'T', 'P']
+    return _to_human(num, suffixes)
+
+
+def gb_to_human(num):
+    """Translates float number of gigabytes into human readable strings."""
+    suffixes = ['G', 'T', 'P']
+    return _to_human(num, suffixes)
+
+
+def _to_human(num, suffixes):
     if num == 0:
         return '0 B'
 
