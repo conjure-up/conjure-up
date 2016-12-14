@@ -20,7 +20,8 @@ class CloudsController:
             existing_controller = juju.get_controller_in_cloud(app.argv.cloud)
 
         if existing_controller is None:
-            return controllers.use('newcloud').render(app.argv.cloud)
+            app.current_cloud = app.argv.cloud
+            return controllers.use('newcloud').render()
 
         utils.info("Using controller '{}'".format(existing_controller))
 

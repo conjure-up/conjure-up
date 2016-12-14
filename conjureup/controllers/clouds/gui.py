@@ -19,7 +19,8 @@ class CloudsController:
         cloud: Cloud to create the controller/model on.
 
         """
-        return controllers.use('newcloud').render(cloud)
+        app.current_cloud = cloud
+        return controllers.use('newcloud').render()
 
     def render(self):
         "Pick or create a cloud to bootstrap a new controller on"

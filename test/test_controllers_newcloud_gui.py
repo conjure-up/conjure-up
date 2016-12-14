@@ -30,8 +30,8 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
         self.view_patcher.start()
         self.app_patcher = patch(
             'conjureup.controllers.newcloud.gui.app')
-        mock_app = self.app_patcher.start()
-        mock_app.ui = MagicMock(name="app.ui")
+        self.mock_app = self.app_patcher.start()
+        self.mock_app.ui = MagicMock(name="app.ui")
         self.track_screen_patcher = patch(
             'conjureup.controllers.newcloud.gui.track_screen')
         self.mock_track_screen = self.track_screen_patcher.start()
@@ -45,7 +45,8 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
 
     def test_render(self):
         "call render"
-        self.controller.render('maas')
+        self.mock_app.current_cloud = 'maas'
+        self.controller.render()
 
 
 class NewCloudGUIFinishTestCase(unittest.TestCase):

@@ -46,6 +46,9 @@ app = SimpleNamespace(
     # Current Juju controller selected
     current_controller=None,
 
+    # Current Juju cloud selected
+    current_cloud=None,
+
     # Session ID for current deployment
     session_id=None,
 

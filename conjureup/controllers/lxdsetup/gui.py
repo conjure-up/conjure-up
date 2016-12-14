@@ -77,8 +77,8 @@ class LXDSetupController:
         app.log.debug("Restarting lxd-bridge")
         utils.run("sudo systemctl restart lxd-bridge.service", shell=True)
 
-        controllers.use('newcloud').render(
-            cloud='localhost', bootstrap=True)
+        app.current_cloud = 'localhost'
+        controllers.use('newcloud').render(bootstrap=True)
 
     def render(self):
         """ Render

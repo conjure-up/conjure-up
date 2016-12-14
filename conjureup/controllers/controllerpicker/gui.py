@@ -28,6 +28,8 @@ class ControllerPicker:
                      self.__handle_exception,
                      queue_name=juju.JUJU_ASYNC_QUEUE)
 
+        c_info = juju.get_controller_info(app.current_controller)
+        app.current_cloud = c_info['details']['cloud']
         return controllers.use('deploy').render()
 
     def render(self):
