@@ -25,6 +25,16 @@ def _human_to(s, md):
 def mb_to_human(num):
     """Translates float number of bytes into human readable strings."""
     suffixes = ['M', 'G', 'T', 'P']
+    return _to_human(num, suffixes)
+
+
+def gb_to_human(num):
+    """Translates float number of gigabytes into human readable strings."""
+    suffixes = ['G', 'T', 'P']
+    return _to_human(num, suffixes)
+
+
+def _to_human(num, suffixes):
     if num == 0:
         return '0 B'
 

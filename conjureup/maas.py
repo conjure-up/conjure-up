@@ -256,7 +256,7 @@ class MaasMachine:
 
     @property
     def storage(self):
-        """ Return storage
+        """ Return storage in gigabytes
 
         :returns: storage size
         :rtype: str
@@ -447,12 +447,16 @@ def satisfies(machine, constraints):
             if mval != '*' and mval != v:
                 cons_checks.append(k)
         else:
-            mval = machine.machine[kmap[k]]
+            if kmap[k] == 'storage':
+                mval = machine.storage
+            else:
+                mval = machine.machine[kmap[k]]
 
             if mval == '*':
                 # '*' always satisfies.
                 continue
 
+            mval = human_to_gb(mval)
             v = human_to_gb(v)
             if mval < v:
                 cons_checks.append(k)

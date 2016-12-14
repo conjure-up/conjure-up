@@ -29,6 +29,7 @@ from urwid import (
 
 from bundleplacer.assignmenttype import AssignmentType, atype_to_label
 from conjureup import juju
+from conjureup import units
 from ubuntui.widgets.buttons import MenuSelectButton, PlainButton
 
 log = logging.getLogger('bundleplacer')
@@ -266,22 +267,31 @@ class JujuMachineWidget(WidgetWrap):
             self.md = self.controller.set_constraint(self.juju_machine_id,
                                                      'cores', int(val))
 
+    def _format_constraint(self, val):
+        """Ensure that a constraint has a unit. bare numbers are treated as
+        gigabytes"""
+        try:
+            return units.gb_to_human(float(val))
+        except ValueError:
+            return val
+
     def handle_mem_changed(self, sender, val):
         if val == '':
             self.md = self.controller.clear_constraint(self.juju_machine_id,
                                                        'mem')
         else:
-            self.md = self.controller.set_constraint(self.juju_machine_id,
-                                                     'mem', float(val) * 1024)
+            self.md = self.controller.set_constraint(
+                self.juju_machine_id, 'mem',
+                self._format_constraint(val))
 
     def handle_disk_changed(self, sender, val):
         if val == '':
             self.md = self.controller.clear_constraint(self.juju_machine_id,
                                                        'root-disk')
         else:
-            self.md = self.controller.set_constraint(self.juju_machine_id,
-                                                     'root-disk',
-                                                     float(val) * 1024)
+            self.md = self.controller.set_constraint(
+                self.juju_machine_id, 'root-disk',
+                self._format_constraint(val))
 
     def show_pin_chooser(self, sender):
         self.controller.show_pin_chooser(self.juju_machine_id)
