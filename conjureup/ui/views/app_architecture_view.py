@@ -8,7 +8,7 @@ from collections import defaultdict
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
-from conjureup.juju import constraints_to_dict, constraints_from_dict
+from conjureup.juju import constraints_from_dict, constraints_to_dict
 from conjureup.ui.views.machine_pin_view import MachinePinView
 from conjureup.ui.widgets.juju_machines_list import JujuMachinesList
 from ubuntui.ev import EventLoop

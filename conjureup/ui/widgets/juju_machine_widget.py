@@ -28,8 +28,7 @@ from urwid import (
 )
 
 from bundleplacer.assignmenttype import AssignmentType, atype_to_label
-from conjureup import juju
-from conjureup import units
+from conjureup import juju, units
 from ubuntui.widgets.buttons import MenuSelectButton, PlainButton
 
 log = logging.getLogger('bundleplacer')

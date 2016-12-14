@@ -7,7 +7,7 @@ def human_to_mb(s):
 
 
 def human_to_gb(s):
-    md = dict(M=1/1024, G=1, T=1024, P=1024 * 1024)
+    md = dict(M=1 / 1024, G=1, T=1024, P=1024 * 1024)
     return _human_to(s, md)
 
 
