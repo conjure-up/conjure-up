@@ -1,5 +1,6 @@
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
+from conjureup.app_config import app
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
 from ubuntui.widgets.hr import HR
@@ -8,9 +9,7 @@ from ubuntui.widgets.input import StringEditor
 
 class NewCloudView(WidgetWrap):
 
-    def __init__(self, app, cloud, schema, cb):
-        self.app = app
-        self.cloud = cloud
+    def __init__(self, schema, cb):
         self.input_items = schema
         self.cb = cb
         self.frame = Frame(body=self._build_widget(),
@@ -20,7 +19,7 @@ class NewCloudView(WidgetWrap):
 
     def _build_widget(self):
         total_items = [Text(
-            "Enter your {} credentials:".format(self.cloud.upper()))]
+            "Enter your {} credentials:".format(app.current_cloud.upper()))]
         total_items += [HR()]
         for k in self.input_items.keys():
             display = k

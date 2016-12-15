@@ -9,7 +9,6 @@ from bundleplacer.assignmenttype import AssignmentType, atype_to_label
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
-from conjureup.juju import get_controller_info
 from conjureup.maas import setup_maas
 from conjureup.telemetry import track_event, track_exception, track_screen
 from conjureup.ui.views.app_architecture_view import AppArchitectureView
@@ -25,8 +24,6 @@ class DeployController:
         self.assignments = defaultdict(list)
         self.deployed_juju_machines = {}
         self.maas_machine_map = {}
-        c_info = get_controller_info(app.current_controller)
-        self.cloud_type = c_info['details']['cloud']
 
     def _handle_exception(self, tag, exc):
         track_exception(exc.args[0])
@@ -183,7 +180,7 @@ class DeployController:
         first add the machines then call done_cb
         """
 
-        if self.cloud_type == 'maas':
+        if app.current_cloud == 'maas':
             self.ensure_machines_maas(application, done_cb)
         else:
             self.ensure_machines_nonmaas(application, done_cb)
@@ -279,8 +276,26 @@ class DeployController:
                                    key=attrgetter('service_name'))
         self.undeployed_applications = self.applications[:]
 
-        if self.cloud_type == 'maas':
-            setup_maas()
+        if app.current_cloud == 'maas':
+            def try_setup_maas():
+                """Try to init maas client.
+                loops until we get an unexpected exception or we succeed.
+                """
+                n = 30
+                while True:
+                    try:
+                        setup_maas()
+                    except juju.ControllerNotFoundException as e:
+                        async.sleep_until(1)
+                        n -= 1
+                        if n == 0:
+                            raise e
+                        continue
+                    else:
+                        break
+
+            async.submit(try_setup_maas,
+                         partial(self._handle_exception, 'EM'))
 
         self.list_view = ApplicationListView(self.applications,
                                              app.metadata_controller,

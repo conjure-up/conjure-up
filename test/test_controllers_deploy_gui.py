@@ -14,13 +14,6 @@ from conjureup.controllers.deploy.gui import DeployController
 class DeployGUIRenderTestCase(unittest.TestCase):
 
     def setUp(self):
-
-        self.get_c_info_patcher = patch(
-            'conjureup.controllers.deploy.gui.get_controller_info')
-        self.mock_get_controller_info = self.get_c_info_patcher.start()
-        self.mock_get_controller_info.return_value = dict(
-            details=dict(cloud='testcloud'))
-
         self.controller = DeployController()
 
         self.utils_patcher = patch(
@@ -68,7 +61,6 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.juju_patcher.stop()
-        self.get_c_info_patcher.stop()
         self.track_screen_patcher.stop()
 
     def test_queue_predeploy_once(self):
@@ -81,13 +73,6 @@ class DeployGUIRenderTestCase(unittest.TestCase):
 class DeployGUIFinishTestCase(unittest.TestCase):
 
     def setUp(self):
-
-        self.get_c_info_patcher = patch(
-            'conjureup.controllers.deploy.gui.get_controller_info')
-        self.mock_get_controller_info = self.get_c_info_patcher.start()
-        self.mock_get_controller_info.return_value = dict(
-            details=dict(cloud='testcloud'))
-
         self.controller = DeployController()
 
         self.controllers_patcher = patch(
@@ -116,7 +101,6 @@ class DeployGUIFinishTestCase(unittest.TestCase):
         self.juju_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
-        self.get_c_info_patcher.stop()
 
     def test_show_bootstrap_wait(self):
         "Go to bootstrap wait controller if bootstrap pending"

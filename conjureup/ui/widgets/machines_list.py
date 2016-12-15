@@ -124,7 +124,11 @@ class MachinesList(WidgetWrap):
                      mw.machine.instance_id == m.instance_id), None)
 
     def update(self):
-        machines = app.maas.client.get_machines()
+        if app.maas.client:
+            machines = app.maas.client.get_machines()
+        else:
+            machines = None
+
         if machines is None:
             if not self.loading:
                 self.loading = True

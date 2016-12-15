@@ -85,7 +85,7 @@ class AppArchitectureView(WidgetWrap):
             "" if self.application.num_units == 1 else "s",
             self.application.service_name))]
 
-        controller_is_maas = self.controller.cloud_type == 'maas'
+        controller_is_maas = app.current_cloud == 'maas'
         self.juju_machines_list = JujuMachinesList(
             self.application,
             self._machines,

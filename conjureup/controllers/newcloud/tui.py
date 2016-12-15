@@ -14,9 +14,6 @@ from . import common
 
 class NewCloudController:
 
-    def __init__(self):
-        self.cloud = None
-
     def do_post_bootstrap(self):
         """ runs post bootstrap script if exists
         """
@@ -47,25 +44,25 @@ class NewCloudController:
     def finish(self):
         return controllers.use('deploy').render()
 
-    def render(self, cloud):
+    def render(self):
 
-        self.cloud = cloud
         if app.current_controller is None:
             app.current_controller = petname.Name()
 
         if app.current_model is None:
             app.current_model = 'conjure-up'
 
-        if self.cloud != 'localhost':
-            if not common.try_get_creds(self.cloud):
+        if app.current_cloud != 'localhost':
+            if not common.try_get_creds(app.current_cloud):
                 utils.warning("You attempted to do an install against a cloud "
                               "that requires credentials that could not be "
                               "found.  If you wish to supply those "
                               "credentials please run "
-                              "`juju add-credential {}`.".format(self.cloud))
+                              "`juju add-credential "
+                              "{}`.".format(app.current_cloud))
                 sys.exit(1)
 
-        if self.cloud == 'localhost':
+        if app.current_cloud == 'localhost':
             if not utils.check_bridge_exists():
                 return controllers.use('lxdsetup').render()
 
@@ -74,8 +71,8 @@ class NewCloudController:
 
         utils.info("Bootstrapping Juju controller")
         p = juju.bootstrap(controller=app.current_controller,
-                           cloud=self.cloud,
-                           credential=common.try_get_creds(self.cloud))
+                           cloud=app.current_cloud,
+                           credential=common.try_get_creds(app.current_cloud))
         if p.returncode != 0:
             pathbase = os.path.join(
                 app.config['spell-dir'],

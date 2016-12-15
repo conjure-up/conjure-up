@@ -12,15 +12,11 @@ from conjureup.app_config import app
 from conjureup.models.provider import Schema
 from conjureup.telemetry import track_event, track_exception, track_screen
 from conjureup.ui.views.newcloud import NewCloudView
-from ubuntui.ev import EventLoop
 
 from . import common
 
 
 class NewCloudController:
-
-    def __init__(self):
-        self.cloud = None
 
     def __handle_exception(self, exc):
         track_exception(exc.args[0])
@@ -44,15 +40,14 @@ class NewCloudController:
             return self.__handle_exception(e)
 
         track_event("Juju Bootstrap", "Done", "")
-        EventLoop.remove_alarms()
         app.ui.set_footer('Bootstrap complete...')
         self.__post_bootstrap_exec()
 
-    def __do_bootstrap(self, cloud=None, credential=None):
-        """ We call self in two seperate places so add self for clarity
-        """
-        if cloud is None:
-            cloud = self.cloud
+    def __do_bootstrap(self, credential=None, cloud_with_creds=None):
+        if cloud_with_creds:
+            cloud = cloud_with_creds
+        else:
+            cloud = app.current_cloud
 
         app.log.debug("Performing bootstrap: {} {}".format(
             app.current_controller, cloud))
@@ -126,23 +121,20 @@ class NewCloudController:
             return controllers.use('clouds').render()
 
         if credentials is not None:
-            common.save_creds(self.cloud, credentials)
+            common.save_creds(app.current_cloud, credentials)
 
-        credentials_key = common.try_get_creds(self.cloud)
+        credentials_key = common.try_get_creds(app.current_cloud)
 
-        if self.cloud == 'maas':
-            self.cloud = '{}/{}'.format(self.cloud,
-                                        credentials['@maas-server'].value)
-        self.__do_bootstrap(credential=credentials_key)
+        cloud_with_creds = None
+        if app.current_cloud == 'maas':
+            cloud_with_creds = '{}/{}'.format(
+                app.current_cloud, credentials['@maas-server'].value)
+        self.__do_bootstrap(credential=credentials_key,
+                            cloud_with_creds=cloud_with_creds)
 
-    def render(self, cloud):
-        """ Render
-
-        Arguments:
-        cloud: The cloud to create credentials for
-        """
+    def render(self):
         track_screen("Cloud Creation")
-        self.cloud = cloud
+
         if app.current_controller is None:
             app.current_controller = petname.Name()
 
@@ -154,7 +146,7 @@ class NewCloudController:
         # a user to configure a LXD bridge with suggested network
         # information.
 
-        if self.cloud == 'localhost':
+        if app.current_cloud == 'localhost':
             if not utils.check_bridge_exists():
                 return controllers.use('lxdsetup').render()
 
@@ -167,22 +159,20 @@ class NewCloudController:
 
         # XXX: always prompt for maas information for now as there is no way to
         # logically store the maas server ip for future sessions.
-        if common.try_get_creds(self.cloud) \
-           is not None and self.cloud != 'maas':
-            self.__do_bootstrap(credential=common.try_get_creds(self.cloud))
+        if common.try_get_creds(app.current_cloud) \
+           is not None and app.current_cloud != 'maas':
+            self.__do_bootstrap(
+                credential=common.try_get_creds(app.current_cloud))
             return controllers.use('deploy').render()
 
         # show credentials editor otherwise
         try:
-            creds = Schema[self.cloud]
+            creds = Schema[app.current_cloud]
         except KeyError as e:
             track_exception("Credentials Error")
             return app.ui.show_exception_message(e)
 
-        view = NewCloudView(app,
-                            self.cloud,
-                            creds,
-                            self.finish)
+        view = NewCloudView(creds, self.finish)
 
         app.ui.set_header(
             title="New cloud setup",
