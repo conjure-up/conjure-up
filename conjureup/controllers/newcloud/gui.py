@@ -12,7 +12,6 @@ from conjureup.app_config import app
 from conjureup.models.provider import Schema
 from conjureup.telemetry import track_event, track_exception, track_screen
 from conjureup.ui.views.newcloud import NewCloudView
-from ubuntui.ev import EventLoop
 
 from . import common
 
@@ -41,19 +40,23 @@ class NewCloudController:
             return self.__handle_exception(e)
 
         track_event("Juju Bootstrap", "Done", "")
-        EventLoop.remove_alarms()
         app.ui.set_footer('Bootstrap complete...')
         self.__post_bootstrap_exec()
 
-    def __do_bootstrap(self, credential=None):
+    def __do_bootstrap(self, credential=None, cloud_with_creds=None):
+        if cloud_with_creds:
+            cloud = cloud_with_creds
+        else:
+            cloud = app.current_cloud
+
         app.log.debug("Performing bootstrap: {} {}".format(
-            app.current_controller, app.current_cloud))
+            app.current_controller, cloud))
 
         app.ui.set_footer('Bootstrapping Juju controller in the background...')
 
         future = juju.bootstrap_async(
             controller=app.current_controller,
-            cloud=app.current_cloud,
+            cloud=cloud,
             credential=credential,
             exc_cb=self.__handle_exception)
         app.bootstrap.running = future
@@ -122,10 +125,12 @@ class NewCloudController:
 
         credentials_key = common.try_get_creds(app.current_cloud)
 
+        cloud_with_creds = None
         if app.current_cloud == 'maas':
-            app.current_cloud = '{}/{}'.format(
+            cloud_with_creds = '{}/{}'.format(
                 app.current_cloud, credentials['@maas-server'].value)
-        self.__do_bootstrap(credential=credentials_key)
+        self.__do_bootstrap(credential=credentials_key,
+                            cloud_with_creds=cloud_with_creds)
 
     def render(self):
         track_screen("Cloud Creation")

@@ -277,7 +277,25 @@ class DeployController:
         self.undeployed_applications = self.applications[:]
 
         if app.current_cloud == 'maas':
-            setup_maas()
+            def try_setup_maas():
+                """Try to init maas client.
+                loops until we get an unexpected exception or we succeed.
+                """
+                n = 30
+                while True:
+                    try:
+                        setup_maas()
+                    except juju.ControllerNotFoundException as e:
+                        async.sleep_until(1)
+                        n -= 1
+                        if n == 0:
+                            raise e
+                        continue
+                    else:
+                        break
+
+            async.submit(try_setup_maas,
+                         partial(self._handle_exception, 'EM'))
 
         self.list_view = ApplicationListView(self.applications,
                                              app.metadata_controller,

@@ -25,6 +25,10 @@ this.CLIENT = None
 this.USER_TAG = None
 
 
+class ControllerNotFoundException(Exception):
+    "An error when a controller can't be found in juju's config"
+
+
 # login decorator
 def requires_login(f):
     def _decorator(*args, **kwargs):
@@ -55,8 +59,9 @@ def get_bootstrap_config(controller_name):
         raise Exception("Could not read Juju's bootstrap-config.yaml")
     cd = bootstrap_config['controllers'].get(controller_name, None)
     if cd is None:
-        raise Exception("'{}' not found in Juju's "
-                        "bootstrap-config.yaml".format(controller_name))
+        raise ControllerNotFoundException(
+            "'{}' not found in Juju's "
+            "bootstrap-config.yaml".format(controller_name))
     return cd
 
 
