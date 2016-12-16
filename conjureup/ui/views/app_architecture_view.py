@@ -45,7 +45,7 @@ class AppArchitectureView(WidgetWrap):
         self.shadow_pins = copy.copy(controller.maas_machine_map)
         self.machine_pin_view = None
 
-        self._machines = app.metadata_controller.bundle.machines.copy()
+        self._machines = copy.deepcopy(app.metadata_controller.bundle.machines)
 
         self.alarm = None
         self.widgets = self.build_widgets()
