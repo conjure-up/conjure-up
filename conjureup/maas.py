@@ -456,8 +456,8 @@ def satisfies(machine, constraints):
                 # '*' always satisfies.
                 continue
 
-            mval = human_to_gb(mval)
-            v = human_to_gb(v)
+            mval = human_to_gb(str(mval))
+            v = human_to_gb(str(v))
             if mval < v:
                 cons_checks.append(k)
 
