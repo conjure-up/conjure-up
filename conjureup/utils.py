@@ -139,8 +139,8 @@ def check_bridge_exists():
 def check_user_in_group(group):
     """ Checks if a user is associated with `group`
     """
-    groups = run_script('id').stdout.decode()
-    if group in groups:
+    groups = run_script('groups').stdout.decode()
+    if group in groups.split():
         return True
     return False
 
