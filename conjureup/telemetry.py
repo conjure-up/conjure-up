@@ -6,6 +6,7 @@ from conjureup.app_config import app
 from conjureup.async import submit
 
 GA_ID = "UA-1018242-61"
+TELEMETRY_ASYNC_QUEUE = "telemetry-async-queue"
 
 
 def track_screen(screen_name):
@@ -15,7 +16,8 @@ def track_screen(screen_name):
                 t="screenview")
     if 'spell' in app.config:
         args['cd1'] = app.config['spell']
-    submit(_post_track(args), lambda _: None)
+    submit(_post_track(args), lambda _: None,
+           queue_name=TELEMETRY_ASYNC_QUEUE)
 
 
 def track_event(category, action, label):
@@ -28,7 +30,8 @@ def track_event(category, action, label):
                 t='event')
     if 'spell' in app.config:
         args['cd1'] = app.config['spell']
-    submit(_post_track(args), lambda _: None)
+    submit(_post_track(args), lambda _: None,
+           queue_name=TELEMETRY_ASYNC_QUEUE)
 
 
 def track_exception(description, is_fatal=True):
@@ -41,7 +44,8 @@ def track_exception(description, is_fatal=True):
                 exf=exf)
     if 'spell' in app.config:
         args['cd1'] = app.config['spell']
-    submit(_post_track(args), lambda _: None)
+    submit(_post_track(args), lambda _: None,
+           queue_name=TELEMETRY_ASYNC_QUEUE)
 
 
 def _post_track(arg_dict):
