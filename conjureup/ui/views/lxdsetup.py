@@ -107,7 +107,7 @@ class LXDSetupView(WidgetWrap):
     def build_info(self):
         items = [
             Text("There was no LXD bridge found on your system or "
-                 "you are not part of the LXD user group which usually "
+                 "not part of the 'lxd' group which usually "
                  "means this is your first time running LXD."),
             Padding.line_break(""),
             Text("If you wish to do so now pressing confirm will drop you out "
