@@ -441,10 +441,19 @@ def satisfies(machine, constraints):
     if constraints is None:
         return (True, [])
 
+    def _arch_clean(arch):
+        if '/' in arch:
+            ar, subar = arch.split('/')
+            return ar, subar
+        else:
+            return arch, 'generic'
+
     for k, v in constraints.items():
         if k == 'arch':
             mval = machine.machine[kmap[k]]
-            if mval != '*' and mval != v:
+            if mval == '*':
+                continue
+            if _arch_clean(mval) != _arch_clean(v):
                 cons_checks.append(k)
         else:
             if kmap[k] == 'storage':
