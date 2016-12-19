@@ -135,6 +135,14 @@ def check_bridge_exists():
             return True
     return False
 
+def check_user_in_group(group):
+    """ Checks if a user is associated with `group`
+    """
+    groups = run_script('id').stdout.decode()
+    if group in groups:
+        return True
+    return False
+
 
 def check_deb_installed(pkg):
     """ Checks if a debian package is installed
@@ -238,7 +246,7 @@ def slurp(path):
 
 
 def install_user():
-    """ returns sudo user
+    """ returns current user
     """
     user = os.getenv('USER', None)
     if user is None:

@@ -106,20 +106,17 @@ class LXDSetupView(WidgetWrap):
 
     def build_info(self):
         items = [
-            Text("There was no LXD bridge found on your system "
-                 "which usually means this is your first time running "
-                 "LXD."),
+            Text("There was no LXD bridge found on your system or "
+                 "you are not part of the LXD user group which usually "
+                 "means this is your first time running LXD."),
             Padding.line_break(""),
-            # Text("If you wish to do so now pressing confirm will drop you out "  # noqa
-            #      "of the installer and walk you through configuring your "
-            #      "network for LXD. Once complete the installer will "
-            #      "start again from the beginning where you can choose "
-            #      "to deploy the bundle via LXD.")
             Text("If you wish to do so now pressing confirm will drop you out "
-                 "of the installer and you will be required to run "
-                 "`lxd init` to configure the network for LXD. Once complete "
-                 "re-run conjure-up and continue the installation.")
-
+                 "of the installer and you will be required to run the following: \n\n"
+                 "  $ sudo lxd init\n"
+                 "  $ newgrp lxd\n"
+                 "  $ lxc finger\n\n"
+                 "If `lxc finger` does not fail with an error you are ready to re-run "
+                 "conjure-up and continue the installation.")
         ]
         return Pile(items)
 
