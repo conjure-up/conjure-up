@@ -21,6 +21,7 @@ from urwid import (
     Columns,
     Divider,
     Edit,
+    IntEdit,
     Pile,
     Text,
     WidgetWrap,
@@ -98,7 +99,7 @@ class JujuMachineWidget(WidgetWrap):
             '{:20s}'.format(self.juju_machine_id), self.show_pin_chooser)
         self.juju_machine_id_label = Text(
             "{:20s}".format(self.juju_machine_id))
-        self.cores_field = Edit('', cdict.get('cores', ''))
+        self.cores_field = IntEdit('', cdict.get('cores', ''))
         connect_signal(self.cores_field, 'change', self.handle_cores_changed)
         self.mem_field = Edit('', cdict.get('mem', ''))
         connect_signal(self.mem_field, 'change', self.handle_mem_changed)
@@ -264,7 +265,7 @@ class JujuMachineWidget(WidgetWrap):
                                                        'cores')
         else:
             self.md = self.controller.set_constraint(self.juju_machine_id,
-                                                     'cores', int(val))
+                                                     'cores', val)
 
     def _format_constraint(self, val):
         """Ensure that a constraint has a unit. bare numbers are treated as
