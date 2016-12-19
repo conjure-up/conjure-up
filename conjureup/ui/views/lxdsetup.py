@@ -111,12 +111,13 @@ class LXDSetupView(WidgetWrap):
                  "means this is your first time running LXD."),
             Padding.line_break(""),
             Text("If you wish to do so now pressing confirm will drop you out "
-                 "of the installer and you will be required to run the following: \n\n"
+                 "of the installer and you will be required to run the "
+                 "following: \n\n"
                  "  $ sudo lxd init\n"
                  "  $ newgrp lxd\n"
                  "  $ lxc finger\n\n"
-                 "If `lxc finger` does not fail with an error you are ready to re-run "
-                 "conjure-up and continue the installation.")
+                 "If `lxc finger` does not fail with an error you are ready "
+                 "to re-run conjure-up and continue the installation.")
         ]
         return Pile(items)
 

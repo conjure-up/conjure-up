@@ -135,6 +135,7 @@ def check_bridge_exists():
             return True
     return False
 
+
 def check_user_in_group(group):
     """ Checks if a user is associated with `group`
     """

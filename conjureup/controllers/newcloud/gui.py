@@ -147,7 +147,8 @@ class NewCloudController:
         # information.
 
         if app.current_cloud == 'localhost':
-            if not utils.check_bridge_exists() or not utils.check_user_in_group('lxd'):
+            if not utils.check_bridge_exists() or \
+               not utils.check_user_in_group('lxd'):
                 return controllers.use('lxdsetup').render()
 
             app.log.debug("Found an IPv4 address, "
