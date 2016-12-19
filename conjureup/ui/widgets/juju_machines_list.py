@@ -112,9 +112,11 @@ class JujuMachinesList(WidgetWrap):
                         on_press=self.do_add_machine),
             'button_secondary',
             'button_secondary focus')
-
+        self.add_new_cols = Columns([Text(s) for s in
+                                     [' ', ' ', ' ', ' ', ' ']] +
+                                    [self.add_new_button], dividechars=2)
         self.machine_pile = Pile(header_widgets + self.machine_widgets +
-                                 [self.add_new_button])
+                                 [self.add_new_cols])
         return self.machine_pile
 
     def do_add_machine(self, sender):
@@ -194,7 +196,7 @@ class JujuMachinesList(WidgetWrap):
             mw, options = t
             if isinstance(mw, JujuMachineWidget):
                 return "B{}".format(mw.juju_machine_id)
-            if mw in [self.add_new_button]:
+            if mw in [self.add_new_cols]:
                 return 'C'
             return 'A'
 
