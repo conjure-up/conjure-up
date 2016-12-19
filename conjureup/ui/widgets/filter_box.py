@@ -38,7 +38,7 @@ class FilterBox(WidgetWrap):
                        edit_changed_cb)
 
         w = Pile([Columns([AttrMap(self.editbox,
-                                   'filter', 'filter_focus')])
+                                   'string_input', 'string_input_focus')])
                   # self.info_text  # -- WORKAROUND for issue #194
                   ])
         super().__init__(w)
