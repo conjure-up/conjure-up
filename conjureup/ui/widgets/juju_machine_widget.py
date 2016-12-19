@@ -21,6 +21,7 @@ from urwid import (
     Columns,
     Divider,
     Edit,
+    IntEdit,
     Pile,
     Text,
     WidgetWrap,
@@ -98,7 +99,7 @@ class JujuMachineWidget(WidgetWrap):
             '{:20s}'.format(self.juju_machine_id), self.show_pin_chooser)
         self.juju_machine_id_label = Text(
             "{:20s}".format(self.juju_machine_id))
-        self.cores_field = Edit('', cdict.get('cores', ''))
+        self.cores_field = IntEdit('', cdict.get('cores', ''))
         connect_signal(self.cores_field, 'change', self.handle_cores_changed)
         self.mem_field = Edit('', cdict.get('mem', ''))
         connect_signal(self.mem_field, 'change', self.handle_mem_changed)
@@ -110,8 +111,10 @@ class JujuMachineWidget(WidgetWrap):
         else:
             machine_id_w = self.juju_machine_id_label
         cols = [machine_id_w, self.cores_field,
-                self.mem_field, self.disk_field, Text("placeholder")]
-        self.unselected_columns = Columns(cols)
+                self.mem_field, self.disk_field]
+        cols = [AttrMap(w, 'filter', 'filter_focus') for w in cols]
+        cols.append(Text("placeholder"))
+        self.unselected_columns = Columns(cols, dividechars=2)
         self.update_assignments()
         return self.unselected_columns
 
@@ -176,11 +179,11 @@ class JujuMachineWidget(WidgetWrap):
             pinned_machine = self.controller.get_pin(self.juju_machine_id)
 
             if pinned_machine:
-                pin_label = "({})".format(pinned_machine.hostname)
+                pin_label = ": {} \N{PENCIL}".format(pinned_machine.hostname)
             else:
-                pin_label = ""
-            self.juju_machine_id_button.set_label('{:20s} {}'.format(
-                self.juju_machine_id, pin_label))
+                pin_label = ": _____ \N{PENCIL}"
+            self.juju_machine_id_button.set_label('{:20s}'.format(
+                self.juju_machine_id + " " + pin_label))
         else:
             self.juju_machine_id_label.set_text('{:20s}'.format(
                 self.juju_machine_id))
@@ -264,7 +267,7 @@ class JujuMachineWidget(WidgetWrap):
                                                        'cores')
         else:
             self.md = self.controller.set_constraint(self.juju_machine_id,
-                                                     'cores', int(val))
+                                                     'cores', val)
 
     def _format_constraint(self, val):
         """Ensure that a constraint has a unit. bare numbers are treated as

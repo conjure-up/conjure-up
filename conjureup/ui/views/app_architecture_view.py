@@ -80,12 +80,18 @@ class AppArchitectureView(WidgetWrap):
             self.frame.focus_position = 'body'
 
     def build_widgets(self):
-        ws = [Text("Choose where to place {} unit{} of {}".format(
+        controller_is_maas = app.current_cloud == 'maas'
+        if controller_is_maas:
+            extra = (" Press enter on a machine ID to pin it to "
+                     "a specific MAAS node.")
+        else:
+            extra = ""
+        ws = [Text("Choose where to place {} unit{} of {}.{}".format(
             self.application.num_units,
             "" if self.application.num_units == 1 else "s",
-            self.application.service_name))]
+            self.application.service_name,
+            extra))]
 
-        controller_is_maas = app.current_cloud == 'maas'
         self.juju_machines_list = JujuMachinesList(
             self.application,
             self._machines,
