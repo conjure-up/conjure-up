@@ -111,8 +111,10 @@ class JujuMachineWidget(WidgetWrap):
         else:
             machine_id_w = self.juju_machine_id_label
         cols = [machine_id_w, self.cores_field,
-                self.mem_field, self.disk_field, Text("placeholder")]
-        self.unselected_columns = Columns(cols)
+                self.mem_field, self.disk_field]
+        cols = [AttrMap(w, 'filter', 'filter_focus') for w in cols]
+        cols.append(Text("placeholder"))
+        self.unselected_columns = Columns(cols, dividechars=2)
         self.update_assignments()
         return self.unselected_columns
 
@@ -177,11 +179,11 @@ class JujuMachineWidget(WidgetWrap):
             pinned_machine = self.controller.get_pin(self.juju_machine_id)
 
             if pinned_machine:
-                pin_label = "({})".format(pinned_machine.hostname)
+                pin_label = ": {} \N{PENCIL}".format(pinned_machine.hostname)
             else:
-                pin_label = ""
-            self.juju_machine_id_button.set_label('{:20s} {}'.format(
-                self.juju_machine_id, pin_label))
+                pin_label = ": _____ \N{PENCIL}"
+            self.juju_machine_id_button.set_label('{:20s}'.format(
+                self.juju_machine_id + " " + pin_label))
         else:
             self.juju_machine_id_label.set_text('{:20s}'.format(
                 self.juju_machine_id))

@@ -103,7 +103,8 @@ class JujuMachinesList(WidgetWrap):
         else:
             labels += [""]
 
-        header_label_col = Columns([Text(m) for m in labels])
+        header_label_col = Columns([Text(m) for m in labels],
+                                   dividechars=2)
         header_widgets.append(header_label_col)
         self.header_padding = len(header_widgets)
         self.add_new_button = AttrMap(
