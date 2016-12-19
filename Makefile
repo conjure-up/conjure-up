@@ -10,7 +10,7 @@ VERSION := 2.1.0
 
 .PHONY: install-dependencies
 install-dependencies:
-	sudo apt-get -yy install devscripts equivs pandoc bsdtar charm charm-tools jq libsystemd-dev
+	sudo apt-get -yy install devscripts equivs pandoc bsdtar jq libsystemd-dev
 	sudo mk-build-deps -i -t "apt-get --no-install-recommends -y" debian/control
 
 .PHONY: uninstall-dependencies
