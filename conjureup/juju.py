@@ -174,8 +174,12 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
 
     cmd += "--bootstrap-series={} ".format(series)
     if cloud != "localhost":
-        cmd += "--credential {}".format(credential)
+        cmd += "--credential {} ".format(credential)
+
+    if app.argv.debug:
+        cmd += "--debug"
     app.log.debug("bootstrap cmd: {}".format(cmd))
+
     try:
         pathbase = os.path.join(app.config['spell-dir'],
                                 '{}-bootstrap').format(app.current_controller)
