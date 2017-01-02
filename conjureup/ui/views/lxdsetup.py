@@ -117,7 +117,9 @@ class LXDSetupView(WidgetWrap):
                  "  $ newgrp lxd\n"
                  "  $ lxc finger\n\n"
                  "If `lxc finger` does not fail with an error you are ready "
-                 "to re-run conjure-up and continue the installation.")
+                 "to re-run conjure-up and continue the installation.\n\n"
+                 "NOTE: Do NOT setup a IPv6 subnet when asked, only IPv4 subnets\n"
+                 "are supported.")
         ]
         return Pile(items)
 
