@@ -54,7 +54,15 @@ def read_config(name):
 
 
 def get_bootstrap_config(controller_name):
-    bootstrap_config = read_config("bootstrap-config")
+    try:
+        bootstrap_config = read_config("bootstrap-config")
+    except Exception:
+        # We may be trying to access the bootstrap-config to quickly
+        # between the time of juju bootstrap occurs and this function
+        # is accessed.
+        app.log.exception("Could not load bootstrap-config, "
+                          "setting an empty controllers dict.")
+        bootstrap_config = dict(controllers={})
     if 'controllers' not in bootstrap_config:
         raise Exception("Could not read Juju's bootstrap-config.yaml")
     cd = bootstrap_config['controllers'].get(controller_name, None)
