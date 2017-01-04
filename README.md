@@ -78,6 +78,10 @@ with all the sensible defaults in place.
 $ conjure-up canonical-kubernetes aws
 ```
 
+# chat
+
+[conjure-up slack channel](https://conjure-up.slack.com/signup)
+
 # authors
 
 * Adam Stokes <adam.stokes@ubuntu.com>
