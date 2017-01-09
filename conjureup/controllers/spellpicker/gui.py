@@ -27,8 +27,9 @@ class SpellPickerController:
         spells = []
         track_screen("Spell Picker")
         if app.endpoint_type is None:
-            for _, kd in app.spells_index.items():
-                spells += kd['spells']
+            for category, cat_dict in app.spells_index.items():
+                spells += [(category, sd)
+                           for sd in cat_dict['spells']]
         elif app.endpoint_type == EndpointType.LOCAL_SEARCH:
             spells = utils.find_spells_matching(app.argv.spell)
         else:
@@ -37,11 +38,20 @@ class SpellPickerController:
             app.ui.show_exception_message(e)
 
         # add subdir of spells-dir to spell dict for bundle readme view:
-        for spell in spells:
+        for category, spell in spells:
             spell['spell-dir'] = os.path.join(app.config['spells-dir'],
                                               spell['key'])
+
+        def spellcatsorter(t):
+            cat = t[0]
+            name = t[1]['name']
+            if cat == '_unassigned_spells':
+                return ('z', name)
+            return (cat, name)
+
         view = SpellPickerView(app,
-                               sorted(spells, key=lambda kv: kv['name']),
+                               sorted(spells,
+                                      key=spellcatsorter),
                                self.finish)
 
         app.ui.set_header(

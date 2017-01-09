@@ -1,7 +1,7 @@
 import os
 import shutil
 from enum import Enum
-from subprocess import CalledProcessError
+from subprocess import PIPE, CalledProcessError
 
 import requests
 from progressbar import (
@@ -156,8 +156,7 @@ def get_remote_url(path):
     return None
 
 
-def download_or_sync_registry(remote_registry, spells_dir,
-                              update=False, branch='master'):
+def download_or_sync_registry(remote_registry, spells_dir, branch='master'):
     """ If first time run this git clones the spell registry, otherwise
     will pull the latest spells down.
 
@@ -168,19 +167,15 @@ def download_or_sync_registry(remote_registry, spells_dir,
     Arguments:
     remote_registry: git location of spells registry
     spells_dir: cache location of local spells directory
-    update: update the source directory
     branch: switch to branch
 
-    Returns:
-    True if successful, False otherwise
     """
     if not os.path.exists(spells_dir):
         run("git clone -q --depth 1 --no-single-branch {} {}".format(
             remote_registry, spells_dir),
-            shell=True, check=True)
-    if os.path.exists(spells_dir) and update:
-        run("cd {} && git pull -q".format(spells_dir),
-            shell=True, check=True)
+            shell=True, check=True, stdout=PIPE, stdin=PIPE)
+    else:
+        run("cd {} && git pull".format(spells_dir),
+            shell=True, check=True, stdout=PIPE, stdin=PIPE)
     run("cd {} && git checkout -q {}".format(spells_dir, branch),
-        shell=True)
-    return False
+        shell=True, check=True, stdout=PIPE, stdin=PIPE)
