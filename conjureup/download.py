@@ -1,7 +1,7 @@
 import os
 import shutil
 from enum import Enum
-from subprocess import CalledProcessError, PIPE
+from subprocess import PIPE, CalledProcessError
 
 import requests
 from progressbar import (
