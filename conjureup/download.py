@@ -155,6 +155,7 @@ def get_remote_url(path):
             return r
     return None
 
+
 def download_or_sync_registry(remote_registry, spells_dir, branch='master'):
     """ If first time run this git clones the spell registry, otherwise
     will pull the latest spells down.

@@ -250,8 +250,8 @@ def main():
         # the picker UI and will defer the copy to
         # SpellPickerController.finish(), so nothing to do here.
         if len(spells) == 1:
-            app.log.debug("found spell {}".format(spells[0]))
-            spell = spells[0]
+            app.log.debug("found spell {}".format(spells[0][1]))
+            spell = spells[0][1]
             utils.set_chosen_spell(spell_name,
                                    os.path.join(opts.cache_dir,
                                                 spell['key']))
