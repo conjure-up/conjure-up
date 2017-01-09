@@ -4,6 +4,7 @@
 import argparse
 import os
 import os.path as path
+import subprocess
 import sys
 import textwrap
 import uuid
@@ -217,14 +218,16 @@ def main():
     spells_registry_branch = os.getenv('CONJUREUP_REGISTRY_BRANCH', 'master')
     if not os.path.exists(spells_dir):
         utils.info("No spells found, syncing from registry, please wait.")
+    try:
         download_or_sync_registry(
             app.global_config['registry']['repo'],
             spells_dir, branch=spells_registry_branch)
-    else:
-        app.log.debug("Refreshing spell registry")
-        download_or_sync_registry(
-            app.global_config['registry']['repo'],
-            spells_dir, update=True, branch=spells_registry_branch)
+    except subprocess.CalledProcessError as e:
+        if not os.path.exists(spells_dir):
+            utils.error("Could not load from registry")
+            sys.exit(1)
+
+        app.log.debug('Could not sync spells from github: {}'.format(e))
 
     spells_index_path = os.path.join(app.config['spells-dir'],
                                      'spells-index.yaml')
