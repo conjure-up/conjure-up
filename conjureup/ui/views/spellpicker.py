@@ -30,8 +30,7 @@ class SpellPickerView(WidgetWrap):
     def __init__(self, app, spells, cb):
         self.app = app
         self.cb = cb
-        self.spells = [SpellPickerWidget(spell, self.submit)
-                       for spell in spells]
+        self.spells = spells
         self.config = self.app.config
         self.frame = Frame(body=self._build_widget(),
                            footer=self._build_footer())
@@ -110,7 +109,16 @@ class SpellPickerView(WidgetWrap):
 
     def _build_widget(self):
         total_items = [HR()]
-        total_items += [spell for spell in self.spells]
+        prev_cat = None
+        for category, spell in self.spells:
+            if category == "_unassigned_spells":
+                category = "other"
+            if category != prev_cat:
+                if prev_cat:
+                    total_items.append(Text(""))
+                total_items.append(Color.label(Text(category)))
+                prev_cat = category
+            total_items.append(SpellPickerWidget(spell, self.submit))
         total_items += [HR()]
 
         self.pile = Pile(total_items)
