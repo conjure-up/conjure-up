@@ -10,7 +10,7 @@ grade: stable
 
 apps:
   conjure-up:
-    command: bin/conjure-up.sh
+    command: conjure-up-wrapper
   bridge:
     command: bridge.start
     stop-command: bridge.stop
@@ -44,4 +44,4 @@ parts:
     plugin: dump
     source: snapcraft/script
     organize:
-      conjure-up.sh: bin/conjure-up.sh
+      conjure-up.sh: bin/conjure-up-wrapper
