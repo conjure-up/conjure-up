@@ -23,6 +23,7 @@ class ApplicationConfigureView(WidgetWrap):
         self.controller = controller
         self.application = application
         self.options_copy = self.application.options.copy()
+        self.num_units_copy = self.application.num_units
         self.metadata_controller = metadata_controller
         self.widgets = self.build_widgets()
         self.description_w = Text("")
@@ -102,7 +103,7 @@ class ApplicationConfigureView(WidgetWrap):
         num_unit_ow = OptionWidget("Units", "int",
                                    "How many units to deploy.",
                                    self.application.orig_num_units,
-                                   current_value=self.application.num_units,
+                                   current_value=self.num_units_copy,
                                    value_changed_callback=self.handle_scale)
         ws.append(num_unit_ow)
         ws += self.get_whitelisted_option_widgets()
@@ -201,11 +202,12 @@ class ApplicationConfigureView(WidgetWrap):
         self.options_copy[opname] = value
 
     def handle_scale(self, opname, scale):
-        self.application.num_units = scale
+        self.num_units_copy = scale
 
     def do_cancel(self, sender):
         self.controller.handle_sub_view_done()
 
     def do_commit(self, sender):
         self.application.options = self.options_copy
+        self.application.num_units = self.num_units_copy
         self.controller.handle_sub_view_done()
