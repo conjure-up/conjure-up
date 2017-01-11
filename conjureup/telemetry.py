@@ -1,4 +1,6 @@
 
+from functools import partial
+
 import requests
 
 from conjureup import __version__ as VERSION
@@ -16,7 +18,8 @@ def track_screen(screen_name):
                 t="screenview")
     if 'spell' in app.config:
         args['cd1'] = app.config['spell']
-    submit(_post_track(args), lambda _: None,
+
+    submit(partial(_post_track, args), lambda _: None,
            queue_name=TELEMETRY_ASYNC_QUEUE)
 
 
@@ -30,7 +33,7 @@ def track_event(category, action, label):
                 t='event')
     if 'spell' in app.config:
         args['cd1'] = app.config['spell']
-    submit(_post_track(args), lambda _: None,
+    submit(partial(_post_track, args), lambda _: None,
            queue_name=TELEMETRY_ASYNC_QUEUE)
 
 
@@ -44,7 +47,7 @@ def track_exception(description, is_fatal=True):
                 exf=exf)
     if 'spell' in app.config:
         args['cd1'] = app.config['spell']
-    submit(_post_track(args), lambda _: None,
+    submit(partial(_post_track, args), lambda _: None,
            queue_name=TELEMETRY_ASYNC_QUEUE)
 
 
