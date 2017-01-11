@@ -258,6 +258,7 @@ class AppArchitectureView(WidgetWrap):
                 self.controller.add_assignment(self.application,
                                                juju_machine_id, atype)
 
+        self.controller.clear_machine_pins()
         for j_m_id, m in self.shadow_pins.items():
             self.controller.set_machine_pin(j_m_id, m)
 

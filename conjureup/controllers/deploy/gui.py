@@ -144,6 +144,36 @@ class DeployController:
         self.list_view.update()
         app.ui.set_body(self.list_view)
 
+    def clear_machine_pins(self):
+        """Remove all mappings between juju machines and maas machines.
+
+        Clears tag constraints that were set when pinning.
+        """
+
+        for juju_machine_id, maas_machine in self.maas_machine_map.items():
+            bundle = app.metadata_controller.bundle
+            juju_machine = bundle.machines[juju_machine_id]
+            maas_machine_tag = maas_machine.instance_id.split('/')[-2]
+            constraints = juju_machine.get('constraints', '')
+            newcons = []
+
+            for con in constraints.split():
+                if not con.startswith('tags='):
+                    newcons.append(con)
+                else:
+                    clean_tags = [t for t in con[5:].split(',')
+                                  if t != maas_machine_tag]
+                    if len(clean_tags) > 0:
+                        newcons.append('tags={}'.format(','.join(clean_tags)))
+
+            if len(newcons) > 0:
+                juju_machine['constraints'] = ' '.join(newcons)
+            else:
+                if 'constraints' in juju_machine:
+                    del juju_machine['constraints']
+
+        self.maas_machine_map = {}
+
     def set_machine_pin(self, juju_machine_id, maas_machine):
         """store the mapping between a juju machine and maas machine.
 
@@ -157,7 +187,7 @@ class DeployController:
         tag = maas_machine.instance_id.split('/')[-2]
         tagstr = "tags={}".format(tag)
         if 'constraints' in juju_machine:
-            juju_machine['constraints'] += "," + tagstr
+            juju_machine['constraints'] += " " + tagstr
         else:
             juju_machine['constraints'] = tagstr
 

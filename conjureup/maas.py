@@ -434,7 +434,8 @@ def satisfies(machine, constraints):
             'cpu_cores': 'cpu_count',
             'cores': 'cpu_count',
             'cpu-cores': 'cpu_count',
-            'root-disk': 'storage'}
+            'root-disk': 'storage',
+            'tags': 'tag_names'}
 
     cons_checks = []
 
@@ -454,6 +455,11 @@ def satisfies(machine, constraints):
             if mval == '*':
                 continue
             if _arch_clean(mval) != _arch_clean(v):
+                cons_checks.append(k)
+
+        elif k == 'tags':
+            mval = machine.machine[kmap[k]]
+            if set(mval) != set(v):
                 cons_checks.append(k)
         else:
             if kmap[k] == 'storage':
