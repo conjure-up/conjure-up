@@ -1,6 +1,7 @@
 
-import requests
 from functools import partial
+
+import requests
 
 from conjureup import __version__ as VERSION
 from conjureup.app_config import app
