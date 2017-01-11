@@ -16,6 +16,8 @@ apps:
     stop-command: bridge.stop
     restart-condition: never
     daemon: oneshot
+  shell:
+    command: bash
 
 parts:
   conjure:
@@ -40,6 +42,6 @@ parts:
       etc/conjure-up.conf: etc/conjure-up.conf
   conjure-up:
     plugin: dump
-    source: snapcraft/script/
+    source: snapcraft/script
     organize:
       conjure-up.sh: bin/conjure-up.sh
