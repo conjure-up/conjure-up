@@ -5,65 +5,42 @@ description: >
    This package provides conjure-up, an interface to installing spells that
    provide the user with an end to end walkthrough experience for installing and
    using big software.
-confinement: strict
+confinement: classic
+grade: stable
 
 apps:
   conjure-up:
-    command: bin/conjure-up-wrapper
-    plugs: [home, network, network-control, network-bind]
+    command: conjure-up.sh
+    plugs: [home, network, network-bind]
   bridge:
     command: bridge.start
     stop-command: bridge.stop
     restart-condition: never
     daemon: oneshot
     plugs: [network, network-bind, network-control, firewall-control]
-  python3:
-    command: python3
-  shell:
-    command: bash
 
 parts:
   conjure:
-    plugin: python3
+    plugin: python
     source: https://github.com/conjure-up/conjure-up.git
     source-type: git
     requirements: requirements.txt
     stage-packages:
+      - locales
+      - libc-bin
       - bsdtar
       - coreutils
       - lxd-client
+      - lxd
       - jq
       - juju
       - iproute2
       - iptables
-    snap:
-      - sbin/ip
-      - sbin/iptables
-      - usr/bin/bsdtar
-      - usr/bin/tail
-      - usr/bin/env
-      - usr/bin/pip*
-      - usr/bin/easy_install*
-      - usr/bin/lxc
-      - usr/bin/jq
-      - usr/bin/juju*
-      - usr/bin/py*
-      - bin/conjure-up
-      - usr/lib/juju-2.0/bin/juju*
-      - usr/lib/python3
-      - usr/lib/python3.5/lib-dynload
-      - etc/python*
-      - -usr/share
-      - -usr/include
-      - -home
   conjure-configs:
     plugin: dump
-    source: https://github.com/conjure-up/conjure-up.git
-    filesets:
-      etc/conjure-up.conf: etc/conjure-up.conf
-      spells: spells
-  conjure-up-copy:
-    plugin: dump
     source: .
-    organize:
-      conjure-up-wrapper: bin/conjure-up-wrapper
+    filesets:
+      etc/conjure-up.conf: conjure-up.conf
+  conjure-up:
+    plugin: dump
+    source: script/
