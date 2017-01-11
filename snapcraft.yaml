@@ -10,20 +10,17 @@ grade: stable
 
 apps:
   conjure-up:
-    command: conjure-up.sh
-    plugs: [home, network, network-bind]
+    command: bin/conjure-up.sh
   bridge:
     command: bridge.start
     stop-command: bridge.stop
     restart-condition: never
     daemon: oneshot
-    plugs: [network, network-bind, network-control, firewall-control]
 
 parts:
   conjure:
     plugin: python
-    source: https://github.com/conjure-up/conjure-up.git
-    source-type: git
+    source: .
     requirements: requirements.txt
     stage-packages:
       - locales
@@ -40,7 +37,9 @@ parts:
     plugin: dump
     source: .
     filesets:
-      etc/conjure-up.conf: conjure-up.conf
+      etc/conjure-up.conf: etc/conjure-up.conf
   conjure-up:
     plugin: dump
-    source: script/
+    source: snapcraft/script/
+    organize:
+      conjure-up.sh: bin/conjure-up.sh

@@ -18,4 +18,4 @@ export LC_ALL=$APPLOC
 export LANG=$APPLOC
 export LANGUAGE=${APPLANG%_*}
 
-$SNAP/usr/bin/conjure-up -c $SNAP/etc/conjure-up.conf --spells-dir $SNAP/spells --cache-dir $SNAP_USER_DATA/conjure-up "$@"
+$SNAP/bin/conjure-up -c $SNAP/etc/conjure-up.conf --spells-dir $SNAP/spells --cache-dir $SNAP_USER_DATA/conjure-up "$@"
