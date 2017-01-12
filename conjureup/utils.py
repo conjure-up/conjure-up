@@ -31,7 +31,8 @@ def is_snap_package_installed(pkg):
         pkg)
     with requests_unixsocket.Session() as session:
         if session.get(snap_query).ok:
-            return
+            return True
+    return False
 
 
 def run(cmd, **kwargs):
