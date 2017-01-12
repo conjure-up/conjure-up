@@ -11,6 +11,8 @@ grade: stable
 apps:
   conjure-up:
     command: conjure-up-wrapper
+  juju:
+    command: bin/juju
   bridge:
     command: bridge.start
     stop-command: bridge.stop
@@ -29,10 +31,7 @@ parts:
       - libc-bin
       - bsdtar
       - coreutils
-      - lxd-client
-      - lxd
       - jq
-      - juju
       - iproute2
       - iptables
   conjure-configs:
@@ -43,5 +42,7 @@ parts:
   conjure-up:
     plugin: dump
     source: snapcraft/script
-    organize:
-      conjure-up.sh: bin/conjure-up-wrapper
+  juju:
+    source-tag: juju-2.0.2
+    prime:
+      - bin/juju

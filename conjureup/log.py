@@ -24,10 +24,16 @@ class _log:
 
 
 def setup_logging(app, logfile, debug=False):
-    cmdslog = TimedRotatingFileHandler(logfile,
-                                       when='D',
-                                       interval=1,
-                                       backupCount=7)
+    try:
+        cmdslog = TimedRotatingFileHandler(logfile,
+                                           when='D',
+                                           interval=1,
+                                           backupCount=7)
+    except FileNotFoundError as e:
+        # SNAP: This failing
+        # May need to do something different for snappy
+        cmdslog = logging.FileHandler('deploy-done.log')
+
     if debug:
         env = logging.DEBUG
         cmdslog.setFormatter(logging.Formatter(
