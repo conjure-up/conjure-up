@@ -14,7 +14,8 @@ from conjureup.controllers.deploy.gui import DeployController
 class DeployGUIRenderTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.controller = DeployController()
+        with patch.object(DeployController, 'sync_with_bundle'):
+            self.controller = DeployController()
 
         self.utils_patcher = patch(
             'conjureup.controllers.deploy.gui.utils')
@@ -73,7 +74,8 @@ class DeployGUIRenderTestCase(unittest.TestCase):
 class DeployGUIFinishTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.controller = DeployController()
+        with patch.object(DeployController, 'sync_with_bundle'):
+            self.controller = DeployController()
 
         self.controllers_patcher = patch(
             'conjureup.controllers.deploy.gui.controllers')

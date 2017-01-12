@@ -24,7 +24,9 @@ class DeployController:
         self.assignments = defaultdict(list)
         self.deployed_juju_machines = {}
         self.maas_machine_map = {}
+        self.sync_with_bundle()
 
+    def sync_with_bundle(self):
         # If no machines are specified, add a machine for each app:
         bundle = app.metadata_controller.bundle
 
