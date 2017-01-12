@@ -88,8 +88,11 @@ class DeployController:
     def do_architecture(self, application, sender):
         # If no machines are specified, add a machine for each app:
         bundle = app.metadata_controller.bundle
+
         if len(bundle.machines) == 0:
             self.generate_juju_machines()
+        else:
+            self.sync_assignments()
 
         av = AppArchitectureView(application,
                                  self)
@@ -99,17 +102,36 @@ class DeployController:
     def generate_juju_machines(self):
         """ Add a separate juju machine for each app.
         Intended for bundles with no machines defined.
+
+        NOTE: assumes there are no placement specs in the bundle.
         """
         bundle = app.metadata_controller.bundle
         midx = 0
         for bundle_application in sorted(bundle.services,
                                          key=attrgetter('service_name')):
+            if bundle_application.placement_spec:
+                app.log.warning("Ignoring placement spec because no machines "
+                                "were set in the bundle: {}".format(
+                                    bundle.application.placement_spec))
             for n in range(bundle_application.num_units):
                 bundle.add_machine(dict(series=bundle.series),
                                    str(midx))
                 self.add_assignment(bundle_application, str(midx),
                                     AssignmentType.DEFAULT)
                 midx += 1
+
+    def sync_assignments(self):
+        bundle = app.metadata_controller.bundle
+        midx = 0
+        for bundle_application in bundle.services:
+            deployargs = bundle_application.as_deployargs()
+            spec_list = deployargs.get('placement', [])
+            for spec in spec_list:
+                juju_machine_id = spec['directive']
+                atype = {"lxd": AssignmentType.LXD,
+                         "kvm": AssignmentType.KVM,
+                         "#": AssignmentType.BareMetal}[spec['scope']]
+                self.add_assignment(bundle_application, juju_machine_id, atype)
 
     def add_assignment(self, application, juju_machine_id, atype):
         self.assignments[juju_machine_id].append((application, atype))
