@@ -122,7 +122,6 @@ class DeployController:
 
     def sync_assignments(self):
         bundle = app.metadata_controller.bundle
-        midx = 0
         for bundle_application in bundle.services:
             deployargs = bundle_application.as_deployargs()
             spec_list = deployargs.get('placement', [])
