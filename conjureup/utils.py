@@ -13,6 +13,7 @@ from subprocess import (
     check_output
 )
 
+import requests_unixsocket
 import yaml
 from termcolor import colored
 
@@ -22,6 +23,16 @@ from bundleplacer.config import Config
 from conjureup import charm
 from conjureup.app_config import app
 from conjureup.telemetry import track_event
+
+
+def is_snap_package_installed(pkg):
+    # snapd is not idempotent so we need to query first
+    snap_query = 'http+unix://%2Frun%2Fsnapd.socket/v2/snaps/{}'.format(
+        pkg)
+    with requests_unixsocket.Session() as session:
+        if session.get(snap_query).ok:
+            return True
+    return False
 
 
 def run(cmd, **kwargs):

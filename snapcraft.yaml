@@ -1,0 +1,48 @@
+name: conjure-up
+version: 2.1.0
+summary: Package runtime for conjure-up spells
+description: >
+   This package provides conjure-up, an interface to installing spells that
+   provide the user with an end to end walkthrough experience for installing and
+   using big software.
+confinement: classic
+grade: stable
+
+apps:
+  conjure-up:
+    command: conjure-up-wrapper
+  juju:
+    command: bin/juju
+  bridge:
+    command: bridge.start
+    stop-command: bridge.stop
+    restart-condition: never
+    daemon: oneshot
+  shell:
+    command: bash
+
+parts:
+  conjure:
+    plugin: python
+    source: .
+    requirements: requirements.txt
+    stage-packages:
+      - locales
+      - libc-bin
+      - bsdtar
+      - coreutils
+      - jq
+      - iproute2
+      - iptables
+  conjure-configs:
+    plugin: dump
+    source: .
+    filesets:
+      etc/conjure-up.conf: etc/conjure-up.conf
+  conjure-up:
+    plugin: dump
+    source: snapcraft/script
+  juju:
+    source-tag: juju-2.0.2
+    prime:
+      - bin/juju

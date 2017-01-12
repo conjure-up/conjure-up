@@ -75,7 +75,7 @@ tox
 tox-quickstart
 nosetests*
 virtualenv
-snapcraft/parts
-snapcraft/prime
-snapcraft/stage
-snapcraft/*.snap
+parts
+prime
+stage
+*.snap
