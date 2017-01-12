@@ -1,4 +1,4 @@
-# conjure-up [![Build Status](https://travis-ci.org/conjure-up/conjure-up.svg?branch=master)](https://travis-ci.org/conjure-up/conjure-up)
+# conjure-up [![Build Status](https://travis-ci.org/conjure-up/conjure-up.svg?branch=master)](https://travis-ci.org/conjure-up/conjure-up) [![Requirements Status](https://requires.io/github/conjure-up/conjure-up/requirements.svg?branch=master)](https://requires.io/github/conjure-up/conjure-up/requirements/?branch=master)
 > Installing cloud packages like whoa.
 
 # what it is
