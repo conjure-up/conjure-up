@@ -25,6 +25,14 @@ class DeployController:
         self.deployed_juju_machines = {}
         self.maas_machine_map = {}
 
+        # If no machines are specified, add a machine for each app:
+        bundle = app.metadata_controller.bundle
+
+        if len(bundle.machines) == 0:
+            self.generate_juju_machines()
+        else:
+            self.sync_assignments()
+
     def _handle_exception(self, tag, exc):
         track_exception(exc.args[0])
         app.ui.show_exception_message(exc)
@@ -86,14 +94,6 @@ class DeployController:
         app.ui.set_body(cv)
 
     def do_architecture(self, application, sender):
-        # If no machines are specified, add a machine for each app:
-        bundle = app.metadata_controller.bundle
-
-        if len(bundle.machines) == 0:
-            self.generate_juju_machines()
-        else:
-            self.sync_assignments()
-
         av = AppArchitectureView(application,
                                  self)
         app.ui.set_header(av.header)
