@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -x
-
 ip addr flush dev conjureup0
 ip link set dev conjureup0 down
 

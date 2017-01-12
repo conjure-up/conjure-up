@@ -1,3 +1,0 @@
-export LC_ALL=C.UTF-8
-
-conjure-up -c $SNAP/etc/conjure-up.conf --spells-dir $SNAP/spells --cache-dir $SNAP_USER_DATA/conjure-up "$@"
