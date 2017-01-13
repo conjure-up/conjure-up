@@ -48,7 +48,7 @@ $ sudo apt install conjure-up
 If you want to try the snap distribution, you can install it with:
 
 ```
-sudo snap install conjure-up --classic`
+sudo snap install conjure-up --classic
 ```
 
 # how to use
