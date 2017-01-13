@@ -12,7 +12,7 @@ apps:
   conjure-up:
     command: conjure-up-wrapper
   juju:
-    command: bin/juju
+    command: juju-wrapper
     aliases:
       - juju
   bridge:
