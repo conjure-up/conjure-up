@@ -25,6 +25,8 @@ storage and networking with:
 $ sudo dpkg-reconfigure -p medium lxd
 ```
 
+> Note: Make sure that you select **NO** when asked to setup IPv6 as this not currently supported.
+
 ..and wake up the lxd daemon with:
 
 ```
@@ -43,14 +45,10 @@ $ sudo apt install conjure-up
 ```
 
 ## alternative installation
-If you want to try the snap distribution, you can install it with `sudo snap install conjure-up --devmode`,
-and if you want to use it for the _openstack-nclxd_ spell to run openstack in LXD containers on localhost,
-you also need to run the following three commands:
+If you want to try the snap distribution, you can install it with:
 
 ```
-$ sudo snap connect conjure-up:firewall-control ubuntu-core:firewall-control
-$ sudo snap connect conjure-up:network-control ubuntu-core:network-control
-$ sudo systemctl start snap.conjure-up.bridge.service
+sudo snap install conjure-up --classic`
 ```
 
 # how to use
@@ -75,7 +73,7 @@ on your keyboard? Not a problem, easily get your **big software** up and running
 with all the sensible defaults in place.
 
 ```
-$ conjure-up canonical-kubernetes aws
+$ conjure-up canonical-kubernetes localhost
 ```
 
 # chat
