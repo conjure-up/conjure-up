@@ -22,6 +22,9 @@ class _log:
     def exception(self, msg):
         self.logger.exception("{}: {}".format(self.app, msg))
 
+    def warning(self, msg):
+        self.logger.warning("{}: {}".format(self.app, msg))
+
 
 def setup_logging(app, logfile, debug=False):
     try:
