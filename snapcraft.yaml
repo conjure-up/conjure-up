@@ -13,6 +13,8 @@ apps:
     command: conjure-up-wrapper
   juju:
     command: bin/juju
+    aliases:
+      - juju
   bridge:
     command: bridge.start
     stop-command: bridge.stop
