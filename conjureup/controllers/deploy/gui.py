@@ -24,13 +24,22 @@ class DeployController:
         self.assignments = defaultdict(list)
         self.deployed_juju_machines = {}
         self.maas_machine_map = {}
-        self.sync_with_bundle()
+        self.init_machines_assignments()
 
-    def sync_with_bundle(self):
-        # If no machines are specified, add a machine for each app:
+    def init_machines_assignments(self):
+        """Initialize the controller's machines and assignments.
+
+        If no machines are specified, or we are deploying to a LXD
+        controller, add a top-level machine for each app - assumes
+        that no placement directives exist in the bundle, and logs any
+        it finds.
+
+        Otherwise, syncs assignments from the bundle's applications'
+        placement specs.
+        """
         bundle = app.metadata_controller.bundle
 
-        if len(bundle.machines) == 0:
+        if len(bundle.machines) == 0 or app.current_cloud == "localhost":
             self.generate_juju_machines()
         else:
             self.sync_assignments()
@@ -112,9 +121,16 @@ class DeployController:
         for bundle_application in sorted(bundle.services,
                                          key=attrgetter('service_name')):
             if bundle_application.placement_spec:
-                app.log.warning("Ignoring placement spec because no machines "
-                                "were set in the bundle: {}".format(
-                                    bundle.application.placement_spec))
+                if app.current_cloud == "localhost":
+                    app.log.info("Ignoring placement spec because we are "
+                                 "deploying to LXD: {}".format(
+                                     bundle_application.placement_spec))
+                else:
+                    app.log.warning("Ignoring placement spec because no "
+                                    "machines were set in the "
+                                    "bundle: {}".format(
+                                        bundle_application.placement_spec))
+
             for n in range(bundle_application.num_units):
                 bundle.add_machine(dict(series=bundle.series),
                                    str(midx))
