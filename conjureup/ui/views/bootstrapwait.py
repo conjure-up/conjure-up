@@ -22,7 +22,7 @@ class BootstrapWaitView(WidgetWrap):
 
     def __init__(self, app, message):
         self.message = Text(message, align="center")
-        self.output = Text("", align="center")
+        self.output = Text("", align="left")
         self.loading_boxes = [Text(x) for x in self.load_attributes]
         super().__init__(self._build_node_waiting())
 
