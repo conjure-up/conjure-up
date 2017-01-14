@@ -1,8 +1,52 @@
 #!/bin/bash
 
+
+VERSION=$(lxd --version)
+
+# LXD 2.3+ needs lxdbr0 setup via lxc.
+if dpkg --compare-versions "$VERSION" gt "2.2"; then
+    if ! lxc network list | grep -q lxdbr0; then
+        # Configure a known address ranges for lxdbr0.
+        lxc network create lxdbr0 \
+            ipv4.address=10.0.8.1/24 ipv4.nat=true \
+            ipv6.address=none ipv6.nat=false
+    fi
+    lxc network show lxdbr0
+    lxc config show
+else
+    # LXD 2.2 and earlier use debconf to create and configure the network.
+    sudo debconf-communicate << EOF
+set lxd/setup-bridge true
+set lxd/bridge-domain lxd
+set lxd/bridge-name lxdbr0
+set lxd/bridge-ipv4 true
+set lxd/bridge-ipv4-address 10.0.8.1
+set lxd/bridge-ipv4-dhcp-first 10.0.8.2
+set lxd/bridge-ipv4-dhcp-last 10.0.8.254
+set lxd/bridge-ipv4-dhcp-leases 252
+set lxd/bridge-ipv4-netmask 24
+set lxd/bridge-ipv4-nat true
+set lxd/bridge-ipv6 false
+EOF
+
+    sudo rm -rf /etc/default/lxd-bridge
+
+    sudo dpkg-reconfigure lxd --frontend=noninteractive
+
+    # Must run a command for systemd socket activation to start the service
+    lxc config show
+fi
+
+sysctl fs.inotify.max_user_instances=1048576
+sysctl fs.inotify.max_queued_events=1048576
+sysctl fs.inotify.max_user_watches=1048576
+sysctl vm.max_map_count=262144
+
 ip link add dev conjureup0 type bridge
 ip addr add 10.99.0.1/24 dev conjureup0
 ip link set dev conjureup0 up
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
 
 iptables -I FORWARD -i conjureup0 -j ACCEPT
 iptables -I FORWARD -o conjureup0 -j ACCEPT
@@ -11,19 +55,3 @@ iptables -I INPUT -i conjureup0 -p tcp -m tcp --dport 53 -j ACCEPT
 iptables -I INPUT -i conjureup0 -p udp -m udp --dport 53 -j ACCEPT
 iptables -I INPUT -i conjureup0 -p tcp -m tcp --dport 67 -j ACCEPT
 iptables -I INPUT -i conjureup0 -p udp -m udp --dport 67 -j ACCEPT
-
-# TODO: This should be addressed with a sysctl interface once we start
-# moving this application over to a strict confinement. For now though,
-# increase the resources for LXD to utilize.
-#
-# TODO: Snapd should look into supporting tear down hooks for snap
-# remove. File bug at https://launchpad.net/snapd
-cat<<EOF>/etc/sysctl.d/60-conjure-up.conf
-net.ipv4.ip_forward = 1
-fs.inotify.max_user_instances = 1048576
-fs.inotify.max_queued_events = 1048576
-fs.inotify.max_user_watches = 1048576
-vm.max_map_count = 262144
-EOF
-
-sysctl -p

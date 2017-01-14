@@ -3,6 +3,8 @@
 ip addr flush dev conjureup0
 ip link set dev conjureup0 down
 
+sleep 5
+
 iptables -D FORWARD -i conjureup0 -j ACCEPT
 iptables -D FORWARD -o conjureup0 -j ACCEPT
 

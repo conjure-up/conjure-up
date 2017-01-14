@@ -306,16 +306,6 @@ def main():
 
         show_env()
 
-    # XXX: This is temporary for snap installs once snap dependencies
-    # can be defined (similar to apt package deps)
-    if not utils.check_deb_installed('lxd-client'):
-        if not utils.is_snap_package_installed('lxd'):
-            utils.warning("This next step utilizes snappy to install LXD "
-                          "and requires you to enter a sudo password. ")
-            utils.run_script('sudo snap install lxd')
-            lxd_dir = os.environ['SNAP_COMMON']
-            app.env['LXD_DIR'] = lxd_dir
-
     if app.argv.cloud:
         if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
             utils.error("Please specify a spell for headless mode.")

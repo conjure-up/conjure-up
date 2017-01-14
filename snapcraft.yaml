@@ -12,16 +12,12 @@ apps:
   conjure-up:
     command: conjure-up-wrapper
   juju:
-    command: juju-wrapper
-    aliases:
-      - juju
+    command: bin/juju
   bridge:
     command: bridge.start
     stop-command: bridge.stop
     restart-condition: never
     daemon: oneshot
-  shell:
-    command: bash
 
 parts:
   conjure:
@@ -29,13 +25,15 @@ parts:
     source: .
     requirements: requirements.txt
     stage-packages:
-      - locales
-      - libc-bin
       - bsdtar
-      - coreutils
       - jq
-      - iproute2
-      - iptables
+    stage:
+      - -usr/bin/2to3-3.5
+      - -usr/bin/py3clean
+      - -usr/bin/py3compile
+      - -usr/bin/pydoc3.5
+      - -usr/share/dh-python
+      - -usr/share/python3/py3versions.py
   conjure-configs:
     plugin: dump
     source: .
