@@ -44,6 +44,7 @@ parts:
   conjure-up:
     plugin: dump
     source: snapcraft/script
+    after: [lxd, lxc, lxcfs]
   juju:
     source-tag: juju-2.0.2
     prime:
