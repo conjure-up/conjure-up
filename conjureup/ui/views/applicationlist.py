@@ -66,7 +66,7 @@ class ApplicationWidget(WidgetWrap):
 
         if self.application.num_units > 0:
             arch_button = (20, Color.button_secondary(
-                PlainButton("Architecture",
+                PlainButton("Architect",
                             partial(self.controller.do_architecture,
                                     self.application)),
                 focus_map='button_secondary focus'))
