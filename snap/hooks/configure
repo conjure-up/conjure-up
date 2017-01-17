@@ -38,10 +38,10 @@ EOF
 fi
 
 cat <<EOF>/etc/sysctl.d/60-conjure-up.conf
-sysctl fs.inotify.max_user_instances=1048576
-sysctl fs.inotify.max_queued_events=1048576
-sysctl fs.inotify.max_user_watches=1048576
-sysctl vm.max_map_count=262144
+fs.inotify.max_user_instances=1048576
+fs.inotify.max_queued_events=1048576
+fs.inotify.max_user_watches=1048576
+vm.max_map_count=262144
 EOF
 
 sysctl -p/etc/sysctl.d/60-conjure-up.conf
