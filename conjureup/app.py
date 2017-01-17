@@ -319,6 +319,7 @@ def main():
     else:
         app.ui = ConjureUI()
         EventLoop.build_loop(app.ui, STYLES,
-                             unhandled_input=unhandled_input)
+                             unhandled_input=unhandled_input,
+                             handle_mouse=False)
         EventLoop.set_alarm_in(0.05, _start)
         EventLoop.run()
