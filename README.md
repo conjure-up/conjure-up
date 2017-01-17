@@ -1,4 +1,4 @@
-# conjure-up [![Build Status](https://travis-ci.org/conjure-up/conjure-up.svg?branch=master)](https://travis-ci.org/conjure-up/conjure-up) [![Requirements Status](https://requires.io/github/conjure-up/conjure-up/requirements.svg?branch=master)](https://requires.io/github/conjure-up/conjure-up/requirements/?branch=master)
+# conjure-up [![Build Status](https://travis-ci.org/conjure-up/conjure-up.svg?branch=master)](https://travis-ci.org/conjure-up/conjure-up)
 > Installing cloud packages like whoa.
 
 # what it is
@@ -15,7 +15,15 @@ solutions up and going with as little hindrance as possible.
 
 > Xenial and above
 
-## pre-reqs
+## recommended
+
+```
+$ sudo snap install conjure-up --edge --classic
+```
+
+## alternative installation
+
+### pre-reqs
 
 If you plan to use conjure-up to deploy onto LXD containers on your local
 machine (aka the _localhost_ cloud type), you will need to set up LXD
@@ -33,22 +41,13 @@ $ sudo dpkg-reconfigure -p medium lxd
 $ lxc finger
 ```
 
-## recommended installation
-We will eventually move to pure snap distribution, however, until that time
-packages are built and located at:
+Install the packages from the below PPA's
 
 ```
 $ sudo apt-add-repository ppa:juju/stable
 $ sudo apt-add-repository ppa:conjure-up/next
 $ sudo apt update
 $ sudo apt install conjure-up
-```
-
-## alternative installation
-If you want to try the snap distribution, you can install it with:
-
-```
-sudo snap install conjure-up --classic
 ```
 
 # how to use
