@@ -1,12 +1,5 @@
 #!/bin/sh
 
-logger -t "conjure-up/systemd" "[DEBUG] Setting sysctl settings"
-
-sysctl fs.inotify.max_user_instances=1048576
-sysctl fs.inotify.max_queued_events=1048576
-sysctl fs.inotify.max_user_watches=1048576
-sysctl vm.max_map_count=262144
-
 logger -t "conjure-up/systemd" "[DEBUG] Creating conjure-up network bridge"
 ip link add dev conjureup0 type bridge
 ip addr add 10.99.0.1/24 dev conjureup0

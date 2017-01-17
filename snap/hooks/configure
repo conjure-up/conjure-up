@@ -15,7 +15,7 @@ if dpkg --compare-versions "$VERSION" gt "2.2"; then
     lxc config show
 else
     # LXD 2.2 and earlier use debconf to create and configure the network.
-    sudo debconf-communicate << EOF
+    debconf-communicate << EOF
 set lxd/setup-bridge true
 set lxd/bridge-domain lxd
 set lxd/bridge-name lxdbr0
@@ -29,18 +29,22 @@ set lxd/bridge-ipv4-nat true
 set lxd/bridge-ipv6 false
 EOF
 
-    sudo rm -rf /etc/default/lxd-bridge
+    rm -rf /etc/default/lxd-bridge
 
-    sudo dpkg-reconfigure lxd --frontend=noninteractive
+    dpkg-reconfigure lxd --frontend=noninteractive
 
     # Must run a command for systemd socket activation to start the service
     lxc config show
 fi
 
+cat <<EOF>/etc/sysctl.d/60-conjure-up.conf
 sysctl fs.inotify.max_user_instances=1048576
 sysctl fs.inotify.max_queued_events=1048576
 sysctl fs.inotify.max_user_watches=1048576
 sysctl vm.max_map_count=262144
+EOF
+
+sysctl -p/etc/sysctl.d/60-conjure-up.conf
 
 ip link add dev conjureup0 type bridge
 ip addr add 10.99.0.1/24 dev conjureup0
