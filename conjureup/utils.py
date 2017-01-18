@@ -13,7 +13,6 @@ from subprocess import (
     check_output
 )
 
-import requests_unixsocket
 import yaml
 from termcolor import colored
 
@@ -23,16 +22,6 @@ from bundleplacer.config import Config
 from conjureup import charm
 from conjureup.app_config import app
 from conjureup.telemetry import track_event
-
-
-def is_snap_package_installed(pkg):
-    # snapd is not idempotent so we need to query first
-    snap_query = 'http+unix://%2Frun%2Fsnapd.socket/v2/snaps/{}'.format(
-        pkg)
-    with requests_unixsocket.Session() as session:
-        if session.get(snap_query).ok:
-            return True
-    return False
 
 
 def run(cmd, **kwargs):
@@ -117,23 +106,41 @@ def run_attach(cmd, output_cb=None):
                                          subproc.returncode))
 
 
-def check_bridge_exists():
-    """ Checks that an LXD network bridge exists
+def lxd_version():
+    """ Get current LXD version
     """
     cmd = run_script('lxc version')
     if cmd.returncode == 0:
-        lxd_version = cmd.stdout.decode().strip()
+        return cmd.stdout.decode().strip()
     else:
         raise Exception("Could not determine LXD version.")
 
-    if lxd_version >= "2.4.0":
+
+def lxd_has_ipv6():
+    """ Checks whether LXD bridge has IPv6 enabled
+    """
+    if check_bridge_exists():
+        if lxd_version() >= "2.4.0":
+            cmd = run_script('lxc network get lxdbr0 ipv6.nat')
+        else:
+            cmd = run_script('debconf-show lxd|grep bridge-ipv6-nat')
+        out = cmd.stdout.decode().strip()
+        if "true" in out:
+            return True
+    return False
+
+
+def check_bridge_exists():
+    """ Checks that an LXD network bridge exists
+    """
+    if lxd_version() >= "2.4.0":
         try:
             run('lxc network list|grep -q bridge',
                 shell=True, check=True)
         except CalledProcessError:
             return False
         return True
-    elif lxd_version < "2.4.0":
+    elif lxd_version() < "2.4.0":
         if os.path.isfile('/etc/default/lxd-bridge'):
             config_string = "[dummy]\n"
             with open('/etc/default/lxd-bridge') as f:

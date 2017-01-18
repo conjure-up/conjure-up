@@ -147,9 +147,24 @@ class NewCloudController:
         # information.
 
         if app.current_cloud == 'localhost':
-            if not utils.check_bridge_exists() or \
-               not utils.check_user_in_group('lxd'):
-                return controllers.use('lxdsetup').render()
+            if not utils.check_bridge_exists():
+                return controllers.use('lxdsetup').render(
+                    "Unable to determine an existing LXD network bridge, "
+                    "please make sure you've run `sudo lxd init` to configure "
+                    "LXD."
+                )
+            if not utils.check_user_in_group('lxd'):
+                return controllers.use('lxdsetup').render(
+                    "{} is not part of the LXD group. You will need "
+                    "to exit conjure-up and do one of the following: "
+                    " 1: Run `newgrp lxd` and re-launch conjure-up\n"
+                    " 2: Log out completely, Log in and "
+                    "re-launch conjure-up".format(os.environ['USER']))
+            if utils.lxd_has_ipv6():
+                return controllers.use('lxdsetup').render(
+                    "The LXD bridge has IPv6 enabled. Currently this is "
+                    "unsupported by conjure-up. Please disable IPv6 and "
+                    "re-launch conjure-up")
 
             app.log.debug("Found an IPv4 address, "
                           "assuming LXD is configured.")
