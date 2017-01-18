@@ -23,7 +23,7 @@ class ConjureUI(Frame):
         errmsg += ("\n\n"
                    "Review log messages at ~/.cache/conjure-up/conjure-up.log "
                    "If appropriate, please submit a bug here: "
-                   "https://bugs.launchpad.net/conjure-up/+filebug")
+                   "https://github.com/conjure-up/conjure-up/issues/new")
 
         self.frame.body = ErrorView(errmsg)
         app.log.exception("Showing dialog for exception:")
