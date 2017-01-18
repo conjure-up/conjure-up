@@ -80,12 +80,12 @@ class LXDSetupController:
         app.current_cloud = 'localhost'
         controllers.use('newcloud').render(bootstrap=True)
 
-    def render(self):
+    def render(self, msg):
         """ Render
         """
         track_screen("LXD Setup")
-        self.view = LXDSetupView(app,
-                                 self.finish)
+        self.view = LXDSetupView(app, msg=msg,
+                                 cb=self.finish)
 
         app.ui.set_header(
             title="Setup LXD Bridge",

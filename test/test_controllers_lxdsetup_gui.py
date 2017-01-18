@@ -45,7 +45,7 @@ class LXDSetupGUIRenderTestCase(unittest.TestCase):
 
     def test_render(self):
         "call render"
-        self.controller.render()
+        self.controller.render("A message")
 
 
 class LXDSetupGUIFinishTestCase(unittest.TestCase):
