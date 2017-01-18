@@ -2,12 +2,11 @@
 #
 # tests controllers/deploystatus/gui.py
 #
-# Copyright 2016 Canonical, Ltd.
+# Copyright 2016, 2017 Canonical, Ltd.
 
 
 import unittest
-#  from unittest.mock import ANY, call, MagicMock, patch, sentinel
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 from conjureup.controllers.deploystatus.gui import DeployStatusController
 
@@ -46,7 +45,9 @@ class DeployStatusGUIRenderTestCase(unittest.TestCase):
 
     def test_render(self):
         "call render"
-        self.controller.render()
+        mock_future = MagicMock(name="last_deploy_action_future")
+        self.controller.render(mock_future)
+        mock_future.add_done_callback.assert_called_once_with(ANY)
 
 
 class DeployStatusGUIFinishTestCase(unittest.TestCase):

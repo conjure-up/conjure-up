@@ -14,7 +14,8 @@ class BootstrapWaitController:
     def finish(self, *args):
         if self.alarm_handle:
             EventLoop.remove_alarm(self.alarm_handle)
-        return controllers.use('deploystatus').render()
+        return controllers.use('deploystatus').render(
+            self.relations_scheduled_future)
 
     def __refresh(self, *args):
         self.view.redraw_kitt()
@@ -22,7 +23,8 @@ class BootstrapWaitController:
             1,
             self.__refresh)
 
-    def render(self):
+    def render(self, relations_scheduled_future):
+        self.relations_scheduled_future = relations_scheduled_future
         track_screen("Bootstrap wait")
         app.log.debug("Rendering bootstrap wait")
 
