@@ -164,7 +164,9 @@ class NewCloudController:
                 return controllers.use('lxdsetup').render(
                     "The LXD bridge has IPv6 enabled. Currently this is "
                     "unsupported by conjure-up. Please disable IPv6 and "
-                    "re-launch conjure-up")
+                    "re-launch conjure-up\n\n"
+                    "Visit http://conjure-up.io/docs/en/users/#_lxd for "
+                    "information on how to disable IPv6.")
 
             app.log.debug("Found an IPv4 address, "
                           "assuming LXD is configured.")
