@@ -17,30 +17,6 @@ solutions up and going with as little hindrance as possible.
 
 ## recommended
 
-```
-$ sudo snap install conjure-up --edge --classic
-```
-
-## alternative installation
-
-### pre-reqs
-
-If you plan to use conjure-up to deploy onto LXD containers on your local
-machine (aka the _localhost_ cloud type), you will need to set up LXD
-beforehand, as this requires **sudo**. If you haven't done that, you can configure
-storage and networking with:
-```
-$ sudo dpkg-reconfigure -p medium lxd
-```
-
-> Note: Make sure that you select **NO** when asked to setup IPv6 as this not currently supported.
-
-..and wake up the lxd daemon with:
-
-```
-$ lxc finger
-```
-
 Install the packages from the below PPA's
 
 ```
