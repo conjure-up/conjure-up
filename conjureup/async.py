@@ -5,7 +5,7 @@ work.
 
 import logging
 import time
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 
@@ -21,18 +21,43 @@ ShutdownEvent = Event()
 _queues = defaultdict(lambda: ThreadPoolExecutor(1))
 DEFAULT_QUEUE = "DEFAULT"
 
+ENABLE_LOG = False
+if ENABLE_LOG:
+    import q
+    _queueLog = defaultdict(OrderedDict)
+
 
 def submit(func, exc_callback, queue_name="DEFAULT"):
     def cb(cb_f):
         e = cb_f.exception()
         if e:
             exc_callback(e)
+        if ENABLE_LOG:
+            now = time.time()
+            t = _queueLog[queue_name][func]
+            _queueLog[queue_name][func] = (t[0], t[1],
+                                           "done", time.time(),
+                                           e,
+                                           "elapsed", now - t[1])
+            q.q(qstatsf())
     if ShutdownEvent.is_set():
         log.debug("ignoring async.submit due to impending shutdown.")
         return
     f = _queues[queue_name].submit(func)
+    if ENABLE_LOG:
+        _queueLog[queue_name][func] = ("added", time.time(), None, None, None)
+        q.q(qstatsf())
     f.add_done_callback(cb)
     return f
+
+
+def qstatsf():
+    s = ""
+    for queue, od in _queueLog.items():
+        s += "{}:\n".format(queue)
+        for func, t in od.items():
+            s += "{} - {}\n".format(func, t)
+    return s
 
 
 def shutdown():

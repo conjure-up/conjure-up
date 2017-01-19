@@ -85,6 +85,11 @@ class DeployGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.deploy.gui.utils')
         self.mock_utils = self.utils_patcher.start()
 
+        self.submit_patcher = patch(
+            'conjureup.controllers.deploy.gui.async.submit')
+        self.mock_submit = self.submit_patcher.start()
+        self.mock_submit.return_value = sentinel.a_future
+
         self.juju_patcher = patch(
             'conjureup.controllers.deploy.gui.juju')
         self.mock_juju = self.juju_patcher.start()
@@ -100,6 +105,7 @@ class DeployGUIFinishTestCase(unittest.TestCase):
     def tearDown(self):
         self.controllers_patcher.stop()
         self.utils_patcher.stop()
+        self.submit_patcher.stop()
         self.juju_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
@@ -111,13 +117,15 @@ class DeployGUIFinishTestCase(unittest.TestCase):
         self.mock_app.bootstrap.running.done = MagicMock(name='done')
         self.mock_app.bootstrap.running.done.return_value = False
         self.controller.finish()
+        self.assertEqual(1, len(self.mock_submit.mock_calls))
         self.assertEqual(self.mock_controllers.mock_calls,
                          [call.use('bootstrapwait'),
-                          call.use().render()])
+                          call.use().render(sentinel.a_future)])
 
     def test_skip_bootstrap_wait(self):
         "Go directly to deploystatus if bootstrap is done"
         self.controller.finish()
+        self.assertEqual(1, len(self.mock_submit.mock_calls))
         self.assertEqual(self.mock_controllers.mock_calls,
                          [call.use('deploystatus'),
-                          call.use().render()])
+                          call.use().render(ANY)])

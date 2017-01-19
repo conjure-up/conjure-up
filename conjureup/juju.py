@@ -358,6 +358,10 @@ def add_machines(machines, msg_cb=None, exc_cb=None):
     supported key
 
     """
+    if len(machines) > 0:
+        pl = "s"
+    else:
+        pl = ""
 
     @requires_login
     def _add_machines_async():
@@ -367,6 +371,9 @@ def add_machines(machines, msg_cb=None, exc_cb=None):
                            "jobs": ["JobHostUnits"]}
                           for m in machines]
         app.log.debug("AddMachines: {}".format(machine_params))
+        if msg_cb:
+            msg_cb("Adding machine{}: {}".format(
+                pl, [(m['series'], m['constraints']) for m in machine_params]))
         try:
             machine_response = this.CLIENT.Client(
                 request="AddMachines", params={"params": machine_params})
@@ -377,7 +384,8 @@ def add_machines(machines, msg_cb=None, exc_cb=None):
             return
 
         if msg_cb:
-            msg_cb("Added machines: {}".format(machine_response))
+            ids = [d['machine'] for d in machine_response['machines']]
+            msg_cb("Added machine{}: {}".format(pl, ids))
         return machine_response
 
     return async.submit(_add_machines_async,

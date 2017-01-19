@@ -23,7 +23,11 @@ class DeployStatusController:
         track_exception(msg)
         return app.ui.show_exception_message(exc)
 
-    def __wait_for_applications(self, *args):
+    def __wait_for_applications(self, relations_scheduled_future):
+        # do not schedule app wait until all relations are set:
+        relations_done_future = relations_scheduled_future.result()
+        relations_done_future.result()
+
         deploy_done_sh = os.path.join(self.bundle_scripts,
                                       '00_deploy-done')
 
@@ -43,7 +47,7 @@ class DeployStatusController:
         self.view.refresh_nodes()
         EventLoop.set_alarm_in(1, self.__refresh)
 
-    def render(self):
+    def render(self, last_deploy_action_future):
         """ Render deploy status view
         """
         track_screen("Deploy Status")
@@ -59,7 +63,8 @@ class DeployStatusController:
         )
         app.ui.set_body(self.view)
         self.__refresh()
-        self.__wait_for_applications()
+        last_deploy_action_future.add_done_callback(
+            self.__wait_for_applications)
 
 
 _controller_class = DeployStatusController

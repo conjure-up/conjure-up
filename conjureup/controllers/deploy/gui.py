@@ -16,6 +16,8 @@ from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView
 from ubuntui.ev import EventLoop
 
+DEPLOY_ASYNC_QUEUE = "DEPLOY_ASYNC_QUEUE"
+
 
 class DeployController:
 
@@ -244,15 +246,20 @@ class DeployController:
             new_assignments.append(plabel)
         application.placement_spec = new_assignments
 
-    def ensure_machines(self, application, done_cb):
+    def ensure_machines_async(self, application, done_cb):
         """If 'application' is assigned to any machine that haven't been added yet,
         first add the machines then call done_cb
         """
+        def _do_ensure_machines():
+            if app.current_cloud == 'maas':
+                self.ensure_machines_maas(application, done_cb)
+            else:
+                self.ensure_machines_nonmaas(application, done_cb)
 
-        if app.current_cloud == 'maas':
-            self.ensure_machines_maas(application, done_cb)
-        else:
-            self.ensure_machines_nonmaas(application, done_cb)
+        async.submit(_do_ensure_machines,
+                     partial(self._handle_exception,
+                             "Error while adding machines"),
+                     queue_name=DEPLOY_ASYNC_QUEUE)
 
     def ensure_machines_maas(self, application, done_cb):
         app_placements = self.get_all_assignments(application)
@@ -269,7 +276,8 @@ class DeployController:
 
             f = juju.add_machines([machine_attrs],
                                   msg_cb=app.ui.set_footer,
-                                  exc_cb=partial(self._handle_exception, "ED"))
+                                  exc_cb=partial(self._handle_exception,
+                                                 "Error Adding Machine"))
             add_machines_result = f.result()
             self._handle_add_machines_return(juju_machine_id,
                                              add_machines_result)
@@ -281,7 +289,10 @@ class DeployController:
         for juju_machine_id in [j_id for j_id, _ in app_placements
                                 if j_id not in self.deployed_juju_machines]:
             juju_machine = juju_machines[juju_machine_id]
-            f = juju.add_machines([juju_machine])
+            f = juju.add_machines([juju_machine],
+                                  msg_cb=app.ui.set_footer,
+                                  exc_cb=partial(self._handle_exception,
+                                                 "Error Adding Machine"))
             result = f.result()
             self._handle_add_machines_return(juju_machine_id, result)
         done_cb()
@@ -310,26 +321,34 @@ class DeployController:
             msg_cb(*args)
             app.ui.set_footer(*args)
 
-        self.ensure_machines(application, partial(self._do_deploy_one,
-                                                  application, msg_both))
+        self.ensure_machines_async(application, partial(self._do_deploy_one,
+                                                        application, msg_both))
 
     def do_deploy_remaining(self):
         "deploys all un-deployed applications"
 
         for application in self.undeployed_applications:
-            self.ensure_machines(application, partial(self._do_deploy_one,
-                                                      application,
-                                                      app.ui.set_footer))
+            self.ensure_machines_async(application,
+                                       partial(self._do_deploy_one,
+                                               application,
+                                               app.ui.set_footer))
 
     def finish(self):
-        juju.set_relations(self.applications,
-                           app.ui.set_footer,
-                           partial(self._handle_exception, "ED"))
+        def enqueue_set_relations():
+            rel_future = juju.set_relations(self.applications,
+                                            app.ui.set_footer,
+                                            partial(self._handle_exception,
+                                                    "Error setting relations"))
+            return rel_future
+        f = async.submit(enqueue_set_relations,
+                         partial(self._handle_exception,
+                                 "Error setting relations"),
+                         queue_name=DEPLOY_ASYNC_QUEUE)
 
         if app.bootstrap.running and not app.bootstrap.running.done():
-            return controllers.use('bootstrapwait').render()
+            return controllers.use('bootstrapwait').render(f)
         else:
-            return controllers.use('deploystatus').render()
+            return controllers.use('deploystatus').render(f)
 
     def render(self):
         track_screen("Deploy")
