@@ -6,8 +6,7 @@
 
 
 import unittest
-#  from unittest.mock import ANY, call, MagicMock, patch, sentinel
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, sentinel
 
 from conjureup.controllers.bootstrapwait.gui import BootstrapWaitController
 
@@ -47,7 +46,7 @@ class BootstrapwaitGUIRenderTestCase(unittest.TestCase):
 
     def test_render(self):
         "call render"
-        self.controller.render()
+        self.controller.render(MagicMock("future"))
 
 
 class BootstrapwaitGUIFinishTestCase(unittest.TestCase):
@@ -75,4 +74,5 @@ class BootstrapwaitGUIFinishTestCase(unittest.TestCase):
 
     def test_finish(self):
         "call finish"
+        self.controller.relations_scheduled_future = sentinel.rsf
         self.controller.finish()

@@ -5,7 +5,7 @@ work.
 
 import logging
 import time
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
 

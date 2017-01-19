@@ -120,7 +120,7 @@ class DeployGUIFinishTestCase(unittest.TestCase):
         self.assertEqual(1, len(self.mock_submit.mock_calls))
         self.assertEqual(self.mock_controllers.mock_calls,
                          [call.use('bootstrapwait'),
-                          call.use().render()])
+                          call.use().render(sentinel.a_future)])
 
     def test_skip_bootstrap_wait(self):
         "Go directly to deploystatus if bootstrap is done"

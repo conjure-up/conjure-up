@@ -16,7 +16,6 @@ from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView
 from ubuntui.ev import EventLoop
 
-
 DEPLOY_ASYNC_QUEUE = "DEPLOY_ASYNC_QUEUE"
 
 
