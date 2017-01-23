@@ -26,6 +26,15 @@ $ sudo apt update
 $ sudo apt install conjure-up
 ```
 
+## alternate (soon to be recommended)
+
+We will be switching over to a snap based installation in the very near future.
+Please help us test this out by installing via `snap` command:
+
+```
+$ sudo snap install conjure-up --classic --edge
+```
+
 # how to use
 
 ## Run the installer interactively
