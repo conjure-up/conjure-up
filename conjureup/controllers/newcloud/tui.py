@@ -44,11 +44,14 @@ class NewCloudController:
 
     def render(self):
         if app.current_controller is None:
-            app.current_controller = "conjure-up-{}".format(utils.gen_hash())
+            app.current_controller = "conjure-up-{}-{}".format(
+                app.current_cloud,
+                utils.gen_hash())
 
         if app.current_model is None:
-            app.current_model = "{}-{}".format(app.env['CONJURE_UP_SPELL'],
-                                               utils.gen_hash())
+            app.current_model = "conjure-up-{}-{}".format(
+                app.env['CONJURE_UP_SPELL'],
+                utils.gen_hash())
 
         if app.current_cloud != 'localhost':
             if not common.try_get_creds(app.current_cloud):

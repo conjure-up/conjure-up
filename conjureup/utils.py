@@ -361,4 +361,4 @@ def get_options_whitelist(service_name):
 def gen_hash():
     """ generates a UUID
     """
-    return str(uuid.uuid4()).split('-')[0]
+    return str(uuid.uuid4()).split('-')[0][:3]

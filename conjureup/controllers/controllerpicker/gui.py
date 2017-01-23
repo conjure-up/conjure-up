@@ -21,8 +21,9 @@ class ControllerPicker:
             return controllers.use('clouds').render()
 
         app.current_controller = controller
-        app.current_model = "{}-{}".format(app.env['CONJURE_UP_SPELL'],
-                                           utils.gen_hash())
+        app.current_model = "conjure-up-{}-{}".format(
+            app.env['CONJURE_UP_SPELL'],
+            utils.gen_hash())
         async.submit(self.__add_model,
                      self.__handle_exception,
                      queue_name=juju.JUJU_ASYNC_QUEUE)
