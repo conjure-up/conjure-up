@@ -139,7 +139,8 @@ def login(force=False):
     this.IS_AUTHENTICATED = True  # noqa
 
 
-def bootstrap(controller, cloud, model='conjure-up', series="xenial", credential=None):
+def bootstrap(controller, cloud, model='conjure-up', series="xenial",
+              credential=None):
     """ Performs juju bootstrap
 
     If not LXD pass along the newly defined credentials
@@ -204,7 +205,8 @@ def bootstrap(controller, cloud, model='conjure-up', series="xenial", credential
         raise e
 
 
-def bootstrap_async(controller, cloud, model='conjure-up', credential=None, exc_cb=None):
+def bootstrap_async(controller, cloud, model='conjure-up', credential=None,
+                    exc_cb=None):
     """ Performs a bootstrap asynchronously
     """
     return async.submit(partial(bootstrap,
