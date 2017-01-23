@@ -33,7 +33,7 @@ class BootstrapWaitView(WidgetWrap):
             sanitize = "".join(ch for ch
                                in t if unicodedata.category(ch)[0] != "C")
             if sanitize.endswith("%"):
-                new_out.append(sanitize.split("%")[0])
+                new_out.append("{}%".format(sanitize.split("%")[0]))
             else:
                 new_out.append(sanitize)
         if len(new_out) >= 10:
@@ -66,7 +66,7 @@ class BootstrapWaitView(WidgetWrap):
         text = [Padding.line_break(""),
                 self.message,
                 Padding.line_break(""),
-                self.output,
+                Padding.center_90(self.output),
                 Padding.line_break("")]
 
         _boxes = []
