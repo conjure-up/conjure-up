@@ -3,8 +3,6 @@ import os
 import sys
 from subprocess import PIPE
 
-import petname
-
 from conjureup import controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
@@ -45,12 +43,12 @@ class NewCloudController:
         return controllers.use('deploy').render()
 
     def render(self):
-
         if app.current_controller is None:
-            app.current_controller = petname.Name()
+            app.current_controller = "conjure-up-{}".format(utils.gen_hash())
 
         if app.current_model is None:
-            app.current_model = 'conjure-up'
+            app.current_model = "{}-{}".format(app.env['CONJURE_UP_SPELL'],
+                                               utils.gen_hash())
 
         if app.current_cloud != 'localhost':
             if not common.try_get_creds(app.current_cloud):

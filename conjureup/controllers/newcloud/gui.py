@@ -4,8 +4,6 @@ import os.path as path
 from functools import partial
 from subprocess import check_output
 
-import petname
-
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
@@ -136,10 +134,11 @@ class NewCloudController:
         track_screen("Cloud Creation")
 
         if app.current_controller is None:
-            app.current_controller = petname.Name()
+            app.current_controller = "conjure-up-{}".format(utils.gen_hash())
 
         if app.current_model is None:
-            app.current_model = 'conjure-up'
+            app.current_model = "{}-{}".format(app.env['CONJURE_UP_SPELL'],
+                                               utils.gen_hash())
 
         # LXD is a special case as we want to make sure a bridge
         # is configured. If not we'll bring up a new view to allow
