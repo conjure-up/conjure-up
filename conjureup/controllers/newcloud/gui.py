@@ -55,6 +55,7 @@ class NewCloudController:
         future = juju.bootstrap_async(
             controller=app.current_controller,
             cloud=cloud,
+            model=app.current_model,
             credential=credential,
             exc_cb=self.__handle_exception)
         app.bootstrap.running = future

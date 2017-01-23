@@ -73,6 +73,7 @@ class NewCloudController:
         utils.info("Bootstrapping Juju controller")
         p = juju.bootstrap(controller=app.current_controller,
                            cloud=app.current_cloud,
+                           model=app.current_model,
                            credential=common.try_get_creds(app.current_cloud))
         if p.returncode != 0:
             pathbase = os.path.join(
