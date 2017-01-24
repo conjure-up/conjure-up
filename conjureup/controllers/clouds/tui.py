@@ -1,7 +1,5 @@
 import sys
 
-import petname
-
 from conjureup import controllers, juju, utils
 from conjureup.app_config import app
 
@@ -26,7 +24,9 @@ class CloudsController:
         utils.info("Using controller '{}'".format(existing_controller))
 
         app.current_controller = existing_controller
-        app.current_model = petname.Name()
+        app.current_model = "conjure-up-{}-{}".format(
+                app.env['CONJURE_UP_SPELL'],
+                utils.gen_hash())
         utils.info("Creating new juju model named '{}', "
                    "please wait.".format(app.current_model))
         juju.add_model(app.current_model, app.current_controller)

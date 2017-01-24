@@ -2,12 +2,10 @@ urwid
 pyyaml
 jinja2
 requests_oauthlib
-requests_unixsocket
 ws4py==0.3.4
 nose
 tox
 termcolor
-petname
 progressbar2
 prettytable
 q
