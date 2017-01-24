@@ -63,11 +63,13 @@ class NewCloudTUIRenderTestCase(unittest.TestCase):
         self.mock_common.try_get_creds.return_value = True
         self.mock_app.current_controller = sentinel.controllername
         self.mock_app.current_cloud = sentinel.cloudname
+        self.mock_app.current_model = sentinel.modelname
         self.mock_juju.bootstrap.return_value.returncode = 0
         self.controller.render()
         self.mock_juju.bootstrap.assert_called_once_with(
             controller=sentinel.controllername,
             cloud=sentinel.cloudname,
+            model=sentinel.modelname,
             credential=True)
 
         self.controller.do_post_bootstrap.assert_called_once_with()

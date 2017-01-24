@@ -1,6 +1,4 @@
-import petname
-
-from conjureup import async, controllers, juju
+from conjureup import async, controllers, juju, utils
 from conjureup.app_config import app
 from conjureup.telemetry import track_exception, track_screen
 from conjureup.ui.views.ControllerListView import ControllerListView
@@ -23,7 +21,9 @@ class ControllerPicker:
             return controllers.use('clouds').render()
 
         app.current_controller = controller
-        app.current_model = petname.Name()
+        app.current_model = "conjure-up-{}-{}".format(
+            app.env['CONJURE_UP_SPELL'],
+            utils.gen_hash())
         async.submit(self.__add_model,
                      self.__handle_exception,
                      queue_name=juju.JUJU_ASYNC_QUEUE)

@@ -139,7 +139,8 @@ def login(force=False):
     this.IS_AUTHENTICATED = True  # noqa
 
 
-def bootstrap(controller, cloud, series="xenial", credential=None):
+def bootstrap(controller, cloud, model='conjure-up', series="xenial",
+              credential=None):
     """ Performs juju bootstrap
 
     If not LXD pass along the newly defined credentials
@@ -155,7 +156,7 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
           "--config image-stream=daily ".format(
               cloud, controller)
     cmd += "--config enable-os-upgrade=false "
-    cmd += "--default-model conjure-up "
+    cmd += "--default-model {} ".format(model)
     if app.argv.http_proxy:
         cmd += "--config http-proxy={} ".format(app.argv.http_proxy)
     if app.argv.https_proxy:
@@ -204,12 +205,14 @@ def bootstrap(controller, cloud, series="xenial", credential=None):
         raise e
 
 
-def bootstrap_async(controller, cloud, credential=None, exc_cb=None):
+def bootstrap_async(controller, cloud, model='conjure-up', credential=None,
+                    exc_cb=None):
     """ Performs a bootstrap asynchronously
     """
     return async.submit(partial(bootstrap,
                                 controller=controller,
                                 cloud=cloud,
+                                model=model,
                                 credential=credential), exc_cb,
                         queue_name=JUJU_ASYNC_QUEUE)
 

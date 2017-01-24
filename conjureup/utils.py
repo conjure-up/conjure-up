@@ -4,6 +4,7 @@ import errno
 import os
 import pty
 import shutil
+import uuid
 from subprocess import (
     DEVNULL,
     PIPE,
@@ -355,3 +356,9 @@ def get_options_whitelist(service_name):
     svc_opts_whitelist = options_whitelist.get(service_name, [])
 
     return svc_opts_whitelist
+
+
+def gen_hash():
+    """ generates a UUID
+    """
+    return str(uuid.uuid4()).split('-')[0][:3]
