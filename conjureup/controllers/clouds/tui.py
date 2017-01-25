@@ -25,8 +25,8 @@ class CloudsController:
 
         app.current_controller = existing_controller
         app.current_model = "conjure-up-{}-{}".format(
-                app.env['CONJURE_UP_SPELL'],
-                utils.gen_hash())
+            app.env['CONJURE_UP_SPELL'],
+            utils.gen_hash())
         utils.info("Creating new juju model named '{}', "
                    "please wait.".format(app.current_model))
         juju.add_model(app.current_model, app.current_controller)
