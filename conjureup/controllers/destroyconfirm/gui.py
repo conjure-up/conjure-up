@@ -12,12 +12,12 @@ class DestroyConfirm:
 
     def __handle_exception(self, exc):
         track_exception(exc.args[0])
-        app.ui.set_footer("Problem destroying the model")
+        app.ui.set_footer("Problem destroying the deployment")
         return app.ui.show_exception_message(exc)
 
     def __do_destroy(self, controller_name, model_name):
         track_event("Destroying controller", "Destroy", "")
-        app.ui.set_footer("Destroying {} model, please wait.".format(
+        app.ui.set_footer("Destroying {} deployment, please wait.".format(
             model_name))
         future = juju.destroy_model_async(controller=controller_name,
                                           model=model_name,
@@ -38,15 +38,17 @@ class DestroyConfirm:
             return controllers.use('destroy').render()
 
     def render(self, controller, model):
+        app.current_controller = controller
+        app.current_model = model['name']
+
         track_screen("Destroy Confirm Controller")
         view = DestroyConfirmView(app,
                                   controller,
                                   model,
                                   cb=self.finish)
-
         app.ui.set_header(
             title="Destroy Confirmation",
-            excerpt="Are you sure you wish to destroy the model?"
+            excerpt="Are you sure you wish to destroy the deployment?"
         )
         app.ui.set_body(view)
 

@@ -66,7 +66,13 @@ class DestroyView(WidgetWrap):
                                           models[0].get('cloud', "")))
                 ))
                 for model in models:
-                    label = "  {}".format(model['name'])
+                    if model['name'] == "controller":
+                        continue
+                    label = ("  {}, Machine Count: {}, "
+                             "Running since: {}".format(
+                                 model['name'],
+                                 len(model['machines'].keys()),
+                                 model['status']['since']))
                     total_items.append(
                         Color.body(
                             menu_btn(label=label,

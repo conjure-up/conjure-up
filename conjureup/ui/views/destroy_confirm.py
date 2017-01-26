@@ -1,5 +1,6 @@
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
+from conjureup.api.models import model_status
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
 from ubuntui.widgets.hr import HR
@@ -61,19 +62,23 @@ class DestroyConfirmView(WidgetWrap):
         return Color.frame_footer(self.footer)
 
     def _build_widget(self):
+        applications = model_status()['applications']
         total_items = []
-        total_items.append(Instruction("Model Information:"))
+        total_items.append(Instruction("Deployment Information:"))
         total_items.append(HR())
-        total_items.append(Text("Model name: {}".format(
-            self.model['name'])))
-        total_items.append(Text("Controller name: {}".format(
-            self.model['controller-name'])))
-        total_items.append(Text("Cloud: {}".format(
-            self.model['cloud'])))
-        total_items.append(Text("Status: {}".format(
-            self.model['status']['current'])))
-        total_items.append(Text("Online since: {}".format(
-            self.model['status']['since'])))
+        tbl = Pile([
+            Columns([('fixed', 15, Text("Name")),
+                     Text(self.model['name'])]),
+            Columns([('fixed', 15, Text("Cloud")),
+                     Text(self.model['cloud'])]),
+            Columns([('fixed', 15, Text("Status")),
+                     Text(self.model['status']['current'])]),
+            Columns([('fixed', 15, Text("Online")),
+                     Text(self.model['status']['since'])]),
+            Columns([('fixed', 15, Text("Applications")),
+                     Text(", ".join(applications.keys()))])
+        ])
+        total_items.append(tbl)
         total_items.append(HR())
         return Padding.center_80(Filler(Pile(total_items), valign='top'))
 

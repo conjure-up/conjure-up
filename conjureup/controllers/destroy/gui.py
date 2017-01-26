@@ -29,7 +29,7 @@ class Destroy:
                            cb=self.finish)
 
         app.ui.set_header(
-            title="Choose a Controller or Model to teardown",
+            title="Choose a deployment to teardown",
             excerpt=excerpt
         )
         app.ui.set_body(view)
