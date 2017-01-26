@@ -621,6 +621,30 @@ def add_model(name, controller):
             "Unable to create model: {}".format(sh.stderr.decode('utf8')))
 
 
+def destroy_model_async(controller, model, exc_cb=None):
+    """ Destroys a model async
+    """
+    return async.submit(partial(destroy_model,
+                                controller=controller,
+                                model=model),
+                        exc_cb,
+                        queue_name=JUJU_ASYNC_QUEUE)
+
+
+def destroy_model(controller, model):
+    """ Destroys a model within a controller
+
+    Arguments:
+    controller: name of controller
+    model: name of model to destroy
+    """
+    sh = run('juju destroy-model -y {}:{}'.format(controller, model),
+             shell=True, stdout=DEVNULL, stderr=PIPE)
+    if sh.returncode > 0:
+        raise Exception(
+            "Unable to destroy model: {}".format(sh.stderr.decode('utf8')))
+
+
 def get_models(controller):
     """ List available models
 

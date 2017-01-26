@@ -18,7 +18,8 @@ setuptools.setup(
     packages=find_420_friendly_packages(),
     entry_points={
         "console_scripts": [
-            "conjure-up = conjureup.app:main"
+            "conjure-up = conjureup.app:main",
+            "conjure-down = conjureup.destroy:main"
         ]
     }
 )
