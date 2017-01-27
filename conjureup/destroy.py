@@ -58,6 +58,9 @@ def main():
         utils.info("")
         sys.exit(1)
 
+    if not os.path.isdir(opts.cache_dir):
+        os.makedirs(opts.cache_dir)
+
     # Application Config
     app.config = {'metadata': None}
     app.argv = opts
