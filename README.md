@@ -17,22 +17,8 @@ solutions up and going with as little hindrance as possible.
 
 ## recommended
 
-Install the packages from the below PPA's
-
 ```
-$ sudo apt-add-repository ppa:juju/stable
-$ sudo apt-add-repository ppa:conjure-up/next
-$ sudo apt update
-$ sudo apt install conjure-up
-```
-
-## alternate (soon to be recommended)
-
-We will be switching over to a snap based installation in the very near future.
-Please help us test this out by installing via `snap` command:
-
-```
-$ sudo snap install conjure-up --classic --edge
+$ sudo snap install conjure-up --classic
 ```
 
 # how to use
@@ -58,6 +44,12 @@ with all the sensible defaults in place.
 
 ```
 $ conjure-up canonical-kubernetes localhost
+```
+
+## Destroying deployments
+
+```
+$ conjure-down
 ```
 
 # chat
