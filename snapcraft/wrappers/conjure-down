@@ -1,0 +1,11 @@
+#!/bin/sh
+
+APPLANG=en_US
+APPENC=UTF-8
+APPLOC="$APPLANG.$APPENC"
+
+export LC_ALL=$APPLOC
+export LANG=$APPLOC
+export LANGUAGE=${APPLANG%_*}
+
+exec $SNAP/bin/conjure-down "$@"
