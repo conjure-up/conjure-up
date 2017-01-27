@@ -46,6 +46,7 @@ parts:
     go-importpath: github.com/juju/juju
     source: https://github.com/juju/juju.git
     source-type: git
-    source-tag: juju-2.1-beta4
+    source-branch: "2.1"
     prime:
       - bin/juju
+      - bin/jujud
