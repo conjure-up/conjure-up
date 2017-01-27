@@ -13,18 +13,5 @@ export PYBUILD_INSTALL_ARGS_python3=--install-data=usr/ \
 %:
 	dh $@ --with python3 --buildsystem=pybuild --with systemd
 
-override_dh_installinit:
-	dh_systemd_enable -pconjure-up --name=conjure-up conjure-up.service
-	dh_installinit -pconjure-up --no-start --noscripts
-	dh_systemd_start -pconjure-up --no-restart-on-upgrade
-
-override_dh_systemd_start:
-	echo "Not running dh_systemd_start"
-
-override_dh_install:
-	mkdir -p $(PKGDIR)/usr/share/man/man1
-	help2man $(PKGDIR)/usr/bin/conjure-up -n "conjure-up" --no-info -o $(PKGDIR)/usr/share/man/man1/conjure-up.1
-	dh_install
-
 override_dh_auto_test:
 	@echo "No tests."
