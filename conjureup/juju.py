@@ -283,6 +283,24 @@ def get_credentials(secrets=True):
     return env['credentials']
 
 
+def get_regions(cloud):
+    """ List available regions for cloud
+
+    Arguments:
+    cloud: Cloud to list regions for
+
+    Returns:
+    Dictionary of all known regions for cloud
+    """
+    sh = run('juju list-regions {} --format yaml'.format(cloud),
+             shell=True, stdout=PIPE, stderr=PIPE)
+    if sh.returncode > 0:
+        raise Exception(
+            "Unable to list regions: {}".format(sh.stderr.decode('utf8'))
+        )
+    return yaml.safe_load(sh.stdout.decode('utf8'))
+
+
 def get_clouds():
     """ List available clouds
 
