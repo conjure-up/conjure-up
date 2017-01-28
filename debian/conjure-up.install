@@ -1,4 +1,0 @@
-conjure-up-rsyslog.conf         usr/share/conjure-up
-etc/*
-init/bridge.start               usr/lib/conjure-up
-init/bridge.stop                usr/lib/conjure-up

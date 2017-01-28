@@ -2,47 +2,14 @@
 
 set -eu
 
-if [ ! -d /var/log/conjure-up ]; then
-    mkdir /var/log/conjure-up
-fi
-chown syslog:syslog /var/log/conjure-up
-
-ln -sf /usr/share/conjure-up/conjure-up-rsyslog.conf /etc/rsyslog.d/99-conjure-up.conf
-
-invoke-rc.d rsyslog restart
-
-# Do the manual steps a user has to run on a fresh system to get an lxd
-# bridge so the juju lxd provider can function. Taken from changes made
-# to cloud-init to do approximately this.
-
-VERSION=$(lxd --version)
-
-# LXD 2.3+ needs lxdbr0 setup via lxc.
-if dpkg --compare-versions "$VERSION" gt "2.2"; then
-    if ! lxc network list | grep -q lxdbr0; then
-        # Configure a known address ranges for lxdbr0.
-        lxc network create lxdbr0 \
-            ipv4.address=10.0.8.1/24 ipv4.nat=true \
-            ipv6.address=none ipv6.nat=false
-    fi
-else
-    if ! debconf-show lxd | grep -q 'bridge-ipv4:\strue'; then
-        debconf-communicate << EOF > /dev/null
-set lxd/setup-bridge true
-set lxd/bridge-domain lxd
-set lxd/bridge-name lxdbr0
-set lxd/bridge-ipv4 true
-set lxd/bridge-ipv4-address 10.0.8.1
-set lxd/bridge-ipv4-dhcp-first 10.0.8.3
-set lxd/bridge-ipv4-dhcp-last 10.0.8.254
-set lxd/bridge-ipv4-dhcp-leases 252
-set lxd/bridge-ipv4-netmask 24
-set lxd/bridge-ipv4-nat true
-set lxd/bridge-ipv6 false
-EOF
-        rm -rf /etc/default/lxd-bridge
-        dpkg-reconfigure lxd --frontend=noninteractive
-    fi
-fi
+echo ""
+echo "The debian package of conjure-up has been deprecated in favor of its snap distribution."
+echo ""
+echo "To get the latest conjure-up package please run:"
+echo ""
+echo "  sudo snap install --classic conjure-up"
+echo ""
+echo "Once that is installed feel free to remove this debian package."
+echo ""
 
 #DEBHELPER#
