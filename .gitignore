@@ -67,7 +67,6 @@ debian/conjure-up/*
 debian/conjure/*
 debian/debhelper*
 debian/files
-conjure-up
 conjure-up.egg-link
 easy-install.pth
 site.py
