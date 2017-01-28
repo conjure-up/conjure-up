@@ -1,4 +1,4 @@
-# conjure-up [![Build Status](https://travis-ci.org/conjure-up/conjure-up.svg?branch=master)](https://travis-ci.org/conjure-up/conjure-up)
+# conjure-up [![Build Status](https://travis-ci.org/conjure-up/conjure-up.svg?branch=master)](https://travis-ci.org/conjure-up/conjure-up) [![Rocket.Chat](http://conjure-up.io/images/join-chat.svg)](https://rocket.ubuntu.com/channel/conjure-up)
 > Installing cloud packages like whoa.
 
 # what it is
@@ -51,10 +51,6 @@ $ conjure-up canonical-kubernetes localhost
 ```
 $ conjure-down
 ```
-
-# chat
-
-[conjure-up slack channel](https://conjure-up.slack.com/signup)
 
 # authors
 
