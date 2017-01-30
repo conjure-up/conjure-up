@@ -74,9 +74,12 @@ class DestroyConfirmView(WidgetWrap):
             Columns([('fixed', 15, Text("Status")),
                      Text(self.model['status']['current'])]),
             Columns([('fixed', 15, Text("Online")),
-                     Text(self.model['status']['since'])]),
+                     Text(str(self.model['status']['since']))]),
             Columns([('fixed', 15, Text("Applications")),
-                     Text(", ".join(applications.keys()))])
+                     Text(", ".join(applications.keys()))]),
+            Columns([('fixed', 15, Text("Machines")),
+                     len(self.model['machines'].keys())])
+
         ])
         total_items.append(tbl)
         total_items.append(HR())
