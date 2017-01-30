@@ -90,6 +90,9 @@ def parse_options(argv):
     parser.add_argument('controller', nargs='?',
                         help="Name of a juju controller to target. "
                         "If not provided, a new one is created.")
+    parser.add_argument('model', nargs='?',
+                        help="Name of a juju model to target. "
+                        "If not provided, a new one is created.")
     return parser.parse_args(argv)
 
 
