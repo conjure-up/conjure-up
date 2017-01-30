@@ -1,3 +1,4 @@
+import datetime
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup.api.models import model_status
@@ -61,6 +62,23 @@ class DestroyConfirmView(WidgetWrap):
         ])
         return Color.frame_footer(self.footer)
 
+    def _sanitize_date(self, date_obj):
+        """ Some cases juju uses human readable date/time like X secs ago and models
+        that run longer get a typical datetime.date object, need to make sure
+        of which one we're dealing with
+
+        Arguments:
+        date_obj: datetime.date object
+
+        Returns:
+        String representation of date or the Juju human readable string
+        if applicable
+        """
+        if isinstance(date_obj, datetime.date):
+            return date_obj.strftime('%Y-%m-%d')
+        else:
+            return str(date_obj)
+
     def _build_widget(self):
         applications = model_status()['applications']
         total_items = []
@@ -74,11 +92,12 @@ class DestroyConfirmView(WidgetWrap):
             Columns([('fixed', 15, Text("Status")),
                      Text(self.model['status']['current'])]),
             Columns([('fixed', 15, Text("Online")),
-                     Text(str(self.model['status']['since']))]),
+                     Text(self._sanitize_date(
+                         self.model['status']['since']))]),
             Columns([('fixed', 15, Text("Applications")),
                      Text(", ".join(applications.keys()))]),
             Columns([('fixed', 15, Text("Machines")),
-                     len(self.model['machines'].keys())])
+                     Text(str(len(self.model['machines'].keys())))])
 
         ])
         total_items.append(tbl)

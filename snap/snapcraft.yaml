@@ -25,9 +25,10 @@ apps:
 parts:
   conjure-up:
     plugin: python
-    source: https://github.com/conjure-up/conjure-up
-    source-type: git
-    source-branch: master
+    source: .
+    # source: https://github.com/conjure-up/conjure-up
+    # source-type: git
+    # source-branch: master
     requirements: requirements.txt
     stage-packages:
       - bsdtar
