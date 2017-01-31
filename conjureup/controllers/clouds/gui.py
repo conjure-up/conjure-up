@@ -1,7 +1,7 @@
 from conjureup import controllers
 from conjureup.app_config import app
 from conjureup.controllers.clouds.common import list_clouds
-from conjureup.telemetry import track_screen
+from conjureup.telemetry import track_screen, track_event
 from conjureup.ui.views.cloud import CloudView
 
 
@@ -20,6 +20,7 @@ class CloudsController:
 
         """
         app.current_cloud = cloud
+        track_event("Cloud selection", app.current_cloud, "")
         return controllers.use('newcloud').render()
 
     def render(self):
