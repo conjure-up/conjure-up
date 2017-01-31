@@ -1,15 +1,14 @@
 #!/bin/sh
 
-set -eu
+set -e
 
-echo ""
-echo "The debian package of conjure-up has been deprecated in favor of its snap distribution."
-echo ""
-echo "To get the latest conjure-up package please run:"
-echo ""
-echo "  sudo snap install --classic conjure-up"
-echo ""
-echo "Once that is installed feel free to remove this debian package."
-echo ""
+if [ ! -d /var/log/conjure-up ]; then
+        mkdir /var/log/conjure-up
+fi
+chown syslog:syslog /var/log/conjure-up
+
+ln -sf /usr/share/conjure-up/conjure-up-rsyslog.conf /etc/rsyslog.d/99-conjure-up.conf
+
+invoke-rc.d rsyslog restart
 
 #DEBHELPER#

@@ -1,8 +1,11 @@
-conjure-up (2.1.0) zesty-proposed; urgency=medium
+conjure-up (2.1.0) UNRELEASED; urgency=medium
 
-  * Move to a snap distribution
-	
- -- Adam Stokes <adam.stokes@ubuntu.com>  Fri, 27 Jan 2017 16:42:12 -0400
+  * Fix failure to find LXD network bridge on LXD versions
+    2.4 and above (LP: #1632456)
+  * Fix traceback during advanced configuration screen on
+    invalid key (LP: #1631770)
+
+ -- Adam Stokes <adam.stokes@ubuntu.com>  Tue, 11 Oct 2016 16:42:12 -0400
 
 conjure-up (2.0.1) yakkety-proposed; urgency=medium
 
