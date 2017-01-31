@@ -18,23 +18,22 @@ class EventLoop:
     """
     loop = None
     alarms = {}
+    extra_opts = {
+        'screen': urwid.raw_display.Screen(),
+        'handle_mouse': True
+    }
 
     @classmethod
     def build_loop(cls, ui, palette, **kwargs):
         """ Builds eventloop
         """
-        extra_opts = {
-            'screen': urwid.raw_display.Screen(),
-            'handle_mouse': True
-        }
-        extra_opts['screen'].set_terminal_properties(colors=256)
-        extra_opts['screen'].reset_default_terminal_palette()
-        extra_opts.update(**kwargs)
+        cls.extra_opts['screen'].set_terminal_properties(colors=256)
+        cls.extra_opts.update(**kwargs)
         evl = asyncio.get_event_loop()
         cls.loop = urwid.MainLoop(ui, palette,
                                   event_loop=urwid.AsyncioEventLoop(loop=evl),
                                   pop_ups=True,
-                                  **extra_opts)
+                                  **cls.extra_opts)
 
     @classmethod
     def exit(cls, err=0):
@@ -85,3 +84,15 @@ class EventLoop:
             log.exception("Exception in ev.run():")
             raise
         return
+
+    @classmethod
+    def rows(cls):
+        """ Returns rows
+        """
+        return cls.extra_opts['screen'].get_cols_rows()[1]
+
+    @classmethod
+    def columns(cls):
+        """ Returns columns
+        """
+        return cls.extra_opts['screen'].get_cols_rows()[0]
