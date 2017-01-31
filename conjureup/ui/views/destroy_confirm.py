@@ -1,4 +1,5 @@
 import datetime
+
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup.api.models import model_status

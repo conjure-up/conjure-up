@@ -2,6 +2,7 @@ language: python
 sudo: false
 python:
   - "3.5"
+  - "latest"
 notifications:
   email: false
   irc:

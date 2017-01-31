@@ -1,7 +1,7 @@
 from conjureup import controllers
 from conjureup.app_config import app
 from conjureup.controllers.clouds.common import list_clouds
-from conjureup.telemetry import track_screen, track_event
+from conjureup.telemetry import track_event, track_screen
 from conjureup.ui.views.cloud import CloudView
 
 
