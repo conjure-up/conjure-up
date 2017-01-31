@@ -16,6 +16,7 @@ apps:
     aliases: [conjure-down]
   juju:
     command: bin/juju
+    aliases: [juju]
   bridge:
     command: wrappers/bridge.start
     stop-command: wrappers/bridge.stop
