@@ -11,4 +11,4 @@ export LANGUAGE=${APPLANG%_*}
 # Make sure a lxc certificate is generated within the snap
 lxc finger > /dev/null 2>&1
 
-exec $SNAP/bin/conjure-up -c $SNAP/etc/conjure-up.conf "$@"
+exec $SNAP/bin/conjure-up -c $SNAP/etc/conjure-up.conf --spells-dir $SNAP/spells --nosync "$@"

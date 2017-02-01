@@ -34,12 +34,19 @@ parts:
     stage-packages:
       - bsdtar
       - jq
-  configs:
-    plugin: dump
-    source: https://github.com/conjure-up/conjure-up
-    source-type: git
     filesets:
       etc/conjure-up.conf: [etc/conjure-up.conf]
+    stage:
+      - -README.md
+      - -debian
+  spells:
+    plugin: dump
+    source: https://github.com/conjure-up/spells.git
+    source-type: git
+    organize:
+      "*": spells/
+    stage:
+      - -README.md
   wrappers:
     plugin: dump
     source: snap/
