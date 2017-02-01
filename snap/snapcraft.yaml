@@ -34,8 +34,8 @@ parts:
     stage-packages:
       - bsdtar
       - jq
-    filesets:
-      etc/conjure-up.conf: [etc/conjure-up.conf]
+    install: |
+      cp etc/conjure-up.conf $SNAPCRAFT_PART_INSTALL/etc/conjure-up.conf
     stage:
       - -README.md
       - -debian
