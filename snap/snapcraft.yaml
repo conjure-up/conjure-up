@@ -39,7 +39,7 @@ parts:
     source: https://github.com/conjure-up/conjure-up
     source-type: git
     filesets:
-      etc/conjure-up.conf: etc/conjure-up.conf
+      etc/conjure-up.conf: [etc/conjure-up.conf]
   wrappers:
     plugin: dump
     source: snap/

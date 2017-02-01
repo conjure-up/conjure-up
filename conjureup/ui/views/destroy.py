@@ -56,6 +56,14 @@ class DestroyView(WidgetWrap):
         ])
         return footer_pile
 
+    def _total_machines(self, model):
+        """ Returns total machines in model
+        """
+        machines = model.get('machines', None)
+        if machines is None:
+            return 0
+        return len(machines.keys())
+
     def _build_widget(self):
         total_items = []
         for controller in self.controllers:
@@ -68,10 +76,11 @@ class DestroyView(WidgetWrap):
                 for model in models:
                     if model['name'] == "controller":
                         continue
+
                     label = ("  {}, Machine Count: {}, "
                              "Running since: {}".format(
                                  model['name'],
-                                 len(model['machines'].keys()),
+                                 self._total_machines(model),
                                  model['status']['since']))
                     total_items.append(
                         Color.body(

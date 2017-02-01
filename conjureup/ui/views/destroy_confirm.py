@@ -80,6 +80,14 @@ class DestroyConfirmView(WidgetWrap):
         else:
             return str(date_obj)
 
+    def _total_machines(self, model):
+        """ Returns total machines in model
+        """
+        machines = model.get('machines', None)
+        if machines is None:
+            return 0
+        return len(machines.keys())
+
     def _build_widget(self):
         applications = model_status()['applications']
         total_items = []
@@ -98,7 +106,7 @@ class DestroyConfirmView(WidgetWrap):
             Columns([('fixed', 15, Text("Applications")),
                      Text(", ".join(applications.keys()))]),
             Columns([('fixed', 15, Text("Machines")),
-                     Text(str(len(self.model['machines'].keys())))])
+                     Text(str(self._total_machines(self.model)))])
 
         ])
         total_items.append(tbl)
