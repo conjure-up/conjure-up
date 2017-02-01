@@ -35,10 +35,12 @@ parts:
       - bsdtar
       - jq
     install: |
+      mkdir -p $SNAPCRAF_PART_INSTALL/etc
       cp etc/conjure-up.conf $SNAPCRAFT_PART_INSTALL/etc/conjure-up.conf
     stage:
       - -README.md
       - -debian
+    after: [python]
   spells:
     plugin: dump
     source: https://github.com/conjure-up/spells.git
@@ -56,6 +58,11 @@ parts:
     source: https://github.com/juju/juju.git
     source-type: git
     source-branch: "2.1"
-    prime:
-      - bin/juju
-      - bin/jujud
+    go-packages:
+      - github.com/juju/juju/cmd/juju
+      - github.com/juju/juju/cmd/jujud
+  python:
+    source: https://www.python.org/ftp/python/3.6.0/Python-3.6.0.tar.xz
+    plugin: autotools
+    configflags: [--prefix=/usr]
+    build-packages: [libssl-dev]
