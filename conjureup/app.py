@@ -234,6 +234,13 @@ def main():
 
             app.log.debug(
                 'Could not sync spells from github: {}'.format(e))
+    else:
+        if not os.path.exists(spells_dir):
+            utils.error(
+                "You opted to not sync from the spells registry, however, "
+                "we could not find any suitable spells in: "
+                "{}".format(spells_dir))
+            sys.exit(1)
 
     spells_index_path = os.path.join(app.config['spells-dir'],
                                      'spells-index.yaml')
