@@ -82,6 +82,10 @@ def parse_options(argv):
                         dest='notrack',
                         help='Opt out of sending anonymous usage '
                         'information to Canonical.')
+    parser.add_argument('--nosync', action='store_true',
+                        dest='nosync',
+                        help='Opt out of syncing with spells '
+                        'registry.')
 
     parser.add_argument('cloud', nargs='?',
                         help="Name of a Juju cloud to "
@@ -215,22 +219,32 @@ def main():
     spells_dir = app.argv.spells_dir
 
     app.config['spells-dir'] = spells_dir
-    spells_registry_branch = os.getenv('CONJUREUP_REGISTRY_BRANCH', 'master')
-    if not os.path.exists(spells_dir):
-        utils.info("No spells found, syncing from registry, please wait.")
-    try:
-        download_or_sync_registry(
-            app.global_config['registry']['repo'],
-            spells_dir, branch=spells_registry_branch)
-    except subprocess.CalledProcessError as e:
-        if not os.path.exists(spells_dir):
-            utils.error("Could not load from registry")
-            sys.exit(1)
-
-        app.log.debug('Could not sync spells from github: {}'.format(e))
-
     spells_index_path = os.path.join(app.config['spells-dir'],
                                      'spells-index.yaml')
+    spells_registry_branch = os.getenv('CONJUREUP_REGISTRY_BRANCH', 'stable')
+
+    if not app.argv.nosync:
+        if not os.path.exists(spells_dir):
+            utils.info("No spells found, syncing from registry, please wait.")
+        try:
+            download_or_sync_registry(
+                app.global_config['registry']['repo'],
+                spells_dir, branch=spells_registry_branch)
+        except subprocess.CalledProcessError as e:
+            if not os.path.exists(spells_dir):
+                utils.error("Could not load from registry")
+                sys.exit(1)
+
+            app.log.debug(
+                'Could not sync spells from github: {}'.format(e))
+    else:
+        if not os.path.exists(spells_index_path):
+            utils.error(
+                "You opted to not sync from the spells registry, however, "
+                "we could not find any suitable spells in: "
+                "{}".format(spells_dir))
+            sys.exit(1)
+
     with open(spells_index_path) as fp:
         app.spells_index = yaml.safe_load(fp.read())
 
