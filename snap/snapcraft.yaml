@@ -25,11 +25,8 @@ apps:
 
 parts:
   conjure-up:
-    plugin: python
     source: .
-    # source: https://github.com/conjure-up/conjure-up
-    # source-type: git
-    # source-branch: master
+    plugin: python
     requirements: requirements.txt
     stage-packages:
       - bsdtar
@@ -42,9 +39,9 @@ parts:
       - -debian
     after: [python]
   spells:
-    plugin: dump
     source: https://github.com/conjure-up/spells.git
     source-type: git
+    plugin: dump
     organize:
       "*": spells/
     stage:
@@ -53,11 +50,12 @@ parts:
     plugin: dump
     source: snap/
   juju:
-    plugin: godeps
-    go-importpath: github.com/juju/juju
     source: https://github.com/juju/juju.git
     source-type: git
     source-branch: "2.1"
+    source-depth: 1
+    plugin: godeps
+    go-importpath: github.com/juju/juju
     go-packages:
       - github.com/juju/juju/cmd/juju
       - github.com/juju/juju/cmd/jujud
