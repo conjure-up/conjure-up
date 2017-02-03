@@ -9,7 +9,7 @@ export LANG=$APPLOC
 export LANGUAGE=${APPLANG%_*}
 
 # Make sure we access our python and juju binaries first
-export PATH=$SNAP/bin:$SNAP/usr/bin:$PATH
+export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 
 # Make sure a lxc certificate is generated within the snap
 export LXD_DIR=/var/snap/lxd/common/lxd
