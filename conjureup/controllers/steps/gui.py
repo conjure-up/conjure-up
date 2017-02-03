@@ -27,14 +27,14 @@ class StepsController:
 
         self.results = OrderedDict()
 
-    def __handle_exception(self, tag, exc):
+    def __handle_exception(self, exc):
         track_exception(exc.args[0], is_fatal=True)
         EventLoop.remove_alarms()
         app.ui.show_exception_message(exc)
 
     def get_result(self, future):
         if future.exception():
-            self.__handle_exception('E002', future.exception())
+            self.__handle_exception(future.exception())
 
         step_model, step_widget = future.result()
 
@@ -86,7 +86,7 @@ class StepsController:
                                       step_widget,
                                       app.ui.set_footer,
                                       gui=True),
-                              partial(self.__handle_exception, 'E002'))
+                              self.__handle_exception)
         future.add_done_callback(self.get_result)
 
     def update(self, *args):
@@ -127,7 +127,7 @@ class StepsController:
                 step_widgets.append(step_widget)
                 app.log.debug("Queueing step: {}".format(step_widget))
             except Exception as e:
-                self.__handle_exception('E002', e)
+                self.__handle_exception(e)
                 return
 
         try:
@@ -144,7 +144,7 @@ class StepsController:
             self.view.step_pile.focus_position = 2
 
         except Exception as e:
-            self.__handle_exception('E002', e)
+            self.__handle_exception(e)
             return
 
         app.ui.set_header(
