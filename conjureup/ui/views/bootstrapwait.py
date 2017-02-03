@@ -35,7 +35,7 @@ class BootstrapWaitView(WidgetWrap):
             if sanitize.endswith("%"):
                 new_out.append("{}%".format(sanitize.split("%")[0]))
             else:
-                new_out.append(sanitize)
+                new_out.append(sanitize[:134])
         if len(new_out) >= 10:
             return "\n".join(new_out[-10:])
         else:
