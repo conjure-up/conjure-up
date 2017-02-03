@@ -10,7 +10,7 @@ VERSION := 2.1.0
 
 .PHONY: install-dependencies
 install-dependencies:
-	sudo apt-get -yy install devscripts equivs pandoc bsdtar jq libsystemd-dev
+	sudo apt-get -yy install devscripts equivs pandoc bsdtar jq libsystemd-dev tox snapcraft
 	sudo mk-build-deps -i -t "apt-get --no-install-recommends -y" debian/control
 
 .PHONY: uninstall-dependencies
@@ -22,12 +22,12 @@ release: update-version clean test
 update-version:
 	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjureup/__init__.py
 	@sed -i -r "1 s/(^conjure-up\s)\(([a-zA-Z0-9\.~\-\+]+)\)/\1\($(VERSION)\)/g" debian/changelog
-	@sed -i -r "s/(^version:\s)(.*)/\1$(VERSION)/" snapcraft/snapcraft.yaml
+	@sed -i -r "s/(^version:\s)(.*)/\1$(VERSION)/" snap/snapcraft.yaml
 
 release-snap: update-version clean clean-snapcraft test
-	@(cd snapcraft && snapcraft)
+	@(cd snap && snapcraft)
 	@echo
-	@echo "Build complete, now run snapcraft push snapcraft/$(NAME)_$(VERSION)_amd64.snap --release stable"
+	@echo "Build complete, now run snapcraft push snap/$(NAME)_$(VERSION)_amd64.snap --release edge"
 	@echo
 
 clean:
@@ -47,7 +47,7 @@ clean:
 	@rm -rf conjure-dev
 
 clean-snapcraft:
-	@(cd snapcraft && snapcraft clean)
+	@(cd snap && snapcraft clean)
 
 .PHONY: test
 test:
