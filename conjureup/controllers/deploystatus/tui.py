@@ -15,8 +15,8 @@ class DeployStatusController:
             app.config['spell-dir'], 'steps'
         )
 
-    def __handle_exception(self, tag, exc):
-        utils.error(exc)
+    def __handle_exception(self, exc):
+        utils.error(exc.args[0])
         sys.exit(1)
 
     def finish(self, future):
@@ -29,7 +29,7 @@ class DeployStatusController:
         future = async.submit(partial(common.wait_for_applications,
                                       deploy_done_sh,
                                       utils.info),
-                              partial(self.__handle_exception, 'ED'),
+                              self.__handle_exception,
                               queue_name=juju.JUJU_ASYNC_QUEUE)
         future.add_done_callback(self.finish)
 
