@@ -26,7 +26,7 @@ class _log:
         self.logger.warning("{}: {}".format(self.app, msg))
 
 
-def setup_logging(app, logfile, debug=False):
+def setup_logging(app, logfile, debug=True):
     cmdslog = TimedRotatingFileHandler(logfile,
                                        when='D',
                                        interval=1,

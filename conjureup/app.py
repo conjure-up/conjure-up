@@ -40,7 +40,7 @@ def parse_options(argv):
                         spell, or a keyword matching multiple spells
                         ('openstack')""")
     parser.add_argument('-d', '--debug', action='store_true',
-                        dest='debug',
+                        dest='debug', default=True,
                         help='Enable debug logging.')
     parser.add_argument('--show-env', action='store_true',
                         dest='show_env',
