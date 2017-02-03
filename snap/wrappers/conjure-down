@@ -7,6 +7,7 @@ APPLOC="$APPLANG.$APPENC"
 export LC_ALL=$APPLOC
 export LANG=$APPLOC
 export LANGUAGE=${APPLANG%_*}
+export LXD_DIR=/var/snap/lxd/common/lxd
 
 # Make sure we access our python and juju binaries first
 export PATH=$SNAP/bin:$SNAP/usr/bin:$PATH

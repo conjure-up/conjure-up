@@ -1,33 +1,14 @@
 #!/bin/bash
 
-VERSION=$(lxd --version)
+snap install lxd || true
 
-# LXD 2.3+ needs lxdbr0 setup via lxc.
-if dpkg --compare-versions "$VERSION" gt "2.2"; then
-    if ! lxc network list | grep -q lxdbr0; then
-        # Configure a known address ranges for lxdbr0.
-        lxc network create lxdbr0 \
-            ipv4.address=10.0.8.1/24 ipv4.nat=true \
-            ipv6.address=none ipv6.nat=false
-    fi
-else
-    if ! debconf-show lxd | grep -q 'bridge-ipv4:\strue'; then
-        debconf-communicate << EOF > /dev/null
-set lxd/setup-bridge true
-set lxd/bridge-domain lxd
-set lxd/bridge-name lxdbr0
-set lxd/bridge-ipv4 true
-set lxd/bridge-ipv4-address 10.0.8.1
-set lxd/bridge-ipv4-dhcp-first 10.0.8.3
-set lxd/bridge-ipv4-dhcp-last 10.0.8.254
-set lxd/bridge-ipv4-dhcp-leases 252
-set lxd/bridge-ipv4-netmask 24
-set lxd/bridge-ipv4-nat true
-set lxd/bridge-ipv6 false
-EOF
-        rm -rf /etc/default/lxd-bridge
-        dpkg-reconfigure lxd --frontend=noninteractive
-    fi
+VERSION=$($SNAP/bin/lxd --version)
+
+if ! $SNAP/bin/lxc network list | grep -q lxdbr0; then
+    # Configure a known address ranges for lxdbr0.
+    $SNAP/bin/lxc network create lxdbr0 \
+                  ipv4.address=10.0.8.1/24 ipv4.nat=true \
+                  ipv6.address=none ipv6.nat=false
 fi
 
 cat <<EOF>/etc/sysctl.d/60-conjure-up.conf
@@ -39,9 +20,9 @@ EOF
 
 sysctl -p/etc/sysctl.d/60-conjure-up.conf
 
-ip link add dev conjureup0 type bridge
-ip addr add 10.99.0.1/24 dev conjureup0
-ip link set dev conjureup0 up
+ip link add dev conjureup0 type bridge || true
+ip addr add 10.99.0.1/24 dev conjureup0 || true
+ip link set dev conjureup0 up || true
 
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
