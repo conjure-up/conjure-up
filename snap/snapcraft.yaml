@@ -59,6 +59,10 @@ parts:
     go-packages:
       - github.com/juju/juju/cmd/juju
       - github.com/juju/juju/cmd/jujud
+    install: |
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/bash-completion/completions
+      cp etc/bash_completion.d/juju-2 $SNAPCRAFT_PART_INSTALL/usr/share/bash-completion/completions/juju-2
+      cp etc/bash_completion.d/juju-version $SNAPCRAFT_PART_INSTALL/usr/share/bash-completion/completions/juju-version
   python:
     source: https://www.python.org/ftp/python/3.6.0/Python-3.6.0.tar.xz
     plugin: autotools
