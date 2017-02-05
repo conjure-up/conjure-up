@@ -1,6 +1,7 @@
 """ Interfaces to Juju API ModelManager """
 
 from conjureup import juju
+from conjureup.app_config import app
 
 
 @juju.requires_login
@@ -13,8 +14,8 @@ def list_models(user='user-admin'):
     Returns:
     Dictionary of known Juju Models (default: user-admin)
     """
-    models = juju.CLIENT.ModelManager(request="ListModels",
-                                      params={'Tag': user})
+    models = app.juju.ModelManager(request="ListModels",
+                                   params={'Tag': user})
     return models['UserModels']
 
 
@@ -28,8 +29,8 @@ def model_info(model):
     Returns:
     Dictionary of model attributes
     """
-    return juju.CLIENT.Client(request="ModelInfo",
-                              params={"Name": model})
+    return app.juju.Client(request="ModelInfo",
+                           params={"Name": model})
 
 
 @juju.requires_login
@@ -39,4 +40,4 @@ def model_status():
     Returns:
     Dictionary of model status
     """
-    return juju.CLIENT.Client(request="FullStatus")
+    return app.juju.Client(request="FullStatus")

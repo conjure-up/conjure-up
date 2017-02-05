@@ -22,6 +22,9 @@ app = SimpleNamespace(
     # MAAS client
     maas=maas,
 
+    # Juju Client
+    juju=None,
+
     # The conjure-up UI framework
     ui=None,
 
