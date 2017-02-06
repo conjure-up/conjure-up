@@ -11,6 +11,9 @@ if ! $SNAP/bin/lxc network list | grep -q lxdbr0; then
                   ipv6.address=none ipv6.nat=false
 fi
 
+# copy bash completions to host system
+cp -a $SNAP/usr/share/bash-completion/completions/juju* /usr/share/bash-completion/completions/.
+
 cat <<EOF>/etc/sysctl.d/60-conjure-up.conf
 fs.inotify.max_user_instances=1048576
 fs.inotify.max_queued_events=1048576
@@ -37,3 +40,4 @@ iptables -I INPUT -i conjureup0 -p tcp -m tcp --dport 53 -j ACCEPT
 iptables -I INPUT -i conjureup0 -p udp -m udp --dport 53 -j ACCEPT
 iptables -I INPUT -i conjureup0 -p tcp -m tcp --dport 67 -j ACCEPT
 iptables -I INPUT -i conjureup0 -p udp -m udp --dport 67 -j ACCEPT
+
