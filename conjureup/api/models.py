@@ -14,8 +14,8 @@ def list_models(user='user-admin'):
     Returns:
     Dictionary of known Juju Models (default: user-admin)
     """
-    models = app.juju.ModelManager(request="ListModels",
-                                   params={'Tag': user})
+    models = app.juju.client.ModelManager(request="ListModels",
+                                          params={'Tag': user})
     return models['UserModels']
 
 
@@ -29,8 +29,8 @@ def model_info(model):
     Returns:
     Dictionary of model attributes
     """
-    return app.juju.Client(request="ModelInfo",
-                           params={"Name": model})
+    return app.juju.client.Client(request="ModelInfo",
+                                  params={"Name": model})
 
 
 @juju.requires_login
@@ -40,4 +40,4 @@ def model_status():
     Returns:
     Dictionary of model status
     """
-    return app.juju.Client(request="FullStatus")
+    return app.juju.client.Client(request="FullStatus")

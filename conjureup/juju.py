@@ -24,7 +24,8 @@ class ControllerNotFoundException(Exception):
 # login decorator
 def requires_login(f):
     def _decorator(*args, **kwargs):
-        login(force=True)
+        if not app.juju.authenticated:
+            login(force=True)
         return f(*args, **kwargs)
     return wraps(f)(_decorator)
 
@@ -104,6 +105,9 @@ def get_controller_in_cloud(cloud):
 def login(force=False):
     """ Login to Juju API server
     """
+    if app.juju.authenticated and not force:
+        return
+
     if app.current_controller is None:
         raise Exception("Unable to determine current controller")
 
@@ -116,12 +120,13 @@ def login(force=False):
     server = env['api-endpoints'][0]
     user_tag = "user-{}".format(account['user'].split("@")[0])
     url = os.path.join('wss://', server, 'model', uuid, 'api')
-    app.juju = JujuClient(
+    app.juju.client = JujuClient(
         user=user_tag,
         url=url,
         password=account['password'])
     try:
-        app.juju.login()
+        app.juju.client.login()
+        app.juju.authenticated = True
     except macumba.errors.LoginError as e:
         raise e
 
@@ -383,7 +388,7 @@ def add_machines(machines, msg_cb=None, exc_cb=None):
             msg_cb("Adding machine{}: {}".format(
                 pl, [(m['series'], m['constraints']) for m in machine_params]))
         try:
-            machine_response = app.juju.Client(
+            machine_response = app.juju.client.Client(
                 request="AddMachines", params={"params": machine_params})
             app.log.debug("AddMachines returned {}".format(machine_response))
         except Exception as e:
@@ -431,8 +436,8 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
             service.csid = CharmStoreID(info["Id"])
 
         app.log.debug("Adding Charm {}".format(service.csid.as_str()))
-        rv = app.juju.Client(request="AddCharm",
-                             params={"url": service.csid.as_str()})
+        rv = app.juju.client.Client(request="AddCharm",
+                                    params={"url": service.csid.as_str()})
         app.log.debug("AddCharm returned {}".format(rv))
 
         charm_id = service.csid.as_str()
@@ -445,7 +450,7 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
                       "url": service.csid.as_str(),
                       "resources": resources}
             app.log.debug("AddPendingResources: {}".format(params))
-            resource_ids = app.juju.Resources(
+            resource_ids = app.juju.client.Resources(
                 request="AddPendingResources",
                 params=params)
             app.log.debug("AddPendingResources returned: {}".format(
@@ -466,8 +471,8 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
             service.service_name)
         if msg_cb:
             msg_cb("{}".format(deploy_message))
-        rv = app.juju.Application(request="Deploy",
-                                  params=app_params)
+        rv = app.juju.client.Application(request="Deploy",
+                                         params=app_params)
         app.log.debug("Deploy returned {}".format(rv))
 
         for result in rv.get('results', []):
@@ -481,7 +486,7 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
         if service.expose:
             expose_params = {"application": service.service_name}
             app.log.debug("Expose: {}".format(expose_params))
-            rv = app.juju.Application(
+            rv = app.juju.client.Application(
                 request="Expose",
                 params=expose_params)
             app.log.debug("Expose returned: {}".format(rv))
@@ -514,8 +519,8 @@ def set_relations(services, msg_cb=None, exc_cb=None):
             params = {"Endpoints": [a, b]}
             try:
                 app.log.debug("AddRelation: {}".format(params))
-                rv = app.juju.Application(request="AddRelation",
-                                          params=params)
+                rv = app.juju.client.Application(request="AddRelation",
+                                                 params=params)
                 app.log.debug("AddRelation returned: {}".format(rv))
             except Exception as e:
                 if exc_cb:

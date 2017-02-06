@@ -15,6 +15,14 @@ maas = SimpleNamespace(
     client=None
 )
 
+juju = SimpleNamespace(
+    # Client
+    client=None,
+
+    # Is authenticated?
+    authenticated=False
+)
+
 app = SimpleNamespace(
     # Juju bootstrap details
     bootstrap=bootstrap,
@@ -23,7 +31,7 @@ app = SimpleNamespace(
     maas=maas,
 
     # Juju Client
-    juju=None,
+    juju=juju,
 
     # The conjure-up UI framework
     ui=None,
