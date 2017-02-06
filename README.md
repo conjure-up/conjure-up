@@ -18,7 +18,7 @@ solutions up and going with as little hindrance as possible.
 ## recommended
 
 ```
-$ sudo snap install conjure-up --classic
+$ sudo snap install conjure-up --classic --beta
 ```
 
 # how to use
