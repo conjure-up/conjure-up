@@ -5,7 +5,7 @@ export LXD_DIR=/var/snap/lxd/common/lxd
 # Make sure we access our python and juju binaries first
 export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 
-. $SNAP/usr/share/bash-completion/completions/juju-2
+. $SNAP/usr/share/bash-completion/completions/juju
 . $SNAP/usr/share/bash-completion/completions/juju-version
 
 exec $SNAP/bin/juju "$@"
