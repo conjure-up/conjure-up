@@ -14,14 +14,15 @@ fi
 # copy bash completions to host system
 cp -a $SNAP/bash_completions/* /usr/share/bash-completion/completions/. || true
 
-cat <<EOF>/etc/sysctl.d/60-conjure-up.conf
+mkdir -p /usr/lib/sysctl.d
+cat <<EOF>/usr/lib/sysctl.d/60-conjure-up.conf
 fs.inotify.max_user_instances=1048576
 fs.inotify.max_queued_events=1048576
 fs.inotify.max_user_watches=1048576
 vm.max_map_count=262144
 EOF
 
-sysctl -p/etc/sysctl.d/60-conjure-up.conf
+sysctl -p /usr/lib/sysctl.d/60-conjure-up.conf
 
 ip link add dev conjureup0 type bridge || true
 ip addr add 10.99.0.1/24 dev conjureup0 || true
