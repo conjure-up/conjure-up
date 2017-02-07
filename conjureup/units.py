@@ -15,11 +15,11 @@ def _human_to(s, md):
     if len(s) == 0:
         raise Exception("unexpected empty string")
 
-    suffix = s[-1]
+    suffix = s[-1].upper()
     if suffix.isalpha():
-        return float(s[:-1]) * md[suffix]
+        return int(float(s[:-1]) * md[suffix])
     else:
-        return float(s)
+        return int(s)
 
 
 def mb_to_human(num):
@@ -36,10 +36,10 @@ def gb_to_human(num):
 
 def _to_human(num, suffixes):
     if num == 0:
-        return '0 B'
+        return '0B'
 
     i = 0
     while num >= 1024 and i < len(suffixes) - 1:
         num /= 1024
         i += 1
-    return "{:.2f} {}".format(num, suffixes[i])
+    return "{:d}{}".format(num, suffixes[i])

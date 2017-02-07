@@ -322,7 +322,9 @@ def get_cloud(name):
 
 
 def constraints_to_dict(constraints):
-    """Parses a constraint string into a dict"""
+    """Parses a constraint string into a dict. Does not do unit
+    conversion. Expects root-disk, mem and cores to be int values, and
+    root-disk and mem should be in megabytes."""
     new_constraints = {}
     if not isinstance(constraints, str):
         app.log.debug(
@@ -337,6 +339,11 @@ def constraints_to_dict(constraints):
             constraint, value = c.split('=')
             if constraint in ['tags', 'spaces']:
                 value = value.split(',')
+            elif constraint in ['root-disk', 'mem', 'cores']:
+                value = int(value)
+            else:
+                raise Exception(
+                    "Unsupported constraint: {}".format(constraint))
             new_constraints[constraint] = value
         except ValueError as e:
             app.log.debug("Skipping constraint: {} ({})".format(c, e))
