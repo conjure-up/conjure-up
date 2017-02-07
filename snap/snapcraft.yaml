@@ -25,7 +25,6 @@ apps:
 
 parts:
   conjure-up:
-    source: dump
     source: .
     plugin: python
     requirements: requirements.txt
