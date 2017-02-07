@@ -12,7 +12,7 @@ if ! $SNAP/bin/lxc network list | grep -q lxdbr0; then
 fi
 
 # copy bash completions to host system
-cp -a $SNAP/usr/share/bash-completion/completions/juju* /usr/share/bash-completion/completions/.
+cp -a $SNAP/bash_completions/* /usr/share/bash-completion/completions/. || true
 
 cat <<EOF>/etc/sysctl.d/60-conjure-up.conf
 fs.inotify.max_user_instances=1048576

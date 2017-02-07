@@ -25,6 +25,7 @@ apps:
 
 parts:
   conjure-up:
+    source: dump
     source: .
     plugin: python
     requirements: requirements.txt
@@ -59,10 +60,15 @@ parts:
     go-packages:
       - github.com/juju/juju/cmd/juju
       - github.com/juju/juju/cmd/jujud
+  bash-comp:
+    source: https://github.com/juju/juju.git
+    source-type: git
+    source-branch: staging
+    source-depth: 1
+    plugin: dump
     install: |
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share/bash-completion/completions
-      cp etc/bash_completion.d/juju-2 $SNAPCRAFT_PART_INSTALL/usr/share/bash-completion/completions/juju
-      cp etc/bash_completion.d/juju-version $SNAPCRAFT_PART_INSTALL/usr/share/bash-completion/completions/juju-version
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bash_completions
+      cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
   python:
     source: https://www.python.org/ftp/python/3.6.0/Python-3.6.0.tar.xz
     plugin: autotools
