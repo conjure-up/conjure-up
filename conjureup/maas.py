@@ -405,6 +405,8 @@ def setup_maas():
     except:
         raise Exception("Could not parse MAAS API Key '{}'".format(api_key))
 
+    app.maas.endpoint = endpoint
+    app.maas.api_key = api_key
     app.maas.client = MaasClient(server_address=endpoint,
                                  consumer_key=consumer_key,
                                  token_key=token_key,

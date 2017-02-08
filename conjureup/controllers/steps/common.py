@@ -74,6 +74,11 @@ def do_step(step_model, step_widget, message_cb, gui=False):
     app.env['JUJU_CONTROLLER'] = app.current_controller
     app.env['JUJU_MODEL'] = app.current_model
 
+    if info['provider-type'] == "maas":
+        # Expose MAAS endpoints and tokens
+        app.env['MAAS_ENDPOINT'] == app.maas.endpoint
+        app.env['MAAS_APIKEY'] == app.maas.api_key
+
     # Set environment variables so they can be accessed from the step scripts
     set_env(step_model.additional_input)
 
