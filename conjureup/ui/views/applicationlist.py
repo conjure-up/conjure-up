@@ -39,12 +39,14 @@ class ApplicationWidget(WidgetWrap):
         self.unit_w.set_text("Units: {:4d}".format(self.application.num_units))
 
     def build_widgets(self, maxlen):
+        num_str = "{}".format(self.application.num_units)
         col_pad = 6
         self.unit_w = Text('Units: {:4d}'.format(self.application.num_units),
                            align='right')
         cws = [
             (maxlen + col_pad,
              Text(self.application.service_name)),
+            (10 + len(num_str), self.unit_w),
             # placeholder for instance type
             ('weight', 1, Text(" ")),
             # placeholder for configure button
@@ -56,7 +58,7 @@ class ApplicationWidget(WidgetWrap):
                 focus_map='button_primary focus'))
         ]
         if not self.hide_config:
-            cws[2] = (20, Color.button_secondary(
+            cws[3] = (20, Color.button_secondary(
                 PlainButton("Configure",
                             partial(self.controller.do_configure,
                                     self.application)),
@@ -68,7 +70,7 @@ class ApplicationWidget(WidgetWrap):
                             partial(self.controller.do_architecture,
                                     self.application)),
                 focus_map='button_secondary focus'))
-            cws.insert(3, arch_button)
+            cws.insert(4, arch_button)
 
         self.columns = Columns(cws, dividechars=1)
         return self.columns
