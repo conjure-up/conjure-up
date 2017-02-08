@@ -100,12 +100,6 @@ class ApplicationConfigureView(WidgetWrap):
     def build_widgets(self):
         ws = [Text("Configure {}".format(
             self.application.service_name))]
-        num_unit_ow = OptionWidget("Units", "int",
-                                   "How many units to deploy.",
-                                   self.application.orig_num_units,
-                                   current_value=self.num_units_copy,
-                                   value_changed_callback=self.handle_scale)
-        ws.append(num_unit_ow)
         ws += self.get_whitelisted_option_widgets()
         self.toggle_show_all_button_index = len(ws) + 1
         self.toggle_show_all_button = PlainButton(
