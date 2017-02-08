@@ -178,17 +178,17 @@ def show_env():
 
 
 def main():
-    opts = parse_options(sys.argv[1:])
-    spell = os.path.basename(os.path.abspath(opts.spell))
-
-    if not os.path.isdir(opts.cache_dir):
-        os.makedirs(opts.cache_dir)
-
     if os.geteuid() == 0:
         utils.info("")
         utils.info("This should _not_ be run as root or with sudo.")
         utils.info("")
         sys.exit(1)
+
+    opts = parse_options(sys.argv[1:])
+    spell = os.path.basename(os.path.abspath(opts.spell))
+
+    if not os.path.isdir(opts.cache_dir):
+        os.makedirs(opts.cache_dir)
 
     # Application Config
     app.config = {'metadata': None}
