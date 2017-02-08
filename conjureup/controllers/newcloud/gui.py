@@ -17,14 +17,21 @@ from . import common
 class NewCloudController:
 
     def __handle_exception(self, exc):
+        if app.showing_error:
+            return
+        app.showing_error = True
         track_exception(exc.args[0])
-        return app.ui.show_exception_message(exc)
+        app.ui.show_exception_message(exc)
 
     def __handle_bootstrap_done(self, future):
         app.log.debug("handle bootstrap")
+        if future.exception():
+            return
         result = future.result()
         if result.returncode < 0:
-            # bootstrap killed via user signal, we're quitting
+            self.__handle_exception(
+                Exception("Bootstrap killed by user: {}".format(
+                    result.returncode)))
             return
         if result.returncode > 0:
             pathbase = os.path.join(
@@ -35,7 +42,8 @@ class NewCloudController:
                 err = "\n".join(errf.readlines())
                 app.log.error(err)
             e = Exception("Bootstrap error: {}".format(err))
-            return self.__handle_exception(e)
+            self.__handle_exception(e)
+            return
 
         track_event("Juju Bootstrap", "Done", "")
         app.ui.set_footer('Bootstrap complete...')
@@ -59,9 +67,9 @@ class NewCloudController:
             credential=credential,
             exc_cb=self.__handle_exception)
         app.bootstrap.running = future
-
-        future.add_done_callback(
-            self.__handle_bootstrap_done)
+        if future is None:
+            return
+        future.add_done_callback(self.__handle_bootstrap_done)
         controllers.use('deploy').render()
 
     def __post_bootstrap_exec(self):
@@ -90,7 +98,8 @@ class NewCloudController:
                                               shell=True,
                                               env=app.env),
                                       self.__handle_exception)
-                future.add_done_callback(self.__post_bootstrap_done)
+                if future:
+                    future.add_done_callback(self.__post_bootstrap_done)
             except Exception as e:
                 return self.__handle_exception(e)
 
@@ -175,8 +184,7 @@ class NewCloudController:
                           "assuming LXD is configured.")
 
             self.__do_bootstrap()
-
-            return controllers.use('deploy').render()
+            return
 
         # XXX: always prompt for maas information for now as there is no way to
         # logically store the maas server ip for future sessions.

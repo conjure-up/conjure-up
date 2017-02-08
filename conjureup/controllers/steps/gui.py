@@ -87,7 +87,8 @@ class StepsController:
                                       app.ui.set_footer,
                                       gui=True),
                               partial(self.__handle_exception, 'E002'))
-        future.add_done_callback(self.get_result)
+        if future:
+            future.add_done_callback(self.get_result)
 
     def update(self, *args):
         for w in self.all_step_widgets:

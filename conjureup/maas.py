@@ -110,7 +110,8 @@ class MaasClient:
         if c_val is None or now - c_ts > 5:
             f = submit(partial(self._get_key_sync, key),
                        lambda _: None)
-            f.add_done_callback(partial(self._update_cache, key))
+            if f:
+                f.add_done_callback(partial(self._update_cache, key))
 
         return c_val
 
