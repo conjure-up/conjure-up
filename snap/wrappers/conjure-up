@@ -11,8 +11,9 @@ export LANGUAGE=${APPLANG%_*}
 # Make sure we access our python and juju binaries first
 export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 
-# Make sure a lxc certificate is generated within the snap
-export LXD_DIR=/var/snap/lxd/common/lxd
+if [ ! -d /var/lib/lxd/ ]; then
+    export LXD_DIR=/var/snap/lxd/common/lxd
+fi
 
 lxc finger > /dev/null 2>&1
 
