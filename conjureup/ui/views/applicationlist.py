@@ -39,14 +39,12 @@ class ApplicationWidget(WidgetWrap):
         self.unit_w.set_text("Units: {:4d}".format(self.application.num_units))
 
     def build_widgets(self, maxlen):
-        num_str = "{}".format(self.application.num_units)
         col_pad = 6
         self.unit_w = Text('Units: {:4d}'.format(self.application.num_units),
                            align='right')
         cws = [
             (maxlen + col_pad,
              Text(self.application.service_name)),
-            (10 + len(num_str), self.unit_w),
             # placeholder for instance type
             ('weight', 1, Text(" ")),
             # placeholder for configure button
