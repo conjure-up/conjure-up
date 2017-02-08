@@ -99,11 +99,17 @@ class JujuMachineWidget(WidgetWrap):
             '{:20s}'.format(self.juju_machine_id), self.show_pin_chooser)
         self.juju_machine_id_label = Text(
             "{:20s}".format(self.juju_machine_id))
-        self.cores_field = IntEdit('', cdict.get('cores', ''))
+        self.cores_field = IntEdit('', str(cdict.get('cores', '')))
         connect_signal(self.cores_field, 'change', self.handle_cores_changed)
-        self.mem_field = Edit('', cdict.get('mem', ''))
+        memval = cdict.get('mem', '')
+        if memval != '':
+            memval = memval / 1024
+        self.mem_field = Edit('', str(memval))
         connect_signal(self.mem_field, 'change', self.handle_mem_changed)
-        self.disk_field = Edit('', cdict.get('root-disk', ''))
+        diskval = cdict.get('root-disk', '')
+        if diskval != '':
+            diskval = diskval / 1024
+        self.disk_field = Edit('', str(diskval))
         connect_signal(self.disk_field, 'change', self.handle_disk_changed)
 
         if self.show_pin:
@@ -271,30 +277,35 @@ class JujuMachineWidget(WidgetWrap):
                                                      'cores', val)
 
     def _format_constraint(self, val):
-        """Ensure that a constraint has a unit. bare numbers are treated as
-        gigabytes"""
-        try:
-            return units.gb_to_human(float(val))
-        except ValueError:
-            return val
+        "Store constraints as int values of megabytes"
+        if val.isnumeric():
+            return int(val) * 1024
+        else:
+            return units.human_to_mb(val)
 
     def handle_mem_changed(self, sender, val):
         if val == '':
             self.md = self.controller.clear_constraint(self.juju_machine_id,
                                                        'mem')
         else:
-            self.md = self.controller.set_constraint(
-                self.juju_machine_id, 'mem',
-                self._format_constraint(val))
+            try:
+                self.md = self.controller.set_constraint(
+                    self.juju_machine_id, 'mem',
+                    self._format_constraint(val))
+            except ValueError:
+                return
 
     def handle_disk_changed(self, sender, val):
         if val == '':
             self.md = self.controller.clear_constraint(self.juju_machine_id,
                                                        'root-disk')
         else:
-            self.md = self.controller.set_constraint(
-                self.juju_machine_id, 'root-disk',
-                self._format_constraint(val))
+            try:
+                self.md = self.controller.set_constraint(
+                    self.juju_machine_id, 'root-disk',
+                    self._format_constraint(val))
+            except ValueError:
+                return
 
     def show_pin_chooser(self, sender):
         self.controller.show_pin_chooser(self.juju_machine_id)
