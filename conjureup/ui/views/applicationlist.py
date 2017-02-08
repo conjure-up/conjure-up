@@ -56,7 +56,7 @@ class ApplicationWidget(WidgetWrap):
                 focus_map='button_primary focus'))
         ]
         if not self.hide_config:
-            cws[3] = (20, Color.button_secondary(
+            cws[2] = (20, Color.button_secondary(
                 PlainButton("Configure",
                             partial(self.controller.do_configure,
                                     self.application)),
@@ -68,7 +68,7 @@ class ApplicationWidget(WidgetWrap):
                             partial(self.controller.do_architecture,
                                     self.application)),
                 focus_map='button_secondary focus'))
-            cws.insert(4, arch_button)
+            cws.insert(3, arch_button)
 
         self.columns = Columns(cws, dividechars=1)
         return self.columns
