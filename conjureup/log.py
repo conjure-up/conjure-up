@@ -35,12 +35,12 @@ def setup_logging(app, logfile, debug=True):
     if debug:
         env = logging.DEBUG
         cmdslog.setFormatter(logging.Formatter(
-            "%(asctime)s %(name)s: [%(levelname)s] "
+            "%(asctime)s [%(levelname)s] "
             "%(filename)s:%(lineno)d - %(message)s"))
     else:
         env = logging.INFO
         cmdslog.setFormatter(logging.Formatter(
-            "%(asctime)s %(name)s: [%(levelname)s] %(message)s"))
+            "%(asctime)s [%(levelname)s] %(message)s"))
 
     cmdslog.setLevel(env)
 
