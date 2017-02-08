@@ -5,6 +5,7 @@ log output, and where to file a bug.
 from urwid import (Pile, Text, Filler, WidgetWrap, Divider)
 from ubuntui.widgets.buttons import cancel_btn
 from ubuntui.utils import Color, Padding
+import sys
 
 
 class ErrorViewException(Exception):
@@ -39,4 +40,4 @@ class ErrorView(WidgetWrap):
         return Pile(buttons)
 
     def cancel(self, button):
-        raise SystemExit("Install exited because of error.")
+        sys.exit(1)
