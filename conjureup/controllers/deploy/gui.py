@@ -9,12 +9,12 @@ from bundleplacer.assignmenttype import AssignmentType, atype_to_label
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
+from conjureup.errors import handle_exception
 from conjureup.maas import setup_maas
 from conjureup.telemetry import track_event, track_exception, track_screen
 from conjureup.ui.views.app_architecture_view import AppArchitectureView
 from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView
-from ubuntui.ev import EventLoop
 
 DEPLOY_ASYNC_QUEUE = "DEPLOY_ASYNC_QUEUE"
 
@@ -46,17 +46,14 @@ class DeployController:
         else:
             self.sync_assignments()
 
-    def _handle_exception(self, tag, exc):
-        track_exception(exc.args[0])
-        app.ui.show_exception_message(exc)
-        self.showing_error = True
-        EventLoop.remove_alarms()
-
     def _pre_deploy_exec(self):
         """ runs pre deploy script if exists
         """
-        app.env['JUJU_PROVIDERTYPE'] = model_info(
-            app.current_model)['provider-type']
+        try:
+            app.env['JUJU_PROVIDERTYPE'] = model_info(
+                app.current_model)['provider-type']
+        except LookupError as e:
+            return handle_exception(e)
         app.env['JUJU_CONTROLLER'] = app.current_controller
         app.env['JUJU_MODEL'] = app.current_model
 
@@ -83,8 +80,7 @@ class DeployController:
         except AttributeError:
             result = json.loads(future.result())
         except:
-            return self._handle_exception(
-                'E003',
+            return handle_exception(
                 Exception(
                     "Problem with pre-deploy: \n{}, ".format(
                         future.result())))
@@ -92,7 +88,7 @@ class DeployController:
         app.log.debug("pre_deploy_done: {}".format(result))
         if result['returnCode'] > 0:
             track_exception("Pre-deploy error")
-            return self._handle_exception('E003', Exception(
+            return handle_exception(Exception(
                 'There was an error during the pre '
                 'deploy processing phase: {}.'.format(result)))
         else:
@@ -257,8 +253,8 @@ class DeployController:
                 self.ensure_machines_nonmaas(application, done_cb)
 
         async.submit(_do_ensure_machines,
-                     partial(self._handle_exception,
-                             "Error while adding machines"),
+                     partial(handle_exception,
+                             Exception("Error while adding machines")),
                      queue_name=DEPLOY_ASYNC_QUEUE)
 
     def ensure_machines_maas(self, application, done_cb):
@@ -276,8 +272,9 @@ class DeployController:
 
             f = juju.add_machines([machine_attrs],
                                   msg_cb=app.ui.set_footer,
-                                  exc_cb=partial(self._handle_exception,
-                                                 "Error Adding Machine"))
+                                  exc_cb=partial(
+                                      handle_exception,
+                                      Exception("Error Adding Machine")))
             add_machines_result = f.result()
             self._handle_add_machines_return(juju_machine_id,
                                              add_machines_result)
@@ -291,8 +288,9 @@ class DeployController:
             juju_machine = juju_machines[juju_machine_id]
             f = juju.add_machines([juju_machine],
                                   msg_cb=app.ui.set_footer,
-                                  exc_cb=partial(self._handle_exception,
-                                                 "Error Adding Machine"))
+                                  exc_cb=partial(
+                                      handle_exception,
+                                      Exception("Error Adding Machine")))
             result = f.result()
             self._handle_add_machines_return(juju_machine_id, result)
         done_cb()
@@ -311,7 +309,10 @@ class DeployController:
         juju.deploy_service(application,
                             app.metadata_controller.series,
                             msg_cb=msg_cb,
-                            exc_cb=partial(self._handle_exception, "ED"))
+                            exc_cb=partial(
+                                handle_exception,
+                                Exception("Failed to deploy: {}".format(
+                                    application))))
 
     def do_deploy(self, application, msg_cb):
         "launches deploy in background for application"
@@ -335,14 +336,13 @@ class DeployController:
 
     def finish(self):
         def enqueue_set_relations():
-            rel_future = juju.set_relations(self.applications,
-                                            app.ui.set_footer,
-                                            partial(self._handle_exception,
-                                                    "Error setting relations"))
+            rel_future = juju.set_relations(
+                self.applications,
+                app.ui.set_footer,
+                handle_exception)
             return rel_future
         f = async.submit(enqueue_set_relations,
-                         partial(self._handle_exception,
-                                 "Error setting relations"),
+                         handle_exception,
                          queue_name=DEPLOY_ASYNC_QUEUE)
 
         if app.bootstrap.running and not app.bootstrap.running.done():
@@ -352,13 +352,10 @@ class DeployController:
 
     def render(self):
         track_screen("Deploy")
-        try:
-            future = async.submit(self._pre_deploy_exec,
-                                  partial(self._handle_exception, 'E003'),
-                                  queue_name=juju.JUJU_ASYNC_QUEUE)
-            future.add_done_callback(self._pre_deploy_done)
-        except Exception as e:
-            return self._handle_exception('E003', e)
+        future = async.submit(self._pre_deploy_exec,
+                              handle_exception,
+                              queue_name=juju.JUJU_ASYNC_QUEUE)
+        future.add_done_callback(self._pre_deploy_done)
 
         self.applications = sorted(app.metadata_controller.bundle.services,
                                    key=attrgetter('service_name'))
@@ -383,7 +380,8 @@ class DeployController:
                         break
 
             async.submit(try_setup_maas,
-                         partial(self._handle_exception, 'EM'))
+                         partial(handle_exception,
+                                 Exception("Error in accessing MAAS")))
 
         self.list_view = ApplicationListView(self.applications,
                                              app.metadata_controller,

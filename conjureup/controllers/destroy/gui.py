@@ -1,6 +1,6 @@
 from conjureup import controllers, juju
 from conjureup.app_config import app
-from conjureup.telemetry import track_exception, track_screen
+from conjureup.telemetry import track_screen
 from conjureup.ui.views.destroy import DestroyView
 
 
@@ -8,10 +8,6 @@ class Destroy:
 
     def __init__(self):
         self.view = None
-
-    def __handle_exception(self, exc):
-        track_exception(exc.args[0])
-        app.ui.show_exception_message(exc)
 
     def finish(self, controller, model):
         return controllers.use('destroyconfirm').render(controller, model)

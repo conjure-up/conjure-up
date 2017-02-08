@@ -4,7 +4,8 @@ from functools import partial
 
 from conjureup import async, controllers, juju
 from conjureup.app_config import app
-from conjureup.telemetry import track_exception, track_screen
+from conjureup.errors import handle_exception
+from conjureup.telemetry import track_screen
 from conjureup.ui.views.deploystatus import DeployStatusView
 from ubuntui.ev import EventLoop
 
@@ -19,10 +20,6 @@ class DeployStatusController:
             app.config['spell-dir'], 'steps'
         )
 
-    def __handle_exception(self, exc):
-        track_exception(exc.args[0])
-        return app.ui.show_exception_message(exc)
-
     def __wait_for_applications(self, relations_scheduled_future):
         # do not schedule app wait until all relations are set:
         relations_done_future = relations_scheduled_future.result()
@@ -34,7 +31,7 @@ class DeployStatusController:
         future = async.submit(partial(common.wait_for_applications,
                                       deploy_done_sh,
                                       app.ui.set_footer),
-                              self.__handle_exception,
+                              handle_exception,
                               queue_name=juju.JUJU_ASYNC_QUEUE)
         future.add_done_callback(self.finish)
 

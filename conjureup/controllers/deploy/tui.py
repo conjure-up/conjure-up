@@ -9,6 +9,7 @@ from subprocess import PIPE
 from conjureup import controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
+from conjureup.errors import handle_exception
 
 
 class DeployController:
@@ -17,10 +18,6 @@ class DeployController:
         self.bundle_filename = None
         self.bundle = None
         self.applications = []
-
-    def __handle_exception(self, tag, exc):
-        utils.error("Error deploying services: {}".format(exc))
-        sys.exit(1)
 
     def do_pre_deploy(self):
         """ runs pre deploy script if exists
@@ -61,11 +58,13 @@ class DeployController:
             juju.deploy_service(service,
                                 app.metadata_controller.series,
                                 utils.info,
-                                partial(self.__handle_exception, "ED"))
+                                partial(handle_exception,
+                                        Exception("Error deploying")))
 
         f = juju.set_relations(self.applications,
                                utils.info,
-                               partial(self.__handle_exception, "ED"))
+                               partial(handle_exception,
+                                       Exception("Error deploying")))
         concurrent.futures.wait([f])
 
         controllers.use('deploystatus').render()
@@ -74,7 +73,8 @@ class DeployController:
         self.do_pre_deploy()
         juju.add_machines(
             list(app.metadata_controller.bundle.machines.values()),
-            exc_cb=partial(self.__handle_exception, "ED"))
+            exc_cb=partial(handle_exception,
+                           Exception("Error adding machines")))
         self.applications = sorted(app.metadata_controller.bundle.services,
                                    key=attrgetter('service_name'))
 
