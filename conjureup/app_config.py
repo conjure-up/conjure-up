@@ -12,7 +12,13 @@ bootstrap = SimpleNamespace(
 
 maas = SimpleNamespace(
     # Client
-    client=None
+    client=None,
+
+    # API key
+    api_key=None,
+
+    # API Endpoint
+    endpoint=None
 )
 
 juju = SimpleNamespace(
