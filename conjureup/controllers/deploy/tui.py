@@ -18,7 +18,7 @@ class DeployController:
         self.bundle = None
         self.applications = []
 
-    def __handle_exception(self, tag, exc):
+    def __handle_exception(self, exc):
         utils.error("Error deploying services: {}".format(exc))
         sys.exit(1)
 
@@ -61,11 +61,11 @@ class DeployController:
             juju.deploy_service(service,
                                 app.metadata_controller.series,
                                 utils.info,
-                                partial(self.__handle_exception, "ED"))
+                                self.__handle_exception)
 
         f = juju.set_relations(self.applications,
                                utils.info,
-                               partial(self.__handle_exception, "ED"))
+                               self.__handle_exception)
         concurrent.futures.wait([f])
 
         controllers.use('deploystatus').render()
@@ -74,7 +74,7 @@ class DeployController:
         self.do_pre_deploy()
         juju.add_machines(
             list(app.metadata_controller.bundle.machines.values()),
-            exc_cb=partial(self.__handle_exception, "ED"))
+            exc_cb=self.__handle_exception)
         self.applications = sorted(app.metadata_controller.bundle.services,
                                    key=attrgetter('service_name'))
 

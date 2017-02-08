@@ -46,7 +46,7 @@ class DeployController:
         else:
             self.sync_assignments()
 
-    def _handle_exception(self, tag, exc):
+    def _handle_exception(self, exc):
         track_exception(exc.args[0])
         app.ui.show_exception_message(exc)
         self.showing_error = True
@@ -84,7 +84,6 @@ class DeployController:
             result = json.loads(future.result())
         except:
             return self._handle_exception(
-                'E003',
                 Exception(
                     "Problem with pre-deploy: \n{}, ".format(
                         future.result())))
@@ -92,7 +91,7 @@ class DeployController:
         app.log.debug("pre_deploy_done: {}".format(result))
         if result['returnCode'] > 0:
             track_exception("Pre-deploy error")
-            return self._handle_exception('E003', Exception(
+            return self._handle_exception(Exception(
                 'There was an error during the pre '
                 'deploy processing phase: {}.'.format(result)))
         else:
@@ -311,7 +310,7 @@ class DeployController:
         juju.deploy_service(application,
                             app.metadata_controller.series,
                             msg_cb=msg_cb,
-                            exc_cb=partial(self._handle_exception, "ED"))
+                            exc_cb=self._handle_exception)
 
     def do_deploy(self, application, msg_cb):
         "launches deploy in background for application"
@@ -354,11 +353,11 @@ class DeployController:
         track_screen("Deploy")
         try:
             future = async.submit(self._pre_deploy_exec,
-                                  partial(self._handle_exception, 'E003'),
+                                  self._handle_exception,
                                   queue_name=juju.JUJU_ASYNC_QUEUE)
             future.add_done_callback(self._pre_deploy_done)
         except Exception as e:
-            return self._handle_exception('E003', e)
+            return self._handle_exception(e)
 
         self.applications = sorted(app.metadata_controller.bundle.services,
                                    key=attrgetter('service_name'))
@@ -383,7 +382,7 @@ class DeployController:
                         break
 
             async.submit(try_setup_maas,
-                         partial(self._handle_exception, 'EM'))
+                         self._handle_exception)
 
         self.list_view = ApplicationListView(self.applications,
                                              app.metadata_controller,
