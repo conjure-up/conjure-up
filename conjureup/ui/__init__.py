@@ -25,9 +25,10 @@ class ConjureUI(Frame):
                    "If appropriate, please submit a bug here: "
                    "https://github.com/conjure-up/conjure-up/issues/new")
 
+        async.shutdown()
+        EventLoop.remove_alarms()
         self.frame.body = ErrorView(errmsg)
         app.log.exception("Showing dialog for exception:")
-        EventLoop.remove_alarms()
 
     def show_error_message(self, msg):
         self.frame.body = ErrorView(msg)

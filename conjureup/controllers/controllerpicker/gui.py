@@ -11,7 +11,7 @@ class ControllerPicker:
 
     def __handle_exception(self, exc):
         track_exception(exc.args[0])
-        app.ui.show_exception_message(exc)
+        return app.ui.show_exception_message(exc)
 
     def __add_model(self):
         juju.add_model(app.current_model, app.current_controller)
@@ -28,7 +28,10 @@ class ControllerPicker:
                      self.__handle_exception,
                      queue_name=juju.JUJU_ASYNC_QUEUE)
 
-        c_info = juju.get_controller_info(app.current_controller)
+        try:
+            c_info = juju.get_controller_info(app.current_controller)
+        except Exception as e:
+            return self.__handle_exception(e)
         app.current_cloud = c_info['details']['cloud']
         return controllers.use('deploy').render()
 
