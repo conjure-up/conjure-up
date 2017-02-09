@@ -85,4 +85,8 @@ app = SimpleNamespace(
     headless=False,
 
     # Remote endpoint type (An enum, see download.py)
-    endpoint_type=None)
+    endpoint_type=None,
+
+    # Flag so we only show the initial cause even if future async
+    # events also raise cascading errors
+    showing_error=False)

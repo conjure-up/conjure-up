@@ -47,9 +47,11 @@ class DeployController:
             self.sync_assignments()
 
     def _handle_exception(self, tag, exc):
+        if app.showing_error:
+            return
+        app.showing_error = True
         track_exception(exc.args[0])
         app.ui.show_exception_message(exc)
-        self.showing_error = True
         EventLoop.remove_alarms()
 
     def _pre_deploy_exec(self):
@@ -68,27 +70,24 @@ class DeployController:
             msg = "Running pre-deployment tasks."
             app.log.debug(msg)
             app.ui.set_footer(msg)
-            return utils.run(pre_deploy_sh,
-                             shell=True,
-                             stdout=PIPE,
-                             stderr=PIPE,
-                             env=app.env)
+            out = utils.run(pre_deploy_sh,
+                            shell=True,
+                            stdout=PIPE,
+                            stderr=PIPE,
+                            env=app.env)
+            return out.stdout.decode()
         return json.dumps({'message': 'No pre deploy necessary',
                            'returnCode': 0,
                            'isComplete': True})
 
     def _pre_deploy_done(self, future):
-        try:
-            result = json.loads(future.result().stdout.decode())
-        except AttributeError:
-            result = json.loads(future.result())
-        except:
-            return self._handle_exception(
-                'E003',
-                Exception(
-                    "Problem with pre-deploy: \n{}, ".format(
-                        future.result())))
 
+        e = future.exception()
+        if e:
+            self._handle_exception('E003', e)
+            return
+
+        result = json.loads(future.result())
         app.log.debug("pre_deploy_done: {}".format(result))
         if result['returnCode'] > 0:
             track_exception("Pre-deploy error")
@@ -351,12 +350,20 @@ class DeployController:
             return controllers.use('deploystatus').render(f)
 
     def render(self):
+        # If bootstrap fails fast, we may be called after the error
+        # screen was already shown. We should bail to avoid
+        # overwriting the error screen.
+        bf = app.bootstrap.running
+        if bf and bf.done() and bf.exception():
+            return
+
         track_screen("Deploy")
         try:
             future = async.submit(self._pre_deploy_exec,
                                   partial(self._handle_exception, 'E003'),
                                   queue_name=juju.JUJU_ASYNC_QUEUE)
-            future.add_done_callback(self._pre_deploy_done)
+            if future:
+                future.add_done_callback(self._pre_deploy_done)
         except Exception as e:
             return self._handle_exception('E003', e)
 

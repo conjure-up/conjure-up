@@ -42,7 +42,7 @@ def submit(func, exc_callback, queue_name="DEFAULT"):
             q.q(qstatsf())
     if ShutdownEvent.is_set():
         log.debug("ignoring async.submit due to impending shutdown.")
-        return
+        return None
     f = _queues[queue_name].submit(func)
     if ENABLE_LOG:
         _queueLog[queue_name][func] = ("added", time.time(), None, None, None)

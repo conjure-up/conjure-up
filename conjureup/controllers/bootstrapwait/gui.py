@@ -34,7 +34,8 @@ class BootstrapWaitController:
         app.ui.set_header(title="Waiting")
         app.ui.set_body(self.view)
 
-        app.bootstrap.running.add_done_callback(self.finish)
+        if app.bootstrap.running:
+            app.bootstrap.running.add_done_callback(self.finish)
         self.__refresh()
 
 

@@ -31,7 +31,8 @@ class DeployStatusController:
                                       utils.info),
                               self.__handle_exception,
                               queue_name=juju.JUJU_ASYNC_QUEUE)
-        future.add_done_callback(self.finish)
+        if future:
+            future.add_done_callback(self.finish)
 
 
 _controller_class = DeployStatusController

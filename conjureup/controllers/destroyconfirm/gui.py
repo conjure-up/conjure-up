@@ -22,8 +22,8 @@ class DestroyConfirm:
         future = juju.destroy_model_async(controller=controller_name,
                                           model=model_name,
                                           exc_cb=self.__handle_exception)
-        future.add_done_callback(
-            self.__handle_destroy_done)
+        if future:
+            future.add_done_callback(self.__handle_destroy_done)
 
     def __handle_destroy_done(self, future):
         if not future.exception():

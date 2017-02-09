@@ -36,7 +36,8 @@ class DeployStatusController:
                                       app.ui.set_footer),
                               self.__handle_exception,
                               queue_name=juju.JUJU_ASYNC_QUEUE)
-        future.add_done_callback(self.finish)
+        if future:
+            future.add_done_callback(self.finish)
 
     def finish(self, future):
         if not future.exception():
@@ -63,8 +64,9 @@ class DeployStatusController:
         )
         app.ui.set_body(self.view)
         self.__refresh()
-        last_deploy_action_future.add_done_callback(
-            self.__wait_for_applications)
+        if last_deploy_action_future:
+            last_deploy_action_future.add_done_callback(
+                self.__wait_for_applications)
 
 
 _controller_class = DeployStatusController

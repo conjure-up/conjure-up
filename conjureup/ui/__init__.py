@@ -28,7 +28,7 @@ class ConjureUI(Frame):
         async.shutdown()
         EventLoop.remove_alarms()
         self.frame.body = ErrorView(errmsg)
-        app.log.exception("Showing dialog for exception:")
+        app.log.debug("Showing dialog for exception: {}".format(ex))
 
     def show_error_message(self, msg):
         self.frame.body = ErrorView(msg)
