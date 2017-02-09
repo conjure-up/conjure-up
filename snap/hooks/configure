@@ -7,7 +7,7 @@ dpkg -l lxd
 if ! dpkg -l lxd; then
     sudo snap install lxd || true
     LXCBIN=/snap/bin/lxc
-    LXDBIN=/usr/bin/lxd
+    LXDBIN=/snap/bin/lxd
 fi
 
 VERSION=$(LXDBIN --version)
