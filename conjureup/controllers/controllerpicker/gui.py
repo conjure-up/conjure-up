@@ -1,6 +1,7 @@
 from conjureup import async, controllers, juju, utils
 from conjureup.app_config import app
-from conjureup.telemetry import track_exception, track_screen
+from conjureup.errors import handle_exception
+from conjureup.telemetry import track_screen
 from conjureup.ui.views.ControllerListView import ControllerListView
 
 
@@ -8,10 +9,6 @@ class ControllerPicker:
 
     def __init__(self):
         self.view = None
-
-    def __handle_exception(self, exc):
-        track_exception(exc.args[0])
-        return app.ui.show_exception_message(exc)
 
     def __add_model(self):
         juju.add_model(app.current_model, app.current_controller)
@@ -25,13 +22,13 @@ class ControllerPicker:
             app.env['CONJURE_UP_SPELL'],
             utils.gen_hash())
         async.submit(self.__add_model,
-                     self.__handle_exception,
+                     handle_exception,
                      queue_name=juju.JUJU_ASYNC_QUEUE)
 
         try:
             c_info = juju.get_controller_info(app.current_controller)
         except Exception as e:
-            return self.__handle_exception(e)
+            return handle_exception(e)
         app.current_cloud = c_info['details']['cloud']
         return controllers.use('deploy').render()
 

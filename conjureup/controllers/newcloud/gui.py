@@ -7,6 +7,7 @@ from subprocess import check_output
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
+from conjureup.errors import handle_exception
 from conjureup.models.provider import Schema
 from conjureup.telemetry import track_event, track_exception, track_screen
 from conjureup.ui.views.newcloud import NewCloudView
@@ -15,10 +16,6 @@ from . import common
 
 
 class NewCloudController:
-
-    def __handle_exception(self, exc):
-        track_exception(exc.args[0])
-        return app.ui.show_exception_message(exc)
 
     def __handle_bootstrap_done(self, future):
         app.log.debug("handle bootstrap")
@@ -35,7 +32,7 @@ class NewCloudController:
                 err = "\n".join(errf.readlines())
                 app.log.error(err)
             e = Exception("Bootstrap error: {}".format(err))
-            return self.__handle_exception(e)
+            return handle_exception(e)
 
         track_event("Juju Bootstrap", "Done", "")
         app.ui.set_footer('Bootstrap complete...')
@@ -57,7 +54,7 @@ class NewCloudController:
             cloud=cloud,
             model=app.current_model,
             credential=credential,
-            exc_cb=self.__handle_exception)
+            exc_cb=handle_exception)
         app.bootstrap.running = future
 
         future.add_done_callback(
@@ -89,21 +86,21 @@ class NewCloudController:
                                               _post_bootstrap_sh,
                                               shell=True,
                                               env=app.env),
-                                      self.__handle_exception)
+                                      handle_exception)
                 future.add_done_callback(self.__post_bootstrap_done)
             except Exception as e:
-                return self.__handle_exception(e)
+                return handle_exception(e)
 
     def __post_bootstrap_done(self, future):
         try:
             result = json.loads(future.result().decode('utf8'))
         except Exception as e:
-            return self.__handle_exception(e)
+            return handle_exception(e)
 
         app.log.debug("post_bootstrap_done: {}".format(result))
         if result['returnCode'] > 0:
             track_exception("Error in Post-Bootstrap")
-            return self.__handle_exception(Exception(
+            return handle_exception(Exception(
                 'There was an error during the post '
                 'bootstrap processing phase: {}.'.format(result)))
         track_event("Juju Post-Bootstrap", "Done", "")

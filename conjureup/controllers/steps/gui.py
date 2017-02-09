@@ -8,8 +8,9 @@ import yaml
 from conjureup import async, controllers
 from conjureup.app_config import app
 from conjureup.controllers.steps import common
+from conjureup.errors import handle_exception
 from conjureup.models.step import StepModel
-from conjureup.telemetry import track_exception, track_screen
+from conjureup.telemetry import track_screen
 from conjureup.ui.views.steps import StepsView
 from conjureup.ui.widgets.step import StepWidget
 from ubuntui.ev import EventLoop
@@ -27,14 +28,9 @@ class StepsController:
 
         self.results = OrderedDict()
 
-    def __handle_exception(self, tag, exc):
-        track_exception(exc.args[0], is_fatal=True)
-        EventLoop.remove_alarms()
-        app.ui.show_exception_message(exc)
-
     def get_result(self, future):
         if future.exception():
-            self.__handle_exception('E002', future.exception())
+            return handle_exception(future.exception())
 
         step_model, step_widget = future.result()
 
@@ -127,8 +123,7 @@ class StepsController:
                 step_widgets.append(step_widget)
                 app.log.debug("Queueing step: {}".format(step_widget))
             except Exception as e:
-                self.__handle_exception('E002', e)
-                return
+                return handle_exception(e)
 
         try:
             self.all_step_widgets = list(step_widgets)
@@ -144,8 +139,7 @@ class StepsController:
             self.view.step_pile.focus_position = 2
 
         except Exception as e:
-            self.__handle_exception('E002', e)
-            return
+            return handle_exception(e)
 
         app.ui.set_header(
             title="Additional Application Configuration",
