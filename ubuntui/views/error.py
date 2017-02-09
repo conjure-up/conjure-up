@@ -2,7 +2,7 @@
 log output, and where to file a bug.
 """
 
-from urwid import (Pile, Text, Filler, WidgetWrap, Divider)
+from urwid import (ExitMainLoop, Pile, Text, Filler, WidgetWrap, Divider)
 from ubuntui.widgets.buttons import cancel_btn
 from ubuntui.utils import Color, Padding
 import sys
@@ -40,4 +40,4 @@ class ErrorView(WidgetWrap):
         return Pile(buttons)
 
     def cancel(self, button):
-        sys.exit(1)
+        raise ExitMainLoop()
