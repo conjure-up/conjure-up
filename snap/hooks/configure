@@ -1,10 +1,9 @@
 #!/bin/bash
 
-LXCBIN=/usr/bin/lxc
-LXDBIN=/usr/bin/lxd
+LXCBIN=$(which lxc)
+LXDBIN=$(which lxd)
 
-dpkg -l lxd
-if ! dpkg -l lxd; then
+if [ "$LXDBIN" = "" ]; then
     sudo snap install lxd || true
     LXCBIN=/snap/bin/lxc
     LXDBIN=/snap/bin/lxd
@@ -13,13 +12,15 @@ fi
 VERSION=$(LXDBIN --version)
 
 if dpkg --compare-versions "$VERSION" gt "2.2"; then
-    if ! lxc network list | grep -q lxdbr0; then
+    if ! $LXCBIN network list | grep -q lxdbr0; then
         # Configure a known address ranges for lxdbr0.
-        lxc network create lxdbr0 \
+        $LXCBIN network create lxdbr0 \
             ipv4.address=10.0.8.1/24 ipv4.nat=true \
             ipv6.address=none ipv6.nat=false
     fi
 else
+    # This is OK since the only time we'll hit an earlier version of LXD is on
+    # Xenial and it would only be in deb form.
     if ! debconf-show lxd | grep -q 'bridge-ipv4:\strue'; then
         debconf-communicate <<EOF> /dev/null
 set lxd/setup-bridge true

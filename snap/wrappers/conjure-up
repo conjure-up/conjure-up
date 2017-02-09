@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 APPLANG=en_US
 APPENC=UTF-8
@@ -8,11 +8,16 @@ export LC_ALL=$APPLOC
 export LANG=$APPLOC
 export LANGUAGE=${APPLANG%_*}
 
-# Make sure we access our python and juju binaries first
-export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
+debian_socket=/var/lib/lxd
+snap_lxd_socket=/var/snap/lxd/common/lxd
 
-if [ ! -d /var/lib/lxd/ ]; then
-    export LXD_DIR=/var/snap/lxd/common/lxd
+lxd_binary=$(which lxd)
+
+# Prefer debian installed lxd, if availible
+if [ "$lxd_binary" = "/usr/bin/lxd" ]; then
+    export LXD_DIR=$debian_socket
+elif [ "$lxd_binary" = "/snap/bin/lxd" ]; then
+    export LXD_DIR=$snap_lxd_socket
 fi
 
 lxc finger > /dev/null 2>&1
