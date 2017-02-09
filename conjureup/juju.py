@@ -1,7 +1,5 @@
 """ Juju helpers
 """
-import q
-
 import os
 from concurrent import futures
 from functools import partial, wraps
