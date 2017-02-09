@@ -354,7 +354,7 @@ class DeployController:
         # screen was already shown. We should bail to avoid
         # overwriting the error screen.
         bf = app.bootstrap.running
-        if bf and bf.exception():
+        if bf and bf.done() and bf.exception():
             return
 
         track_screen("Deploy")
