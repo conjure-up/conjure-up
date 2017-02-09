@@ -4,6 +4,7 @@
 import argparse
 import os
 import os.path as path
+import platform
 import subprocess
 import sys
 import textwrap
@@ -26,6 +27,7 @@ from conjureup.download import (
     get_remote_url
 )
 from conjureup.log import setup_logging
+from conjureup.telemetry import track_event
 from conjureup.ui import ConjureUI
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
@@ -320,6 +322,7 @@ def main():
 
         show_env()
 
+    track_event("OS", platform.platform(), "")
     if app.argv.cloud:
         if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
             utils.error("Please specify a spell for headless mode.")
