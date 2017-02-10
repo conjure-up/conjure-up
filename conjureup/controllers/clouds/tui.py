@@ -6,35 +6,41 @@ from conjureup.app_config import app
 
 class CloudsController:
 
+    def __get_existing_controller(self, controller):
+        if juju.get_controller(controller):
+            return juju.get_controller_in_cloud(app.argv.cloud)
+        return None
+
     def finish(self):
-        if app.argv.controller:
-            existing_controller = app.argv.controller
-            if juju.get_controller(existing_controller) is None:
-                utils.error("Specified controller '{}' "
-                            "could not be found in cloud '{}'.".format(
-                                existing_controller, app.argv.cloud))
-                sys.exit(1)
-        else:
-            existing_controller = juju.get_controller_in_cloud(app.argv.cloud)
+        app.current_cloud = app.argv.cloud
 
-        if existing_controller is None:
-            app.current_cloud = app.argv.cloud
-            return controllers.use('newcloud').render()
-
-        utils.info("Using controller '{}'".format(existing_controller))
-
-        app.current_controller = existing_controller
         if app.argv.model:
             app.current_model = app.argv.model
         else:
             app.current_model = "conjure-up-{}-{}".format(
                 app.env['CONJURE_UP_SPELL'],
                 utils.gen_hash())
-        utils.info("Creating new juju model named '{}', "
-                   "please wait.".format(app.current_model))
-        juju.add_model(app.current_model, app.current_controller)
 
-        return controllers.use('deploy').render()
+        if not app.argv.controller:
+            app.current_controller = "conjure-up-{}-{}".format(
+                app.current_cloud,
+                utils.gen_hash())
+
+            return controllers.use('newcloud').render()
+
+        app.current_controller = app.argv.controller
+        if self.__get_existing_controller(app.current_controller) is None:
+            return controllers.use('newcloud').render()
+        else:
+            utils.info("Using controller '{}'".format(app.current_controller))
+            utils.info("Creating new deployment named '{}', "
+                       "please wait.".format(app.current_model))
+            juju.add_model(app.current_model, app.current_controller)
+            return controllers.use('deploy').render()
+
+        utils.error("Something happened with the controller or model, "
+                    "please check the logs.")
+        sys.exit(1)
 
     def render(self):
         if app.argv.cloud not in juju.get_clouds().keys():

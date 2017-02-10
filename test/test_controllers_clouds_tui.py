@@ -92,7 +92,7 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
     def test_finish_w_controller(self):
         "clouds.finish with an existing controller"
         self.mock_gcc.return_value = 'testcontroller'
-        self.mock_app.argv.controller = None
+        self.mock_app.argv.controller = 'testcontroller'
         self.controller.finish()
         self.mock_juju.assert_has_calls([
             call.add_model(ANY, 'testcontroller')])
