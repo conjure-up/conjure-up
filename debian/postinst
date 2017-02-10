@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 echo ""
 echo "This version of conjure-up has been replaced by the snap package. "
