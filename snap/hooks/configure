@@ -41,8 +41,7 @@ EOF
 fi
 
 # copy bash completions to host system
-cp -a $SNAP/bash_completions/juju-2 /usr/share/bash-completion/completions/juju || true
-cp -a $SNAP/bash_completions/juju-version /usr/share/bash-completion/completions/juju-version || true
+cp -a $SNAP/bash_completions/* /usr/share/bash-completion/completions/. || true
 
 mkdir -p /usr/lib/sysctl.d
 cat <<EOF>/usr/lib/sysctl.d/60-conjure-up.conf
