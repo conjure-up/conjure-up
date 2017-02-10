@@ -216,8 +216,12 @@ def model_available():
     True/False if juju status was successful and a working model is found
     """
     try:
-        run('juju status', shell=True,
-            check=True, stderr=DEVNULL, stdout=DEVNULL)
+        run('juju -m {}:{} status'.format(app.current_controller,
+                                          app.current_model),
+            shell=True,
+            check=True,
+            stderr=DEVNULL,
+            stdout=DEVNULL)
     except CalledProcessError:
         return False
     return True
