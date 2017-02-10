@@ -117,6 +117,16 @@ def lxd_version():
         raise Exception("Could not determine LXD version.")
 
 
+def juju_version():
+    """ Get current Juju version
+    """
+    cmd = run_script('juju version')
+    if cmd.returncode == 0:
+        return cmd.stdout.decode().strip()
+    else:
+        raise Exception("Could not determine LXD version.")
+
+
 def lxd_has_ipv6():
     """ Checks whether LXD bridge has IPv6 enabled
     """

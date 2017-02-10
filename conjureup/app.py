@@ -202,6 +202,11 @@ def main():
                             os.path.join(opts.cache_dir, 'conjure-up.log'),
                             opts.debug)
 
+    # Grab current LXD and Juju versions
+    app.log.debug("LXD version: {}, Juju version: {}".format(
+        utils.lxd_version(),
+        utils.juju_version()))
+
     # Setup proxy
     apply_proxy()
 
