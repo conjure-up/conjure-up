@@ -6,8 +6,11 @@
 override_dh_auto_clean:
 	@rm debian/*.log || true
 
+override_dh_auto_build:
+	@echo "No autobuild"
+
 override_dh_auto_install:
-	@echo "wtf"
+	@echo "No install"
 
 override_dh_auto_test:
 	@echo "No tests."
