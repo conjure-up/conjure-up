@@ -2,26 +2,7 @@ Source: conjure-up
 Section: admin
 Priority: extra
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Build-Depends: debhelper (>= 9),
-               dh-python,
-               dh-systemd,
-               help2man,
-               pep8,
-               pyflakes,
-               python3-all,
-               python3-bson,
-               python3-jinja2,
-               python3-nose,
-               python3-petname,
-               python3-prettytable,
-               python3-progressbar,
-               python3-requests,
-               python3-requests-oauthlib,
-               python3-setuptools,
-               python3-termcolor,
-               python3-urwid,
-               python3-ws4py,
-               python3-yaml
+Build-Depends: debhelper (>= 9)
 Standards-Version: 3.9.7
 Homepage: https://github.com/conjure-up/conjure-up
 X-Python3-Version: >= 3.5
@@ -30,34 +11,14 @@ Vcs-Git: https://github.com/conjure-up/conjure-up.git
 
 Package: conjure-up
 Architecture: all
-Depends: bsdtar,
-         git-core,
-         jq,
-         juju-2.0,
-         lxd,
-         lxd-client,
-         juju-wait,
-         python3-bson,
-         python3-jinja2,
-         python3-petname,
-         python3-prettytable,
-         python3-progressbar,
-         python3-requests,
-         python3-requests-oauthlib,
-         python3-termcolor,
-         python3-urwid,
-         python3-ws4py,
-         python3-yaml,
-         rsyslog,
-         ${misc:Depends},
-         ${python3:Depends},
-         ${shlibs:Depends}
+Depends: ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends}
 Breaks: conjure (<< 0.1)
 Replaces: conjure (<< 0.1)
-Description: Package runtime for conjure-up spells
+Description: transitional dummy package runtime for conjure-up
  This package provides conjure-up, an interface to installing spells that
  provide the user with an end to end walkthrough experience for installing and
- using big software.
+ using big software. This is a transitional dummy package for conjure-up. It
+ can safely be removed.
 
 Package: conjure
 Section: oldlibs
