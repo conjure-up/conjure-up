@@ -120,7 +120,7 @@ def download(src, dst, purge_top_level=True):
             bsdtar_cmd += "-s'|[^/]*/||' "
         bsdtar_cmd += "-C {}".format(dst)
         app.log.debug("Extracting spell: {}".format(bsdtar_cmd))
-        run(bsdtar_cmd, shell=True, check=True)
+        run(bsdtar_cmd, shell=True, check=True, env=app.env)
     except CalledProcessError as e:
         raise Exception("Unable to download {}: {}".format(src, e))
 
