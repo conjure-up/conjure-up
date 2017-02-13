@@ -70,3 +70,9 @@ iptables -I INPUT -i conjureup0 -p tcp -m tcp --dport 53 -j ACCEPT
 iptables -I INPUT -i conjureup0 -p udp -m udp --dport 53 -j ACCEPT
 iptables -I INPUT -i conjureup0 -p tcp -m tcp --dport 67 -j ACCEPT
 iptables -I INPUT -i conjureup0 -p udp -m udp --dport 67 -j ACCEPT
+
+cat <<EOF>/etc/ld.so.conf.d/conjure-up.conf
+$SNAP/usr/lib/$(uname -p)-linux-gnu/
+EOF
+
+sudo ldconfig
