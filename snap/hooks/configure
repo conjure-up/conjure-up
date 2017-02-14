@@ -1,44 +1,20 @@
 #!/bin/bash
 
-LXCBIN=$(which lxc)
-LXDBIN=$(which lxd)
+set -eu
 
-if [ "$LXDBIN" = "" ]; then
-    sudo snap install lxd || true
-    LXCBIN=/snap/bin/lxc
-    LXDBIN=/snap/bin/lxd
-fi
+sudo snap install lxd || true
+LXCBIN=/snap/bin/lxc
+LXDBIN=/snap/bin/lxd
 
-VERSION=$(LXDBIN --version)
-
-if dpkg --compare-versions "$VERSION" gt "2.2"; then
-    if ! $LXCBIN network list | grep -q lxdbr0; then
-        # Configure a known address ranges for lxdbr0.
-        $LXCBIN network create lxdbr0 \
+if ! $LXCBIN network list | grep -q lxdbr0; then
+    # Configure a known address ranges for lxdbr0.
+    $LXCBIN network create lxdbr0 \
             ipv4.address=10.0.8.1/24 ipv4.nat=true \
             ipv6.address=none ipv6.nat=false
-    fi
-else
-    # This is OK since the only time we'll hit an earlier version of LXD is on
-    # Xenial and it would only be in deb form.
-    if ! debconf-show lxd | grep -q 'bridge-ipv4:\strue'; then
-        debconf-communicate <<EOF> /dev/null
-set lxd/setup-bridge true
-set lxd/bridge-domain lxd
-set lxd/bridge-name lxdbr0
-set lxd/bridge-ipv4 true
-set lxd/bridge-ipv4-address 10.0.8.1
-set lxd/bridge-ipv4-dhcp-first 10.0.8.3
-set lxd/bridge-ipv4-dhcp-last 10.0.8.254
-set lxd/bridge-ipv4-dhcp-leases 252
-set lxd/bridge-ipv4-netmask 24
-set lxd/bridge-ipv4-nat true
-set lxd/bridge-ipv6 false
-EOF
-        rm -rf /etc/default/lxd-bridge
-        dpkg-reconfigure lxd --frontend=noninteractive
-    fi
 fi
+
+# Set deb lxd to listen to another port
+/usr/bin/lxc config set core.https_address [::]:8553 || true
 
 # copy bash completions to host system
 cp -a $SNAP/bash_completions/* /usr/share/bash-completion/completions/. || true
