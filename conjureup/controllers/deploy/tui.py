@@ -41,7 +41,12 @@ class DeployController:
                                stdout=PIPE,
                                stderr=PIPE,
                                env=app.env)
-                result = json.loads(sh.stdout.decode('utf8'))
+                try:
+                    result = json.loads(sh.stdout.decode('utf8'))
+                except json.decoder.JSONDecodeError as e:
+                    utils.error(sh.stdout.decode())
+                    utils.error(sh.stderr.decode())
+                    sys.exit(1)
                 if result['returnCode'] > 0:
                     utils.error("Failed to run pre-deploy task: "
                                 "{}".format(result['message']))

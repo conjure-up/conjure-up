@@ -75,7 +75,12 @@ class DeployController:
                             stdout=PIPE,
                             stderr=PIPE,
                             env=app.env)
-            return out.stdout.decode()
+            try:
+                return out.stdout.decode()
+            except json.decoder.JSONDecodeError as e:
+                app.log.exception(out.stdout.decode())
+                app.log.exception(out.stderr.decode())
+                raise Exception(out)
         return json.dumps({'message': 'No pre deploy necessary',
                            'returnCode': 0,
                            'isComplete': True})
