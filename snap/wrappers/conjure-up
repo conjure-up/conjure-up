@@ -1,5 +1,11 @@
 #!/bin/bash
 
+set -eu
+
+log() {
+    echo -e "\e[32m\e[1m[info]\e[0m $@"
+}
+
 APPLANG=en_US
 APPENC=UTF-8
 APPLOC="$APPLANG.$APPENC"
@@ -14,7 +20,22 @@ export LXD_DIR=$snap_lxd_socket
 # Make sure we access our python and juju binaries first
 export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 
-/snap/bin/lxc finger > /dev/null 2>&1
+LXCBIN=/snap/bin/lxc
+
+$LXCBIN finger > /dev/null 2>&1
+if ! $LXCBIN network show lxdbr0 > /dev/null 2>&1; then
+    log "First time run, verifying conjure-up pre-requisites"
+    $LXCBIN network create lxdbr0 ipv4.address=10.0.8.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false > /dev/null 2>&1 || true
+fi
+
+if ! $LXCBIN network show conjureup0 > /dev/null 2>&1; then
+    $LXCBIN network create conjureup0 ipv4.address=10.99.0.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false > /dev/null 2>&1 || true
+fi
+
+# Pick a different port for deb installed LXD to use so that snap installed LXD can stick
+# with the defaults.
+# TODO: Remove this once https://bugs.launchpad.net/juju/+bug/1664721 is addressed.
+/usr/bin/lxc config set core.https_address [::]:8553 > /dev/null 2>&1 || true
 
 exec $SNAP/bin/conjure-up -c $SNAP/etc/conjure-up.conf \
      --spells-dir $SNAP/spells --nosync "$@"

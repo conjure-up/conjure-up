@@ -2,19 +2,7 @@
 
 set -eu
 
-sudo snap install lxd || true
-LXCBIN=/snap/bin/lxc
-LXDBIN=/snap/bin/lxd
-
-if ! $LXCBIN network list | grep -q lxdbr0; then
-    # Configure a known address ranges for lxdbr0.
-    $LXCBIN network create lxdbr0 \
-            ipv4.address=10.0.8.1/24 ipv4.nat=true \
-            ipv6.address=none ipv6.nat=false
-fi
-
-# Set deb lxd to listen to another port
-/usr/bin/lxc config set core.https_address [::]:8553 || true
+snap install lxd || true
 
 # copy bash completions to host system
 cp -a $SNAP/bash_completions/* /usr/share/bash-completion/completions/. || true
@@ -25,30 +13,13 @@ fs.inotify.max_user_instances=1048576
 fs.inotify.max_queued_events=1048576
 fs.inotify.max_user_watches=1048576
 vm.max_map_count=262144
+net.ipv4.ip_forward=1
 EOF
 
 sysctl -p /usr/lib/sysctl.d/60-conjure-up.conf
-
-ip link add dev conjureup0 type bridge || true
-ip addr add 10.99.0.1/24 dev conjureup0 || true
-ip link set dev conjureup0 up || true
-
-echo 1 > /proc/sys/net/ipv4/ip_forward
-
-if iptables-save|grep -q "10\.99\.0\.0"; then
-    exit 0
-fi
-
-iptables -I FORWARD -i conjureup0 -j ACCEPT
-iptables -I FORWARD -o conjureup0 -j ACCEPT
-iptables -t nat -A POSTROUTING -s 10.99.0.1/24 ! -d 10.99.0.1/24 -j MASQUERADE
-iptables -I INPUT -i conjureup0 -p tcp -m tcp --dport 53 -j ACCEPT
-iptables -I INPUT -i conjureup0 -p udp -m udp --dport 53 -j ACCEPT
-iptables -I INPUT -i conjureup0 -p tcp -m tcp --dport 67 -j ACCEPT
-iptables -I INPUT -i conjureup0 -p udp -m udp --dport 67 -j ACCEPT
 
 cat <<EOF>/etc/ld.so.conf.d/conjure-up.conf
 $SNAP/usr/lib/$(uname -p)-linux-gnu/
 EOF
 
-sudo ldconfig
+ldconfig
