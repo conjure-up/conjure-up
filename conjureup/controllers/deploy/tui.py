@@ -63,6 +63,8 @@ class DeployController:
         """ handles deployment
         """
         for service in self.applications:
+            if app.current_cloud == "localhost":
+                service.placement_spec = None
             juju.deploy_service(service,
                                 app.metadata_controller.series,
                                 utils.info,
