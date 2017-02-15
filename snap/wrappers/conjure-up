@@ -6,6 +6,24 @@ log() {
     echo -e "\e[32m\e[1m[info]\e[0m $@"
 }
 
+if [ -f "/usr/bin/lxc" ]; then
+    echo ""
+    log "In order for conjure-up to provide a seamless out of the box deploy"
+    log "experience we need to upgrade the underlying container component. "
+    log "If you have existing LXD containers running they will be affected "
+    log "and should be backed up prior to continuing."
+    echo ""
+    echo -n "Continue with conjure-up deployment? [y/N]: "
+    read -n 1 proceed
+    if [ "$proceed" == "y" ] || [ "$proceed" == "Y" ]; then
+        echo ""
+        log "Upgrading container subsystem"
+        sudo apt-get -qyf remove lxd lxd-client > /dev/null 2>&1
+    else
+        exit 0
+    fi
+fi
+
 APPLANG=en_US
 APPENC=UTF-8
 APPLOC="$APPLANG.$APPENC"
@@ -24,18 +42,13 @@ LXCBIN=/snap/bin/lxc
 
 $LXCBIN finger > /dev/null 2>&1
 if ! $LXCBIN network show lxdbr0 > /dev/null 2>&1; then
-    log "First time run, verifying conjure-up pre-requisites"
+    log "Verifying conjure-up pre-requisites"
     $LXCBIN network create lxdbr0 ipv4.address=10.0.8.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false > /dev/null 2>&1 || true
 fi
 
 if ! $LXCBIN network show conjureup0 > /dev/null 2>&1; then
     $LXCBIN network create conjureup0 ipv4.address=10.99.0.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false > /dev/null 2>&1 || true
 fi
-
-# Pick a different port for deb installed LXD to use so that snap installed LXD can stick
-# with the defaults.
-# TODO: Remove this once https://bugs.launchpad.net/juju/+bug/1664721 is addressed.
-/usr/bin/lxc config set core.https_address [::]:8553 > /dev/null 2>&1 || true
 
 exec $SNAP/bin/conjure-up -c $SNAP/etc/conjure-up.conf \
      --spells-dir $SNAP/spells --nosync "$@"
