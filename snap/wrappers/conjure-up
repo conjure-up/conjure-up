@@ -51,13 +51,13 @@ export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 LXCBIN=/snap/bin/lxc
 
 $LXCBIN finger > /dev/null 2>&1
-if ! $LXCBIN network show lxdbr0 > /dev/null 2>&1; then
+if ! $LXCBIN network show conjureup0 > /dev/null 2>&1; then
     log "Verifying conjure-up pre-requisites"
-    $LXCBIN network create lxdbr0 ipv4.address=10.0.8.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false > /dev/null 2>&1 || true
+    $LXCBIN network create conjureup0 ipv4.address=10.0.8.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false
 fi
 
-if ! $LXCBIN network show conjureup0 > /dev/null 2>&1; then
-    $LXCBIN network create conjureup0 ipv4.address=10.99.0.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false > /dev/null 2>&1 || true
+if ! $LXCBIN network show conjureup1 > /dev/null 2>&1; then
+    $LXCBIN network create conjureup1 ipv4.address=10.99.0.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false
 fi
 
 exec $SNAP/bin/conjure-up -c $SNAP/etc/conjure-up.conf \
