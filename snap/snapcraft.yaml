@@ -17,6 +17,11 @@ apps:
   juju:
     command: wrappers/juju
     aliases: [juju]
+  bridge:
+    command: wrappers/bridge.start
+    stop-command: wrappers/bridge.stop
+    restart-condition: never
+    daemon: oneshot
 
 parts:
   conjure-up:

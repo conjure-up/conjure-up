@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -eux
+
+ip link add dev conjureup0 type bridge || true
+ip addr add 10.99.0.1/24 dev conjureup0 || true
+ip link set dev conjureup0 up || true
+
+iptables -I FORWARD -i conjureup0 -j ACCEPT || true
+iptables -I FORWARD -o conjureup0 -j ACCEPT || true
+iptables -t nat -A POSTROUTING -s 10.99.0.1/24 ! -d 10.99.0.1/24 -j MASQUERADE || true
+iptables -I INPUT -i conjureup0 -p tcp -m tcp --dport 53 -j ACCEPT || true
+iptables -I INPUT -i conjureup0 -p udp -m udp --dport 53 -j ACCEPT || true
+iptables -I INPUT -i conjureup0 -p tcp -m tcp --dport 67 -j ACCEPT || true
+iptables -I INPUT -i conjureup0 -p udp -m udp --dport 67 -j ACCEPT || true
