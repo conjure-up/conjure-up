@@ -2,38 +2,6 @@
 
 set -eu
 
-log() {
-    echo -e "\e[32m\e[1m[info]\e[0m $@"
-}
-
-upgrade_container_subsystem() {
-    echo ""
-    log "Upgrading container subsystem"
-    sudo apt-get -qyf remove lxd lxd-client > /dev/null 2>&1
-}
-
-if [ -f "/usr/bin/lxc" ] && /usr/bin/lxc list | egrep -q "RUNNING|STOPPED"; then
-    echo ""
-    log "In order for conjure-up to provide a seamless out of the box"
-    log "experience we need to upgrade the underlying container subsystem."
-    log ""
-    log "It looks like you have existing LXD containers as they will be affected"
-    log "and should be backed up prior to continuing."
-    log ""
-    log "For help on backing up containers visit:"
-    log " http://conjure-up.io/docs/en/users/#backup-existing-containers"
-    echo ""
-    read -r -p "Continue with conjure-up deployment? [y/N]: " proceed
-    proceed=${proceed,,}
-    if [[ "$proceed" =~ ^(yes|y)$ ]]; then
-        upgrade_container_subsystem
-    else
-        exit 0
-    fi
-elif [ -f "/usr/bin/lxc" ]; then
-    upgrade_container_subsystem
-fi
-
 APPLANG=en_US
 APPENC=UTF-8
 APPLOC="$APPLANG.$APPENC"
@@ -42,23 +10,22 @@ export LC_ALL=$APPLOC
 export LANG=$APPLOC
 export LANGUAGE=${APPLANG%_*}
 
+debian_socket=/var/lib/lxd
 snap_lxd_socket=/var/snap/lxd/common/lxd
 
-export LXD_DIR=$snap_lxd_socket
+lxd_binary=$(which lxd)
+
+# Prefer debian installed lxd, if availible
+if [ "$lxd_binary" = "/usr/bin/lxd" ]; then
+    export LXD_DIR=$debian_socket
+elif [ "$lxd_binary" = "/snap/bin/lxd" ]; then
+    export LXD_DIR=$snap_lxd_socket
+fi
+
 # Make sure we access our python and juju binaries first
 export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 
-LXCBIN=/snap/bin/lxc
-
-$LXCBIN finger > /dev/null 2>&1
-if ! $LXCBIN network show conjureup0 > /dev/null 2>&1; then
-    log "Verifying conjure-up pre-requisites"
-    $LXCBIN network create conjureup0 ipv4.address=10.0.8.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false
-fi
-
-if ! $LXCBIN network show conjureup1 > /dev/null 2>&1; then
-    $LXCBIN network create conjureup1 ipv4.address=10.99.0.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false
-fi
+lxc finger > /dev/null 2>&1
 
 exec $SNAP/bin/conjure-up -c $SNAP/etc/conjure-up.conf \
      --spells-dir $SNAP/spells --nosync "$@"

@@ -1,8 +1,56 @@
 #!/bin/bash
 
-set -eu
+set -eux
 
-snap install lxd || true
+# Make sure we have lxd installed to use
+lxd_bin=/usr/bin/lxd
+lxc_bin=/usr/bin/lxc
+brctl_bin=$SNAP/sbin/brctl
+if [ "$(which lxd)" = "" ]; then
+    snap install lxd > /dev/null 2>&1 || true
+    lxd_bin=/snap/bin/lxd
+    lxc_bin=/snap/bin/lxc
+else
+    VERSION=$($lxd_bin --version)
+    if dpkg --compare-versions "$VERSION" gt "2.2"; then
+        # Be smarter about configuring the bridge, if there is no pre configured
+        # bridge, we'll remove it and use lxc network create feature
+        if ! ip addr show lxdbr0|grep -qP '^\s+inet\s\d+\.\d+\.\d+\.\d+'; then
+            ip addr flush dev lxdbr0 || true
+            ip link set dev lxdbr0 down || true
+            $brctl_bin delbr lxdbr0 || true
+            $lxc_bin network create lxdbr0 ipv4.address=10.0.8.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false
+        fi
+        if ! $lxc_bin network show conjureup0 > /dev/null 2>&1; then
+            $lxc_bin network create conjureup0 ipv4.address=10.99.0.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false
+        fi
+    else
+        # This works b/c anything less than version 2.2 is available only in the
+        # Ubuntu archive.
+        if ! debconf-show lxd | grep -q 'bridge-ipv4:\strue'; then
+            debconf-communicate <<EOF> /dev/null
+set lxd/setup-bridge true
+set lxd/bridge-domain lxd
+set lxd/bridge-name lxdbr0
+set lxd/bridge-ipv4 true
+set lxd/bridge-ipv4-address 10.0.8.1
+set lxd/bridge-ipv4-dhcp-first 10.0.8.3
+set lxd/bridge-ipv4-dhcp-last 10.0.8.254
+set lxd/bridge-ipv4-dhcp-leases 252
+set lxd/bridge-ipv4-netmask 24
+set lxd/bridge-ipv4-nat true
+set lxd/bridge-ipv6 false
+EOF
+            rm -rf /etc/default/lxd-bridge
+            dpkg-reconfigure lxd --frontend=noninteractive
+        fi
+        if ! ip addr show conjureup0; then
+            ip link add dev conjureup0 type bridge
+            ip addr add 10.99.0.1/24 dev conjureup0
+            ip link set dev conjureup0 up
+        fi
+    fi
+fi
 
 # copy bash completions to host system
 cp -a $SNAP/bash_completions/* /usr/share/bash-completion/completions/. || true
