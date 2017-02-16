@@ -97,7 +97,11 @@ def do_step(step_model, step_widget, message_cb, gui=False):
     try:
         with open(step_model.path + ".out") as outf:
             lines = outf.readlines()
-            result = json.loads(lines[-1])
+            try:
+                result = json.loads(lines[-1])
+            except json.decoder.JSONDecodeError as e:
+                raise Exception(
+                    "Unable to parse json ({}): {}".format(e, lines))
     except:
         raise Exception("Could not read output from step "
                         "{}: {}".format(step_model.path, lines))

@@ -36,7 +36,7 @@ if grep -q 'trusty' /etc/lsb-release; then
     fi
 fi
 
-$lxc_bin finger > /dev/null 2>&1
+$lxc_bin finger
 
 exec $SNAP/bin/conjure-up -c $SNAP/etc/conjure-up.conf \
      --spells-dir $SNAP/spells --nosync "$@"
