@@ -21,6 +21,7 @@ if dpkg --compare-versions "$VERSION" gt "2.2"; then
         if ! $lxc_bin network show conjureup0 > /dev/null 2>&1; then
             $lxc_bin network create conjureup0 ipv4.address=10.99.0.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false
         fi
+        chown root:lxd /var/lib/lxd/unix.socket || true
     fi
 else
     # This works b/c anything less than version 2.2 is available only in the
@@ -47,6 +48,8 @@ EOF
         ip addr add 10.99.0.1/24 dev conjureup0
         ip link set dev conjureup0 up
     fi
+
+    chown root:lxd /var/lib/lxd/unix.socket || true
 fi
 
 # copy bash completions to host system
