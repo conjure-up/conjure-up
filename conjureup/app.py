@@ -318,6 +318,7 @@ def main():
 
     app.env = os.environ.copy()
     app.env['CONJURE_UP_CACHEDIR'] = app.argv.cache_dir
+    app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
     app.env['CONJURE_UP_SPELL'] = spell_name
 
     if app.argv.show_env:
