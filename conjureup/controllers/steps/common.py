@@ -100,7 +100,7 @@ def do_step(step_model, step_widget, message_cb, gui=False):
             result = json.loads(lines[-1])
     except:
         raise Exception("Could not read output from step "
-                        "{}".format(step_model.path))
+                        "{}: {}".format(step_model.path, lines))
     if 'returnCode' not in result:
         raise Exception("Invalid last message from step: {}".format(result))
     if result['returnCode'] > 0:
