@@ -14,6 +14,7 @@ debian_socket=/var/lib/lxd
 snap_lxd_socket=/var/snap/lxd/common/lxd
 
 lxd_binary=$(which lxd)
+lxc_bin=$(which lxc)
 
 # Prefer debian installed lxd, if availible
 if [ "$lxd_binary" = "/usr/bin/lxd" ]; then
@@ -25,7 +26,17 @@ fi
 # Make sure we access our python and juju binaries first
 export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 
-lxc finger > /dev/null 2>&1
+if grep -q 'trusty' /etc/lsb-release; then
+    # Need to do this only on trusty as the hooks/configure script for snap is failing on this
+    if ! $lxc_bin network show lxdbr0 > /dev/null 2>&1; then
+        $lxc_bin network create lxdbr0 ipv4.address=10.0.8.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false > /dev/null 2>&1
+    fi
+    if ! $lxc_bin network show conjureup0 > /dev/null 2>&1; then
+        $lxc_bin network create conjureup0 ipv4.address=10.99.0.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false > /dev/null 2>&1
+    fi
+fi
+
+$lxc_bin finger > /dev/null 2>&1
 
 exec $SNAP/bin/conjure-up -c $SNAP/etc/conjure-up.conf \
      --spells-dir $SNAP/spells --nosync "$@"
