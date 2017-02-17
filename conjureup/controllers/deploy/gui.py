@@ -61,6 +61,7 @@ class DeployController:
             app.current_model)['provider-type']
         app.env['JUJU_CONTROLLER'] = app.current_controller
         app.env['JUJU_MODEL'] = app.current_model
+        app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
 
         pre_deploy_sh = os.path.join(app.config['spell-dir'],
                                      'steps/00_pre-deploy')
@@ -76,7 +77,7 @@ class DeployController:
                             stderr=PIPE,
                             env=app.env)
             try:
-                return out.stdout.decode()
+                return json.loads(out.stdout.decode())
             except json.decoder.JSONDecodeError as e:
                 app.log.exception(out.stdout.decode())
                 app.log.exception(out.stderr.decode())
@@ -89,11 +90,12 @@ class DeployController:
 
         e = future.exception()
         if e:
-            self._handle_exception('E003', e)
+            self._handle_exception('Pre Deploy', e)
             return
 
-        result = json.loads(future.result())
+        result = future.result()
         app.log.debug("pre_deploy_done: {}".format(result))
+
         if result['returnCode'] > 0:
             track_exception("Pre-deploy error")
             return self._handle_exception('E003', Exception(

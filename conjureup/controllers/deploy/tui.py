@@ -30,6 +30,7 @@ class DeployController:
             app.current_model)['provider-type']
         app.env['JUJU_CONTROLLER'] = app.current_controller
         app.env['JUJU_MODEL'] = app.current_model
+        app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
 
         pre_deploy_sh = os.path.join(app.config['spell-dir'],
                                      'steps/00_pre-deploy')
