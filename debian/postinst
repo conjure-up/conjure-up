@@ -5,7 +5,7 @@ echo "This version of conjure-up has been replaced by the snap package. "
 echo ""
 echo "   Please run the following to get the latest conjure-up:"
 echo "     $ sudo apt-get remove conjure-up"
-echo "     $ sudo snap install conjure-up --classic --candidate"
+echo "     $ sudo snap install conjure-up --classic"
 echo ""
 
 #DEBHELPER#
