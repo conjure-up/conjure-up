@@ -13,13 +13,15 @@ solutions up and going with as little hindrance as possible.
 
 # installation
 
-> Xenial and above
+> Trusty and above
 
 ## recommended
 
 ```
 $ sudo snap install conjure-up --classic
 ```
+
+Trusty users please [see here](http://conjure-up.io/docs/en/users/#install-trusty-caveat)
 
 # how to use
 
