@@ -47,6 +47,26 @@ EOF
         ip link add dev conjureup0 type bridge
         ip addr add 10.99.0.1/24 dev conjureup0
         ip link set dev conjureup0 up
+        cat <<EOF>/etc/systemd/system/multi-user.target.wants/conjure-up.service
+[Unit]
+Description=conjure-up - network bridge
+Documentation=man:conjure-up(1)
+After=network-online.target
+Before=lxd.service
+Requires=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/conjure-up/bridge.start
+ExecStop=/usr/lib/conjure-up/bridge.stop
+
+[Install]
+WantedBy=multi-user.target
+
+EOF
+        mkdir -p /usr/lib/conjure-up
+        cp -a $SNAP/init/bridge* /usr/lib/conjure-up/.
     fi
 
     chown root:lxd /var/lib/lxd/unix.socket || true
