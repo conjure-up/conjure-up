@@ -330,7 +330,10 @@ def main():
 
         show_env()
 
-    track_event("OS", platform.platform(), "")
+    os_string = "{}-{}".format(
+        "-".join(platform.linux_distribution()),
+        platform.processor())
+    track_event("OS", os_string, "")
     if app.argv.cloud:
         if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
             utils.error("Please specify a spell for headless mode.")
