@@ -3,75 +3,11 @@
 set -eux
 
 # Make sure we have lxd installed to use
-lxd_bin=/usr/bin/lxd
-lxc_bin=/usr/bin/lxc
-if [ "$(which lxd)" = "" ]; then
-    snap install lxd > /dev/null 2>&1 || true
-    lxd_bin=/snap/bin/lxd
-    lxc_bin=/snap/bin/lxc
-fi
-VERSION=$($lxd_bin --version)
-if dpkg --compare-versions "$VERSION" gt "2.2"; then
-    if ! grep -q 'trusty' /etc/lsb-release; then
-        # Be smarter about configuring the bridge, if there is no pre configured
-        # bridge go ahead and configure what we need.
-        if ! $lxc_bin network show lxdbr0 > /dev/null 2>&1; then
-            $lxc_bin network create lxdbr0 ipv4.address=10.0.8.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false
-        fi
-        if ! $lxc_bin network show conjureup0 > /dev/null 2>&1; then
-            $lxc_bin network create conjureup0 ipv4.address=10.99.0.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false
-        fi
-        chown root:lxd /var/lib/lxd/unix.socket || true
-    fi
-else
-    # This works b/c anything less than version 2.2 is available only in the
-    # Ubuntu archive.
-    if ! debconf-show lxd | grep -q 'bridge-ipv4:\strue'; then
-        debconf-communicate <<EOF> /dev/null
-set lxd/setup-bridge true
-set lxd/bridge-domain lxd
-set lxd/bridge-name lxdbr0
-set lxd/bridge-ipv4 true
-set lxd/bridge-ipv4-address 10.0.8.1
-set lxd/bridge-ipv4-dhcp-first 10.0.8.3
-set lxd/bridge-ipv4-dhcp-last 10.0.8.254
-set lxd/bridge-ipv4-dhcp-leases 252
-set lxd/bridge-ipv4-netmask 24
-set lxd/bridge-ipv4-nat true
-set lxd/bridge-ipv6 false
-EOF
-        rm -rf /etc/default/lxd-bridge
-        dpkg-reconfigure lxd --frontend=noninteractive
-    fi
-    if ! ip addr show conjureup0; then
-        ip link add dev conjureup0 type bridge
-        ip addr add 10.99.0.1/24 dev conjureup0
-        ip link set dev conjureup0 up
-    fi
-    # Not needed with lxd versions > 2.2
-    cat <<EOF>/etc/systemd/system/conjure-up.service
-[Unit]
-Description=conjure-up - network bridge
-Documentation=man:conjure-up(1)
-After=network-online.target
-Before=lxd.service
-Requires=network-online.target
+apt-add-repository -y ppa:ubuntu-lxc/lxd-stable
+apt-get -qq update
+apt-get install -qqyf lxd lxd-client
 
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/usr/lib/conjure-up/bridge.start
-ExecStop=/usr/lib/conjure-up/bridge.stop
-
-[Install]
-WantedBy=multi-user.target
-
-EOF
-        mkdir -p /usr/lib/conjure-up
-        cp -a $SNAP/init/bridge* /usr/lib/conjure-up/.
-
-    chown root:lxd /var/lib/lxd/unix.socket || true
-fi
+chown root:lxd /var/lib/lxd/unix.socket || true
 
 # copy bash completions to host system
 cp -a $SNAP/bash_completions/* /usr/share/bash-completion/completions/. || true
@@ -92,3 +28,14 @@ $SNAP/usr/lib/$(uname -p)-linux-gnu/
 EOF
 
 ldconfig
+
+
+# Cleanup from previous versions
+if -f /etc/systemd/system/conjure-up.service; then
+    systemctl stop conjure-up.service
+    rm /etc/systemd/system/conjure-up.service
+fi
+
+if -d /usr/lib/conjure-up; then
+    rm -rf /usr/lib/conjure-up
+fi
