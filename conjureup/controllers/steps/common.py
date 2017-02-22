@@ -3,6 +3,7 @@ import os
 from glob import glob
 
 from conjureup import utils
+from conjureup import juju
 from conjureup.api.models import model_info
 from conjureup.app_config import app
 
@@ -65,7 +66,12 @@ def do_step(step_model, step_widget, message_cb, gui=False):
                     "invalid input: {}/{}".format(e,
                                                   matching_widget))
 
-    info = model_info(app.current_model)
+    try:
+        info = model_info(app.current_model)
+    except:
+        juju.login(force=True)
+        info = model_info(app.current_model)
+
     # Set our provider type environment var so that it is
     # exposed in future processing tasks
     app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
