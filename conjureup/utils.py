@@ -2,9 +2,9 @@ import codecs
 import configparser
 import errno
 import os
-import sys
 import pty
 import shutil
+import sys
 import uuid
 from subprocess import (
     DEVNULL,

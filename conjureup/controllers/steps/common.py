@@ -2,8 +2,7 @@ import json
 import os
 from glob import glob
 
-from conjureup import utils
-from conjureup import juju
+from conjureup import juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
 
