@@ -3,9 +3,17 @@
 set -eux
 
 # Make sure we have lxd installed to use
-apt-add-repository -y ppa:ubuntu-lxc/lxd-stable
-apt-get -qq update
+if ! grep -q 'zesty' /etc/lsb-release; then
+  apt-add-repository -y ppa:ubuntu-lxc/lxd-stable
+  apt-get -qq update
+fi
 apt-get install -qqyf lxd lxd-client
+
+if grep -q 'trusty' /etc/lsb-release; then
+    service lxd restart
+else
+    systemctl restart lxd
+fi
 
 chown root:lxd /var/lib/lxd/unix.socket || true
 
