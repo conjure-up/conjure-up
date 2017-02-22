@@ -1,4 +1,5 @@
 import os
+import sys
 
 from prettytable import PrettyTable
 from termcolor import colored
@@ -20,8 +21,12 @@ class SummaryController:
         table = PrettyTable()
         table.field_names = ["Application", "Result"]
         for k, v in results.items():
-            application_name = colored(k, 'blue', attrs=['bold'])
-            result = colored(v, 'green', attrs=['bold'])
+            if sys.__stdin__.isatty():
+                application_name = colored(k, 'blue', attrs=['bold'])
+                result = colored(v, 'green', attrs=['bold'])
+            else:
+                application_name = k
+                result = v
             table.add_row([application_name, result])
         print(table)
         utils.info("Installation of your big software is now complete.")
