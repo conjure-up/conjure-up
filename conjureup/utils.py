@@ -2,6 +2,7 @@ import codecs
 import configparser
 import errno
 import os
+import sys
 import pty
 import shutil
 import uuid
@@ -15,7 +16,7 @@ from subprocess import (
 )
 
 import yaml
-from termcolor import colored
+from termcolor import cprint
 
 from bundleplacer.bundle import Bundle
 from bundleplacer.charmstore_api import MetadataController
@@ -185,19 +186,26 @@ def check_deb_installed(pkg):
     return True
 
 
+def send_msg(msg, label, color, attrs=['bold']):
+    if sys.__stdin__.isatty():
+        cprint("[{}] ".format(label),
+               color,
+               attrs=attrs,
+               end="{}\n".format(msg))
+    else:
+        print("[{}] {}".format(label, msg))
+
+
 def info(msg):
-    prefix = colored('[info]', 'green', attrs=['bold'])
-    print("{} {}".format(prefix, msg))
+    send_msg(msg, 'info', 'green')
 
 
 def error(msg):
-    prefix = colored('[error]', 'red', attrs=['bold'])
-    print("{} {}".format(prefix, msg))
+    send_msg(msg, 'error', 'red')
 
 
 def warning(msg):
-    prefix = colored('[warning]', 'yellow', attrs=['bold'])
-    print("{} {}".format(prefix, msg))
+    send_msg(msg, 'warning', 'yellow')
 
 
 def install_home():
