@@ -5,7 +5,7 @@ NAME = conjure-up
 CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
-VERSION := 2.2.0
+VERSION := 2.2+git$(GIT_REV)
 
 
 .PHONY: install-dependencies
@@ -21,7 +21,6 @@ release: update-version clean test
 
 update-version:
 	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjureup/__init__.py
-	@sed -i -r "1 s/(^conjure-up\s)\(([a-zA-Z0-9\.~\-\+]+)\)/\1\($(VERSION)\)/g" debian/changelog
 	@sed -i -r "s/(^version:\s)(.*)/\1$(VERSION)/" snap/snapcraft.yaml
 
 release-snap: update-version clean clean-snapcraft test
