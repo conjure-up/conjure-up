@@ -1,3 +1,0 @@
-#!/bin/sh
-
-sudo dpkg-reconfigure -p medium lxd && sudo systemctl start lxd-bridge && conjure-up "$1"

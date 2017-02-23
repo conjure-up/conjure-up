@@ -31,7 +31,6 @@ release-snap: update-version clean clean-snapcraft test
 	@echo
 
 clean:
-	@-debian/rules clean
 	@rm -rf *egg*
 	@rm -rf site.py
 	@rm -rf easy-install*
@@ -52,16 +51,6 @@ clean-snapcraft:
 .PHONY: test
 test:
 	@tox -e py35,flake,isort
-
-DPKGBUILDARGS = -us -uc -i'.git.*|.tox|.bzr.*|.editorconfig|.travis-yaml|macumba\/debian|' -i'snapcraft'
-deb-src: clean
-	@debuild -S -sa $(DPKGBUILDARGS)
-
-deb-release:
-	@debuild -S -sd $(DPKGBUILDARGS)
-
-deb: clean
-	@debuild -b $(DPKGBUILDARGS)
 
 git-sync-requirements:
 	if [ ! -f tools/sync-repo.py ]; then echo "Need to download sync-repo.py from https://git.io/v2mEw" && exit 1; fi
