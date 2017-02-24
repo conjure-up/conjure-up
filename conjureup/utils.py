@@ -6,6 +6,7 @@ import pty
 import shutil
 import sys
 import uuid
+from collections import Mapping
 from subprocess import (
     DEVNULL,
     PIPE,
@@ -227,6 +228,34 @@ def mkdir(path):
         chown(path, install_user(), recursive=True)
 
 
+def merge_dicts(*dicts):
+    """
+    Return a new dictionary that is the result of merging the arguments
+    together.
+    In case of conflicts, later arguments take precedence over earlier
+    arguments.
+    ref:  http://stackoverflow.com/a/8795331/3170835
+    """
+    updated = {}
+    # grab all keys
+    keys = set()
+    for d in dicts:
+        keys = keys.union(set(d))
+
+    for key in keys:
+        values = [d[key] for d in dicts if key in d]
+        # which ones are mapping types? (aka dict)
+        maps = [value for value in values if isinstance(value, Mapping)]
+        if maps:
+            # if we have any mapping types, call recursively to merge them
+            updated[key] = merge_dicts(*maps)
+        else:
+            # otherwise, just grab the last value we have, since later
+            # arguments take precedence over earlier arguments
+            updated[key] = values[-1]
+    return updated
+
+
 def chown(path, user, group=None, recursive=False):
     """ Change user/group ownership of file
 
@@ -319,7 +348,19 @@ def setup_metadata_controller():
         bundle_filename = charm.get_bundle(
             app.config['metadata']['bundle-location'], True)
 
-    bundle = Bundle(filename=bundle_filename)
+    # Load bundle data early so we can merge any additional charm options
+    with open(bundle_filename) as f:
+        bundle_data = yaml.load(f)
+
+    bundle_custom_filename = os.path.join(app.config['spell-dir'],
+                                          'bundle-custom.yaml')
+    if os.path.isfile(bundle_custom_filename):
+        with open(bundle_custom_filename) as f:
+            bundle_custom = yaml.load(f)
+        bundle_data = merge_dicts(bundle_data,
+                                  bundle_custom)
+
+    bundle = Bundle(bundle_data=bundle_data)
     bundleplacer_cfg = Config(
         'bundle-placer',
         {
