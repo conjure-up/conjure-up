@@ -39,3 +39,6 @@ conjure-up --version
 lxd version
 cat /etc/lsb-release
 ```
+
+
+Summary of problem:
