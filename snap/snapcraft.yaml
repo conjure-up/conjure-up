@@ -39,6 +39,8 @@ parts:
   spells:
     source: https://github.com/conjure-up/spells.git
     source-type: git
+    source-branch: "stable"
+    source-depth: 1
     plugin: dump
     organize:
       "*": spells/
