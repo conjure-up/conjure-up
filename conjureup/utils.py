@@ -132,10 +132,7 @@ def lxd_has_ipv6():
     """ Checks whether LXD bridge has IPv6 enabled
     """
     if check_bridge_exists():
-        if lxd_version() >= "2.4.0":
-            cmd = run_script('lxc network get lxdbr0 ipv6.nat')
-        else:
-            cmd = run_script('debconf-show lxd|grep bridge-ipv6-nat')
+        cmd = run_script('lxc network get lxdbr0 ipv6.nat')
         out = cmd.stdout.decode().strip()
         if "true" in out:
             return True
@@ -145,25 +142,12 @@ def lxd_has_ipv6():
 def check_bridge_exists():
     """ Checks that an LXD network bridge exists
     """
-    if lxd_version() >= "2.4.0":
-        try:
-            run('lxc network list|grep -q bridge',
-                shell=True, check=True)
-        except CalledProcessError:
-            return False
-        return True
-    elif lxd_version() < "2.4.0":
-        if os.path.isfile('/etc/default/lxd-bridge'):
-            config_string = "[dummy]\n"
-            with open('/etc/default/lxd-bridge') as f:
-                config_string = config_string + f.read()
-            cfg = configparser.ConfigParser()
-            cfg.read_string(config_string)
-            ready = cfg.get('dummy', 'LXD_IPV4_ADDR')
-            if not ready.strip('"'):
-                return False
-            return True
-    return False
+    try:
+        run('lxc network list|grep -q bridge',
+            shell=True, check=True)
+    except CalledProcessError:
+        return False
+    return True
 
 
 def check_user_in_group(group):
