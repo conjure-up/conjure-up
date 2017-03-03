@@ -1,5 +1,4 @@
 import codecs
-import configparser
 import errno
 import os
 import pty
