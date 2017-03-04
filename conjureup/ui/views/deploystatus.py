@@ -28,8 +28,8 @@ class DeployStatusView(WidgetWrap):
             self._refresh_nodes_on_main_thread)
 
     def _refresh_nodes_on_main_thread(self):
-        status = model_status()
-        for name, service in sorted(status['applications'].items()):
+        applications = model_status().applications
+        for name, service in sorted(applications.items()):
             service_w = ServiceWidget(name, service)
             for unit in service_w.Units:
                 try:

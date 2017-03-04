@@ -75,10 +75,9 @@ class NewCloudController:
     def __post_bootstrap_exec(self):
         """ Executes post-bootstrap.sh if exists
         """
-        info = model_info(app.current_model)
         # Set our provider type environment var so that it is
         # exposed in future processing tasks
-        app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
+        app.env['JUJU_PROVIDERTYPE'] = model_info().provider_type
         app.env['JUJU_CONTROLLER'] = app.current_controller
         app.env['JUJU_MODEL'] = app.current_model
         _post_bootstrap_sh = path.join(app.config['spell-dir'],
