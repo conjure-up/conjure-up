@@ -7,14 +7,18 @@
 
 import unittest
 #  from unittest.mock import ANY, call, MagicMock, patch
-from unittest.mock import MagicMock, patch, sentinel
+from unittest.mock import ANY, MagicMock, patch, sentinel
 
+from conjureup import events
 from conjureup.controllers.newcloud.tui import NewCloudController
+
+from .helpers import test_loop
 
 
 class NewCloudTUIRenderTestCase(unittest.TestCase):
 
     def setUp(self):
+        events.Shutdown.clear()
         self.controller = NewCloudController()
         self.controller.do_post_bootstrap = MagicMock()
 
@@ -49,8 +53,9 @@ class NewCloudTUIRenderTestCase(unittest.TestCase):
         "non-localhost cloud raises if no creds"
         self.mock_common.try_get_creds.return_value = False
         self.mock_juju.bootstrap.return_value.returncode = 0
-        with self.assertRaises(SystemExit):
-            self.controller.render()
+        self.controller.render()
+        assert not self.mock_app.loop.create_task.called
+        assert events.Shutdown.is_set()
 
     def test_render_non_localhost_with_creds(self):
         "non-localhost cloud ok if has creds"
@@ -66,14 +71,8 @@ class NewCloudTUIRenderTestCase(unittest.TestCase):
         self.mock_app.current_model = sentinel.modelname
         self.mock_juju.bootstrap.return_value.returncode = 0
         self.controller.render()
-        self.mock_juju.bootstrap.assert_called_once_with(
-            controller=sentinel.controllername,
-            cloud=sentinel.cloudname,
-            model=sentinel.modelname,
-            credential=True)
-
-        self.controller.do_post_bootstrap.assert_called_once_with()
-        self.mock_finish.assert_called_once_with()
+        self.mock_app.loop.create_task.assert_called_once_with(ANY)
+        self.mock_finish.assert_called_once_with(True)
 
 
 class NewCloudTUIFinishTestCase(unittest.TestCase):
@@ -97,6 +96,10 @@ class NewCloudTUIFinishTestCase(unittest.TestCase):
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
 
+        self.common_patcher = patch(
+            'conjureup.controllers.newcloud.tui.common')
+        self.mock_common = self.common_patcher.start()
+
     def tearDown(self):
         self.controllers_patcher.stop()
         self.utils_patcher.stop()
@@ -105,4 +108,13 @@ class NewCloudTUIFinishTestCase(unittest.TestCase):
 
     def test_finish(self):
         "call finish"
-        self.controller.finish()
+        async def dummy():
+            pass
+
+        self.mock_common.do_bootstrap.side_effect = [dummy()]
+        with test_loop() as loop:
+            loop.run_until_complete(self.controller.finish('creds'))
+        self.mock_common.do_bootstrap.assert_called_once_with(
+            'creds',
+            msg_cb=self.mock_utils.info,
+            fail_msg_cb=self.mock_utils.error)

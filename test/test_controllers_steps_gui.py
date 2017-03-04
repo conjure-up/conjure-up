@@ -73,26 +73,25 @@ class StepsGUIFinishTestCase(unittest.TestCase):
         m_f = self.mock_common.get_step_metadata_filenames
         m_f.return_value = sentinel.step_metas
 
-        self.submit_patcher = patch(
-            'conjureup.controllers.steps.gui.async.submit')
-        self.mock_submit = self.submit_patcher.start()
+        self.utils_patcher = patch(
+            'conjureup.controllers.steps.gui.utils')
+        self.mock_utils = self.utils_patcher.start()
 
         self.controller = StepsController()
         self.mock_stepsview = MagicMock()
         self.controller.view = self.mock_stepsview
+        self.controller._put = MagicMock()
 
     def tearDown(self):
         self.controllers_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
         self.common_patcher.stop()
-        self.submit_patcher.stop()
 
-    def test_finish_done(self):
-        "call finish with done=True"
+    def test_next_step(self):
+        "call next_step"
         self.controller.results = sentinel.results
         mock_model = MagicMock(name="model")
         mock_widget = MagicMock(name="widget")
-        self.controller.finish(mock_model, mock_widget, done=True)
-        m_r = self.mock_controllers.use('summary').render
-        m_r.assert_called_once_with(sentinel.results)
+        self.controller.next_step(mock_model, mock_widget)
+        assert self.mock_app.loop.create_task.called

@@ -38,6 +38,7 @@ c.finish()
 from functools import lru_cache
 from importlib import import_module
 
+from conjureup import events
 from conjureup.app_config import app
 
 
@@ -51,15 +52,22 @@ def use(controller):
     Arguments:
     controller: name of view controller to Load
     """
-    try:
-        if app.headless:
-            pkg = ("conjureup.controllers.{}.tui".format(controller))
-        else:
-            pkg = ("conjureup.controllers.{}.gui".format(controller))
-        module = import_module(pkg)
-        if '_controller_class' in dir(module):
-            return module._controller_class()
-        else:
-            return module
-    except Exception as e:
-        raise e
+    if events.Error.is_set() or events.Shutdown.is_set():
+        # once an error has been encountered or a shutdown issued
+        # we don't want to allow any new controllers to be rendered
+        return NoopController()
+
+    if app.headless:
+        pkg = ("conjureup.controllers.{}.tui".format(controller))
+    else:
+        pkg = ("conjureup.controllers.{}.gui".format(controller))
+    module = import_module(pkg)
+    if '_controller_class' in dir(module):
+        return module._controller_class()
+    else:
+        return module
+
+
+class NoopController:
+    def render(self):
+        pass

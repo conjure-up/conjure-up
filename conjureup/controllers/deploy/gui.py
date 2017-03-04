@@ -1,25 +1,18 @@
-import json
-import os
+import asyncio
 from collections import defaultdict
-from functools import partial
 from operator import attrgetter
-from subprocess import PIPE
 
 from bundleplacer.assignmenttype import AssignmentType, atype_to_label
-from ubuntui.ev import EventLoop
 
-from conjureup import async, controllers, juju, utils
-from conjureup.api.models import model_info
+from conjureup import controllers, events, juju
 from conjureup.app_config import app
 from conjureup.maas import setup_maas
-from conjureup.telemetry import track_event, track_exception, track_screen
+from conjureup.telemetry import track_screen
 from conjureup.ui.views.app_architecture_view import AppArchitectureView
 from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView
 
 from . import common
-
-DEPLOY_ASYNC_QUEUE = "DEPLOY_ASYNC_QUEUE"
 
 
 class DeployController:
@@ -48,63 +41,6 @@ class DeployController:
             self.generate_juju_machines()
         else:
             self.sync_assignments()
-
-    def _handle_exception(self, tag, exc):
-        if app.showing_error:
-            return
-        app.showing_error = True
-        track_exception(exc.args[0])
-        app.ui.show_exception_message(exc)
-        EventLoop.remove_alarms()
-
-    def _pre_deploy_exec(self):
-        """ runs pre deploy script if exists
-        """
-        app.env['JUJU_PROVIDERTYPE'] = model_info(
-            app.current_model)['provider-type']
-        app.env['JUJU_CONTROLLER'] = app.current_controller
-        app.env['JUJU_MODEL'] = app.current_model
-        app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
-
-        pre_deploy_sh = os.path.join(app.config['spell-dir'],
-                                     'steps/00_pre-deploy')
-        if os.path.isfile(pre_deploy_sh) \
-           and os.access(pre_deploy_sh, os.X_OK):
-            track_event("Juju Pre-Deploy", "Started", "")
-            msg = "Running pre-deployment tasks."
-            app.log.debug(msg)
-            app.ui.set_footer(msg)
-            out = utils.run(pre_deploy_sh,
-                            shell=True,
-                            stdout=PIPE,
-                            stderr=PIPE,
-                            env=app.env)
-            try:
-                return json.loads(out.stdout.decode())
-            except json.decoder.JSONDecodeError as e:
-                app.log.exception(out.stdout.decode())
-                app.log.exception(out.stderr.decode())
-                raise Exception(out)
-        return {'message': 'No pre deploy necessary',
-                'returnCode': 0,
-                'isComplete': True}
-
-    def _pre_deploy_done(self, future):
-
-        e = future.exception()
-        if e:
-            self._handle_exception('Pre Deploy', e)
-            return
-
-        result = future.result()
-        app.log.debug("pre_deploy_done: {}".format(result))
-
-        if result['returnCode'] > 0:
-            return self._handle_exception('E003', Exception(
-                'There was an error during the pre '
-                'deploy processing phase: {}.'.format(result)))
-        else:
-            app.ui.set_footer("Pre-deploy processing done.")
 
     def do_configure(self, application, sender):
         "shows configure view for application"
@@ -254,96 +190,70 @@ class DeployController:
             new_assignments.append(plabel)
         application.placement_spec = new_assignments
 
-    def ensure_machines_async(self, application, done_cb):
+    async def get_maas_constraints(self, machine_id):
+        if machine_id not in self.maas_machine_map:
+            return ''
+        maas_machine = self.maas_machine_map[machine_id]
+        await app.loop.run_in_executor(
+            app.maas.client.assign_id_tags([maas_machine]))
+        machine_tag = maas_machine.instance_id.split('/')[-2]
+        return "tags={}".format(machine_tag)
+
+    async def ensure_machines(self, application):
         """If 'application' is assigned to any machine that haven't been added yet,
-        first add the machines then call done_cb
+        add the machines prior to deployment.
         """
-        def _do_ensure_machines():
-            cloud_types = juju.get_cloud_types_by_name()
-            current_cloud_type = cloud_types[app.current_cloud]
-            if current_cloud_type == 'maas':
-                self.ensure_machines_maas(application, done_cb)
-            else:
-                self.ensure_machines_nonmaas(application, done_cb)
+        cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
 
-        async.submit(_do_ensure_machines,
-                     partial(self._handle_exception,
-                             "Error while adding machines"),
-                     queue_name=DEPLOY_ASYNC_QUEUE)
-
-    def ensure_machines_maas(self, application, done_cb):
+        if cloud_type == 'maas':
+            await events.MAASConnected.wait()
         app_placements = self.get_all_assignments(application)
-        for juju_machine_id in [j_id for j_id, _ in app_placements
-                                if j_id not in self.deployed_juju_machines]:
-            machine_attrs = {'series': application.csid.series}
-
-            if juju_machine_id in self.maas_machine_map:
-                maas_machine = self.maas_machine_map[juju_machine_id]
-                app.maas.client.assign_id_tags([maas_machine])
-                machine_tag = maas_machine.instance_id.split('/')[-2]
-                cons = "tags={}".format(machine_tag)
-                machine_attrs['constraints'] = cons
-
-            f = juju.add_machines([machine_attrs],
-                                  msg_cb=app.ui.set_footer,
-                                  exc_cb=partial(self._handle_exception,
-                                                 "Error Adding Machine"))
-            add_machines_result = f.result()
-            self._handle_add_machines_return(juju_machine_id,
-                                             add_machines_result)
-        done_cb()
-
-    def ensure_machines_nonmaas(self, application, done_cb):
         juju_machines = app.metadata_controller.bundle.machines
-        app_placements = self.get_all_assignments(application)
-        for juju_machine_id in [j_id for j_id, _ in app_placements
-                                if j_id not in self.deployed_juju_machines]:
-            juju_machine = juju_machines[juju_machine_id]
-            if 'series' not in juju_machine:
-                juju_machine['series'] = application.csid.series
-            f = juju.add_machines([juju_machine],
-                                  msg_cb=app.ui.set_footer,
-                                  exc_cb=partial(self._handle_exception,
-                                                 "Error Adding Machine"))
-            result = f.result()
-            self._handle_add_machines_return(juju_machine_id, result)
-        done_cb()
+        machines = []
+        for virt_machine_id, _ in app_placements:
+            if virt_machine_id in self.deployed_juju_machines:
+                continue
+            machine_attrs = {
+                'virt_machine_id': virt_machine_id,
+                'series': application.csid.series,
+            }
+            if cloud_type == 'maas':
+                machine_attrs['constraints'] = \
+                    await self.get_maas_constraints(virt_machine_id)
+            else:
+                machine_attrs.update(juju_machines[virt_machine_id])
+            machines.append(machine_attrs)
 
-    def _handle_add_machines_return(self, juju_machine_id,
-                                    add_machines_return):
-        new_machines_list = add_machines_return['machines']
-        if len(new_machines_list) != 1:
-            raise Exception("Unexpected return value from "
-                            "add_machines: {}".format(add_machines_return))
-        new_machine_id = new_machines_list[0]['machine']
-        self.deployed_juju_machines[juju_machine_id] = new_machine_id
+        return await juju.add_machines([application], machines,
+                                       msg_cb=app.ui.set_footer)
 
-    def _do_deploy_one(self, application, msg_cb):
-        self.apply_assignments(application)
-        juju.deploy_service(application,
-                            app.metadata_controller.series,
-                            msg_cb=msg_cb,
-                            exc_cb=partial(self._handle_exception, "ED"))
-
-    def do_deploy(self, application, msg_cb):
+    async def _do_deploy(self, application, msg_cb):
         "launches deploy in background for application"
         self.undeployed_applications.remove(application)
 
+        default_series = app.metadata_controller.series
+
+        added_machines = await self.ensure_machines(application)
+
+        for virt_machine_id, real_machine_id in added_machines.items():
+            self.deployed_juju_machines[virt_machine_id] = real_machine_id
+        self.apply_assignments(application)
+
+        await juju.deploy_service(application, default_series, msg_cb=msg_cb)
+        await juju.set_relations(application, msg_cb=app.ui.set_footer)
+
+    def do_deploy(self, application, msg_cb):
         def msg_both(*args):
             msg_cb(*args)
             app.ui.set_footer(*args)
 
-        self.ensure_machines_async(application, partial(self._do_deploy_one,
-                                                        application, msg_both))
+        app.loop.create_task(self._do_deploy(application, msg_both))
 
     def do_deploy_remaining(self):
         "deploys all un-deployed applications"
-
         for application in self.undeployed_applications:
-            self.ensure_machines_async(application,
-                                       partial(self._do_deploy_one,
-                                               application,
-                                               app.ui.set_footer))
+            app.loop.create_task(self._do_deploy(application,
+                                                 app.ui.set_footer))
 
     def sync_assignment_opts(self):
         svc_opts = {}
@@ -354,43 +264,42 @@ class DeployController:
             for svc, _ in al:
                 svc.options = svc_opts[svc.service_name]
 
-    def finish(self):
-        def enqueue_set_relations():
-            rel_future = juju.set_relations(self.applications,
-                                            app.ui.set_footer,
-                                            partial(self._handle_exception,
-                                                    "Error setting relations"))
-            return rel_future
-        f = async.submit(enqueue_set_relations,
-                         partial(self._handle_exception,
-                                 "Error setting relations"),
-                         queue_name=DEPLOY_ASYNC_QUEUE)
+    async def connect_maas(self):
+        """Try to init maas client.
+        loops until we get an unexpected exception or we succeed.
+        """
+        n = 30
+        while True:
+            try:
+                await app.loop.run_in_executor(setup_maas)
+            except juju.ControllerNotFoundException as e:
+                await asyncio.sleep(1)
+                n -= 1
+                if n == 0:
+                    raise e
+                continue
+            else:
+                events.MAASConnected.set()
+                break
 
+    def finish(self):
         self.sync_assignment_opts()
         common.write_bundle(self.assignments)
 
-        if app.bootstrap.running and not app.bootstrap.running.done():
-            return controllers.use('bootstrapwait').render(f)
+        if not events.Bootstrapped.is_set():
+            return controllers.use('bootstrapwait').render()
         else:
-            return controllers.use('deploystatus').render(f)
+            return controllers.use('deploystatus').render()
 
     def render(self):
         # If bootstrap fails fast, we may be called after the error
         # screen was already shown. We should bail to avoid
         # overwriting the error screen.
-        bf = app.bootstrap.running
-        if bf and bf.done() and bf.exception():
+        if events.Error.is_set():
             return
 
         track_screen("Deploy")
-        try:
-            future = async.submit(self._pre_deploy_exec,
-                                  partial(self._handle_exception, 'E003'),
-                                  queue_name=juju.JUJU_ASYNC_QUEUE)
-            if future:
-                future.add_done_callback(self._pre_deploy_done)
-        except Exception as e:
-            return self._handle_exception('E003', e)
+        app.loop.create_task(common.pre_deploy(app.ui.set_footer))
 
         self.applications = sorted(app.metadata_controller.bundle.services,
                                    key=attrgetter('service_name'))
@@ -398,25 +307,7 @@ class DeployController:
 
         cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
         if cloud_type == 'maas':
-            def try_setup_maas():
-                """Try to init maas client.
-                loops until we get an unexpected exception or we succeed.
-                """
-                n = 30
-                while True:
-                    try:
-                        setup_maas()
-                    except juju.ControllerNotFoundException as e:
-                        async.sleep_until(1)
-                        n -= 1
-                        if n == 0:
-                            raise e
-                        continue
-                    else:
-                        break
-
-            async.submit(try_setup_maas,
-                         partial(self._handle_exception, 'EM'))
+            app.loop.create_task(self.connect_maas())
 
         self.list_view = ApplicationListView(self.applications,
                                              app.metadata_controller,

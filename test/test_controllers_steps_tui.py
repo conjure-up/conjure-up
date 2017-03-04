@@ -6,49 +6,40 @@
 
 
 import unittest
-from unittest.mock import MagicMock, patch, sentinel
+from unittest.mock import MagicMock, patch
 
+from conjureup import events
 from conjureup.controllers.steps.tui import StepsController
+
+from .helpers import test_loop
 
 
 class StepsTUIRenderTestCase(unittest.TestCase):
 
     def setUp(self):
-
-        self.utils_patcher = patch(
-            'conjureup.controllers.steps.tui.utils')
-        self.mock_utils = self.utils_patcher.start()
-
-        self.finish_patcher = patch(
-            'conjureup.controllers.steps.tui.StepsController.finish')
-        self.mock_finish = self.finish_patcher.start()
+        self.do_steps_patcher = patch(
+            'conjureup.controllers.steps.tui.StepsController.do_steps')
+        self.mock_do_steps = self.do_steps_patcher.start()
 
         self.app_patcher = patch(
             'conjureup.controllers.steps.tui.app')
-        mock_app = self.app_patcher.start()
-        mock_app.ui = MagicMock(name="app.ui")
-
-        self.common_patcher = patch(
-            'conjureup.controllers.steps.tui.common')
-        self.mock_common = self.common_patcher.start()
+        self.mock_app = self.app_patcher.start()
         self.controller = StepsController()
 
     def tearDown(self):
-        self.utils_patcher.stop()
-        self.finish_patcher.stop()
+        self.do_steps_patcher.stop()
         self.app_patcher.stop()
-        self.common_patcher.stop()
 
     def test_render(self):
         "call render"
-        self.mock_common.get_step_metadata_filenames.return_value = []
         self.controller.render()
+        self.mock_app.loop.create_task.called_once_with(self.mock_do_steps())
 
 
 class StepsTUIFinishTestCase(unittest.TestCase):
 
     def setUp(self):
-
+        events.Shutdown.clear()
         self.controllers_patcher = patch(
             'conjureup.controllers.steps.tui.controllers')
         self.mock_controllers = self.controllers_patcher.start()
@@ -67,8 +58,6 @@ class StepsTUIFinishTestCase(unittest.TestCase):
         self.common_patcher = patch(
             'conjureup.controllers.steps.tui.common')
         self.mock_common = self.common_patcher.start()
-        m_f = self.mock_common.get_step_metadata_filenames
-        m_f.return_value = sentinel.step_metas
         self.controller = StepsController()
 
     def tearDown(self):
@@ -78,6 +67,36 @@ class StepsTUIFinishTestCase(unittest.TestCase):
         self.app_patcher.stop()
         self.common_patcher.stop()
 
-    def test_finish(self):
-        "call finish"
-        self.controller.finish()
+    def test_do_steps(self):
+        "call do_steps"
+        responses = ['result1', 'result2']
+        results = {'title2': 'result1',
+                   'title3': 'result2'}
+
+        async def dummy():
+            return responses.pop(0)
+
+        self.mock_common.get_step_metadata_filenames.side_effect = [['sudo_n',
+                                                                     'sudo_y'],
+                                                                    ['sudo_y',
+                                                                     'nosudo']]
+        self.mock_common.load_step.side_effect = [MagicMock(needs_sudo=True,
+                                                            title='title1'),
+                                                  MagicMock(needs_sudo=True,
+                                                            title='title2'),
+                                                  MagicMock(needs_sudo=False,
+                                                            title='title3')]
+        self.mock_utils.is_linux.return_value = True
+        self.mock_utils.can_sudo.side_effect = [False, True, False]
+        self.mock_common.do_step.side_effect = [dummy(), dummy()]
+
+        with test_loop() as loop:
+            loop.run_until_complete(self.controller.do_steps())
+            assert events.Shutdown.is_set()
+            assert not self.mock_controllers.use.called
+
+            events.Shutdown.clear()
+            loop.run_until_complete(self.controller.do_steps())
+            assert not events.Shutdown.is_set()
+            self.mock_controllers.use.assert_called_once_with('summary')
+            self.mock_controllers.use().render.assert_called_once_with(results)

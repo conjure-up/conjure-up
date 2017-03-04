@@ -4,14 +4,16 @@ Seperate cli application for cleaning up existing controllers
 """
 
 import argparse
+import asyncio
 import os
+import signal
 import sys
 
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 
 from conjureup import __version__ as VERSION
-from conjureup import async, controllers, utils
+from conjureup import controllers, events, utils
 from conjureup.app_config import app
 from conjureup.log import setup_logging
 from conjureup.ui import ConjureUI
@@ -40,13 +42,7 @@ def parse_options(argv):
     return parser.parse_args(argv)
 
 
-def unhandled_input(key):
-    if key in ['q', 'Q']:
-        async.shutdown()
-        EventLoop.exit(0)
-
-
-def _start(*args, **kwargs):
+async def _start():
     controllers.use('destroy').render()
 
 
@@ -70,15 +66,25 @@ def main():
                             opts.debug)
 
     app.env = os.environ.copy()
+    app.loop = asyncio.get_event_loop()
+    app.loop.add_signal_handler(signal.SIGINT, events.Shutdown.set)
+    app.loop.create_task(events.shutdown_watcher())
+    app.loop.create_task(_start())
 
-    if app.argv.controller and app.argv.model:
-        app.headless = True
-        app.ui = None
-        app.env['CONJURE_UP_HEADLESS'] = "1"
-        _start()
-
-    app.ui = ConjureUI()
-    EventLoop.build_loop(app.ui, STYLES,
-                         unhandled_input=unhandled_input)
-    EventLoop.set_alarm_in(0.05, _start)
-    EventLoop.run()
+    try:
+        if app.argv.controller and app.argv.model:
+            app.headless = True
+            app.ui = None
+            app.env['CONJURE_UP_HEADLESS'] = "1"
+            app.loop.run_forever()
+        else:
+            app.ui = ConjureUI()
+            EventLoop.build_loop(app.ui, STYLES,
+                                 unhandled_input=events.unhandled_input)
+            EventLoop.run()
+    finally:
+        # explicitly close aysncio event loop to avoid hitting the
+        # following issue due to signal handlers added by
+        # asyncio.create_subprocess_exec being cleaned up during final
+        # garbage collection: https://github.com/python/asyncio/issues/396
+        app.loop.close()

@@ -9,6 +9,7 @@ import unittest
 #  from unittest.mock import ANY, call, MagicMock, patch, sentinel
 from unittest.mock import MagicMock, patch
 
+from conjureup import events
 from conjureup.controllers.lxdsetup.gui import LXDSetupController
 
 
@@ -51,6 +52,7 @@ class LXDSetupGUIRenderTestCase(unittest.TestCase):
 class LXDSetupGUIFinishTestCase(unittest.TestCase):
 
     def setUp(self):
+        events.Shutdown.clear()
         self.controller = LXDSetupController()
 
         self.controllers_patcher = patch(
@@ -77,4 +79,8 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
 
     def test_finish(self):
         "call finish"
-        self.controller.finish()
+        with self.assertRaises(Exception):
+            self.controller.finish()
+        assert not events.Shutdown.is_set()
+        self.controller.finish(True)
+        assert events.Shutdown.is_set()

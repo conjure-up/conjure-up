@@ -1,8 +1,11 @@
+import asyncio
 import codecs
 import errno
+import json
 import os
 import pty
 import shutil
+import subprocess
 import sys
 import uuid
 from collections import Mapping
@@ -108,6 +111,69 @@ def run_attach(cmd, output_cb=None):
         raise Exception("Problem running {0} "
                         "{1}:{2}".format(cmd,
                                          subproc.returncode))
+
+
+async def run_step(step_name, msg_cb):
+    step_path = str(Path(app.config['spell-dir']) / 'steps' / step_name)
+
+    if not os.access(step_path, os.X_OK):
+        raise Exception("Step {} not executable".format(step_name))
+
+    while True:
+        app.log.debug("Executing script: {}".format(step_path))
+        app.log.debug("Env: {}".format(app.env.keys()))
+
+        with open(step_path + ".out", 'w') as outf:
+            with open(step_path + ".err", 'w') as errf:
+                proc = await asyncio.create_subprocess_exec(step_path,
+                                                            env=app.env,
+                                                            stdout=outf,
+                                                            stderr=errf)
+                await proc.wait()
+        try:
+            stderr = Path(step_path + '.err').read_text()
+        except Exception:
+            stderr = None
+
+        if proc.returncode != 0:
+            raise Exception("Failure in step {}: {}".format(step_name, stderr))
+
+        try:
+            result = json.loads(Path(step_path + '.out').read_text())
+        except OSError as e:
+            raise Exception("Unable to read output from step {}: {}".format(
+                step_name, e))
+        except json.decoder.JSONDecodeError as e:
+            raise Exception("Unable to parse output from step {}: {}".format(
+                step_name, e))
+
+        if 'returnCode' not in result:
+            raise Exception("Invalid message from step {}".format(step_name))
+
+        if result['returnCode'] != 0:
+            raise Exception("Failure in step {}: {}".format(step_name,
+                                                            result['message']))
+
+        if result.get('isComplete', True):
+            break
+        msg_cb("{}, please wait".format(result['message']))
+
+    return result['message']
+
+
+def can_sudo(self, password=None):
+    if password:
+        password = '{}\n'.format(password).encode('utf8')
+        result = subprocess.run(['sudo', '-S', '/bin/true'],
+                                input=password,
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL)
+        if result.returncode != 0:
+            return False
+    result = subprocess.run(['sudo', '-n', '/bin/true'],
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL)
+    return result.returncode == 0
 
 
 def lxd_version():
@@ -446,3 +512,42 @@ def set_terminal_title(title):
     """ Sets the terminal title
     """
     sys.stdout.write("\x1b]2;{}\x07".format(title))
+
+
+class IterQueue(asyncio.Queue):
+    """
+    Queue subclass that supports the ``async for`` syntax.
+
+    When the producer is done adding items, it must call `close` to
+    notify the consumer.
+
+    Example::
+
+        queue = IterQueue()
+
+        async def consumer():
+            async for line in queue:
+                print(line)
+
+        async def producer():
+            with open('filename') as fp:
+                for line in fp:
+                    await queue.put(line)
+            queue.close()
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.sentinal = []
+        super().__init__(*args, **kwargs)
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        item = await self.get()
+        if item is self.sentinal:
+            raise StopAsyncIteration
+        return item
+
+    async def close(self):
+        await self.put(self.sentinal)

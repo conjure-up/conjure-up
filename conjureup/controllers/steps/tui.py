@@ -1,47 +1,29 @@
-import os.path as path
-import sys
 from collections import OrderedDict
 
-from conjureup import controllers, utils
+from conjureup import controllers, events, utils
 from conjureup.app_config import app
 from conjureup.controllers.steps import common
 
 
 class StepsController:
-
-    def __init__(self):
-        self.bundle_scripts = path.join(
-            app.config['spell-dir'], 'steps'
-        )
-        self.step_metas = common.get_step_metadata_filenames(
-            self.bundle_scripts)
-        self.results = OrderedDict()
-
-    def finish(self):
-        return controllers.use('summary').render(self.results)
-
     def render(self):
-        for step_meta_path in self.step_metas:
-            try:
-                model = common.load_step(step_meta_path)
-            except common.ValidationError as e:
-                app.log.error(e.msg)
-                utils.error(e.msg)
-                sys.exit(1)
-            if utils.is_linux() and model.needs_sudo and not model.can_sudo():
-                utils.error("Step requires passwordless sudo: {}".format(
-                    model.title))
-                sys.exit(1)
-            app.log.debug("Running step: {}".format(model))
-            try:
-                step_model, _ = common.do_step(model,
-                                               None,
-                                               utils.info)
-                self.results[step_model.title] = step_model.result
-            except Exception as e:
-                utils.error("Failed to run {}: {}".format(model.path, e))
-                sys.exit(1)
-        self.finish()
+        app.loop.create_task(self.do_steps())
+
+    async def do_steps(self):
+        step_metas = common.get_step_metadata_filenames()
+        results = OrderedDict()
+        for step_meta_path in step_metas:
+            step_model = common.load_step(step_meta_path)
+            if utils.is_linux():
+                if step_model.needs_sudo and not utils.can_sudo():
+                    utils.error("Step requires passwordless sudo: {}".format(
+                        step_model.title))
+                    events.Shutdown.set(1)
+                    return
+            results[step_model.title] = await common.do_step(step_model,
+                                                             utils.info)
+        events.PostDeployComplete.set()
+        return controllers.use('summary').render(results)
 
 
 _controller_class = StepsController

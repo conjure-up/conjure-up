@@ -6,8 +6,9 @@
 
 
 import unittest
-from unittest.mock import MagicMock, call, patch, sentinel
+from unittest.mock import MagicMock, patch, sentinel
 
+from conjureup import events
 from conjureup.controllers.summary.gui import SummaryController
 
 
@@ -50,6 +51,7 @@ class SummaryGUIRenderTestCase(unittest.TestCase):
 class SummaryGUIFinishTestCase(unittest.TestCase):
 
     def setUp(self):
+        events.Shutdown.clear()
 
         self.render_patcher = patch(
             'conjureup.controllers.summary.gui.SummaryController.render')
@@ -66,6 +68,5 @@ class SummaryGUIFinishTestCase(unittest.TestCase):
 
     def test_finish(self):
         "finish should stop event loop"
-        with patch("conjureup.controllers.summary.gui.EventLoop") as m_ev:
-            self.controller.finish()
-            m_ev.assert_has_calls([call.remove_alarms(), call.exit(0)])
+        self.controller.finish()
+        assert events.Shutdown.is_set()

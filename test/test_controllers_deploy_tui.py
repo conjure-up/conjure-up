@@ -7,9 +7,11 @@
 
 import unittest
 #  from unittest.mock import , call, MagicMock, patch, sentinel
-from unittest.mock import ANY, MagicMock, patch, sentinel
+from unittest.mock import MagicMock, patch, sentinel
 
 from conjureup.controllers.deploy.tui import DeployController
+
+from .helpers import test_loop
 
 
 class DeployTUIRenderTestCase(unittest.TestCase):
@@ -20,14 +22,14 @@ class DeployTUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.deploy.tui.utils')
         self.mock_utils = self.utils_patcher.start()
 
-        self.finish_patcher = patch(
-            'conjureup.controllers.deploy.tui.DeployController.finish')
-        self.mock_finish = self.finish_patcher.start()
+        self.do_deploy_patcher = patch(
+            'conjureup.controllers.deploy.tui.DeployController.do_deploy')
+        self.mock_do_deploy = self.do_deploy_patcher.start()
 
         self.app_patcher = patch(
             'conjureup.controllers.deploy.tui.app')
-        mock_app = self.app_patcher.start()
-        mock_app.ui = MagicMock(name="app.ui")
+        self.mock_app = self.app_patcher.start()
+        self.mock_app.ui = MagicMock(name="app.ui")
 
         self.mock_bundle = MagicMock(name="bundle")
         self.mock_bundle.machines = {"1": sentinel.machine_1}
@@ -38,25 +40,25 @@ class DeployTUIRenderTestCase(unittest.TestCase):
         self.juju_patcher = patch(
             'conjureup.controllers.deploy.tui.juju')
         self.mock_juju = self.juju_patcher.start()
-        self.mock_juju.JUJU_ASYNC_QUEUE = sentinel.JUJU_ASYNC_QUEUE
 
     def tearDown(self):
         self.utils_patcher.stop()
-        self.finish_patcher.stop()
+        self.do_deploy_patcher.stop()
         self.app_patcher.stop()
         self.juju_patcher.stop()
 
     def test_render(self):
         "call render"
-        with patch.object(self.controller, 'do_pre_deploy') as mock_predeploy:
-            self.controller.render()
-            mock_predeploy.assert_called_once_with()
-        self.mock_juju.add_machines.assert_called_once_with(ANY, exc_cb=ANY)
+        self.controller.render()
+        assert self.mock_app.loop.create_task.called
 
 
-class DeployTUIFinishTestCase(unittest.TestCase):
+class DeployTUIDoDeployTestCase(unittest.TestCase):
 
     def setUp(self):
+        async def dummy():
+            pass
+
         self.controller = DeployController()
 
         self.controllers_patcher = patch(
@@ -66,6 +68,10 @@ class DeployTUIFinishTestCase(unittest.TestCase):
         self.utils_patcher = patch(
             'conjureup.controllers.deploy.tui.utils')
         self.mock_utils = self.utils_patcher.start()
+
+        self.common_patcher = patch(
+            'conjureup.controllers.deploy.tui.common')
+        self.mock_common = self.common_patcher.start()
 
         self.render_patcher = patch(
             'conjureup.controllers.deploy.tui.DeployController.render')
@@ -77,20 +83,31 @@ class DeployTUIFinishTestCase(unittest.TestCase):
         self.juju_patcher = patch(
             'conjureup.controllers.deploy.tui.juju')
         self.mock_juju = self.juju_patcher.start()
-        self.mock_juju.JUJU_ASYNC_QUEUE = sentinel.JUJU_ASYNC_QUEUE
 
-        self.concurrent_patcher = patch(
-            'conjureup.controllers.deploy.tui.concurrent')
-        self.mock_concurrent = self.concurrent_patcher.start()
+        self.mock_common.pre_deploy.return_value = dummy()
+        self.mock_juju.add_machines.return_value = dummy()
+        self.mock_juju.deploy_service.return_value = dummy()
+        self.mock_juju.set_relations.return_value = dummy()
 
     def tearDown(self):
         self.controllers_patcher.stop()
         self.utils_patcher.stop()
+        self.common_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
         self.juju_patcher.stop()
-        self.concurrent_patcher.stop()
 
-    def test_finish(self):
-        "call finish"
-        self.controller.finish()
+    def test_do_deploy(self):
+        "call do_deploy"
+        self.mock_app.metadata_controller.bundle.services = [
+            MagicMock(service_name='service'),
+        ]
+
+        with test_loop() as loop:
+            loop.run_until_complete(self.controller.do_deploy())
+
+        assert self.mock_common.pre_deploy.called
+        assert self.mock_juju.add_machines.called
+        assert self.mock_juju.deploy_service.called
+        assert self.mock_juju.set_relations.called
+        self.mock_controllers.use.assert_called_once_with('deploystatus')

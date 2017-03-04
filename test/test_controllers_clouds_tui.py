@@ -8,12 +8,14 @@
 import unittest
 from unittest.mock import ANY, MagicMock, call, patch
 
+from conjureup import events
 from conjureup.controllers.clouds.tui import CloudsController
 
 
 class CloudsTUIRenderTestCase(unittest.TestCase):
 
     def setUp(self):
+        events.Shutdown.clear()
         self.controller = CloudsController()
 
         self.utils_patcher = patch(
@@ -49,8 +51,9 @@ class CloudsTUIRenderTestCase(unittest.TestCase):
 
     def test_render_unknown(self):
         "Rendering with an unknown cloud should raise"
-        with self.assertRaises(SystemExit):
-            self.controller.render()
+        self.controller.render()
+        assert events.Shutdown.is_set()
+        assert not self.mock_finish.called
 
 
 class CloudsTUIFinishTestCase(unittest.TestCase):

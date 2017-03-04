@@ -39,4 +39,4 @@ class StepsView(WidgetWrap):
         return Padding.center_20(self.button)
 
     def done(self, *args):
-        self.cb(None, None, done=True)
+        self.cb()

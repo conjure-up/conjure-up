@@ -12,7 +12,7 @@ from ubuntui.widgets.input import (
 )
 from urwid import Columns, Pile, Text, WidgetWrap
 
-from conjureup.utils import is_linux
+from conjureup import utils
 
 
 class StepWidget(WidgetWrap):
@@ -171,10 +171,10 @@ class StepWidget(WidgetWrap):
             'pending_icon',
             self.icon.get_text()[0]
         ))
-        if is_linux() and self.model.needs_sudo:
+        if utils.is_linux() and self.model.needs_sudo:
             self.step_pile.contents.append((Padding.line_break(""),
                                             self.step_pile.options()))
-            can_sudo = self.model.can_sudo()
+            can_sudo = utils.can_sudo()
             label = 'This step requires sudo.'
             if not can_sudo:
                 label += '  Please enter sudo password:'

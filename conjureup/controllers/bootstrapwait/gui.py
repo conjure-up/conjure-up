@@ -1,33 +1,14 @@
+import asyncio
 from pathlib import Path
 
-from ubuntui.ev import EventLoop
-
-from conjureup import controllers
+from conjureup import controllers, events
 from conjureup.app_config import app
 from conjureup.telemetry import track_screen
 from conjureup.ui.views.bootstrapwait import BootstrapWaitView
 
 
 class BootstrapWaitController:
-
-    def __init__(self):
-        self.alarm_handle = None
-        self.view = None
-
-    def finish(self, *args):
-        if self.alarm_handle:
-            EventLoop.remove_alarm(self.alarm_handle)
-        return controllers.use('deploystatus').render(
-            self.relations_scheduled_future)
-
-    def __refresh(self, *args):
-        self.view.redraw_kitt()
-        self.alarm_handle = EventLoop.set_alarm_in(
-            1,
-            self.__refresh)
-
-    def render(self, relations_scheduled_future):
-        self.relations_scheduled_future = relations_scheduled_future
+    def render(self):
         track_screen("Bootstrap wait")
         app.log.debug("Rendering bootstrap wait")
 
@@ -37,16 +18,24 @@ class BootstrapWaitController:
             cache_dir = Path(app.config['spell-dir'])
             bootstrap_stderr_path = cache_dir / '{}-bootstrap.err'.format(
                 app.current_controller)
-        self.view = BootstrapWaitView(
+        view = BootstrapWaitView(
             app=app,
             message="Juju Controller is initializing. Please wait.",
             watch_file=bootstrap_stderr_path)
         app.ui.set_header(title="Waiting")
-        app.ui.set_body(self.view)
+        app.ui.set_body(view)
 
-        if app.bootstrap.running:
-            app.bootstrap.running.add_done_callback(self.finish)
-        self.__refresh()
+        app.loop.create_task(self.refresh(view))
+        app.loop.create_task(self.finish())
+
+    async def refresh(self, view):
+        while not events.Bootstrapped.is_set():
+            view.redraw_kitt()
+            await asyncio.sleep(1)
+
+    async def finish(self):
+        await events.Bootstrapped.wait()
+        return controllers.use('deploystatus').render()
 
 
 _controller_class = BootstrapWaitController

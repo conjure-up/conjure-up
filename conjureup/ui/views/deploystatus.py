@@ -1,12 +1,9 @@
 import random
 
-from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.juju.service import ServiceWidget
 from ubuntui.widgets.table import Table
 from urwid import Text, WidgetWrap
-
-from conjureup.api.models import model_status
 
 
 class DeployStatusView(WidgetWrap):
@@ -18,19 +15,31 @@ class DeployStatusView(WidgetWrap):
         self.table = Table()
         super().__init__(Padding.center_80(self.table.render()))
 
-    def refresh_nodes(self):
+    def refresh_nodes(self, applications):
         """Adds services to the view if they don't already exist
 
         Schedules UI update on main thread to avoid urwid issues with
         changing listbox state during render.
         """
-        EventLoop.loop.event_loop._loop.call_soon_threadsafe(
-            self._refresh_nodes_on_main_thread)
-
-    def _refresh_nodes_on_main_thread(self):
-        status = model_status()
-        for name, service in sorted(status['applications'].items()):
-            service_w = ServiceWidget(name, service)
+        for name, application in sorted(applications.items()):
+            # XXX refactor ubuntui to accept libjuju objects directly
+            service = {
+                'units': {
+                    unit.name: {
+                        'public-address': unit.public_address,
+                        'machine': unit.machine_id,
+                        'agent-status': {
+                            'status': unit.agent_status,
+                            'info': unit.agent_status_message,
+                        },
+                        'workload-status': {
+                            'status': unit.workload_status,
+                            'info': unit.workload_status_message,
+                        },
+                    } for unit in application.units
+                }
+            }
+            service_w = ServiceWidget(application.name, service)
             for unit in service_w.Units:
                 try:
                     unit_w = self.deployed[unit._name]

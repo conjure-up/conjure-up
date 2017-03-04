@@ -1,43 +1,28 @@
 """ Interfaces to Juju API ModelManager """
 
-from conjureup import juju
+import asyncio
+
 from conjureup.app_config import app
+from conjureup.juju import requires_login
 
 
-@juju.requires_login
-def list_models(user='user-admin'):
-    """ Lists Juju Models
-
-    Arguments:
-    user: Name of user to list models for.
+@requires_login
+def model_info():
+    """ Returns information on the current model.
 
     Returns:
-    Dictionary of known Juju Models (default: user-admin)
+        ModelInfo object
     """
-    models = app.juju.client.ModelManager(request="ListModels",
-                                          params={'Tag': user})
-    return models['UserModels']
+    return app.juju.client.info
 
 
-@juju.requires_login
-def model_info(model):
-    """ Returns information on select model
-
-    Arguments:
-    model: name of model to inspect
-
-    Returns:
-    Dictionary of model attributes
-    """
-    return app.juju.client.Client(request="ModelInfo",
-                                  params={"Name": model})
-
-
-@juju.requires_login
+@requires_login
 def model_status():
     """ Returns the FullStatus output of a model
 
     Returns:
-    Dictionary of model status
+        FullStatus object
     """
-    return app.juju.client.Client(request="FullStatus")
+    f = asyncio.run_coroutine_threadsafe(app.juju.client.get_status(),
+                                         app.juju.client.loop)
+    return f.result()
