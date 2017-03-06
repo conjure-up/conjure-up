@@ -125,7 +125,7 @@ def juju_version():
     if cmd.returncode == 0:
         return cmd.stdout.decode().strip()
     else:
-        raise Exception("Could not determine LXD version.")
+        raise Exception("Could not determine Juju version.")
 
 
 def lxd_has_ipv6():
