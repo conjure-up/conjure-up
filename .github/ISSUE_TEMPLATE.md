@@ -36,7 +36,7 @@ which conjure-up
 which lxd
 juju version
 conjure-up --version
-lxd version
+lxd --version
 cat /etc/lsb-release
 ```
 
