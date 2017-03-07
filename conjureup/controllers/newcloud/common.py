@@ -48,8 +48,11 @@ def try_get_creds(cloud):
     if len(existing_creds['credentials'][cloud].keys()) == 0:
         return None
 
-    first_cred = list(existing_creds['credentials'][cloud].keys())[0]
-    return first_cred
+    for k in existing_creds['credentials'][cloud].keys():
+        if 'default-region' in k:
+            continue
+        else:
+            return k
 
 
 def save_creds(cloud, credentials):
