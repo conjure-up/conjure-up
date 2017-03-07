@@ -41,8 +41,8 @@ class CloudsTUIRenderTestCase(unittest.TestCase):
 
     def test_render(self):
         "Rendering with a known cloud should call finish"
-        self.mock_app.argv.cloud = "testcloud"
-        t = ['testcloud']
+        self.mock_app.current_cloud = "aws"
+        t = ['aws']
         self.mock_juju.get_clouds.return_value.keys.return_value = t
         self.controller.render()
         self.mock_finish.assert_called_once_with()

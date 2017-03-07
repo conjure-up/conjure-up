@@ -162,7 +162,7 @@ class NewCloudController:
 
         cloud = juju.get_cloud(app.current_cloud)
 
-        if cloud['type']:
+        if cloud['type'] == 'lxd':
             if utils.lxd_version() < parse_version('2.9'):
                 return controllers.use('lxdsetup').render(
                     "The current version of LXD found on this system is not "

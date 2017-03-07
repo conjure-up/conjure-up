@@ -43,7 +43,8 @@ class NewCloudController:
         return controllers.use('deploy').render()
 
     def render(self):
-        if app.current_cloud != 'localhost':
+        cloud = juju.get_cloud(app.current_cloud)
+        if cloud['type'] != 'lxd':
             if not common.try_get_creds(app.current_cloud):
                 utils.warning("You attempted to do an install against a cloud "
                               "that requires credentials that could not be "
@@ -53,7 +54,7 @@ class NewCloudController:
                               "{}`.".format(app.current_cloud))
                 sys.exit(1)
 
-        if app.current_cloud == 'localhost':
+        if cloud['type'] == 'lxd':
             if not utils.check_bridge_exists():
                 return controllers.use('lxdsetup').render()
 

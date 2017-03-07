@@ -12,8 +12,6 @@ class CloudsController:
         return None
 
     def finish(self):
-        app.current_cloud = app.argv.cloud
-
         if app.argv.model:
             app.current_model = app.argv.model
         else:
@@ -43,11 +41,11 @@ class CloudsController:
         sys.exit(1)
 
     def render(self):
-        if app.argv.cloud not in juju.get_clouds().keys():
+        if app.current_cloud not in juju.get_clouds().keys():
             formatted_clouds = ", ".join(juju.get_clouds().keys())
             utils.warning(
                 "Unknown Cloud: {}, please choose "
-                "from one of the following: {}".format(app.argv.cloud,
+                "from one of the following: {}".format(app.current_cloud,
                                                        formatted_clouds))
             sys.exit(1)
         utils.info(

@@ -335,6 +335,15 @@ def main():
         platform.processor())
     track_event("OS", os_string, "")
     if app.argv.cloud:
+        if '/' in app.argv.cloud:
+            parse_cli_cloud = app.argv.cloud.split('/')
+            app.current_cloud, app.current_region = parse_cli_cloud
+            app.log.debug(
+                "Region found {} for cloud {}".format(app.current_cloud,
+                                                      app.current_region))
+        else:
+            app.current_cloud = app.argv.cloud
+
         if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
             utils.error("Please specify a spell for headless mode.")
             sys.exit(1)
