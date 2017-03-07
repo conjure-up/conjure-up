@@ -43,6 +43,12 @@ clean:
 	@rm -rf conjure-up
 	@rm -rf dist
 	@rm -rf conjure-dev
+	@find bundleplacer/ -name \*.pyc -delete
+	@find conjureup/ -name \*.pyc -delete
+	@find test/ -name \*.pyc -delete
+	@find ubuntui/ -name \*.pyc -delete
+	@find macumba/ -name \*.pyc -delete
+	@find . -name __pycache__ -delete
 
 clean-snapcraft:
 	@(cd snap && snapcraft clean)
