@@ -169,7 +169,7 @@ def bootstrap(controller, cloud, model='conjure-up', series="xenial",
         cmd += "--to {} ".format(app.argv.bootstrap_to)
 
     cmd += "--bootstrap-series={} ".format(series)
-    if cloud != "localhost":
+    if credential is not None:
         cmd += "--credential {} ".format(credential)
 
     if app.argv.debug:
