@@ -158,7 +158,9 @@ class NewCloudController:
         # a user to configure a LXD bridge with suggested network
         # information.
 
-        if app.current_cloud == 'localhost':
+        cloud = juju.get_cloud(app.current_cloud)
+
+        if cloud['type']:
             if not utils.check_bridge_exists():
                 return controllers.use('lxdsetup').render(
                     "Unable to determine an existing LXD network bridge, "
@@ -199,7 +201,10 @@ class NewCloudController:
             creds = Schema[app.current_cloud]
         except KeyError as e:
             track_exception("Credentials Error")
-            return app.ui.show_exception_message(e)
+            return app.ui.show_exception_message(
+                Exception(
+                    "Unable to find credentials for cloud "
+                    "looking for {}".format(app.current_cloud)))
 
         view = NewCloudView(creds, self.finish)
 
