@@ -17,6 +17,10 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
     def setUp(self):
         self.controller = NewCloudController()
 
+        self.controllers_patcher = patch(
+            'conjureup.controllers.newcloud.gui.controllers')
+        self.mock_controllers = self.controllers_patcher.start()
+
         self.utils_patcher = patch(
             'conjureup.controllers.newcloud.gui.utils')
         self.mock_utils = self.utils_patcher.start()
@@ -32,6 +36,11 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.newcloud.gui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.juju_patcher = patch(
+            'conjureup.controllers.newcloud.gui.juju'
+        )
+        self.mock_juju = self.juju_patcher.start()
+        self.mock_juju.get_cloud.return_value = {'type': 'lxd'}
         self.track_screen_patcher = patch(
             'conjureup.controllers.newcloud.gui.track_screen')
         self.mock_track_screen = self.track_screen_patcher.start()
@@ -41,12 +50,20 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
+        self.juju_patcher.stop()
         self.track_screen_patcher.stop()
 
     def test_render(self):
         "call render"
-        self.mock_app.current_cloud = 'maas'
+        self.mock_utils.lxd_has_ipv6.return_value = False
         self.controller.render()
+        self.mock_controllers.use.assert_called_once_with('deploy')
+
+    def test_render_lxdsetup_with_ipv6(self):
+        "call render and access lxdsetup controller if ipv6 enabled"
+        self.mock_utils.lxd_has_ipv6.return_value = True
+        self.controller.render()
+        self.mock_controllers.use.assert_called_once_with('lxdsetup')
 
 
 class NewCloudGUIFinishTestCase(unittest.TestCase):
