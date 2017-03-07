@@ -144,6 +144,9 @@ def bootstrap(controller, cloud, model='conjure-up', series="xenial",
     log: application logger
     credential: credentials key
     """
+    if app.current_region is not None:
+        app.log.debug("Bootstrapping to set region: {}")
+        cloud = "{}/{}".format(app.current_cloud, app.current_region)
     cmd = "juju bootstrap {} {} " \
           "--config image-stream=daily ".format(
               cloud, controller)
