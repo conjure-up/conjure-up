@@ -9,6 +9,8 @@ import unittest
 #  from unittest.mock import ANY, call, MagicMock, patch, sentinel
 from unittest.mock import MagicMock, patch
 
+from pkg_resources import parse_version
+
 from conjureup.controllers.newcloud.gui import NewCloudController
 
 
@@ -44,6 +46,7 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
         self.track_screen_patcher = patch(
             'conjureup.controllers.newcloud.gui.track_screen')
         self.mock_track_screen = self.track_screen_patcher.start()
+        self.mock_utils.lxd_version.return_value = parse_version('2.9')
 
     def tearDown(self):
         self.utils_patcher.stop()
@@ -64,6 +67,12 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
         self.mock_utils.lxd_has_ipv6.return_value = True
         self.controller.render()
         self.mock_controllers.use.assert_called_once_with('lxdsetup')
+
+    def test_lxd_version_to_low(self):
+        """ Make sure lxd versions fail properly
+        """
+        assert parse_version('2.1') < parse_version('2.10.1')
+        assert parse_version('2.0.8') < parse_version('2.9')
 
 
 class NewCloudGUIFinishTestCase(unittest.TestCase):
