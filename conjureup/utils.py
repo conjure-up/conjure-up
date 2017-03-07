@@ -16,6 +16,7 @@ from subprocess import (
 )
 
 import yaml
+from pkg_resources import parse_version
 from termcolor import cprint
 
 from bundleplacer.bundle import Bundle
@@ -111,9 +112,9 @@ def run_attach(cmd, output_cb=None):
 def lxd_version():
     """ Get current LXD version
     """
-    cmd = run_script('lxc version')
+    cmd = run_script('lxd --version')
     if cmd.returncode == 0:
-        return cmd.stdout.decode().strip()
+        return parse_version(cmd.stdout.decode().strip())
     else:
         raise Exception("Could not determine LXD version.")
 
@@ -123,7 +124,7 @@ def juju_version():
     """
     cmd = run_script('juju version')
     if cmd.returncode == 0:
-        return cmd.stdout.decode().strip()
+        return parse_version(cmd.stdout.decode().strip())
     else:
         raise Exception("Could not determine Juju version.")
 

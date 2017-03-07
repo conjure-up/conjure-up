@@ -4,6 +4,8 @@ import os.path as path
 from functools import partial
 from subprocess import check_output
 
+from pkg_resources import parse_version
+
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
@@ -161,6 +163,17 @@ class NewCloudController:
         cloud = juju.get_cloud(app.current_cloud)
 
         if cloud['type']:
+            if utils.lxd_version() < parse_version('2.9'):
+                return controllers.use('lxdsetup').render(
+                    "The current version of LXD found on this system is not "
+                    "compatible. Please run the following to get the latest "
+                    "supported LXD:\n\n"
+                    "  sudo apt-add-repository ppa:ubuntu-lxc/lxd-stable\n"
+                    "  sudo apt-get update\n"
+                    "  sudo apt-get install lxd lxd-client\n\n"
+                    "Once complete please re-run conjure-up."
+                )
+
             if not utils.check_bridge_exists():
                 return controllers.use('lxdsetup').render(
                     "Unable to determine an existing LXD network bridge, "
