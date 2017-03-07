@@ -82,9 +82,9 @@ class DeployController:
                 app.log.exception(out.stdout.decode())
                 app.log.exception(out.stderr.decode())
                 raise Exception(out)
-        return json.dumps({'message': 'No pre deploy necessary',
-                           'returnCode': 0,
-                           'isComplete': True})
+        return {'message': 'No pre deploy necessary',
+                'returnCode': 0,
+                'isComplete': True}
 
     def _pre_deploy_done(self, future):
 
