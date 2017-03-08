@@ -41,6 +41,10 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
         self.juju_patcher = patch(
             'conjureup.controllers.newcloud.gui.juju'
         )
+        self.common_patcher = patch(
+            'conjureup.controllers.newcloud.gui.common'
+        )
+        self.mock_common = self.common_patcher.start()
         self.mock_juju = self.juju_patcher.start()
         self.mock_juju.get_cloud.return_value = {'type': 'lxd'}
         self.track_screen_patcher = patch(
@@ -54,6 +58,7 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.juju_patcher.stop()
+        self.common_patcher.stop()
         self.track_screen_patcher.stop()
 
     def test_render(self):
@@ -61,12 +66,6 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
         self.mock_utils.lxd_has_ipv6.return_value = False
         self.controller.render()
         self.mock_controllers.use.assert_called_once_with('deploy')
-
-    def test_render_lxdsetup_with_ipv6(self):
-        "call render and access lxdsetup controller if ipv6 enabled"
-        self.mock_utils.lxd_has_ipv6.return_value = True
-        self.controller.render()
-        self.mock_controllers.use.assert_called_once_with('lxdsetup')
 
     def test_lxd_version_to_low(self):
         """ Make sure lxd versions fail properly
