@@ -11,7 +11,7 @@ def wait_for_applications(script, msg_cb):
     """ Processes a 00_deploy-done to verify if applications are available
 
     Arguments:
-    script: script to run (00_deploy-done.sh)
+    script: script to run (00_deploy-done)
     msg_cb: message callback
     """
     if os.path.isfile(script) \
@@ -25,7 +25,9 @@ def wait_for_applications(script, msg_cb):
                 if sh.returncode != 0:
                     app.log.error("error running {}:\n{}".format(script,
                                                                  sh.stderr))
-                    raise Exception("Error running {}".format(script))
+                    raise Exception(
+                        "Error in waiting for deployment to finish: "
+                        "{}".format(sh.stderr.decode()))
 
                 try:
                     lines = sh.stdout.decode('utf8').splitlines()
