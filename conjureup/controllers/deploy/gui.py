@@ -97,7 +97,6 @@ class DeployController:
         app.log.debug("pre_deploy_done: {}".format(result))
 
         if result['returnCode'] > 0:
-            track_exception("Pre-deploy error")
             return self._handle_exception('E003', Exception(
                 'There was an error during the pre '
                 'deploy processing phase: {}.'.format(result)))
