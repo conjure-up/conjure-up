@@ -149,7 +149,8 @@ def setup_lxdbr0_network():
     """ This attempts to setup LXD networking if not available
     """
     try:
-        utils.run('lxc network show lxdbr0', shell=True, check=True)
+        utils.run('lxc network show lxdbr0', shell=True, check=True,
+                  stdout=DEVNULL)
     except CalledProcessError:
         out = utils.run_script('lxc network create lxdbr0 '
                                'ipv4.address=10.0.8.1/24 '
