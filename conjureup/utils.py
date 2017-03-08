@@ -132,23 +132,11 @@ def juju_version():
 def lxd_has_ipv6():
     """ Checks whether LXD bridge has IPv6 enabled
     """
-    if check_bridge_exists():
-        cmd = run_script('lxc network get lxdbr0 ipv6.nat')
-        out = cmd.stdout.decode().strip()
-        if "true" in out:
-            return True
+    cmd = run_script('lxc network get lxdbr0 ipv6.nat')
+    out = cmd.stdout.decode().strip()
+    if "true" in out:
+        return True
     return False
-
-
-def check_bridge_exists():
-    """ Checks that an LXD network bridge exists
-    """
-    try:
-        run('lxc network list|grep -q bridge',
-            shell=True, check=True)
-    except CalledProcessError:
-        return False
-    return True
 
 
 def check_user_in_group(group):

@@ -55,11 +55,7 @@ class NewCloudController:
                 sys.exit(1)
 
         if cloud['type'] == 'lxd':
-            if not utils.check_bridge_exists():
-                return controllers.use('lxdsetup').render()
-
-            app.log.debug("Found an IPv4 address, "
-                          "assuming LXD is configured.")
+            common.is_lxd_ready()
 
         utils.info("Bootstrapping Juju controller \"{}\" "
                    "with deployment \"{}\"".format(

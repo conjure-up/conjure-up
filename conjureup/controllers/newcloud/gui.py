@@ -4,8 +4,6 @@ import os.path as path
 from functools import partial
 from subprocess import check_output
 
-from pkg_resources import parse_version
-
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
@@ -163,43 +161,7 @@ class NewCloudController:
         cloud = juju.get_cloud(app.current_cloud)
 
         if cloud['type'] == 'lxd':
-            if utils.lxd_version() < parse_version('2.9'):
-                return controllers.use('lxdsetup').render(
-                    "The current version of LXD found on this system is not "
-                    "compatible. Please run the following to get the latest "
-                    "supported LXD:\n\n"
-                    "  sudo apt-add-repository ppa:ubuntu-lxc/lxd-stable\n"
-                    "  sudo apt-get update\n"
-                    "  sudo apt-get install lxd lxd-client\n\n"
-                    "Or if you're using the snap version:\n\n"
-                    "  sudo snap refresh lxd --candidate\n\n"
-                    "Once complete please re-run conjure-up."
-                )
-
-            if not utils.check_bridge_exists():
-                return controllers.use('lxdsetup').render(
-                    "Unable to determine an existing LXD network bridge, "
-                    "please make sure you've run `sudo lxd init` to configure "
-                    "LXD."
-                )
-            if not utils.check_user_in_group('lxd'):
-                return controllers.use('lxdsetup').render(
-                    "{} is not part of the LXD group. You will need "
-                    "to exit conjure-up and do one of the following: "
-                    " 1: Run `newgrp lxd` and re-launch conjure-up\n"
-                    " 2: Log out completely, Log in and "
-                    "re-launch conjure-up".format(os.environ['USER']))
-            if utils.lxd_has_ipv6():
-                return controllers.use('lxdsetup').render(
-                    "The LXD bridge has IPv6 enabled. Currently this is "
-                    "unsupported by conjure-up. Please disable IPv6 and "
-                    "re-launch conjure-up\n\n"
-                    "Visit http://conjure-up.io/docs/en/users/#_lxd for "
-                    "information on how to disable IPv6.")
-
-            app.log.debug("Found an IPv4 address, "
-                          "assuming LXD is configured.")
-
+            common.is_lxd_ready()
             self.__do_bootstrap()
             return
 

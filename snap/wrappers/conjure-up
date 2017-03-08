@@ -36,37 +36,6 @@ if [[ -f /usr/bin/lxd  && -f /snap/bin/lxd ]]; then
     exit 1
 fi
 
-if ! id -Gn | grep -q '\blxd\b'; then
-    echo ""
-    echo "You do not appear to be apart of the LXD group, please run the following before proceeding:"
-    echo ""
-    echo "  $ newgrp lxd"
-    echo "  $ conjure-up"
-    echo ""
-    exit 1
-fi
-
-if ! $lxc_bin network show lxdbr0 > /dev/null 2>&1;then
-    $lxc_bin network create lxdbr0 ipv4.address=10.0.8.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false > /dev/null 2>&1
-elif $lxc_bin network show lxdbr0 | grep -q 'ipv4\.address:\snone'; then
-    tmpfile=$(mktemp)
-    cat<<EOF>$tmpfile
-config:
-  dns.mode: dynamic
-  ipv4.address: 10.0.8.1/24
-  ipv4.nat: true
-  ipv6.address: none
-name: lxdbr0
-type: bridge
-used_by: []
-managed: true
-EOF
-    cat $tmpfile|$lxc_bin network edit lxdbr0
-fi
-
-if ! $lxc_bin network show conjureup0 > /dev/null 2>&1; then
-    $lxc_bin network create conjureup0 ipv4.address=10.99.0.1/24 ipv4.nat=true ipv6.address=none ipv6.nat=false > /dev/null 2>&1
-fi
 
 exec $SNAP/bin/conjure-up -c $SNAP/etc/conjure-up.conf \
      --spells-dir $SNAP/spells --nosync "$@"
