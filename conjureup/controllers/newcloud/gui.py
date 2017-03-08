@@ -171,6 +171,8 @@ class NewCloudController:
                     "  sudo apt-add-repository ppa:ubuntu-lxc/lxd-stable\n"
                     "  sudo apt-get update\n"
                     "  sudo apt-get install lxd lxd-client\n\n"
+                    "Or if you're using the snap version:\n\n"
+                    "  sudo snap refresh lxd --candidate\n\n"
                     "Once complete please re-run conjure-up."
                 )
 
