@@ -1,6 +1,6 @@
 import os
 import os.path as path
-from subprocess import CalledProcessError
+from subprocess import CalledProcessError, DEVNULL
 
 import yaml
 from pkg_resources import parse_version
@@ -132,7 +132,7 @@ def is_lxd_ready():
 def setup_conjureup0_network():
     """ This attempts to setup LXD network bridge for conjureup if not available
     """
-    out = utils.run_script('lxc network show conjureup0')
+    out = utils.run_script('lxc network show conjureup0', stdout=DEVNULL)
     if out.returncode != 0:
         out = utils.run_script('lxc network create conjureup0 '
                                'ipv4.address=10.99.0.1/24 '
