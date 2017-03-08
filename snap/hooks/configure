@@ -33,19 +33,17 @@ EOF
 
 sysctl -p /usr/lib/sysctl.d/60-conjure-up.conf
 
-cat <<EOF>/etc/ld.so.conf.d/conjure-up.conf
-$SNAP/usr/lib/$(uname -p)-linux-gnu/
-EOF
-
-ldconfig
-
-
 # Cleanup from previous versions
-if -f /etc/systemd/system/conjure-up.service; then
-    systemctl stop conjure-up.service
-    rm /etc/systemd/system/conjure-up.service
+if [[ -f /etc/ld.so.conf.d/conjure-up.conf ]]; then
+    rm -f /etc/ld.so.conf.d/conjure-up.conf
+    ldconfig
 fi
 
-if -d /usr/lib/conjure-up; then
+if [[ -f /etc/systemd/system/conjure-up.service ]]; then
+    systemctl stop conjure-up.service
+    rm -f /etc/systemd/system/conjure-up.service
+fi
+
+if [[ -d /usr/lib/conjure-up ]]; then
     rm -rf /usr/lib/conjure-up
 fi
