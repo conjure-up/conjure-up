@@ -1,6 +1,6 @@
 import os
 import os.path as path
-from subprocess import CalledProcessError, DEVNULL
+from subprocess import DEVNULL, CalledProcessError
 
 import yaml
 from pkg_resources import parse_version
@@ -15,16 +15,13 @@ def __format_creds(creds):
     """ Formats the credentials into strings from the widgets values
     """
     formatted = {}
-    for k, v in creds.items():
-        if k.startswith('_'):
-            # Not a widget but a private key
-            k = k[1:]
-            formatted[k] = v
-        elif k.startswith('@'):
-            # A Widget, but not stored in credentials
+    for field in creds['fields']:
+        if not field['storable']:
             continue
-        else:
-            formatted[k] = v.value
+        if 'storable-as' in field:
+            if isinstance(field['storable-as'], list):
+                formatted[field['key']] = [field['input'].value]
+        formatted[field['key']] = field['input'].value
     return formatted
 
 

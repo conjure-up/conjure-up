@@ -7,7 +7,7 @@ from subprocess import check_output
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
-from conjureup.models.provider import Schema
+from conjureup.models.provider import load_schema
 from conjureup.telemetry import track_event, track_exception, track_screen
 from conjureup.ui.views.newcloud import NewCloudView
 
@@ -175,9 +175,9 @@ class NewCloudController:
 
         # show credentials editor otherwise
         try:
-            creds = Schema[app.current_cloud]
-        except KeyError as e:
-            track_exception("Credentials Error")
+            creds = load_schema(app.current_cloud)
+        except Exception as e:
+            track_exception("Credentials Error: {}".format(e))
             return app.ui.show_exception_message(
                 Exception(
                     "Unable to find credentials for cloud "
