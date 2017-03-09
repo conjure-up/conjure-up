@@ -21,19 +21,17 @@ class NewCloudView(WidgetWrap):
         total_items = [Text(
             "Enter your {} credentials:".format(app.current_cloud.upper()))]
         total_items += [HR()]
-        for k in self.input_items.keys():
-            display = k
-            if k.startswith('_'):
-                # Don't treat 'private' keys as input
-                continue
-            if k.startswith('@'):
-                # Strip public, not storable attribute
-                display = k[1:]
+        for field in self.input_items['fields']:
+            label = field['key']
+            if field['label'] is not None:
+                label = field['label']
+
             col = Columns(
                 [
-                    ('weight', 0.5, Text(display, align='right')),
-                    Color.string_input(self.input_items[k],
-                                       focus_map='string_input focus')
+                    ('weight', 0.5, Text(label, align='right')),
+                    Color.string_input(
+                        field['input'],
+                        focus_map='string_input focus')
                 ], dividechars=1
             )
             total_items.append(col)
