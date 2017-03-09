@@ -4,40 +4,30 @@ from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
 
 """ Defining the schema
 
-The schema contains attributes for rendering proper credentials for the
-different clouds. There are a few cases where additional attributes are
-required and some that are required aren't necessarily meant to be edited.
+The schema contains attributes for rendering proper credentials.
 
-The schema uses a simple single first value for describing the type of
-attribute it is. If there is no indicating first character it is considered
-public, editable, and viewable by the end user.
+A typical schema is:
 
-The schema contains the following:
-
-- If a key starts with '_' it is private, not editable, but stored in
-  the credentials as is.
-- If a key starts with '@' it is public, editable, but _not_ stored in
-  the credentials file.
-- If the key does not start with any sigil it is public, editable, and
-  stored in the credentials file.
-
-Examples:
-
-('maas', OrderedDict([
-  ('@maas-server', StringEditor()) # Required input not stored.
-  ('_auth-type', 'oauth1) # Required, not editable and is stored.
-  ('maas-oauth', StringEditor()) # required, editable, and stored.
-])
+'auth-type': 'access-key' - defines the auth type supported by provider
+'fields': [] - editable fields in the ui, each field can contain:
+  'label'    - Friendly label to the user
+  'input'    - Input widget
+  'key'      - key that matches what the provider expects for authentication
+  'storable' - if False will skip storing key=value in credentials
 """
 aws = {
     'auth-type': 'access-key',
     'fields': [
-        {'label': None,
-         'input': StringEditor(),
-         'key': 'access-key'},
-        {'label': None,
-         'input': StringEditor(),
-         'key': 'secret-key'}
+        {
+            'label': None,
+            'input': StringEditor(),
+            'key': 'access-key'
+        },
+        {
+            'label': None,
+            'input': StringEditor(),
+            'key': 'secret-key'
+        }
     ]
 }
 
@@ -45,13 +35,13 @@ maas = {
     'auth-type': 'oauth1',
     'fields': [
         {
-            'label': None,
+            'label': 'server address (only the ip or dns name)',
             'input': StringEditor(),
-            'key': 'maas-server',
+            'key': 'endpoint',
             'storable': False
         },
         {
-            'label': None,
+            'label': 'api key',
             'input': StringEditor(),
             'key': 'maas-oauth'
         }
@@ -59,7 +49,7 @@ maas = {
 }
 
 azure = {
-    'auth-type': 'userpass',
+    'auth-type': 'service-principal-secret',
     'fields': [
         {
             'label': None,
@@ -80,43 +70,12 @@ azure = {
             'label': None,
             'input': PasswordEditor(),
             'key': 'application-password'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'location'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'endpoint'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'storage-endpoint'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'storage-account-type'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'storage-account'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'storage-account-key'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'controller-resource-group'
-        },
-
+        }
+        # {
+        #     'label': None,
+        #     'input': StringEditor(),
+        #     'key': 'storage-account-type'
+        # }
     ]
 }
 
@@ -141,19 +100,8 @@ google = {
         {
             'label': None,
             'input': StringEditor(),
-            'key': 'region'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
             'key': 'project-id'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'image-endpoint'
         }
-
     ]
 }
 
@@ -169,23 +117,13 @@ cloudsigma = {
             'label': None,
             'input': PasswordEditor(),
             'key': 'password'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'region'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'endpoint'
         }
 
     ]
 }
 
 joyent = {
-    'auth-type': 'access-key',
+    'auth-type': 'userpass',
     'fields': [
         {
             'label': None,
@@ -199,14 +137,8 @@ joyent = {
         },
         {
             'label': None,
-            'input': StringEditor(
-                default="https://us-west-1.api.joyentcloud.com"),
-            'key': 'sdc-url'
-        },
-        {
-            'label': None,
             'input': StringEditor(),
-            'key': 'private-key-path'
+            'key': 'private-key'
         },
         {
             'label': None,
@@ -237,12 +169,12 @@ openstack = {
         {
             'label': None,
             'input': StringEditor(),
-            'key': 'auth-url'
+            'key': 'domain-name'
         },
         {
             'label': None,
             'input': StringEditor(),
-            'key': 'auth-mode'
+            'key': 'project-domain-name'
         },
         {
             'label': None,
@@ -254,26 +186,34 @@ openstack = {
             'input': StringEditor(),
             'key': 'secret-key'
         },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'region'
-        },
-        {
-            'label': None,
-            'input': YesNo(),
-            'key': 'use-floating-ip'
-        },
-        {
-            'label': None,
-            'input': YesNo(),
-            'key': 'use-default-secgroup'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'network'
-        }
+        # {
+        #     'label': None,
+        #     'input': StringEditor(),
+        #     'key': 'region',
+        #     'type': 'openstack'
+        # },
+        # {
+        #     'label': None,
+        #     'input': YesNo(),
+        #     'key': 'use-floating-ip',
+        #     'type': 'openstack'
+        # },
+        # {
+        #     'label': None,
+        #     'input': YesNo(),
+        #     'key': 'use-default-secgroup',
+        #     'type': 'openstack'
+        # },
+        # {
+        #     'label': None,
+        #     'input': StringEditor(),
+        #     'key': 'network'
+        # },
+        # {
+        #     'label': None,
+        #     'input': StringEditor(),
+        #     'key': 'external-network'
+        # }
     ]
 }
 
@@ -281,30 +221,26 @@ vsphere = {
     'auth-type': 'userpass',
     'fields': [
         {
-            'label': 'vcenter api-endpoint',
+            'label': 'api-endpoint',
             'input': StringEditor(),
-            'key': 'host'
-        },
-        {
-            'label': 'vcenter user',
-            'input': StringEditor(),
-            'key': 'user'
-        },
-        {
-            'label': 'vcenter password',
-            'input': PasswordEditor(),
-            'key': 'password'
-        },
-        {
-            'label': 'datacenter',
-            'input': StringEditor(),
-            'key': 'regions',
-            'storable-as': list()
+            'key': 'endpoint',
+            'storable': False
         },
         {
             'label': None,
             'input': StringEditor(),
-            'key': 'external-network'
+            'key': 'user'
+        },
+        {
+            'label': None,
+            'input': PasswordEditor(),
+            'key': 'password'
+        },
+        {
+            'label': None,
+            'input': StringEditor(),
+            'key': 'external-network',
+            'storable': False
         },
     ]
 }
@@ -436,10 +372,11 @@ SchemaV1 = OrderedDict([
         ('network', StringEditor())
     ])),
     ('vsphere', OrderedDict([
-        ('datacenter', StringEditor()),
-        ('host', StringEditor()),
-        ('user', StringEditor()),
-        ('password', PasswordEditor()),
+        ('_auth-type', 'userpass'),
+        ('host', ("vcenter api-endpoint", StringEditor())),
+        ('user', ("vcenter username", StringEditor())),
+        ('password', ("vcenter password", PasswordEditor())),
+        ('regions', ("datacenter", StringEditor())),
         ('external-network', StringEditor())
     ])),
     ('manual', OrderedDict([

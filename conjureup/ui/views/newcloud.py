@@ -17,7 +17,7 @@ class NewCloudView(WidgetWrap):
         self.buttons_selected = False
         super().__init__(self.frame)
 
-    def _build_widget(self):
+    def _gen_credentials(self):
         total_items = [Text(
             "Enter your {} credentials:".format(app.current_cloud.upper()))]
         total_items += [HR()]
@@ -36,7 +36,10 @@ class NewCloudView(WidgetWrap):
             )
             total_items.append(col)
             total_items.append(Padding.line_break(""))
-        total_items.append(Text(""))
+        return total_items
+
+    def _build_widget(self):
+        total_items = self._gen_credentials()
         self.pile = Pile(total_items)
         return Padding.center_60(Filler(self.pile, valign="top"))
 
@@ -81,8 +84,13 @@ class NewCloudView(WidgetWrap):
     def validate(self):
         """ Will provide an error text if any fields are blank
         """
-        values = [i.value for i in self.input_items.values()
-                  if isinstance(i, StringEditor)]
+        values = []
+        for i in self.input_items.values():
+            if isinstance(i, tuple) and len(i) == 2:
+                if isinstance(i[1], StringEditor):
+                    values.append(i[1].value)
+            if isinstance(i, StringEditor):
+                values.append(i.value)
 
         if None in values:
             self.pile.contents[-1] = (
