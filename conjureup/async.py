@@ -7,7 +7,7 @@ import logging
 import time
 from collections import OrderedDict, defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from threading import Event
+from threading import Event, RLock
 
 log = logging.getLogger("async")
 
@@ -76,3 +76,24 @@ def sleep_until(s):
         if time.time() - start >= s:
             return True
     raise ThreadCancelledException("Thread cancelled while sleeping")
+
+
+class Counter():
+    def __init__(self):
+        self.lock = RLock()
+        self._value = 0
+
+    def increment(self):
+        with self.lock:
+            self._value += 1
+
+    def decrement(self):
+        with self.lock:
+            self._value = max(self._value - 1, 0)
+
+    @property
+    def value(self):
+        return self._value
+
+    def empty(self):
+        return self.value == 0

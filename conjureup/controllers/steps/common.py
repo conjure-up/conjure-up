@@ -2,7 +2,7 @@ import json
 import os
 from glob import glob
 
-from conjureup import juju, utils
+from conjureup import utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
 
@@ -65,21 +65,17 @@ def do_step(step_model, step_widget, message_cb, gui=False):
                     "invalid input: {}/{}".format(e,
                                                   matching_widget))
 
-    try:
-        info = model_info(app.current_model)
-    except:
-        juju.login(force=True)
-        info = model_info(app.current_model)
+    provider_type = model_info().provider_type
 
     # Set our provider type environment var so that it is
     # exposed in future processing tasks
-    app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
+    app.env['JUJU_PROVIDERTYPE'] = provider_type
 
     # Set current juju controller and model
     app.env['JUJU_CONTROLLER'] = app.current_controller
     app.env['JUJU_MODEL'] = app.current_model
 
-    if info['provider-type'] == "maas":
+    if provider_type == "maas":
         app.log.debug("MAAS CONFIG: {}".format(app.maas))
 
         # Expose MAAS endpoints and tokens

@@ -2,7 +2,6 @@ import setuptools
 
 # All these imported to be added to our distribution
 import conjureup
-import macumba  # noqa
 import ubuntui  # noqa
 import bundleplacer  # noqa
 

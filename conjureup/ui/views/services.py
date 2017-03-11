@@ -40,8 +40,8 @@ class ServicesView(WidgetWrap):
     def refresh_nodes(self):
         """ Adds services to the view if they don't already exist
         """
-        status = model_status()
-        for name, service in sorted(status['applications'].items()):
+        applications = model_status().applications
+        for name, service in sorted(applications.items()):
             service_w = ServiceWidget(name, service)
             for unit in service_w.Units:
                 services_list = []

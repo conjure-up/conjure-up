@@ -1,11 +1,6 @@
 {
     "repos": [
         {
-            "url": "https://github.com/Ubuntu-Solutions-Engineering/macumba.git",
-            "version": "master",
-            "directories": "macumba"
-        },
-        {
             "url": "https://github.com/Ubuntu-Solutions-Engineering/urwid-ubuntu.git",
             "version": "master",
             "directories": "ubuntui"

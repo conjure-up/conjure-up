@@ -10,3 +10,4 @@ progressbar2
 prettytable
 q
 juju_wait
+juju

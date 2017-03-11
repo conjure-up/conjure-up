@@ -57,8 +57,7 @@ class DeployController:
     def _pre_deploy_exec(self):
         """ runs pre deploy script if exists
         """
-        app.env['JUJU_PROVIDERTYPE'] = model_info(
-            app.current_model)['provider-type']
+        app.env['JUJU_PROVIDERTYPE'] = model_info().provider_type
         app.env['JUJU_CONTROLLER'] = app.current_controller
         app.env['JUJU_MODEL'] = app.current_model
         app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
@@ -78,7 +77,7 @@ class DeployController:
                             env=app.env)
             try:
                 return json.loads(out.stdout.decode())
-            except json.decoder.JSONDecodeError as e:
+            except json.decoder.JSONDecodeError:
                 app.log.exception(out.stdout.decode())
                 app.log.exception(out.stderr.decode())
                 raise Exception(out)
@@ -302,13 +301,11 @@ class DeployController:
             self._handle_add_machines_return(juju_machine_id, result)
         done_cb()
 
-    def _handle_add_machines_return(self, juju_machine_id,
-                                    add_machines_return):
-        new_machines_list = add_machines_return['machines']
-        if len(new_machines_list) != 1:
+    def _handle_add_machines_return(self, juju_machine_id, new_machine_ids):
+        if len(new_machine_ids) != 1:
             raise Exception("Unexpected return value from "
-                            "add_machines: {}".format(add_machines_return))
-        new_machine_id = new_machines_list[0]['machine']
+                            "add_machines: {}".format(new_machine_ids))
+        new_machine_id = new_machine_ids[0]
         self.deployed_juju_machines[juju_machine_id] = new_machine_id
 
     def _do_deploy_one(self, application, msg_cb):
