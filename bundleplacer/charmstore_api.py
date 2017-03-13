@@ -192,7 +192,7 @@ class MetadataController:
 
         for charm_name, charm_dict in sorted(metas.items()):
             md = charm_dict["Meta"]["charm-metadata"]
-            csid = CharmStoreID(charm_dict['Id'])
+            csid = CharmStoreID(charm_name)
             self.request_readme(csid.as_str(include_scheme=False),
                                 csid.as_seriesname())
             id_no_rev = csid.as_str_without_rev()
