@@ -154,7 +154,8 @@ class MetadataController:
             self.metadata_future.add_done_callback(self.handle_load_done)
 
     def _request_readme(self, charm_id, short_charm_id):
-        readme_url = "https://api.jujucharms.com/v4/{}/readme".format(charm_id)
+        readme_url = ("https://api.jujucharms.com/charmstore"
+                      "/v5/{}/readme".format(charm_id))
         r = requests.get(readme_url)
         if r.ok:
             t = r.text
@@ -179,7 +180,8 @@ class MetadataController:
             csid = CharmStoreID(n)
             ids.append("id={}".format(csid.as_str_without_rev()))
         ids_str = "&".join(ids)
-        url = 'https://api.jujucharms.com/v4/meta/any?include=charm-metadata&'
+        url = 'https://api.jujucharms.com/charmstore/v5'
+        url += '/meta/any?include=charm-metadata&'
         url += 'include=charm-config&'
         url += ids_str
         r = requests.get(url)
@@ -316,7 +318,7 @@ class CharmStoreAPI:
     _cachelock = RLock()
 
     def __init__(self, series):
-        self.baseurl = 'https://api.jujucharms.com/v4'
+        self.baseurl = 'https://api.jujucharms.com/charmstore/v5'
         self.series = series
 
     def _do_remote_lookup(self, charm_name, metakey):
