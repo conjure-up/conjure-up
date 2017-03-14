@@ -198,7 +198,14 @@ class MetadataController:
             id_no_rev = csid.as_str_without_rev()
             if id_no_rev in self.charm_info:
                 continue
+
             self.charm_info[id_no_rev] = charm_dict
+
+            if csid.series == "":
+                csid.series = self.bundle.series
+                id_no_rev_with_default_series = csid.as_str_without_rev()
+                self.charm_info[id_no_rev_with_default_series] = charm_dict
+
             rd = md.get("Requires", {})
             pd = md.get("Provides", {})
             requires = []

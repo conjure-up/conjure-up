@@ -482,6 +482,9 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
             source_csid = CharmStoreID(service.charm_source)
             if source_csid.series != '':
                 deploy_args['series'] = source_csid.series
+            else:
+                deploy_args['series'] = default_series
+
         app_params = {"applications": [deploy_args]}
 
         app.log.debug("Deploying {}: {}".format(service, app_params))
