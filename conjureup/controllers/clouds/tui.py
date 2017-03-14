@@ -31,7 +31,7 @@ class CloudsController:
             return controllers.use('newcloud').render()
         else:
             utils.info("Using controller '{}'".format(app.current_controller))
-            utils.info("Creating new deployment named '{}', "
+            utils.info("Creating new model named '{}', "
                        "please wait.".format(app.current_model))
             juju.add_model(app.current_model, app.current_controller)
             return controllers.use('deploy').render()
