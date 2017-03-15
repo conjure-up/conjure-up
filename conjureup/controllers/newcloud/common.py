@@ -128,7 +128,9 @@ def is_lxd_ready():
 def setup_conjureup0_network():
     """ This attempts to setup LXD network bridge for conjureup if not available
     """
-    out = utils.run_script('lxc network show conjureup0', stdout=DEVNULL)
+    out = utils.run_script('lxc network show conjureup0',
+                           stdout=DEVNULL,
+                           stderr=DEVNULL)
     if out.returncode != 0:
         out = utils.run_script('lxc network create conjureup0 '
                                'ipv4.address=10.99.0.1/24 '
@@ -146,7 +148,7 @@ def setup_lxdbr0_network():
     """
     try:
         utils.run('lxc network show lxdbr0', shell=True, check=True,
-                  stdout=DEVNULL)
+                  stdout=DEVNULL, stderr=DEVNULL)
     except CalledProcessError:
         out = utils.run_script('lxc network create lxdbr0 '
                                'ipv4.address=10.0.8.1/24 '
