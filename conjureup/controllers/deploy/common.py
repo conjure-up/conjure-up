@@ -1,5 +1,5 @@
-from datetime import datetime
 import os
+from datetime import datetime
 
 from conjureup.app_config import app
 from conjureup.bundlewriter import BundleWriter
