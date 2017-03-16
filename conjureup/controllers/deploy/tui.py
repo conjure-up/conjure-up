@@ -85,7 +85,6 @@ class DeployController:
             exc_cb=partial(self.__handle_exception, "ED"))
         self.applications = sorted(app.metadata_controller.bundle.services,
                                    key=attrgetter('service_name'))
-
         self.finish()
 
 

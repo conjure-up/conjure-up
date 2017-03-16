@@ -103,6 +103,10 @@ class DeployGUIFinishTestCase(unittest.TestCase):
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
 
+        self.common_patcher = patch(
+            'conjureup.controllers.deploy.gui.common')
+        self.mock_common = self.common_patcher.start()
+
     def tearDown(self):
         self.controllers_patcher.stop()
         self.utils_patcher.stop()

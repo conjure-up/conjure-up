@@ -16,6 +16,8 @@ from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView
 from ubuntui.ev import EventLoop
 
+from . import common
+
 DEPLOY_ASYNC_QUEUE = "DEPLOY_ASYNC_QUEUE"
 
 
@@ -338,6 +340,15 @@ class DeployController:
                                                application,
                                                app.ui.set_footer))
 
+    def sync_assignment_opts(self):
+        svc_opts = {}
+        for application in self.applications:
+            svc_opts[application.service_name] = application.options
+
+        for mid, al in self.assignments.items():
+            for svc, _ in al:
+                svc.options = svc_opts[svc.service_name]
+
     def finish(self):
         def enqueue_set_relations():
             rel_future = juju.set_relations(self.applications,
@@ -349,6 +360,9 @@ class DeployController:
                          partial(self._handle_exception,
                                  "Error setting relations"),
                          queue_name=DEPLOY_ASYNC_QUEUE)
+
+        self.sync_assignment_opts()
+        common.write_bundle(self.assignments)
 
         if app.bootstrap.running and not app.bootstrap.running.done():
             return controllers.use('bootstrapwait').render(f)
