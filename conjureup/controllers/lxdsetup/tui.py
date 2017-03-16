@@ -6,9 +6,9 @@ from conjureup import utils
 class LXDSetupController:
 
     def render(self, msg):
-        utils.info("")
+        print("")
         utils.info(msg)
-        utils.info("")
+        print("")
         sys.exit(1)
 
 

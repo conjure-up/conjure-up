@@ -55,7 +55,9 @@ class NewCloudController:
                 sys.exit(1)
 
         if cloud['type'] == 'lxd':
-            common.is_lxd_ready()
+            lxd = common.is_lxd_ready()
+            if not lxd['ready']:
+                return controllers.use('lxdsetup').render(lxd['msg'])
 
         utils.info("Bootstrapping Juju controller \"{}\" "
                    "with deployment \"{}\"".format(
