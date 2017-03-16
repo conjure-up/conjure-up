@@ -14,7 +14,7 @@ class LXDSetupView(WidgetWrap):
         self.cb = cb
         _pile = [
             Padding.center_60(Instruction(
-                "Please configure networking for LXD"
+                "LXD Configuration is required"
             )),
             Padding.center_60(HR()),
             Padding.center_60(self.build_info()),

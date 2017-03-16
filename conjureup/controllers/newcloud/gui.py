@@ -161,7 +161,9 @@ class NewCloudController:
             cloud = juju.get_cloud(app.current_cloud)
 
             if cloud['type'] == 'lxd':
-                common.is_lxd_ready()
+                lxd = common.is_lxd_ready()
+                if not lxd['ready']:
+                    return controllers.use('lxdsetup').render(lxd['msg'])
                 self.__do_bootstrap()
                 return
         except LookupError as e:

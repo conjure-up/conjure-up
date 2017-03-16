@@ -88,7 +88,7 @@ class LXDSetupController:
                                  cb=self.finish)
 
         app.ui.set_header(
-            title="Setup LXD Bridge",
+            title="Configure LXD",
         )
         app.ui.set_body(self.view)
 
