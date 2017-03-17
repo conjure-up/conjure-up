@@ -86,7 +86,6 @@ class BundleWriter:
 
         mkeys = list(machines.keys())
         for machine_id in mkeys:
-            q.q(self.assignments[machine_id])
             if len(self.assignments[machine_id]) < 1:
                 del machines[machine_id]
 
