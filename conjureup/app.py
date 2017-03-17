@@ -2,6 +2,7 @@
 """
 
 import argparse
+import asyncio
 import os
 import os.path as path
 import platform
@@ -369,3 +370,8 @@ def main():
                              unhandled_input=unhandled_input)
         EventLoop.set_alarm_in(0.05, _start)
         EventLoop.run()
+        # explicitly close aysncio event loop to avoid hitting the following
+        # issue due to signal handlers added by asyncio.create_subprocess_exec
+        # being cleaned up during final garbage collection:
+        # https://github.com/python/asyncio/issues/396
+        asyncio.get_event_loop().close()

@@ -6,10 +6,8 @@ from conjureup.app_config import app
 
 class CloudsController:
 
-    def __get_existing_controller(self, controller):
-        if juju.get_controller(controller):
-            return juju.get_controller_in_cloud(app.argv.cloud)
-        return None
+    def __controller_exists(self, controller):
+        return juju.get_controller(controller) is not None
 
     def finish(self):
         if app.argv.model:
@@ -27,13 +25,15 @@ class CloudsController:
             return controllers.use('newcloud').render()
 
         app.current_controller = app.argv.controller
-        if self.__get_existing_controller(app.current_controller) is None:
+        if not self.__controller_exists(app.current_controller):
             return controllers.use('newcloud').render()
         else:
             utils.info("Using controller '{}'".format(app.current_controller))
             utils.info("Creating new model named '{}', "
                        "please wait.".format(app.current_model))
-            juju.add_model(app.current_model, app.current_controller)
+            juju.add_model(app.current_model,
+                           app.current_controller,
+                           app.current_cloud)
             return controllers.use('deploy').render()
 
         utils.error("Something happened with the controller or model, "

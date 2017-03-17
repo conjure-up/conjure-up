@@ -55,6 +55,13 @@ class NewCloudController:
         else:
             cloud = app.current_cloud
 
+        if app.is_jaas:
+            juju.add_model(app.current_model,
+                           app.current_controller,
+                           app.current_cloud)
+            self.__post_bootstrap_exec()
+            return
+
         app.log.debug("Performing bootstrap: {} {}".format(
             app.current_controller, cloud))
 

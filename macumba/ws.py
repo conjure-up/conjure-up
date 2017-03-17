@@ -9,7 +9,7 @@ log = logging.getLogger('macumba')
 
 class JujuWS(WebSocketClient):
 
-    def __init__(self, url, password, protocols=['https-only'],
+    def __init__(self, url, protocols=['https-only'],
                  extensions=None, ssl_options=None, headers=None,
                  start_reqid=1):
         WebSocketClient.__init__(self, url, protocols, extensions,
@@ -41,12 +41,10 @@ class JujuWS(WebSocketClient):
     def do_close(self):
         self.close()
 
-    def do_connect(self, creds):
+    def do_connect(self):
         self.connect()
         self.open_done.wait()
         self.open_done.clear()
-        rv = self.do_send(creds)
-        return rv
 
     def do_send(self, json_message):
         with self.rid_lock:

@@ -1,9 +1,6 @@
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
-from conjureup.controllers.clouds.common import (
-    parse_blacklist,
-    parse_whitelist
-)
+from conjureup import juju
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
@@ -16,8 +13,6 @@ class CloudView(WidgetWrap):
         self.app = app
         self.cb = cb
         self.clouds = clouds
-        self.blacklist = parse_blacklist()
-        self.whitelist = parse_whitelist()
         self.config = self.app.config
         self.buttons_pile_selected = False
         self.frame = Frame(body=self._build_widget(),
@@ -77,15 +72,8 @@ class CloudView(WidgetWrap):
             total_items.append(Padding.line_break(""))
         total_items.append(Text("Configure a New Cloud"))
         total_items.append(HR())
-        if self.whitelist:
-            new_clouds = self.whitelist
-        elif self.blacklist:
-            # TODO: add vsphere
-            new_clouds = set(['localhost', 'maas']) ^ set(
-                self.blacklist)
-        else:
-            # TODO: add vsphere
-            new_clouds = ['localhost', 'maas']
+        # TODO: add vsphere
+        new_clouds = juju.get_compatible_clouds(['localhost', 'maas'])
         for item in new_clouds:
             total_items.append(
                 Color.body(
