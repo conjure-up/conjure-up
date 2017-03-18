@@ -64,6 +64,7 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
     def test_render(self):
         "call render"
         self.mock_utils.lxd_has_ipv6.return_value = False
+        self.mock_app.is_jaas = False
         self.controller.render()
         self.mock_controllers.use.assert_called_once_with('deploy')
 

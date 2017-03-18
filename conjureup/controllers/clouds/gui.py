@@ -1,5 +1,4 @@
-from conjureup import controllers
-from conjureup import juju
+from conjureup import controllers, juju
 from conjureup.app_config import app
 from conjureup.telemetry import track_event, track_screen
 from conjureup.ui.views.cloud import CloudView

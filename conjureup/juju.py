@@ -13,8 +13,7 @@ import yaml
 
 import macumba
 from bundleplacer.charmstore_api import CharmStoreID
-from conjureup import async
-from conjureup import consts
+from conjureup import async, consts
 from conjureup.app_config import app
 from conjureup.utils import juju_path, run
 from macumba.v2 import JujuClient
@@ -759,6 +758,11 @@ def add_model(name, controller, cloud):
     # macaroons; model_available does this and verifies the model is working
     if not model_available():
         raise Exception("Unable to connect model after creation")
+
+
+def add_model_async(name, controller, cloud, exc_cb=None):
+    return async.submit(partial(add_model, name, controller, cloud),
+                        exc_cb, queue_name=JUJU_ASYNC_QUEUE)
 
 
 def destroy_model_async(controller, model, exc_cb=None):
