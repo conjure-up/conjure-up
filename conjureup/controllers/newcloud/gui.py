@@ -41,7 +41,7 @@ class NewCloudController:
             with open(pathbase + ".err") as errf:
                 err = "\n".join(errf.readlines())
                 app.log.error(err)
-            e = Exception("Bootstrap error: {}".format(err))
+            e = Exception("Juju failed to bootstrap")
             self.__handle_exception(e)
             return
 
