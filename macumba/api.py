@@ -14,9 +14,6 @@ from .errors import (LoginError,
                      MacumbaError)
 from .ws import JujuWS
 
-from pprint import pformat
-from conjureup import utils
-
 log = logging.getLogger('macumba')
 
 
@@ -125,12 +122,13 @@ class Base:
             "request": "RedirectInfo",
             "version": 3,
         })
-        res = self.receive(req_id)
-        if 'Error' in res:
-            if res['Error'] == 'not redirected':
+        try:
+            res = self.receive(req_id)
+        except ServerError as e:
+            if e.response['Error'] == 'not redirected':
                 return None  # no redirect needed
             else:
-                raise ServerError(res['Error'], res)
+                raise
         return res
 
     def _handle_redirect(self, redirect_info):
