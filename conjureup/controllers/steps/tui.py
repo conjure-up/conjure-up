@@ -29,9 +29,14 @@ class StepsController:
             step_ex_path, ext = path.splitext(step_meta_path)
             if not path.isfile(step_ex_path) or \
                not os.access(step_ex_path, os.X_OK):
-                app.log.error(
-                    'Unable to process step, missing {}'.format(step_ex_path))
-                continue
+                failed_path = step_ex_path.split('/')[-3:]
+                msg = (
+                    'Step {} is not executable, make sure it has '
+                    'the executable bit set'.format(
+                        '/'.join(failed_path)))
+                app.log.error(msg)
+                utils.error(msg)
+                sys.exit(1)
             step_metadata = {}
             with open(step_meta_path) as fp:
                 step_metadata = yaml.load(fp.read())
