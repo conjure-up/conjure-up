@@ -71,6 +71,7 @@ class NewCloudController:
             if future is None:
                 return
             future.add_done_callback(self.__handle_add_model_done)
+            controllers.use('deploy').render()
             return
 
         app.log.debug("Performing bootstrap: {} {}".format(
