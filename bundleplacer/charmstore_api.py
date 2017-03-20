@@ -193,8 +193,6 @@ class MetadataController:
         for charm_name, charm_dict in sorted(metas.items()):
             md = charm_dict["Meta"]["charm-metadata"]
             csid = CharmStoreID(charm_name)
-            self.request_readme(csid.as_str(include_scheme=False),
-                                csid.as_seriesname())
             id_no_rev = csid.as_str_without_rev()
             if id_no_rev in self.charm_info:
                 continue
@@ -205,6 +203,9 @@ class MetadataController:
                 csid.series = self.bundle.series
                 id_no_rev_with_default_series = csid.as_str_without_rev()
                 self.charm_info[id_no_rev_with_default_series] = charm_dict
+
+            self.request_readme(csid.as_str(include_scheme=False),
+                                csid.as_seriesname())
 
             rd = md.get("Requires", {})
             pd = md.get("Provides", {})
