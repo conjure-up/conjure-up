@@ -57,6 +57,15 @@ app = SimpleNamespace(
     # cli opts
     argv=None,
 
+    # Is JAAS supported by the current spell
+    jaas_ok=True,
+
+    # Which controller, if any, is the JAAS controller
+    jaas_controller=None,
+
+    # Whether the JAAS controller is selected
+    is_jaas=False,
+
     # Current Juju model being used
     current_model=None,
 

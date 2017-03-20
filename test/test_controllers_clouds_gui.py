@@ -28,7 +28,7 @@ class CloudsGUIRenderTestCase(unittest.TestCase):
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
         self.list_clouds_patcher = patch(
-            'conjureup.controllers.clouds.gui.list_clouds')
+            'conjureup.juju.get_compatible_clouds')
         self.mock_list_clouds = self.list_clouds_patcher.start()
         self.mock_list_clouds.return_value = ['test1', 'test2']
 

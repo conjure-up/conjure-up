@@ -1,11 +1,9 @@
-import os
 import random
 import unicodedata
 from subprocess import DEVNULL, CalledProcessError, check_output
 
 from urwid import Columns, Filler, Pile, Text, WidgetWrap
 
-from conjureup.app_config import app
 from ubuntui.utils import Padding
 
 
@@ -20,8 +18,10 @@ class BootstrapWaitView(WidgetWrap):
                        ('pending_icon', "\u2587"),
                        ('pending_icon', "\u2588")]
 
-    def __init__(self, app, message):
+    def __init__(self, app, message, watch_file=None):
+        self.app = app
         self.message = Text(message, align="center")
+        self.watch_file = watch_file
         self.output = Text("", align="left")
         self.loading_boxes = [Text(x) for x in self.load_attributes]
         super().__init__(self._build_node_waiting())
@@ -49,17 +49,14 @@ class BootstrapWaitView(WidgetWrap):
             i.set_text(
                 self.load_attributes[random.randrange(
                     len(self.load_attributes))])
-        cache_dir = app.config['spell-dir']
 
-        bootstrap_stderrpath = os.path.join(
-            cache_dir,
-            '{}-bootstrap.err').format(app.current_controller)
-        try:
-            out = check_output("tail -n 10 {}".format(bootstrap_stderrpath),
-                               shell=True, stderr=DEVNULL)
-            self.output.set_text(self._clear_control_characters(out))
-        except CalledProcessError:
-            self.output.set_text("Waiting")
+        if self.watch_file:
+            try:
+                out = check_output("tail -n 10 {}".format(self.watch_file),
+                                   shell=True, stderr=DEVNULL)
+                self.output.set_text(self._clear_control_characters(out))
+            except CalledProcessError:
+                self.output.set_text("Waiting")
 
     def _build_node_waiting(self):
         """ creates a loading screen if nodes do not exist yet """

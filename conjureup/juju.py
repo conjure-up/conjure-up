@@ -1,15 +1,19 @@
 """ Juju helpers
 """
+import asyncio
+import base64
+import json
 import os
 from concurrent import futures
 from functools import partial, wraps
+from pathlib import Path
 from subprocess import DEVNULL, PIPE, CalledProcessError, Popen, TimeoutExpired
 
 import yaml
 
 import macumba
 from bundleplacer.charmstore_api import CharmStoreID
-from conjureup import async
+from conjureup import async, consts
 from conjureup.app_config import app
 from conjureup.utils import juju_path, run
 from macumba.v2 import JujuClient
@@ -120,15 +124,42 @@ def login(force=False):
     server = env['api-endpoints'][0]
     user_tag = "user-{}".format(account['user'].split("@")[0])
     url = os.path.join('wss://', server, 'model', uuid, 'api')
+    password = account.get('password')
+    macaroons = get_macaroons() if not password else None
     app.juju.client = JujuClient(
         user=user_tag,
         url=url,
-        password=account['password'])
+        password=password,
+        macaroons=macaroons)
     try:
         app.juju.client.login()
         app.juju.authenticated = True
     except macumba.errors.LoginError as e:
         raise e
+
+
+def get_macaroons():
+    """Decode and return macaroons from default ~/.go-cookies
+
+    NB: Copied from python-libjuju
+    """
+    try:
+        cookie_file = os.path.expanduser('~/.go-cookies')
+        with open(cookie_file, 'r') as f:
+            cookies = json.load(f)
+    except (OSError, ValueError):
+        app.log.warn("Couldn't load macaroons from %s", cookie_file)
+        return []
+
+    base64_macaroons = [
+        c['Value'] for c in cookies
+        if c['Name'].startswith('macaroon-') and c['Value']
+    ]
+
+    return [
+        json.loads(base64.b64decode(value).decode('utf-8'))
+        for value in base64_macaroons
+    ]
 
 
 def bootstrap(controller, cloud, model='conjure-up', series="xenial",
@@ -212,6 +243,51 @@ def bootstrap_async(controller, cloud, model='conjure-up', credential=None,
                         queue_name=JUJU_ASYNC_QUEUE)
 
 
+def has_jaas_auth():
+    oauth_token = Path('~/.local/share/juju/store-usso-token').expanduser()
+    go_cookies = Path('~/.go-cookies').expanduser()
+    if oauth_token.exists():
+        return True
+    if go_cookies.exists():
+        go_cookies = json.loads(go_cookies.read_text())
+        for cookie in go_cookies or []:
+            if cookie['Domain'] == consts.JAAS_DOMAIN:
+                return True
+    return False
+
+
+def register_controller(name, endpoint, email, password, twofa,
+                        cb=None, fail_cb=None, exc_cb=None):
+    async def _register_controller():
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                'juju', 'register', '-B', endpoint,
+                stdin=PIPE, stdout=PIPE, stderr=PIPE,
+            )
+            if has_jaas_auth():
+                # if the user already authed with jujucharms.com, such as by
+                # logging in with the charm command, or registering JaaS and
+                # then unregistering it, we only need to name the controller
+                input = [name]
+            else:
+                input = [email, password, twofa, name]
+            (stdout, stderr) = await proc.communicate(
+                b''.join(b'%s\n' % bytes(f, 'utf8') for f in input))
+            if proc.returncode > 0:
+                if fail_cb:
+                    fail_cb(stderr.decode('utf8'))
+                    return
+                else:
+                    raise CalledProcessError(stderr.decode('utf8'))
+            cb()
+        except Exception as e:
+            if exc_cb:
+                exc_cb(e)
+                return
+            raise
+    asyncio.get_event_loop().create_task(_register_controller())
+
+
 def model_available():
     """ Checks if juju is available
 
@@ -219,7 +295,7 @@ def model_available():
     True/False if juju status was successful and a working model is found
     """
     try:
-        run('juju -m {}:{} status'.format(app.current_controller,
+        run('juju status -m {}:{}'.format(app.current_controller,
                                           app.current_model),
             shell=True,
             check=True,
@@ -313,6 +389,33 @@ def get_clouds():
             "Unable to list clouds: {}".format(sh.stderr.decode('utf8'))
         )
     return yaml.safe_load(sh.stdout.decode('utf8'))
+
+
+def get_compatible_clouds(clouds=None):
+    """ List clouds which are compatible with the current spell and controller.
+
+    Arguments:
+    clouds: optional initial list of clouds to filter
+    Returns:
+    List of cloud names
+    """
+    clouds = set(clouds or get_clouds().keys())
+
+    if app.current_controller:
+        # if we already have a controller, we should query
+        # it via the API for what clouds it supports; for now,
+        # though, just assume it's JAAS and hard-code the options
+        clouds &= consts.JAAS_CLOUDS
+
+    whitelist = set(app.config['metadata'].get('cloud-whitelist', []))
+    blacklist = set(app.config['metadata'].get('cloud-blacklist', []))
+    if len(whitelist) > 0:
+        return sorted(clouds & whitelist)
+
+    elif len(blacklist) > 0:
+        return sorted(clouds ^ blacklist)
+
+    return sorted(clouds)
 
 
 def get_cloud(name):
@@ -640,17 +743,26 @@ def get_model(controller, name):
         "Unable to find model: {}".format(name))
 
 
-def add_model(name, controller):
+def add_model(name, controller, cloud):
     """ Adds a model to current controller
 
     Arguments:
     controller: controller to add model in
     """
-    sh = run('juju add-model {} -c {}'.format(name, controller),
+    sh = run('juju add-model {} -c {} {}'.format(name, controller, cloud),
              shell=True, stdout=DEVNULL, stderr=PIPE)
     if sh.returncode > 0:
         raise Exception(
             "Unable to create model: {}".format(sh.stderr.decode('utf8')))
+    # the CLI has to connect to the model at least once to populate the model
+    # macaroons; model_available does this and verifies the model is working
+    if not model_available():
+        raise Exception("Unable to connect model after creation")
+
+
+def add_model_async(name, controller, cloud, exc_cb=None):
+    return async.submit(partial(add_model, name, controller, cloud),
+                        exc_cb, queue_name=JUJU_ASYNC_QUEUE)
 
 
 def destroy_model_async(controller, model, exc_cb=None):

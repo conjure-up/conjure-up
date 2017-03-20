@@ -46,14 +46,33 @@ class NewCloudController:
             return
 
         track_event("Juju Bootstrap", "Done", "")
-        app.ui.set_footer('Bootstrap complete...')
+        app.ui.set_footer('Bootstrap complete.')
         self.__post_bootstrap_exec()
+
+    def __handle_add_model_done(self, future):
+        track_event("Juju Add JaaS Model", "Done", "")
+        app.ui.set_footer('Add model complete.')
 
     def __do_bootstrap(self, credential=None, cloud_with_creds=None):
         if cloud_with_creds:
             cloud = cloud_with_creds
         else:
             cloud = app.current_cloud
+
+        if app.is_jaas:
+            # jaas is always bootstrapped, so we do an add-model instead
+            app.ui.set_footer('Adding new model in the background...')
+            future = juju.add_model_async(app.current_model,
+                                          app.current_controller,
+                                          app.current_cloud,
+                                          exc_cb=self.__handle_exception)
+            # we treat the add-model like a bootstrap for UI purposes
+            app.bootstrap.running = future
+            if future is None:
+                return
+            future.add_done_callback(self.__handle_add_model_done)
+            controllers.use('deploy').render()
+            return
 
         app.log.debug("Performing bootstrap: {} {}".format(
             app.current_controller, cloud))
@@ -177,10 +196,9 @@ class NewCloudController:
 
         # XXX: always prompt for maas information for now as there is no way to
         # logically store the maas server ip for future sessions.
-        if common.try_get_creds(app.current_cloud) \
-           is not None and app.current_cloud != 'maas':
-            self.__do_bootstrap(
-                credential=common.try_get_creds(app.current_cloud))
+        creds = common.try_get_creds(app.current_cloud)
+        if creds and app.current_cloud != 'maas':
+            self.__do_bootstrap(credential=creds)
             return controllers.use('deploy').render()
 
         # show credentials editor otherwise

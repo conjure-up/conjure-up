@@ -91,12 +91,12 @@ class JujuClient(Base):
     API_VERSION = 2
     CREDS_VERSION = 3
 
-    def __init__(self, url, password, user='user-admin'):
+    def __init__(self, url, password, user='user-admin', macaroons=None):
         for name, version in _FACADE_VERSIONS.items():
             setattr(self, name, partial(self._request,
                                         name_type=name,
                                         version=version))
-        super().__init__(url, password, user)
+        super().__init__(url, password, user, macaroons)
 
     def _request(self, name_type, version, request, params=None):
         """ Performs a request

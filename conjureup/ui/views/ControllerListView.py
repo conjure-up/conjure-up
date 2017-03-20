@@ -48,6 +48,13 @@ class ControllerListView(WidgetWrap):
 
     def _build_footer(self):
         footer_pile = Pile([
+            Padding.center_60(Text(
+                'The controller is what allows Juju to deploy and manage your '
+                'models/spells.  With JaaS, the controller will be managed '
+                'for you, so that you can focus on your applications and '
+                'solutions. Alternatively, you can host and manage your own '
+                'controller on the cloud to which you deploy.'
+            )),
             Padding.line_break(""),
             Color.frame_footer(
                 Columns([
@@ -59,8 +66,20 @@ class ControllerListView(WidgetWrap):
 
     def _build_widget(self):
         total_items = []
+        if self.app.jaas_ok:
+            total_items.append(HR())
+            total_items.append(Color.body(
+                menu_btn(
+                    label='Juju-as-a-Service (JaaS) Managed Controller',
+                    on_press=self.handle_jaas,
+                ),
+                focus_map='menu_button focus'
+            ))
         if len(self.controllers) > 0:
             total_items.append(HR())
+            total_items.append(Color.label(Text(
+                "Existing Self-Hosted Controllers")))
+            total_items.append(Padding.line_break(""))
             cdict = defaultdict(lambda: defaultdict(list))
             for cname, d in self.controllers.items():
                 cdict[d['cloud']][d.get('region', None)].append(cname)
@@ -86,18 +105,21 @@ class ControllerListView(WidgetWrap):
         total_items.append(HR())
         total_items.append(
             Color.body(
-                menu_btn(label="Create New",
+                menu_btn(label="Deploy New Self-Hosted Controller",
                          on_press=self.handle_create_new),
                 focus_map='menu_button focus'
             )
         )
         return Padding.center_80(Filler(Pile(total_items), valign='top'))
 
-    def submit(self, cname, btn):
-        self.cb(cname)
+    def handle_jaas(self, btn):
+        self.cb('jaas')
 
     def handle_create_new(self, btn):
         self.cb(None)
+
+    def submit(self, cname, btn):
+        self.cb(cname)
 
     def cancel(self, btn):
         EventLoop.exit(0)

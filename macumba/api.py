@@ -1,15 +1,21 @@
-import time
-import os.path as path
+import random
 import requests
+import string
 import logging
 import threading
+import time
+from tempfile import NamedTemporaryFile
+from urllib.parse import urlsplit, urlunsplit
 from .errors import (LoginError,
                      CharmNotFoundError,
-                     RequestTimeout,
                      ServerError,
+                     RequestTimeout,
                      BadResponseError,
                      MacumbaError)
 from .ws import JujuWS
+
+from pprint import pformat
+from conjureup import utils
 
 log = logging.getLogger('macumba')
 
@@ -52,7 +58,7 @@ class Base:
     CREDS_VERSION = None
     FACADE_VERSIONS = {}
 
-    def __init__(self, url, password, user='user-admin'):
+    def __init__(self, url, password, user='user-admin', macaroons=None):
         """ init
 
         Params:
@@ -64,14 +70,22 @@ class Base:
         self.password = password
         self.connlock = threading.RLock()
         with self.connlock:
-            self.conn = JujuWS(url, password)
+            self.conn = JujuWS(url)
 
+        if macaroons:
+            user = ''
+            password = ''
+
+        nonce = ''.join(random.sample(string.printable, 12))
         self.creds = {'Type': 'Admin',
                       'Version': self.CREDS_VERSION,
                       'Request': 'Login',
                       'RequestId': 1,
                       'Params': {'auth-tag': user,
-                                 'credentials': password}}
+                                 'credentials': password,
+                                 'nonce': nonce,
+                                 'macaroons': macaroons or [],
+                                 }}
 
     def _prepare_strparams(self, d):
         r = {}
@@ -91,13 +105,72 @@ class Base:
         block other threads until done.
         """
         with self.connlock:
-            req_id = self.conn.do_connect(self.creds)
             try:
-                res = self.receive(req_id)
-                if 'Error' in res:
-                    raise LoginError(res['ErrorCode'])
+                self.conn.do_connect()
+                redirect_info = self._get_redirect_info()
+                if redirect_info:
+                    self._handle_redirect(redirect_info)
+                else:
+                    req_id = self.conn.do_send(self.creds)
+                    res = self.receive(req_id)
+                    if 'Error' in res:
+                        raise LoginError(res['ErrorCode'])
             except Exception as e:
+                raise
                 raise LoginError(str(e))
+
+    def _get_redirect_info(self):
+        req_id = self.conn.do_send({
+            "type": "Admin",
+            "request": "RedirectInfo",
+            "version": 3,
+        })
+        res = self.receive(req_id)
+        if 'Error' in res:
+            if res['Error'] == 'not redirected':
+                return None  # no redirect needed
+            else:
+                raise ServerError(res['Error'], res)
+        return res
+
+    def _handle_redirect(self, redirect_info):
+        url_parts = list(urlsplit(self.url))
+        servers = [
+            s for servers in redirect_info['servers']
+            for s in servers if s['scope'] == 'public'
+        ]
+        with NamedTemporaryFile() as ca_certs:
+            ssl_options = None
+            if redirect_info['ca-cert']:
+                ca_certs.write(
+                    redirect_info['ca-cert'].encode('ascii'))
+                ssl_options = {'ca_certs': ca_certs.name}
+            for server in servers:
+                self.conn.do_close()
+                url_parts[1] = "{value}:{port}".format(**server)
+                self.conn = JujuWS(urlunsplit(url_parts),
+                                   ssl_options=ssl_options)
+                self.conn.do_connect()
+                try:
+                    req_id = self.conn.do_send(self.creds)
+                    try:
+                        response = self.receive(req_id, timeout=5)
+                    except RequestTimeout as e:
+                        log.error(
+                            'Connection to {value}:{port} timed out'.format(
+                                **server))
+                        continue  # try next server
+                    except ServerError as e:
+                        log.error(e.message)
+                        continue  # try next server
+                    if 'discharge-required-error' in response:
+                        continue  # try next server
+                    return response
+                except Exception as e:
+                    log.exception(e)
+                    continue  # try next server
+            else:
+                raise LoginError('All redirect servers failed to login')
 
     def reconnect(self):
         with self.connlock:
