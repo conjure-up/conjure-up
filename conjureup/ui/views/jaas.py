@@ -16,14 +16,21 @@ class JaaSLoginView(WidgetWrap):
         self.fields = None
         self.frame = Frame(body=self._build_widget(),
                            footer=self._build_footer())
-        self.tab_order = (
-            ('body', 0, None),
-            ('body', 2, None),
-            ('body', 4, None),
-            ('body', 6, 0),
-            # ('body', 6, 2),
-            ('footer', None, None),
-        )
+        self.tab_order = [
+            'email',
+            'password',
+            'twofa',
+            'login',
+            'quit',
+        ]
+        self.focus_by_fields = {
+            'email': ('body', 0, None),
+            'password': ('body', 2, None),
+            'twofa': ('body', 4, None),
+            'login': ('body', 6, 0),
+            'browser': ('body', 6, 2),
+            'quit': ('footer', None, None),
+        }
         super().__init__(self.frame)
 
     def _build_widget(self):
@@ -100,16 +107,34 @@ class JaaSLoginView(WidgetWrap):
         return self.buttons_pile
 
     def _find_tab_index(self):
-        for tab_index, tab_info in enumerate(self.tab_order):
-            frame_focus, fields_focus, button_focus = tab_info
+        for tab_index, field in enumerate(self.tab_order):
+            frame, fields, button = self.focus_by_fields[field]
             if all([
-                frame_focus == self.frame.focus_position,
-                fields_focus in (None, self.fields.focus_position),
-                button_focus in (None, self.buttons.focus_position),
+                frame == self.frame.focus_position,
+                fields in (None, self.fields.focus_position),
+                button in (None, self.buttons.focus_position),
             ]):
                 return tab_index
         else:
             return None
+
+    def _update_focus(self, field):
+        frame_focus, field_focus, button_focus = self.focus_by_fields[field]
+        self.frame.focus_position = frame_focus
+        if field_focus is not None:
+            self.fields.focus_position = field_focus
+        if button_focus is not None:
+            self.buttons.focus_position = button_focus
+
+    def _inc_focus(self):
+        tab_index = self._find_tab_index()
+        new_focus = self.tab_order[(tab_index + 1) % len(self.tab_order)]
+        self._update_focus(new_focus)
+
+    def _dec_focus(self):
+        tab_index = self._find_tab_index()
+        new_focus = self.tab_order[(tab_index - 1) % len(self.tab_order)]
+        self._update_focus(new_focus)
 
     def keypress(self, size, key):
         tab_index = self._find_tab_index()
@@ -119,23 +144,20 @@ class JaaSLoginView(WidgetWrap):
             return super().keypress(size, key)
 
         if key in ('tab', 'shift tab', 'enter'):
-            new_focus = None
-            if key == 'tab' and tab_index < len(self.tab_order) - 1:
-                new_focus = self.tab_order[tab_index + 1]
-            elif key == 'enter' and tab_index < 3:
-                new_focus = self.tab_order[tab_index + 1]
-            elif key == 'shift tab' and tab_index > 0:
-                new_focus = self.tab_order[tab_index - 1]
-            if new_focus:
-                frame_focus, field_focus, button_focus = new_focus
-                self.frame.focus_position = frame_focus
-                if field_focus is not None:
-                    self.fields.focus_position = field_focus
-                if button_focus is not None:
-                    self.buttons.focus_position = button_focus
-                return
-
-        return super().keypress(size, key)
+            if key == 'tab':
+                return self._inc_focus()
+            elif key == 'shift tab':
+                return self._dec_focus()
+            elif key == 'enter':
+                if tab_index < 2:
+                    return self._inc_focus()
+                elif tab_index == 2:
+                    self._update_focus('login')
+                    return super().keypress(size, 'enter')
+                else:
+                    return super().keypress(size, 'enter')
+        else:
+            return super().keypress(size, key)
 
     def cancel(self, btn):
         EventLoop.exit(0)
