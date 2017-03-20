@@ -70,18 +70,19 @@ class CloudView(WidgetWrap):
                     )
                 )
             total_items.append(Padding.line_break(""))
-        total_items.append(Text("Configure a New Cloud"))
-        total_items.append(HR())
         # TODO: add vsphere
         new_clouds = juju.get_compatible_clouds(['localhost', 'maas'])
-        for item in new_clouds:
-            total_items.append(
-                Color.body(
-                    menu_btn(label=item,
-                             on_press=self.submit),
-                    focus_map='menu_button focus'
+        if new_clouds:
+            total_items.append(Text("Configure a New Cloud"))
+            total_items.append(HR())
+            for item in new_clouds:
+                total_items.append(
+                    Color.body(
+                        menu_btn(label=item,
+                                 on_press=self.submit),
+                        focus_map='menu_button focus'
+                    )
                 )
-            )
         return Padding.center_80(Filler(Pile(total_items), valign='top'))
 
     def submit(self, result):
