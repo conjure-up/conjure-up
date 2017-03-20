@@ -262,6 +262,8 @@ def main():
     spell_name = spell
     app.endpoint_type = detect_endpoint(opts.spell)
 
+    app.env = os.environ.copy()
+
     if app.endpoint_type == EndpointType.LOCAL_SEARCH:
         spells = utils.find_spells_matching(opts.spell)
 
@@ -317,9 +319,7 @@ def main():
         download(remote, app.config['spell-dir'], True)
         utils.set_spell_metadata()
 
-    app.env = os.environ.copy()
     app.env['CONJURE_UP_CACHEDIR'] = app.argv.cache_dir
-    app.env['CONJURE_UP_SPELL'] = spell_name
 
     if app.argv.show_env:
         if not app.argv.cloud:

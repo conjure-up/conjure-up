@@ -345,7 +345,6 @@ def setup_metadata_controller():
 
 def set_chosen_spell(spell_name, spell_dir):
     track_event("Spell Choice", spell_name, "")
-    app.env = os.environ.copy()
     app.env['CONJURE_UP_SPELL'] = spell_name
     app.config.update({'spell-dir': spell_dir,
                        'spell': spell_name})
