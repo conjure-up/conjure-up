@@ -38,10 +38,13 @@ class JaaSLoginController:
                                       cb=self.register))
 
     def register(self, email=None, password=None, twofa=None):
-        juju.register_controller('jaas', JAAS_DOMAIN,
+        if not app.jaas_controller:
+            app.jaas_controller = 'jaas'
+        juju.register_controller(app.jaas_controller, JAAS_DOMAIN,
                                  email, password, twofa,
                                  cb=self.finish,
                                  fail_cb=self.fail,
+                                 timeout_cb=self.timeout,
                                  exc_cb=self.__handle_exception)
         self.render_interstitial()
 
@@ -68,17 +71,31 @@ class JaaSLoginController:
         msg = stderr
         prefix = 'ERROR cannot get token: '
         if msg.startswith(prefix):
-            msg = msg[len(prefix):]
+            msg = 'Login failed, please try again: {}'.format(
+                msg[len(prefix):])
         prefix = 'Invalid request data (email: ['
         if msg.startswith(prefix):
-            msg = msg[len(prefix):][:-3]  # also strip trailing ])
-        self.render_form(
-            error='Login failed, please try again: {}'.format(msg))
+            msg = 'Login failed, please try again: {}'.format(
+                msg[len(prefix):][:-3])  # also strip trailing ])
+        prefix = 'ERROR cannot get user details for'
+        if msg.startswith(prefix):
+            msg = ('USSO account not connected with JaaS.  Please login via '
+                   'your browser at https://jujucharms.com/login to connect '
+                   'your account, and then try this login again.')
         self.__remove_alarm()
+        self.render_form(error=msg)
+
+    def timeout(self):
+        controllers = juju.get_controllers()
+        if app.jaas_controller in controllers['controllers']:
+            # registration seems to have worked; maybe we should remove and
+            # try again to be safe, but hopefully it's safe to just move on
+            return self.finish()
+        self.__remove_alarm()
+        self.render_form(error='Timed out connecting to JaaS.  '
+                               'Please try again.')
 
     def finish(self):
-        if not app.jaas_controller:
-            app.jaas_controller = 'jaas'
         app.current_controller = app.jaas_controller
         app.is_jaas = True
         self.__remove_alarm()
