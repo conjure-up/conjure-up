@@ -346,12 +346,35 @@ def set_spell_metadata():
     app.config['metadata'] = metadata
 
 
+def get_spell_metadata(spell):
+    """ Returns metadata about spell
+    """
+    metadata_path = os.path.join(app.config['spell-dir'],
+                                 spell,
+                                 'metadata.yaml')
+    with open(metadata_path) as fp:
+        metadata = yaml.safe_load(fp.read())
+
+    return metadata
+
+
 def find_spells_matching(key):
     if key in app.spells_index:
-        return [(key, sd) for sd in app.spells_index[key]['spells']]
+        _spells = []
+        for sd in app.spells_index[key]['spells']:
+            spell_metadata = get_spell_metadata(sd['key'])
+            if 'localhost' in spell_metadata['cloud-whitelist'] \
+               and not is_linux():
+                continue
+            _spells.append((key, sd))
+        return _spells
 
     for category, d in app.spells_index.items():
         for spell in d['spells']:
+            spell_metadata = get_spell_metadata(spell['key'])
+            if 'localhost' in spell_metadata['cloud-whitelist'] \
+               and not is_linux():
+                continue
             if spell['key'] == key:
                 return [(category, spell)]
     return []
@@ -384,3 +407,9 @@ def is_darwin():
     """ Checks if host platform is macOS
     """
     return sys.platform.startswith('darwin')
+
+
+def is_linux():
+    """ Checks if host platform is linux
+    """
+    return sys.platform.startswith('linux')
