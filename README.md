@@ -58,6 +58,7 @@ $ conjure-down
 
 * Adam Stokes <adam.stokes@ubuntu.com>
 * Mike McCracken <mike.mccracken@canonical.com>
+* Cory Johns <cory.johns@canonical.com>
 
 # license
 
