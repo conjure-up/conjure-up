@@ -27,15 +27,18 @@ class StepsController:
     def render(self):
         for step_meta_path in self.step_metas:
             step_ex_path, ext = path.splitext(step_meta_path)
-            if not path.isfile(step_ex_path) or \
-               not os.access(step_ex_path, os.X_OK):
-                failed_path = step_ex_path.split('/')[-3:]
-                msg = (
+            short_path = '/'.join(step_ex_path.split('/')[-3:])
+            err_msg = None
+            if not path.isfile(step_ex_path):
+                err_msg = (
+                    'Step {} has no implementation'.format(short_path))
+            elif not os.access(step_ex_path, os.X_OK):
+                err_msg = (
                     'Step {} is not executable, make sure it has '
-                    'the executable bit set'.format(
-                        '/'.join(failed_path)))
-                app.log.error(msg)
-                utils.error(msg)
+                    'the executable bit set'.format(short_path))
+            if err_msg:
+                app.log.error(err_msg)
+                utils.error(err_msg)
                 sys.exit(1)
             step_metadata = {}
             with open(step_meta_path) as fp:
