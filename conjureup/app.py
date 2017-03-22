@@ -51,9 +51,9 @@ def parse_options(argv):
                         'during post deployment actions. This is useful '
                         'for headless installs allowing you to set those '
                         'variables to further customize your deployment.')
-    parser.add_argument('-c', dest='global_config_file',
-                        help='Location of conjure-up.conf',
-                        default='/etc/conjure-up.conf')
+    parser.add_argument('--registry', dest='registry',
+                        help='Spells Registry',
+                        default='https://github.com/conjure-up/spells.git')
     parser.add_argument('--cache-dir', dest='cache_dir',
                         help='Download directory for spells',
                         default=os.path.expanduser("~/.cache/conjure-up"))
@@ -214,19 +214,6 @@ def main():
     app.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
                                str(uuid.uuid4()))
 
-    global_config_filename = app.argv.global_config_file
-    if not os.path.exists(global_config_filename):
-        # fallback to source tree location
-        global_config_filename = os.path.join(os.path.dirname(__file__),
-                                              "../etc/conjure-up.conf")
-        if not os.path.exists(global_config_filename):
-            utils.error("Could not find {}.".format(global_config_filename))
-            sys.exit(1)
-
-    with open(global_config_filename) as fp:
-        global_conf = yaml.safe_load(fp.read())
-        app.global_config = global_conf
-
     spells_dir = app.argv.spells_dir
 
     app.config['spells-dir'] = spells_dir
@@ -239,7 +226,7 @@ def main():
             utils.info("No spells found, syncing from registry, please wait.")
         try:
             download_or_sync_registry(
-                app.global_config['registry']['repo'],
+                app.argv.registry,
                 spells_dir, branch=spells_registry_branch)
         except subprocess.CalledProcessError as e:
             if not os.path.exists(spells_dir):

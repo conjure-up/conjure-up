@@ -27,9 +27,6 @@ parts:
       - bsdtar
       - jq
       - bridge-utils
-    install: |
-      mkdir -p $SNAPCRAFT_PART_INSTALL/etc
-      cp etc/conjure-up.conf $SNAPCRAFT_PART_INSTALL/etc/conjure-up.conf
     stage:
       - -README.md
       - -debian
