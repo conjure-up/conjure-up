@@ -105,15 +105,18 @@ class StepsController:
         self.n_completed_steps = 0
         for step_meta_path in self.step_metas:
             step_ex_path, ext = path.splitext(step_meta_path)
-            if not path.isfile(step_ex_path) or \
-               not os.access(step_ex_path, os.X_OK):
-                failed_path = step_ex_path.split('/')[-3:]
-                msg = (
+            short_path = '/'.join(step_ex_path.split('/')[-3:])
+            err_msg = None
+            if not path.isfile(step_ex_path):
+                err_msg = (
+                    'Step {} has no implementation'.format(short_path))
+            elif not os.access(step_ex_path, os.X_OK):
+                err_msg = (
                     'Step {} is not executable, make sure it has '
-                    'the executable bit set'.format(
-                        '/'.join(failed_path)))
-                app.log.error(msg)
-                self.__handle_exception('E002', Exception(msg))
+                    'the executable bit set'.format(short_path))
+            if err_msg:
+                app.log.error(err_msg)
+                self.__handle_exception('E002', Exception(err_msg))
                 return
             step_metadata = {}
             with open(step_meta_path) as fp:

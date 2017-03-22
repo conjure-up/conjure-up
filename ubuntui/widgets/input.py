@@ -48,8 +48,8 @@ class PasswordEditor(StringEditor):
     """ Password input prompt with masking
     """
 
-    def __init__(self, caption=None, mask="*"):
-        super().__init__(caption, mask=mask)
+    def __init__(self, caption=None, mask="*", default=None):
+        super().__init__(caption, mask=mask, default=default)
 
 
 class RealnameEditor(StringEditor):
@@ -119,14 +119,20 @@ class Selector(WidgetWrap):
     """ Radio selection list of options
     """
 
-    def __init__(self, opts):
+    def __init__(self, opts, default=None):
         """
         :param list opts: list of options to display
         """
         self.opts = opts
         self.group = []
-        self._add_options()
+        self.default = default
+        if self.default is True and 'Yes' in opts:
+            self.default = 'Yes'
+        elif self.default is False and 'No' in opts:
+            self.default = 'No'
         super().__init__(Columns(self._add_options()))
+        if self.default is not None:
+            self.set_default(self.default, True)
 
     def _add_options(self):
         cols = []
@@ -167,6 +173,6 @@ class YesNo(Selector):
     """ Yes/No selector
     """
 
-    def __init__(self):
+    def __init__(self, default=None):
         opts = ['Yes', 'No']
-        super().__init__(opts)
+        super().__init__(opts, default)
