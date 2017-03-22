@@ -349,7 +349,7 @@ def set_spell_metadata():
 def get_spell_metadata(spell):
     """ Returns metadata about spell
     """
-    metadata_path = os.path.join(app.config['spell-dir'],
+    metadata_path = os.path.join(app.config['spells-dir'],
                                  spell,
                                  'metadata.yaml')
     with open(metadata_path) as fp:
