@@ -358,24 +358,42 @@ def get_spell_metadata(spell):
     return metadata
 
 
+def __available_on_darwin(key):
+    """ Returns True if spell is available on macOS
+    """
+    metadata = get_spell_metadata(key)
+    if is_darwin() and 'cloud-whitelist' in metadata \
+       and 'localhost' in metadata['cloud-whitelist']:
+        return False
+    return True
+
+
+def find_spells():
+    """ Find spells, excluding localhost only spells if not linux
+    """
+    _spells = []
+    for category, cat_dict in app.spells_index.items():
+        for sd in cat_dict['spells']:
+            if not __available_on_darwin(sd['key']):
+                continue
+            _spells.append((category, sd))
+    return _spells
+
+
 def find_spells_matching(key):
     if key in app.spells_index:
         _spells = []
         for sd in app.spells_index[key]['spells']:
-            spell_metadata = get_spell_metadata(sd['key'])
-            if 'localhost' in spell_metadata['cloud-whitelist'] \
-               and not is_linux():
+            if not __available_on_darwin(sd['key']):
                 continue
             _spells.append((key, sd))
         return _spells
 
     for category, d in app.spells_index.items():
         for spell in d['spells']:
-            spell_metadata = get_spell_metadata(spell['key'])
-            if 'localhost' in spell_metadata['cloud-whitelist'] \
-               and not is_linux():
-                continue
             if spell['key'] == key:
+                if not __available_on_darwin(sd['key']):
+                    continue
                 return [(category, spell)]
     return []
 

@@ -27,15 +27,7 @@ class SpellPickerController:
         spells = []
         track_screen("Spell Picker")
         if app.endpoint_type is None:
-            for category, cat_dict in app.spells_index.items():
-                for spell in cat_dict['spells']:
-                    spell_metadata = utils.get_spell_metadata(spell['key'])
-                    # Skip Spells for localhost if not on Linux
-                    if 'localhost' in spell_metadata['cloud-whitelist'] \
-                       and not utils.is_linux():
-                        continue
-                spells += [(category, sd)
-                           for sd in cat_dict['spells']]
+            spells += utils.find_spells()
         elif app.endpoint_type == EndpointType.LOCAL_SEARCH:
             spells = utils.find_spells_matching(app.argv.spell)
         else:
