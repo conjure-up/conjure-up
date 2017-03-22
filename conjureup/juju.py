@@ -15,7 +15,7 @@ import macumba
 from bundleplacer.charmstore_api import CharmStoreID
 from conjureup import async, consts
 from conjureup.app_config import app
-from conjureup.utils import juju_path, run, is_darwin
+from conjureup.utils import is_darwin, juju_path, run
 from macumba.v2 import JujuClient
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"

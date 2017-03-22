@@ -37,5 +37,5 @@ if [[ -f /usr/bin/lxd  && -f /snap/bin/lxd ]]; then
 fi
 
 
-exec $SNAP/bin/conjure-up -c $SNAP/etc/conjure-up.conf \
+exec $SNAP/bin/conjure-up \
      --spells-dir $SNAP/spells --nosync "$@"

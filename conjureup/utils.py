@@ -296,23 +296,6 @@ def install_user():
     return user
 
 
-def load_global_conf():
-    """ loads global configuration
-
-    Returns:
-    dictionary of config items
-    """
-    global_conf_file = '/etc/conjure-up.conf'
-    if not os.path.exists(global_conf_file):
-        global_conf_file = os.path.join(
-            os.path.dirname(__file__), '..', 'etc', 'conjure-up.conf')
-    try:
-        with open(global_conf_file) as fp:
-            return yaml.safe_load(fp.read())
-    except:
-        return {}
-
-
 def setup_metadata_controller():
     bundle_filename = os.path.join(app.config['spell-dir'], 'bundle.yaml')
     if not os.path.isfile(bundle_filename):
