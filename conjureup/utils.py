@@ -112,6 +112,9 @@ def run_attach(cmd, output_cb=None):
 def lxd_version():
     """ Get current LXD version
     """
+    if is_darwin():
+        return "N/A"
+
     cmd = run_script('lxd --version')
     if cmd.returncode == 0:
         return parse_version(cmd.stdout.decode().strip())
@@ -392,3 +395,9 @@ def gen_hash():
     """ generates a UUID
     """
     return str(uuid.uuid4()).split('-')[0][:3]
+
+
+def is_darwin():
+    """ Checks if host platform is macOS
+    """
+    return sys.platform.startswith('darwin')
