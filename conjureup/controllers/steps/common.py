@@ -15,9 +15,9 @@ def set_env(inputs):
     for i in inputs:
         env_key = i['key'].upper()
         try:
-            input_key = i['input']
+            input_key = str(i['input'])
         except KeyError:
-            input_key = i.get('default', '')
+            input_key = str(i.get('default', ''))
         app.env[env_key] = input_key
         app.log.debug("Setting environment var: {}={}".format(
             env_key,

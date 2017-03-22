@@ -16,10 +16,10 @@ from ubuntui.widgets.input import (
 
 class StepWidget(WidgetWrap):
     INPUT_TYPES = {
-        'text': StringEditor(),
-        'password': PasswordEditor(),
-        'boolean': YesNo(),
-        'integer': IntegerEditor()
+        'text': StringEditor,
+        'password': PasswordEditor,
+        'boolean': YesNo,
+        'integer': IntegerEditor,
     }
 
     def __init__(self, app, step_model, cb):
@@ -41,14 +41,21 @@ class StepWidget(WidgetWrap):
         self.additional_input = []
         if len(step_model.additional_input) > 0:
             for i in step_model.additional_input:
+                if i['type'] in self.INPUT_TYPES:
+                    widget_inst = self.INPUT_TYPES[i['type']](
+                        default=i.get('default'))
+                else:
+                    self.app.log.error('Invalid input type "{}" in step {}; '
+                                       'should be one of: {}'.format(
+                                           i['type'],
+                                           step_model.title,
+                                           ', '.join(self.INPUT_TYPES.keys())))
+                    widget_inst = None
                 widget = {
                     "label": Text(('body', i['label'])),
                     "key": i['key'],
-                    "input": self.INPUT_TYPES.get(i['type'])
+                    "input": widget_inst,
                 }
-                if 'default' in i:
-                    widget['input'] = StringEditor(default=i['default'])
-
                 self.additional_input.append(widget)
         else:
             widget = {
