@@ -15,7 +15,7 @@ import macumba
 from bundleplacer.charmstore_api import CharmStoreID
 from conjureup import async, consts
 from conjureup.app_config import app
-from conjureup.utils import is_darwin, juju_path, run
+from conjureup.utils import is_linux, juju_path, run
 from macumba.v2 import JujuClient
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
@@ -410,7 +410,7 @@ def get_compatible_clouds(clouds=None):
     """
     clouds = set(clouds or get_clouds().keys())
 
-    if is_darwin():
+    if not is_linux():
         # LXD not available on macOS
         clouds.remove('localhost')
 

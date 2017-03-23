@@ -27,9 +27,7 @@ class SpellPickerController:
         spells = []
         track_screen("Spell Picker")
         if app.endpoint_type is None:
-            for category, cat_dict in app.spells_index.items():
-                spells += [(category, sd)
-                           for sd in cat_dict['spells']]
+            spells += utils.find_spells()
         elif app.endpoint_type == EndpointType.LOCAL_SEARCH:
             spells = utils.find_spells_matching(app.argv.spell)
         else:

@@ -346,13 +346,54 @@ def set_spell_metadata():
     app.config['metadata'] = metadata
 
 
+def get_spell_metadata(spell):
+    """ Returns metadata about spell
+    """
+    metadata_path = os.path.join(app.config['spells-dir'],
+                                 spell,
+                                 'metadata.yaml')
+    with open(metadata_path) as fp:
+        metadata = yaml.safe_load(fp.read())
+
+    return metadata
+
+
+def __available_on_darwin(key):
+    """ Returns True if spell is available on macOS
+    """
+    metadata = get_spell_metadata(key)
+    if is_darwin() and 'cloud-whitelist' in metadata \
+       and 'localhost' in metadata['cloud-whitelist']:
+        return False
+    return True
+
+
+def find_spells():
+    """ Find spells, excluding localhost only spells if not linux
+    """
+    _spells = []
+    for category, cat_dict in app.spells_index.items():
+        for sd in cat_dict['spells']:
+            if not __available_on_darwin(sd['key']):
+                continue
+            _spells.append((category, sd))
+    return _spells
+
+
 def find_spells_matching(key):
     if key in app.spells_index:
-        return [(key, sd) for sd in app.spells_index[key]['spells']]
+        _spells = []
+        for sd in app.spells_index[key]['spells']:
+            if not __available_on_darwin(sd['key']):
+                continue
+            _spells.append((key, sd))
+        return _spells
 
     for category, d in app.spells_index.items():
         for spell in d['spells']:
             if spell['key'] == key:
+                if not __available_on_darwin(sd['key']):
+                    continue
                 return [(category, spell)]
     return []
 
@@ -384,3 +425,9 @@ def is_darwin():
     """ Checks if host platform is macOS
     """
     return sys.platform.startswith('darwin')
+
+
+def is_linux():
+    """ Checks if host platform is linux
+    """
+    return sys.platform.startswith('linux')
