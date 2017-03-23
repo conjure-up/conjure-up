@@ -33,7 +33,8 @@ class CloudsController:
                        "please wait.".format(app.current_model))
             juju.add_model(app.current_model,
                            app.current_controller,
-                           app.current_cloud)
+                           app.current_cloud,
+                           allow_exists=True)
             return controllers.use('deploy').render()
 
         utils.error("Something happened with the controller or model, "

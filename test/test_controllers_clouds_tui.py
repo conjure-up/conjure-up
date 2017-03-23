@@ -96,7 +96,8 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
         self.mock_app.current_cloud = 'cloud'
         self.controller.finish()
         self.mock_juju.assert_has_calls([
-            call.add_model(ANY, 'testcontroller', 'cloud')])
+            call.add_model(ANY, 'testcontroller', 'cloud',
+                           allow_exists=True)])
 
     def test_finish_no_controller(self):
         "clouds.finish without existing controller"
