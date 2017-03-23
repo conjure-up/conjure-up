@@ -5,6 +5,8 @@ set -eux
 if [[ ! -x /snap/bin/lxd ]]; then
     # Make sure we have lxd installed to use
     if ! grep -q 'zesty' /etc/lsb-release; then
+        apt-get -qq update
+        apt-get install -qqyf software-properties-common
         apt-add-repository -y ppa:ubuntu-lxc/lxd-stable
         apt-get -qq update
     fi

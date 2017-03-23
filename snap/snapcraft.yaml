@@ -27,6 +27,7 @@ parts:
       - bsdtar
       - jq
       - bridge-utils
+      - software-properties-common
     stage:
       - -README.md
       - -debian
