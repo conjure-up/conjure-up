@@ -37,6 +37,7 @@ class StepWidget(WidgetWrap):
         self.result = Text(step_model.result)
         self.output = Text(('info_minor', ''))
         self.icon = Text(("info_minor", "\N{BALLOT BOX}"))
+        self.sudo_input = None
 
         self.additional_input = []
         if len(step_model.additional_input) > 0:
@@ -156,6 +157,23 @@ class StepWidget(WidgetWrap):
             'pending_icon',
             self.icon.get_text()[0]
         ))
+        if self.model.needs_sudo:
+            self.step_pile.contents.append((Padding.line_break(""),
+                                            self.step_pile.options()))
+            can_sudo = self.model.can_sudo()
+            label = 'This step requires sudo.'
+            if not can_sudo:
+                label += '  Please enter sudo password:'
+            columns = [
+                ('weight', 0.5, Padding.left(Text(('body', label)), left=5)),
+            ]
+            if not can_sudo:
+                self.sudo_input = PasswordEditor()
+                columns.append(('weight', 1, Color.string_input(
+                    self.sudo_input, focus_map='string_input focus')))
+            self.step_pile.contents.append((Columns(columns, dividechars=3),
+                                            self.step_pile.options()))
+
         for i in self.additional_input:
             self.app.log.debug(i)
             self.step_pile.contents.append((Padding.line_break(""),

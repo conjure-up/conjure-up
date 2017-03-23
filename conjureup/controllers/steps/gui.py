@@ -31,6 +31,7 @@ class StepsController:
     def get_result(self, future):
         if future.exception():
             self.__handle_exception('E002', future.exception())
+            return
 
         step_model, step_widget = future.result()
 
@@ -103,13 +104,13 @@ class StepsController:
             try:
                 # Store step model and its widget
                 model = common.load_step(step_meta_path)
+                if not model.viewable:
+                    app.log.debug("Skipping step: {}".format(model.title))
+                    continue
                 step_widget = StepWidget(
                     app,
                     model,
                     self.finish)
-                if not step_widget.model.viewable:
-                    app.log.debug("Skipping step: {}".format(step_widget))
-                    continue
                 step_widgets.append(step_widget)
                 app.log.debug("Queueing step: {}".format(step_widget))
             except Exception as e:

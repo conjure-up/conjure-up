@@ -28,6 +28,10 @@ class StepsController:
                 app.log.error(e.msg)
                 utils.error(e.msg)
                 sys.exit(1)
+            if model.needs_sudo and not model.can_sudo():
+                utils.error("Step requires passwordless sudo: {}".format(
+                    model.title))
+                sys.exit(1)
             app.log.debug("Running step: {}".format(model))
             try:
                 step_model, _ = common.do_step(model,
