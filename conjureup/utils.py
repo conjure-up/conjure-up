@@ -392,7 +392,7 @@ def find_spells_matching(key):
     for category, d in app.spells_index.items():
         for spell in d['spells']:
             if spell['key'] == key:
-                if not __available_on_darwin(sd['key']):
+                if not __available_on_darwin(spell['key']):
                     continue
                 return [(category, spell)]
     return []
