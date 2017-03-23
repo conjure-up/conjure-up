@@ -763,9 +763,12 @@ def add_model(name, controller, cloud, allow_exists=False):
     controller: controller to add model in
     allow_exists: re-use an existing model, if one exists.
     """
+    if allow_exists and model_available():
+        return
+
     sh = run('juju add-model {} -c {} {}'.format(name, controller, cloud),
              shell=True, stdout=DEVNULL, stderr=PIPE)
-    if sh.returncode > 0 and not allow_exists:
+    if sh.returncode > 0:
         raise Exception(
             "Unable to create model: {}".format(sh.stderr.decode('utf8')))
     # the CLI has to connect to the model at least once to populate the model
