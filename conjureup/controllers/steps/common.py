@@ -1,10 +1,19 @@
 import json
 import os
+import os.path as path
+import yaml
 from glob import glob
 
 from conjureup import juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
+from conjureup.models.step import StepModel
+
+
+class ValidationError(Exception):
+    def __init__(self, msg, *args, **kwargs):
+        self.msg = msg
+        super().__init__(msg, *args, **kwargs)
 
 
 def set_env(inputs):
@@ -36,6 +45,22 @@ def get_step_metadata_filenames(steps_dir):
 
     """
     return sorted(glob(os.path.join(steps_dir, 'step-*.yaml')))
+
+
+def load_step(step_meta_path):
+    step_ex_path, ext = path.splitext(step_meta_path)
+    short_path = '/'.join(step_ex_path.split('/')[-3:])
+    if not path.isfile(step_ex_path):
+        raise ValidationError(
+            'Step {} has no implementation'.format(short_path))
+    elif not os.access(step_ex_path, os.X_OK):
+        raise ValidationError(
+            'Step {} is not executable, make sure it has '
+            'the executable bit set'.format(short_path))
+    with open(step_meta_path) as fp:
+        step_metadata = yaml.load(fp.read())
+        model = StepModel(step_metadata, step_ex_path)
+        return model
 
 
 def do_step(step_model, step_widget, message_cb, gui=False):
