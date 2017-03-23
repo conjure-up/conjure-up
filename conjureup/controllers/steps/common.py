@@ -1,8 +1,9 @@
 import json
 import os
 import os.path as path
-import yaml
 from glob import glob
+
+import yaml
 
 from conjureup import juju, utils
 from conjureup.api.models import model_info

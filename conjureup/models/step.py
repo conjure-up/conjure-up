@@ -1,6 +1,7 @@
 """ Step model
 """
 import subprocess
+
 from conjureup.app_config import app
 
 
