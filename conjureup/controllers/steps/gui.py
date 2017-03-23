@@ -1,14 +1,10 @@
-import os
 import os.path as path
 from collections import OrderedDict, deque
 from functools import partial
 
-import yaml
-
 from conjureup import async, controllers
 from conjureup.app_config import app
 from conjureup.controllers.steps import common
-from conjureup.models.step import StepModel
 from conjureup.telemetry import track_exception, track_screen
 from conjureup.ui.views.steps import StepsView
 from conjureup.ui.widgets.step import StepWidget
@@ -35,6 +31,7 @@ class StepsController:
     def get_result(self, future):
         if future.exception():
             self.__handle_exception('E002', future.exception())
+            return
 
         step_model, step_widget = future.result()
 
@@ -104,38 +101,20 @@ class StepsController:
         step_widgets = deque()
         self.n_completed_steps = 0
         for step_meta_path in self.step_metas:
-            step_ex_path, ext = path.splitext(step_meta_path)
-            short_path = '/'.join(step_ex_path.split('/')[-3:])
-            err_msg = None
-            if not path.isfile(step_ex_path):
-                err_msg = (
-                    'Step {} has no implementation'.format(short_path))
-            elif not os.access(step_ex_path, os.X_OK):
-                err_msg = (
-                    'Step {} is not executable, make sure it has '
-                    'the executable bit set'.format(short_path))
-            if err_msg:
-                app.log.error(err_msg)
-                self.__handle_exception('E002', Exception(err_msg))
-                return
-            step_metadata = {}
-            with open(step_meta_path) as fp:
-                step_metadata = yaml.load(fp.read())
-
             try:
                 # Store step model and its widget
-                model = StepModel(step_metadata, step_meta_path)
+                model = common.load_step(step_meta_path)
+                if not model.viewable:
+                    app.log.debug("Skipping step: {}".format(model.title))
+                    continue
                 step_widget = StepWidget(
                     app,
                     model,
                     self.finish)
-                if not step_widget.model.viewable:
-                    app.log.debug("Skipping step: {}".format(step_widget))
-                    continue
-                model.path = step_ex_path
                 step_widgets.append(step_widget)
                 app.log.debug("Queueing step: {}".format(step_widget))
             except Exception as e:
+                app.log.exception(e)
                 self.__handle_exception('E002', e)
                 return
 

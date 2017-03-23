@@ -48,6 +48,10 @@ with all the sensible defaults in place.
 $ conjure-up canonical-kubernetes localhost
 ```
 
+Note that some spells require sudo for certain steps.  When running in headless
+mode, conjure-up should be run with a user with passwordless sudo enabled (or
+sudo should be pre-authorized before invoking conjure-up).
+
 ## Destroying deployments
 
 ```

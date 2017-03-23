@@ -1,5 +1,7 @@
 """ Step model
 """
+import subprocess
+
 from conjureup.app_config import app
 
 
@@ -10,8 +12,9 @@ class StepModel:
         self.description = step.get('description', '')
         self.result = ''
         self.viewable = step.get('viewable', False)
-
+        self.needs_sudo = step.get('sudo', False)
         self.additional_input = step.get('additional-input', [])
+        self.path = path
 
     def __getattr__(self, attr):
         """
@@ -34,3 +37,16 @@ class StepModel:
                                                self.description,
                                                self.viewable,
                                                self.path)
+
+    def can_sudo(self, password=None):
+        if not password:
+            result = subprocess.run(['sudo', '-nv'],
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL)
+        else:
+            password = '{}\n'.format(password).encode('utf8')
+            result = subprocess.run(['sudo', '-Sv'],
+                                    input=password,
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL)
+        return result.returncode == 0

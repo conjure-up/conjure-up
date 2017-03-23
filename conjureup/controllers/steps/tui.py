@@ -1,14 +1,10 @@
-import os
 import os.path as path
 import sys
 from collections import OrderedDict
 
-import yaml
-
 from conjureup import controllers, utils
 from conjureup.app_config import app
 from conjureup.controllers.steps import common
-from conjureup.models.step import StepModel
 
 
 class StepsController:
@@ -26,25 +22,16 @@ class StepsController:
 
     def render(self):
         for step_meta_path in self.step_metas:
-            step_ex_path, ext = path.splitext(step_meta_path)
-            short_path = '/'.join(step_ex_path.split('/')[-3:])
-            err_msg = None
-            if not path.isfile(step_ex_path):
-                err_msg = (
-                    'Step {} has no implementation'.format(short_path))
-            elif not os.access(step_ex_path, os.X_OK):
-                err_msg = (
-                    'Step {} is not executable, make sure it has '
-                    'the executable bit set'.format(short_path))
-            if err_msg:
-                app.log.error(err_msg)
-                utils.error(err_msg)
+            try:
+                model = common.load_step(step_meta_path)
+            except common.ValidationError as e:
+                app.log.error(e.msg)
+                utils.error(e.msg)
                 sys.exit(1)
-            step_metadata = {}
-            with open(step_meta_path) as fp:
-                step_metadata = yaml.load(fp.read())
-            model = StepModel(step_metadata, step_meta_path)
-            model.path = step_ex_path
+            if model.needs_sudo and not model.can_sudo():
+                utils.error("Step requires passwordless sudo: {}".format(
+                    model.title))
+                sys.exit(1)
             app.log.debug("Running step: {}".format(model))
             try:
                 step_model, _ = common.do_step(model,
