@@ -43,6 +43,11 @@ class StepModel:
             result = subprocess.run(['sudo', '-nv'],
                                     stdout=subprocess.DEVNULL,
                                     stderr=subprocess.DEVNULL)
+            if result.returncode != 0:
+                # Try a second method
+                result = subprocess.run(['sudo', '-n', '/bin/true'],
+                                        stdout=subprocess.DEVNULL,
+                                        stderr=subprocess.DEVNULL)
         else:
             password = '{}\n'.format(password).encode('utf8')
             result = subprocess.run(['sudo', '-Sv'],
