@@ -85,8 +85,7 @@ class StepWidget(WidgetWrap):
             if len(lines) < 1:
                 return
             result = json.loads(lines[-1])
-            self.output.set_text(('body', "\n    " +
-                                  result['message']))
+            self.output.set_text(('body', result['message']))
 
     def clear_output(self):
         self.output.set_text("")
@@ -94,6 +93,12 @@ class StepWidget(WidgetWrap):
     def set_description(self, description, color='info_minor'):
         self.description.set_text(
             (color, description))
+
+    def set_error(self, msg):
+        self.output.set_text(('error_major', msg))
+
+    def clear_error(self):
+        self.clear_output()
 
     def set_icon_state(self, result_code):
         """ updates status icon
@@ -138,6 +143,13 @@ class StepWidget(WidgetWrap):
         self.step_pile.contents[self.current_button_index] = (
             Text(""), self.step_pile.options())
 
+    def show_button(self):
+        self.step_pile.contents[self.current_button_index] = (
+            Padding.right_20(
+                Color.button_primary(self.button,
+                                     focus_map='button_primary focus')),
+            self.step_pile.options())
+
     def build_widget(self):
         return Pile([
             Columns(
@@ -145,7 +157,8 @@ class StepWidget(WidgetWrap):
                     ('fixed', 3, self.icon),
                     self.description,
                 ], dividechars=1),
-            self.output
+            Padding.line_break(""),
+            Padding.push_4(self.output)
         ]
         )
 
@@ -192,12 +205,11 @@ class StepWidget(WidgetWrap):
                  self.step_pile.options()))
 
         self.button = submit_btn(label="Run", on_press=self.submit)
-        self.step_pile.contents.append(
-            (Padding.right_20(
-                Color.button_primary(self.button,
-                                     focus_map='button_primary focus')),
-             self.step_pile.options()))
+        self.step_pile.contents.append((Padding.line_break(""),
+                                        self.step_pile.options()))
+        self.step_pile.contents.append((Text(""), self.step_pile.options()))
         self.step_pile.contents.append((HR(), self.step_pile.options()))
+        self.show_button()
         self.step_pile.focus_position = self.current_button_index
 
     def submit(self, btn):
