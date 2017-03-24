@@ -81,7 +81,9 @@ def do_step(step_model, step_widget, message_cb, gui=False):
         if step_widget and step_widget.sudo_input:
             password = step_widget.sudo_input.value
         if not step_model.can_sudo(password):
-            raise Exception('Sudo failed')
+            raise Exception('Sudo failed.  Please check your password '
+                            'and ensure that your sudo timeout is not '
+                            'set to zero.')
 
     # merge the step_widget input data into our step model
     if gui:
