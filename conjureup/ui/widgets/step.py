@@ -158,7 +158,7 @@ class StepWidget(WidgetWrap):
             'pending_icon',
             self.icon.get_text()[0]
         ))
-        if self.model.needs_sudo and is_linux():
+        if is_linux() and self.model.needs_sudo:
             self.step_pile.contents.append((Padding.line_break(""),
                                             self.step_pile.options()))
             can_sudo = self.model.can_sudo()
