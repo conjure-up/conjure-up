@@ -2,7 +2,7 @@ import os.path as path
 from collections import OrderedDict, deque
 from functools import partial
 
-from conjureup import async, controllers
+from conjureup import async, controllers, utils
 from conjureup.app_config import app
 from conjureup.controllers.steps import common
 from conjureup.telemetry import track_exception, track_screen
@@ -66,6 +66,19 @@ class StepsController:
         step_model: step_model returned from widget
         done: if True continues on to the summary view
         """
+        if utils.is_linux() and step_model.needs_sudo:
+            password = None
+            if step_widget.sudo_input:
+                password = step_widget.sudo_input.value
+            if not step_model.can_sudo(password):
+                step_widget.set_error(
+                    'Sudo failed.  Please check your password and ensure that '
+                    'your sudo timeout is not set to zero.')
+                step_widget.show_button()
+                return
+
+        step_widget.clear_error()
+
         if done:
             EventLoop.remove_alarms()
             return controllers.use('summary').render(self.results)
