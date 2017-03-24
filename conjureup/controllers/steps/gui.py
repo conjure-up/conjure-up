@@ -66,6 +66,10 @@ class StepsController:
         step_model: step_model returned from widget
         done: if True continues on to the summary view
         """
+        if done:
+            EventLoop.remove_alarms()
+            return controllers.use('summary').render(self.results)
+
         if utils.is_linux() and step_model.needs_sudo:
             password = None
             if step_widget.sudo_input:
@@ -78,10 +82,6 @@ class StepsController:
                 return
 
         step_widget.clear_error()
-
-        if done:
-            EventLoop.remove_alarms()
-            return controllers.use('summary').render(self.results)
 
         # Set next button focus here now that the step is complete.
         self.view.steps.popleft()
