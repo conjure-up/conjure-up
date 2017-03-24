@@ -39,19 +39,15 @@ class StepModel:
                                                self.path)
 
     def can_sudo(self, password=None):
-        if not password:
-            result = subprocess.run(['sudo', '-nv'],
-                                    stdout=subprocess.DEVNULL,
-                                    stderr=subprocess.DEVNULL)
-            if result.returncode != 0:
-                # Try a second method
-                result = subprocess.run(['sudo', '-n', '/bin/true'],
-                                        stdout=subprocess.DEVNULL,
-                                        stderr=subprocess.DEVNULL)
-        else:
+        if password:
             password = '{}\n'.format(password).encode('utf8')
-            result = subprocess.run(['sudo', '-Sv'],
+            result = subprocess.run(['sudo', '-S', '/bin/true'],
                                     input=password,
                                     stdout=subprocess.DEVNULL,
                                     stderr=subprocess.DEVNULL)
+            if result.returncode != 0:
+                return False
+        result = subprocess.run(['sudo', '-n', '/bin/true'],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL)
         return result.returncode == 0
