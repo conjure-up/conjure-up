@@ -76,7 +76,7 @@ def do_step(step_model, step_widget, message_cb, gui=False):
     Step title and results message
     """
 
-    if step_model.needs_sudo:
+    if utils.is_linux() and step_model.needs_sudo:
         password = None
         if step_widget and step_widget.sudo_input:
             password = step_widget.sudo_input.value

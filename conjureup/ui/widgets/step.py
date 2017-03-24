@@ -3,6 +3,7 @@ import os
 
 from urwid import Columns, Pile, Text, WidgetWrap
 
+from conjureup.utils import is_linux
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import submit_btn
 from ubuntui.widgets.hr import HR
@@ -157,7 +158,7 @@ class StepWidget(WidgetWrap):
             'pending_icon',
             self.icon.get_text()[0]
         ))
-        if self.model.needs_sudo:
+        if is_linux() and self.model.needs_sudo:
             self.step_pile.contents.append((Padding.line_break(""),
                                             self.step_pile.options()))
             can_sudo = self.model.can_sudo()
