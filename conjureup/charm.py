@@ -28,7 +28,6 @@ def get_bundle(bundle_name, channel='stable'):
     Arguments:
     bundle_name: name of bundle (ie canonical-kubernetes)
     channel: Which channel to pull the bundle from
-    to_file: store to a temporary file
 
     Returns:
     Dictionary of bundle's yaml unless to_file is True,
