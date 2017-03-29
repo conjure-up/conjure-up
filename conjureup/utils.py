@@ -321,7 +321,6 @@ def setup_metadata_controller():
         app.log.debug("Pulling bundle for {} from channel: {}".format(
             bundle_name, bundle_channel))
         bundle_data = charm.get_bundle(bundle_name, bundle_channel)
-        app.log.debug(bundle_data)
 
     if bundle_custom_filename.exists():
         bundle_custom = yaml.load(slurp(bundle_custom_filename))
