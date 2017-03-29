@@ -94,8 +94,8 @@ def parse_options(argv):
     parser.add_argument('--channel', type=str,
                         choices=charm.CHANNELS,
                         dest='channel',
-                        help='Pull deployment from '
-                        '[edge,beta,candidate,stable] channel')
+                        default='stable',
+                        help='conjure-up spell from a release channel')
 
     parser.add_argument('cloud', nargs='?',
                         help="Name of a Juju cloud to "
