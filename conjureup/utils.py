@@ -6,6 +6,7 @@ import shutil
 import sys
 import uuid
 from collections import Mapping
+from pathlib import Path
 from subprocess import (
     DEVNULL,
     PIPE,
@@ -297,36 +298,37 @@ def install_user():
 
 
 def setup_metadata_controller():
-    bundle_filename = os.path.join(app.config['spell-dir'], 'bundle.yaml')
-    if not os.path.isfile(bundle_filename):
-        if 'bundle-location' not in app.config['metadata']:
+    """ Pulls in a local bundle or via charmstore api and sets up our
+    controller. You can also further customize the bundle by providing a local
+    bundle-custom.yaml that will be deep merged over whatever bundle is
+    referenced. """
+    spell_dir = Path(app.config['spell-dir'])
+    bundle_filename = spell_dir / 'bundle.yaml'
+    bundle_custom_filename = spell_dir / 'bundle-custom.yaml'
+
+    if bundle_filename.exists():
+        # Load bundle data early so we can merge any additional charm options
+        bundle_data = yaml.load(slurp(bundle_filename))
+    else:
+        bundle_name = app.config['metadata'].get('bundle-name', None)
+        if bundle_name is None:
             raise Exception(
-                "Could not determine bundle location: no local bundle "
-                "was found and bundle-location not set in spell metadata.")
-        bundle_filename = charm.get_bundle(
-            app.config['metadata']['bundle-location'], True)
+                "Could not determine a bundle to download, please make sure "
+                "the spell contains a 'bundle-name' field."
+            )
+        bundle_channel = app.argv.channel
 
-    # Load bundle data early so we can merge any additional charm options
-    with open(bundle_filename) as f:
-        bundle_data = yaml.load(f)
+        app.log.debug("Pulling bundle for {} from channel: {}".format(
+            bundle_name, bundle_channel))
+        bundle_data = charm.get_bundle(bundle_name, bundle_channel)
 
-    bundle_custom_filename = os.path.join(app.config['spell-dir'],
-                                          'bundle-custom.yaml')
-    if os.path.isfile(bundle_custom_filename):
-        with open(bundle_custom_filename) as f:
-            bundle_custom = yaml.load(f)
+    if bundle_custom_filename.exists():
+        bundle_custom = yaml.load(slurp(bundle_custom_filename))
         bundle_data = merge_dicts(bundle_data,
                                   bundle_custom)
 
     bundle = Bundle(bundle_data=bundle_data)
-    bundleplacer_cfg = Config(
-        'bundle-placer',
-        {
-            'bundle_filename': bundle_filename,
-            'bundle_key': None,
-        })
-
-    app.metadata_controller = MetadataController(bundle, bundleplacer_cfg)
+    app.metadata_controller = MetadataController(bundle, Config('bundle-cfg'))
 
 
 def set_chosen_spell(spell_name, spell_dir):

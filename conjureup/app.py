@@ -16,7 +16,7 @@ from prettytable import PrettyTable
 from termcolor import colored
 
 from conjureup import __version__ as VERSION
-from conjureup import async, consts, controllers, utils
+from conjureup import async, charm, consts, controllers, utils
 from conjureup.app_config import app
 from conjureup.controllers.steps.common import get_step_metadata_filenames
 from conjureup.download import (
@@ -89,6 +89,13 @@ def parse_options(argv):
                         dest='nosync',
                         help='Opt out of syncing with spells '
                         'registry.')
+
+    # Channels
+    parser.add_argument('--channel', type=str,
+                        choices=charm.CHANNELS,
+                        dest='channel',
+                        default='stable',
+                        help='conjure-up spell from a release channel')
 
     parser.add_argument('cloud', nargs='?',
                         help="Name of a Juju cloud to "
