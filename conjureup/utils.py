@@ -282,7 +282,7 @@ def slurp(path):
     path: path of file
     """
     try:
-        with open(path) as f:
+        with path.open() as f:
             return f.read().strip()
     except IOError:
         raise IOError
