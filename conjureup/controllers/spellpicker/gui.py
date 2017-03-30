@@ -13,6 +13,7 @@ class SpellPickerController:
         self.view = None
 
     def finish(self, spellname):
+        utils.set_terminal_title("conjure-up {}".format(spellname))
         utils.set_chosen_spell(spellname,
                                os.path.join(app.argv.cache_dir,
                                             spellname))

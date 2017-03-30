@@ -197,6 +197,7 @@ def main():
         utils.info("")
         sys.exit(1)
 
+    utils.set_terminal_title("conjure-up")
     opts = parse_options(sys.argv[1:])
     spell = os.path.basename(os.path.abspath(opts.spell))
 
