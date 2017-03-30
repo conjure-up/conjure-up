@@ -433,3 +433,9 @@ def is_linux():
     """ Checks if host platform is linux
     """
     return sys.platform.startswith('linux')
+
+
+def set_terminal_title(title):
+    """ Sets the terminal title
+    """
+    sys.stdout.write("\x1b]2;{}\x07".format(title))
