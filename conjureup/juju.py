@@ -445,10 +445,11 @@ def get_cloud_types_by_name():
     """
     clouds = {n: c['type'] for n, c in get_clouds().items()}
 
-    if 'lxd' in clouds:
-        # normalize 'lxd' cloud type to localhost; 'lxd' can happen
-        # depending on how the controller was bootstrapped
-        clouds['localhost'] = clouds.pop('lxd')
+    # normalize 'lxd' cloud type to localhost; 'lxd' can happen
+    # depending on how the controller was bootstrapped
+    for name, cloud_type in clouds.items():
+        if cloud_type == 'lxd':
+            clouds[name] = 'localhost'
 
     return clouds
 
