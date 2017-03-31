@@ -27,9 +27,7 @@ class ControllerPicker:
             return controllers.use('jaaslogin').render()
 
         app.current_controller = controller
-        app.current_model = "conjure-up-{}-{}".format(
-            app.env['CONJURE_UP_SPELL'],
-            utils.gen_hash())
+        app.current_model = utils.gen_model()
 
         try:
             c_info = juju.get_controller_info(app.current_controller)
