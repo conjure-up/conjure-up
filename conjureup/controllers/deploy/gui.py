@@ -258,7 +258,9 @@ class DeployController:
         first add the machines then call done_cb
         """
         def _do_ensure_machines():
-            if app.current_cloud == 'maas':
+            cloud_types = juju.get_cloud_types_by_name()
+            current_cloud_type = cloud_types[app.current_cloud]
+            if current_cloud_type == 'maas':
                 self.ensure_machines_maas(application, done_cb)
             else:
                 self.ensure_machines_nonmaas(application, done_cb)
@@ -296,6 +298,8 @@ class DeployController:
         for juju_machine_id in [j_id for j_id, _ in app_placements
                                 if j_id not in self.deployed_juju_machines]:
             juju_machine = juju_machines[juju_machine_id]
+            if 'series' not in juju_machine:
+                juju_machine['series'] = application.csid.series
             f = juju.add_machines([juju_machine],
                                   msg_cb=app.ui.set_footer,
                                   exc_cb=partial(self._handle_exception,
