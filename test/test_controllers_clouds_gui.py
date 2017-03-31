@@ -31,6 +31,9 @@ class CloudsGUIRenderTestCase(unittest.TestCase):
             'conjureup.juju.get_compatible_clouds')
         self.mock_list_clouds = self.list_clouds_patcher.start()
         self.mock_list_clouds.return_value = ['test1', 'test2']
+        self.get_clouds_patcher = patch(
+            'conjureup.juju.get_clouds')
+        self.mock_get_clouds_patcher = self.get_clouds_patcher.start()
 
         self.track_screen_patcher = patch(
             'conjureup.controllers.clouds.gui.track_screen')
@@ -41,6 +44,7 @@ class CloudsGUIRenderTestCase(unittest.TestCase):
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.list_clouds_patcher.stop()
+        self.get_clouds_patcher.stop()
         self.track_screen_patcher.stop()
 
     def test_render(self):
