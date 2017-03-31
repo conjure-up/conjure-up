@@ -95,6 +95,13 @@ class NewCloudGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.newcloud.gui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+
+        self.juju_patcher = patch(
+            'conjureup.controllers.newcloud.gui.juju'
+        )
+        self.mock_juju = self.juju_patcher.start()
+        self.mock_juju.get_cloud.return_value = {'type': 'lxd'}
+
         self.track_screen_patcher = patch(
             'conjureup.controllers.newcloud.gui.track_screen')
         self.mock_track_screen = self.track_screen_patcher.start()
@@ -107,6 +114,7 @@ class NewCloudGUIFinishTestCase(unittest.TestCase):
         self.utils_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.juju_patcher.stop()
         self.track_screen_patcher.stop()
         self.track_event_patcher.stop()
 
