@@ -1,4 +1,4 @@
-from urwid import Columns, Filler, ListBox, Text, WidgetWrap
+from urwid import Columns, ListBox, Text, WidgetWrap
 
 from ubuntui.utils import Padding
 from ubuntui.widgets.hr import HR
@@ -15,7 +15,7 @@ class SummaryView(WidgetWrap):
         ]
         self.result_pile += [Padding.center_90(s)
                              for s in self.build_results()]
-        super().__init__(Filler(ListBox(self.result_pile), valign="top"))
+        super().__init__(ListBox(self.result_pile))
 
     def build_results(self):
         rows = []
