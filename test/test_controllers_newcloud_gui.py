@@ -46,7 +46,8 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
         )
         self.mock_common = self.common_patcher.start()
         self.mock_juju = self.juju_patcher.start()
-        self.mock_juju.get_cloud.return_value = {'type': 'lxd'}
+        self.mock_juju.get_cloud_types_by_name.return_value = {'localhost':
+                                                               'lxd'}
         self.track_screen_patcher = patch(
             'conjureup.controllers.newcloud.gui.track_screen')
         self.mock_track_screen = self.track_screen_patcher.start()
@@ -65,6 +66,7 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
         "call render"
         self.mock_utils.lxd_has_ipv6.return_value = False
         self.mock_app.is_jaas = False
+        self.mock_app.current_cloud = 'localhost'
         self.controller.render()
         self.mock_controllers.use.assert_called_once_with('deploy')
 
