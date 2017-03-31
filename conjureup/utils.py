@@ -308,7 +308,7 @@ def setup_metadata_controller():
 
     if bundle_filename.exists():
         # Load bundle data early so we can merge any additional charm options
-        bundle_data = yaml.load(slurp(bundle_filename))
+        bundle_data = yaml.load(bundle_filename.read_text())
     else:
         bundle_name = app.config['metadata'].get('bundle-name', None)
         if bundle_name is None:
