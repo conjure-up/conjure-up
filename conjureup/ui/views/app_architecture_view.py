@@ -8,7 +8,11 @@ from collections import defaultdict
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
-from conjureup.juju import constraints_from_dict, constraints_to_dict
+from conjureup.juju import (
+    constraints_from_dict,
+    constraints_to_dict,
+    get_cloud_types_by_name
+)
 from conjureup.ui.views.machine_pin_view import MachinePinView
 from conjureup.ui.widgets.juju_machines_list import JujuMachinesList
 from ubuntui.ev import EventLoop
@@ -80,7 +84,8 @@ class AppArchitectureView(WidgetWrap):
             self.frame.focus_position = 'body'
 
     def build_widgets(self):
-        controller_is_maas = app.current_cloud == 'maas'
+        cloud_type = get_cloud_types_by_name()[app.current_cloud]
+        controller_is_maas = cloud_type == 'maas'
         if controller_is_maas:
             extra = (" Press enter on a machine ID to pin it to "
                      "a specific MAAS node.")

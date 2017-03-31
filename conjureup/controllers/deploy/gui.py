@@ -395,7 +395,8 @@ class DeployController:
                                    key=attrgetter('service_name'))
         self.undeployed_applications = self.applications[:]
 
-        if app.current_cloud == 'maas':
+        cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
+        if cloud_type == 'maas':
             def try_setup_maas():
                 """Try to init maas client.
                 loops until we get an unexpected exception or we succeed.
