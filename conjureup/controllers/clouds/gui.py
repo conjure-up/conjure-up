@@ -25,12 +25,20 @@ class CloudsController:
     def render(self):
         "Pick or create a cloud to bootstrap a new controller on"
         track_screen("Cloud Select")
-        clouds = juju.get_compatible_clouds()
+
+        compatible_clouds = juju.get_compatible_clouds()
+        all_clouds = juju.get_clouds()
+        clouds = []
+
+        for k, v in all_clouds.items():
+            if v['type'] in compatible_clouds:
+                clouds.append(k)
+
         excerpt = app.config.get(
             'description',
             "Please select from a list of available clouds")
         view = CloudView(app,
-                         clouds,
+                         sorted(clouds),
                          cb=self.finish)
 
         app.ui.set_header(
