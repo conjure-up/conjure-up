@@ -400,35 +400,57 @@ def get_clouds():
     return yaml.safe_load(sh.stdout.decode('utf8'))
 
 
-def get_compatible_clouds(clouds=None):
-    """ List clouds which are compatible with the current spell and controller.
+def get_compatible_clouds(cloud_types=None):
+    """ List cloud types compatible with the current spell and controller.
 
     Arguments:
     clouds: optional initial list of clouds to filter
     Returns:
-    List of cloud names
+    List of cloud types
     """
-    clouds = set(clouds or get_clouds().keys())
+    clouds = get_clouds()
+    cloud_types = set(cloud_types or (c['type'] for c in clouds.values()))
+
+    if 'lxd' in cloud_types:
+        # normalize 'lxd' cloud type to localhost; 'lxd' can happen
+        # depending on how the controller was bootstrapped
+        cloud_types -= {'lxd'}
+        cloud_types |= {'localhost'}
 
     if not is_linux():
         # LXD not available on macOS
-        clouds.remove('localhost')
+        cloud_types -= {'localhost'}
 
     if app.current_controller:
         # if we already have a controller, we should query
         # it via the API for what clouds it supports; for now,
         # though, just assume it's JAAS and hard-code the options
-        clouds &= consts.JAAS_CLOUDS
+        cloud_types &= consts.JAAS_CLOUDS
 
     whitelist = set(app.config['metadata'].get('cloud-whitelist', []))
     blacklist = set(app.config['metadata'].get('cloud-blacklist', []))
     if len(whitelist) > 0:
-        return sorted(clouds & whitelist)
+        return sorted(cloud_types & whitelist)
 
     elif len(blacklist) > 0:
-        return sorted(clouds ^ blacklist)
+        return sorted(cloud_types ^ blacklist)
 
-    return sorted(clouds)
+    return sorted(cloud_types)
+
+
+def get_cloud_types_by_name():
+    """ Return a mapping of cloud names to their type.
+
+    This accounts for some normalizations that get_clouds() doesn't.
+    """
+    clouds = {n: c['type'] for n, c in get_clouds().items()}
+
+    if 'lxd' in clouds:
+        # normalize 'lxd' cloud type to localhost; 'lxd' can happen
+        # depending on how the controller was bootstrapped
+        clouds['localhost'] = clouds.pop('lxd')
+
+    return clouds
 
 
 def get_cloud(name):

@@ -45,6 +45,7 @@ class ControllerPicker:
     def render(self):
         existing_controllers = juju.get_controllers()['controllers']
         clouds = juju.get_compatible_clouds()
+        cloud_types = juju.get_cloud_types_by_name()
 
         app.jaas_ok = set(clouds) & JAAS_CLOUDS
         jaas_controller = {n for n, c in existing_controllers.items()
@@ -52,9 +53,9 @@ class ControllerPicker:
         if jaas_controller:
             app.jaas_controller = jaas_controller.pop()
 
-        filtered_controllers = {n: d for n, d
-                                in existing_controllers.items()
-                                if d['cloud'] in clouds}
+        filtered_controllers = {n: d
+                                for n, d in existing_controllers.items()
+                                if cloud_types.get(d['cloud']) in clouds}
 
         if not app.jaas_ok and len(filtered_controllers) == 0:
             return controllers.use('clouds').render()
