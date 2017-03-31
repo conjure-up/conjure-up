@@ -168,9 +168,7 @@ class NewCloudController:
                 utils.gen_hash())
 
         if app.current_model is None:
-            app.current_model = "conjure-up-{}-{}".format(
-                app.env['CONJURE_UP_SPELL'],
-                utils.gen_hash())
+            app.current_model = utils.gen_model()
 
         # LXD is a special case as we want to make sure a bridge
         # is configured. If not we'll bring up a new view to allow

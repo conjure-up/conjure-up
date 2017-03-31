@@ -13,9 +13,7 @@ class CloudsController:
         if app.argv.model:
             app.current_model = app.argv.model
         else:
-            app.current_model = "conjure-up-{}-{}".format(
-                app.env['CONJURE_UP_SPELL'],
-                utils.gen_hash())
+            app.current_model = utils.gen_model()
 
         if not app.argv.controller:
             app.current_controller = "conjure-up-{}-{}".format(

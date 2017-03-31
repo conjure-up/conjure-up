@@ -423,6 +423,13 @@ def gen_hash():
     return str(uuid.uuid4()).split('-')[0][:3]
 
 
+def gen_model():
+    """ generates a unique model name
+    """
+    name = "conjure-{}".format(app.env['CONJURE_UP_SPELL'])
+    return "{}-{}".format(name[:24], gen_hash())
+
+
 def is_darwin():
     """ Checks if host platform is macOS
     """
