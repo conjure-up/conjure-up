@@ -72,7 +72,6 @@ class NewCloudController:
             if future is None:
                 return
             future.add_done_callback(self.__handle_add_model_done)
-            print("deploy #2")
             controllers.use('deploy').render()
             return
 
@@ -91,7 +90,6 @@ class NewCloudController:
         if future is None:
             return
         future.add_done_callback(self.__handle_bootstrap_done)
-        print("deploy #3")
         controllers.use('deploy').render()
 
     def __post_bootstrap_exec(self):
@@ -200,7 +198,6 @@ class NewCloudController:
         creds = common.try_get_creds(app.current_cloud)
         if creds and cloud_type != 'maas':
             self.__do_bootstrap(credential=creds)
-            print("deploy #1")
             return controllers.use('deploy').render()
 
         # show credentials editor otherwise
