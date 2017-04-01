@@ -2,11 +2,9 @@ urwid
 pyyaml
 jinja2
 requests_oauthlib
-ws4py==0.3.4
-nose
-tox
+ws4py
 termcolor
 progressbar2
 prettytable
-q
 juju_wait
+ipython
