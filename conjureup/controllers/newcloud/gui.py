@@ -153,7 +153,8 @@ class NewCloudController:
         credentials_key = common.try_get_creds(app.current_cloud)
 
         cloud_with_creds = None
-        if app.current_cloud == 'maas':
+        cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
+        if cloud_type == 'maas':
             cloud_with_creds = '{}/{}'.format(
                 app.current_cloud, credentials['fields'][0]['input'].value)
         self.__do_bootstrap(credential=credentials_key,
@@ -175,10 +176,9 @@ class NewCloudController:
         # a user to configure a LXD bridge with suggested network
         # information.
 
+        cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
         try:
-            cloud = juju.get_cloud(app.current_cloud)
-
-            if cloud['type'] == 'lxd':
+            if cloud_type == 'lxd':
                 lxd = common.is_lxd_ready()
                 if not lxd['ready']:
                     return controllers.use('lxdsetup').render(lxd['msg'])
@@ -186,7 +186,7 @@ class NewCloudController:
                 return
         except LookupError as e:
             # TODO: Add vsphere once lp bug 1671650 is resolved
-            if app.current_cloud in ['maas']:
+            if cloud_type in ['maas']:
                 app.log.debug(
                     "Not a cloud, using provider type: {}".format(
                         app.current_cloud))
@@ -196,7 +196,7 @@ class NewCloudController:
         # XXX: always prompt for maas information for now as there is no way to
         # logically store the maas server ip for future sessions.
         creds = common.try_get_creds(app.current_cloud)
-        if creds and app.current_cloud != 'maas':
+        if creds and cloud_type != 'maas':
             self.__do_bootstrap(credential=creds)
             return controllers.use('deploy').render()
 
