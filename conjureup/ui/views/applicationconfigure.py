@@ -169,7 +169,11 @@ class ApplicationConfigureView(WidgetWrap):
     def _get_option_widgets(self, opnames, options):
         ws = []
         for opname in opnames:
-            opdict = options[opname]
+            try:
+                opdict = options[opname]
+            except KeyError:
+                app.log.debug("Unknown charm option ({}), skipping".format(opname))
+                continue
             cv = self.application.options.get(opname, None)
             ow = OptionWidget(opname,
                               opdict['Type'],
