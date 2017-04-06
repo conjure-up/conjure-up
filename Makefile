@@ -8,25 +8,26 @@ GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
 VERSION := 2.2-beta3
 
 
-.PHONY: install-dependencies
-install-dependencies:
-	sudo apt-get -yy install devscripts equivs pandoc bsdtar jq libsystemd-dev tox snapcraft
-	sudo mk-build-deps -i -t "apt-get --no-install-recommends -y" debian/control
+.PHONY: sysdeps
+sysdeps:
+	@sudo apt-get update
+	@sudo apt-get -qqyf install jq python3-yaml bsdtar bridge-utils software-properties-common snapcraft
 
-.PHONY: uninstall-dependencies
-uninstall-dependencies:
-	sudo apt-get remove conjure-build-deps
+.PHONY: install
+install: snap
+	@sudo snap install $(NAME)_$(VERSION)_amd64.snap --classic --dangerous
 
-release: update-version clean test
+release: update-version clean test snap
 
 update-version:
 	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjureup/__init__.py
 	@sed -i -r "s/(^version:\s)(.*)/\1$(VERSION)/" snap/snapcraft.yaml
 
-release-snap: update-version clean clean-snapcraft test
-	@(cd snap && snapcraft)
+snap: sysdeps update-version clean test
+	@snapcraft
 	@echo
-	@echo "Build complete, now run snapcraft push snap/$(NAME)_$(VERSION)_amd64.snap --release edge"
+	@echo "Build complete, now run snapcraft push $(NAME)_$(VERSION)_amd64.snap --release edge"
+	@echo "Or install with sudo snap install $(NAME)_$(VERSION)_amd64.snap --classic --dangerous"
 	@echo
 
 clean:
@@ -49,12 +50,10 @@ clean:
 	@find ubuntui/ -name \*.pyc -delete
 	@find macumba/ -name \*.pyc -delete
 	@find . -name __pycache__ -delete
-
-clean-snapcraft:
-	@(cd snap && snapcraft clean)
+	@snapcraft clean
 
 .PHONY: test
-test:
+test: auto-format
 	@tox -e py35,flake,isort
 
 git-sync-requirements:
@@ -67,16 +66,6 @@ git_rev:
 dev: clean
 	tox -e conjure-dev
 	@echo "Run 'source conjure-dev/bin/activate' to enter the dev venv"
-
-# Indirection to allow 'make run' to build deb automatically, but
-# 'make sbuild; make run' will not invoke 'deb'.
-../conjure*.deb: deb
-	echo "rule to make .deb automatically"
-
-.PHONY: install
-install: ../conjure*.deb
-	sudo dpkg -i ../conjure-up_*deb
-	sudo apt-get -yy install -f
 
 # Fix some of the python formatting preferred by pylint
 auto-format:
