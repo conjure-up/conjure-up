@@ -8,6 +8,7 @@ from functools import partial
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup import utils
+from conjureup.app_config import app
 from conjureup.ui.widgets.option_widget import OptionWidget
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
@@ -172,7 +173,8 @@ class ApplicationConfigureView(WidgetWrap):
             try:
                 opdict = options[opname]
             except KeyError:
-                app.log.debug("Unknown charm option ({}), skipping".format(opname))
+                app.log.debug(
+                    "Unknown charm option ({}), skipping".format(opname))
                 continue
             cv = self.application.options.get(opname, None)
             ow = OptionWidget(opname,
