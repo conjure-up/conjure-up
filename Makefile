@@ -31,6 +31,7 @@ snap: sysdeps update-version clean test
 	@echo
 
 clean:
+	@snapcraft clean
 	@rm -rf *egg*
 	@rm -rf site.py
 	@rm -rf easy-install*
@@ -50,7 +51,6 @@ clean:
 	@find ubuntui/ -name \*.pyc -delete
 	@find macumba/ -name \*.pyc -delete
 	@find . -name __pycache__ -delete
-	@snapcraft clean
 
 .PHONY: test
 test: auto-format
