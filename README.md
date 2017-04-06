@@ -23,6 +23,12 @@ $ sudo snap install conjure-up --classic
 
 Trusty users please [see here](http://conjure-up.io/docs/en/users/#install-trusty-caveat)
 
+## macOS
+
+```
+$ brew install conjure-up
+```
+
 # how to use
 
 ## Run the installer interactively
