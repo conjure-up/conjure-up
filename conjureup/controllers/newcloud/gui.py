@@ -156,7 +156,7 @@ class NewCloudController:
         cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
         if cloud_type == 'maas':
             cloud_with_creds = '{}/{}'.format(
-                app.current_cloud, credentials['fields'][0]['input'].value)
+                app.current_cloud, credentials.fields()[0].value)
         self.__do_bootstrap(credential=credentials_key,
                             cloud_with_creds=cloud_with_creds)
 

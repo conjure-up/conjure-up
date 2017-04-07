@@ -451,6 +451,11 @@ def get_cloud_types_by_name():
         if cloud_type == 'lxd':
             clouds[name] = 'localhost'
 
+    # Since MAAS is a provider type and not identified as a cloud
+    # we special case this so that selecting MAAS acts like any
+    # other cloud selection.
+    if 'maas' not in clouds:
+        clouds['maas'] = 'maas'
     return clouds
 
 
