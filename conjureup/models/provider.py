@@ -45,11 +45,12 @@ class Field:
     def validate(self):
         """ Validator for field
         """
+        self.error.set_text("")
+
         if self.required and not self.value:
             self.error.set_text("This field is required and cannot be empty.")
             return False
         if self.validator and callable(self.validator):
-            self.error.set_text("")
             is_valid, msg = self.validator()
             if not is_valid:
                 self.error.set_text(msg)
