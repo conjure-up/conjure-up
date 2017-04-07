@@ -1,5 +1,6 @@
 from collections import OrderedDict
-
+from functools import partial
+from urwid import Text
 from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
 
 """ Defining the schema
@@ -11,254 +12,339 @@ A typical schema is:
 'auth-type': 'access-key' - defines the auth type supported by provider
 'fields': [] - editable fields in the ui, each field can contain:
   'label'    - Friendly label to the user
-  'input'    - Input widget
+  'widget'   - Input widget
   'key'      - key that matches what the provider expects for authentication
   'storable' - if False will skip storing key=value in credentials
+  'validator'- Function to check validity, returns (Boolean, "Optional error")
 """
-aws = {
-    'auth-type': 'access-key',
-    'fields': [
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'access-key'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'secret-key'
-        }
-    ]
-}
 
-maas = {
-    'auth-type': 'oauth1',
-    'fields': [
-        {
-            'label': 'server address (only the ip or dns name)',
-            'input': StringEditor(),
-            'key': 'endpoint',
-            'storable': False
-        },
-        {
-            'label': 'api key',
-            'input': StringEditor(),
-            'key': 'maas-oauth'
-        }
-    ]
-}
 
-azure = {
-    'auth-type': 'service-principal-secret',
-    'fields': [
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'application-id'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'subscription-id'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'tenant-id'
-        },
-        {
-            'label': None,
-            'input': PasswordEditor(),
-            'key': 'application-password'
-        }
-        # {
-        #     'label': None,
-        #     'input': StringEditor(),
-        #     'key': 'storage-account-type'
-        # }
-    ]
-}
+class Field:
+    """ Field class with validation
+    """
+    def __init__(self,
+                 label=None,
+                 widget=None,
+                 key=None,
+                 storable=True,
+                 error=None,
+                 required=True,
+                 validator=None):
+        self.label = label
+        self.widget = widget
+        self.key = key
+        self.storable = storable
+        self.error = Text("")
+        self.required = required
+        self.validator = validator
 
-google = {
-    'auth-type': 'oauth2',
-    'fields': [
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'private-key'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'client-id'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'client-email'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'project-id'
-        }
-    ]
-}
+    def validate(self):
+        """ Validator for field
+        """
+        if self.required and not self.value:
+            self.error.set_text("This field is required and cannot be empty.")
+            return False
+        if self.validator and callable(self.validator):
+            self.error.set_text("")
+            is_valid, msg = self.validator()
+            if not is_valid:
+                self.error.set_text(msg)
+                return False
+        return True
 
-cloudsigma = {
-    'auth-type': 'userpass',
-    'fields': [
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'username'
-        },
-        {
-            'label': None,
-            'input': PasswordEditor(),
-            'key': 'password'
-        }
+    @property
+    def value(self):
+        return self.widget.value
 
-    ]
-}
 
-joyent = {
-    'auth-type': 'userpass',
-    'fields': [
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'sdc-user'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'sdc-key-id'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'private-key'
-        },
-        {
-            'label': None,
-            'input': StringEditor(default='rsa-sha256'),
-            'key': 'algorithm'
-        }
-    ]
-}
+class BaseProvider:
+    """ Base provider for all schemas
+    """
+    AUTH_TYPE = None
 
-openstack = {
-    'auth-type': 'userpass',
-    'fields': [
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'username'
-        },
-        {
-            'label': None,
-            'input': PasswordEditor(),
-            'key': 'password'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'tenant-name'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'domain-name'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'project-domain-name'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'access-key'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'secret-key'
-        },
-        # {
-        #     'label': None,
-        #     'input': StringEditor(),
-        #     'key': 'region',
-        #     'type': 'openstack'
-        # },
-        # {
-        #     'label': None,
-        #     'input': YesNo(),
-        #     'key': 'use-floating-ip',
-        #     'type': 'openstack'
-        # },
-        # {
-        #     'label': None,
-        #     'input': YesNo(),
-        #     'key': 'use-default-secgroup',
-        #     'type': 'openstack'
-        # },
-        # {
-        #     'label': None,
-        #     'input': StringEditor(),
-        #     'key': 'network'
-        # },
-        # {
-        #     'label': None,
-        #     'input': StringEditor(),
-        #     'key': 'external-network'
-        # }
-    ]
-}
+    def is_valid(self):
+        validations = []
+        for f in self.fields():
+            validations.append(f.validate())
 
-vsphere = {
-    'auth-type': 'userpass',
-    'fields': [
-        {
-            'label': 'api-endpoint',
-            'input': StringEditor(),
-            'key': 'endpoint',
-            'storable': False
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'user'
-        },
-        {
-            'label': None,
-            'input': PasswordEditor(),
-            'key': 'password'
-        },
-        {
-            'label': None,
-            'input': StringEditor(),
-            'key': 'external-network',
-            'storable': False
-        },
-    ]
-}
+        if not all(validations):
+            return False
+        return True
+
+    def fields(self):
+        raise NotImplementedError
+
+
+class AWS(BaseProvider):
+    AUTH_TYPE = 'access-key'
+    ACCESS_KEY = Field(label='AWS Access Key',
+                       widget=StringEditor(),
+                       key='access-key')
+    SECRET_KEY = Field(label='AWS Secret Key',
+                       widget=StringEditor(),
+                       key='secret-key'),
+
+    def fields(self):
+        return [
+            self.ACCESS_KEY,
+            self.SECRET_KEY
+        ]
+
+
+class MAAS(BaseProvider):
+    AUTH_TYPE = 'oauth1'
+
+    def __init__(self):
+        self.address = Field(
+            label='server address (only the ip or dns name)',
+            widget=StringEditor(),
+            key='endpoint',
+            storable=False
+        )
+        self.apikey = Field(
+            label='api key',
+            widget=StringEditor(),
+            key='maas-oauth',
+            validator=partial(self._has_correct_api_key)
+        )
+
+    def fields(self):
+        return [
+            self.address,
+            self.apikey
+        ]
+
+    def _has_correct_api_key(self):
+        """ Validates MAAS Api key
+        """
+        key = self.apikey.value.split(':')
+        if len(key) != 3:
+            return (False,
+                    "Could not determine tokens, usually indicates an "
+                    "error with the format of the API KEY. That format "
+                    "should be 'aaaaa:bbbbb:cccc'")
+        return (True, None)
+
+
+class Azure(BaseProvider):
+    AUTH_TYPE = 'service-principal-secret'
+
+    def __init__(self):
+        self.application_id = Field(
+            label='application id',
+            widget=StringEditor(),
+            key='application-id'
+        )
+        self.subscription_id = Field(
+            label='subscription id',
+            widget=StringEditor(),
+            key='subscription-id'
+        )
+        self.tenant_id = Field(
+            label='tenant id',
+            widget=StringEditor(),
+            key='tenant-id'
+        )
+        self.application_password = Field(
+            label='application password',
+            widget=PasswordEditor(),
+            key='application-password'
+        )
+
+    def fields(self):
+        return [
+            self.application_id,
+            self.subscription_id,
+            self.tenant_id,
+            self.application_password
+        ]
+
+
+class Google(BaseProvider):
+    AUTH_TYPE = 'oauth2'
+
+    def __init__(self):
+        self.private_key = Field(
+            label='private key',
+            widget=StringEditor(),
+            key='private-key'
+        )
+        self.client_id = Field(
+            label='private key',
+            widget=StringEditor(),
+            key='client-id'
+        )
+        self.client_email = Field(
+            label='client email',
+            widget=StringEditor(),
+            key='client-email'
+        )
+        self.project_id = Field(
+            label='project id',
+            widget=StringEditor(),
+            key='project-id'
+        )
+
+    def fields(self):
+        return [
+            self.private_key,
+            self.client_id,
+            self.client_email,
+            self.project_id
+        ]
+
+
+class CloudSigma(BaseProvider):
+    AUTH_TYPE = 'userpass'
+
+    def __init__(self):
+        self.username = Field(
+            label='username',
+            widget=StringEditor(),
+            key='username'
+        )
+        self.password = Field(
+            label='password',
+            widget=StringEditor(),
+            key='password'
+        )
+
+    def fields(self):
+        return [
+            self.username,
+            self.password
+        ]
+
+
+class Joyent(BaseProvider):
+    AUTH_TYPE = 'userpass'
+
+    def __init__(self):
+        self.sdc_user = Field(
+            label='sdc user',
+            widget=StringEditor(),
+            key='sdc-user'
+        )
+        self.sdc_key_id = Field(
+            label='sdc key id',
+            widget=StringEditor(),
+            key='sdc-key-id'
+        )
+        self.private_key = Field(
+            label='private key',
+            widget=StringEditor(),
+            key='private-key'
+        )
+        self.algorithm = Field(
+            label='algorithm',
+            widget=StringEditor(default='rsa-sha256'),
+            key='algorithm'
+        )
+
+    def fields(self):
+        return [
+            self.sdc_user,
+            self.sdc_key_id,
+            self.private_key,
+            self.algorithm
+        ]
+
+
+class OpenStack(BaseProvider):
+    AUTH_TYPE = 'userpass'
+
+    def __init__(self):
+        self.username = Field(
+            label='username',
+            widget=StringEditor(),
+            key='username'
+        )
+        self.password = Field(
+            label='password',
+            widget=PasswordEditor(),
+            key='password'
+        )
+        self.domain_name = Field(
+            label='domain name',
+            widget=StringEditor(),
+            key='domain-name'
+        )
+        self.project_domain_name = Field(
+            label='project domain name',
+            widget=StringEditor(),
+            key='project-domain-name'
+        )
+        self.access_key = Field(
+            label='access key',
+            widget=StringEditor(),
+            key='access-key'
+        )
+        self.secret_key = Field(
+            label='secret key',
+            widget=StringEditor(),
+            key='secret-key'
+        )
+
+    def fields(self):
+        return [
+            self.username,
+            self.password,
+            self.domain_name,
+            self.project_domain_name,
+            self.access_key,
+            self.secret_key,
+        ]
+
+
+class VSphere(BaseProvider):
+    AUTH_TYPE = 'userpass'
+
+    def __init__(self):
+        self.api_endpoint = Field(
+            label='api endpoint',
+            widget=StringEditor(),
+            key='endpoint',
+            storable=False
+        )
+        self.user = Field(
+            label='user',
+            widget=StringEditor(),
+            key='user'
+        )
+        self.password = Field(
+            label='password',
+            widget=PasswordEditor(),
+            key='password'
+        )
+        self.external_network = Field(
+            label='external network',
+            widget=StringEditor(),
+            key='external-network',
+            storable=False
+        )
+
+    def fields(self):
+        return [
+            self.api_endpoint,
+            self.user,
+            self.password,
+            self.external_network
+        ]
 
 
 Schema = [
-    ('aws', aws),
-    ('aws-china', aws),
-    ('aws-gov', aws),
-    ('maas', maas),
-    ('azure', azure),
-    ('azure-china', azure),
-    ('google', google),
-    ('cloudsigma', cloudsigma),
-    ('joyent', joyent),
-    ('openstack', openstack),
-    ('rackspace', openstack),
-    ('vsphere', vsphere)
+    ('aws', AWS),
+    ('aws-china', AWS),
+    ('aws-gov', AWS),
+    ('maas', MAAS),
+    ('azure', Azure),
+    ('azure-china', Azure),
+    ('google', Google),
+    ('cloudsigma', CloudSigma),
+    ('joyent', Joyent),
+    ('openstack', OpenStack),
+    ('rackspace', OpenStack),
+    ('vsphere', VSphere)
 ]
 
 
@@ -268,7 +354,7 @@ def load_schema(cloud):
     for s in Schema:
         k, v = s
         if cloud == k:
-            return v
+            return v()
     raise Exception("Could not find schema for: {}".format(cloud))
 
 

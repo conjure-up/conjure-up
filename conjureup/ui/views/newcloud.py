@@ -4,13 +4,12 @@ from conjureup.app_config import app
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
 from ubuntui.widgets.hr import HR
-from ubuntui.widgets.input import StringEditor
 
 
 class NewCloudView(WidgetWrap):
 
     def __init__(self, schema, cb):
-        self.input_items = schema
+        self.schema = schema
         self.cb = cb
         self.frame = Frame(body=self._build_widget(),
                            footer=self._build_footer())
@@ -21,20 +20,21 @@ class NewCloudView(WidgetWrap):
         total_items = [Text(
             "Enter your {} credentials:".format(app.current_cloud.upper()))]
         total_items += [HR()]
-        for field in self.input_items['fields']:
-            label = field['key']
-            if field['label'] is not None:
-                label = field['label']
+        for field in self.schema.fields():
+            label = field.key
+            if field.label is not None:
+                label = field.label
 
             col = Columns(
                 [
                     ('weight', 0.5, Text(label, align='right')),
                     Color.string_input(
-                        field['input'],
+                        field.widget,
                         focus_map='string_input focus')
                 ], dividechars=1
             )
             total_items.append(col)
+            total_items.append(Color.error_major(field.error))
             total_items.append(Padding.line_break(""))
         return total_items
 
@@ -81,29 +81,9 @@ class NewCloudView(WidgetWrap):
         rv = super().keypress(size, key)
         return rv
 
-    def validate(self):
-        """ Will provide an error text if any fields are blank
-        """
-        values = []
-        for i in self.input_items.values():
-            if isinstance(i, tuple) and len(i) == 2:
-                if isinstance(i[1], StringEditor):
-                    values.append(i[1].value)
-            if isinstance(i, StringEditor):
-                values.append(i.value)
-
-        if None in values:
-            self.pile.contents[-1] = (
-                Padding.center_60(
-                    Color.error_major(
-                        Text("Please fill all required fields."))),
-                self.pile.options())
-            return False
-        return True
-
     def cancel(self, btn):
         self.cb(back=True)
 
     def submit(self, result):
-        if self.validate():
-            self.cb(self.input_items)
+        if self.schema.is_valid():
+            self.cb(self.schema)
