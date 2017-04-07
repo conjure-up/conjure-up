@@ -177,21 +177,12 @@ class NewCloudController:
         # information.
 
         cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
-        try:
-            if cloud_type == 'lxd':
-                lxd = common.is_lxd_ready()
-                if not lxd['ready']:
-                    return controllers.use('lxdsetup').render(lxd['msg'])
-                self.__do_bootstrap()
-                return
-        except LookupError as e:
-            # TODO: Add vsphere once lp bug 1671650 is resolved
-            if cloud_type in ['maas']:
-                app.log.debug(
-                    "Not a cloud, using provider type: {}".format(
-                        app.current_cloud))
-            else:
-                raise Exception(e)
+        if cloud_type == 'localhost':
+            lxd = common.is_lxd_ready()
+            if not lxd['ready']:
+                return controllers.use('lxdsetup').render(lxd['msg'])
+            self.__do_bootstrap()
+            return
 
         # XXX: always prompt for maas information for now as there is no way to
         # logically store the maas server ip for future sessions.
