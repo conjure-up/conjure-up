@@ -47,7 +47,7 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
         self.mock_common = self.common_patcher.start()
         self.mock_juju = self.juju_patcher.start()
         self.mock_juju.get_cloud_types_by_name.return_value = {'localhost':
-                                                               'lxd'}
+                                                               'localhost'}
         self.track_screen_patcher = patch(
             'conjureup.controllers.newcloud.gui.track_screen')
         self.mock_track_screen = self.track_screen_patcher.start()
