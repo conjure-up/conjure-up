@@ -18,6 +18,7 @@ install: snap
 	@sudo snap install $(NAME)_$(VERSION)_amd64.snap --classic --dangerous
 
 release: update-version clean test snap
+	@snapcraft push $(NAME)_$(VERSION)_amd64.snap --release edge
 
 update-version:
 	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjureup/__init__.py
