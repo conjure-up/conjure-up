@@ -1,7 +1,10 @@
 from collections import OrderedDict
 from functools import partial
+
 from urwid import Text
+
 from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
+
 
 """ Defining the schema
 
@@ -22,6 +25,7 @@ A typical schema is:
 class Field:
     """ Field class with validation
     """
+
     def __init__(self,
                  label=None,
                  widget=None,
@@ -119,10 +123,13 @@ class MAAS(BaseProvider):
         """
         key = self.apikey.value.split(':')
         if len(key) != 3:
-            return (False,
-                    "Could not determine tokens, usually indicates an "
-                    "error with the format of the API KEY. That format "
-                    "should be 'aaaaa:bbbbb:cccc'")
+            return (
+                False,
+                "Could not determine tokens, usually indicates an "
+                "error with the format of the API KEY. That format "
+                "should be 'aaaaa:bbbbb:cccc'. Please visit your MAAS user "
+                "preferences page to grab the correct API Key: "
+                "http://<maas-server>:5240/MAAS/account/prefs/")
         return (True, None)
 
 

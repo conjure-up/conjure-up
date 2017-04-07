@@ -171,18 +171,26 @@ class NewCloudController:
         if app.current_model is None:
             app.current_model = utils.gen_model()
 
-        # LXD is a special case as we want to make sure a bridge
-        # is configured. If not we'll bring up a new view to allow
-        # a user to configure a LXD bridge with suggested network
-        # information.
+        try:
+            # LXD is a special case as we want to make sure a bridge
+            # is configured. If not we'll bring up a new view to allow
+            # a user to configure a LXD bridge with suggested network
+            # information.
 
-        cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
-        if cloud_type == 'localhost':
-            lxd = common.is_lxd_ready()
-            if not lxd['ready']:
-                return controllers.use('lxdsetup').render(lxd['msg'])
-            self.__do_bootstrap()
-            return
+            cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
+            if cloud_type == 'localhost':
+                lxd = common.is_lxd_ready()
+                if not lxd['ready']:
+                    return controllers.use('lxdsetup').render(lxd['msg'])
+                self.__do_bootstrap()
+                return
+        except KeyError:
+            if app.current_cloud == "maas":
+                cloud_type = "maas"
+            else:
+                raise Exception(
+                    "Attempted to query unknown cloud type: {}".format(
+                        app.current_cloud))
 
         # XXX: always prompt for maas information for now as there is no way to
         # logically store the maas server ip for future sessions.

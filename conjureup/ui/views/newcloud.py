@@ -34,7 +34,14 @@ class NewCloudView(WidgetWrap):
                 ], dividechars=1
             )
             total_items.append(col)
-            total_items.append(Color.error_major(field.error))
+            total_items.append(
+                Columns(
+                    [
+                        ('weight', 0.5, Text("")),
+                        Color.error_major(field.error)
+                    ], dividechars=1
+                )
+            )
             total_items.append(Padding.line_break(""))
         return total_items
 
