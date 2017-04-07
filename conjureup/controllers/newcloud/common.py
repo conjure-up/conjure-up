@@ -15,11 +15,11 @@ def __format_creds(creds):
     """ Formats the credentials into strings from the widgets values
     """
     formatted = {}
-    formatted['auth-type'] = creds['auth-type']
-    for field in creds['fields']:
-        if 'storable' in field and not field['storable']:
+    formatted['auth-type'] = creds.AUTH_TYPE
+    for field in creds.fields():
+        if not field.storable:
             continue
-        formatted[field['key']] = field['input'].value
+        formatted[field.key] = field.value
 
     return formatted
 
