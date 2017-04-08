@@ -89,7 +89,7 @@ class AWS(BaseProvider):
                                 key='access-key')
         self.secret_key = Field(label='AWS Secret Key',
                                 widget=StringEditor(),
-                                key='secret-key'),
+                                key='secret-key')
 
     def fields(self):
         return [
