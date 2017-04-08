@@ -82,17 +82,19 @@ class BaseProvider:
 
 class AWS(BaseProvider):
     AUTH_TYPE = 'access-key'
-    ACCESS_KEY = Field(label='AWS Access Key',
-                       widget=StringEditor(),
-                       key='access-key')
-    SECRET_KEY = Field(label='AWS Secret Key',
-                       widget=StringEditor(),
-                       key='secret-key'),
+
+    def __init__(self):
+        self.access_key = Field(label='AWS Access Key',
+                                widget=StringEditor(),
+                                key='access-key')
+        self.secret_key = Field(label='AWS Secret Key',
+                                widget=StringEditor(),
+                                key='secret-key'),
 
     def fields(self):
         return [
-            self.ACCESS_KEY,
-            self.SECRET_KEY
+            self.access_key,
+            self.secret_key
         ]
 
 
