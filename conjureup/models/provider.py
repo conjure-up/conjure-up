@@ -180,7 +180,7 @@ class Google(BaseProvider):
             key='private-key'
         )
         self.client_id = Field(
-            label='private key',
+            label='client id',
             widget=StringEditor(),
             key='client-id'
         )
