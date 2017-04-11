@@ -1,4 +1,7 @@
 urwid
+ubuntui
+macumba
+bundle-placement
 pyyaml
 jinja2
 requests_oauthlib

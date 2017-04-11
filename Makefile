@@ -50,20 +50,14 @@ clean:
 	@rm -rf conjure-up
 	@rm -rf dist
 	@rm -rf conjure-dev
-	@find bundleplacer/ -name \*.pyc -delete
 	@find conjureup/ -name \*.pyc -delete
 	@find test/ -name \*.pyc -delete
-	@find ubuntui/ -name \*.pyc -delete
-	@find macumba/ -name \*.pyc -delete
 	@find . -name __pycache__ -delete
+	@rm -rf *.snap
 
 .PHONY: test
 test: auto-format
 	@tox -e py35,flake,isort
-
-git-sync-requirements:
-	if [ ! -f tools/sync-repo.py ]; then echo "Need to download sync-repo.py from https://git.io/v2mEw" && exit 1; fi
-	tools/sync-repo.py -m repo-manifest.json -f
 
 git_rev:
 	@echo $(GIT_REV)
