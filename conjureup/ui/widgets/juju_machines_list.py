@@ -16,11 +16,11 @@
 import logging
 from operator import attrgetter
 
+from ubuntui.widgets.buttons import PlainButton
 from urwid import AttrMap, Columns, Divider, Pile, Text, WidgetWrap
 
 from conjureup.ui.widgets.filter_box import FilterBox
 from conjureup.ui.widgets.juju_machine_widget import JujuMachineWidget
-from ubuntui.widgets.buttons import PlainButton
 
 log = logging.getLogger('bundleplacer')
 

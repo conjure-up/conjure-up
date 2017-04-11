@@ -2,13 +2,14 @@ import os.path as path
 from collections import OrderedDict, deque
 from functools import partial
 
+from ubuntui.ev import EventLoop
+
 from conjureup import async, controllers, utils
 from conjureup.app_config import app
 from conjureup.controllers.steps import common
 from conjureup.telemetry import track_exception, track_screen
 from conjureup.ui.views.steps import StepsView
 from conjureup.ui.widgets.step import StepWidget
-from ubuntui.ev import EventLoop
 
 
 class StepsController:

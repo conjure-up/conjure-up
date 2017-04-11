@@ -7,13 +7,14 @@ import argparse
 import os
 import sys
 
+from ubuntui.ev import EventLoop
+from ubuntui.palette import STYLES
+
 from conjureup import __version__ as VERSION
 from conjureup import async, controllers, utils
 from conjureup.app_config import app
 from conjureup.log import setup_logging
 from conjureup.ui import ConjureUI
-from ubuntui.ev import EventLoop
-from ubuntui.palette import STYLES
 
 
 def parse_options(argv):

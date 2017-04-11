@@ -9,14 +9,14 @@ from functools import partial, wraps
 from pathlib import Path
 from subprocess import DEVNULL, PIPE, CalledProcessError, Popen, TimeoutExpired
 
-import yaml
-
 import macumba
+import yaml
 from bundleplacer.charmstore_api import CharmStoreID
+from macumba.v2 import JujuClient
+
 from conjureup import async, consts
 from conjureup.app_config import app
 from conjureup.utils import is_linux, juju_path, run
-from macumba.v2 import JujuClient
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
 

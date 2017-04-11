@@ -5,15 +5,15 @@
 import logging
 from functools import partial
 
+from ubuntui.ev import EventLoop
+from ubuntui.utils import Color, Padding
+from ubuntui.widgets.buttons import PlainButton, menu_btn
+from ubuntui.widgets.hr import HR
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup import utils
 from conjureup.app_config import app
 from conjureup.ui.widgets.option_widget import OptionWidget
-from ubuntui.ev import EventLoop
-from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import PlainButton, menu_btn
-from ubuntui.widgets.hr import HR
 
 log = logging.getLogger('conjure')
 

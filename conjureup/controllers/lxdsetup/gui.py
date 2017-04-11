@@ -1,10 +1,11 @@
 from tempfile import NamedTemporaryFile
 
+from ubuntui.ev import EventLoop
+
 from conjureup import controllers, utils
 from conjureup.app_config import app
 from conjureup.telemetry import track_screen
 from conjureup.ui.views.lxdsetup import LXDSetupView
-from ubuntui.ev import EventLoop
 
 
 class LXDSetupController:

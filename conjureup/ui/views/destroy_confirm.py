@@ -1,12 +1,12 @@
 import datetime
 
-from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
-
-from conjureup.api.models import model_status
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.text import Instruction
+from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
+
+from conjureup.api.models import model_status
 
 
 class DestroyConfirmView(WidgetWrap):

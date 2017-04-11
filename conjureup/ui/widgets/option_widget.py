@@ -16,6 +16,9 @@
 import logging
 from enum import Enum
 
+from ubuntui.utils import Color, Padding
+from ubuntui.widgets.buttons import PlainButton
+from ubuntui.widgets.input import StringEditor
 from urwid import (
     CheckBox,
     Columns,
@@ -26,10 +29,6 @@ from urwid import (
     WidgetWrap,
     connect_signal
 )
-
-from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import PlainButton
-from ubuntui.widgets.input import StringEditor
 
 log = logging.getLogger('conjure')
 

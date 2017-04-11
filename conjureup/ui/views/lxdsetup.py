@@ -1,9 +1,8 @@
-from urwid import Filler, Pile, Text, WidgetWrap
-
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import cancel_btn, confirm_btn
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.text import Instruction
+from urwid import Filler, Pile, Text, WidgetWrap
 
 
 class LXDSetupView(WidgetWrap):

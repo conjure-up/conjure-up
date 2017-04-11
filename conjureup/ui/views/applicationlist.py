@@ -4,14 +4,14 @@
 import logging
 from functools import partial
 
-from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
-
-from conjureup.app_config import app
-from conjureup.utils import get_options_whitelist
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import PlainButton, menu_btn
 from ubuntui.widgets.hr import HR
+from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
+
+from conjureup.app_config import app
+from conjureup.utils import get_options_whitelist
 
 log = logging.getLogger('conjure')
 

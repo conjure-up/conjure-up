@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 
-from urwid import Columns, Filler, Pile, Text, WidgetWrap
-
-from conjureup.app_config import app
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn, quit_btn
+from urwid import Columns, Filler, Pile, Text, WidgetWrap
+
+from conjureup.app_config import app
 
 
 class VariantView(WidgetWrap):

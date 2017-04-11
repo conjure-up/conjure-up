@@ -1,11 +1,11 @@
 import random
 
-from urwid import Text, WidgetWrap
-
-from conjureup.api.models import model_status
 from ubuntui.utils import Color
 from ubuntui.widgets.juju.service import ServiceWidget
 from ubuntui.widgets.table import Table
+from urwid import Text, WidgetWrap
+
+from conjureup.api.models import model_status
 
 
 class ServicesView(WidgetWrap):

@@ -17,12 +17,12 @@ from subprocess import (
 )
 
 import yaml
-from pkg_resources import parse_version
-from termcolor import cprint
-
 from bundleplacer.bundle import Bundle
 from bundleplacer.charmstore_api import MetadataController
 from bundleplacer.config import Config
+from pkg_resources import parse_version
+from termcolor import cprint
+
 from conjureup import charm
 from conjureup.app_config import app
 from conjureup.telemetry import track_event

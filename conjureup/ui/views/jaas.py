@@ -1,8 +1,7 @@
-from urwid import Columns, Edit, Filler, Frame, Pile, Text, WidgetWrap
-
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
+from urwid import Columns, Edit, Filler, Frame, Pile, Text, WidgetWrap
 
 
 class JaaSLoginView(WidgetWrap):

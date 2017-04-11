@@ -5,6 +5,10 @@ import copy
 import logging
 from collections import defaultdict
 
+from ubuntui.ev import EventLoop
+from ubuntui.utils import Color, Padding
+from ubuntui.widgets.buttons import menu_btn
+from ubuntui.widgets.hr import HR
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
@@ -15,10 +19,6 @@ from conjureup.juju import (
 )
 from conjureup.ui.views.machine_pin_view import MachinePinView
 from conjureup.ui.widgets.juju_machines_list import JujuMachinesList
-from ubuntui.ev import EventLoop
-from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import menu_btn
-from ubuntui.widgets.hr import HR
 
 log = logging.getLogger('conjure')
 

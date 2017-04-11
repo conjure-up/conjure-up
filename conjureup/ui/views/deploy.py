@@ -1,8 +1,7 @@
-from urwid import Filler, Pile, Text, WidgetWrap
-
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import cancel_btn
+from urwid import Filler, Pile, Text, WidgetWrap
 
 
 class DeployView(WidgetWrap):

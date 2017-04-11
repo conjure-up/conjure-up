@@ -1,12 +1,12 @@
 import random
 
-from urwid import Text, WidgetWrap
-
-from conjureup.api.models import model_status
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.juju.service import ServiceWidget
 from ubuntui.widgets.table import Table
+from urwid import Text, WidgetWrap
+
+from conjureup.api.models import model_status
 
 
 class DeployStatusView(WidgetWrap):

@@ -14,6 +14,8 @@ import uuid
 import yaml
 from prettytable import PrettyTable
 from termcolor import colored
+from ubuntui.ev import EventLoop
+from ubuntui.palette import STYLES
 
 from conjureup import __version__ as VERSION
 from conjureup import async, charm, consts, controllers, utils
@@ -30,8 +32,6 @@ from conjureup.download import (
 from conjureup.log import setup_logging
 from conjureup.telemetry import track_event
 from conjureup.ui import ConjureUI
-from ubuntui.ev import EventLoop
-from ubuntui.palette import STYLES
 
 
 def parse_options(argv):

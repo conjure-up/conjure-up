@@ -2,11 +2,12 @@ import os
 import os.path as path
 from functools import partial
 
+from ubuntui.ev import EventLoop
+
 from conjureup import async, controllers, juju
 from conjureup.app_config import app
 from conjureup.telemetry import track_exception, track_screen
 from conjureup.ui.views.deploystatus import DeployStatusView
-from ubuntui.ev import EventLoop
 
 from . import common
 

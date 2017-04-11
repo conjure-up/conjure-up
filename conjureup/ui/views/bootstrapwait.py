@@ -2,9 +2,8 @@ import random
 import unicodedata
 from subprocess import DEVNULL, CalledProcessError, check_output
 
-from urwid import Columns, Filler, Pile, Text, WidgetWrap
-
 from ubuntui.utils import Padding
+from urwid import Columns, Filler, Pile, Text, WidgetWrap
 
 
 class BootstrapWaitView(WidgetWrap):

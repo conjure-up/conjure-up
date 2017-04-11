@@ -1,5 +1,4 @@
 import yaml
-
 from bundleplacer.assignmenttype import AssignmentType
 
 

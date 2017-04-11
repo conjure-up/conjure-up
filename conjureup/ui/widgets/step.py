@@ -1,9 +1,6 @@
 import json
 import os
 
-from urwid import Columns, Pile, Text, WidgetWrap
-
-from conjureup.utils import is_linux
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import submit_btn
 from ubuntui.widgets.hr import HR
@@ -13,6 +10,9 @@ from ubuntui.widgets.input import (
     StringEditor,
     YesNo
 )
+from urwid import Columns, Pile, Text, WidgetWrap
+
+from conjureup.utils import is_linux
 
 
 class StepWidget(WidgetWrap):

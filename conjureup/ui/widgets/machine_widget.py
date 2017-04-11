@@ -15,10 +15,10 @@
 
 import logging
 
+from ubuntui.widgets.buttons import PlainButton
 from urwid import AttrMap, Columns, Text, WidgetWrap
 
 from conjureup.app_config import app
-from ubuntui.widgets.buttons import PlainButton
 
 log = logging.getLogger('bundleplacer')
 

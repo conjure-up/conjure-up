@@ -6,6 +6,8 @@ from operator import attrgetter
 from subprocess import PIPE
 
 from bundleplacer.assignmenttype import AssignmentType, atype_to_label
+from ubuntui.ev import EventLoop
+
 from conjureup import async, controllers, juju, utils
 from conjureup.api.models import model_info
 from conjureup.app_config import app
@@ -14,7 +16,6 @@ from conjureup.telemetry import track_event, track_exception, track_screen
 from conjureup.ui.views.app_architecture_view import AppArchitectureView
 from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView
-from ubuntui.ev import EventLoop
 
 from . import common
 

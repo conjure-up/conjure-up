@@ -1,8 +1,7 @@
-from urwid import Filler, Pile, WidgetWrap
-
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import done_btn
 from ubuntui.widgets.hr import HR
+from urwid import Filler, Pile, WidgetWrap
 
 
 class StepsView(WidgetWrap):

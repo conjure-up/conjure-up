@@ -1,10 +1,11 @@
+from ubuntui.ev import EventLoop
+
 from conjureup import controllers, juju
 from conjureup.app_config import app
 from conjureup.consts import JAAS_DOMAIN
 from conjureup.telemetry import track_exception, track_screen
 from conjureup.ui.views.bootstrapwait import BootstrapWaitView
 from conjureup.ui.views.jaas import JaaSLoginView
-from ubuntui.ev import EventLoop
 
 
 class JaaSLoginController:

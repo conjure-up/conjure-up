@@ -1,10 +1,11 @@
 from pathlib import Path
 
+from ubuntui.ev import EventLoop
+
 from conjureup import controllers
 from conjureup.app_config import app
 from conjureup.telemetry import track_screen
 from conjureup.ui.views.bootstrapwait import BootstrapWaitView
-from ubuntui.ev import EventLoop
 
 
 class BootstrapWaitController:

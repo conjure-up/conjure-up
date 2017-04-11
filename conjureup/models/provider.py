@@ -1,9 +1,8 @@
 from collections import OrderedDict
 from functools import partial
 
-from urwid import Text
-
 from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
+from urwid import Text
 
 
 """ Defining the schema

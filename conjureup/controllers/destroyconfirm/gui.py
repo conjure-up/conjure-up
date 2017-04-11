@@ -1,8 +1,9 @@
+from ubuntui.ev import EventLoop
+
 from conjureup import controllers, juju
 from conjureup.app_config import app
 from conjureup.telemetry import track_event, track_exception, track_screen
 from conjureup.ui.views.destroy_confirm import DestroyConfirmView
-from ubuntui.ev import EventLoop
 
 
 class DestroyConfirm:

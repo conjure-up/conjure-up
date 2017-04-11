@@ -6,13 +6,13 @@ import logging
 import os
 from glob import glob
 
-from urwid import BoxAdapter, Filler, ListBox, Pile, Text, WidgetWrap
-
-from conjureup import utils
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.hr import HR
+from urwid import BoxAdapter, Filler, ListBox, Pile, Text, WidgetWrap
+
+from conjureup import utils
 
 log = logging.getLogger('conjure')
 

@@ -1,7 +1,6 @@
-from urwid import Columns, ListBox, Text, WidgetWrap
-
 from ubuntui.utils import Padding
 from ubuntui.widgets.hr import HR
+from urwid import Columns, ListBox, Text, WidgetWrap
 
 
 class SummaryView(WidgetWrap):
