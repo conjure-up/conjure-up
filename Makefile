@@ -6,7 +6,7 @@ CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
 VERSION := 2.2-beta3
-
+CHANNEL := edge
 
 .PHONY: sysdeps
 sysdeps:
@@ -18,7 +18,7 @@ install: snap
 	@sudo snap install $(NAME)_$(VERSION)_amd64.snap --classic --dangerous
 
 release: update-version clean test snap
-	@snapcraft push $(NAME)_$(VERSION)_amd64.snap --release edge
+	@snapcraft push $(NAME)_$(VERSION)_amd64.snap --release $(CHANNEL)
 
 update-version:
 	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjureup/__init__.py
@@ -27,7 +27,7 @@ update-version:
 snap: sysdeps update-version clean test
 	@snapcraft
 	@echo
-	@echo "Build complete, now run snapcraft push $(NAME)_$(VERSION)_amd64.snap --release edge"
+	@echo "Build complete, now run snapcraft push $(NAME)_$(VERSION)_amd64.snap --release $(CHANNEL)"
 	@echo "Or install with sudo snap install $(NAME)_$(VERSION)_amd64.snap --classic --dangerous"
 	@echo
 
