@@ -17,8 +17,12 @@ sysdeps:
 install: snap
 	@sudo snap install $(NAME)_$(VERSION)_amd64.snap --classic --dangerous
 
-release: update-version clean test snap
+release: update-version gen-changelog clean test snap
 	@snapcraft push $(NAME)_$(VERSION)_amd64.snap --release $(CHANNEL)
+
+gen-changelog:
+	if [ ! -f `which github_changelog_generator` ]; then echo "Need to install changelog generator: gem install github_changelog_generator, also generate a token https://git.io/vS1eF" && exit 1; fi
+	@github_changelog_generator
 
 update-version:
 	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjureup/__init__.py
