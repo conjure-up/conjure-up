@@ -114,6 +114,8 @@ def unhandled_input(key):
     if key in ['q', 'Q']:
         async.shutdown()
         EventLoop.exit(0)
+    if key in ['R']:
+        EventLoop.redraw_screen()
 
 
 def _start(*args, **kwargs):
