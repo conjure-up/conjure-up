@@ -6,7 +6,7 @@ CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
 VERSION := 2.1.3
-CHANNEL := edge
+CHANNEL := candidate
 
 .PHONY: sysdeps
 sysdeps:
@@ -17,7 +17,7 @@ sysdeps:
 install: snap
 	@sudo snap install $(NAME)_$(VERSION)_amd64.snap --classic --dangerous
 
-release: update-version gen-changelog clean test snap
+release: update-version clean test snap
 	@snapcraft push $(NAME)_$(VERSION)_amd64.snap --release $(CHANNEL)
 
 gen-changelog:
