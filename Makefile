@@ -17,7 +17,7 @@ sysdeps:
 install: snap
 	@sudo snap install $(NAME)_$(VERSION)_amd64.snap --classic --dangerous
 
-release: update-version gen-changelog clean test snap
+release: update-version clean test snap
 	@snapcraft push $(NAME)_$(VERSION)_amd64.snap --release $(CHANNEL)
 
 gen-changelog:
