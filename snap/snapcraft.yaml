@@ -57,7 +57,7 @@ parts:
       mkdir -p $SNAPCRAFT_PART_INSTALL/bash_completions
       cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
   python:
-    source: https://www.python.org/ftp/python/3.6.0/Python-3.6.0.tar.xz
+    source: https://www.python.org/ftp/python/3.6.1/Python-3.6.1.tar.xz
     plugin: autotools
     configflags: [--prefix=/usr]
     build-packages: [libssl-dev]
