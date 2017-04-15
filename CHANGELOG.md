@@ -1,8 +1,30 @@
 # Change Log
 
-## [Unreleased](https://github.com/conjure-up/conjure-up/tree/HEAD)
+## [2.1.5](https://github.com/conjure-up/conjure-up/tree/2.1.5) (2017-04-15)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.4...2.1.5)
 
-[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.2.0-beta2...HEAD)
+**Fixed bugs:**
+
+- error during conjure-up landscape to an existing maas controller [\#814](https://github.com/conjure-up/conjure-up/issues/814)
+- maas deploy error in get\_models [\#774](https://github.com/conjure-up/conjure-up/issues/774)
+
+## [2.1.4](https://github.com/conjure-up/conjure-up/tree/2.1.4) (2017-04-14)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.3...2.1.4)
+
+**Fixed bugs:**
+
+- \_\_init\_\_\(\) got an unexpected keyword argument 'default' [\#821](https://github.com/conjure-up/conjure-up/issues/821)
+- Conjure-up screen does not get past adding machine\['0'\] [\#819](https://github.com/conjure-up/conjure-up/issues/819)
+- Snap fails to install, with ERROR: '~ubuntu-lxc' user or team does not exist [\#818](https://github.com/conjure-up/conjure-up/issues/818)
+- entering sudo password fails to allow a snap to install [\#816](https://github.com/conjure-up/conjure-up/issues/816)
+- Deployment of kubernetes-core crashes on 2.2-beta3 [\#806](https://github.com/conjure-up/conjure-up/issues/806)
+
+**Closed issues:**
+
+- Juju failed to bootstrap: maas [\#817](https://github.com/conjure-up/conjure-up/issues/817)
+
+## [2.1.3](https://github.com/conjure-up/conjure-up/tree/2.1.3) (2017-04-12)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.2.0-beta2...2.1.3)
 
 **Implemented enhancements:**
 
