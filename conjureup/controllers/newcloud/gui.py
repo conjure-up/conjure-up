@@ -184,12 +184,15 @@ class NewCloudController:
             self.__do_bootstrap()
             return
 
-        # XXX: always prompt for maas information for now as there is no way to
-        # logically store the maas server ip for future sessions.
         creds = common.try_get_creds(app.current_cloud)
-        if creds and cloud_type != 'maas':
-            self.__do_bootstrap(credential=creds)
-            return controllers.use('deploy').render()
+        try:
+            endpoint = juju.get_cloud(app.current_cloud).get('endpoint', None)
+        except LookupError:
+            endpoint = None
+        if creds:
+            if endpoint or cloud_type != 'maas':
+                self.__do_bootstrap(credential=creds)
+                return controllers.use('deploy').render()
 
         # show credentials editor otherwise
         try:
@@ -198,8 +201,12 @@ class NewCloudController:
             track_exception("Credentials Error: {}".format(e))
             return app.ui.show_exception_message(
                 Exception(
-                    "Unable to find credentials for cloud "
-                    "looking for {}".format(app.current_cloud)))
+                    "Unable to find credentials for {}, "
+                    "you can double check what credentials you "
+                    "do have available by running "
+                    "`juju credentials`. Please see `juju help "
+                    "add-credential` for more information.".format(
+                        app.current_cloud)))
 
         view = NewCloudView(creds, self.finish)
 

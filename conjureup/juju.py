@@ -325,7 +325,7 @@ def autoload_credentials():
     return True
 
 
-def get_credential(cloud, user):
+def get_credential(cloud, user=None):
     """ Get credentials for user
 
     Arguments:
@@ -333,11 +333,19 @@ def get_credential(cloud, user):
     user: user listed in the credentials
     """
     creds = get_credentials()
-    if cloud in creds.keys():
-        if user in creds[cloud].keys():
-            return creds[cloud][user]
-    raise Exception(
-        "Unable to locate credentials for: {}".format(user))
+    if cloud not in creds.keys():
+        return None
+
+    if user and user in creds[cloud].keys():
+        return creds[cloud][user]
+    elif app.current_controller in creds[cloud].keys():
+        return creds[cloud][app.current_controller]
+    else:
+        try:
+            return next(iter(creds[cloud].values()))
+        except StopIteration:
+            app.log.debug("Unable to pull a credential from: {}".format(cloud))
+            return None
 
 
 def get_credentials(secrets=True):
