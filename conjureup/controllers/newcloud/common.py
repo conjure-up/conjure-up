@@ -48,6 +48,10 @@ def try_get_creds(cloud):
     if len(existing_creds['credentials'][cloud].keys()) == 0:
         return None
 
+    if 'default-credential' in existing_creds['credentials'][cloud]:
+        return existing_creds['credentials'][cloud]['default-credential']
+
+    # XXX we should really prompt to select because this is non-deterministic
     for k in existing_creds['credentials'][cloud].keys():
         if 'default-region' in k:
             continue
