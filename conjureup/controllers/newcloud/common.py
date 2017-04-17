@@ -180,6 +180,7 @@ def setup_lxdbr0_network():
 
 async def do_bootstrap(creds, msg_cb, fail_msg_cb, region=None):
     if not app.is_jaas:
+        app.log.info('Bootstrapping Juju controller.')
         msg_cb('Bootstrapping Juju controller.')
         track_event("Juju Bootstrap", "Started", "")
         cloud_with_region = app.current_cloud
@@ -195,13 +196,15 @@ async def do_bootstrap(creds, msg_cb, fail_msg_cb, region=None):
                 '{}-bootstrap').format(app.current_controller)
             with open(pathbase + ".err") as errf:
                 err_log = "\n".join(errf.readlines())
-            app.log.error(err_log)
-            fail_msg_cb("Error bootstrapping controller: {}".format(err_log))
+            msg = "Error bootstrapping controller: {}".format(err_log)
+            app.log.error(msg)
+            fail_msg_cb(msg)
             cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
             raise Exception('Unable to bootstrap (cloud type: {})'.format(
                 cloud_type))
             return
 
+        app.log.info('Bootstrap complete.')
         msg_cb('Bootstrap complete.')
         track_event("Juju Bootstrap", "Done", "")
 
@@ -212,16 +215,21 @@ async def do_bootstrap(creds, msg_cb, fail_msg_cb, region=None):
         app.env['JUJU_CONTROLLER'] = app.current_controller
         app.env['JUJU_MODEL'] = app.current_model
 
+        app.log.info("Running post-bootstrap tasks.")
         msg_cb("Running post-bootstrap tasks.")
         track_event("Juju Post-Bootstrap", "Started", "")
         result = await utils.run_step('00_post-bootstrap', msg_cb)
-        msg_cb("Finished post bootstrap task: {}".format(result))
+        msg = "Finished post bootstrap task: {}".format(result)
+        app.log.info(msg)
+        msg_cb(msg)
         track_event("Juju Post-Bootstrap", "Done", "")
     else:
+        app.log.info('Adding new model in the background.')
         msg_cb('Adding new model in the background.')
         track_event("Juju Add JaaS Model", "Started", "")
         await juju.add_model(app.current_model,
                              app.current_controller,
                              app.current_cloud)
         track_event("Juju Add JaaS Model", "Done", "")
+        app.log.info('Add model complete.')
         msg_cb('Add model complete.')

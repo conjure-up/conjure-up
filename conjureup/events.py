@@ -1,4 +1,4 @@
-from asyncio import CancelledError, Event, Task
+import asyncio
 from collections import defaultdict
 
 from ubuntui.ev import EventLoop
@@ -9,11 +9,18 @@ from conjureup.app_config import app
 from conjureup.telemetry import track_exception
 
 
-class ShutdownEvent(Event):
-    def set(self, exit_code=None):
-        if exit_code is not None:
-            app.exit_code = exit_code
-        return super().set()
+class Event(asyncio.Event):
+    def __init__(self, name):
+        self._name = name
+        super().__init__()
+
+    def set(self):
+        app.log.debug('Setting {}'.format(self._name))
+        super().set()
+
+    def clear(self):
+        app.log.debug('Clearing {}'.format(self._name))
+        super().clear()
 
 
 class NamedEvent:
@@ -21,13 +28,16 @@ class NamedEvent:
     Event wrapper that manages individual events per name.
     """
 
-    def __init__(self):
-        self._events = defaultdict(Event)
+    def __init__(self, name):
+        self._name = name
+        self._events = defaultdict(asyncio.Event)
 
     def set(self, name):
+        app.log.debug('Setting {}:{}'.format(self._name, name))
         self._events[name].set()
 
     def clear(self, name):
+        app.log.debug('Clearing {}:{}'.format(self._name, name))
         self._events[name].clear()
 
     def is_set(self, name):
@@ -37,19 +47,26 @@ class NamedEvent:
         return await self._events[name].wait()
 
 
-Error = Event()
-Shutdown = ShutdownEvent()
-MAASConnected = Event()
-Bootstrapped = Event()
-ModelAvailable = Event()
-ModelConnected = Event()
-PreDeployComplete = Event()
-MachinesCreated = NamedEvent()
-AppDeployed = NamedEvent()
-PendingRelations = NamedEvent()
-RelationsAdded = NamedEvent()
-ModelSettled = Event()
-PostDeployComplete = Event()
+class ShutdownEvent(Event):
+    def set(self, exit_code=None):
+        if exit_code is not None:
+            app.exit_code = exit_code
+        return super().set()
+
+
+Error = Event('Error')
+Shutdown = ShutdownEvent('Shutdown')
+MAASConnected = Event('MAASConnected')
+Bootstrapped = Event('Bootstrapped')
+ModelAvailable = Event('ModelAvailable')
+ModelConnected = Event('ModelConnected')
+PreDeployComplete = Event('PreDeployComplete')
+MachinesCreated = NamedEvent('MachinesCreated')
+AppDeployed = NamedEvent('AppDeployed')
+PendingRelations = NamedEvent('PendingRelations')
+RelationsAdded = NamedEvent('RelationsAdded')
+ModelSettled = Event('ModelSettled')
+PostDeployComplete = Event('PostDeployComplete')
 
 
 def unhandled_input(key):
@@ -89,7 +106,7 @@ async def shutdown_watcher():
     app.log.info('Watching for shutdown')
     try:
         await Shutdown.wait()
-    except CancelledError:
+    except asyncio.CancelledError:
         pass
 
     app.log.info('Shutting down')
@@ -105,7 +122,7 @@ async def shutdown_watcher():
         if not app.headless:
             EventLoop.remove_alarms()
 
-        for task in Task.all_tasks(app.loop):
+        for task in asyncio.Task.all_tasks(app.loop):
             # cancel all other tasks
             if getattr(task, '_coro', None) is not shutdown_watcher:
                 task.cancel()

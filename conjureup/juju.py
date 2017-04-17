@@ -122,8 +122,9 @@ async def login():
     model_name = '{}:{}'.format(app.current_controller,
                                 app.current_model)
 
-    app.log.info('Waiting for model {}...'.format(model_name))
-    await events.ModelAvailable.wait()
+    if not events.ModelAvailable.is_set():
+        app.log.info('Waiting for model {}...'.format(model_name))
+        await events.ModelAvailable.wait()
     app.log.info('Connecting to model {}...'.format(model_name))
     await app.juju.client.connect_model(model_name)
     app.juju.authenticated = True
@@ -185,13 +186,16 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
             proc = await asyncio.create_subprocess_exec(*cmd,
                                                         stdout=outf,
                                                         stderr=errf)
+            app.log.debug('waiting for proc')
             await proc.wait()
+            app.log.debug('proc done')
     if proc.returncode < 0:
         raise Exception('Bootstrap killed by user: {}'.format(
             proc.returncode))
     elif proc.returncode > 0:
         return False
     events.Bootstrapped.set()
+    events.ModelAvailable.set()
     return True
 
 
