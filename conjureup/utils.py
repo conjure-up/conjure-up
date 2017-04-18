@@ -132,7 +132,6 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
 
     while True:
         app.log.debug("Executing script: {}".format(step_path))
-        app.log.debug("Env: {}".format(app.env.keys()))
 
         with open(step_path + ".out", 'w') as outf:
             with open(step_path + ".err", 'w') as errf:
