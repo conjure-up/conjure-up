@@ -282,6 +282,14 @@ class DeployController:
                 events.MAASConnected.set()
                 break
 
+    async def watch_for_deploy_tasks(self):
+        await asyncio.gather(*(events.RelationsAdded.wait(a.service_name)
+                               for a in self.applications))
+        events.DeploymentComplete.set()
+        if not events.ModelSettled.is_set():
+            app.ui.set_footer('Applications deployed and related, '
+                              'waiting for everything to become ready.')
+
     def finish(self):
         self.sync_assignment_opts()
         common.write_bundle(self.assignments)

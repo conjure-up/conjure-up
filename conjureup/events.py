@@ -65,6 +65,7 @@ MachinesCreated = NamedEvent('MachinesCreated')
 AppDeployed = NamedEvent('AppDeployed')
 PendingRelations = NamedEvent('PendingRelations')
 RelationsAdded = NamedEvent('RelationsAdded')
+DeploymentComplete = Event('DeploymentComplete')
 ModelSettled = Event('ModelSettled')
 PostDeployComplete = Event('PostDeployComplete')
 
