@@ -168,7 +168,7 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
             break
         msg_cb("{}, please wait".format(result['message']))
 
-    msg = "Finished {}: {}".format(step_title, result)
+    msg = "Finished {}: {}".format(step_title, result['message'])
     app.log.info(msg)
     msg_cb(msg)
     if event_name is not None:
