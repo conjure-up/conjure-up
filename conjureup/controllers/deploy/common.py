@@ -29,22 +29,7 @@ async def pre_deploy(msg_cb):
     app.env['JUJU_MODEL'] = app.current_model
     app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
 
-    pre_deploy_sh = os.path.join(app.config['spell-dir'],
-                                 'steps/00_pre-deploy')
-
-    if not os.path.isfile(pre_deploy_sh):
-        app.log.info('No pre-deploy task to run.')
-        events.PreDeployComplete.set()
-        return
-
-    app.log.info('Running pre-deploy task.')
-    msg_cb('Running pre-deploy task.')
-
-    result = await utils.run_step('00_pre-deploy')
-
-    msg = "Finished pre-deploy task{}".format(
-        ': {}'.format(result) if result else '.')
-    app.log.info(msg)
-    msg_cb(msg)
+    await utils.run_step('00_pre-deploy',
+                         'pre-deploy',
+                         msg_cb)
     events.PreDeployComplete.set()
-    return result

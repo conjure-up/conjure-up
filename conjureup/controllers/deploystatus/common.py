@@ -14,7 +14,9 @@ async def wait_for_applications(msg_cb):
     # https://bugs.launchpad.net/juju-wait/+bug/1680963
     for i in range(3):
         try:
-            await utils.run_step('00_deploy-done', msg_cb)
+            await utils.run_step('00_deploy-done',
+                                 'deployment watcher',
+                                 msg_cb)
             break
         except Exception as e:
             if i < 2 and 'Applications did not start successfully' in str(e):

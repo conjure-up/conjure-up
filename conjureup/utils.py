@@ -113,11 +113,22 @@ def run_attach(cmd, output_cb=None):
                                          subproc.returncode))
 
 
-async def run_step(step_name, msg_cb):
-    step_path = str(Path(app.config['spell-dir']) / 'steps' / step_name)
+async def run_step(step_file, step_title, msg_cb, event_name=None):
+    step_path = Path(app.config['spell-dir']) / 'steps' / step_file
+
+    if not step_path.is_file():
+        return
+
+    step_path = str(step_path)
+
+    msg = "Running {}.".format(step_title)
+    app.log.info(msg)
+    msg_cb(msg)
+    if event_name is not None:
+        track_event(event_name, "Started", "")
 
     if not os.access(step_path, os.X_OK):
-        raise Exception("Step {} not executable".format(step_name))
+        raise Exception("Step {} not executable".format(step_title))
 
     while True:
         app.log.debug("Executing script: {}".format(step_path))
@@ -136,27 +147,33 @@ async def run_step(step_name, msg_cb):
             stderr = None
 
         if proc.returncode != 0:
-            raise Exception("Failure in step {}: {}".format(step_name, stderr))
+            raise Exception("Failure in step {}: {}".format(step_file, stderr))
 
         try:
             result = json.loads(Path(step_path + '.out').read_text())
         except OSError as e:
             raise Exception("Unable to read output from step {}: {}".format(
-                step_name, e))
+                step_file, e))
         except json.decoder.JSONDecodeError as e:
             raise Exception("Unable to parse output from step {}: {}".format(
-                step_name, e))
+                step_file, e))
 
         if 'returnCode' not in result:
-            raise Exception("Invalid message from step {}".format(step_name))
+            raise Exception("Invalid message from step {}".format(step_file))
 
         if result['returnCode'] != 0:
-            raise Exception("Failure in step {}: {}".format(step_name,
+            raise Exception("Failure in step {}: {}".format(step_file,
                                                             result['message']))
 
         if result.get('isComplete', True):
             break
         msg_cb("{}, please wait".format(result['message']))
+
+    msg = "Finished {}: {}".format(step_title, result)
+    app.log.info(msg)
+    msg_cb(msg)
+    if event_name is not None:
+        track_event(event_name, "Done", "")
 
     return result['message']
 

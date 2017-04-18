@@ -89,8 +89,4 @@ async def do_step(step_model, msg_cb):
     # Set environment variables so they can be accessed from the step scripts
     set_env(step_model.additional_input)
 
-    msg_cb("Running step: {}".format(step_model.title))
-    result = await utils.run_step(step_model.name, msg_cb)
-
-    msg_cb("{} completed.".format(step_model.title))
-    return result
+    return await utils.run_step(step_model.name, step_model.title, msg_cb)

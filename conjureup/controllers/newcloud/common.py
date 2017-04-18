@@ -211,18 +211,14 @@ async def do_bootstrap(creds, msg_cb, fail_msg_cb, region=None):
         await juju.login()  # login to the newly created (default) model
 
         # Set provider type for post-bootstrap
-        app.env['JUJU_PROVIDERTYPE'] = app.juju.client.provider_type
+        app.env['JUJU_PROVIDERTYPE'] = app.juju.client.info.provider_type
         app.env['JUJU_CONTROLLER'] = app.current_controller
         app.env['JUJU_MODEL'] = app.current_model
 
-        app.log.info("Running post-bootstrap tasks.")
-        msg_cb("Running post-bootstrap tasks.")
-        track_event("Juju Post-Bootstrap", "Started", "")
-        result = await utils.run_step('00_post-bootstrap', msg_cb)
-        msg = "Finished post bootstrap task: {}".format(result)
-        app.log.info(msg)
-        msg_cb(msg)
-        track_event("Juju Post-Bootstrap", "Done", "")
+        await utils.run_step('00_post-bootstrap',
+                             'post-bootstrap',
+                             msg_cb,
+                             'Juju Post-Bootstrap')
     else:
         app.log.info('Adding new model in the background.')
         msg_cb('Adding new model in the background.')
