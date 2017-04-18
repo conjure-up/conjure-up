@@ -195,7 +195,7 @@ class DeployController:
             return ''
         maas_machine = self.maas_machine_map[machine_id]
         await app.loop.run_in_executor(
-            app.maas.client.assign_id_tags([maas_machine]))
+            None, app.maas.client.assign_id_tags([maas_machine]))
         machine_tag = maas_machine.instance_id.split('/')[-2]
         return "tags={}".format(machine_tag)
 
@@ -271,7 +271,7 @@ class DeployController:
         n = 30
         while True:
             try:
-                await app.loop.run_in_executor(setup_maas)
+                await app.loop.run_in_executor(None, setup_maas)
             except juju.ControllerNotFoundException as e:
                 await asyncio.sleep(1)
                 n -= 1
