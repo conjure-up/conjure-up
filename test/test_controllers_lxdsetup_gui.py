@@ -33,6 +33,9 @@ class LXDSetupGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.lxdsetup.gui.app')
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', mock_app)
+        self.ev_app_patcher.start()
         self.track_screen_patcher = patch(
             'conjureup.controllers.lxdsetup.gui.track_screen')
         self.mock_track_screen = self.track_screen_patcher.start()
@@ -42,6 +45,7 @@ class LXDSetupGUIRenderTestCase(unittest.TestCase):
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
         self.track_screen_patcher.stop()
 
     def test_render(self):
@@ -52,7 +56,6 @@ class LXDSetupGUIRenderTestCase(unittest.TestCase):
 class LXDSetupGUIFinishTestCase(unittest.TestCase):
 
     def setUp(self):
-        events.Shutdown.clear()
         self.controller = LXDSetupController()
 
         self.controllers_patcher = patch(
@@ -70,12 +73,17 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.lxdsetup.gui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', self.mock_app)
+        self.ev_app_patcher.start()
+        events.Shutdown.clear()
 
     def tearDown(self):
         self.controllers_patcher.stop()
         self.utils_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
 
     def test_finish(self):
         "call finish"

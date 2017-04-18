@@ -40,6 +40,9 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.mock_app.metadata_controller.bundle = self.mock_bundle
         self.mock_app.current_controller = 'testcontroller'
         self.mock_app.bootstrap.running.exception.return_value = None
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', self.mock_app)
+        self.ev_app_patcher.start()
 
         self.juju_patcher = patch(
             'conjureup.controllers.deploy.gui.juju')
@@ -54,6 +57,7 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.common_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
         self.juju_patcher.stop()
         self.track_screen_patcher.stop()
 
@@ -85,6 +89,9 @@ class DeployGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.deploy.gui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', self.mock_app)
+        self.ev_app_patcher.start()
 
         self.common_patcher = patch(
             'conjureup.controllers.deploy.gui.common')
@@ -95,6 +102,7 @@ class DeployGUIFinishTestCase(unittest.TestCase):
         self.juju_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
 
     def test_show_bootstrap_wait(self):
         "Go to bootstrap wait controller if bootstrap pending"

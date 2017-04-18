@@ -23,12 +23,16 @@ class SummaryTUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.summary.tui.app')
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', mock_app)
+        self.ev_app_patcher.start()
         self.controller = SummaryController()
         self.controller.save_path = sentinel.savepath
 
     def tearDown(self):
         self.utils_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
 
     def test_render_empty(self):
         "call render with empty results"

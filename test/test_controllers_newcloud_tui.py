@@ -18,7 +18,6 @@ from .helpers import test_loop
 class NewCloudTUIRenderTestCase(unittest.TestCase):
 
     def setUp(self):
-        events.Shutdown.clear()
         self.controller = NewCloudController()
         self.controller.do_post_bootstrap = MagicMock()
 
@@ -34,6 +33,9 @@ class NewCloudTUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.newcloud.tui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', self.mock_app)
+        self.ev_app_patcher.start()
         self.juju_patcher = patch(
             'conjureup.controllers.newcloud.tui.juju')
         self.mock_juju = self.juju_patcher.start()
@@ -41,11 +43,13 @@ class NewCloudTUIRenderTestCase(unittest.TestCase):
         self.common_patcher = patch(
             'conjureup.controllers.newcloud.tui.common')
         self.mock_common = self.common_patcher.start()
+        events.Shutdown.clear()
 
     def tearDown(self):
         self.utils_patcher.stop()
         self.finish_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
         self.mock_juju.stop()
         self.common_patcher.stop()
 
@@ -95,6 +99,9 @@ class NewCloudTUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.newcloud.tui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', self.mock_app)
+        self.ev_app_patcher.start()
 
         self.common_patcher = patch(
             'conjureup.controllers.newcloud.tui.common')
@@ -105,6 +112,7 @@ class NewCloudTUIFinishTestCase(unittest.TestCase):
         self.utils_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
 
     def test_finish(self):
         "call finish"

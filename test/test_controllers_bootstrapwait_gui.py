@@ -34,6 +34,9 @@ class BootstrapwaitGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.bootstrapwait.gui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', self.mock_app)
+        self.ev_app_patcher.start()
 
         self.track_screen_patcher = patch(
             'conjureup.controllers.bootstrapwait.gui.track_screen')
@@ -43,6 +46,7 @@ class BootstrapwaitGUIRenderTestCase(unittest.TestCase):
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
         self.track_screen_patcher.stop()
 
     def test_render(self):
@@ -70,6 +74,9 @@ class BootstrapwaitGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.bootstrapwait.gui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', self.mock_app)
+        self.ev_app_patcher.start()
 
         self.asleep_patcher = patch('asyncio.sleep')
         self.mock_asleep = self.asleep_patcher.start()
@@ -78,6 +85,7 @@ class BootstrapwaitGUIFinishTestCase(unittest.TestCase):
         self.controllers_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
         self.asleep_patcher.stop()
 
     def test_refresh(self):
