@@ -178,7 +178,7 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
     return result['message']
 
 
-def can_sudo(self, password=None):
+def can_sudo(password=None):
     if password:
         password = '{}\n'.format(password).encode('utf8')
         result = subprocess.run(['sudo', '-S', '/bin/true'],
