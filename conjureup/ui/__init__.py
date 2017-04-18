@@ -14,8 +14,10 @@ class ConjureUI(Frame):
         elif hasattr(ex, 'errno') and ex.errno == errno.ENOENT:
             # handle oserror
             errmsg = ex.args[1]
+        elif isinstance(ex, TimeoutError):
+            errmsg = 'Timeout: {}'.format(ex)
         else:
-            errmsg = ex.args[0]
+            errmsg = str(ex)
         errmsg += ("\n\n"
                    "Review log messages at ~/.cache/conjure-up/conjure-up.log "
                    "If appropriate, please submit a bug here: "

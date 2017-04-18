@@ -14,8 +14,11 @@ class ControllerPicker:
             if not app.jaas_controller:
                 # jaas not already registered
                 return controllers.use('jaaslogin').render()
-            # jaas already registered
-            controller = app.jaas_controller
+            # jaas already registered, but we they still need to pick a cloud
+            app.current_controller = app.jaas_controller
+            app.is_jaas = True
+            events.Bootstrapped.set()
+            return controllers.use('clouds').render()
 
         app.current_controller = controller
         app.current_model = utils.gen_model()
