@@ -69,5 +69,5 @@ def use(controller):
 
 
 class NoopController:
-    def render(self):
+    def render(self, *args, **kwargs):
         pass
