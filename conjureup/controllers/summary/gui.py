@@ -1,7 +1,6 @@
 import os
 
-from ubuntui.ev import EventLoop
-
+from conjureup import events
 from conjureup.app_config import app
 from conjureup.controllers.summary import common
 from conjureup.telemetry import track_screen
@@ -16,8 +15,7 @@ class SummaryController:
                                       'results.txt')
 
     def finish(self):
-        EventLoop.remove_alarms()
-        EventLoop.exit(0)
+        events.Shutdown.set(0)
 
     def render(self, results):
         track_screen("Summary")

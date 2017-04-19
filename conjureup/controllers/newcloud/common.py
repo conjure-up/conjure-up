@@ -5,8 +5,9 @@ from subprocess import DEVNULL, CalledProcessError
 import yaml
 from pkg_resources import parse_version
 
-from conjureup import utils
+from conjureup import juju, utils
 from conjureup.app_config import app
+from conjureup.telemetry import track_event
 
 cred_path = path.join(utils.juju_path(), 'credentials.yaml')
 
@@ -47,6 +48,10 @@ def try_get_creds(cloud):
     if len(existing_creds['credentials'][cloud].keys()) == 0:
         return None
 
+    if 'default-credential' in existing_creds['credentials'][cloud]:
+        return existing_creds['credentials'][cloud]['default-credential']
+
+    # XXX we should really prompt to select because this is non-deterministic
     for k in existing_creds['credentials'][cloud].keys():
         if 'default-region' in k:
             continue
@@ -171,3 +176,56 @@ def setup_lxdbr0_network():
             if out.returncode != 0:
                 raise Exception("Problem with {}: {}".format(
                     n, out.stderr.decode()))
+
+
+async def do_bootstrap(creds, msg_cb, fail_msg_cb, region=None):
+    if not app.is_jaas:
+        app.log.info('Bootstrapping Juju controller.')
+        msg_cb('Bootstrapping Juju controller.')
+        track_event("Juju Bootstrap", "Started", "")
+        cloud_with_region = app.current_cloud
+        if region:
+            cloud_with_region = '/'.join([app.current_cloud, region])
+        success = await juju.bootstrap(app.current_controller,
+                                       cloud_with_region,
+                                       app.current_model,
+                                       credential=creds)
+        if not success:
+            pathbase = os.path.join(
+                app.config['spell-dir'],
+                '{}-bootstrap').format(app.current_controller)
+            with open(pathbase + ".err") as errf:
+                err_log = "\n".join(errf.readlines())
+            msg = "Error bootstrapping controller: {}".format(err_log)
+            app.log.error(msg)
+            fail_msg_cb(msg)
+            cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
+            raise Exception('Unable to bootstrap (cloud type: {})'.format(
+                cloud_type))
+            return
+
+        app.log.info('Bootstrap complete.')
+        msg_cb('Bootstrap complete.')
+        track_event("Juju Bootstrap", "Done", "")
+
+        await juju.login()  # login to the newly created (default) model
+
+        # Set provider type for post-bootstrap
+        app.env['JUJU_PROVIDERTYPE'] = app.juju.client.info.provider_type
+        app.env['JUJU_CONTROLLER'] = app.current_controller
+        app.env['JUJU_MODEL'] = app.current_model
+
+        await utils.run_step('00_post-bootstrap',
+                             'post-bootstrap',
+                             msg_cb,
+                             'Juju Post-Bootstrap')
+    else:
+        app.log.info('Adding new model in the background.')
+        msg_cb('Adding new model in the background.')
+        track_event("Juju Add JaaS Model", "Started", "")
+        await juju.add_model(app.current_model,
+                             app.current_controller,
+                             app.current_cloud)
+        track_event("Juju Add JaaS Model", "Done", "")
+        app.log.info('Add model complete.')
+        msg_cb('Add model complete.')

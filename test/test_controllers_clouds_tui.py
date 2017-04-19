@@ -8,6 +8,7 @@
 import unittest
 from unittest.mock import ANY, MagicMock, call, patch
 
+from conjureup import events
 from conjureup.controllers.clouds.tui import CloudsController
 
 
@@ -28,15 +29,20 @@ class CloudsTUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.clouds.tui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', self.mock_app)
+        self.ev_app_patcher.start()
 
         self.juju_patcher = patch(
             'conjureup.controllers.clouds.tui.juju')
         self.mock_juju = self.juju_patcher.start()
+        events.Shutdown.clear()
 
     def tearDown(self):
         self.utils_patcher.stop()
         self.finish_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
         self.juju_patcher.stop()
 
     def test_render(self):
@@ -49,8 +55,9 @@ class CloudsTUIRenderTestCase(unittest.TestCase):
 
     def test_render_unknown(self):
         "Rendering with an unknown cloud should raise"
-        with self.assertRaises(SystemExit):
-            self.controller.render()
+        self.controller.render()
+        assert events.Shutdown.is_set()
+        assert not self.mock_finish.called
 
 
 class CloudsTUIFinishTestCase(unittest.TestCase):
@@ -73,6 +80,9 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.clouds.tui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', self.mock_app)
+        self.ev_app_patcher.start()
         self.juju_patcher = patch(
             'conjureup.controllers.clouds.tui.juju')
         self.mock_juju = self.juju_patcher.start()
@@ -86,6 +96,7 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
         self.utils_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
         self.juju_patcher.stop()
         self.gcc_patcher.stop()
 

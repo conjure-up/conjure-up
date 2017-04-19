@@ -1,6 +1,4 @@
-import sys
-
-from conjureup import controllers, juju, utils
+from conjureup import controllers, events, juju, utils
 from conjureup.app_config import app
 
 
@@ -29,24 +27,25 @@ class CloudsController:
             utils.info("Using controller '{}'".format(app.current_controller))
             utils.info("Creating new model named '{}', "
                        "please wait.".format(app.current_model))
-            juju.add_model(app.current_model,
-                           app.current_controller,
-                           app.current_cloud,
-                           allow_exists=True)
+            app.loop.create_task(juju.add_model(app.current_model,
+                                                app.current_controller,
+                                                app.current_cloud,
+                                                allow_exists=True))
             return controllers.use('deploy').render()
 
         utils.error("Something happened with the controller or model, "
                     "please check the logs.")
-        sys.exit(1)
+        events.Shutdown.set(1)
 
     def render(self):
         if app.current_cloud not in juju.get_clouds().keys():
             formatted_clouds = ", ".join(juju.get_clouds().keys())
-            utils.warning(
+            utils.error(
                 "Unknown Cloud: {}, please choose "
                 "from one of the following: {}".format(app.current_cloud,
                                                        formatted_clouds))
-            sys.exit(1)
+            events.Shutdown.set(1)
+            return
         utils.info(
             "Summoning {} to {}".format(app.argv.spell, app.argv.cloud))
         self.finish()

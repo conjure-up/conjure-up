@@ -3,23 +3,21 @@ from ubuntui.views import ErrorView
 from conjureup import async
 from conjureup.app_config import app
 from ubuntui.ev import EventLoop
-import macumba
 import errno
 
 
 class ConjureUI(Frame):
 
     def show_exception_message(self, ex):
-
         if isinstance(ex, async.ThreadCancelledException):
             pass
-        elif isinstance(ex, macumba.errors.ServerError):
-            errmsg = ex.args[1]
         elif hasattr(ex, 'errno') and ex.errno == errno.ENOENT:
             # handle oserror
             errmsg = ex.args[1]
+        elif isinstance(ex, TimeoutError):
+            errmsg = 'Timeout: {}'.format(ex)
         else:
-            errmsg = ex.args[0]
+            errmsg = str(ex)
         errmsg += ("\n\n"
                    "Review log messages at ~/.cache/conjure-up/conjure-up.log "
                    "If appropriate, please submit a bug here: "

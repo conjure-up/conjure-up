@@ -63,7 +63,6 @@ app = SimpleNamespace(
     # Whether the JAAS controller is selected
     is_jaas=False,
 
-    # Current Juju model being used
     current_model=None,
 
     # Current Juju controller selected
@@ -96,6 +95,8 @@ app = SimpleNamespace(
     # Remote endpoint type (An enum, see download.py)
     endpoint_type=None,
 
-    # Flag so we only show the initial cause even if future async
-    # events also raise cascading errors
-    showing_error=False)
+    # Reference to asyncio loop so that it can be accessed from other threads
+    loop=None,
+
+    # exit code for conjure-up to terminate with
+    exit_code=0)

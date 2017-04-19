@@ -11,6 +11,8 @@ from unittest.mock import MagicMock, patch
 
 from conjureup.controllers.deploystatus.tui import DeployStatusController
 
+from .helpers import test_loop
+
 
 class DeployStatusTUIRenderTestCase(unittest.TestCase):
 
@@ -54,6 +56,10 @@ class DeployStatusTUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.deploystatus.tui.utils')
         self.mock_utils = self.utils_patcher.start()
 
+        self.common_patcher = patch(
+            'conjureup.controllers.deploystatus.tui.common')
+        self.mock_common = self.common_patcher.start()
+
         self.render_patcher = patch(
             'conjureup.controllers.deploystatus.tui.'
             'DeployStatusController.render')
@@ -72,15 +78,11 @@ class DeployStatusTUIFinishTestCase(unittest.TestCase):
         self.app_patcher.stop()
 
     def test_finish_ok(self):
-        "finish with no exception calls steps"
-        mock_future = MagicMock(name='future')
-        mock_future.exception.return_value = False
-        self.controller.finish(mock_future)
-        self.mock_controllers.use.assert_called_once_with('steps')
+        "finish calls steps"
+        async def dummy():
+            pass
 
-    def test_finish_exception(self):
-        "finish with exception just bails"
-        mock_future = MagicMock(name='future')
-        mock_future.exception.return_value = True
-        self.controller.finish(mock_future)
-        self.assertEqual(False, self.mock_controllers.use.called)
+        self.mock_common.wait_for_applications.return_value = dummy()
+        with test_loop() as loop:
+            loop.run_until_complete(self.controller.finish())
+        self.mock_controllers.use.assert_called_once_with('steps')

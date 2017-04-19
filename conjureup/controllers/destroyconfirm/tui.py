@@ -1,6 +1,4 @@
-import sys
-
-from conjureup import utils
+from conjureup import events, utils
 
 
 class DestroyConfirm:
@@ -9,7 +7,7 @@ class DestroyConfirm:
         utils.error("You should not have gotten here, "
                     "please file a bug at "
                     "https://github.com/conjure-up/conjure-up/issues/new")
-        sys.exit(1)
+        events.Shutdown.set(1)
 
 
 _controller_class = DestroyConfirm

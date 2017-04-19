@@ -4,7 +4,7 @@ import sys
 from prettytable import PrettyTable
 from termcolor import colored
 
-from conjureup import utils
+from conjureup import events, utils
 from conjureup.app_config import app
 from conjureup.controllers.summary import common
 
@@ -30,6 +30,7 @@ class SummaryController:
             table.add_row([application_name, result])
         print(table)
         utils.info("Installation of your big software is now complete.")
+        events.Shutdown.set(0)
 
 
 _controller_class = SummaryController

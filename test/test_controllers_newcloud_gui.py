@@ -55,9 +55,9 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.utils_patcher.stop()
-        self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
+        self.mock_finish.stop()
         self.juju_patcher.stop()
         self.common_patcher.stop()
         self.track_screen_patcher.stop()
@@ -68,7 +68,7 @@ class NewCloudGUIRenderTestCase(unittest.TestCase):
         self.mock_app.is_jaas = False
         self.mock_app.current_cloud = 'localhost'
         self.controller.render()
-        self.mock_controllers.use.assert_called_once_with('deploy')
+        assert self.mock_finish.called
 
     def test_lxd_version_to_low(self):
         """ Make sure lxd versions fail properly
@@ -107,9 +107,11 @@ class NewCloudGUIFinishTestCase(unittest.TestCase):
         self.track_screen_patcher = patch(
             'conjureup.controllers.newcloud.gui.track_screen')
         self.mock_track_screen = self.track_screen_patcher.start()
-        self.track_event_patcher = patch(
-            'conjureup.controllers.newcloud.gui.track_event')
-        self.mock_track_event = self.track_event_patcher.start()
+
+        self.common_patcher = patch(
+            'conjureup.controllers.newcloud.gui.common'
+        )
+        self.mock_common = self.common_patcher.start()
 
     def tearDown(self):
         self.controllers_patcher.stop()
@@ -118,8 +120,9 @@ class NewCloudGUIFinishTestCase(unittest.TestCase):
         self.app_patcher.stop()
         self.juju_patcher.stop()
         self.track_screen_patcher.stop()
-        self.track_event_patcher.stop()
+        self.common_patcher.stop()
 
     def test_finish(self):
         "call finish"
         self.controller.finish()
+        assert self.mock_app.loop.create_task.called

@@ -1,24 +1,24 @@
 """ Juju helpers
 """
 import asyncio
-import base64
 import json
 import os
 from concurrent import futures
-from functools import partial, wraps
+from functools import wraps
 from pathlib import Path
-from subprocess import DEVNULL, PIPE, CalledProcessError, Popen, TimeoutExpired
+from subprocess import DEVNULL, PIPE, CalledProcessError
 
-import macumba
 import yaml
 from bundleplacer.charmstore_api import CharmStoreID
-from macumba.v2 import JujuClient
+from juju.model import Model
 
-from conjureup import async, consts
+from conjureup import consts, events
 from conjureup.app_config import app
 from conjureup.utils import is_linux, juju_path, run
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
+
+PENDING_DEPLOYS = 0
 
 
 class ControllerNotFoundException(Exception):
@@ -106,10 +106,10 @@ def get_controller_in_cloud(cloud):
     return None
 
 
-def login(force=False):
+async def login():
     """ Login to Juju API server
     """
-    if app.juju.authenticated and not force:
+    if app.juju.authenticated:
         return
 
     if app.current_controller is None:
@@ -118,52 +118,22 @@ def login(force=False):
     if app.current_model is None:
         raise Exception("Tried to login with no current model set.")
 
-    env = get_controller(app.current_controller)
-    account = get_account(app.current_controller)
-    uuid = get_model(app.current_controller, app.current_model)['model-uuid']
-    server = env['api-endpoints'][0]
-    user_tag = "user-{}".format(account['user'].split("@")[0])
-    url = os.path.join('wss://', server, 'model', uuid, 'api')
-    password = account.get('password')
-    macaroons = get_macaroons() if not password else None
-    app.juju.client = JujuClient(
-        user=user_tag,
-        url=url,
-        password=password,
-        macaroons=macaroons)
-    try:
-        app.juju.client.login()
-        app.juju.authenticated = True
-    except macumba.errors.LoginError as e:
-        raise e
+    app.juju.client = Model(app.loop)
+    model_name = '{}:{}'.format(app.current_controller,
+                                app.current_model)
+
+    if not events.ModelAvailable.is_set():
+        app.log.info('Waiting for model {}...'.format(model_name))
+        await events.ModelAvailable.wait()
+    app.log.info('Connecting to model {}...'.format(model_name))
+    await app.juju.client.connect_model(model_name)
+    app.juju.authenticated = True
+    events.ModelConnected.set()
+    app.log.info('Connected')
 
 
-def get_macaroons():
-    """Decode and return macaroons from default ~/.go-cookies
-
-    NB: Copied from python-libjuju
-    """
-    try:
-        cookie_file = os.path.expanduser('~/.go-cookies')
-        with open(cookie_file, 'r') as f:
-            cookies = json.load(f)
-    except (OSError, ValueError):
-        app.log.warn("Couldn't load macaroons from %s", cookie_file)
-        return []
-
-    base64_macaroons = [
-        c['Value'] for c in cookies
-        if c['Name'].startswith('macaroon-') and c['Value']
-    ]
-
-    return [
-        json.loads(base64.b64decode(value).decode('utf-8'))
-        for value in base64_macaroons
-    ]
-
-
-def bootstrap(controller, cloud, model='conjure-up', series="xenial",
-              credential=None):
+async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
+                    credential=None):
     """ Performs juju bootstrap
 
     If not LXD pass along the newly defined credentials
@@ -171,76 +141,62 @@ def bootstrap(controller, cloud, model='conjure-up', series="xenial",
     Arguments:
     controller: name of your controller
     cloud: name of local or public cloud to deploy to
+    model: name of default model to create
     series: define the bootstrap series defaults to xenial
-    log: application logger
     credential: credentials key
     """
     if app.current_region is not None:
         app.log.debug("Bootstrapping to set region: {}")
         cloud = "{}/{}".format(app.current_cloud, app.current_region)
-    cmd = "juju bootstrap {} {} " \
-          "--config image-stream=daily ".format(
-              cloud, controller)
-    cmd += "--config enable-os-upgrade=false "
-    cmd += "--default-model {} ".format(model)
-    if app.argv.http_proxy:
-        cmd += "--config http-proxy={} ".format(app.argv.http_proxy)
-    if app.argv.https_proxy:
-        cmd += "--config https-proxy={} ".format(app.argv.https_proxy)
-    if app.argv.apt_http_proxy:
-        cmd += "--config apt-http-proxy={} ".format(app.argv.apt_http_proxy)
-    if app.argv.apt_https_proxy:
-        cmd += "--config apt-https-proxy={} ".format(app.argv.apt_https_proxy)
-    if app.argv.no_proxy:
-        cmd += "--config no-proxy={} ".format(app.argv.no_proxy)
-    if app.argv.bootstrap_timeout:
-        cmd += "--config bootstrap-timeout={} ".format(
-            app.argv.bootstrap_timeout)
-    if app.argv.bootstrap_to:
-        cmd += "--to {} ".format(app.argv.bootstrap_to)
 
-    cmd += "--bootstrap-series={} ".format(series)
+    cmd = ["juju", "bootstrap", cloud, controller, "--default-model", model]
+
+    def add_config(k, v):
+        cmd.extend(["--config", "{}={}".format(k, v)])
+
+    add_config("image-stream", "daily"),
+    add_config("enable-os-upgrade", "false"),
+    if app.argv.http_proxy:
+        add_config("http-proxy", app.argv.http_proxy)
+    if app.argv.https_proxy:
+        add_config("https-proxy", app.argv.https_proxy)
+    if app.argv.apt_http_proxy:
+        add_config("apt-http-proxy", app.argv.apt_http_proxy)
+    if app.argv.apt_https_proxy:
+        add_config("apt-https-proxy", app.argv.apt_https_proxy)
+    if app.argv.no_proxy:
+        add_config("no-proxy", app.argv.no_proxy)
+    if app.argv.bootstrap_timeout:
+        add_config("bootstrap-timeout", app.argv.bootstrap_timeout)
+    if app.argv.bootstrap_to:
+        cmd.extend(["--to", app.argv.bootstrap_to])
+
+    cmd.extend(["--bootstrap-series", series])
     if credential is not None:
-        cmd += "--credential {} ".format(credential)
+        cmd.extend(["--credential", credential])
 
     if app.argv.debug:
-        cmd += "--debug"
+        cmd.append("--debug")
     app.log.debug("bootstrap cmd: {}".format(cmd))
 
-    try:
-        pathbase = os.path.join(app.config['spell-dir'],
-                                '{}-bootstrap').format(app.current_controller)
-        with open(pathbase + ".out", 'w') as outf:
-            with open(pathbase + ".err", 'w') as errf:
-                p = Popen(cmd, shell=True, stdout=outf,
-                          stderr=errf)
-                while p.poll() is None:
-                    async.sleep_until(2)
-                return p
-    except CalledProcessError:
-        raise Exception("Unable to bootstrap.")
-    except async.ThreadCancelledException:
-        p.terminate()
-        try:
-            p.wait(timeout=2)
-        except TimeoutExpired:
-            p.kill()
-            p.wait()
-        return p
-    except Exception as e:
-        raise e
-
-
-def bootstrap_async(controller, cloud, model='conjure-up', credential=None,
-                    exc_cb=None):
-    """ Performs a bootstrap asynchronously
-    """
-    return async.submit(partial(bootstrap,
-                                controller=controller,
-                                cloud=cloud,
-                                model=model,
-                                credential=credential), exc_cb,
-                        queue_name=JUJU_ASYNC_QUEUE)
+    pathbase = os.path.join(app.config['spell-dir'],
+                            '{}-bootstrap').format(app.current_controller)
+    with open(pathbase + ".out", 'w') as outf:
+        with open(pathbase + ".err", 'w') as errf:
+            proc = await asyncio.create_subprocess_exec(*cmd,
+                                                        stdout=outf,
+                                                        stderr=errf)
+            app.log.debug('waiting for proc')
+            await proc.wait()
+            app.log.debug('proc done')
+    if proc.returncode < 0:
+        raise Exception('Bootstrap killed by user: {}'.format(
+            proc.returncode))
+    elif proc.returncode > 0:
+        return False
+    events.Bootstrapped.set()
+    events.ModelAvailable.set()
+    return True
 
 
 def has_jaas_auth():
@@ -256,63 +212,52 @@ def has_jaas_auth():
     return False
 
 
-def register_controller(name, endpoint, email, password, twofa, timeout=30,
-                        cb=None, fail_cb=None, timeout_cb=None, exc_cb=None):
-    async def _register_controller():
-        try:
-            proc = await asyncio.create_subprocess_exec(
-                'juju', 'register', '-B', endpoint,
-                stdin=PIPE, stdout=PIPE, stderr=PIPE,
-            )
-            if has_jaas_auth():
-                # if the user already authed with jujucharms.com, such as by
-                # logging in with the charm command, or registering JaaS and
-                # then unregistering it, we only need to name the controller
-                input = [name]
-            else:
-                input = [email, password, twofa, name]
-            try:
-                stdin = b''.join(b'%s\n' % bytes(f, 'utf8') for f in input)
-                (stdout, stderr) = await asyncio.wait_for(
-                    proc.communicate(stdin), timeout)
-            except asyncio.TimeoutError:
-                proc.kill()
-                if timeout_cb:
-                    timeout_cb()
-                elif fail_cb:
-                    fail_cb((proc.stderr or b'').decode('utf8'))
-                return
-            if proc.returncode > 0:
-                if fail_cb:
-                    fail_cb(stderr.decode('utf8'))
-                    return
-                else:
-                    raise CalledProcessError(stderr.decode('utf8'))
-            cb()
-        except Exception as e:
-            if exc_cb:
-                exc_cb(e)
-                return
-            raise
-    asyncio.get_event_loop().create_task(_register_controller())
+async def register_controller(name, endpoint, email, password, twofa,
+                              timeout=30, fail_cb=None, timeout_cb=None):
+    proc = await asyncio.create_subprocess_exec(
+        'juju', 'register', '-B', endpoint,
+        stdin=PIPE, stdout=PIPE, stderr=PIPE,
+    )
+    if has_jaas_auth():
+        # if the user already authed with jujucharms.com, such as by
+        # logging in with the charm command, or registering JaaS and
+        # then unregistering it, we only need to name the controller
+        input = [name]
+    else:
+        input = [email, password, twofa, name]
+    try:
+        stdin = b''.join(b'%s\n' % bytes(f, 'utf8') for f in input)
+        stdout, stderr = await asyncio.wait_for(proc.communicate(stdin),
+                                                timeout)
+        stdout = stdout.decode('utf8')
+        stderr = stderr.decode('utf8')
+    except asyncio.TimeoutError:
+        proc.kill()
+        if timeout_cb:
+            timeout_cb()
+        elif fail_cb:
+            fail_cb((proc.stderr or b'').decode('utf8'))
+        return
+    if proc.returncode > 0:
+        if fail_cb:
+            fail_cb(stderr)
+            return
+        else:
+            raise CalledProcessError(stderr)
 
 
-def model_available():
+async def model_available(name):
     """ Checks if juju is available
 
     Returns:
     True/False if juju status was successful and a working model is found
     """
-    try:
-        run('juju status -m {}:{}'.format(app.current_controller,
-                                          app.current_model),
-            shell=True,
-            check=True,
-            stderr=DEVNULL,
-            stdout=DEVNULL)
-    except CalledProcessError:
-        return False
-    return True
+    proc = await asyncio.create_subprocess_exec(
+        'juju', 'status', '-m', ':'.join([app.current_controller, name]),
+        stderr=DEVNULL,
+        stdout=DEVNULL)
+    await proc.wait()
+    return proc.returncode == 0
 
 
 def autoload_credentials():
@@ -527,52 +472,60 @@ def deploy(bundle):
         raise e
 
 
-def add_machines(machines, msg_cb=None, exc_cb=None):
+async def add_machines(applications, machines, msg_cb):
     """Add machines to model
 
     Arguments:
 
+    app: name of app to which the machines belong
     machines: list of dictionaries of machine attributes.
     The key 'series' is required, and 'constraints' is the only other
     supported key
 
     """
-    if len(machines) > 0:
-        pl = "s"
+    if not events.PreDeployComplete.is_set():
+        # block until after pre-deploy
+        app.log.debug('Waiting for pre-deploy')
+        await events.PreDeployComplete.wait()
+
+    ids = {}
+    if machines:
+        msg = 'Adding machine{}: {}'.format(
+            's' if len(machines) > 1 else '',
+            ', '.join(repr((m['series'], m.get('constraints', '')))
+                      for m in machines),
+        )
+        app.log.info(msg)
+        msg_cb(msg)
+
+        tasks = []
+        for machine in machines:
+            series = machine['series']
+            constraints = constraints_to_dict(machine.get('constraints', ''))
+            tasks.append(app.juju.client.add_machine(series=series,
+                                                     constraints=constraints))
+
+        created_machines = await asyncio.gather(*tasks)
+        ids = {
+            m['virt_machine_id']: c.id
+            for m, c in zip(machines, created_machines)
+        }
+
+        msg = "Added machine{}: {}".format(
+            's' if len(ids) > 1 else '',
+            ', '.join(ids),
+        )
+        app.log.info(msg)
+        msg_cb(msg)
     else:
-        pl = ""
-
-    @requires_login
-    def _add_machines_async():
-        machine_params = [{"series": m['series'],
-                           "constraints": constraints_to_dict(
-                               m.get('constraints', "")),
-                           "jobs": ["JobHostUnits"]}
-                          for m in machines]
-        app.log.debug("AddMachines: {}".format(machine_params))
-        if msg_cb:
-            msg_cb("Adding machine{}: {}".format(
-                pl, [(m['series'], m['constraints']) for m in machine_params]))
-        try:
-            machine_response = app.juju.client.Client(
-                request="AddMachines", params={"params": machine_params})
-            app.log.debug("AddMachines returned {}".format(machine_response))
-        except Exception as e:
-            if exc_cb:
-                exc_cb(e)
-            return
-
-        if msg_cb:
-            ids = [d['machine'] for d in machine_response['machines']]
-            msg_cb("Added machine{}: {}".format(pl, ids))
-        return machine_response
-
-    return async.submit(_add_machines_async,
-                        exc_cb,
-                        queue_name=JUJU_ASYNC_QUEUE)
+        app.log.info('No new machines to add for {}'.format(
+            ', '.join(a.service_name for a in applications)))
+    for application in applications:
+        events.MachinesCreated.set(application.service_name)
+    return ids
 
 
-def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
+async def deploy_service(service, default_series, msg_cb):
     """Juju deploy service.
 
     If the service's charm ID doesn't have a revno, will query charm
@@ -590,122 +543,83 @@ def deploy_service(service, default_series, msg_cb=None, exc_cb=None):
     submitted to juju
 
     """
+    name = service.service_name
+    if not events.MachinesCreated.is_set(name):
+        # block until we have machines
+        app.log.debug('Waiting for machines for {}'.format(name))
+        await events.MachinesCreated.wait(name)
+        app.log.debug('Machines for {} are ready'.format(name))
 
-    @requires_login
-    def _deploy_async():
+    if service.csid.rev == "":
+        id_no_rev = service.csid.as_str_without_rev()
+        mc = app.metadata_controller
+        futures.wait([mc.metadata_future])
+        info = mc.get_charm_info(id_no_rev, lambda _: None)
+        service.csid = CharmStoreID(info["Id"])
 
-        if service.csid.rev == "":
-            id_no_rev = service.csid.as_str_without_rev()
-            mc = app.metadata_controller
-            futures.wait([mc.metadata_future])
-            info = mc.get_charm_info(id_no_rev, lambda _: None)
-            service.csid = CharmStoreID(info["Id"])
+    deploy_args = {}
+    deploy_args = dict(
+        entity_url=service.csid.as_str(),
+        application_name=service.service_name,
+        num_units=service.num_units,
+        constraints=service.constraints,
+        to=service.placement_spec,
+        config=service.options,
+    )
 
-        app.log.debug("Adding Charm {}".format(service.csid.as_str()))
-        rv = app.juju.client.Client(request="AddCharm",
-                                    params={"url": service.csid.as_str()})
-        app.log.debug("AddCharm returned {}".format(rv))
+    msg = 'Deploying {}...'.format(service.service_name)
+    app.log.info(msg)
+    msg_cb(msg)
 
-        charm_id = service.csid.as_str()
-        resources = app.metadata_controller.get_resources(charm_id)
+    app_inst = await app.juju.client.deploy(**deploy_args)
 
-        app.log.debug("Resources for charm id '{}': {}".format(charm_id,
-                                                               resources))
-        if resources:
-            params = {"tag": "application-{}".format(service.csid.name),
-                      "url": service.csid.as_str(),
-                      "resources": resources}
-            app.log.debug("AddPendingResources: {}".format(params))
-            resource_ids = app.juju.client.Resources(
-                request="AddPendingResources",
-                params=params)
-            app.log.debug("AddPendingResources returned: {}".format(
-                resource_ids))
-            application_to_resource_map = {}
-            for idx, resource in enumerate(resources):
-                pid = resource_ids['pending-ids'][idx]
-                application_to_resource_map[resource['Name']] = pid
-            service.resources = application_to_resource_map
+    if service.expose:
+        msg = 'Exposing {}.'.format(service.service_name)
+        app.log.info(msg)
+        msg_cb(msg)
+        await app_inst.expose()
 
-        deploy_args = service.as_deployargs()
-        if service.csid.series != '':
-            deploy_args['series'] = service.csid.series
-        else:
-            source_csid = CharmStoreID(service.charm_source)
-            if source_csid.series != '':
-                deploy_args['series'] = source_csid.series
-            else:
-                deploy_args['series'] = default_series
+    msg = '{}: deployed, installing.'.format(service.service_name)
+    app.log.info(msg)
+    msg_cb(msg)
 
-        app_params = {"applications": [deploy_args]}
-
-        app.log.debug("Deploying {}: {}".format(service, app_params))
-
-        deploy_message = "Deploying {}... ".format(
-            service.service_name)
-        if msg_cb:
-            msg_cb("{}".format(deploy_message))
-        rv = app.juju.client.Application(request="Deploy",
-                                         params=app_params)
-        app.log.debug("Deploy returned {}".format(rv))
-
-        for result in rv.get('results', []):
-            if 'error' in result:
-                raise Exception("Error deploying: {}".format(
-                    result['error'].get('message', 'error')))
-
-        if msg_cb:
-            msg_cb("{}: deployed, installing.".format(service.service_name))
-
-        if service.expose:
-            expose_params = {"application": service.service_name}
-            app.log.debug("Expose: {}".format(expose_params))
-            rv = app.juju.client.Application(
-                request="Expose",
-                params=expose_params)
-            app.log.debug("Expose returned: {}".format(rv))
-
-    return async.submit(_deploy_async,
-                        exc_cb,
-                        queue_name=JUJU_ASYNC_QUEUE)
+    events.AppDeployed.set(service.service_name)
 
 
-def set_relations(services, msg_cb=None, exc_cb=None):
+async def set_relations(service, msg_cb):
     """ Juju set relations
 
     Arguments:
-    services: list of services with relations to set
-    msg_cb: message callback
-    exc_cb: exception handler callback
+    service: service with relations to set
     """
     relations = set()
-    for service in services:
-        for a, b in service.relations:
-            if (a, b) not in relations and (b, a) not in relations:
-                relations.add((a, b))
+    for a, b in service.relations:
+        rel_pair = tuple(sorted((a, b)))
+        if rel_pair in relations:
+            continue
+        a_app = a.split(':')[0]
+        b_app = b.split(':')[0]
+        app.log.debug('Waiting for {} and {}'.format(a_app, b_app))
+        await events.AppDeployed.wait(a_app)
+        await events.AppDeployed.wait(b_app)
+        relations.add(rel_pair)
 
-    @requires_login
-    def do_add_all():
-        if msg_cb:
-            msg_cb("Setting application relations")
+    for rel_pair in relations:
+        rel_name = '{} <-> {}'.format(*rel_pair)
+        pending = events.PendingRelations.is_set(rel_name)
+        added = events.RelationsAdded.is_set(rel_name)
+        if pending or added:
+            continue
 
-        for a, b in list(relations):
-            params = {"Endpoints": [a, b]}
-            try:
-                app.log.debug("AddRelation: {}".format(params))
-                rv = app.juju.client.Application(request="AddRelation",
-                                                 params=params)
-                app.log.debug("AddRelation returned: {}".format(rv))
-            except Exception as e:
-                if exc_cb:
-                    exc_cb(e)
-                return
-        if msg_cb:
-            msg_cb("Completed setting application relations")
+        msg = "Setting relation {}".format(rel_name)
+        app.log.info(msg)
+        msg_cb(msg)
+        events.PendingRelations.set(rel_name)
+        await app.juju.client.add_relation(*rel_pair)
+        events.PendingRelations.clear(rel_name)
+        events.RelationsAdded.set(rel_name)
 
-    return async.submit(do_add_all,
-                        exc_cb,
-                        queue_name=JUJU_ASYNC_QUEUE)
+    events.RelationsAdded.set(service.service_name)
 
 
 def get_controller_info(name=None):
@@ -792,54 +706,49 @@ def get_model(controller, name):
         "Unable to find model: {}".format(name))
 
 
-def add_model(name, controller, cloud, allow_exists=False):
+async def add_model(name, controller, cloud, allow_exists=False):
     """ Adds a model to current controller
 
     Arguments:
     controller: controller to add model in
     allow_exists: re-use an existing model, if one exists.
     """
-    if allow_exists and model_available():
+    if allow_exists and await model_available(name):
+        events.ModelAvailable.set()
+        await login()
         return
 
-    sh = run('juju add-model {} -c {} {}'.format(name, controller, cloud),
-             shell=True, stdout=DEVNULL, stderr=PIPE)
-    if sh.returncode > 0:
+    proc = await asyncio.create_subprocess_exec(
+        'juju', 'add-model', name, '-c', controller, cloud,
+        stdout=DEVNULL, stderr=PIPE)
+    _, stderr = await proc.communicate()
+    if proc.returncode > 0:
         raise Exception(
-            "Unable to create model: {}".format(sh.stderr.decode('utf8')))
-    # the CLI has to connect to the model at least once to populate the model
-    # macaroons; model_available does this and verifies the model is working
-    if not model_available():
+            "Unable to create model: {}".format(stderr.decode('utf8')))
+    # the CLI has to connect to the model at least once to
+    # populate the model macaroons; model_available does this
+    # and verifies the model is working
+    if not await model_available(name):
         raise Exception("Unable to connect model after creation")
+    events.ModelAvailable.set()
+    await login()
 
 
-def add_model_async(name, controller, cloud, exc_cb=None):
-    return async.submit(partial(add_model, name, controller, cloud),
-                        exc_cb, queue_name=JUJU_ASYNC_QUEUE)
-
-
-def destroy_model_async(controller, model, exc_cb=None):
-    """ Destroys a model async
-    """
-    return async.submit(partial(destroy_model,
-                                controller=controller,
-                                model=model),
-                        exc_cb,
-                        queue_name=JUJU_ASYNC_QUEUE)
-
-
-def destroy_model(controller, model):
+async def destroy_model(controller, model):
     """ Destroys a model within a controller
 
     Arguments:
     controller: name of controller
     model: name of model to destroy
     """
-    sh = run('juju destroy-model -y {}:{}'.format(controller, model),
-             shell=True, stdout=DEVNULL, stderr=PIPE)
-    if sh.returncode > 0:
+    proc = await asyncio.create_subprocess_exec(
+        'juju', 'destroy-model', '-y', ':'.join([controller, model]),
+        stdout=DEVNULL, stderr=PIPE)
+    _, stderr = await proc.communicate()
+    if proc.returncode > 0:
         raise Exception(
-            "Unable to destroy model: {}".format(sh.stderr.decode('utf8')))
+            "Unable to destroy model: {}".format(stderr.decode('utf8')))
+    events.ModelAvailable.clear()
 
 
 def get_models(controller):

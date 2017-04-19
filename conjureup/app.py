@@ -6,6 +6,7 @@ import asyncio
 import os
 import os.path as path
 import platform
+import signal
 import subprocess
 import sys
 import textwrap
@@ -18,7 +19,7 @@ from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 
 from conjureup import __version__ as VERSION
-from conjureup import async, charm, consts, controllers, utils
+from conjureup import charm, consts, controllers, events, utils
 from conjureup.app_config import app
 from conjureup.controllers.steps.common import get_step_metadata_filenames
 from conjureup.download import (
@@ -43,7 +44,7 @@ def parse_options(argv):
                         spell, or a keyword matching multiple spells
                         ('openstack')""")
     parser.add_argument('-d', '--debug', action='store_true',
-                        dest='debug', default=True,
+                        dest='debug', default=False,
                         help='Enable debug logging.')
     parser.add_argument('--show-env', action='store_true',
                         dest='show_env',
@@ -110,15 +111,11 @@ def parse_options(argv):
     return parser.parse_args(argv)
 
 
-def unhandled_input(key):
-    if key in ['q', 'Q']:
-        async.shutdown()
-        EventLoop.exit(0)
-    if key in ['R']:
-        EventLoop.redraw_screen()
+async def _start(*args, **kwargs):
+    # NB: we have to set the exception handler here because we need to
+    # override the one set by urwid, which happens in MainLoop.run()
+    app.loop.set_exception_handler(events.handle_exception)
 
-
-def _start(*args, **kwargs):
     if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
         controllers.use('spellpicker').render()
         return
@@ -209,7 +206,7 @@ def main():
     # Application Config
     app.config = {'metadata': None}
     app.argv = opts
-    app.log = setup_logging("conjure-up/{}".format(spell),
+    app.log = setup_logging(app,
                             os.path.join(opts.cache_dir, 'conjure-up.log'),
                             opts.debug)
 
@@ -332,43 +329,53 @@ def main():
         "-".join(platform.linux_distribution()),
         platform.processor())
     track_event("OS", os_string, "")
-    if app.argv.cloud:
-        if '/' in app.argv.cloud:
-            parse_cli_cloud = app.argv.cloud.split('/')
-            app.current_cloud, app.current_region = parse_cli_cloud
-            app.log.debug(
-                "Region found {} for cloud {}".format(app.current_cloud,
-                                                      app.current_region))
-        else:
-            app.current_cloud = app.argv.cloud
 
-        if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
-            utils.error("Please specify a spell for headless mode.")
-            sys.exit(1)
+    app.loop = asyncio.get_event_loop()
+    app.loop.add_signal_handler(signal.SIGINT, events.Shutdown.set)
+    try:
+        if app.argv.cloud:
+            if '/' in app.argv.cloud:
+                parse_cli_cloud = app.argv.cloud.split('/')
+                app.current_cloud, app.current_region = parse_cli_cloud
+                app.log.debug(
+                    "Region found {} for cloud {}".format(app.current_cloud,
+                                                          app.current_region))
+            else:
+                app.current_cloud = app.argv.cloud
 
-        app.headless = True
-        app.ui = None
-        app.env['CONJURE_UP_HEADLESS'] = "1"
-        _start()
-
-    else:
-        if EventLoop.rows() < 43 or EventLoop.columns() < 132:
-            print("")
-            utils.warning(
-                "conjure-up is best viewed with a terminal geometry of "
-                "at least 132x43. Please increase the size of your terminal "
-                "before starting conjure-up.")
-            print("")
-            acknowledge = input("Do you wish to continue? [Y/n] ")
-            if 'N' in acknowledge or 'n' in acknowledge:
+            if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
+                utils.error("Please specify a spell for headless mode.")
                 sys.exit(1)
-        app.ui = ConjureUI()
-        EventLoop.build_loop(app.ui, STYLES,
-                             unhandled_input=unhandled_input)
-        EventLoop.set_alarm_in(0.05, _start)
-        EventLoop.run()
-        # explicitly close aysncio event loop to avoid hitting the following
-        # issue due to signal handlers added by asyncio.create_subprocess_exec
-        # being cleaned up during final garbage collection:
-        # https://github.com/python/asyncio/issues/396
-        asyncio.get_event_loop().close()
+
+            app.headless = True
+            app.ui = None
+            app.env['CONJURE_UP_HEADLESS'] = "1"
+            app.loop.create_task(events.shutdown_watcher())
+            app.loop.create_task(_start())
+            app.loop.run_forever()
+
+        else:
+            if EventLoop.rows() < 43 or EventLoop.columns() < 132:
+                print("")
+                utils.warning(
+                    "conjure-up is best viewed with a terminal geometry "
+                    "of at least 132x43. Please increase the size of your "
+                    "terminal before starting conjure-up.")
+                print("")
+                acknowledge = input("Do you wish to continue? [Y/n] ")
+                if 'N' in acknowledge or 'n' in acknowledge:
+                    sys.exit(1)
+            app.ui = ConjureUI()
+
+            EventLoop.build_loop(app.ui, STYLES,
+                                 unhandled_input=events.unhandled_input)
+            app.loop.create_task(events.shutdown_watcher())
+            app.loop.create_task(_start())
+            EventLoop.run()
+    finally:
+        # explicitly close asyncio event loop to avoid hitting the
+        # following issue due to signal handlers added by
+        # asyncio.create_subprocess_exec being cleaned up during final
+        # garbage collection: https://github.com/python/asyncio/issues/396
+        app.loop.close()
+    sys.exit(app.exit_code)

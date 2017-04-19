@@ -28,6 +28,8 @@ class SummaryView(WidgetWrap):
         rows.append(HR())
         rows.append(Padding.line_break(""))
         for k, v in self.results.items():
+            from conjureup.app_config import app
+            app.log.debug('Rendering result: {} -> {}'.format(k, v))
             rows.append(
                 Columns(
                     [

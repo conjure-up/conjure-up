@@ -1,83 +1,41 @@
-import json
-import os
-import sys
-from subprocess import PIPE
-
-from conjureup import controllers, juju, utils
-from conjureup.api.models import model_info
+from conjureup import controllers, events, juju, utils
 from conjureup.app_config import app
 
 from . import common
 
 
 class NewCloudController:
-
-    def do_post_bootstrap(self):
-        """ runs post bootstrap script if exists
-        """
-        # Set provider type for post-bootstrap
-        info = model_info(app.current_model)
-        app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
-        app.env['JUJU_CONTROLLER'] = app.current_controller
-        app.env['JUJU_MODEL'] = app.current_model
-
-        post_bootstrap_sh = os.path.join(app.config['spell-dir'],
-                                         'steps/00_post-bootstrap')
-        if os.path.isfile(post_bootstrap_sh) \
-           and os.access(post_bootstrap_sh, os.X_OK):
-            utils.info("Running post-bootstrap tasks.")
-            try:
-                sh = utils.run(post_bootstrap_sh, shell=True,
-                               stdout=PIPE,
-                               stderr=PIPE,
-                               env=app.env)
-                result = json.loads(sh.stdout.decode('utf8'))
-                utils.info("Finished post bootstrap task: {}".format(
-                    result['message']))
-            except Exception as e:
-                utils.warning(
-                    "Failed to run post bootstrap task: {}".format(e))
-                sys.exit(1)
-
-    def finish(self):
-        return controllers.use('deploy').render()
-
     def render(self):
+        creds = None
         cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
         if cloud_type != 'localhost':
-            if not common.try_get_creds(app.current_cloud):
+            creds = common.try_get_creds(app.current_cloud)
+            if not creds:
                 utils.warning("You attempted to do an install against a cloud "
                               "that requires credentials that could not be "
                               "found.  If you wish to supply those "
                               "credentials please run "
                               "`juju add-credential "
                               "{}`.".format(app.current_cloud))
-                sys.exit(1)
+                events.Shutdown.set(1)
+                return
 
+        # LXD is a special case as we want to make sure a bridge
+        # is configured. If not we'll bring up a new view to allow
+        # a user to configure a LXD bridge with suggested network
+        # information.
         if cloud_type == 'localhost':
             lxd = common.is_lxd_ready()
             if not lxd['ready']:
                 return controllers.use('lxdsetup').render(lxd['msg'])
 
-        utils.info("Bootstrapping Juju controller \"{}\" "
-                   "with deployment \"{}\"".format(
-                       app.current_controller,
-                       app.current_model))
-        p = juju.bootstrap(controller=app.current_controller,
-                           cloud=app.current_cloud,
-                           model=app.current_model,
-                           credential=common.try_get_creds(app.current_cloud))
-        if p.returncode != 0:
-            pathbase = os.path.join(
-                app.config['spell-dir'],
-                '{}-bootstrap').format(app.current_controller)
-            with open(pathbase + ".err") as errf:
-                utils.error("Error bootstrapping controller: "
-                            "{}".format("".join(errf.readlines())))
-            sys.exit(1)
+        app.loop.create_task(self.finish(creds))
 
-        self.do_post_bootstrap()
-        self.finish()
+    async def finish(self, creds):
+        await common.do_bootstrap(creds,
+                                  msg_cb=utils.info,
+                                  fail_msg_cb=utils.error)
+        controllers.use('deploy').render()
 
 
 _controller_class = NewCloudController

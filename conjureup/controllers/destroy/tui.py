@@ -1,23 +1,20 @@
-import sys
-
-from conjureup import juju, utils
+from conjureup import events, juju, utils
 from conjureup.app_config import app
+from conjureup.telemetry import track_event
 
 
 class Destroy:
-
     def render(self):
-        utils.info("Destroying model {} in "
-                   "controller {}".format(app.argv.model,
-                                          app.argv.controller))
-        try:
-            juju.destroy_model(app.argv.controller, app.argv.model)
-        except Exception as e:
-            utils.error(
-                "There was a problem destroying the model: {}".format(e))
-            sys.exit(1)
+        app.loop.create_task(self.do_destroy(app.argv.model,
+                                             app.argv.controller))
+
+    async def do_destroy(self, model, controller):
+        track_event("Destroying model", "Destroy", "")
+        utils.info("Destroying model {} in controller {}".format(model,
+                                                                 controller))
+        await juju.destroy_model(controller, model)
         utils.info("Model has been removed")
-        sys.exit(0)
+        events.Shutdown.set(0)
 
 
 _controller_class = Destroy

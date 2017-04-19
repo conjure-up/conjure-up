@@ -10,3 +10,4 @@ termcolor
 progressbar2
 prettytable
 juju_wait
+juju

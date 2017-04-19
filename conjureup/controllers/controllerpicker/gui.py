@@ -1,43 +1,36 @@
-from conjureup import async, controllers, juju, utils
+from conjureup import controllers, events, juju, utils
 from conjureup.app_config import app
 from conjureup.consts import JAAS_CLOUDS, JAAS_ENDPOINT
-from conjureup.telemetry import track_exception, track_screen
+from conjureup.telemetry import track_screen
 from conjureup.ui.views.ControllerListView import ControllerListView
 
 
 class ControllerPicker:
-
-    def __init__(self):
-        self.view = None
-
-    def __handle_exception(self, exc):
-        track_exception(exc.args[0])
-        return app.ui.show_exception_message(exc)
-
-    def __add_model(self):
-        juju.add_model(app.current_model,
-                       app.current_controller,
-                       app.current_cloud)
-
     def finish(self, controller):
         if controller is None:
             return controllers.use('clouds').render()
 
         if controller == 'jaas':
-            return controllers.use('jaaslogin').render()
+            if not app.jaas_controller:
+                # jaas not already registered
+                return controllers.use('jaaslogin').render()
+            # jaas already registered, but we they still need to pick a cloud
+            app.current_controller = app.jaas_controller
+            app.is_jaas = True
+            events.Bootstrapped.set()
+            return controllers.use('clouds').render()
 
         app.current_controller = controller
         app.current_model = utils.gen_model()
 
-        try:
-            c_info = juju.get_controller_info(app.current_controller)
-        except Exception as e:
-            return self.__handle_exception(e)
+        c_info = juju.get_controller_info(app.current_controller)
         app.current_cloud = c_info['details']['cloud']
 
-        async.submit(self.__add_model,
-                     self.__handle_exception,
-                     queue_name=juju.JUJU_ASYNC_QUEUE)
+        events.Bootstrapped.set()
+
+        app.loop.create_task(juju.add_model(app.current_model,
+                                            app.current_controller,
+                                            app.current_cloud))
         return controllers.use('deploy').render()
 
     def render(self):

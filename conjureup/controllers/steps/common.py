@@ -1,12 +1,9 @@
-import json
 import os
-import os.path as path
-from glob import glob
+from pathlib import Path
 
 import yaml
 
-from conjureup import juju, utils
-from conjureup.api.models import model_info
+from conjureup import utils
 from conjureup.app_config import app
 from conjureup.models.step import StepModel
 
@@ -34,37 +31,34 @@ def set_env(inputs):
             app.env[env_key]))
 
 
-def get_step_metadata_filenames(steps_dir):
+def get_step_metadata_filenames():
     """Gets a list of step metadata filenames sorted alphabetically
     (hence in execution order)
-
-    Arguments:
-    steps_dir: path to search for step metadata files
 
     Returns:
     list of step metadata file names
 
     """
-    return sorted(glob(os.path.join(steps_dir, 'step-*.yaml')))
+    steps_dir = Path(app.config['spell-dir']) / 'steps'
+    return sorted(steps_dir.glob('step-*.yaml'))
 
 
 def load_step(step_meta_path):
-    step_ex_path, ext = path.splitext(step_meta_path)
-    short_path = '/'.join(step_ex_path.split('/')[-3:])
-    if not path.isfile(step_ex_path):
+    step_meta_path = Path(step_meta_path)
+    step_name = step_meta_path.stem
+    step_ex_path = step_meta_path.parent / step_name
+    if not step_ex_path.is_file():
         raise ValidationError(
-            'Step {} has no implementation'.format(short_path))
-    elif not os.access(step_ex_path, os.X_OK):
+            'Step {} has no implementation'.format(step_name))
+    elif not os.access(str(step_ex_path), os.X_OK):
         raise ValidationError(
-            'Step {} is not executable, make sure it has '
-            'the executable bit set'.format(short_path))
-    with open(step_meta_path) as fp:
-        step_metadata = yaml.load(fp.read())
-        model = StepModel(step_metadata, step_ex_path)
-        return model
+            'Step {} is not executable'.format(step_name))
+    step_metadata = yaml.load(step_meta_path.read_text())
+    model = StepModel(step_metadata, str(step_ex_path), step_name)
+    return model
 
 
-def do_step(step_model, step_widget, message_cb, gui=False):
+async def do_step(step_model, msg_cb):
     """ Processes steps in the background
 
     Arguments:
@@ -75,36 +69,17 @@ def do_step(step_model, step_widget, message_cb, gui=False):
     Returns:
     Step title and results message
     """
-    # merge the step_widget input data into our step model
-    if gui:
-        step_widget.clear_button()
-        for i in step_model.additional_input:
-            try:
-                matching_widget = [
-                    x for x in step_widget.additional_input
-                    if x['key'] == i['key']][0]
-                i['input'] = matching_widget['input'].value
-            except IndexError as e:
-                app.log.error(
-                    "Tried to pull a value from an "
-                    "invalid input: {}/{}".format(e,
-                                                  matching_widget))
-
-    try:
-        info = model_info(app.current_model)
-    except:
-        juju.login(force=True)
-        info = model_info(app.current_model)
+    provider_type = app.juju.client.info.provider_type
 
     # Set our provider type environment var so that it is
     # exposed in future processing tasks
-    app.env['JUJU_PROVIDERTYPE'] = info['provider-type']
+    app.env['JUJU_PROVIDERTYPE'] = provider_type
 
     # Set current juju controller and model
     app.env['JUJU_CONTROLLER'] = app.current_controller
     app.env['JUJU_MODEL'] = app.current_model
 
-    if info['provider-type'] == "maas":
+    if provider_type == "maas":
         app.log.debug("MAAS CONFIG: {}".format(app.maas))
 
         # Expose MAAS endpoints and tokens
@@ -114,37 +89,4 @@ def do_step(step_model, step_widget, message_cb, gui=False):
     # Set environment variables so they can be accessed from the step scripts
     set_env(step_model.additional_input)
 
-    if not os.access(step_model.path, os.X_OK):
-        app.log.error("Step {} not executable".format(step_model.path))
-
-    message_cb("Running step: {}".format(step_model.title))
-    if gui:
-        step_widget.set_icon_state('waiting')
-    app.log.debug("Executing script: {}".format(step_model.path))
-    with open(step_model.path + ".out", 'w') as outf:
-        with open(step_model.path + ".err", 'w') as errf:
-            utils.run_script(step_model.path,
-                             stderr=errf,
-                             stdout=outf)
-    try:
-        with open(step_model.path + ".out") as outf:
-            lines = outf.readlines()
-            try:
-                result = json.loads(lines[-1])
-            except json.decoder.JSONDecodeError as e:
-                raise Exception(
-                    "Unable to parse json ({}): {}".format(e, lines))
-    except:
-        raise Exception("Could not read output from step "
-                        "{}: {}".format(step_model.path, lines))
-    if 'returnCode' not in result:
-        raise Exception("Invalid last message from step: {}".format(result))
-    if result['returnCode'] > 0:
-        app.log.error(
-            "Failure in step: {}".format(result['message']))
-        raise Exception(result['message'])
-
-    step_model.result = result['message']
-    message_cb("{} completed.".format(step_model.title))
-
-    return (step_model, step_widget)
+    return await utils.run_step(step_model.name, step_model.title, msg_cb)

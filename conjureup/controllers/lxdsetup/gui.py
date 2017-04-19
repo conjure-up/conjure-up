@@ -1,18 +1,12 @@
 from tempfile import NamedTemporaryFile
 
-from ubuntui.ev import EventLoop
-
-from conjureup import controllers, utils
+from conjureup import controllers, events, utils
 from conjureup.app_config import app
 from conjureup.telemetry import track_screen
 from conjureup.ui.views.lxdsetup import LXDSetupView
 
 
 class LXDSetupController:
-
-    def __init__(self):
-        self.view = None
-
     def __format_input(self, network):
         """ Formats the network dictionary into strings from the widgets values
         """
@@ -52,12 +46,11 @@ class LXDSetupController:
             return controllers.use('clouds').render()
 
         if needs_lxd_setup:
-            EventLoop.remove_alarms()
-            EventLoop.exit(1)
+            events.Shutdown.set(1)
+            return
 
         if lxdnetwork is None:
-            return app.ui.show_exception_message(
-                Exception("Unable to configure LXD network bridge."))
+            raise Exception("Unable to configure LXD network bridge.")
 
         formatted_network = self.__format_input(lxdnetwork)
         app.log.debug("LXD Config {}".format(formatted_network))
@@ -79,19 +72,19 @@ class LXDSetupController:
         utils.run("sudo systemctl restart lxd-bridge.service", shell=True)
 
         app.current_cloud = 'localhost'
-        controllers.use('newcloud').render(bootstrap=True)
+        controllers.use('newcloud').render()
 
     def render(self, msg):
         """ Render
         """
         track_screen("LXD Setup")
-        self.view = LXDSetupView(app, msg=msg,
-                                 cb=self.finish)
+        view = LXDSetupView(app, msg=msg,
+                            cb=self.finish)
 
         app.ui.set_header(
             title="Configure LXD",
         )
-        app.ui.set_body(self.view)
+        app.ui.set_body(view)
 
 
 _controller_class = LXDSetupController

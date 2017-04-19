@@ -89,7 +89,7 @@ class DestroyConfirmView(WidgetWrap):
         return len(machines.keys())
 
     def _build_widget(self):
-        applications = model_status()['applications']
+        applications = model_status().applications
         total_items = []
         total_items.append(Instruction("Deployment Information:"))
         total_items.append(HR())

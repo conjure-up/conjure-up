@@ -6,8 +6,9 @@
 
 
 import unittest
-from unittest.mock import MagicMock, call, patch, sentinel
+from unittest.mock import MagicMock, patch, sentinel
 
+from conjureup import events
 from conjureup.controllers.summary.gui import SummaryController
 
 
@@ -26,6 +27,9 @@ class SummaryGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.summary.gui.app')
         mock_app = self.app_patcher.start()
         mock_app.ui = MagicMock(name="app.ui")
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', mock_app)
+        self.ev_app_patcher.start()
 
         self.track_screen_patcher = patch(
             'conjureup.controllers.summary.gui.track_screen')
@@ -38,6 +42,7 @@ class SummaryGUIRenderTestCase(unittest.TestCase):
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
         self.track_screen_patcher.stop()
 
     def test_render_empty(self):
@@ -50,7 +55,6 @@ class SummaryGUIRenderTestCase(unittest.TestCase):
 class SummaryGUIFinishTestCase(unittest.TestCase):
 
     def setUp(self):
-
         self.render_patcher = patch(
             'conjureup.controllers.summary.gui.SummaryController.render')
         self.mock_render = self.render_patcher.start()
@@ -58,14 +62,18 @@ class SummaryGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.summary.gui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.ev_app_patcher = patch(
+            'conjureup.events.app', self.mock_app)
+        self.ev_app_patcher.start()
         self.controller = SummaryController()
+        events.Shutdown.clear()
 
     def tearDown(self):
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.ev_app_patcher.stop()
 
     def test_finish(self):
         "finish should stop event loop"
-        with patch("conjureup.controllers.summary.gui.EventLoop") as m_ev:
-            self.controller.finish()
-            m_ev.assert_has_calls([call.remove_alarms(), call.exit(0)])
+        self.controller.finish()
+        assert events.Shutdown.is_set()
