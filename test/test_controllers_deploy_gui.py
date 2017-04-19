@@ -85,6 +85,10 @@ class DeployGUIFinishTestCase(unittest.TestCase):
         self.render_patcher = patch(
             'conjureup.controllers.deploy.gui.DeployController.render')
         self.mock_render = self.render_patcher.start()
+        self.watch_patcher = patch(
+            'conjureup.controllers.deploy.gui.DeployController'
+            '.watch_for_deploy_complete')
+        self.watch_patcher.start()
         self.app_patcher = patch(
             'conjureup.controllers.deploy.gui.app')
         self.mock_app = self.app_patcher.start()
@@ -101,6 +105,7 @@ class DeployGUIFinishTestCase(unittest.TestCase):
         self.controllers_patcher.stop()
         self.juju_patcher.stop()
         self.render_patcher.stop()
+        self.watch_patcher.stop()
         self.app_patcher.stop()
         self.ev_app_patcher.stop()
 
