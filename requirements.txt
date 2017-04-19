@@ -10,5 +10,4 @@ termcolor
 progressbar2
 prettytable
 juju_wait
-#juju
-git+https://github.com/juju/python-libjuju@feature/api_version_support#egg=juju
+juju
