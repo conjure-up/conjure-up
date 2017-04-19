@@ -195,7 +195,7 @@ class DeployController:
             return ''
         maas_machine = self.maas_machine_map[machine_id]
         await app.loop.run_in_executor(
-            None, app.maas.client.assign_id_tags([maas_machine]))
+            None, app.maas.client.assign_id_tags, [maas_machine])
         machine_tag = maas_machine.instance_id.split('/')[-2]
         return "tags={}".format(machine_tag)
 
