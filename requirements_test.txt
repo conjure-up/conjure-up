@@ -6,3 +6,4 @@ nose
 tox
 q
 ipython
+ipdb

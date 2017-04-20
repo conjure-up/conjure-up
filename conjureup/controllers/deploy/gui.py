@@ -209,12 +209,11 @@ class DeployController:
             await events.MAASConnected.wait()
         app_placements = self.get_all_assignments(application)
         juju_machines = app.metadata_controller.bundle.machines
-        machines = []
+        machines = {}
         for virt_machine_id, _ in app_placements:
             if virt_machine_id in self.deployed_juju_machines:
                 continue
             machine_attrs = {
-                'virt_machine_id': virt_machine_id,
                 'series': application.csid.series,
             }
             if cloud_type == 'maas':
@@ -222,7 +221,7 @@ class DeployController:
                     await self.get_maas_constraints(virt_machine_id)
             else:
                 machine_attrs.update(juju_machines[virt_machine_id])
-            machines.append(machine_attrs)
+            machines[virt_machine_id] = machine_attrs
 
         return await juju.add_machines([application], machines,
                                        msg_cb=app.ui.set_footer)
