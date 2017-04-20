@@ -19,7 +19,7 @@ class DeployController:
                               key=attrgetter('service_name'))
 
         await common.pre_deploy(msg_cb=utils.info)
-        await juju.add_machines([a.service_name for a in applications],
+        await juju.add_machines(applications,
                                 machines,
                                 msg_cb=utils.info)
         tasks = []

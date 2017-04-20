@@ -478,7 +478,7 @@ async def add_machines(applications, machines, msg_cb):
     Arguments:
 
     app: name of app to which the machines belong
-    machines: list of dictionaries of machine attributes.
+    machines: a mapping of virtual machine numbers to machine attributes.
     The key 'series' is required, and 'constraints' is the only other
     supported key
 
@@ -492,14 +492,16 @@ async def add_machines(applications, machines, msg_cb):
     if machines:
         msg = 'Adding machine{}: {}'.format(
             's' if len(machines) > 1 else '',
-            ', '.join(repr((m['series'], m.get('constraints', '')))
-                      for m in machines),
+            ', '.join(
+                '{}: ({}, {})'.format(v, m['series'], m.get('constraints', ''))
+                for v, m in machines.items()),
         )
         app.log.info(msg)
         msg_cb(msg)
 
         tasks = []
-        for machine in machines:
+        for vmid in sorted(machines.keys()):
+            machine = machines[vmid]
             series = machine['series']
             constraints = constraints_to_dict(machine.get('constraints', ''))
             tasks.append(app.juju.client.add_machine(series=series,
@@ -507,8 +509,8 @@ async def add_machines(applications, machines, msg_cb):
 
         created_machines = await asyncio.gather(*tasks)
         ids = {
-            m['virt_machine_id']: c.id
-            for m, c in zip(machines, created_machines)
+            vmid: m.id
+            for vmid, m in zip(sorted(machines.keys()), created_machines)
         }
 
         msg = "Added machine{}: {}".format(
