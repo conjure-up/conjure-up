@@ -43,6 +43,10 @@ def parse_options(argv):
 
 
 async def _start():
+    # NB: we have to set the exception handler here because we need to
+    # override the one set by urwid, which happens in MainLoop.run()
+    app.loop.set_exception_handler(events.handle_exception)
+
     controllers.use('destroy').render()
 
 
@@ -61,7 +65,7 @@ def main():
     # Application Config
     app.config = {'metadata': None}
     app.argv = opts
-    app.log = setup_logging("conjure-down",
+    app.log = setup_logging(app,
                             os.path.join(opts.cache_dir, 'conjure-down.log'),
                             opts.debug)
 
