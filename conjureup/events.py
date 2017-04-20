@@ -87,7 +87,7 @@ def handle_exception(loop, context):
         return  # already reporting an error
     Error.set()
     exc = context['exception']
-    track_exception(exc.args[0])
+    track_exception(str(exc))
 
     # not sure of a cleaner way to log the exception instance
     try:
