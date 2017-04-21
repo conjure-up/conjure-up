@@ -341,6 +341,42 @@ class VSphere(BaseProvider):
         ]
 
 
+class Oracle(BaseProvider):
+    AUTH_TYPE = 'userpass'
+
+    def __init__(self):
+        self.api_endpoint = Field(
+            label='api endpoint',
+            widget=StringEditor(),
+            key='endpoint',
+            storable=False
+        )
+        self.user = Field(
+            label='user',
+            widget=StringEditor(),
+            key='user'
+        )
+        self.password = Field(
+            label='password',
+            widget=PasswordEditor(),
+            key='password'
+        )
+        self.external_network = Field(
+            label='external network',
+            widget=StringEditor(),
+            key='external-network',
+            storable=False
+        )
+
+    def fields(self):
+        return [
+            self.api_endpoint,
+            self.user,
+            self.password,
+            self.external_network
+        ]
+
+
 Schema = [
     ('aws', AWS),
     ('aws-china', AWS),
