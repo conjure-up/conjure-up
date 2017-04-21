@@ -19,8 +19,6 @@ install: snap
 
 release: update-version clean test snap
 	@snapcraft push $(NAME)_$(VERSION)_amd64.snap --release $(CHANNEL)
-	@git checkout -- conjureup/__init__.py
-	@git checkout -- snap/snapcraft.yaml
 
 gen-changelog:
 	if [ ! -f `which github_changelog_generator` ]; then echo "Need to install changelog generator: gem install github_changelog_generator, also generate a token https://git.io/vS1eF" && exit 1; fi
@@ -29,6 +27,7 @@ gen-changelog:
 update-version:
 	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjureup/__init__.py
 	@sed -i -r "s/(^version:\s)(.*)/\1$(VERSION)/" snap/snapcraft.yaml
+	@git commit -asm "Version bump: $(VERSION)"
 
 snap: sysdeps update-version clean test
 	@snapcraft
