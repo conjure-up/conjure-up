@@ -2,6 +2,7 @@ from ubuntui.frame import Frame  # noqa
 from ubuntui.views import ErrorView
 from conjureup import async
 from conjureup.app_config import app
+from conjureup.ui.views.shutdown import ShutdownView
 from ubuntui.ev import EventLoop
 import errno
 
@@ -30,3 +31,6 @@ class ConjureUI(Frame):
 
     def show_error_message(self, msg):
         self.frame.body = ErrorView(msg)
+
+    def show_shutdown_message(self):
+        self.frame.body = ShutdownView()
