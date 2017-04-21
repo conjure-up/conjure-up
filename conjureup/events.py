@@ -113,6 +113,8 @@ async def shutdown_watcher():
     app.log.info('Shutting down')
     if app.headless:
         utils.warning('Shutting down')
+    else:
+        app.ui.show_shutdown_message()
 
     try:
         if app.juju.authenticated:
