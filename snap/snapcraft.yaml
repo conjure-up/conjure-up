@@ -1,5 +1,5 @@
 name: conjure-up
-version: 2.2-beta3+8c775ab
+version: 2.2-beta3+41e97d5
 summary: Package runtime for conjure-up spells
 description: >
    This package provides conjure-up, an interface to installing spells that
