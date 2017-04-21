@@ -78,6 +78,25 @@ class NewCloudController:
                 # the "region" when bootstrapping
                 region = credentials.fields()[0].value
 
+            # XXX: Oracle is handled special case until that cloud is
+            # solidified and makes it into Juju's default cloud listing
+            if cloud_type == 'oracle':
+                # need to create a custom cloud here with endpoint for oracle
+                endpoint = credentials.fields()[3].value
+                oracle_config = {
+                    'type': 'oracle',
+                            'description': 'Oracle Cloud',
+                            'auth-types': ['userpass'],
+                            'endpoint': endpoint,
+                            'regions': {
+                                'uscom-central-1': {}
+                            }
+                }
+                try:
+                    juju.get_cloud('oracle')
+                except LookupError:
+                    juju.add_cloud('oracle', oracle_config)
+
         credentials_key = common.try_get_creds(app.current_cloud)
         app.loop.create_task(common.do_bootstrap(credentials_key,
                                                  region=region,

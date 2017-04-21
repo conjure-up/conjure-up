@@ -345,35 +345,35 @@ class Oracle(BaseProvider):
     AUTH_TYPE = 'userpass'
 
     def __init__(self):
-        self.api_endpoint = Field(
-            label='api endpoint',
+        self.identity_domain = Field(
+            label='identity domain',
             widget=StringEditor(),
-            key='endpoint',
-            storable=False
+            key='identity-domain'
         )
-        self.user = Field(
-            label='user',
+        self.username = Field(
+            label='e-mail address',
             widget=StringEditor(),
-            key='user'
+            key='username'
         )
         self.password = Field(
             label='password',
             widget=PasswordEditor(),
             key='password'
         )
-        self.external_network = Field(
-            label='external network',
-            widget=StringEditor(),
-            key='external-network',
+        self.endpoint = Field(
+            label='endpoint',
+            widget=StringEditor(
+                default="https://compute.uscom-central-1.oraclecloud.com/"),
+            key='endpoint',
             storable=False
         )
 
     def fields(self):
         return [
-            self.api_endpoint,
-            self.user,
+            self.identity_domain,
+            self.username,
             self.password,
-            self.external_network
+            self.endpoint
         ]
 
 
@@ -389,7 +389,8 @@ Schema = [
     ('joyent', Joyent),
     ('openstack', OpenStack),
     ('rackspace', OpenStack),
-    ('vsphere', VSphere)
+    ('vsphere', VSphere),
+    ('oracle', Oracle)
 ]
 
 
