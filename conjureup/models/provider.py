@@ -341,6 +341,42 @@ class VSphere(BaseProvider):
         ]
 
 
+class Oracle(BaseProvider):
+    AUTH_TYPE = 'userpass'
+
+    def __init__(self):
+        self.identity_domain = Field(
+            label='identity domain',
+            widget=StringEditor(),
+            key='identity-domain'
+        )
+        self.username = Field(
+            label='e-mail address',
+            widget=StringEditor(),
+            key='username'
+        )
+        self.password = Field(
+            label='password',
+            widget=PasswordEditor(),
+            key='password'
+        )
+        self.endpoint = Field(
+            label='endpoint',
+            widget=StringEditor(
+                default="https://compute.uscom-central-1.oraclecloud.com/"),
+            key='endpoint',
+            storable=False
+        )
+
+    def fields(self):
+        return [
+            self.identity_domain,
+            self.username,
+            self.password,
+            self.endpoint
+        ]
+
+
 Schema = [
     ('aws', AWS),
     ('aws-china', AWS),
@@ -353,7 +389,8 @@ Schema = [
     ('joyent', Joyent),
     ('openstack', OpenStack),
     ('rackspace', OpenStack),
-    ('vsphere', VSphere)
+    ('vsphere', VSphere),
+    ('oracle', Oracle)
 ]
 
 

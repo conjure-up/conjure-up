@@ -7,6 +7,7 @@ from concurrent import futures
 from functools import wraps
 from pathlib import Path
 from subprocess import DEVNULL, PIPE, CalledProcessError
+from tempfile import NamedTemporaryFile
 
 import yaml
 from bundleplacer.charmstore_api import CharmStoreID
@@ -14,7 +15,7 @@ from juju.model import Model
 
 from conjureup import consts, events
 from conjureup.app_config import app
-from conjureup.utils import is_linux, juju_path, run
+from conjureup.utils import is_linux, juju_path, run, spew
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
 
@@ -409,7 +410,35 @@ def get_cloud_types_by_name():
     # other cloud selection.
     if 'maas' not in clouds:
         clouds['maas'] = 'maas'
+
+    # Since Oracle is not in list clouds currently, special case this
+    # as a provider similar to MAAS.
+    if 'oracle' not in clouds:
+        clouds['oracle'] = 'oracle'
     return clouds
+
+
+def add_cloud(name, config):
+    """ Adds a cloud
+
+    Arguments:
+    name: name of cloud to add
+    config: cloud configuration
+    """
+    _config = {
+        'clouds': {
+            name: config
+        }
+    }
+    with NamedTemporaryFile(mode='w', encoding='utf-8',
+                            delete=False) as tempf:
+        output = yaml.safe_dump(_config, default_flow_style=False)
+        spew(tempf.name, output)
+        sh = run('juju add-cloud {} {}'.format(name, tempf.name),
+                 shell=True, stdout=PIPE, stderr=PIPE)
+        if sh.returncode > 0:
+            raise Exception(
+                "Unable to add cloud: {}".format(sh.stderr.decode('utf8')))
 
 
 def get_cloud(name):
