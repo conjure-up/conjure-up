@@ -1,5 +1,5 @@
 name: conjure-up
-version: 2.2-beta3+834c21a
+version: 2.2-beta3+8c775ab
 summary: Package runtime for conjure-up spells
 description: >
    This package provides conjure-up, an interface to installing spells that
@@ -60,4 +60,4 @@ parts:
     source: https://www.python.org/ftp/python/3.6.1/Python-3.6.1.tar.xz
     plugin: autotools
     configflags: [--prefix=/usr]
-    build-packages: [libssl-dev]
+    build-packages: [libssl-dev, lsb-release]
