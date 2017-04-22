@@ -21,7 +21,7 @@ solutions up and going with as little hindrance as possible.
 $ sudo snap install conjure-up --classic
 ```
 
-Trusty users please [see here](http://conjure-up.io/docs/en/users/#install-trusty-caveat)
+Trusty users please [see here](https://docs.ubuntu.com/conjure-up/en/#installing-conjure-up)
 
 ## macOS
 
