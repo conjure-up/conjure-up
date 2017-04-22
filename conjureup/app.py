@@ -31,7 +31,7 @@ from conjureup.download import (
     get_remote_url
 )
 from conjureup.log import setup_logging
-from conjureup.telemetry import track_event
+from conjureup.telemetry import track_event, track_screen
 from conjureup.ui import ConjureUI
 
 
@@ -330,6 +330,8 @@ def main():
     os_string = "{}-{}".format(
         "-".join(platform.linux_distribution()),
         platform.processor())
+
+    track_screen("Application Start")
     track_event("OS", os_string, "")
 
     app.loop = asyncio.get_event_loop()
