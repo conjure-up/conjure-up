@@ -76,6 +76,16 @@ class BaseProvider:
         return True
 
     def fields(self):
+        """ Should return a list of fields
+        """
+        raise NotImplementedError
+
+    def cloud_config(self, endpoint):
+        """ Returns a config suitable to store as a cloud
+
+        Arguments:
+        endpoint: api endpoint that juju can communicate with
+        """
         raise NotImplementedError
 
 
@@ -101,7 +111,7 @@ class MAAS(BaseProvider):
     AUTH_TYPE = 'oauth1'
 
     def __init__(self):
-        self.address = Field(
+        self.endpoint = Field(
             label='server address (only the ip or dns name)',
             widget=StringEditor(),
             key='endpoint',
@@ -116,9 +126,16 @@ class MAAS(BaseProvider):
 
     def fields(self):
         return [
-            self.address,
+            self.endpoint,
             self.apikey
         ]
+
+    def cloud_config(self, endpoint):
+        return {
+            'type': 'maas',
+            'auth-types': ['oauth1'],
+            'endpoint': "http://{}:5240/MAAS".format(endpoint)
+        }
 
     def _has_correct_api_key(self):
         """ Validates MAAS Api key
@@ -375,6 +392,17 @@ class Oracle(BaseProvider):
             self.password,
             self.endpoint
         ]
+
+    def cloud_config(self, endpoint):
+        return {
+            'type': 'oracle',
+            'description': 'Oracle Cloud',
+            'auth-types': ['userpass'],
+            'endpoint': endpoint,
+            'regions': {
+                'uscom-central-1': {}
+            }
+        }
 
 
 Schema = [

@@ -512,6 +512,13 @@ def gen_model():
     return "{}-{}".format(name[:24], gen_hash())
 
 
+def gen_cloud():
+    """ generates a unique cloud
+    """
+    name = "conjure-{}".format(app.current_cloud)
+    return "{}-{}".format(name[:24], gen_hash())
+
+
 def is_darwin():
     """ Checks if host platform is macOS
     """

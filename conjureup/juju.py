@@ -430,6 +430,7 @@ def add_cloud(name, config):
             name: config
         }
     }
+    app.log.debug(_config)
     with NamedTemporaryFile(mode='w', encoding='utf-8',
                             delete=False) as tempf:
         output = yaml.safe_dump(_config, default_flow_style=False)
