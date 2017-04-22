@@ -181,11 +181,13 @@ def show_env():
                                              width=55)])
     print(table)
     print("")
+
+    url = ("https://docs.ubuntu.com/conjure-up/"
+           "en/usage#customising-headless-mode")
     print(
         textwrap.fill(
-            "See http://conjure-up.io/docs/en/users/#running-in-headless-mode "
-            "for more information on using these variables to further "
-            "customize your deployment.", width=79))
+            "See {} for more information on using these variables to further "
+            "customize your deployment.".format(url), width=79))
     sys.exit(0)
 
 
