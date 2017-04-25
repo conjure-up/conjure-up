@@ -1,8 +1,9 @@
 from collections import OrderedDict
 from functools import partial
-
+import ipaddress
 from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
 from urwid import Text
+from urllib.parse import urlparse
 
 
 """ Defining the schema
@@ -60,6 +61,10 @@ class Field:
     def value(self):
         return self.widget.value
 
+    @value.setter  # NOQA
+    def value(self, value):
+        self.widget.value = value
+
 
 class BaseProvider:
     """ Base provider for all schemas
@@ -115,7 +120,8 @@ class MAAS(BaseProvider):
             label='server address (only the ip or dns name)',
             widget=StringEditor(),
             key='endpoint',
-            storable=False
+            storable=False,
+            validator=partial(self._has_correct_endpoint)
         )
         self.apikey = Field(
             label='api key',
@@ -134,8 +140,47 @@ class MAAS(BaseProvider):
         return {
             'type': 'maas',
             'auth-types': ['oauth1'],
-            'endpoint': "http://{}:5240/MAAS".format(endpoint)
+            'endpoint': endpoint
         }
+
+    def _has_correct_endpoint(self):
+        """ Validates that a ip address or url is passed.
+        If url, check to make sure it ends in the /MAAS endpoint
+        """
+        endpoint = self.endpoint.value
+        # Is URL?
+        if endpoint.startswith('http'):
+            url = urlparse(endpoint)
+            if not url.netloc:
+                return (False,
+                        "Unable to determine the web address, "
+                        "please use the format of "
+                        "http://maas-server.com:5240/MAAS")
+            else:
+                if not url.path == '/MAAS':
+                    self.endpoint.value = "{}/MAAS".format(url.geturl())
+                return (True, None)
+        else:
+            try:
+                # Check if valid IPv4 address, add default scheme, api
+                # endpoint
+                ip = endpoint.split(':')
+                port = '5240'
+                if len(ip) == 2:
+                    ip, port = ip
+                else:
+                    ip = ip.pop()
+                ipaddress.ip_address(ip)
+                self.endpoint.value = "http://{}:{}/MAAS".format(ip, port)
+                return (True, None)
+            except ValueError:
+                # Pass through to end so we can let the user know to use the
+                # proper http://maas-server.com/MAAS url
+                pass
+        return (False,
+                "Unable to validate that this entry is "
+                "the correct format. Please use  the format of "
+                "http://maas-server.com:5240/MAAS")
 
     def _has_correct_api_key(self):
         """ Validates MAAS Api key
