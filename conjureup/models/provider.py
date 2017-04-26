@@ -164,6 +164,7 @@ class MAAS(BaseProvider):
             # Looks like we just have a domain name
             self.endpoint.value = urljoin("http://{}:5240".format(endpoint),
                                           "MAAS")
+            return (True, None)
         else:
             try:
                 # Check if valid IPv4 address, add default scheme, api
