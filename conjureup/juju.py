@@ -4,7 +4,6 @@ import asyncio
 import json
 import os
 from concurrent import futures
-from functools import wraps
 from pathlib import Path
 from subprocess import DEVNULL, PIPE, CalledProcessError
 from tempfile import NamedTemporaryFile
@@ -24,15 +23,6 @@ PENDING_DEPLOYS = 0
 
 class ControllerNotFoundException(Exception):
     "An error when a controller can't be found in juju's config"
-
-
-# login decorator
-def requires_login(f):
-    def _decorator(*args, **kwargs):
-        if not app.juju.authenticated:
-            login(force=True)
-        return f(*args, **kwargs)
-    return wraps(f)(_decorator)
 
 
 def read_config(name):
