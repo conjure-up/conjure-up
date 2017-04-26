@@ -6,8 +6,6 @@ from ubuntui.widgets.hr import HR
 from ubuntui.widgets.text import Instruction
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
-from conjureup.api.models import model_status
-
 
 class DestroyConfirmView(WidgetWrap):
 
@@ -89,7 +87,7 @@ class DestroyConfirmView(WidgetWrap):
         return len(machines.keys())
 
     def _build_widget(self):
-        applications = model_status().applications
+        applications = self.app.juju.client.applications
         total_items = []
         total_items.append(Instruction("Deployment Information:"))
         total_items.append(HR())

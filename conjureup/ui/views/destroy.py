@@ -1,4 +1,5 @@
 from functools import partial
+from operator import itemgetter
 
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
@@ -65,22 +66,25 @@ class DestroyView(WidgetWrap):
 
     def _build_widget(self):
         total_items = []
-        for controller in self.controllers:
+        for controller in sorted(self.controllers):
             models = self.models[controller]['models']
             if len(models) > 0:
                 total_items.append(Color.label(
                     Text("{} ({})".format(controller,
                                           models[0].get('cloud', "")))
                 ))
-                for model in models:
+                for model in sorted(models, key=itemgetter('name')):
                     if model['name'] == "controller":
                         continue
+                    if model['life'] == 'dying':
+                        continue
 
-                    label = ("  {}, Machine Count: {}, "
-                             "Running since: {}".format(
-                                 model['name'],
-                                 self._total_machines(model),
-                                 model['status']['since']))
+                    label = "  {}, Machine Count: {}{}".format(
+                        model['name'],
+                        self._total_machines(model),
+                        ", Running since: {}".format(
+                            model['status'].get('since'))
+                        if 'since' in model['status'] else '')
                     total_items.append(
                         Color.body(
                             menu_btn(label=label,
