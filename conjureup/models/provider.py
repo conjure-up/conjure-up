@@ -371,7 +371,7 @@ class VSphere(BaseProvider):
     AUTH_TYPE = 'userpass'
 
     def __init__(self):
-        self.api_endpoint = Field(
+        self.endpoint = Field(
             label='api endpoint',
             widget=StringEditor(),
             key='endpoint',
@@ -396,7 +396,7 @@ class VSphere(BaseProvider):
 
     def fields(self):
         return [
-            self.api_endpoint,
+            self.endpoint,
             self.user,
             self.password,
             self.external_network
@@ -422,32 +422,13 @@ class Oracle(BaseProvider):
             widget=PasswordEditor(),
             key='password'
         )
-        self.endpoint = Field(
-            label='endpoint',
-            widget=StringEditor(
-                default="https://compute.uscom-central-1.oraclecloud.com/"),
-            key='endpoint',
-            storable=False
-        )
 
     def fields(self):
         return [
             self.identity_domain,
             self.username,
-            self.password,
-            self.endpoint
+            self.password
         ]
-
-    def cloud_config(self, endpoint):
-        return {
-            'type': 'oracle',
-            'description': 'Oracle Cloud',
-            'auth-types': ['userpass'],
-            'endpoint': endpoint,
-            'regions': {
-                'uscom-central-1': {}
-            }
-        }
 
 
 Schema = [

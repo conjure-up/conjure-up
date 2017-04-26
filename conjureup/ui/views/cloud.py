@@ -72,7 +72,7 @@ class CloudView(WidgetWrap):
             total_items.append(Padding.line_break(""))
         # TODO: add vsphere
         new_clouds = juju.get_compatible_clouds(
-            ['localhost', 'maas', 'oracle'])
+            ['localhost', 'maas'])
         if new_clouds:
             total_items.append(Text("Configure a New Cloud"))
             total_items.append(HR())

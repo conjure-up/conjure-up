@@ -71,7 +71,7 @@ class NewCloudController:
         region = None
         if credentials is not None:
             cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
-            if cloud_type == 'maas' or cloud_type == 'oracle':
+            if cloud_type == 'maas':
                 # Now that we are passed the selection of a cloud we create a
                 # new cloud name for the remainder of the deployment and make
                 # sure this cloud is saved for future use.
@@ -86,7 +86,8 @@ class NewCloudController:
                     juju.add_cloud(app.current_cloud,
                                    credentials.cloud_config(
                                        credentials.endpoint.value))
-
+            else:
+                common.save_creds(app.current_cloud, credentials)
         credentials_key = common.try_get_creds(app.current_cloud)
         app.loop.create_task(common.do_bootstrap(credentials_key,
                                                  region=region,
