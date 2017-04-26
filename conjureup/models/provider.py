@@ -1,8 +1,12 @@
+import ipaddress
 from collections import OrderedDict
 from functools import partial
+from urllib.parse import urljoin, urlparse
 
 from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
 from urwid import Text
+
+from conjureup.utils import is_valid_hostname
 
 
 """ Defining the schema
@@ -60,6 +64,10 @@ class Field:
     def value(self):
         return self.widget.value
 
+    @value.setter  # NOQA
+    def value(self, value):
+        self.widget.value = value
+
 
 class BaseProvider:
     """ Base provider for all schemas
@@ -76,6 +84,13 @@ class BaseProvider:
         return True
 
     def fields(self):
+        """ Should return a list of fields
+        """
+        raise NotImplementedError
+
+    def cloud_config(self):
+        """ Returns a config suitable to store as a cloud
+        """
         raise NotImplementedError
 
 
@@ -101,11 +116,12 @@ class MAAS(BaseProvider):
     AUTH_TYPE = 'oauth1'
 
     def __init__(self):
-        self.address = Field(
+        self.endpoint = Field(
             label='server address (only the ip or dns name)',
             widget=StringEditor(),
             key='endpoint',
-            storable=False
+            storable=False,
+            validator=partial(self._has_correct_endpoint)
         )
         self.apikey = Field(
             label='api key',
@@ -116,9 +132,61 @@ class MAAS(BaseProvider):
 
     def fields(self):
         return [
-            self.address,
+            self.endpoint,
             self.apikey
         ]
+
+    def cloud_config(self):
+        return {
+            'type': 'maas',
+            'auth-types': ['oauth1'],
+            'endpoint': self.endpoint.value
+        }
+
+    def _has_correct_endpoint(self):
+        """ Validates that a ip address or url is passed.
+        If url, check to make sure it ends in the /MAAS endpoint
+        """
+        endpoint = self.endpoint.value
+        # Is URL?
+        if endpoint.startswith('http'):
+            url = urlparse(endpoint)
+            if not url.netloc:
+                return (False,
+                        "Unable to determine the web address, "
+                        "please use the format of "
+                        "http://maas-server.com:5240/MAAS")
+            else:
+                if not url.path == '/MAAS':
+                    self.endpoint.value = urljoin(url.geturl(), "MAAS")
+                return (True, None)
+        elif is_valid_hostname(endpoint):
+            # Looks like we just have a domain name
+            self.endpoint.value = urljoin("http://{}:5240".format(endpoint),
+                                          "MAAS")
+            return (True, None)
+        else:
+            try:
+                # Check if valid IPv4 address, add default scheme, api
+                # endpoint
+                ip = endpoint.split(':')
+                port = '5240'
+                if len(ip) == 2:
+                    ip, port = ip
+                else:
+                    ip = ip.pop()
+                ipaddress.ip_address(ip)
+                self.endpoint.value = urljoin(
+                    "http://{}:{}".format(ip, port), "MAAS")
+                return (True, None)
+            except ValueError:
+                # Pass through to end so we can let the user know to use the
+                # proper http://maas-server.com/MAAS url
+                pass
+        return (False,
+                "Unable to validate that this entry is "
+                "the correct format. Please use  the format of "
+                "http://maas-server.com:5240/MAAS")
 
     def _has_correct_api_key(self):
         """ Validates MAAS Api key
@@ -309,7 +377,7 @@ class VSphere(BaseProvider):
     AUTH_TYPE = 'userpass'
 
     def __init__(self):
-        self.api_endpoint = Field(
+        self.endpoint = Field(
             label='api endpoint',
             widget=StringEditor(),
             key='endpoint',
@@ -334,7 +402,7 @@ class VSphere(BaseProvider):
 
     def fields(self):
         return [
-            self.api_endpoint,
+            self.endpoint,
             self.user,
             self.password,
             self.external_network
@@ -360,20 +428,12 @@ class Oracle(BaseProvider):
             widget=PasswordEditor(),
             key='password'
         )
-        self.endpoint = Field(
-            label='endpoint',
-            widget=StringEditor(
-                default="https://compute.uscom-central-1.oraclecloud.com/"),
-            key='endpoint',
-            storable=False
-        )
 
     def fields(self):
         return [
             self.identity_domain,
             self.username,
-            self.password,
-            self.endpoint
+            self.password
         ]
 
 

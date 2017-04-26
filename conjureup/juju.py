@@ -411,10 +411,6 @@ def get_cloud_types_by_name():
     if 'maas' not in clouds:
         clouds['maas'] = 'maas'
 
-    # Since Oracle is not in list clouds currently, special case this
-    # as a provider similar to MAAS.
-    if 'oracle' not in clouds:
-        clouds['oracle'] = 'oracle'
     return clouds
 
 
@@ -430,6 +426,7 @@ def add_cloud(name, config):
             name: config
         }
     }
+    app.log.debug(_config)
     with NamedTemporaryFile(mode='w', encoding='utf-8',
                             delete=False) as tempf:
         output = yaml.safe_dump(_config, default_flow_style=False)

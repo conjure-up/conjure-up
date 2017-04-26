@@ -28,8 +28,8 @@ class MaasClient:
         token_key: user token
         token_secret: user token secret
         """
-        self.api_url = "http://{}:5240/MAAS/api/{}".format(server_address,
-                                                           self.API_VERSION)
+        self.api_url = "{}/api/{}".format(server_address,
+                                          self.API_VERSION)
         self.oauth = OAuth1(consumer_key,
                             resource_owner_key=token_key,
                             resource_owner_secret=token_secret,

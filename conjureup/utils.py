@@ -4,6 +4,7 @@ import errno
 import json
 import os
 import pty
+import re
 import shutil
 import subprocess
 import sys
@@ -512,6 +513,13 @@ def gen_model():
     return "{}-{}".format(name[:24], gen_hash())
 
 
+def gen_cloud():
+    """ generates a unique cloud
+    """
+    name = "conjure-cloud-{}".format(app.current_cloud)
+    return "{}-{}".format(name[:24], gen_hash())
+
+
 def is_darwin():
     """ Checks if host platform is macOS
     """
@@ -522,6 +530,19 @@ def is_linux():
     """ Checks if host platform is linux
     """
     return sys.platform.startswith('linux')
+
+
+def is_valid_hostname(hostname):
+    """ Checks if a hostname is valid
+    Graciously taken from http://stackoverflow.com/a/2532344/3170835
+    """
+    if len(hostname) > 255:
+        return False
+    if hostname[-1] == ".":
+        # strip exactly one dot from the right, if present
+        hostname = hostname[:-1]
+    allowed = re.compile("(?!-)[A-Z\d\-\_]{1,63}(?<!-)$", re.IGNORECASE)
+    return all(allowed.match(x) for x in hostname.split("."))
 
 
 def set_terminal_title(title):

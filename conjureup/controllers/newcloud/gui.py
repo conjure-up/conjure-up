@@ -70,33 +70,23 @@ class NewCloudController:
 
         region = None
         if credentials is not None:
-            common.save_creds(app.current_cloud, credentials)
             cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
             if cloud_type == 'maas':
-                # when bootstrapping a MAAS controller that hasn't been added
-                # as a saved cloud, we have to provide the API endpoint as
-                # the "region" when bootstrapping
-                region = credentials.fields()[0].value
+                # Now that we are passed the selection of a cloud we create a
+                # new cloud name for the remainder of the deployment and make
+                # sure this cloud is saved for future use.
+                app.current_cloud = utils.gen_cloud()
 
-            # XXX: Oracle is handled special case until that cloud is
-            # solidified and makes it into Juju's default cloud listing
-            if cloud_type == 'oracle':
-                # need to create a custom cloud here with endpoint for oracle
-                endpoint = credentials.fields()[3].value
-                oracle_config = {
-                    'type': 'oracle',
-                            'description': 'Oracle Cloud',
-                            'auth-types': ['userpass'],
-                            'endpoint': endpoint,
-                            'regions': {
-                                'uscom-central-1': {}
-                            }
-                }
+                # Save credentials for new cloud
+                common.save_creds(app.current_cloud, credentials)
+
                 try:
-                    juju.get_cloud('oracle')
+                    juju.get_cloud(app.current_cloud)
                 except LookupError:
-                    juju.add_cloud('oracle', oracle_config)
-
+                    juju.add_cloud(app.current_cloud,
+                                   credentials.cloud_config())
+            else:
+                common.save_creds(app.current_cloud, credentials)
         credentials_key = common.try_get_creds(app.current_cloud)
         app.loop.create_task(common.do_bootstrap(credentials_key,
                                                  region=region,
