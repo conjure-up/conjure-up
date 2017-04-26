@@ -14,6 +14,7 @@ which lxd
 juju version
 conjure-up --version
 lxd --version
+lxc config show
 cat /etc/lsb-release
 ```
 
