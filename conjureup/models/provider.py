@@ -1,7 +1,7 @@
 import ipaddress
 from collections import OrderedDict
 from functools import partial
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 
 from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
 from urwid import Text
@@ -159,7 +159,7 @@ class MAAS(BaseProvider):
                         "http://maas-server.com:5240/MAAS")
             else:
                 if not url.path == '/MAAS':
-                    self.endpoint.value = "{}/MAAS".format(url.geturl())
+                    self.endpoint.value = urljoin(url.geturl(), "MAAS")
                 return (True, None)
         else:
             try:
@@ -172,7 +172,8 @@ class MAAS(BaseProvider):
                 else:
                     ip = ip.pop()
                 ipaddress.ip_address(ip)
-                self.endpoint.value = "http://{}:{}/MAAS".format(ip, port)
+                self.endpoint.value = urljoin(
+                    "http://{}:{}".format(ip, port), "MAAS")
                 return (True, None)
             except ValueError:
                 # Pass through to end so we can let the user know to use the
