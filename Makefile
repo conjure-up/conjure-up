@@ -11,7 +11,7 @@ CHANNEL := edge
 .PHONY: sysdeps
 sysdeps:
 	@sudo apt-get update
-	@sudo apt-get -qqyf install jq python3-yaml bsdtar bridge-utils software-properties-common snapcraft python3-dev
+	@sudo apt-get -qqyf install jq python3-yaml bsdtar bridge-utils software-properties-common snapcraft python3-dev tox
 
 .PHONY: install
 install: snap
