@@ -1,7 +1,7 @@
 import ipaddress
 from collections import OrderedDict
 from functools import partial
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urljoin, urlparse
 
 from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
 from urwid import Text
