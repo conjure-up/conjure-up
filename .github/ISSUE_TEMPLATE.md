@@ -5,23 +5,6 @@ Thank you for trying **conjure-up**! Before reporting a bug please make sure you
 - [ ] Is this problem already documented at https://docs.ubuntu.com/conjure-up/en/troubleshoot#common-spell-problems
 - [ ] Is conjure-up running inside a virtual machine?
 
-
-Please outline the hardware you're running conjure-up on, including number of cpus, amount of memory, amount of storage space available:
-
-
-    - What spell was selected?:
-    - What cloud provider was selected (this includes both MAAS and localhost)?:
-      - If MAAS which version are you running?
-
-
-Please outline what commands were run to install and execute conjure-up:
-
-
-
-Please post **~/.cache/conjure-up/conjure-up.log**
-
-
-
 ## Please provide the output of the following commands
 
 ```
@@ -34,4 +17,33 @@ lxd --version
 cat /etc/lsb-release
 ```
 
-## Summary of problem
+Please attach tarball of **~/.cache/conjure-up**:
+
+```
+tar cvzf conjure-up.tar.gz ~/.cache/conjure-up
+```
+
+## Sosreport
+
+In order to better get an overall idea of your system setup please also attach a **sosreport**
+
+```
+sudo apt install sosreport
+sosreport
+```
+
+The resulting output file can be attached to this issue.
+
+
+## What Spell was Selected?
+
+## What provider (aws, maas, localhost, etc)?
+
+### MAAS Users
+Which version of MAAS?
+
+## Commands ran
+
+Please outline what commands were run to install and execute conjure-up:
+
+## Additional Information
