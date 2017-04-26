@@ -1,9 +1,10 @@
+import ipaddress
 from collections import OrderedDict
 from functools import partial
-import ipaddress
+from urllib.parse import urlparse
+
 from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
 from urwid import Text
-from urllib.parse import urlparse
 
 
 """ Defining the schema
