@@ -86,11 +86,8 @@ class BaseProvider:
         """
         raise NotImplementedError
 
-    def cloud_config(self, endpoint):
+    def cloud_config(self):
         """ Returns a config suitable to store as a cloud
-
-        Arguments:
-        endpoint: api endpoint that juju can communicate with
         """
         raise NotImplementedError
 
@@ -137,11 +134,11 @@ class MAAS(BaseProvider):
             self.apikey
         ]
 
-    def cloud_config(self, endpoint):
+    def cloud_config(self):
         return {
             'type': 'maas',
             'auth-types': ['oauth1'],
-            'endpoint': endpoint
+            'endpoint': self.endpoint.value
         }
 
     def _has_correct_endpoint(self):

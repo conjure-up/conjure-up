@@ -84,8 +84,7 @@ class NewCloudController:
                     juju.get_cloud(app.current_cloud)
                 except LookupError:
                     juju.add_cloud(app.current_cloud,
-                                   credentials.cloud_config(
-                                       credentials.endpoint.value))
+                                   credentials.cloud_config())
             else:
                 common.save_creds(app.current_cloud, credentials)
         credentials_key = common.try_get_creds(app.current_cloud)
