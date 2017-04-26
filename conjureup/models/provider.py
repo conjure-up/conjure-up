@@ -6,6 +6,8 @@ from urllib.parse import urljoin, urlparse
 from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
 from urwid import Text
 
+from conjureup.utils import is_valid_hostname
+
 
 """ Defining the schema
 
@@ -158,6 +160,10 @@ class MAAS(BaseProvider):
                 if not url.path == '/MAAS':
                     self.endpoint.value = urljoin(url.geturl(), "MAAS")
                 return (True, None)
+        elif is_valid_hostname(endpoint):
+            # Looks like we just have a domain name
+            self.endpoint.value = urljoin("http://{}:5240".format(endpoint),
+                                          "MAAS")
         else:
             try:
                 # Check if valid IPv4 address, add default scheme, api
