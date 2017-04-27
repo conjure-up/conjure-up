@@ -52,9 +52,9 @@ def try_get_creds(cloud):
         return existing_creds['credentials'][cloud]['default-credential']
 
     # XXX we should really prompt to select because this is non-deterministic
-    for k in existing_creds['credentials'][cloud].keys():
+    for k, v in existing_creds['credentials'][cloud].items():
         if 'default-region' in k:
-            continue
+            app.current_region = v
         else:
             return k
 
@@ -178,14 +178,15 @@ def setup_lxdbr0_network():
                     n, out.stderr.decode()))
 
 
-async def do_bootstrap(creds, msg_cb, fail_msg_cb, region=None):
+async def do_bootstrap(creds, msg_cb, fail_msg_cb):
     if not app.is_jaas:
         app.log.info('Bootstrapping Juju controller.')
         msg_cb('Bootstrapping Juju controller.')
         track_event("Juju Bootstrap", "Started", "")
         cloud_with_region = app.current_cloud
-        if region:
-            cloud_with_region = '/'.join([app.current_cloud, region])
+        if app.current_region:
+            cloud_with_region = '/'.join([app.current_cloud,
+                                          app.current_region])
         success = await juju.bootstrap(app.current_controller,
                                        cloud_with_region,
                                        app.current_model,

@@ -1,6 +1,7 @@
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
 from ubuntui.widgets.hr import HR
+from ubuntui.widgets.input import SelectorHorizontal
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
@@ -8,8 +9,17 @@ from conjureup.app_config import app
 
 class NewCloudView(WidgetWrap):
 
-    def __init__(self, schema, cb):
+    def __init__(self, schema, regions, cb):
         self.schema = schema
+        self.regions = regions
+        self.regions_w = SelectorHorizontal(self.regions)
+        try:
+            self.regions_w.set_default(self.schema.default_region, True)
+        except NotImplementedError:
+            app.log.debug(
+                'Attempted to set a default region for cloud({}) '
+                'and failed, no default is set in the widget list.'.format(
+                    app.current_cloud))
         self.cb = cb
         self.frame = Frame(body=self._build_widget(),
                            footer=self._build_footer())
@@ -43,6 +53,14 @@ class NewCloudView(WidgetWrap):
                 )
             )
             total_items.append(Padding.line_break(""))
+        total_items.append(
+            Columns(
+                [
+                    ('weight', 0.5, Text("Select a Cloud Region",
+                                         align='right')),
+                    self.regions_w
+                ], dividechars=1
+            ))
         return total_items
 
     def _build_widget(self):
@@ -92,5 +110,7 @@ class NewCloudView(WidgetWrap):
         self.cb(back=True)
 
     def submit(self, result):
+        region = self.regions_w.value
         if self.schema.is_valid():
-            self.cb(self.schema)
+            self.cb(credentials=self.schema,
+                    region=region)

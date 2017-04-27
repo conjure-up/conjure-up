@@ -93,6 +93,12 @@ class BaseProvider:
         """
         raise NotImplementedError
 
+    @property
+    def default_region(self):
+        """ Returns a default region for cloud
+        """
+        raise NotImplementedError
+
 
 class AWS(BaseProvider):
     AUTH_TYPE = 'access-key'
@@ -110,6 +116,10 @@ class AWS(BaseProvider):
             self.access_key,
             self.secret_key
         ]
+
+    @property
+    def default_region(self):
+        return 'us-east-1'
 
 
 class MAAS(BaseProvider):

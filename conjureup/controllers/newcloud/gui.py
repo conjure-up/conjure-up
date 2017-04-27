@@ -56,7 +56,11 @@ class NewCloudController:
                     "add-credential` for more information.".format(
                         app.current_cloud)))
 
-        view = NewCloudView(creds, self.finish)
+        regions = []
+        # No regions for these providers
+        if cloud_type != 'maas' or cloud_type != 'vsphere':
+            regions = sorted(juju.get_regions(app.current_cloud).keys())
+        view = NewCloudView(creds, regions, self.finish)
 
         app.ui.set_header(
             title="New cloud setup",
@@ -64,11 +68,13 @@ class NewCloudController:
         app.ui.set_body(view)
         app.ui.set_footer("")
 
-    def finish(self, credentials=None, back=False):
+    def finish(self, credentials=None, region=None, back=False):
+        if region:
+            app.current_region = region
+
         if back:
             return controllers.use('clouds').render()
 
-        region = None
         if credentials is not None:
             cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
             if cloud_type == 'maas':
@@ -89,7 +95,6 @@ class NewCloudController:
                 common.save_creds(app.current_cloud, credentials)
         credentials_key = common.try_get_creds(app.current_cloud)
         app.loop.create_task(common.do_bootstrap(credentials_key,
-                                                 region=region,
                                                  msg_cb=app.ui.set_footer,
                                                  fail_msg_cb=lambda e: None))
         controllers.use('deploy').render()
