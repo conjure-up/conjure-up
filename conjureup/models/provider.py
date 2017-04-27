@@ -460,7 +460,7 @@ Schema = [
     ('openstack', OpenStack),
     ('rackspace', OpenStack),
     ('vsphere', VSphere),
-    ('oracle', Oracle)
+    ('oracle-compute', Oracle)
 ]
 
 
