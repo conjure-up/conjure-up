@@ -429,7 +429,7 @@ class Oracle(BaseProvider):
             key='identity-domain'
         )
         self.username = Field(
-            label='e-mail address',
+            label='username or e-mail',
             widget=StringEditor(),
             key='username'
         )
