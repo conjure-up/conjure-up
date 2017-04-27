@@ -4,6 +4,7 @@ Thank you for trying **conjure-up**! Before reporting a bug please make sure you
 
 - [ ] Is this problem already documented at https://docs.ubuntu.com/conjure-up/en/troubleshoot#common-spell-problems
 - [ ] Is conjure-up running inside a virtual machine?
+- [ ] Is this problem reproducible with `sudo snap refresh conjure-up --edge`?
 
 ## Please provide the output of the following commands
 
