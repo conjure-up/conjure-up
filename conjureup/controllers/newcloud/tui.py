@@ -25,9 +25,8 @@ class NewCloudController:
         # a user to configure a LXD bridge with suggested network
         # information.
         if cloud_type == 'localhost':
-            lxd = common.is_lxd_ready()
-            if not lxd['ready']:
-                return controllers.use('lxdsetup').render(lxd['msg'])
+            if common.is_lxd_ready():
+                return controllers.use('lxdsetup').render()
 
         app.loop.create_task(self.finish(creds))
 

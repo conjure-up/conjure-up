@@ -74,11 +74,11 @@ class LXDSetupController:
         app.current_cloud = 'localhost'
         controllers.use('newcloud').render()
 
-    def render(self, msg):
+    def render(self):
         """ Render
         """
         track_screen("LXD Setup")
-        view = LXDSetupView(app, msg=msg,
+        view = LXDSetupView(app,
                             cb=self.finish)
 
         app.ui.set_header(

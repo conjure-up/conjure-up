@@ -17,20 +17,30 @@ apps:
   juju:
     command: wrappers/juju
     aliases: [juju]
+  daemon:
+    command: wrappers/daemon.start
+    stop-command: wrappers/daemon.stop
+    daemon: simple
+  lxc:
+    command: wrappers/lxc
+  lxd:
+    command: wrappers/lxd
 
 parts:
   conjure-up:
     source: .
     plugin: python
     requirements: requirements.txt
-    stage-packages:
-      - bsdtar
-      - jq
-      - bridge-utils
-      - software-properties-common
     stage:
       - -README.md
       - -debian
+      - -usr/bin/py*
+      - -usr/bin/2to3-3.5
+      - -usr/share/*python*
+      - -usr/lib/python3.5
+    stage-packages:
+      - bsdtar
+      - jq
     after: [python]
   spells:
     source: https://github.com/conjure-up/spells.git
@@ -40,9 +50,12 @@ parts:
       "*": spells/
     stage:
       - -README.md
+    after: [conjure-up]
   wrappers:
     plugin: dump
     source: snap/
+    build-packages: [lsb-release]
+    after: [conjure-up]
   juju:
     source: https://github.com/juju/juju.git
     source-type: git
@@ -57,8 +70,36 @@ parts:
       mkdir -p $SNAPCRAFT_PART_INSTALL/bash_completions
       cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
     build-packages: [lsb-release]
+    after: [conjure-up, lxd]
   python:
     source: https://www.python.org/ftp/python/3.6.1/Python-3.6.1.tar.xz
     plugin: autotools
     configflags: [--prefix=/usr]
     build-packages: [libssl-dev]
+  lxc:
+    configflags:
+    - --disable-selinux
+    - --disable-python
+    - --disable-lua
+    - --disable-tests
+    - --disable-examples
+    - --disable-doc
+    - --disable-api-docs
+    - --disable-bash
+    - --disable-cgmanager
+    - --enable-apparmor
+    - --enable-seccomp
+    - --enable-capabilities
+    - --with-rootfs-path=/var/snap/conjure-up/common/lxc/
+    - --libexecdir=/snap/conjure-up/current/libexec/
+    organize:
+      snap/conjure-up/current/libexec: libexec
+    after: [conjure-up]
+  lxcfs:
+    organize:
+      snap/conjure-up/current/lxc: lxc
+      snap/conjure-up/current/lxcfs: lxcfs
+    configflags:
+    - --datarootdir=/snap/conjure-up/current/
+    - --localstatedir=/var/snap/conjure-up/common/var/
+    after: [conjure-up]
