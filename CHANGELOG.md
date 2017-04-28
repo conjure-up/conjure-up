@@ -1,5 +1,48 @@
 # Change Log
 
+## [2.2.0-beta3](https://github.com/conjure-up/conjure-up/tree/2.2.0-beta3) (2017-04-28)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.5...2.2.0-beta3)
+
+**Implemented enhancements:**
+
+- Provide better feedback if shutdown process takes some time [\#835](https://github.com/conjure-up/conjure-up/issues/835)
+- enable oracle provider [\#833](https://github.com/conjure-up/conjure-up/issues/833)
+- \[ARM64\] Need conjure-up snap in snap store [\#828](https://github.com/conjure-up/conjure-up/issues/828)
+- support bootstrap to a region for public cloud in gui mode [\#715](https://github.com/conjure-up/conjure-up/issues/715)
+- migrate to libjuju [\#697](https://github.com/conjure-up/conjure-up/issues/697)
+- export bundle after mutations [\#621](https://github.com/conjure-up/conjure-up/issues/621)
+
+**Fixed bugs:**
+
+- conjure-down failed with “login\(\) got an unexpected keyword arument ‘force’ “ [\#845](https://github.com/conjure-up/conjure-up/issues/845)
+- conjure-down stacktraces [\#832](https://github.com/conjure-up/conjure-up/issues/832)
+- libjuju: headless failure to add machines [\#829](https://github.com/conjure-up/conjure-up/issues/829)
+- There was an error during the pre deploy processing phase, failure to set profile [\#825](https://github.com/conjure-up/conjure-up/issues/825)
+- Conjure up isn't bootstraping juju [\#810](https://github.com/conjure-up/conjure-up/issues/810)
+- conjure-up errors on the kubernetes-core spell on OSX [\#776](https://github.com/conjure-up/conjure-up/issues/776)
+- conjure-up from edge r154 nonetype exception deploying landscape on maas [\#773](https://github.com/conjure-up/conjure-up/issues/773)
+- Juju Bootstrap to MAAS should not do --debug [\#742](https://github.com/conjure-up/conjure-up/issues/742)
+- Continues forever but doesn't do anything. [\#729](https://github.com/conjure-up/conjure-up/issues/729)
+- Openstack fails to correctly deploy when network device is not eth0 [\#728](https://github.com/conjure-up/conjure-up/issues/728)
+
+**Closed issues:**
+
+- Failed to set profile [\#849](https://github.com/conjure-up/conjure-up/issues/849)
+- Landscape install waiting status 16.04 conjure-up [\#844](https://github.com/conjure-up/conjure-up/issues/844)
+- Conjure-up --bootstrap-to \<hostname\> no progress  'fetching juju agent version 2.1.2 for amd64' [\#824](https://github.com/conjure-up/conjure-up/issues/824)
+- Reason: Juju failed to bootstrap: maas [\#822](https://github.com/conjure-up/conjure-up/issues/822)
+
+**Merged pull requests:**
+
+- integrate region selection in credentials view [\#847](https://github.com/conjure-up/conjure-up/pull/847) ([battlemidget](https://github.com/battlemidget))
+- Fix conjure-down [\#846](https://github.com/conjure-up/conjure-up/pull/846) ([johnsca](https://github.com/johnsca))
+- Add better add cloud [\#840](https://github.com/conjure-up/conjure-up/pull/840) ([battlemidget](https://github.com/battlemidget))
+- Add message to indicate shutdown [\#838](https://github.com/conjure-up/conjure-up/pull/838) ([johnsca](https://github.com/johnsca))
+- oracle provider [\#837](https://github.com/conjure-up/conjure-up/pull/837) ([battlemidget](https://github.com/battlemidget))
+- Fix error handling and logging in conjure-down [\#834](https://github.com/conjure-up/conjure-up/pull/834) ([johnsca](https://github.com/johnsca))
+- Fix add\_machines failure in headless [\#830](https://github.com/conjure-up/conjure-up/pull/830) ([johnsca](https://github.com/johnsca))
+- Switch to libjuju and asyncio [\#713](https://github.com/conjure-up/conjure-up/pull/713) ([johnsca](https://github.com/johnsca))
+
 ## [2.1.5](https://github.com/conjure-up/conjure-up/tree/2.1.5) (2017-04-15)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.4...2.1.5)
 
@@ -40,7 +83,6 @@
 - azure: need to make sure generated model names are less than 80 char [\#795](https://github.com/conjure-up/conjure-up/issues/795)
 - Calling incorrect ensure\_machines when cloud name != maas [\#794](https://github.com/conjure-up/conjure-up/issues/794)
 - OS X "Unable to find model" [\#778](https://github.com/conjure-up/conjure-up/issues/778)
-- conjure-up errors on the kubernetes-core spell on OSX [\#776](https://github.com/conjure-up/conjure-up/issues/776)
 - headless maas deployments fail with 'services' error [\#757](https://github.com/conjure-up/conjure-up/issues/757)
 - output truncated in summary view if current view is filled [\#738](https://github.com/conjure-up/conjure-up/issues/738)
 
