@@ -1,0 +1,38 @@
+#!/bin/sh
+set -eu
+
+if [ -d /sys/kernel/security/apparmor ] && [ "$(cat /proc/self/attr/current)" != "unconfined" ]; then
+    exec aa-exec -p unconfined -- $0 "$@"
+fi
+
+## LXD
+if [ -e ${SNAP_COMMON}/lxd.pid ]; then
+    PID=$(cat ${SNAP_COMMON}/lxd.pid)
+    /bin/kill -SIGPWR $PID
+    COUNT=0
+    while [ "$COUNT" != "30" ]; do
+        sleep 1
+        COUNT=$((${COUNT}+1))
+        ps $PID >/dev/null 2>&1 || break
+    done
+    ps $PID >/dev/null 2>&1 && /bin/kill -9 $PID
+fi
+
+## LXCFS
+if [ -e ${SNAP_COMMON}/lxcfs.pid ]; then
+    PID=$(cat ${SNAP_COMMON}/lxcfs.pid)
+    /bin/kill $PID
+    COUNT=0
+    while [ "$COUNT" != "30" ]; do
+        sleep 1
+        COUNT=$((${COUNT}+1))
+        ps $PID >/dev/null 2>&1 || break
+    done
+    ps $PID >/dev/null 2>&1 && /bin/kill -9 $PID
+fi
+
+fusermount -u ${SNAP_COMMON}/var/lib/lxcfs >/dev/null 2>&1 || true
+
+## Cleanup
+rm -f ${SNAP_COMMON}/lxcfs.pid ${SNAP_COMMON}/lxd.pid
+exit 0
