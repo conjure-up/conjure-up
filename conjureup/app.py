@@ -330,12 +330,8 @@ def main():
 
         show_env()
 
-    os_string = "{}-{}".format(
-        "-".join(platform.linux_distribution()),
-        platform.processor())
-
     track_screen("Application Start")
-    track_event("OS", os_string, "")
+    track_event("OS", platform.platform(), "")
 
     app.loop = asyncio.get_event_loop()
     app.loop.add_signal_handler(signal.SIGINT, events.Shutdown.set)
