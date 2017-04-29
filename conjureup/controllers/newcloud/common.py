@@ -1,9 +1,9 @@
 import os
 import os.path as path
-from pathlib import Path
 from subprocess import DEVNULL, CalledProcessError
 
 import yaml
+from pkg_resources import parse_version
 
 from conjureup import juju, utils
 from conjureup.app_config import app
@@ -87,6 +87,18 @@ def save_creds(cloud, credentials):
 def is_lxd_ready():
     """ routine for making sure lxd is configured for localhost deployments
     """
+    if utils.lxd_version() < parse_version('2.9'):
+        return {"ready": False,
+                "msg": "The current version of LXD found on this system is "
+                "not compatible. Please run the following to get the latest "
+                "supported LXD:\n\n"
+                "  sudo apt-add-repository ppa:ubuntu-lxc/lxd-stable\n"
+                "  sudo apt-get update\n"
+                "  sudo apt-get install lxd lxd-client\n\n"
+                "Or if you're using the snap version:\n\n"
+                "  sudo snap refresh lxd --candidate\n\n"
+                "Once complete please re-run conjure-up."}
+
     if not utils.check_user_in_group('lxd'):
         return {"ready": False,
                 "msg": "User {} is not part of the LXD group. You will need "
@@ -97,8 +109,7 @@ def is_lxd_ready():
                 "re-launch conjure-up".format(os.environ['USER'])}
 
     try:
-        lxd_init()
-        setup_conjureup1_network()
+        setup_lxdbr0_network()
         setup_conjureup0_network()
     except Exception as e:
         return {"ready": False,
@@ -119,29 +130,6 @@ def is_lxd_ready():
     return {"ready": True, "msg": ""}
 
 
-def lxd_init():
-    """ Runs initial lxd init
-    """
-    app.log.debug("Determining if embedded LXD is setup and ready.")
-    snap_user_data = os.environ.get('SNAP_USER_DATA', None)
-    if snap_user_data:
-        lxd_setup_path = Path(snap_user_data) / 'lxd.setup'
-        if not lxd_setup_path.exists():
-            out = utils.run_script("lxc version")
-            app.log.debug("Grabbing embedded LXC Version: {}".format(out))
-            out = utils.run_script("lxd init --auto")
-            app.log.debug("Initializing LXD: {}".format(out))
-            out = utils.run_script(
-                'lxc config set core.https_address [::]:12001')
-            app.log.debug("Setting custom LXD Port: {}".format(out))
-            out = utils.run_script(
-                'lxc profile device add default eth0 nic nictype=bridged '
-                'parent=conjureup1 name=eth0')
-            app.log.debug(
-                "Adding custom bridge to default profile: {}".format(out))
-            lxd_setup_path.touch()
-
-
 def setup_conjureup0_network():
     """ This attempts to setup LXD network bridge for conjureup if not available
     """
@@ -160,15 +148,15 @@ def setup_conjureup0_network():
                     out.stderr.decode()))
 
 
-def setup_conjureup1_network():
+def setup_lxdbr0_network():
     """ This attempts to setup LXD networking if not available
     """
     try:
-        utils.run('lxc network show conjureup1', shell=True, check=True,
+        utils.run('lxc network show lxdbr0', shell=True, check=True,
                   stdout=DEVNULL, stderr=DEVNULL)
     except CalledProcessError:
-        out = utils.run_script('lxc network create conjureup1 '
-                               'ipv4.address=10.100.0.1/24 '
+        out = utils.run_script('lxc network create lxdbr0 '
+                               'ipv4.address=10.0.8.1/24 '
                                'ipv4.nat=true '
                                'ipv6.address=none '
                                'ipv6.nat=false')
@@ -176,14 +164,12 @@ def setup_conjureup1_network():
             raise Exception(
                 "Failed to create LXD network bridge: {}".format(
                     out.stderr.decode()))
-        utils.run_script(
-            'lxc network attach-profile conjureup1 default eth0 eth0')
     out = utils.run_script(
-        "lxc network show conjureup1 | grep -q 'ipv4\.address:\snone'")
+        "lxc network show lxdbr0 | grep -q 'ipv4\.address:\snone'")
     if out.returncode == 0:
         network_set_cmds = [
-            'lxc network set conjureup1 ipv4.address 10.0.8.1/24',
-            'lxc network set conjureup1 ipv4.nat true'
+            'lxc network set lxdbr0 ipv4.address 10.0.8.1/24',
+            'lxc network set lxdbr0 ipv4.nat true'
         ]
         for n in network_set_cmds:
             out = utils.run_script(n)
