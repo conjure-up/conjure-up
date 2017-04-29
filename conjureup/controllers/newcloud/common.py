@@ -96,7 +96,7 @@ def is_lxd_ready():
                 "  sudo apt-get update\n"
                 "  sudo apt-get install lxd lxd-client\n\n"
                 "Or if you're using the snap version:\n\n"
-                "  sudo snap refresh lxd --candidate\n\n"
+                "  sudo snap refresh lxd\n\n"
                 "Once complete please re-run conjure-up."}
 
     if not utils.check_user_in_group('lxd'):
