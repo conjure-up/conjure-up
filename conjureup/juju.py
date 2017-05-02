@@ -114,7 +114,6 @@ async def login():
                                 app.current_model)
 
     if not events.ModelAvailable.is_set():
-        app.log.info('Waiting for model {}...'.format(model_name))
         await events.ModelAvailable.wait()
     app.log.info('Connecting to model {}...'.format(model_name))
     await app.juju.client.connect_model(model_name)
@@ -501,7 +500,6 @@ async def add_machines(applications, machines, msg_cb):
     """
     if not events.PreDeployComplete.is_set():
         # block until after pre-deploy
-        app.log.debug('Waiting for pre-deploy')
         await events.PreDeployComplete.wait()
 
     ids = {}
@@ -564,7 +562,6 @@ async def deploy_service(service, default_series, msg_cb):
     name = service.service_name
     if not events.MachinesCreated.is_set(name):
         # block until we have machines
-        app.log.debug('Waiting for machines for {}'.format(name))
         await events.MachinesCreated.wait(name)
         app.log.debug('Machines for {} are ready'.format(name))
 
@@ -617,9 +614,10 @@ async def set_relations(service, msg_cb):
             continue
         a_app = a.split(':')[0]
         b_app = b.split(':')[0]
-        app.log.debug('Waiting for {} and {}'.format(a_app, b_app))
-        await events.AppDeployed.wait(a_app)
-        await events.AppDeployed.wait(b_app)
+        await asyncio.gather(
+            events.AppDeployed.wait(a_app),
+            events.AppDeployed.wait(b_app),
+        )
         relations.add(rel_pair)
 
     for rel_pair in relations:
