@@ -701,7 +701,7 @@ def get_accounts():
         raise Exception(
             "Unable to find: {}".format(env))
     with open(env, 'r') as c:
-        env = yaml.load(c)
+        env = yaml.safe_load(c)
         return env['controllers']
     raise Exception("Unable to find accounts")
 

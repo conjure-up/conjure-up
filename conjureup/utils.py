@@ -391,7 +391,7 @@ def setup_metadata_controller():
 
     if bundle_filename.exists():
         # Load bundle data early so we can merge any additional charm options
-        bundle_data = yaml.load(bundle_filename.read_text())
+        bundle_data = yaml.safe_load(bundle_filename.read_text())
     else:
         bundle_name = app.config['metadata'].get('bundle-name', None)
         if bundle_name is None:
@@ -406,7 +406,7 @@ def setup_metadata_controller():
         bundle_data = charm.get_bundle(bundle_name, bundle_channel)
 
     if bundle_custom_filename.exists():
-        bundle_custom = yaml.load(slurp(bundle_custom_filename))
+        bundle_custom = yaml.safe_load(slurp(bundle_custom_filename))
         bundle_data = merge_dicts(bundle_data,
                                   bundle_custom)
 

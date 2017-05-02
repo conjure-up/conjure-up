@@ -171,7 +171,7 @@ def show_env():
     table.align = 'l'
     for step_meta_path in step_metas:
         with open(step_meta_path) as fp:
-            step_metadata = yaml.load(fp.read())
+            step_metadata = yaml.safe_load(fp.read())
         if 'additional-input' in step_metadata:
             for x in step_metadata['additional-input']:
                 default = colored(x['default'], 'green', attrs=['bold'])

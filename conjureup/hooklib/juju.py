@@ -22,7 +22,7 @@ def status():
             shell=True, check=True, stdout=PIPE)
     except CalledProcessError:
         return None
-    return yaml.load(sh.stdout.decode())
+    return yaml.safe_load(sh.stdout.decode())
 
 
 def leader(application):
@@ -40,7 +40,7 @@ def leader(application):
     except CalledProcessError:
         return None
 
-    leader_yaml = yaml.load(sh.stdout.decode())
+    leader_yaml = yaml.safe_load(sh.stdout.decode())
 
     for leader in leader_yaml:
         if leader['Stdout'].strip() == 'True':
@@ -85,7 +85,7 @@ def run_action(unit, action):
             JUJU_CM_STR, unit, action),
         shell=True,
         stdout=PIPE)
-    run_action_output = yaml.load(sh.stdout.decode())
+    run_action_output = yaml.safe_load(sh.stdout.decode())
     log.debug("{}: {}".format(sh.args, run_action_output))
     action_id = run_action_output.get('Action queued with id', None)
     log.debug("Found action: {}".format(action_id))
@@ -101,7 +101,7 @@ def run_action(unit, action):
             stdout=PIPE)
         log.debug(sh)
         try:
-            output = yaml.load(sh.stdout.decode())
+            output = yaml.safe_load(sh.stdout.decode())
             log.debug(output)
         except Exception as e:
             log.debug(e)
