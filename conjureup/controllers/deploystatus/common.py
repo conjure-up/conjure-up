@@ -5,7 +5,7 @@ from conjureup.app_config import app
 
 
 async def wait_for_applications(msg_cb):
-    await events.ModelConnected.wait()
+    await events.DeploymentComplete.wait()
     msg = 'Waiting for deployment to settle.'
     app.log.info(msg)
     msg_cb(msg)

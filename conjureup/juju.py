@@ -502,43 +502,60 @@ async def add_machines(applications, machines, msg_cb):
         # block until after pre-deploy
         await events.PreDeployComplete.wait()
 
-    ids = {}
-    if machines:
-        msg = 'Adding machine{}: {}'.format(
-            's' if len(machines) > 1 else '',
-            ', '.join(
-                '{}: ({}, {})'.format(v, m['series'], m.get('constraints', ''))
-                for v, m in machines.items()),
-        )
-        app.log.info(msg)
-        msg_cb(msg)
-
-        tasks = []
-        for vmid in sorted(machines.keys()):
+    new_machines = {}
+    tasks = []
+    for vmid in sorted(machines.keys()):
+        if events.MachineCreated.is_set(vmid):
+            tasks.append(asyncio.sleep(0))  # no-op
+        elif events.MachinePending.is_set(vmid):
+            tasks.append(events.MachineCreated.wait(vmid))
+        else:
+            events.MachinePending.set(vmid)
             machine = machines[vmid]
             series = machine['series']
             constraints = constraints_to_dict(machine.get('constraints', ''))
             tasks.append(app.juju.client.add_machine(series=series,
                                                      constraints=constraints))
+            new_machines[vmid] = None
 
-        created_machines = await asyncio.gather(*tasks)
-        ids = {
-            vmid: m.id
-            for vmid, m in zip(sorted(machines.keys()), created_machines)
-        }
-
-        msg = "Added machine{}: {}".format(
-            's' if len(ids) > 1 else '',
-            ', '.join(ids),
+    if new_machines:
+        msg = 'Adding machine{}: {}'.format(
+            's' if len(new_machines) > 1 else '',
+            ', '.join(
+                '{}: ({}, {})'.format(v,
+                                      machines[v]['series'],
+                                      machines[v].get('constraints', ''))
+                for v in sorted(new_machines.keys())),
         )
         app.log.info(msg)
         msg_cb(msg)
     else:
         app.log.info('No new machines to add for {}'.format(
             ', '.join(a.service_name for a in applications)))
+
+    results = await asyncio.gather(*tasks)
+    for vmid, task_result in zip(sorted(machines.keys()), results):
+        if vmid not in new_machines:
+            # this is an events.MachinePending.wait() or no-op result
+            continue
+        events.MachinePending.clear(vmid)
+        events.MachineCreated.set(vmid)
+        new_machines[vmid] = task_result.id
+
+    if new_machines:
+        msg = "Added machine{}: {}".format(
+            's' if len(new_machines) > 1 else '',
+            ', '.join(sorted(new_machines.keys())),
+        )
+        app.log.info(msg)
+        msg_cb(msg)
+
     for application in applications:
-        events.MachinesCreated.set(application.service_name)
-    return ids
+        app.log.info('Machines available for application {}'.format(
+            application.service_name
+        ))
+        events.AppMachinesCreated.set(application.service_name)
+    return new_machines
 
 
 async def deploy_service(service, default_series, msg_cb):
@@ -560,9 +577,9 @@ async def deploy_service(service, default_series, msg_cb):
 
     """
     name = service.service_name
-    if not events.MachinesCreated.is_set(name):
+    if not events.AppMachinesCreated.is_set(name):
         # block until we have machines
-        await events.MachinesCreated.wait(name)
+        await events.AppMachinesCreated.wait(name)
         app.log.debug('Machines for {} are ready'.format(name))
 
     if service.csid.rev == "":
@@ -585,6 +602,8 @@ async def deploy_service(service, default_series, msg_cb):
     msg = 'Deploying {}...'.format(service.service_name)
     app.log.info(msg)
     msg_cb(msg)
+    from pprint import pformat
+    app.log.debug(pformat(deploy_args))
 
     app_inst = await app.juju.client.deploy(**deploy_args)
 
