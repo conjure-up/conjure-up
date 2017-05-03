@@ -1,5 +1,6 @@
 import asyncio
-from collections import defaultdict
+import inspect
+from pathlib import Path
 
 from ubuntui.ev import EventLoop
 from urwid import ExitMainLoop
@@ -14,13 +15,52 @@ class Event(asyncio.Event):
         self._name = name
         super().__init__()
 
+    def _log(self, action):
+        base_path = Path(__file__).parent.parent
+        frame = inspect.stack()[2]
+        event_methods = ('set', 'clear', 'wait')
+        if frame.filename == __file__ and frame.function in event_methods:
+            # NamedEvent wraps these methods and we want the original
+            # caller, so we need to jump up an extra stack frame
+            frame = inspect.stack()[3]
+        task = getattr(asyncio.Task.current_task(), '_coro', '')
+        try:
+            frame_file = Path(frame.filename).relative_to(base_path)
+        except ValueError:
+            frame_file = Path(frame.filename)
+        frame_lineno = frame.lineno
+        if task:
+            code = task.cr_frame.f_code
+            task_name = code.co_name
+            try:
+                task_file = Path(code.co_filename).relative_to(base_path)
+            except ValueError:
+                task_file = Path(code.co_filename)
+            task_lineno = task.cr_frame.f_lineno
+            if task_file != frame_file or task_lineno != frame_lineno:
+                task = ' in task {} at {}:{}'.format(task_name,
+                                                     task_file,
+                                                     task_lineno)
+            else:
+                task = ''
+        app.log.debug('{} {} at {}:{}{}'.format(action,
+                                                self._name,
+                                                frame_file,
+                                                frame_lineno,
+                                                task))
+
     def set(self):
-        app.log.debug('Setting {}'.format(self._name))
+        self._log('Setting')
         super().set()
 
     def clear(self):
-        app.log.debug('Clearing {}'.format(self._name))
+        self._log('Clearing')
         super().clear()
+
+    async def wait(self):
+        self._log('Awaiting')
+        await super().wait()
+        self._log('Received')
 
 
 class NamedEvent:
@@ -30,21 +70,24 @@ class NamedEvent:
 
     def __init__(self, name):
         self._name = name
-        self._events = defaultdict(asyncio.Event)
+        self._events = {}
+
+    def _event(self, name):
+        if name not in self._events:
+            self._events[name] = Event(':'.join([self._name, name]))
+        return self._events[name]
 
     def set(self, name):
-        app.log.debug('Setting {}:{}'.format(self._name, name))
-        self._events[name].set()
+        self._event(name).set()
 
     def clear(self, name):
-        app.log.debug('Clearing {}:{}'.format(self._name, name))
-        self._events[name].clear()
+        self._event(name).clear()
 
     def is_set(self, name):
-        return self._events[name].is_set()
+        return self._event(name).is_set()
 
     async def wait(self, name):
-        return await self._events[name].wait()
+        return await self._event(name).wait()
 
 
 class ShutdownEvent(Event):
@@ -61,7 +104,9 @@ Bootstrapped = Event('Bootstrapped')
 ModelAvailable = Event('ModelAvailable')
 ModelConnected = Event('ModelConnected')
 PreDeployComplete = Event('PreDeployComplete')
-MachinesCreated = NamedEvent('MachinesCreated')
+MachinePending = NamedEvent('MachinePending')
+MachineCreated = NamedEvent('MachineCreated')
+AppMachinesCreated = NamedEvent('AppMachinesCreated')
 AppDeployed = NamedEvent('AppDeployed')
 PendingRelations = NamedEvent('PendingRelations')
 RelationsAdded = NamedEvent('RelationsAdded')
