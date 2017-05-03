@@ -80,6 +80,8 @@ class DeployTUIDoDeployTestCase(unittest.TestCase):
             'conjureup.controllers.deploy.tui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.events_app_patcher = patch('conjureup.events.app', self.mock_app)
+        self.events_app_patcher.start()
         self.juju_patcher = patch(
             'conjureup.controllers.deploy.tui.juju')
         self.mock_juju = self.juju_patcher.start()
@@ -95,6 +97,7 @@ class DeployTUIDoDeployTestCase(unittest.TestCase):
         self.common_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
+        self.events_app_patcher.stop()
         self.juju_patcher.stop()
 
     def test_do_deploy(self):
