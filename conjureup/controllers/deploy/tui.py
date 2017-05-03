@@ -1,7 +1,7 @@
 import asyncio
 from operator import attrgetter
 
-from conjureup import controllers, juju, utils
+from conjureup import controllers, events, juju, utils
 from conjureup.app_config import app
 
 from . import common
@@ -32,6 +32,7 @@ class DeployController:
             tasks.append(juju.set_relations(service,
                                             msg_cb=utils.info))
         await asyncio.gather(*tasks)
+        events.DeploymentComplete.set()
         controllers.use('deploystatus').render()
 
 
