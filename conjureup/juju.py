@@ -400,6 +400,10 @@ def get_cloud_types_by_name():
     if 'maas' not in clouds:
         clouds['maas'] = 'maas'
 
+    # vSphere is treated in the same vein as MAAS
+    if 'vsphere' not in clouds:
+        clouds['vsphere'] = 'vsphere'
+
     return clouds
 
 

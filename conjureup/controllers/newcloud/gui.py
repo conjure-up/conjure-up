@@ -58,7 +58,7 @@ class NewCloudController:
 
         regions = []
         # No regions for these providers
-        if cloud_type != 'maas' or cloud_type != 'vsphere':
+        if cloud_type not in ['maas', 'vsphere']:
             regions = sorted(juju.get_regions(app.current_cloud).keys())
         view = NewCloudView(creds, regions, self.finish)
 
