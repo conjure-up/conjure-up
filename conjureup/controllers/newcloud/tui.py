@@ -32,6 +32,7 @@ class NewCloudController:
         app.loop.create_task(self.finish(creds))
 
     async def finish(self, creds):
+        await common.pre_bootstrap(msg_cb=utils.info)
         await common.do_bootstrap(creds,
                                   msg_cb=utils.info,
                                   fail_msg_cb=utils.error)
