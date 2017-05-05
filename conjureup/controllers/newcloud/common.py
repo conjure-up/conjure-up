@@ -180,6 +180,7 @@ def setup_lxdbr0_network():
 
 async def do_bootstrap(creds, msg_cb, fail_msg_cb):
     if not app.is_jaas:
+        await pre_bootstrap(msg_cb)
         app.log.info('Bootstrapping Juju controller.')
         msg_cb('Bootstrapping Juju controller.')
         track_event("Juju Bootstrap", "Started", "")
@@ -230,3 +231,18 @@ async def do_bootstrap(creds, msg_cb, fail_msg_cb):
         track_event("Juju Add JaaS Model", "Done", "")
         app.log.info('Add model complete.')
         msg_cb('Add model complete.')
+
+
+async def pre_bootstrap(msg_cb):
+    """ runs pre bootstrap script if exists
+    """
+
+    # Set provider type for post-bootstrap
+    app.env['JUJU_PROVIDERTYPE'] = app.juju.client.info.provider_type
+    app.env['JUJU_CONTROLLER'] = app.current_controller
+    app.env['JUJU_MODEL'] = app.current_model
+    app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
+
+    await utils.run_step('00_pre-bootstrap',
+                         'pre-bootstrap',
+                         msg_cb)
