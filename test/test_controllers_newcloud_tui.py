@@ -18,9 +18,6 @@ from .helpers import test_loop
 class NewCloudTUIRenderTestCase(unittest.TestCase):
 
     def setUp(self):
-        async def dummy():
-            pass
-
         self.controller = NewCloudController()
         self.controller.do_post_bootstrap = MagicMock()
 
@@ -46,8 +43,6 @@ class NewCloudTUIRenderTestCase(unittest.TestCase):
         self.common_patcher = patch(
             'conjureup.controllers.newcloud.tui.common')
         self.mock_common = self.common_patcher.start()
-
-        self.mock_common.pre_bootstrap.return_value = dummy()
         events.Shutdown.clear()
 
     def tearDown(self):
@@ -125,7 +120,6 @@ class NewCloudTUIFinishTestCase(unittest.TestCase):
             pass
 
         self.mock_common.do_bootstrap.side_effect = [dummy()]
-        self.mock_common.pre_bootstrap.side_effect = [dummy()]
         with test_loop() as loop:
             loop.run_until_complete(self.controller.finish('creds'))
         self.mock_common.do_bootstrap.assert_called_once_with(

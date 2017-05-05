@@ -94,7 +94,6 @@ class NewCloudController:
             else:
                 common.save_creds(app.current_cloud, credentials)
         credentials_key = common.try_get_creds(app.current_cloud)
-        app.loop.create_task(common.pre_bootstrap(app.ui.set_footer))
         app.loop.create_task(common.do_bootstrap(credentials_key,
                                                  msg_cb=app.ui.set_footer,
                                                  fail_msg_cb=lambda e: None))

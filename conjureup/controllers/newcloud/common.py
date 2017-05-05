@@ -5,7 +5,7 @@ from subprocess import DEVNULL, CalledProcessError
 import yaml
 from pkg_resources import parse_version
 
-from conjureup import events, juju, utils
+from conjureup import juju, utils
 from conjureup.app_config import app
 from conjureup.telemetry import track_event
 
@@ -180,6 +180,7 @@ def setup_lxdbr0_network():
 
 async def do_bootstrap(creds, msg_cb, fail_msg_cb):
     if not app.is_jaas:
+        await pre_bootstrap(msg_cb)
         app.log.info('Bootstrapping Juju controller.')
         msg_cb('Bootstrapping Juju controller.')
         track_event("Juju Bootstrap", "Started", "")
@@ -235,7 +236,6 @@ async def do_bootstrap(creds, msg_cb, fail_msg_cb):
 async def pre_bootstrap(msg_cb):
     """ runs pre bootstrap script if exists
     """
-    await events.ModelConnected.wait()
 
     # Set provider type for post-bootstrap
     app.env['JUJU_PROVIDERTYPE'] = app.juju.client.info.provider_type
@@ -246,4 +246,3 @@ async def pre_bootstrap(msg_cb):
     await utils.run_step('00_pre-bootstrap',
                          'pre-bootstrap',
                          msg_cb)
-    events.PreBootstrapComplete.set()
