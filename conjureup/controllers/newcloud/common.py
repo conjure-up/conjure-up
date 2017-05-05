@@ -238,8 +238,8 @@ async def pre_bootstrap(msg_cb):
     """
 
     # Set provider type for post-bootstrap
-    # TODO: Grab this earlier
-    # app.env['JUJU_PROVIDERTYPE'] = app.juju.client.info.provider_type
+    app.env['JUJU_PROVIDERTYPE'] = juju.get_cloud_types_by_name()[
+        app.current_cloud]
     app.env['JUJU_CONTROLLER'] = app.current_controller
     app.env['JUJU_MODEL'] = app.current_model
     app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
