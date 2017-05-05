@@ -7,7 +7,8 @@ from . import common
 class NewCloudController:
     def render(self):
         creds = None
-        cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
+        app.env['JUJU_PROVIDERTYPE'] = \
+            cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
         if cloud_type != 'localhost':
             creds = common.try_get_creds(app.current_cloud)
             if not creds:

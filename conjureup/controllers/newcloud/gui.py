@@ -19,7 +19,8 @@ class NewCloudController:
         if app.current_model is None:
             app.current_model = utils.gen_model()
 
-        cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
+        app.env['JUJU_PROVIDERTYPE'] = \
+            cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
 
         # LXD is a special case as we want to make sure a bridge
         # is configured. If not we'll bring up a new view to allow
