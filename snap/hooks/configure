@@ -2,7 +2,24 @@
 
 set -eux
 
-# Setup LXD
+if [[ ! -x /snap/bin/lxd ]]; then
+    # Make sure we have lxd installed to use
+    if ! grep -q 'zesty' /etc/lsb-release; then
+        apt-get -qq update
+        apt-get install -qqyf software-properties-common
+        apt-add-repository -y ppa:ubuntu-lxc/lxd-stable
+        apt-get -qq update
+    fi
+    apt-get install -qqyf lxd lxd-client
+
+    if grep -q 'trusty' /etc/lsb-release; then
+        service lxd restart
+    else
+        systemctl restart lxd
+    fi
+    chown root:lxd /var/lib/lxd/unix.socket || true
+fi
+
 
 # copy bash completions to host system
 cp -a $SNAP/bash_completions/* /usr/share/bash-completion/completions/. || true

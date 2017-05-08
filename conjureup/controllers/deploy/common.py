@@ -19,9 +19,7 @@ def write_bundle(assignments):
 async def pre_deploy(msg_cb):
     """ runs pre deploy script if exists
     """
-    app.log.info('Waiting for model connection')
     await events.ModelConnected.wait()
-    app.log.info('Got model connection')
 
     # Set provider type for post-bootstrap
     app.env['JUJU_PROVIDERTYPE'] = app.juju.client.info.provider_type

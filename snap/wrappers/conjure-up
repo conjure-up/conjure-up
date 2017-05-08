@@ -10,10 +10,32 @@ export LC_ALL=$APPLOC
 export LANG=$APPLOC
 export LANGUAGE=${APPLANG%_*}
 export LD_LIBRARY_PATH=$SNAP/usr/lib/$(uname -p)-linux-gnu/
-export LXD_DIR=${SNAP_COMMON}/lxd/
+
+debian_socket=/var/lib/lxd
+snap_lxd_socket=/var/snap/lxd/common/lxd
+
+lxd_binary=$(which lxd)
+lxc_bin=$(which lxc)
+
+# Prefer debian installed lxd, if availible
+if [ "$lxd_binary" = "/usr/bin/lxd" ]; then
+    export LXD_DIR=$debian_socket
+elif [ "$lxd_binary" = "/snap/bin/lxd" ]; then
+    export LXD_DIR=$snap_lxd_socket
+fi
 
 # Make sure we access our python and juju binaries first
 export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
+
+if [[ -f /usr/bin/lxd  && -f /snap/bin/lxd ]]; then
+    echo ""
+    echo "Multiple LXD versions installed, please remove one before proceeding."
+    echo ""
+    echo "See http://conjure-up.io/docs/en/users/#a-note-for-lxd-users for more information."
+    echo ""
+    exit 1
+fi
+
 
 exec $SNAP/bin/conjure-up \
      --spells-dir $SNAP/spells --nosync "$@"

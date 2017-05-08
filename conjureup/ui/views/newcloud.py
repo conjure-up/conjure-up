@@ -53,14 +53,15 @@ class NewCloudView(WidgetWrap):
                 )
             )
             total_items.append(Padding.line_break(""))
-        total_items.append(
-            Columns(
-                [
-                    ('weight', 0.5, Text("Select a Cloud Region",
-                                         align='right')),
-                    self.regions_w
-                ], dividechars=1
-            ))
+        if len(self.regions) > 0:
+            total_items.append(
+                Columns(
+                    [
+                        ('weight', 0.5, Text("Select a Cloud Region",
+                                             align='right')),
+                        self.regions_w
+                    ], dividechars=1
+                ))
         return total_items
 
     def _build_widget(self):

@@ -358,16 +358,6 @@ def main():
             app.loop.run_forever()
 
         else:
-            if EventLoop.rows() < 43 or EventLoop.columns() < 132:
-                print("")
-                utils.warning(
-                    "conjure-up is best viewed with a terminal geometry "
-                    "of at least 132x43. Please increase the size of your "
-                    "terminal before starting conjure-up.")
-                print("")
-                acknowledge = input("Do you wish to continue? [Y/n] ")
-                if 'N' in acknowledge or 'n' in acknowledge:
-                    sys.exit(1)
             app.ui = ConjureUI()
 
             EventLoop.build_loop(app.ui, STYLES,
