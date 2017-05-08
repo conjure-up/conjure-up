@@ -163,7 +163,7 @@ def show_env():
     step_scripts = os.path.join(
         app.config['spell-dir'], 'steps'
     )
-    step_metas = get_step_metadata_filenames(step_scripts)
+    step_metas = get_step_metadata_filenames()
     print("Available environment variables: \n")
     table = PrettyTable()
     table.field_names = ["ENV", "DEFAULT",
