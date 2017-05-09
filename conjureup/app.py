@@ -160,9 +160,6 @@ def apply_proxy():
 def show_env():
     """ Shows environment variables from post deploy actions
     """
-    step_scripts = os.path.join(
-        app.config['spell-dir'], 'steps'
-    )
     step_metas = get_step_metadata_filenames()
     print("Available environment variables: \n")
     table = PrettyTable()
