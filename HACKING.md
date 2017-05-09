@@ -1,7 +1,6 @@
 # Getting a development environment started
 
 0. clone the repo
-1. `make git-sync-requirements`
 2. `make dev`
 3. `source conjure-dev/bin/activate`
 3. `make test`
