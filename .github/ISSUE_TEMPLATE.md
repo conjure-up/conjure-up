@@ -25,13 +25,13 @@ Please attach tarball of **~/.cache/conjure-up**:
 tar cvzf conjure-up.tar.gz ~/.cache/conjure-up
 ```
 
-## Crashdump
+## Sosreport
 
-In order to better get an overall idea of your system setup please also attach a
-**juju-crashdump** with **sosreport** plugin enabled.
+Please attach a sosreport:
 
 ```
-sudo snap install juju-crashdump --classic && juju crashdump -a sosreport`
+sudo apt install sosreport
+sosreport
 ```
 
 The resulting output file can be attached to this issue.
