@@ -11,8 +11,8 @@ class ControllerPicker:
             return controllers.use('clouds').render()
 
         if controller == 'jaas':
-            if not app.jaas_controller:
-                # jaas not already registered
+            if not app.jaas_controller or not juju.has_jaas_auth():
+                # jaas is either not registered or not logged in
                 return controllers.use('jaaslogin').render()
             # jaas already registered, but we they still need to pick a cloud
             app.current_controller = app.jaas_controller

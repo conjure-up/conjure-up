@@ -29,15 +29,17 @@ class JaaSLoginController:
 
     async def _register(self, email, password, twofa):
         app.jaas_controller = 'jaas'
-        await juju.register_controller(app.jaas_controller,
-                                       JAAS_DOMAIN,
-                                       email, password, twofa,
-                                       fail_cb=self.fail,
-                                       timeout_cb=self.timeout)
+        if not await juju.register_controller(app.jaas_controller,
+                                              JAAS_DOMAIN,
+                                              email, password, twofa,
+                                              fail_cb=self.fail,
+                                              timeout_cb=self.timeout):
+            return
         app.current_controller = app.jaas_controller
         app.is_jaas = True
         self.authenticating.clear()
         events.Bootstrapped.set()
+        app.log.info('JAAS is registered')
         controllers.use('clouds').render()
 
     def render_interstitial(self):
@@ -59,20 +61,19 @@ class JaaSLoginController:
     def fail(self, stderr):
         self.authenticating.clear()
         msg = stderr
-        prefix = 'ERROR cannot get token: '
-        if msg.startswith(prefix):
-            msg = 'Login failed, please try again: {}'.format(
-                msg[len(prefix):])
-        prefix = 'Invalid request data (email: ['
-        if msg.startswith(prefix):
-            msg = 'Login failed, please try again: {}'.format(
-                msg[len(prefix):][:-3])  # also strip trailing ])
-        prefix = 'ERROR cannot get user details for'
-        if msg.startswith(prefix):
+        if 'ERROR cannot get user details for' in msg:
             msg = ('USSO account not connected with JaaS.  Please login via '
                    'your browser at https://jujucharms.com/login to connect '
                    'your account, and then try this login again.')
-        self.render_form(error=msg)
+        else:
+            prefix = 'ERROR cannot get token: '
+            if msg.startswith(prefix):
+                msg = msg[len(prefix):]
+            prefix = 'Invalid request data (email: ['
+            if msg.startswith(prefix):
+                msg = msg[len(prefix):][:-3]  # also strip trailing ])
+            msg = 'Login failed, please try again: {}'.format(msg)
+        self.render(error=msg)
 
     def timeout(self):
         self.authenticating.clear()
@@ -82,8 +83,7 @@ class JaaSLoginController:
             # try again to be safe, but hopefully it's safe to just move on
             return self.finish()
         self.__remove_alarm()
-        self.render_form(error='Timed out connecting to JaaS.  '
-                               'Please try again.')
+        self.render(error='Timed out connecting to JaaS.  Please try again.')
 
 
 _controller_class = JaaSLoginController
