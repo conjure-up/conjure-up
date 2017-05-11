@@ -20,13 +20,24 @@ class NewCloudController:
                 events.Shutdown.set(1)
                 return
 
-        # LXD is a special case as we want to make sure a bridge
-        # is configured. If not we'll bring up a new view to allow
-        # a user to configure a LXD bridge with suggested network
-        # information.
         if cloud_type == 'localhost':
-            if common.is_lxd_ready():
-                return controllers.use('lxdsetup').render()
+            # Grab list of available physical networks to bind our bridge to
+            iface = None
+            try:
+                ifaces = utils.get_physical_network_interfaces()
+                # Grab a physical network device that has an ip address
+                iface = [i for i in ifaces
+                         if utils.get_physical_network_ipaddr(i)][0]
+            except Exception:
+                utils.warning(
+                    "Could not find a suitable physical network interface "
+                    "to create a LXD bridge on. Please check your network "
+                    "configuration.")
+                events.Shutdown.set(1)
+
+            if not common.get_lxd_setup_path().exists():
+                common.lxd_init(iface)
+                common.get_lxd_setup_path.touch()
 
         app.loop.create_task(self.finish(creds))
 

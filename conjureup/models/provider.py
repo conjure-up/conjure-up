@@ -3,10 +3,15 @@ from collections import OrderedDict
 from functools import partial
 from urllib.parse import urljoin, urlparse
 
-from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
+from ubuntui.widgets.input import (
+    PasswordEditor,
+    SelectorHorizontal,
+    StringEditor,
+    YesNo
+)
 from urwid import Text
 
-from conjureup.utils import is_valid_hostname
+from conjureup.utils import get_physical_network_interfaces, is_valid_hostname
 
 
 """ Defining the schema
@@ -211,6 +216,21 @@ class MAAS(BaseProvider):
                 "preferences page to grab the correct API Key: "
                 "http://<maas-server>:5240/MAAS/account/prefs/")
         return (True, None)
+
+
+class Localhost(BaseProvider):
+    def __init__(self):
+        self.network_interface = Field(
+            label='network interface to create a LXD bridge for',
+            widget=SelectorHorizontal(get_physical_network_interfaces()),
+            key='network-interface',
+            storable=False
+        )
+
+    def fields(self):
+        return [
+            self.network_interface
+        ]
 
 
 class Azure(BaseProvider):
@@ -460,7 +480,8 @@ Schema = [
     ('openstack', OpenStack),
     ('rackspace', OpenStack),
     ('vsphere', VSphere),
-    ('oracle-compute', Oracle)
+    ('oracle-compute', Oracle),
+    ('localhost', Localhost)
 ]
 
 

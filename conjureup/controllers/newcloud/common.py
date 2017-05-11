@@ -35,6 +35,10 @@ def try_get_creds(cloud):
     Returns:
     First set of credentials found for cloud
     """
+    cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
+    if cloud_type == 'localhost':
+        return None
+
     if not path.isfile(cred_path):
         return None
 
@@ -84,55 +88,38 @@ def save_creds(cloud, credentials):
                                     default_flow_style=False))
 
 
-def is_lxd_ready():
-    """ routine for making sure lxd is configured for localhost deployments
-    """
-    try:
-        lxd_init()
-        app.log.debug("LXD is configured.")
-    except Exception as e:
-        raise
-
-
-def lxd_init():
-    """ Runs initial lxd init
-    """
-    app.log.debug("Determining if embedded LXD is setup and ready.")
+def get_lxd_setup_path():
     snap_user_data = os.environ.get('SNAP_USER_DATA', None)
     if snap_user_data:
-        lxd_setup_path = Path(snap_user_data) / 'lxd.setup'
-        if not lxd_setup_path.exists():
+        return Path(snap_user_data) / 'lxd.setup'
+    return Path(app.env['CONJURE_UP_CACHEDIR']) / 'lxd.setup'
 
-            # Grab list of available physical networks to bind our bridge to
-            iface = None
-            try:
-                ifaces = utils.get_physical_network_interfaces()
-                # Grab a physical network device that has an ip address
-                iface = [i for i in ifaces
-                         if utils.get_physical_network_ipaddr(i)][0]
-            except Exception:
-                raise
 
-            lxd_init_cmds = [
-                "lxc version",
-                "lxd init --auto",
-                'lxc config set core.https_address [::]:12001',
-                'lxc profile device add default {iface} '
-                'nic nictype=bridged '
-                'parent=conjureup1 name={iface}'.format(iface=iface)
-            ]
-            for cmd in lxd_init_cmds:
-                app.log.debug("LXD Init: {}".format(cmd))
-                out = utils.run_script(cmd)
-                if out.returncode != 0:
-                    raise Exception(
-                        "Problem running: {}:{}".format(
-                            cmd,
-                            out.stderr.decode('utf8')))
+def lxd_init(iface):
+    """ Runs initial lxd init
 
-            setup_bridge_network(iface)
-            setup_unused_bridge_network()
-            lxd_setup_path.touch()
+    Arguments:
+    iface: interface name
+    """
+    lxd_init_cmds = [
+        "lxc version",
+        "lxd init --auto",
+        'lxc config set core.https_address [::]:12001',
+        'lxc profile device add default {iface} '
+        'nic nictype=bridged '
+        'parent=conjureup1 name={iface}'.format(iface=iface)
+    ]
+    for cmd in lxd_init_cmds:
+        app.log.debug("LXD Init: {}".format(cmd))
+        out = utils.run_script(cmd)
+        if out.returncode != 0:
+            raise Exception(
+                "Problem running: {}:{}".format(
+                    cmd,
+                    out.stderr.decode('utf8')))
+
+    setup_bridge_network(iface)
+    setup_unused_bridge_network()
 
 
 def setup_unused_bridge_network():
