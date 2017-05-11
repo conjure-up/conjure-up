@@ -94,7 +94,7 @@ class NewCloudController:
                 except Exception:
                     raise
 
-            if self.cloud_type == 'maas':
+            elif self.cloud_type == 'maas':
                 # Now that we are passed the selection of a cloud we create a
                 # new cloud name for the remainder of the deployment and make
                 # sure this cloud is saved for future use.
