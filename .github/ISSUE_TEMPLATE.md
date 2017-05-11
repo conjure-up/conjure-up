@@ -27,7 +27,7 @@ tar cvzf conjure-up.tar.gz ~/.cache/conjure-up
 
 ## Sosreport
 
-In order to better get an overall idea of your system setup please also attach a **sosreport**
+Please attach a sosreport:
 
 ```
 sudo apt install sosreport

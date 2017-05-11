@@ -190,50 +190,52 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
 
 
 def has_jaas_auth():
-    oauth_token = Path('~/.local/share/juju/store-usso-token').expanduser()
-    go_cookies = Path('~/.go-cookies').expanduser()
-    if oauth_token.exists():
-        return True
-    if go_cookies.exists():
-        go_cookies = json.loads(go_cookies.read_text())
-        for cookie in go_cookies or []:
+    jaas_cookies = Path('~/.local/share/juju/cookies/jaas.json').expanduser()
+    if jaas_cookies.exists():
+        jaas_cookies = json.loads(jaas_cookies.read_text())
+        for cookie in jaas_cookies or []:
             if cookie['Domain'] == consts.JAAS_DOMAIN:
-                return True
+                return bool(cookie['Value'])
     return False
 
 
 async def register_controller(name, endpoint, email, password, twofa,
                               timeout=30, fail_cb=None, timeout_cb=None):
+    app.log.info('Registering controller {}'.format(name))
     proc = await asyncio.create_subprocess_exec(
         'juju', 'register', '-B', endpoint,
         stdin=PIPE, stdout=PIPE, stderr=PIPE,
     )
-    if has_jaas_auth():
-        # if the user already authed with jujucharms.com, such as by
-        # logging in with the charm command, or registering JaaS and
-        # then unregistering it, we only need to name the controller
-        input = [name]
-    else:
-        input = [email, password, twofa, name]
     try:
-        stdin = b''.join(b'%s\n' % bytes(f, 'utf8') for f in input)
+        stdin = b''.join(b'%s\n' % bytes(f, 'utf8')
+                         for f in [name, email, password, twofa])
         stdout, stderr = await asyncio.wait_for(proc.communicate(stdin),
                                                 timeout)
         stdout = stdout.decode('utf8')
         stderr = stderr.decode('utf8')
+
+        prefix = 'Enter a name for this controller: '
+        if stderr.startswith(prefix):
+            # Juju has started putting this one prompt out on stderr
+            # instead of stdout for some reason, so we work around it.
+            stderr = stderr[len(prefix):]
     except asyncio.TimeoutError:
         proc.kill()
+        app.log.warning('Registration timed out')
         if timeout_cb:
             timeout_cb()
         elif fail_cb:
-            fail_cb((proc.stderr or b'').decode('utf8'))
-        return
-    if proc.returncode > 0:
+            fail_cb('Timed out')
+        return False
+    if proc.returncode != 0:
+        app.log.warning('Registration failed: {}'.format(stderr))
         if fail_cb:
             fail_cb(stderr)
-            return
+            return False
         else:
             raise CalledProcessError(stderr)
+    app.log.info('Registration complete')
+    return True
 
 
 async def model_available(name):
