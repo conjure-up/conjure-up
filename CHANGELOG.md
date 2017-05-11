@@ -1,20 +1,39 @@
 # Change Log
 
-## [2.2.0-beta3](https://github.com/conjure-up/conjure-up/tree/2.2.0-beta3) (2017-04-28)
+## [2.2.0-beta4](https://github.com/conjure-up/conjure-up/tree/2.2.0-beta4) (2017-05-11)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.2.0-beta3...2.2.0-beta4)
+
+**Closed issues:**
+
+- Juju beta4 breaks auth [\#878](https://github.com/conjure-up/conjure-up/issues/878)
+
+**Merged pull requests:**
+
+- Fix JAAS registration for 2.2-beta4 [\#879](https://github.com/conjure-up/conjure-up/pull/879) ([johnsca](https://github.com/johnsca))
+- Allow to run without installation [\#870](https://github.com/conjure-up/conjure-up/pull/870) ([techtonik](https://github.com/techtonik))
+
+## [2.2.0-beta3](https://github.com/conjure-up/conjure-up/tree/2.2.0-beta3) (2017-05-09)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.5...2.2.0-beta3)
 
 **Implemented enhancements:**
 
+- add prebootstrap process hook [\#863](https://github.com/conjure-up/conjure-up/issues/863)
+- embed lxd [\#850](https://github.com/conjure-up/conjure-up/issues/850)
 - Provide better feedback if shutdown process takes some time [\#835](https://github.com/conjure-up/conjure-up/issues/835)
 - enable oracle provider [\#833](https://github.com/conjure-up/conjure-up/issues/833)
 - \[ARM64\] Need conjure-up snap in snap store [\#828](https://github.com/conjure-up/conjure-up/issues/828)
 - support bootstrap to a region for public cloud in gui mode [\#715](https://github.com/conjure-up/conjure-up/issues/715)
+- support conjure-up on vmware/vsphere [\#709](https://github.com/conjure-up/conjure-up/issues/709)
 - migrate to libjuju [\#697](https://github.com/conjure-up/conjure-up/issues/697)
 - export bundle after mutations [\#621](https://github.com/conjure-up/conjure-up/issues/621)
 
 **Fixed bugs:**
 
+- charm not found error when deploying spell from an edge channel [\#862](https://github.com/conjure-up/conjure-up/issues/862)
+- Duplicate machines \(co-location\) not properly handled by "deploy all" [\#857](https://github.com/conjure-up/conjure-up/issues/857)
+- Failures in automated tests [\#854](https://github.com/conjure-up/conjure-up/issues/854)
 - conjure-down failed with “login\(\) got an unexpected keyword arument ‘force’ “ [\#845](https://github.com/conjure-up/conjure-up/issues/845)
+- conjure-up crashes on macos [\#839](https://github.com/conjure-up/conjure-up/issues/839)
 - conjure-down stacktraces [\#832](https://github.com/conjure-up/conjure-up/issues/832)
 - libjuju: headless failure to add machines [\#829](https://github.com/conjure-up/conjure-up/issues/829)
 - There was an error during the pre deploy processing phase, failure to set profile [\#825](https://github.com/conjure-up/conjure-up/issues/825)
@@ -27,13 +46,24 @@
 
 **Closed issues:**
 
+- Incompatibility with LXD 2.13 [\#866](https://github.com/conjure-up/conjure-up/issues/866)
+- Openstack Autopilot deployment on Ubuntu 16.04 LTS [\#851](https://github.com/conjure-up/conjure-up/issues/851)
 - Failed to set profile [\#849](https://github.com/conjure-up/conjure-up/issues/849)
 - Landscape install waiting status 16.04 conjure-up [\#844](https://github.com/conjure-up/conjure-up/issues/844)
+- MAAS is not completing a successful node deployment [\#843](https://github.com/conjure-up/conjure-up/issues/843)
+- Failing to connect to LXD server when deploying spells [\#841](https://github.com/conjure-up/conjure-up/issues/841)
 - Conjure-up --bootstrap-to \<hostname\> no progress  'fetching juju agent version 2.1.2 for amd64' [\#824](https://github.com/conjure-up/conjure-up/issues/824)
 - Reason: Juju failed to bootstrap: maas [\#822](https://github.com/conjure-up/conjure-up/issues/822)
+- Openstack with NovaLXD installation failure [\#724](https://github.com/conjure-up/conjure-up/issues/724)
 
 **Merged pull requests:**
 
+- Update HACKING.md [\#869](https://github.com/conjure-up/conjure-up/pull/869) ([techtonik](https://github.com/techtonik))
+- Adds pre-bootstrap hook [\#864](https://github.com/conjure-up/conjure-up/pull/864) ([battlemidget](https://github.com/battlemidget))
+- Fix headless deploy blocking indefinitely [\#861](https://github.com/conjure-up/conjure-up/pull/861) ([johnsca](https://github.com/johnsca))
+- Fix extra machines being created [\#860](https://github.com/conjure-up/conjure-up/pull/860) ([johnsca](https://github.com/johnsca))
+- Revert "Include our own LXD to not conflict with rest of users system." [\#853](https://github.com/conjure-up/conjure-up/pull/853) ([battlemidget](https://github.com/battlemidget))
+- Include our own LXD to not conflict with rest of users system. [\#852](https://github.com/conjure-up/conjure-up/pull/852) ([battlemidget](https://github.com/battlemidget))
 - integrate region selection in credentials view [\#847](https://github.com/conjure-up/conjure-up/pull/847) ([battlemidget](https://github.com/battlemidget))
 - Fix conjure-down [\#846](https://github.com/conjure-up/conjure-up/pull/846) ([johnsca](https://github.com/johnsca))
 - Add better add cloud [\#840](https://github.com/conjure-up/conjure-up/pull/840) ([battlemidget](https://github.com/battlemidget))
