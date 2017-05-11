@@ -73,14 +73,14 @@ class NewCloudView(WidgetWrap):
         cancel = menu_btn(on_press=self.cancel,
                           label="\n  BACK\n")
         confirm = menu_btn(on_press=self.submit,
-                           label="\n ADD CREDENTIAL\n")
+                           label="\n SAVE\n")
         self.buttons = Columns([
             ('fixed', 2, Text("")),
             ('fixed', 13, Color.menu_button(
                 cancel,
                 focus_map='button_primary focus')),
             Text(""),
-            ('fixed', 20, Color.menu_button(
+            ('fixed', 13, Color.menu_button(
                 confirm,
                 focus_map='button_primary focus')),
             ('fixed', 2, Text(""))
@@ -113,5 +113,5 @@ class NewCloudView(WidgetWrap):
     def submit(self, result):
         region = self.regions_w.value
         if self.schema.is_valid():
-            self.cb(credentials=self.schema,
+            self.cb(schema=self.schema,
                     region=region)

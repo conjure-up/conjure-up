@@ -1,0 +1,8 @@
+#!/bin/sh
+export LXD_DIR=${SNAP_COMMON}/lxd/
+
+if [ -d /sys/kernel/security/apparmor ] && [ "$(cat /proc/self/attr/current)" != "unconfined" ]; then
+    exec aa-exec -p unconfined -- $0 "$@"
+fi
+
+exec $SNAP/bin/lxd "$@"

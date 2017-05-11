@@ -50,7 +50,7 @@ class LXDSetupGUIRenderTestCase(unittest.TestCase):
 
     def test_render(self):
         "call render"
-        self.controller.render("A message")
+        self.controller.render()
 
 
 class LXDSetupGUIFinishTestCase(unittest.TestCase):

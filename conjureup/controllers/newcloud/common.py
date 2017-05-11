@@ -1,9 +1,9 @@
 import os
 import os.path as path
+from pathlib import Path
 from subprocess import DEVNULL, CalledProcessError
 
 import yaml
-from pkg_resources import parse_version
 
 from conjureup import juju, utils
 from conjureup.app_config import app
@@ -35,6 +35,10 @@ def try_get_creds(cloud):
     Returns:
     First set of credentials found for cloud
     """
+    cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
+    if cloud_type == 'localhost':
+        return None
+
     if not path.isfile(cred_path):
         return None
 
@@ -84,54 +88,43 @@ def save_creds(cloud, credentials):
                                     default_flow_style=False))
 
 
-def is_lxd_ready():
-    """ routine for making sure lxd is configured for localhost deployments
+def get_lxd_setup_path():
+    snap_user_data = os.environ.get('SNAP_USER_DATA', None)
+    if snap_user_data:
+        return Path(snap_user_data) / 'lxd.setup'
+    return Path(app.env['CONJURE_UP_CACHEDIR']) / 'lxd.setup'
+
+
+def lxd_init(iface):
+    """ Runs initial lxd init
+
+    Arguments:
+    iface: interface name
     """
-    if utils.lxd_version() < parse_version('2.9'):
-        return {"ready": False,
-                "msg": "The current version of LXD found on this system is "
-                "not compatible. Please run the following to get the latest "
-                "supported LXD:\n\n"
-                "  sudo apt-add-repository ppa:ubuntu-lxc/lxd-stable\n"
-                "  sudo apt-get update\n"
-                "  sudo apt-get install lxd lxd-client\n\n"
-                "Or if you're using the snap version:\n\n"
-                "  sudo snap refresh lxd\n\n"
-                "Once complete please re-run conjure-up."}
+    lxd_init_cmds = [
+        "lxc version",
+        "lxd init --auto",
+        'lxc config set core.https_address [::]:12001',
+        'lxc profile device add default {iface} '
+        'nic nictype=bridged '
+        'parent=conjureup1 name={iface}'.format(iface=iface)
+    ]
+    for cmd in lxd_init_cmds:
+        app.log.debug("LXD Init: {}".format(cmd))
+        out = utils.run_script(cmd)
+        if out.returncode != 0:
+            raise Exception(
+                "Problem running: {}:{}".format(
+                    cmd,
+                    out.stderr.decode('utf8')))
 
-    if not utils.check_user_in_group('lxd'):
-        return {"ready": False,
-                "msg": "User {} is not part of the LXD group. You will need "
-                "to exit conjure-up and do one of the following:\n\n"
-                " 1: Run `newgrp lxd` and re-launch conjure-up\n\n"
-                "  Or\n\n"
-                " 2: Log out completely, Log in and "
-                "re-launch conjure-up".format(os.environ['USER'])}
-
-    try:
-        setup_lxdbr0_network()
-        setup_conjureup0_network()
-    except Exception as e:
-        return {"ready": False,
-                "msg": "Unable to determine an existing LXD network bridge, "
-                "please make sure you've run `sudo lxd init` to configure "
-                "LXD.\n\n{}".format(e)}
-
-    if utils.lxd_has_ipv6():
-        return {"ready": False,
-                "msg": "The LXD bridge has IPv6 enabled. Currently this is "
-                "unsupported by conjure-up. Please disable IPv6 and "
-                "re-launch conjure-up\n\n"
-                "Visit https://docs.ubuntu.com/conjure-up/en/troubleshoot#lxd "
-                "for information on how to disable IPv6."}
-
-    app.log.debug("Found an IPv4 address, "
-                  "assuming LXD is configured.")
-    return {"ready": True, "msg": ""}
+    setup_bridge_network(iface)
+    setup_unused_bridge_network()
 
 
-def setup_conjureup0_network():
-    """ This attempts to setup LXD network bridge for conjureup if not available
+def setup_unused_bridge_network():
+    """ Sets up an unused bridge that can be used with deployments such as
+    OpenStack on LXD using NovaLXD.
     """
     out = utils.run_script('lxc network show conjureup0',
                            stdout=DEVNULL,
@@ -148,15 +141,15 @@ def setup_conjureup0_network():
                     out.stderr.decode()))
 
 
-def setup_lxdbr0_network():
-    """ This attempts to setup LXD networking if not available
+def setup_bridge_network(iface):
+    """ Sets up our main network bridge to be used with Localhost deployments
     """
     try:
-        utils.run('lxc network show lxdbr0', shell=True, check=True,
+        utils.run('lxc network show conjureup1', shell=True, check=True,
                   stdout=DEVNULL, stderr=DEVNULL)
     except CalledProcessError:
-        out = utils.run_script('lxc network create lxdbr0 '
-                               'ipv4.address=10.0.8.1/24 '
+        out = utils.run_script('lxc network create conjureup1 '
+                               'ipv4.address=10.100.0.1/24 '
                                'ipv4.nat=true '
                                'ipv6.address=none '
                                'ipv6.nat=false')
@@ -164,18 +157,11 @@ def setup_lxdbr0_network():
             raise Exception(
                 "Failed to create LXD network bridge: {}".format(
                     out.stderr.decode()))
-    out = utils.run_script(
-        "lxc network show lxdbr0 | grep -q 'ipv4\.address:\snone'")
-    if out.returncode == 0:
-        network_set_cmds = [
-            'lxc network set lxdbr0 ipv4.address 10.0.8.1/24',
-            'lxc network set lxdbr0 ipv4.nat true'
-        ]
-        for n in network_set_cmds:
-            out = utils.run_script(n)
-            if out.returncode != 0:
-                raise Exception("Problem with {}: {}".format(
-                    n, out.stderr.decode()))
+
+        utils.run_script(
+            'lxc network attach-profile conjureup1 '
+            'default {iface} {iface}'.format(
+                iface=iface))
 
 
 async def do_bootstrap(creds, msg_cb, fail_msg_cb):

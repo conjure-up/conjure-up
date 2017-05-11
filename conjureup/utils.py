@@ -551,6 +551,38 @@ def set_terminal_title(title):
     sys.stdout.write("\x1b]2;{}\x07".format(title))
 
 
+def get_physical_network_interfaces():
+    """ Returns a list of physical network interfaces
+    """
+    sys_class_net = Path('/sys/class/net')
+    devices = [
+        i.name for i in sys_class_net.glob("*")
+        if "virtual" not in str(i.resolve())
+    ]
+    if len(devices) == 0:
+        raise Exception("No physical network devices found on system.")
+    return devices
+
+
+def get_physical_network_ipaddr(iface):
+    """ Gets an IP Address for network device, ipv4 only
+
+    Arguments:
+    iface: interface to query
+    """
+    out = run_script('ip addr show {}'.format(iface))
+    if out.returncode != 0:
+        raise Exception(
+            "Could not determine an IPv4 address for {}".format(iface))
+
+    app.log.debug("Parsing {} for IPv4 address".format(
+        out.stdout.decode('utf8')))
+
+    ipv4_addr = out.stdout.decode(
+        'utf8').split('inet ')[1].split('/')[0]
+    return ipv4_addr
+
+
 class IterQueue(asyncio.Queue):
     """
     Queue subclass that supports the ``async for`` syntax.

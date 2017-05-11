@@ -1,15 +1,13 @@
-import sys
-
-from conjureup import utils
+from conjureup import events, utils
 
 
 class LXDSetupController:
 
-    def render(self, msg):
+    def render(self):
         print("")
-        utils.info(msg)
+        utils.error("Unable to setup LXD networking for deployment")
         print("")
-        sys.exit(1)
+        events.Shutdown.set(1)
 
 
 _controller_class = LXDSetupController
