@@ -132,7 +132,7 @@ class MAAS(BaseProvider):
 
     def __init__(self):
         self.endpoint = Field(
-            label='server address (only the ip or dns name)',
+            label='api endpoint (http://example.com:5240/MAAS)',
             widget=StringEditor(),
             key='endpoint',
             storable=False,
