@@ -37,7 +37,7 @@ class NewCloudController:
 
             if not common.get_lxd_setup_path().exists():
                 common.lxd_init(iface)
-                common.get_lxd_setup_path.touch()
+                common.get_lxd_setup_path().touch()
 
         app.loop.create_task(self.finish(creds))
 
