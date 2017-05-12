@@ -25,10 +25,10 @@ class NewCloudController:
             iface = None
             try:
                 ifaces = utils.get_physical_network_interfaces()
-                # Grab a physical network device that has an ip address
+                # Grab the first physical network device that has an ip address
                 iface = [i for i in ifaces
                          if utils.get_physical_network_ipaddr(i)][0]
-            except Exception:
+            except:
                 utils.warning(
                     "Could not find a suitable physical network interface "
                     "to create a LXD bridge on. Please check your network "

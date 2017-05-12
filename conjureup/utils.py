@@ -578,8 +578,11 @@ def get_physical_network_ipaddr(iface):
     app.log.debug("Parsing {} for IPv4 address".format(
         out.stdout.decode('utf8')))
 
-    ipv4_addr = out.stdout.decode(
-        'utf8').split('inet ')[1].split('/')[0]
+    try:
+        ipv4_addr = out.stdout.decode(
+            'utf8').split('inet ')[1].split('/')[0]
+    except IndexError:
+        return None
     return ipv4_addr
 
 
