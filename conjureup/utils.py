@@ -516,7 +516,7 @@ def gen_model():
 def gen_cloud():
     """ generates a unique cloud
     """
-    name = "conjure-cloud-{}".format(app.current_cloud)
+    name = "conjure-cloud-{}".format(app.current_cloud_type)
     return "{}-{}".format(name[:24], gen_hash())
 
 
@@ -555,13 +555,22 @@ def get_physical_network_interfaces():
     """ Returns a list of physical network interfaces
     """
     sys_class_net = Path('/sys/class/net')
-    devices = [
-        i.name for i in sys_class_net.glob("*")
-        if "virtual" not in str(i.resolve())
-    ]
+    devices = []
+    for device in sys_class_net.glob("*"):
+        if "virtual" in str(device.resolve()):
+            continue
+        try:
+            if not get_physical_network_ipaddr(device.name):
+                continue
+        except Exception:
+            continue
+        devices.append(device.name)
     if len(devices) == 0:
-        raise Exception("No physical network devices found on system.")
-    return devices
+        raise Exception(
+            "Could not find a suitable physical network interface "
+            "to create a LXD bridge on. Please check your network "
+            "configuration.")
+    return sorted(devices)
 
 
 def get_physical_network_ipaddr(iface):

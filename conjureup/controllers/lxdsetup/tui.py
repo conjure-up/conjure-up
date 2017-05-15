@@ -1,13 +1,13 @@
-from conjureup import events, utils
+from . import common
 
 
-class LXDSetupController:
-
+class LXDSetupController(common.LXDSetupController):
     def render(self):
-        print("")
-        utils.error("Unable to setup LXD networking for deployment")
-        print("")
-        events.Shutdown.set(1)
+        if self.is_ready:
+            return self.next_screen()
+
+        # can't ask, so pick the first (by name) physical interface we find
+        self.setup(self.ifaces[0])
 
 
 _controller_class = LXDSetupController

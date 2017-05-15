@@ -1,4 +1,4 @@
-from conjureup import controllers, juju
+from conjureup import controllers, juju, utils
 from conjureup.app_config import app
 from conjureup.telemetry import track_event, track_screen
 from conjureup.ui.views.cloud import CloudView
@@ -10,17 +10,17 @@ class CloudsController:
         self.view = None
 
     def finish(self, cloud):
-        """Show the 'newcloud' screen to enter credentials for a new
-        controller on 'cloud'.  There will not be an existing
-        controller.
-
-        Arguments:
-        cloud: Cloud to create the controller/model on.
+        """Save the selected cloud and move on to the region selection screen.
 
         """
-        app.current_cloud = cloud
+        if cloud == 'maas':
+            app.current_cloud_type = 'maas'
+            app.current_cloud = utils.gen_cloud()
+        else:
+            app.current_cloud_type = juju.get_cloud_types_by_name()[cloud]
+            app.current_cloud = cloud
         track_event("Cloud selection", app.current_cloud, "")
-        return controllers.use('newcloud').render()
+        return controllers.use('regions').render()
 
     def render(self):
         "Pick or create a cloud to bootstrap a new controller on"

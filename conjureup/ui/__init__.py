@@ -17,6 +17,8 @@ class ConjureUI(Frame):
             errmsg = ex.args[1]
         elif isinstance(ex, TimeoutError):
             errmsg = 'Timeout: {}'.format(ex)
+        elif hasattr(ex, 'user_message'):
+            errmsg = ex.user_message
         else:
             errmsg = str(ex)
         errmsg += ("\n\n"

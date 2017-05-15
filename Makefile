@@ -69,8 +69,8 @@ dev: clean
 
 # Fix some of the python formatting preferred by pylint
 auto-format:
-	@tox -e py35 -- isort -rc -m 3 conjureup test tools
-	@tox -e py35 -- autopep8 --in-place --recursive conjureup test tools
+	@tox -e isort -- isort -rc -m 3 conjureup test tools
+	@tox -e isort -- autopep8 --in-place --recursive conjureup test tools
 
 
 all: release

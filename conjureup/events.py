@@ -141,7 +141,11 @@ def handle_exception(loop, context):
         app.log.exception('Unhandled exception')
 
     if app.headless:
-        utils.error(exc)
+        if hasattr(exc, 'user_message'):
+            msg = exc.user_message
+        else:
+            msg = str(exc)
+        utils.error(msg)
         Shutdown.set(1)
     else:
         app.exit_code = 1  # store exit code for later

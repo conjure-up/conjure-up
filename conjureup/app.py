@@ -100,7 +100,8 @@ def parse_options(argv):
 
     parser.add_argument('cloud', nargs='?',
                         help="Name of a Juju cloud to "
-                        "target, such as ['aws', 'localhost' ...]. "
+                        "target, such as ['aws', 'localhost' ...], optionally "
+                        "with a region, in the form <cloud>/<region>. "
                         "If no controller exists there, one may be created")
     parser.add_argument('controller', nargs='?',
                         help="Name of a juju controller to target. "
