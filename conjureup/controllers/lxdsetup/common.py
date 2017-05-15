@@ -26,6 +26,7 @@ class BaseLXDSetupController:
             iface = iface.network_interface.value
         self.lxd_init(iface)
         self.flag_file.touch()
+        self.next_screen()
 
     def lxd_init(self, iface):
         """ Runs initial lxd init
