@@ -203,6 +203,7 @@ def main():
         os.makedirs(opts.cache_dir)
 
     # Application Config
+    app.env = os.environ.copy()
     app.config = {'metadata': None}
     app.argv = opts
     app.log = setup_logging(app,
@@ -257,8 +258,6 @@ def main():
 
     spell_name = spell
     app.endpoint_type = detect_endpoint(opts.spell)
-
-    app.env = os.environ.copy()
 
     if app.endpoint_type == EndpointType.LOCAL_SEARCH:
         spells = utils.find_spells_matching(opts.spell)
