@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 from conjureup import controllers, juju, utils
 from conjureup.app_config import app
@@ -36,16 +36,13 @@ class BootstrapController:
                                            app.current_model,
                                            credential=creds)
             if not success:
-                pathbase = os.path.join(
-                    app.config['spell-dir'],
-                    '{}-bootstrap').format(app.current_controller)
-                with open(pathbase + ".err") as errf:
-                    err_log = "\n".join(errf.readlines())
-                msg = "Error bootstrapping controller: {}".format(err_log)
-                app.log.error(msg)
+                log_file = '{}-bootstrap.err'.format(app.current_controller)
+                log_file = Path(app.config['spell-dir']) / log_file
+                err_log = log_file.read_text('utf8').splitlines()
+                app.log.error("Error bootstrapping controller: "
+                              "{}".format(err_log))
                 raise Exception('Unable to bootstrap (cloud type: {})'.format(
                     app.current_cloud_type))
-                return
 
             self.emit('Bootstrap complete.')
             track_event("Juju Bootstrap", "Done", "")
