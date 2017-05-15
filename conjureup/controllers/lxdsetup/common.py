@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from subprocess import DEVNULL, CalledProcessError
 
 from conjureup import controllers, utils
 from conjureup.app_config import app
@@ -38,9 +37,6 @@ class BaseLXDSetupController:
             "lxc version",
             "lxd init --auto",
             'lxc config set core.https_address [::]:12001',
-            'lxc profile device add default {iface}'
-            ' nic nictype=bridged'
-            ' parent=conjureup1 name={iface}'.format(iface=iface)
         ]
         for cmd in lxd_init_cmds:
             app.log.debug("LXD Init: {}".format(cmd))
@@ -57,42 +53,38 @@ class BaseLXDSetupController:
     def setup_bridge_network(self, iface):
         """ Sets up our main network bridge to be used with Localhost deployments
         """
-        try:
-            utils.run('lxc network show conjureup1', shell=True, check=True,
-                      stdout=DEVNULL, stderr=DEVNULL)
-        except CalledProcessError:
-            out = utils.run_script('lxc network create conjureup1 '
-                                   'ipv4.address=10.100.0.1/24 '
-                                   'ipv4.nat=true '
-                                   'ipv6.address=none '
-                                   'ipv6.nat=false')
-            if out.returncode != 0:
-                raise Exception(
-                    "Failed to create LXD network bridge: {}".format(
-                        out.stderr.decode()))
+        out = utils.run_script('lxc network show conjureup1')
+        if out.returncode == 0:
+            return  # already configured
 
-            out = utils.run_script(
-                'lxc network attach-profile conjureup1 '
-                'default {iface} {iface}'.format(
-                    iface=iface))
-            if out.returncode != 0:
-                raise Exception(
-                    "Failed to attach LXD network profile: {}".format(
-                        out.stderr.decode()))
+        out = utils.run_script('lxc network create conjureup1 '
+                               'ipv4.address=10.100.0.1/24 '
+                               'ipv4.nat=true '
+                               'ipv6.address=none '
+                               'ipv6.nat=false')
+        if out.returncode != 0:
+            raise Exception("Failed to create LXD conjureup1 network bridge: "
+                            "{}".format(out.stderr.decode()))
+
+        out = utils.run_script('lxc network attach-profile conjureup1 '
+                               'default {iface} {iface}'.format(iface=iface))
+        if out.returncode != 0:
+            raise Exception("Failed to attach LXD conjureup1 network profile: "
+                            "{}".format(out.stderr.decode()))
 
     def setup_unused_bridge_network(self):
         """ Sets up an unused bridge that can be used with deployments such as
         OpenStack on LXD using NovaLXD.
         """
-        out = utils.run_script('lxc network show conjureup0',
-                               stdout=DEVNULL,
-                               stderr=DEVNULL)
+        out = utils.run_script('lxc network show conjureup0')
+        if out.returncode == 0:
+            return  # already configured
+
+        out = utils.run_script('lxc network create conjureup0 '
+                               'ipv4.address=10.99.0.1/24 '
+                               'ipv4.nat=true '
+                               'ipv6.address=none '
+                               'ipv6.nat=false')
         if out.returncode != 0:
-            out = utils.run_script('lxc network create conjureup0 '
-                                   'ipv4.address=10.99.0.1/24 '
-                                   'ipv4.nat=true '
-                                   'ipv6.address=none '
-                                   'ipv6.nat=false')
-            if out.returncode != 0:
-                raise Exception("Failed to create LXD conjureup0 network "
-                                "bridge: {}".format(out.stderr.decode('utf8')))
+            raise Exception("Failed to create LXD conjureup0 network bridge: "
+                            "{}".format(out.stderr.decode('utf8')))

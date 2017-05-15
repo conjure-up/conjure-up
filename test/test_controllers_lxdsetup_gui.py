@@ -6,7 +6,6 @@
 
 
 import unittest
-from subprocess import CalledProcessError
 from unittest.mock import MagicMock, patch
 
 from conjureup import events
@@ -91,8 +90,6 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
         self.utils_patcher = patch(
             'conjureup.controllers.lxdsetup.common.utils')
         self.mock_utils = self.utils_patcher.start()
-        self.mock_utils.run.side_effect = CalledProcessError(
-            1, 'lxc network show conjureup0')
 
         self.render_patcher = patch(
             'conjureup.controllers.lxdsetup.gui.LXDSetupController.render')
@@ -126,15 +123,31 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
             success,  # lxc version
             success,  # lxd init
             success,  # lxc config
-            success,  # lxc profile device add
+            failure,  # lxc network show conjureup1
             success,  # lxc network create conjureup1
             success,  # lxc network attach-profile
-            failure,  # lxc network show
+            failure,  # lxc network show conjureup0
             success,  # lxc network create conjureup0
         ]
 
         self.controller.setup('iface')
         assert self.controller.flag_file.touch.called
+
+    def test_setup_skip(self):
+        "lxdsetup.gui.test_bridge_fail"
+        success = MagicMock(returncode=0)
+
+        self.mock_utils.run_script.side_effect = [
+            success,  # lxc version
+            success,  # lxd init
+            success,  # lxc config
+            success,  # lxc network show conjureup1
+            success,  # lxc network show conjureup0
+        ]
+
+        self.controller.setup('iface')
+        assert self.controller.flag_file.touch.called
+        assert self.mock_utils.run_script.call_count == 5
 
     def test_setup_init_fail(self):
         "lxdsetup.gui.test_init_fail"
@@ -157,7 +170,7 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
             success,  # lxc version
             success,  # lxd init
             success,  # lxc config
-            success,  # lxc profile device add
+            failure,  # lxc network show conjureup1
             failure,  # lxc network create conjureup1
         ]
 
@@ -174,7 +187,6 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
             success,  # lxc version
             success,  # lxd init
             success,  # lxc config
-            success,  # lxc profile device add
             success,  # lxc network create conjureup1
             failure,  # lxc network attach-profile
         ]
@@ -192,10 +204,10 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
             success,  # lxc version
             success,  # lxd init
             success,  # lxc config
-            success,  # lxc profile device add
+            failure,  # lxc network show conjureup1
             success,  # lxc network create conjureup1
             success,  # lxc network attach-profile
-            failure,  # lxc network show
+            failure,  # lxc network show conjureup0
             failure,  # lxc network create conjureup0
         ]
 
