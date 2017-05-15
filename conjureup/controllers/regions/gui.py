@@ -4,7 +4,7 @@ from conjureup.ui.views.regions import RegionPickerView
 from . import common
 
 
-class RegionsController(common.BaseController):
+class RegionsController(common.BaseRegionsController):
     def render(self, back=False):
         if len(self.regions) < 2:
             if back:

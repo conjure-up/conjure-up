@@ -4,7 +4,7 @@ from conjureup.app_config import app
 from . import common
 
 
-class RegionsController(common.BaseController):
+class RegionsController(common.BaseRegionsController):
     def render(self):
         if app.current_region or not self.regions:
             self.finish(app.current_region)

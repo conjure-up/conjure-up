@@ -13,7 +13,7 @@ from conjureup.ui.views.credentials import (
 from . import common
 
 
-class CredentialsController(common.BaseController):
+class CredentialsController(common.BaseCredentialsController):
     def render(self):
         if app.current_cloud_type == 'localhost':
             # no credentials required for localhost

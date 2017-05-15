@@ -3,7 +3,7 @@ from conjureup.app_config import app
 from conjureup.models.provider import load_schema
 
 
-class BaseController:
+class BaseRegionsController:
     def __init__(self):
         # can't just determine these during __init__ because the controller
         # instance is cached and the BACK button means we can get called

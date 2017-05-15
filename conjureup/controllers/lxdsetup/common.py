@@ -6,7 +6,7 @@ from conjureup import controllers, utils
 from conjureup.app_config import app
 
 
-class LXDSetupController:
+class BaseLXDSetupController:
     def __init__(self):
         snap_user_data = os.environ.get('SNAP_USER_DATA', None)
         if snap_user_data:

@@ -2,7 +2,7 @@ from conjureup import controllers, juju
 from conjureup.app_config import app
 
 
-class BaseController:
+class BaseCredentialsController:
     def __init__(self):
         creds = juju.get_credentials().get(app.current_cloud, {})
         creds.pop('default-region', None)

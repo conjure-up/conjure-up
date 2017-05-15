@@ -6,8 +6,8 @@ from conjureup.telemetry import track_event
 
 
 class BootstrapController:
-    def msg_cb(self, msg):
-        pass
+    def __init__(self, msg_cb):
+        self.msg_cb = msg_cb
 
     def render(self):
         app.loop.create_task(self.do_bootstrap(app.current_credential))

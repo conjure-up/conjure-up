@@ -5,7 +5,7 @@ from conjureup.ui.views.lxdsetup import LXDSetupView
 from . import common
 
 
-class LXDSetupController(common.LXDSetupController):
+class LXDSetupController(common.BaseLXDSetupController):
     def render(self):
         if self.is_ready:
             return self.next_screen()
