@@ -117,4 +117,4 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
         self.mock_app.argv.controller = None
         self.controller.finish()
         self.mock_controllers.use.assert_has_calls([
-            call('newcloud'), call().render()])
+            call('regions'), call().render()])
