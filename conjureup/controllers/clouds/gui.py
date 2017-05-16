@@ -19,6 +19,15 @@ class CloudsController:
         else:
             app.current_cloud_type = juju.get_cloud_types_by_name()[cloud]
             app.current_cloud = cloud
+
+        if app.current_controller is None:
+            app.current_controller = "conjure-up-{}-{}".format(
+                app.current_cloud,
+                utils.gen_hash())
+
+        if app.current_model is None:
+            app.current_model = utils.gen_model()
+
         track_event("Cloud selection", app.current_cloud, "")
         return controllers.use('regions').render()
 

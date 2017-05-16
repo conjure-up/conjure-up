@@ -13,18 +13,9 @@ class BaseBootstrapController:
         controllers.use('deploy').render()
 
     async def do_bootstrap(self, creds):
-        if app.current_controller is None:
-            app.current_controller = "conjure-up-{}-{}".format(
-                app.current_cloud,
-                utils.gen_hash())
-
-        if app.current_model is None:
-            app.current_model = utils.gen_model()
-
         if not app.is_jaas:
             await self.pre_bootstrap()
-            app.log.info('Bootstrapping Juju controller.')
-            self.msg_cb('Bootstrapping Juju controller.')
+            self.emit('Bootstrapping Juju controller.')
             track_event("Juju Bootstrap", "Started", "")
             cloud_with_region = app.current_cloud
             if app.current_region:
