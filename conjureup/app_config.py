@@ -71,6 +71,9 @@ app = SimpleNamespace(
     # Current Juju cloud selected
     current_cloud=None,
 
+    # Current Juju cloud type selected
+    current_cloud_type=None,
+
     # Current Juju cloud region
     current_region=None,
 

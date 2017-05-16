@@ -69,6 +69,11 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
 
+        self.cloud_types_patcher = patch(
+            'conjureup.juju.get_cloud_types_by_name')
+        self.mock_cloud_types = self.cloud_types_patcher.start()
+        self.mock_cloud_types.return_value = {'testcloud': 'maas'}
+
         self.cloudname = 'testcloudname'
 
         self.track_event_patcher = patch(
@@ -85,4 +90,4 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
         "clouds.finish without existing controller"
         self.controller.finish('testcloud')
         self.mock_controllers.use.assert_has_calls([
-            call('newcloud'), call().render()])
+            call('regions'), call().render()])

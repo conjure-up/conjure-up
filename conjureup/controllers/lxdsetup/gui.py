@@ -1,90 +1,27 @@
-from tempfile import NamedTemporaryFile
-
-from conjureup import controllers, events, utils
 from conjureup.app_config import app
-from conjureup.telemetry import track_screen
+from conjureup.models.provider import load_schema
 from conjureup.ui.views.lxdsetup import LXDSetupView
 
+from . import common
 
-class LXDSetupController:
-    def __format_input(self, network):
-        """ Formats the network dictionary into strings from the widgets values
-        """
-        formatted = {}
-        for k, v in network.items():
-            widget, help_text = v
-            if k.startswith('_'):
-                # Not a widget but a private key
-                k = k[1:]
-            if isinstance(widget.value, bool) and widget.value:
-                formatted[k] = str("true")
-            elif isinstance(widget.value, bool) and not widget.value:
-                formatted[k] = str("false")
-            elif widget.value is None:
-                formatted[k] = str("")
-            else:
-                formatted[k] = widget.value
-        return formatted
 
-    def __format_conf(self, network):
-        """ Formats the lxd bridge config for writing to file
-        """
-        lines = []
-        for k in network.keys():
-            lines.append("{}={}".format(k, network[k]))
-        return "\n".join(lines)
-
-    def finish(self, needs_lxd_setup=False, lxdnetwork=None, back=False):
-        """ Processes the new LXD setup and loads the controller to
-        finish bootstrapping the model.
-
-        Arguments:
-        back: if true loads previous controller
-        needs_lxd_setup: if true prompt user to run lxd init
-        """
-        if back:
-            return controllers.use('clouds').render()
-
-        if needs_lxd_setup:
-            events.Shutdown.set(1)
-            return
-
-        if lxdnetwork is None:
-            raise Exception("Unable to configure LXD network bridge.")
-
-        formatted_network = self.__format_input(lxdnetwork)
-        app.log.debug("LXD Config {}".format(formatted_network))
-
-        out = self.__format_conf(formatted_network)
-
-        with NamedTemporaryFile(mode="w", encoding="utf-8",
-                                delete=False) as tempf:
-            app.log.debug("Saving LXD config to {}".format(tempf.name))
-            utils.spew(tempf.name, out)
-            sh = utils.run('sudo mv {} /etc/default/lxd-bridge'.format(
-                tempf.name), shell=True)
-            if sh.returncode > 0:
-                return app.ui.show_exception_message(
-                    Exception("Problem saving config: {}".format(
-                        sh.stderr.decode('utf8'))))
-
-        app.log.debug("Restarting lxd-bridge")
-        utils.run("sudo systemctl restart lxd-bridge.service", shell=True)
-
-        app.current_cloud = 'localhost'
-        controllers.use('newcloud').render()
-
+class LXDSetupController(common.BaseLXDSetupController):
     def render(self):
-        """ Render
-        """
-        track_screen("LXD Setup")
-        view = LXDSetupView(app,
-                            cb=self.finish)
+        if self.is_ready:
+            return self.next_screen()
 
-        app.ui.set_header(
-            title="Configure LXD",
-        )
-        app.ui.set_body(view)
+        if len(self.ifaces) == 1:
+            return self.setup(self.ifaces[0])
+
+        view = LXDSetupView(self.schema, self.setup)
+        view.show()
+
+    @property
+    def schema(self):
+        if hasattr(self, '_schema'):
+            return self._schema
+        self._schema = load_schema(app.current_cloud_type)
+        return self._schema
 
 
 _controller_class = LXDSetupController

@@ -102,7 +102,7 @@ class BaseProvider:
     def default_region(self):
         """ Returns a default region for cloud
         """
-        raise NotImplementedError
+        return None
 
 
 class AWS(BaseProvider):
@@ -468,21 +468,32 @@ class Oracle(BaseProvider):
 
 
 Schema = [
-    ('aws', AWS),
-    ('aws-china', AWS),
-    ('aws-gov', AWS),
+    ('ec2', AWS),
     ('maas', MAAS),
     ('azure', Azure),
-    ('azure-china', Azure),
-    ('google', Google),
+    ('gce', Google),
     ('cloudsigma', CloudSigma),
     ('joyent', Joyent),
     ('openstack', OpenStack),
     ('rackspace', OpenStack),
     ('vsphere', VSphere),
     ('oracle', Oracle),
-    ('localhost', Localhost)
+    ('localhost', Localhost),
+    ('lxd', Localhost),
 ]
+
+
+class SchemaError(Exception):
+    def __init__(self, cloud):
+        super().__init__("Credentials Error: Could not find schema for: "
+                         "{}".format(cloud))
+        self.user_message = (
+            "Unable to find credentials for {}, "
+            "you can double check what credentials you "
+            "do have available by running "
+            "`juju credentials`. Please see `juju help "
+            "add-credential` for more information.".format(
+                cloud))
 
 
 def load_schema(cloud):
@@ -492,7 +503,7 @@ def load_schema(cloud):
         k, v = s
         if cloud == k:
             return v()
-    raise Exception("Could not find schema for: {}".format(cloud))
+    raise SchemaError(cloud)
 
 
 SchemaV1 = OrderedDict([
