@@ -35,9 +35,9 @@ class BaseLXDSetupController:
         iface: interface name
         """
         lxd_init_cmds = [
-            "lxc version",
-            "lxd init --auto",
-            'lxc config set core.https_address [::]:12001',
+            "conjure-up.lxc version",
+            "conjure-up.lxd init --auto",
+            'conjure-up.lxc config set core.https_address [::]:12001',
         ]
         for cmd in lxd_init_cmds:
             app.log.debug("LXD Init: {}".format(cmd))
@@ -54,11 +54,11 @@ class BaseLXDSetupController:
     def setup_bridge_network(self, iface):
         """ Sets up our main network bridge to be used with Localhost deployments
         """
-        out = utils.run_script('lxc network show conjureup1')
+        out = utils.run_script('conjure-up.lxc network show conjureup1')
         if out.returncode == 0:
             return  # already configured
 
-        out = utils.run_script('lxc network create conjureup1 '
+        out = utils.run_script('conjure-up.lxc network create conjureup1 '
                                'ipv4.address=10.100.0.1/24 '
                                'ipv4.nat=true '
                                'ipv6.address=none '
@@ -67,8 +67,9 @@ class BaseLXDSetupController:
             raise Exception("Failed to create LXD conjureup1 network bridge: "
                             "{}".format(out.stderr.decode()))
 
-        out = utils.run_script('lxc network attach-profile conjureup1 '
-                               'default {iface} {iface}'.format(iface=iface))
+        out = utils.run_script(
+            'conjure-up.lxc network attach-profile conjureup1 '
+            'default {iface} {iface}'.format(iface=iface))
         if out.returncode != 0:
             raise Exception("Failed to attach LXD conjureup1 network profile: "
                             "{}".format(out.stderr.decode()))
@@ -77,11 +78,11 @@ class BaseLXDSetupController:
         """ Sets up an unused bridge that can be used with deployments such as
         OpenStack on LXD using NovaLXD.
         """
-        out = utils.run_script('lxc network show conjureup0')
+        out = utils.run_script('conjure-up.lxc network show conjureup0')
         if out.returncode == 0:
             return  # already configured
 
-        out = utils.run_script('lxc network create conjureup0 '
+        out = utils.run_script('conjure-up.lxc network create conjureup0 '
                                'ipv4.address=10.99.0.1/24 '
                                'ipv4.nat=true '
                                'ipv6.address=none '

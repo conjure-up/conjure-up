@@ -11,14 +11,7 @@ import sys
 import uuid
 from collections import Mapping
 from pathlib import Path
-from subprocess import (
-    DEVNULL,
-    PIPE,
-    CalledProcessError,
-    Popen,
-    check_call,
-    check_output
-)
+from subprocess import PIPE, Popen, check_call, check_output
 
 import yaml
 from bundleplacer.bundle import Bundle
@@ -199,7 +192,7 @@ def lxd_version():
     if is_darwin():
         return "N/A"
 
-    cmd = run_script('lxd --version')
+    cmd = run_script('conjure-up.lxd --version')
     if cmd.returncode == 0:
         return parse_version(cmd.stdout.decode().strip())
     else:
@@ -214,36 +207,6 @@ def juju_version():
         return parse_version(cmd.stdout.decode().strip())
     else:
         raise Exception("Could not determine Juju version.")
-
-
-def lxd_has_ipv6():
-    """ Checks whether LXD bridge has IPv6 enabled
-    """
-    cmd = run_script('lxc network get lxdbr0 ipv6.nat')
-    out = cmd.stdout.decode().strip()
-    if "true" in out:
-        return True
-    return False
-
-
-def check_user_in_group(group):
-    """ Checks if a user is associated with `group`
-    """
-    groups = run_script('groups').stdout.decode()
-    if group in groups.split():
-        return True
-    return False
-
-
-def check_deb_installed(pkg):
-    """ Checks if a debian package is installed
-    """
-    try:
-        run('dpkg-query -W {}'.format(pkg),
-            shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)
-    except CalledProcessError:
-        return False
-    return True
 
 
 def send_msg(msg, label, color, attrs=['bold']):
