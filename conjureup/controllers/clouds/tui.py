@@ -22,7 +22,7 @@ class CloudsController:
 
         app.current_controller = app.argv.controller
         if not self.__controller_exists(app.current_controller):
-            return controllers.use('newcloud').render()
+            return controllers.use('regions').render()
         else:
             utils.info("Using controller '{}'".format(app.current_controller))
             utils.info("Creating new model named '{}', "
