@@ -18,7 +18,7 @@ class CloudsController:
                 app.current_cloud,
                 utils.gen_hash())
 
-            return controllers.use('newcloud').render()
+            return controllers.use('regions').render()
 
         app.current_controller = app.argv.controller
         if not self.__controller_exists(app.current_controller):
