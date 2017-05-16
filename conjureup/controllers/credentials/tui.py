@@ -9,7 +9,7 @@ class CredentialsController(common.BaseCredentialsController):
         if app.current_cloud_type == 'localhost':
             # no credentials required for localhost
             self.finish(None)
-        elif not self.creds:
+        elif not self.credentials:
             utils.warning("You attempted to do an install against a cloud "
                           "that requires credentials that could not be "
                           "found.  If you wish to supply those "
