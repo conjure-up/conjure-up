@@ -27,7 +27,6 @@ gen-changelog:
 update-version:
 	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjureup/__init__.py
 	@sed -i -r "s/(^version:\s)(.*)/\1$(VERSION)/" snap/snapcraft.yaml
-	@git commit -asm "Version bump: $(VERSION)"
 
 snap: sysdeps update-version clean test
 	@snapcraft
