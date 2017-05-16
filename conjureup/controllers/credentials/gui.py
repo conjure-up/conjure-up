@@ -20,7 +20,7 @@ class CredentialsController(common.BaseCredentialsController):
             self.finish(None)
         elif not self.credentials:
             self.render_form()
-        elif len(self.credentials) > 1:
+        elif len(self.credentials) >= 1:
             self.render_picker()
         else:
             self.finish(self.default_credential)
