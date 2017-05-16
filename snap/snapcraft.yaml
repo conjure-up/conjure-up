@@ -70,7 +70,9 @@ parts:
       mkdir -p $SNAPCRAFT_PART_INSTALL/bash_completions
       cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
     build-packages: [lsb-release]
-    after: [conjure-up, lxd]
+    after: [conjure-up, lxd, go]
+  go:
+    source-tag: go1.8
   python:
     source: https://www.python.org/ftp/python/3.6.1/Python-3.6.1.tar.xz
     plugin: autotools
