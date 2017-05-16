@@ -94,7 +94,9 @@ class CredentialsController(common.BaseCredentialsController):
                 juju.add_cloud(app.current_cloud,
                                credential.cloud_config())
 
-        self.finish(credential)
+        # This should return the app.current_controller so juju bootstrap knows
+        # which credential to bootstrap with
+        self.finish(app.current_controller)
 
 
 _controller_class = CredentialsController
