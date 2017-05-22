@@ -203,7 +203,7 @@ async def register_controller(name, endpoint, email, password, twofa,
                               timeout=30, fail_cb=None, timeout_cb=None):
     app.log.info('Registering controller {}'.format(name))
     proc = await asyncio.create_subprocess_exec(
-        'juju', 'register', '-B', endpoint,
+        'juju', 'login', '-B', endpoint,
         stdin=PIPE, stdout=PIPE, stderr=PIPE,
     )
     try:
