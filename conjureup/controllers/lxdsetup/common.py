@@ -71,8 +71,11 @@ class BaseLXDSetupController:
             'conjure-up.lxc network attach-profile conjureup1 '
             'default {iface} {iface}'.format(iface=iface))
         if out.returncode != 0:
-            raise Exception("Failed to attach LXD conjureup1 network profile: "
-                            "{}".format(out.stderr.decode()))
+            # Skip if device already exists
+            if 'device already exists' not in out.stderr.decode():
+                raise Exception(
+                    "Failed to attach LXD conjureup1 network profile: "
+                    "{}".format(out.stderr.decode()))
 
     def setup_unused_bridge_network(self):
         """ Sets up an unused bridge that can be used with deployments such as
