@@ -8,10 +8,6 @@ class CloudsController:
         return juju.get_controller(controller) is not None
 
     def finish(self):
-        if not app.current_cloud_type:
-            app.current_cloud_type = juju.get_cloud_types_by_name()[
-                app.current_cloud]
-
         if app.argv.model:
             app.current_model = app.argv.model
         else:

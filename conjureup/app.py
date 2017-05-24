@@ -19,7 +19,7 @@ from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 
 from conjureup import __version__ as VERSION
-from conjureup import charm, consts, controllers, events, utils
+from conjureup import charm, consts, controllers, events, juju, utils
 from conjureup.app_config import app
 from conjureup.controllers.steps.common import get_step_metadata_filenames
 from conjureup.download import (
@@ -346,6 +346,9 @@ def main():
             if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
                 utils.error("Please specify a spell for headless mode.")
                 sys.exit(1)
+
+            app.current_cloud_type = juju.get_cloud_types_by_name()[
+                app.current_cloud]
 
             app.headless = True
             app.ui = None
