@@ -99,6 +99,7 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
         self.mock_app.env = {'CONJURE_UP_CACHEDIR': '/tmp'}
+        self.mock_app.current_model = 'conjure-up-bong'
         self.ev_app_patcher = patch(
             'conjureup.events.app', self.mock_app)
         self.ev_app_patcher.start()
@@ -121,13 +122,15 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
 
         self.mock_utils.run_script.side_effect = [
             success,  # lxc version
-            success,  # lxd init
-            success,  # lxc config
+            success,  # lxd config
+            success,  # lxc storage create default disk
+            success,  # lxc profile device add disk
             failure,  # lxc network show conjureup1
             success,  # lxc network create conjureup1
             success,  # lxc network attach-profile
             failure,  # lxc network show conjureup0
             success,  # lxc network create conjureup0
+            success,  # lxc network attach-profile
         ]
 
         self.controller.setup('iface')
@@ -139,15 +142,16 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
 
         self.mock_utils.run_script.side_effect = [
             success,  # lxc version
-            success,  # lxd init
-            success,  # lxc config
+            success,  # lxd config
+            success,  # lxc storage create default disk
+            success,  # lxc profile device add disk
             success,  # lxc network show conjureup1
             success,  # lxc network show conjureup0
         ]
 
         self.controller.setup('iface')
         assert self.controller.flag_file.touch.called
-        assert self.mock_utils.run_script.call_count == 5
+        assert self.mock_utils.run_script.call_count == 6
 
     def test_setup_init_fail(self):
         "lxdsetup.gui.test_init_fail"
@@ -168,8 +172,9 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
 
         self.mock_utils.run_script.side_effect = [
             success,  # lxc version
-            success,  # lxd init
-            success,  # lxc config
+            success,  # lxd config
+            success,  # lxc storage disk
+            success,  # lxc profile disk
             failure,  # lxc network show conjureup1
             failure,  # lxc network create conjureup1
         ]

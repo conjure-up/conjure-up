@@ -36,17 +36,20 @@ class BaseLXDSetupController:
         """
         lxd_init_cmds = [
             "conjure-up.lxc version",
-            "conjure-up.lxd init --auto",
             'conjure-up.lxc config set core.https_address [::]:12001',
+            'conjure-up.lxc storage create default dir',
+            'conjure-up.lxc profile device add default '
+            'root disk path=/ pool=default',
         ]
         for cmd in lxd_init_cmds:
             app.log.debug("LXD Init: {}".format(cmd))
             out = utils.run_script(cmd)
             if out.returncode != 0:
-                raise Exception(
-                    "Problem running: {}:{}".format(
-                        cmd,
-                        out.stderr.decode('utf8')))
+                if 'already exists' not in out.stderr.decode():
+                    raise Exception(
+                        "Problem running: {}:{}".format(
+                            cmd,
+                            out.stderr.decode('utf8')))
 
         self.setup_bridge_network(iface)
         self.setup_unused_bridge_network()
@@ -69,7 +72,8 @@ class BaseLXDSetupController:
 
         out = utils.run_script(
             'conjure-up.lxc network attach-profile conjureup1 '
-            'default {iface} {iface}'.format(iface=iface))
+            'default eth0 eth0')
+
         if out.returncode != 0:
             # Skip if device already exists
             if 'device already exists' not in out.stderr.decode():
@@ -90,6 +94,14 @@ class BaseLXDSetupController:
                                'ipv4.nat=true '
                                'ipv6.address=none '
                                'ipv6.nat=false')
+
+        out = utils.run_script(
+            'conjure-up.lxc network attach-profile conjureup0 '
+            'default eth1 eth1')
+
         if out.returncode != 0:
-            raise Exception("Failed to create LXD conjureup0 network bridge: "
-                            "{}".format(out.stderr.decode('utf8')))
+            # Skip if device already exists
+            if 'device already exists' not in out.stderr.decode():
+                raise Exception(
+                    "Failed to attach LXD conjureup0 network profile: "
+                    "{}".format(out.stderr.decode()))
