@@ -479,7 +479,7 @@ def gen_model():
 def gen_cloud():
     """ generates a unique cloud
     """
-    name = "conjure-cloud-{}".format(app.current_cloud_type)
+    name = "cloud-{}".format(app.current_cloud_type)
     return "{}-{}".format(name[:24], gen_hash())
 
 
