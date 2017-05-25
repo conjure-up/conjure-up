@@ -34,6 +34,7 @@ parts:
     after: [python]
   spells:
     source: https://github.com/conjure-up/spells.git
+    source-branch: stable
     source-type: git
     plugin: dump
     organize:
@@ -46,7 +47,7 @@ parts:
   juju:
     source: https://github.com/juju/juju.git
     source-type: git
-    source-tag: "juju-2.1.2"
+    source-tag: "juju-2.1.3"
     source-depth: 1
     plugin: godeps
     go-importpath: github.com/juju/juju
