@@ -216,7 +216,7 @@ def send_msg(msg, label, color, attrs=['bold']):
                attrs=attrs,
                end="{}\n".format(msg))
     else:
-        print("[{}] {}".format(label, msg))
+        print("[{}] {}\n".format(label, msg))
 
 
 def info(msg):
