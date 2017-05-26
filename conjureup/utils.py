@@ -1,8 +1,6 @@
-import aiofiles
 import asyncio
 import codecs
 import errno
-import json
 import os
 import pty
 import re
@@ -14,6 +12,7 @@ from collections import Mapping
 from pathlib import Path
 from subprocess import PIPE, Popen, check_call, check_output
 
+import aiofiles
 import yaml
 from bundleplacer.bundle import Bundle
 from bundleplacer.charmstore_api import MetadataController
