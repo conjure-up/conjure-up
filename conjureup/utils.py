@@ -132,7 +132,7 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
                                                         env=app.env,
                                                         stdout=outf,
                                                         stderr=errf)
-            async with aiofiles.open(Path(step_path + '.out'), 'r') as f:
+            async with aiofiles.open(step_path + '.out', 'r') as f:
                 while proc.returncode is None:
                     async for line in f:
                         if line.startswith('result:'):
