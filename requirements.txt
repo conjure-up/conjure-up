@@ -1,3 +1,4 @@
+aiofiles==0.3.1
 bundle-placement==0.0.1
 Jinja2==2.9.6
 juju==0.4.2
