@@ -1,3 +1,4 @@
+import aiofiles
 import asyncio
 import codecs
 import errno
@@ -124,51 +125,31 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
     if not os.access(step_path, os.X_OK):
         raise Exception("Step {} not executable".format(step_title))
 
-    while True:
-        app.log.debug("Executing script: {}".format(step_path))
+    app.log.debug("Executing script: {}".format(step_path))
 
-        with open(step_path + ".out", 'w') as outf:
-            with open(step_path + ".err", 'w') as errf:
-                proc = await asyncio.create_subprocess_exec(step_path,
-                                                            env=app.env,
-                                                            stdout=outf,
-                                                            stderr=errf)
-                await proc.wait()
-        try:
-            stderr = Path(step_path + '.err').read_text()
-        except Exception:
-            stderr = None
+    async with aiofiles.open(step_path + ".out", 'w') as outf:
+        async with aiofiles.open(step_path + ".err", 'w') as errf:
+            proc = await asyncio.create_subprocess_exec(step_path,
+                                                        env=app.env,
+                                                        stdout=outf,
+                                                        stderr=errf)
+            async with aiofiles.open(Path(step_path + '.out'), 'r') as f:
+                while proc.returncode is None:
+                    async for line in f:
+                        msg_cb(line)
 
-        if proc.returncode != 0:
-            raise Exception("Failure in step {}: {}".format(step_file, stderr))
+            await proc.wait()
 
-        try:
-            result = json.loads(Path(step_path + '.out').read_text())
-        except OSError as e:
-            raise Exception("Unable to read output from step {}: {}".format(
-                step_file, e))
-        except json.decoder.JSONDecodeError as e:
-            raise Exception("Unable to parse output from step {}: {}".format(
-                step_file, e))
+            if proc.returncode != 0:
+                raise Exception("Failure in step {}".format(step_file))
 
-        if 'returnCode' not in result:
-            raise Exception("Invalid message from step {}".format(step_file))
+            msg = "Finished {}".format(step_title)
+            app.log.info(msg)
+            msg_cb(msg)
+            if event_name is not None:
+                track_event(event_name, "Done", "")
 
-        if result['returnCode'] != 0:
-            raise Exception("Failure in step {}: {}".format(step_file,
-                                                            result['message']))
-
-        if result.get('isComplete', True):
-            break
-        msg_cb("{}, please wait".format(result['message']))
-
-    msg = "Finished {}: {}".format(step_title, result['message'])
-    app.log.info(msg)
-    msg_cb(msg)
-    if event_name is not None:
-        track_event(event_name, "Done", "")
-
-    return result['message']
+    return proc.stdout.decode()
 
 
 def can_sudo(password=None):
