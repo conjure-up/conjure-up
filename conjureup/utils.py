@@ -135,9 +135,11 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
             async with aiofiles.open(Path(step_path + '.out'), 'r') as f:
                 while proc.returncode is None:
                     async for line in f:
-                        msg_cb(line)
-
-            await proc.wait()
+                        if line.startswith('result:'):
+                            msg = line
+                        else:
+                            msg_cb(line)
+                    await asyncio.sleep(0.01)
 
             if proc.returncode != 0:
                 raise Exception("Failure in step {}".format(step_file))
@@ -148,7 +150,7 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
             if event_name is not None:
                 track_event(event_name, "Done", "")
 
-    return proc.stdout.decode()
+    return msg
 
 
 def can_sudo(password=None):
