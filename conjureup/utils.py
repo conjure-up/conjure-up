@@ -137,16 +137,12 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
                     async for line in f:
                         if line.startswith('result:'):
                             msg = line
-                        else:
-                            msg_cb(line)
+                        msg_cb(line)
                     await asyncio.sleep(0.01)
 
             if proc.returncode != 0:
                 raise Exception("Failure in step {}".format(step_file))
 
-            msg = "Finished {}".format(step_title)
-            app.log.info(msg)
-            msg_cb(msg)
             if event_name is not None:
                 track_event(event_name, "Done", "")
 
