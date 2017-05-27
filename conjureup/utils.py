@@ -115,7 +115,7 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
 
     step_path = str(step_path)
 
-    msg = "Running {}.".format(step_title)
+    msg = "Running step: {}.".format(step_title)
     app.log.info(msg)
     msg_cb(msg)
     if event_name is not None:
@@ -126,6 +126,7 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
 
     app.log.debug("Executing script: {}".format(step_path))
 
+    result = None
     async with aiofiles.open(step_path + ".out", 'w') as outf:
         async with aiofiles.open(step_path + ".err", 'w') as errf:
             proc = await asyncio.create_subprocess_exec(step_path,
@@ -136,7 +137,8 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
                 while proc.returncode is None:
                     async for line in f:
                         if line.startswith('result:'):
-                            msg = line
+                            result = line
+                        msg = line
                         msg_cb(line)
                     await asyncio.sleep(0.01)
 
@@ -146,7 +148,7 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
             if event_name is not None:
                 track_event(event_name, "Done", "")
 
-    return msg
+    return result if result else msg
 
 
 def can_sudo(password=None):
