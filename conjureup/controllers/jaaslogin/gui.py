@@ -40,7 +40,10 @@ class JaaSLoginController:
         self.authenticating.clear()
         events.Bootstrapped.set()
         app.log.info('JAAS is registered')
-        controllers.use('clouds').render()
+        app.loop.create_task(juju.add_model(app.current_model,
+                                            app.current_controller,
+                                            app.current_cloud))
+        controllers.use('deploy').render()
 
     def render_interstitial(self):
         track_screen("JaaS Login Wait")

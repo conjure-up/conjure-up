@@ -19,7 +19,7 @@ class BaseLXDSetupController:
         return self.flag_file.exists()
 
     def next_screen(self):
-        return controllers.use('bootstrap').render()
+        return controllers.use('controllerpicker').render()
 
     def setup(self, iface):
         if not isinstance(iface, str):
