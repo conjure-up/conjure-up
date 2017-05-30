@@ -13,29 +13,7 @@ class CloudsController:
         else:
             app.current_model = utils.gen_model()
 
-        if not app.argv.controller:
-            app.current_controller = "conjure-up-{}-{}".format(
-                app.current_cloud,
-                utils.gen_hash())
-
-            return controllers.use('regions').render()
-
-        app.current_controller = app.argv.controller
-        if not self.__controller_exists(app.current_controller):
-            return controllers.use('regions').render()
-        else:
-            utils.info("Using controller '{}'".format(app.current_controller))
-            utils.info("Creating new model named '{}', "
-                       "please wait.".format(app.current_model))
-            app.loop.create_task(juju.add_model(app.current_model,
-                                                app.current_controller,
-                                                app.current_cloud,
-                                                allow_exists=True))
-            return controllers.use('deploy').render()
-
-        utils.error("Something happened with the controller or model, "
-                    "please check the logs.")
-        events.Shutdown.set(1)
+        return controllers.use('regions').render()
 
     def render(self):
         if app.current_cloud not in juju.get_clouds().keys():

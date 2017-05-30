@@ -139,11 +139,7 @@ async def _start(*args, **kwargs):
         controllers.use('deploystatus').render()
         return
 
-    if app.argv.cloud:
-        controllers.use('clouds').render()
-        return
-
-    controllers.use('controllerpicker').render()
+    controllers.use('clouds').render()
 
 
 def apply_proxy():
@@ -347,8 +343,11 @@ def main():
                 utils.error("Please specify a spell for headless mode.")
                 sys.exit(1)
 
-            app.current_cloud_type = juju.get_cloud_types_by_name()[
-                app.current_cloud]
+            cloud_types = juju.get_cloud_types_by_name()
+            if app.current_cloud not in cloud_types:
+                utils.error('Unknown cloud: {}'.format(app.current_cloud))
+                sys.exit(1)
+            app.current_cloud_type = cloud_types[app.current_cloud]
 
             app.headless = True
             app.ui = None

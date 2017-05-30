@@ -20,4 +20,4 @@ class BaseCredentialsController:
         if app.current_cloud_type == 'localhost':
             controllers.use('lxdsetup').render()
         else:
-            controllers.use('bootstrap').render()
+            controllers.use('controllerpicker').render()
