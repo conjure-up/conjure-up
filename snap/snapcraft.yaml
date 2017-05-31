@@ -73,6 +73,8 @@ parts:
       cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
     build-packages: [lsb-release]
     after: [conjure-up, lxd, go]
+  lxd:
+    source-tag: lxd-2.13
   go:
     source-tag: go1.8
   python:
