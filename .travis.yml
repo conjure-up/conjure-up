@@ -12,7 +12,6 @@ notifications:
     on_failure: change
     on_success: never
 install:
-  - travis_retry pip install tox
+  - make sysdeps
 script:
-  - if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then travis_retry tox -e py35; fi
-  - travis_retry tox -e flake,isort
+  - make test

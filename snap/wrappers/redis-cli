@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eu
 
-"$SNAP/bin/redis-cli -p 6380" "$@"
+"$SNAP/bin/redis-cli" -p 6380 "$@"

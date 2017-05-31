@@ -16,4 +16,4 @@ export LXD_DIR=${SNAP_COMMON}/lxd/
 # Make sure we access our python and juju binaries first
 export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 
-exec "$SNAP/bin/conjure-up --spells-dir $SNAP/spells --nosync" "$@"
+exec "$SNAP/bin/conjure-up" --spells-dir "$SNAP/spells" --nosync "$@"

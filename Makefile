@@ -11,7 +11,7 @@ CHANNEL := edge
 .PHONY: sysdeps
 sysdeps:
 	@sudo apt-get update
-	@sudo apt-get -qqyf install jq python3-yaml bsdtar bridge-utils software-properties-common snapcraft python3-dev tox
+	@sudo apt-get -qqyf install jq python3-yaml bsdtar bridge-utils software-properties-common snapcraft python3-dev tox shellcheck
 
 .PHONY: install
 install: snap
@@ -58,6 +58,7 @@ clean:
 .PHONY: test
 test: auto-format
 	@tox -e py35,flake,isort
+	@shellcheck snap/wrappers/*
 
 git_rev:
 	@echo $(GIT_REV)

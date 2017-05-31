@@ -2,4 +2,4 @@
 set -eu
 
 ## Start redis-server
-"$SNAP/bin/redis-server --port 6380" "$@"
+"$SNAP/bin/redis-server" --port 6380 "$@"
