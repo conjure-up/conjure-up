@@ -1,14 +1,12 @@
+from conjureup.app_config import app
 
-from conjureup import controllers
+from . import common
 
 
-class ControllerPicker:
-
-    def finish(self):
-        return controllers.use('deploy').render()
-
+class ControllerPicker(common.BaseControllerPicker):
     def render(self):
-        self.finish()
+        self.check_jaas()
+        self.finish(app.argv.controller)
 
 
 _controller_class = ControllerPicker

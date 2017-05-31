@@ -6,7 +6,7 @@
 
 
 import unittest
-from unittest.mock import ANY, MagicMock, call, patch
+from unittest.mock import MagicMock, call, patch
 
 from conjureup import events
 from conjureup.controllers.clouds.tui import CloudsController
@@ -100,17 +100,16 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
         self.juju_patcher.stop()
         self.gcc_patcher.stop()
 
-    def test_finish_w_controller(self):
+    def test_finish_w_model(self):
         "clouds.finish with an existing controller"
         self.mock_gcc.return_value = 'testcontroller'
-        self.mock_app.argv.controller = 'testcontroller'
+        self.mock_app.argv.model = 'testmodel'
         self.mock_app.current_cloud = 'cloud'
         self.controller.finish()
-        self.mock_juju.assert_has_calls([
-            call.add_model(ANY, 'testcontroller', 'cloud',
-                           allow_exists=True)])
+        self.mock_controllers.use.assert_has_calls([
+            call('regions'), call().render()])
 
-    def test_finish_no_controller(self):
+    def test_finish_no_model(self):
         "clouds.finish without existing controller"
         self.mock_gcc.return_value = None
         self.mock_app.argv.cloud = 'testcloud'

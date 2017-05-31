@@ -20,11 +20,6 @@ class CloudsController:
             app.current_cloud_type = juju.get_cloud_types_by_name()[cloud]
             app.current_cloud = cloud
 
-        if app.current_controller is None:
-            app.current_controller = "conjure-up-{}-{}".format(
-                app.current_cloud,
-                utils.gen_hash())
-
         if app.current_model is None:
             app.current_model = utils.gen_model()
 
@@ -35,19 +30,28 @@ class CloudsController:
         "Pick or create a cloud to bootstrap a new controller on"
         track_screen("Cloud Select")
 
-        compatible_clouds = juju.get_compatible_clouds()
         all_clouds = juju.get_clouds()
-        clouds = []
-
-        for k, v in all_clouds.items():
-            if v['type'] in compatible_clouds:
-                clouds.append(k)
+        compatible_clouds = juju.get_compatible_clouds()
+        cloud_types = juju.get_cloud_types_by_name()
+        # filter to only public clouds
+        public_clouds = sorted(
+            name for name, info in all_clouds.items()
+            if info['defined'] == 'public' and
+            cloud_types[name] in compatible_clouds)
+        # filter to custom clouds
+        # exclude localhost because we treat that as "configuring a new cloud"
+        custom_clouds = sorted(
+            name for name, info in all_clouds.items()
+            if info['defined'] != 'public' and
+            cloud_types[name] != 'localhost' and
+            cloud_types[name] in compatible_clouds)
 
         excerpt = app.config.get(
             'description',
-            "Please select from a list of available clouds")
+            "Where would you like to deploy?")
         view = CloudView(app,
-                         sorted(clouds),
+                         public_clouds,
+                         custom_clouds,
                          cb=self.finish)
 
         app.ui.set_header(

@@ -27,8 +27,18 @@ apps:
     command: wrappers/lxc
   lxd:
     command: wrappers/lxd
+  redis-server:
+    command: wrappers/redis.daemon.start
+    daemon: simple
+  redis-cli:
+    command: wrappers/redis-cli
 
 parts:
+  redis:
+    plugin: make
+    source: https://github.com/antirez/redis.git
+    source-tag: 3.2.9
+    make-install-var: PREFIX
   conjure-up:
     source: .
     plugin: python
@@ -73,6 +83,8 @@ parts:
       cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
     build-packages: [lsb-release]
     after: [conjure-up, lxd, go]
+  lxd:
+    source-tag: lxd-2.13
   go:
     source-tag: go1.8
   python:

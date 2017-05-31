@@ -9,10 +9,11 @@ from conjureup import juju
 
 class CloudView(WidgetWrap):
 
-    def __init__(self, app, clouds, cb=None):
+    def __init__(self, app, public_clouds, custom_clouds, cb=None):
         self.app = app
         self.cb = cb
-        self.clouds = clouds
+        self.public_clouds = public_clouds
+        self.custom_clouds = custom_clouds
         self.config = self.app.config
         self.buttons_pile_selected = False
         self.frame = Frame(body=self._build_widget(),
@@ -57,11 +58,22 @@ class CloudView(WidgetWrap):
 
     def _build_widget(self):
         total_items = []
-        clouds = [x for x in self.clouds if 'localhost' != x]
-        if len(clouds) > 0:
-            total_items.append(Text("Choose a Cloud"))
+        if len(self.public_clouds) > 0:
+            total_items.append(Text("Public Clouds"))
             total_items.append(HR())
-            for item in clouds:
+            for item in self.public_clouds:
+                total_items.append(
+                    Color.body(
+                        menu_btn(label=item,
+                                 on_press=self.submit),
+                        focus_map='menu_button focus'
+                    )
+                )
+            total_items.append(Padding.line_break(""))
+        if len(self.custom_clouds) > 0:
+            total_items.append(Text("Your Clouds"))
+            total_items.append(HR())
+            for item in self.custom_clouds:
                 total_items.append(
                     Color.body(
                         menu_btn(label=item,
@@ -75,7 +87,7 @@ class CloudView(WidgetWrap):
         if new_clouds:
             total_items.append(Text("Configure a New Cloud"))
             total_items.append(HR())
-            for item in new_clouds:
+            for item in sorted(new_clouds):
                 total_items.append(
                     Color.body(
                         menu_btn(label=item,
