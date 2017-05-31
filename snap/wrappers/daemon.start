@@ -2,31 +2,67 @@
 set -eu
 
 if [ -d /sys/kernel/security/apparmor ] && [ "$(cat /proc/self/attr/current)" != "unconfined" ]; then
-    exec aa-exec -p unconfined -- $0 "$@"
+    exec aa-exec -p unconfined -- "$0" "$@"
 fi
 
-export LXD_DIR=${SNAP_COMMON}/lxd/
-export LXD_LXC_TEMPLATE_CONFIG=${SNAP}/lxc/config/
-export HOME=/tmp/
-OUT_DEVICE=$(ip -4 route show | grep ^default | cut -d ' ' -f5)
+export LXD_DIR="${SNAP_COMMON}/lxd/"
+export LXD_LXC_TEMPLATE_CONFIG="${SNAP}/lxc/config/"
+export HOME="/tmp/"
+
+# Escape resource limits
+## pid cgroup
+pidns=$(grep ":pids:" /proc/self/cgroup | awk -F: '{print $NF}')
+if [ -n "${pidns}" ] && [ -e "/sys/fs/cgroup/pids/${pidns}" ]; then
+    echo max > "/sys/fs/cgroup/pids/${pidns}/pids.max"
+fi
+
+## prlimits
+prlimit -p $$ --nofile=1048576:1048576
+prlimit -p $$ --nproc=unlimited:unlimited
+
+# Setup a functional /etc
+if mountpoint -q /etc; then
+    ## Unmount and replace with an empty tmpfs
+    umount -l /etc
+    mount -t tmpfs tmpfs /etc -o mode=0755
+
+    ## Pass the bits we need from the host
+    for i in hostname hosts passwd group resolv.conf; do
+        touch "/etc/${i}"
+        mount -o bind,ro /var/lib/snapd/hostfs/etc/${i} /etc/${i}
+    done
+
+    ## And the bits we need from the core snap
+    for i in alternatives apparmor apparmor.d ssl vim; do
+        mkdir "/etc/${i}"
+        mount -o bind,ro /snap/core/current/etc/${i} /etc/${i}
+    done
+fi
+
+# LXC
+## Host specific overrides
+mkdir -p "${SNAP_COMMON}/lxc"
+touch "${SNAP_COMMON}/lxc/local.conf"
+if ! grep -q "\-Ubuntu" /proc/version ; then
+    echo "lxc.aa_allow_incomplete = 1" > "${SNAP_COMMON}/lxc/local.conf"
+fi
 
 # LXCFS
 ## Create the mount point
-mkdir -p ${SNAP_COMMON}/var/lib/lxcfs
+mkdir -p "${SNAP_COMMON}/var/lib/lxcfs"
 
 ## Cleanup any leftover
-fusermount -u ${SNAP_COMMON}/var/lib/lxcfs >/dev/null 2>&1 || true
-rm -f ${SNAP_COMMON}/lxcfs.pid
+fusermount -u "${SNAP_COMMON}/var/lib/lxcfs" >/dev/null 2>&1 || true
+rm -f "${SNAP_COMMON}/lxcfs.pid"
 
 ## Start lxcfs
-$SNAP/bin/lxcfs ${SNAP_COMMON}/var/lib/lxcfs -p ${SNAP_COMMON}/lxcfs.pid &
+$SNAP/bin/lxcfs "${SNAP_COMMON}/var/lib/lxcfs" -p "${SNAP_COMMON}/lxcfs.pid" &
 
 # LXD
 ## Create the main directory
-mkdir -p ${SNAP_COMMON}/lxc
-if [ ! -d ${SNAP_COMMON}/lxd ]; then
-    mkdir -p ${SNAP_COMMON}/lxd ${SNAP_COMMON}/lxd/logs
-    chmod 0711 ${SNAP_COMMON}/lxd
+if [ ! -d "${SNAP_COMMON}/lxd" ]; then
+    mkdir -p "${SNAP_COMMON}/lxd" "${SNAP_COMMON}/lxd/logs"
+    chmod 0711 "${SNAP_COMMON}/lxd"
 fi
 
 ## Start lxd
@@ -38,22 +74,18 @@ else
     echo "No \"lxd\" group found, only root will be able to use LXD."
 fi
 
-if [ -d /sys/kernel/security/apparmor ]; then
-    aa-exec -p unconfined -- ${CMD} &
-else
-    ${CMD} &
-fi
+${CMD} &
 
 ## Wait for it to be ready
 PID=$!
-echo $PID > ${SNAP_COMMON}/lxd.pid
+echo $PID > "${SNAP_COMMON}/lxd.pid"
 $SNAP/bin/lxd waitready
 
 ## Put database in versioned path
-if [ ! -L ${SNAP_COMMON}/lxd/lxd.db ]; then
-    mkdir -p ${SNAP_DATA}/lxd/
-    mv ${SNAP_COMMON}/lxd/lxd.db ${SNAP_DATA}/lxd/lxd.db
-    ln -s ../../current/lxd/lxd.db ${SNAP_COMMON}/lxd/lxd.db
+if [ ! -L "${SNAP_COMMON}/lxd/lxd.db" ]; then
+    mkdir -p "${SNAP_DATA}/lxd/"
+    mv "${SNAP_COMMON}/lxd/lxd.db" "${SNAP_DATA}/lxd/lxd.db"
+    ln -s "../../current/lxd/lxd.db" "${SNAP_COMMON}/lxd/lxd.db"
 fi
 
 ## Wait for the daemon to die
