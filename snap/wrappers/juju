@@ -4,7 +4,8 @@
 # Make sure we access our python and juju binaries first
 export LXD_DIR=${SNAP_COMMON}/lxd/
 export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
-export LD_LIBRARY_PATH=$SNAP/usr/lib/$(uname -p)-linux-gnu/
+export LD_LIBRARY_PATH
+LD_LIBRARY_PATH=$SNAP/usr/lib/$(uname -p)-linux-gnu/
 
 
-exec $SNAP/bin/juju "$@"
+exec "$SNAP/bin/juju" "$@"

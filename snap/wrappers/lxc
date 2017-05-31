@@ -3,4 +3,4 @@ export LXD_DIR=${SNAP_COMMON}/lxd/
 export EDITOR=vim.tiny
 export VISUAL=${EDITOR}
 
-exec $SNAP/bin/lxc "$@"
+exec "$SNAP/bin/lxc" "$@"

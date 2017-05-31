@@ -56,7 +56,7 @@ fusermount -u "${SNAP_COMMON}/var/lib/lxcfs" >/dev/null 2>&1 || true
 rm -f "${SNAP_COMMON}/lxcfs.pid"
 
 ## Start lxcfs
-$SNAP/bin/lxcfs "${SNAP_COMMON}/var/lib/lxcfs" -p "${SNAP_COMMON}/lxcfs.pid" &
+"$SNAP/bin/lxcfs" "${SNAP_COMMON}/var/lib/lxcfs" -p "${SNAP_COMMON}/lxcfs.pid" &
 
 # LXD
 ## Create the main directory
@@ -79,7 +79,7 @@ ${CMD} &
 ## Wait for it to be ready
 PID=$!
 echo $PID > "${SNAP_COMMON}/lxd.pid"
-$SNAP/bin/lxd waitready
+"$SNAP/bin/lxd" waitready
 
 ## Put database in versioned path
 if [ ! -L "${SNAP_COMMON}/lxd/lxd.db" ]; then
