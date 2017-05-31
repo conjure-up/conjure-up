@@ -1,5 +1,5 @@
 language: python
-sudo: true
+sudo: false
 python:
   - "3.5"
 notifications:
@@ -12,6 +12,7 @@ notifications:
     on_failure: change
     on_success: never
 install:
-  - make sysdeps
+  - travis_retry pip install tox
 script:
-  - make test
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then travis_retry tox -e py35; fi
+  - travis_retry tox -e flake,isort
