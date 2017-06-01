@@ -1,6 +1,6 @@
 autopep8
 flake8
-isort
+isort==4.2.9
 pylint
 nose
 tox
