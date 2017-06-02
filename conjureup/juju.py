@@ -747,7 +747,7 @@ def get_model(controller, name):
         "Unable to find model: {}".format(name))
 
 
-async def add_model(name, controller, cloud, allow_exists=False):
+async def add_model(name, controller, cloud, allow_exists=True):
     """ Adds a model to current controller
 
     Arguments:
