@@ -9,6 +9,7 @@ import subprocess
 import sys
 import uuid
 from collections import Mapping
+from contextlib import contextmanager
 from pathlib import Path
 from subprocess import PIPE, Popen, check_call, check_output
 
@@ -23,6 +24,21 @@ from termcolor import cprint
 from conjureup import charm
 from conjureup.app_config import app
 from conjureup.telemetry import track_event
+
+
+@contextmanager
+def chdir(directory):
+    """Change the current working directory to a different directory for a code
+    block and return the previous directory after the block exits. Useful to
+    run commands from a specificed directory.
+
+    :param str directory: The directory path to change to for this context.
+    """
+    cur = os.getcwd()
+    try:
+        yield os.chdir(directory)
+    finally:
+        os.chdir(cur)
 
 
 def run(cmd, **kwargs):
