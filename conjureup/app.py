@@ -11,6 +11,7 @@ import subprocess
 import sys
 import textwrap
 import uuid
+import redis
 
 import yaml
 from prettytable import PrettyTable
@@ -80,6 +81,9 @@ def parse_options(argv):
                         help='The MAAS node hostname to deploy to. Useful '
                         'for using lower end hardware as the Juju admin '
                         'controller.', metavar='<host>.maas')
+    parser.add_argument('--redis-port', dest='redis_port',
+                        help='Redis port to connect to',
+                        default=6379)
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
     parser.add_argument('--notrack', action='store_true',
@@ -200,6 +204,9 @@ def main():
         os.makedirs(opts.cache_dir)
 
     # Application Config
+    app.state = redis.StrictRedis(host='localhost',
+                                  port=opts.redis_port,
+                                  db=0)
     app.env = os.environ.copy()
     app.config = {'metadata': None}
     app.argv = opts

@@ -101,5 +101,8 @@ app = SimpleNamespace(
     # Reference to asyncio loop so that it can be accessed from other threads
     loop=None,
 
+    # Redis State storage endpoint
+    state=None,
+
     # exit code for conjure-up to terminate with
     exit_code=0)
