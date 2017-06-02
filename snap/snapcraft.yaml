@@ -61,7 +61,7 @@ parts:
   juju:
     source: https://github.com/juju/juju.git
     source-type: git
-    source-branch: "develop"
+    source-tag: "juju-2.2-beta4"
     source-depth: 1
     plugin: godeps
     go-importpath: github.com/juju/juju
@@ -73,6 +73,8 @@ parts:
       cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
     build-packages: [lsb-release]
     after: [conjure-up, lxd, go]
+  lxd:
+    source-tag: lxd-2.13
   go:
     source-tag: go1.8
   python:
