@@ -67,6 +67,8 @@ class CredentialsController(common.BaseCredentialsController):
 
     def save_credential(self, credential):
         cred_path = path.join(utils.juju_path(), 'credentials.yaml')
+        cred_name = "conjure-{}-{}".format(app.current_cloud, utils.gen_hash())
+
         try:
             existing_creds = yaml.safe_load(open(cred_path))
         except:
@@ -74,12 +76,12 @@ class CredentialsController(common.BaseCredentialsController):
 
         if app.current_cloud in existing_creds['credentials'].keys():
             c = existing_creds['credentials'][app.current_cloud]
-            c[app.current_controller] = self._format_creds(credential)
+            c[cred_name] = self._format_creds(credential)
         else:
             # Handle the case where path exists but an entry for the cloud
             # has yet to be added.
             existing_creds['credentials'][app.current_cloud] = {
-                app.current_controller: self._format_creds(credential)
+                cred_name: self._format_creds(credential)
             }
 
         with open(cred_path, 'w') as cred_f:
@@ -94,9 +96,9 @@ class CredentialsController(common.BaseCredentialsController):
                 juju.add_cloud(app.current_cloud,
                                credential.cloud_config())
 
-        # This should return the app.current_controller so juju bootstrap knows
+        # This should return the credential name so juju bootstrap knows
         # which credential to bootstrap with
-        self.finish(app.current_controller)
+        self.finish(cred_name)
 
 
 _controller_class = CredentialsController
