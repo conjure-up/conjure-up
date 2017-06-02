@@ -46,6 +46,7 @@ parts:
     after: [python]
   spells:
     source: https://github.com/conjure-up/spells.git
+    source-tag: "2.2.0"
     source-type: git
     plugin: dump
     organize:
