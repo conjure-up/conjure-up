@@ -53,7 +53,7 @@ def load_step(step_meta_path):
     elif not os.access(str(step_ex_path), os.X_OK):
         raise ValidationError(
             'Step {} is not executable'.format(step_name))
-    step_metadata = yaml.load(step_meta_path.read_text())
+    step_metadata = yaml.safe_load(step_meta_path.read_text())
     model = StepModel(step_metadata, str(step_ex_path), step_name)
     return model
 
