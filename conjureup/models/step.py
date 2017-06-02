@@ -11,6 +11,7 @@ class StepModel:
         self.result = ''
         self.viewable = step.get('viewable', False)
         self.needs_sudo = step.get('sudo', False)
+        self.result_key = step.get('result-key', None)
         self.additional_input = step.get('additional-input', [])
         self.path = path
         self.name = name

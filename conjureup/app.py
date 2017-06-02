@@ -11,8 +11,8 @@ import subprocess
 import sys
 import textwrap
 import uuid
-import redis
 
+import redis
 import yaml
 from prettytable import PrettyTable
 from termcolor import colored

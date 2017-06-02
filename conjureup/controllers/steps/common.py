@@ -89,4 +89,8 @@ async def do_step(step_model, msg_cb):
     # Set environment variables so they can be accessed from the step scripts
     set_env(step_model.additional_input)
 
-    return await utils.run_step(step_model.name, step_model.title, msg_cb)
+    # Set result to be written to
+    app.env['RESULT'] = "conjure-up.{}.{}".format(app.config['spell'],
+                                                  step_model.result_key)
+
+    return await utils.run_step(step_model, msg_cb)

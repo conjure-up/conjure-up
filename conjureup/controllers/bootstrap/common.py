@@ -2,6 +2,7 @@ from pathlib import Path
 
 from conjureup import controllers, events, juju, utils
 from conjureup.app_config import app
+from conjureup.models.step import StepModel
 from conjureup.telemetry import track_event
 
 
@@ -46,8 +47,10 @@ class BaseBootstrapController:
         app.env['JUJU_CONTROLLER'] = app.current_controller
         app.env['JUJU_MODEL'] = app.current_model
 
-        await utils.run_step('00_post-bootstrap',
-                             'post-bootstrap',
+        step = StepModel({},
+                         path='00_post-bootstrap',
+                         name='post-bootstrap')
+        await utils.run_step(step,
                              self.msg_cb,
                              'Juju Post-Bootstrap')
         events.Bootstrapped.set()
@@ -63,8 +66,10 @@ class BaseBootstrapController:
         app.env['JUJU_MODEL'] = app.current_model
         app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
 
-        await utils.run_step('00_pre-bootstrap',
-                             'pre-bootstrap',
+        step = StepModel({},
+                         path='00_pre-bootstrap',
+                         name='pre-bootstrap')
+        await utils.run_step(step,
                              self.msg_cb)
 
     def emit(self, msg):

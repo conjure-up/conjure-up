@@ -2,6 +2,7 @@ import asyncio
 
 from conjureup import events, utils
 from conjureup.app_config import app
+from conjureup.models.step import StepModel
 
 
 async def wait_for_applications(msg_cb):
@@ -14,8 +15,10 @@ async def wait_for_applications(msg_cb):
     # https://bugs.launchpad.net/juju-wait/+bug/1680963
     for i in range(3):
         try:
-            await utils.run_step('00_deploy-done',
-                                 'deployment watcher',
+            step = StepModel({},
+                             path='00_deploy-done',
+                             name='Deployment Watcher')
+            await utils.run_step(step,
                                  msg_cb)
             break
         except Exception as e:
