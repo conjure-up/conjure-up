@@ -62,7 +62,7 @@ parts:
   juju:
     source: https://github.com/juju/juju.git
     source-type: git
-    source-tag: "juju-2.2-beta4"
+    source-tag: "juju-2.2-rc1"
     source-depth: 1
     plugin: godeps
     go-importpath: github.com/juju/juju
