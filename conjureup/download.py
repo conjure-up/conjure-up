@@ -1,7 +1,7 @@
 import os
 import shutil
 from enum import Enum
-from subprocess import PIPE, CalledProcessError
+from subprocess import DEVNULL, CalledProcessError
 
 import requests
 from progressbar import (
@@ -14,7 +14,7 @@ from progressbar import (
 
 from conjureup.app_config import app
 from conjureup.consts import UNSPECIFIED_SPELL
-from conjureup.utils import run
+from conjureup.utils import chdir, run
 
 
 class EndpointType(Enum):
@@ -170,12 +170,25 @@ def download_or_sync_registry(remote_registry, spells_dir, branch='master'):
     branch: switch to branch
 
     """
-    if not os.path.exists(spells_dir):
+    def clone():
         run("git clone -q --depth 1 --no-single-branch {} {}".format(
             remote_registry, spells_dir),
-            shell=True, check=True, stdout=PIPE, stdin=PIPE)
-    else:
-        run("cd {} && git pull".format(spells_dir),
-            shell=True, check=True, stdout=PIPE, stdin=PIPE)
-    run("cd {} && git checkout -q {}".format(spells_dir, branch),
-        shell=True, check=True, stdout=PIPE, stdin=PIPE)
+            shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)
+
+    if not os.path.exists(spells_dir):
+        clone()
+    try:
+        with chdir(spells_dir):
+            run("git reset --hard HEAD", shell=True, check=True,
+                stdout=DEVNULL, stderr=DEVNULL)
+
+            run("git checkout -q {}".format(branch),
+                shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)
+
+            run("git pull", shell=True, check=True,
+                stdout=DEVNULL, stderr=DEVNULL)
+    except CalledProcessError:
+        app.log.debug(
+            "Failed to update spells registry, re-pulling fresh copy.")
+        shutil.rmtree(spells_dir)
+        clone()
