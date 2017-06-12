@@ -177,8 +177,8 @@ def download_or_sync_registry(remote_registry, spells_dir, branch='master'):
 
     if not os.path.exists(spells_dir):
         clone()
-    with chdir(spells_dir):
-        try:
+    try:
+        with chdir(spells_dir):
             run("git reset --hard HEAD", shell=True, check=True,
                 stdout=DEVNULL, stderr=DEVNULL)
 
@@ -187,8 +187,8 @@ def download_or_sync_registry(remote_registry, spells_dir, branch='master'):
 
             run("git pull", shell=True, check=True,
                 stdout=DEVNULL, stderr=DEVNULL)
-        except CalledProcessError:
-            app.log.debug(
-                "Failed to update spells registry, re-pulling fresh copy.")
-            shutil.rmtree(spells_dir)
-            clone()
+    except CalledProcessError:
+        app.log.debug(
+            "Failed to update spells registry, re-pulling fresh copy.")
+        shutil.rmtree(spells_dir)
+        clone()
