@@ -5,10 +5,10 @@ set -eux
 # Setup LXD
 
 # copy bash completions to host system
-cp -a $SNAP/bash_completions/* /usr/share/bash-completion/completions/. || true
+cp -a "$SNAP"/bash_completions/* /usr/share/bash-completion/completions/. || true
 
 mkdir -p /usr/lib/sysctl.d
-cat <<EOF>/usr/lib/sysctl.d/60-conjure-up.conf
+cat <<EOF >/usr/lib/sysctl.d/60-conjure-up.conf
 fs.inotify.max_user_instances=1048576
 fs.inotify.max_queued_events=1048576
 fs.inotify.max_user_watches=1048576
@@ -31,4 +31,13 @@ fi
 
 if [[ -d /usr/lib/conjure-up ]]; then
     rm -rf /usr/lib/conjure-up
+fi
+
+if [[ ! -f /snap/bin/juju ]]; then
+    # "Fake" a snap alias.  We can't use `snap alias` here because the snap
+    # system isn't re-entrant during snap install, so instead we manually
+    # create a symlink.  This has the downside of not showing up in the
+    # list of `snap aliases` but the up-side that it automatically defers
+    # to the juju snap if that is installed later.
+    ln -s conjure-up.juju /snap/bin/juju
 fi
