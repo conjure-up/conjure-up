@@ -18,7 +18,6 @@ apps:
     aliases: [conjure-down]
   juju:
     command: wrappers/juju
-    aliases: [juju]
   daemon:
     command: wrappers/daemon.start
     stop-command: wrappers/daemon.stop
