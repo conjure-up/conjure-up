@@ -16,7 +16,7 @@ async def wait_for_applications(msg_cb):
     for i in range(3):
         try:
             step = StepModel({},
-                             path='00_deploy-done',
+                             filename='00_deploy-done',
                              name='Deployment Watcher')
             await utils.run_step(step,
                                  msg_cb)

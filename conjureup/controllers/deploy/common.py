@@ -29,7 +29,7 @@ async def pre_deploy(msg_cb):
     app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
 
     step = StepModel({},
-                     path='00_pre-deploy',
+                     filename='00_pre-deploy',
                      name='pre-deploy')
     await utils.run_step(step,
                          msg_cb)

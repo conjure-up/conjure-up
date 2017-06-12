@@ -5,15 +5,14 @@ from conjureup.app_config import app
 
 class StepModel:
 
-    def __init__(self, step, path, name):
+    def __init__(self, step, filename, name):
         self.title = step.get('title', '')
         self.description = step.get('description', '')
         self.result = ''
         self.viewable = step.get('viewable', False)
         self.needs_sudo = step.get('sudo', False)
-        self.result_key = step.get('result-key', None)
         self.additional_input = step.get('additional-input', [])
-        self.path = path
+        self.filename = filename
         self.name = name
 
     def __getattr__(self, attr):

@@ -108,7 +108,12 @@ def run_attach(cmd, output_cb=None):
 
 
 async def run_step(step, msg_cb, event_name=None):
-    step_path = Path(app.config['spell-dir']) / 'steps' / step.path
+    # Define STEP_NAME for use in determining where to store
+    # our step results,
+    #  redis-cli set "conjure-up.$SPELL_NAME.$STEP_NAME.result" "val"
+    app.env['CONJURE_UP_STEP'] = step.filename
+
+    step_path = Path(app.config['spell-dir']) / 'steps' / step.filename
 
     if not step_path.is_file():
         return
@@ -144,8 +149,9 @@ async def run_step(step, msg_cb, event_name=None):
             if event_name is not None:
                 track_event(event_name, "Done", "")
 
-    result = app.state.get("conjure-up.{}.{}".format(app.config['spell'],
-                                                     step.result_key))
+    result = app.state.get(
+        "conjure-up.{}.{}.result".format(app.config['spell'],
+                                         step.filename))
     return result.decode('utf8')
 
 

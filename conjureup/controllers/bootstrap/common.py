@@ -48,7 +48,7 @@ class BaseBootstrapController:
         app.env['JUJU_MODEL'] = app.current_model
 
         step = StepModel({},
-                         path='00_post-bootstrap',
+                         filename='00_post-bootstrap',
                          name='post-bootstrap')
         await utils.run_step(step,
                              self.msg_cb,
@@ -67,7 +67,7 @@ class BaseBootstrapController:
         app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
 
         step = StepModel({},
-                         path='00_pre-bootstrap',
+                         filename='00_pre-bootstrap',
                          name='pre-bootstrap')
         await utils.run_step(step,
                              self.msg_cb)
