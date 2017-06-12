@@ -1,5 +1,7 @@
 import os
+import textwrap
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from conjureup import controllers, utils
 from conjureup.app_config import app
@@ -53,6 +55,41 @@ class BaseLXDSetupController:
 
         self.setup_bridge_network(iface)
         self.setup_unused_bridge_network()
+        self.set_default_profile()
+
+    def set_default_profile(self):
+        """ Sets the default profile with the correct parent network bridges
+        """
+        profile = textwrap.dedent(
+            """
+            config: {}
+            description: Default LXD profile
+            devices:
+              eth0:
+                name: eth0
+                nictype: bridged
+                parent: conjureup1
+                type: nic
+              eth1:
+                name: eth1
+                nictype: bridged
+                parent: conjureup0
+                type: nic
+              root:
+                path: /
+                pool: default
+                type: disk
+            name: default
+            """)
+        with NamedTemporaryFile(mode='w', encoding='utf-8',
+                                delete=False) as tempf:
+            utils.spew(tempf.name, profile)
+            out = utils.run_script(
+                'cat {} |conjure-up.lxc profile edit default'.format(
+                    tempf.name))
+            if out.returncode != 0:
+                raise Exception("Problem setting default profile: {}".format(
+                    out))
 
     def setup_bridge_network(self, iface):
         """ Sets up our main network bridge to be used with Localhost deployments
@@ -70,17 +107,6 @@ class BaseLXDSetupController:
             raise Exception("Failed to create LXD conjureup1 network bridge: "
                             "{}".format(out.stderr.decode()))
 
-        out = utils.run_script(
-            'conjure-up.lxc network attach-profile conjureup1 '
-            'default eth0 eth0')
-
-        if out.returncode != 0:
-            # Skip if device already exists
-            if 'device already exists' not in out.stderr.decode():
-                raise Exception(
-                    "Failed to attach LXD conjureup1 network profile: "
-                    "{}".format(out.stderr.decode()))
-
     def setup_unused_bridge_network(self):
         """ Sets up an unused bridge that can be used with deployments such as
         OpenStack on LXD using NovaLXD.
@@ -95,13 +121,7 @@ class BaseLXDSetupController:
                                'ipv6.address=none '
                                'ipv6.nat=false')
 
-        out = utils.run_script(
-            'conjure-up.lxc network attach-profile conjureup0 '
-            'default eth1 eth1')
-
         if out.returncode != 0:
-            # Skip if device already exists
-            if 'device already exists' not in out.stderr.decode():
-                raise Exception(
-                    "Failed to attach LXD conjureup0 network profile: "
-                    "{}".format(out.stderr.decode()))
+            raise Exception(
+                "Failed to create conjureup0 network bridge: "
+                "{}".format(out.stderr.decode()))
