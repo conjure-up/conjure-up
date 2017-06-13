@@ -144,7 +144,7 @@ async def run_step(step, msg_cb, event_name=None):
                     await asyncio.sleep(0.01)
 
             if proc.returncode != 0:
-                raise Exception("Failure in step {}".format(step.path))
+                raise Exception("Failure in step {}".format(step.filename))
 
             if event_name is not None:
                 track_event(event_name, "Done", "")

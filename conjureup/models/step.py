@@ -35,4 +35,4 @@ class StepModel:
         return "<t: {} d: {} v: {} p:>".format(self.title,
                                                self.description,
                                                self.viewable,
-                                               self.path)
+                                               self.filename)
