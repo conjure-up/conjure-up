@@ -13,15 +13,13 @@ solutions up and going with as little hindrance as possible.
 
 # installation
 
-> Trusty and above
+> Ubuntu and macOS
 
-## recommended
+## Ubuntu
 
 ```
 $ sudo snap install conjure-up --classic
 ```
-
-Trusty users please [see here](https://docs.ubuntu.com/conjure-up/en/#installing-conjure-up)
 
 ## macOS
 
