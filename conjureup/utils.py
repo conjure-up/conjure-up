@@ -123,26 +123,30 @@ def run_attach(cmd, output_cb=None):
                                          subproc.returncode))
 
 
-async def run_step(step_file, step_title, msg_cb, event_name=None):
-    step_path = Path(app.config['spell-dir']) / 'steps' / step_file
+async def run_step(step, msg_cb, event_name=None):
+    # Define STEP_NAME for use in determining where to store
+    # our step results,
+    #  redis-cli set "conjure-up.$SPELL_NAME.$STEP_NAME.result" "val"
+    app.env['CONJURE_UP_STEP'] = step.filename
+
+    step_path = Path(app.config['spell-dir']) / 'steps' / step.filename
 
     if not step_path.is_file():
         return
 
     step_path = str(step_path)
 
-    msg = "Running step: {}.".format(step_title)
+    msg = "Running step: {}.".format(step.name)
     app.log.info(msg)
     msg_cb(msg)
     if event_name is not None:
         track_event(event_name, "Started", "")
 
     if not os.access(step_path, os.X_OK):
-        raise Exception("Step {} not executable".format(step_title))
+        raise Exception("Step {} not executable".format(step.title))
 
     app.log.debug("Executing script: {}".format(step_path))
 
-    result = None
     async with aiofiles.open(step_path + ".out", 'w') as outf:
         async with aiofiles.open(step_path + ".err", 'w') as errf:
             proc = await asyncio.create_subprocess_exec(step_path,
@@ -152,19 +156,19 @@ async def run_step(step_file, step_title, msg_cb, event_name=None):
             async with aiofiles.open(step_path + '.out', 'r') as f:
                 while proc.returncode is None:
                     async for line in f:
-                        if line.startswith('result:'):
-                            result = line
-                        msg = line
                         msg_cb(line)
                     await asyncio.sleep(0.01)
 
             if proc.returncode != 0:
-                raise Exception("Failure in step {}".format(step_file))
+                raise Exception("Failure in step {}".format(step.filename))
 
             if event_name is not None:
                 track_event(event_name, "Done", "")
 
-    return result if result else msg
+    result = app.state.get(
+        "conjure-up.{}.{}.result".format(app.config['spell'],
+                                         step.filename))
+    return result.decode('utf8')
 
 
 def can_sudo(password=None):

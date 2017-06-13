@@ -78,9 +78,9 @@ class StepWidget(WidgetWrap):
     def update(self):
         if not self.show_output:
             return
-        if not os.path.exists(self.model.path + ".out"):
+        if not os.path.exists(self.model.filename + ".out"):
             return
-        with open(self.model.path + ".out") as outf:
+        with open(self.model.filename + ".out") as outf:
             lines = outf.readlines()
             if len(lines) < 1:
                 return

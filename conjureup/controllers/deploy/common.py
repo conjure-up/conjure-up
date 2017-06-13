@@ -4,6 +4,7 @@ from datetime import datetime
 from conjureup import events, utils
 from conjureup.app_config import app
 from conjureup.bundlewriter import BundleWriter
+from conjureup.models.step import StepModel
 
 
 def write_bundle(assignments):
@@ -27,7 +28,9 @@ async def pre_deploy(msg_cb):
     app.env['JUJU_MODEL'] = app.current_model
     app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
 
-    await utils.run_step('00_pre-deploy',
-                         'pre-deploy',
+    step = StepModel({},
+                     filename='00_pre-deploy',
+                     name='pre-deploy')
+    await utils.run_step(step,
                          msg_cb)
     events.PreDeployComplete.set()
