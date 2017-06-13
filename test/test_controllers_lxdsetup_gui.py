@@ -48,7 +48,6 @@ class LXDSetupGUIRenderTestCase(unittest.TestCase):
         self.controller = LXDSetupController()
         self.controller.next_screen = MagicMock()
         self.controller.setup = MagicMock()
-        self.controller.set_default_profile = MagicMock()
 
     def tearDown(self):
         self.utils_patcher.stop()
@@ -108,7 +107,6 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
 
         self.controller = LXDSetupController()
         self.controller.flag_file = MagicMock()
-        self.controller.set_default_profile = MagicMock()
 
     def tearDown(self):
         self.controllers_patcher.stop()
