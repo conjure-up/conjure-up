@@ -172,7 +172,7 @@ class MAAS(BaseProvider):
                         "please use the format of "
                         "http://maas-server.com:5240/MAAS")
             else:
-                if not url.path == '/MAAS':
+                if 'MAAS' not in url.path:
                     self.endpoint.value = urljoin(url.geturl(), "MAAS")
                 return (True, None)
         elif is_valid_hostname(endpoint):
