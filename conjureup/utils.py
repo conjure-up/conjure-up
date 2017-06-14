@@ -209,6 +209,19 @@ def juju_version():
         raise Exception("Could not determine Juju version.")
 
 
+def snap_version():
+    """ Get snap version
+    """
+    cmd = run_script('snap version')
+    if cmd.returncode == 0:
+        name_version_str = cmd.stdout.decode().splitlines()[0]
+        try:
+            name, version = name_version_str.split()
+            return parse_version(version)
+        except:
+            raise Exception("Could not determine Snap version.")
+
+
 def send_msg(msg, label, color, attrs=['bold']):
     if sys.__stdin__.isatty():
         cprint("[{}] ".format(label),

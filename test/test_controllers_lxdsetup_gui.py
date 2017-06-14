@@ -8,6 +8,8 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
+from pkg_resources import parse_version
+
 from conjureup import events
 from conjureup.controllers.lxdsetup.gui import LXDSetupController
 
@@ -104,11 +106,17 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
         self.ev_app_patcher = patch(
             'conjureup.events.app', self.mock_app)
         self.ev_app_patcher.start()
+        self.parse_version_patcher = patch(
+            'conjureup.controllers.lxdsetup.common.parse_version'
+        )
+        self.mock_parse_version = self.parse_version_patcher.start()
         events.Shutdown.clear()
 
         self.controller = LXDSetupController()
         self.controller.flag_file = MagicMock()
         self.controller.set_default_profile = MagicMock()
+        self.mock_utils.snap_version.return_value = parse_version('2.25')
+        self.mock_parse_version.return_value = parse_version('2.25')
 
     def tearDown(self):
         self.controllers_patcher.stop()
@@ -116,6 +124,14 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
         self.render_patcher.stop()
         self.app_patcher.stop()
         self.ev_app_patcher.stop()
+        self.parse_version_patcher.stop()
+
+    def test_snap_version_incompatible(self):
+        """ Test that an invalid snap version fails correctly
+        """
+        self.mock_utils.snap_version.return_value = parse_version('2.21')
+        with self.assertRaises(Exception):
+            self.controller.setup('iface')
 
     def test_setup_success(self):
         "lxdsetup.gui.test_setup_success"
