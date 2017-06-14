@@ -3,6 +3,8 @@ import textwrap
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+from pkg_resources import parse_version
+
 from conjureup import controllers, utils
 from conjureup.app_config import app
 
@@ -20,10 +22,22 @@ class BaseLXDSetupController:
     def is_ready(self):
         return self.flag_file.exists()
 
+    @property
+    def is_snap_compatible(self):
+        """ Checks if snap version is new enough
+        """
+        return utils.snap_version() >= parse_version('2.25')
+
     def next_screen(self):
         return controllers.use('controllerpicker').render()
 
     def setup(self, iface):
+        # Make sure we're using a newer snapd
+        if not self.is_snap_compatible:
+            raise Exception(
+                "You must be on a snapd version of 2.25 or newer. "
+                "Please run `sudo apt update && sudo apt dist-upgrade`.\n\n"
+                "Once complete, re-run conjure-up.")
         if not isinstance(iface, str):
             iface = iface.network_interface.value
         self.lxd_init(iface)
