@@ -9,17 +9,6 @@ export LXD_DIR="${SNAP_COMMON}/lxd/"
 export LXD_LXC_TEMPLATE_CONFIG="${SNAP}/lxc/config/"
 export HOME="/tmp/"
 
-# Escape resource limits
-## pid cgroup
-pidns=$(grep ":pids:" /proc/self/cgroup | awk -F: '{print $NF}')
-if [ -n "${pidns}" ] && [ -e "/sys/fs/cgroup/pids/${pidns}" ]; then
-    echo max > "/sys/fs/cgroup/pids/${pidns}/pids.max"
-fi
-
-## prlimits
-prlimit -p $$ --nofile=1048576:1048576
-prlimit -p $$ --nproc=unlimited:unlimited
-
 # Setup a functional /etc
 if mountpoint -q /etc; then
     ## Unmount and replace with an empty tmpfs
@@ -38,6 +27,17 @@ if mountpoint -q /etc; then
         mount -o bind,ro /snap/core/current/etc/${i} /etc/${i}
     done
 fi
+
+# Escape resource limits
+## pid cgroup
+pidcg=$(grep ":pids:" /proc/self/cgroup | awk -F: '{print $NF}')
+if [ -n "${pidcg}" ] && [ "${pidcg}" != "/" ] && [ -e "/sys/fs/cgroup/pids/${pidcg}" ]; then
+    echo max > "/sys/fs/cgroup/pids/${pidcg}/pids.max"
+fi
+
+## prlimits
+prlimit -p $$ --nofile=1048576:1048576
+prlimit -p $$ --nproc=unlimited:unlimited
 
 # LXC
 ## Host specific overrides
