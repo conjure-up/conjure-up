@@ -76,7 +76,8 @@ class BaseLXDSetupController:
         """
         profile = textwrap.dedent(
             """
-            config: {}
+            config:
+              boot.autostart: "true"
             description: Default LXD profile
             devices:
               eth0:
