@@ -73,7 +73,7 @@ def machine_states():
     """
     return [(name, md['juju-status'].get('current', ''),
              md['juju-status'].get('message', ''))
-            for name, md in status().get('machines',  {}).items()]
+            for name, md in status().get('machines', {}).items()]
 
 
 def run_action(unit, action):

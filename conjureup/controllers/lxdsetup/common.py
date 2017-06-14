@@ -62,7 +62,15 @@ class BaseLXDSetupController:
         """
         profile = textwrap.dedent(
             """
-            config: {}
+            config:
+              boot.autostart: "true"
+              linux.kernel_modules: ip_tables,ip6_tables,netlink_diag,nf_nat,overlay,openvswitch,nbd
+              raw.lxc: |
+                lxc.aa_profile=unconfined
+                lxc.mount.auto=proc:rw sys:rw
+                lxc.cap.drop=
+              security.nesting: "true"
+              security.privileged: "true"
             description: Default LXD profile
             devices:
               eth0:
@@ -78,6 +86,14 @@ class BaseLXDSetupController:
               root:
                 path: /
                 pool: default
+                type: disk
+              aadisable:
+                path: /sys/module/nf_conntrack/parameters/hashsize
+                source: /dev/null
+                type: disk
+              aadisable1:
+                path: /sys/module/apparmor/parameters/enabled
+                source: /dev/null
                 type: disk
             name: default
             """)
