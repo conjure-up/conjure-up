@@ -15,3 +15,4 @@ ws4py==0.3.4
 git+https://github.com/battlemidget/env.git@1.0.0
 sh==1.12.13
 redis==2.10.5
+raven==6.1.0
