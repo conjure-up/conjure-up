@@ -162,14 +162,13 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
             success,  # lxc version
             success,  # lxd config
             success,  # lxc storage create default disk
-            success,  # lxc profile device add disk
             success,  # lxc network show conjureup1
             success,  # lxc network show conjureup0
         ]
 
         self.controller.setup('iface')
         assert self.controller.flag_file.touch.called
-        assert self.mock_utils.run_script.call_count == 6
+        assert self.mock_utils.run_script.call_count == 5
 
     def test_setup_init_fail(self):
         "lxdsetup.gui.test_init_fail"
@@ -229,7 +228,6 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
             success,  # lxc config
             failure,  # lxc network show conjureup1
             success,  # lxc network create conjureup1
-            success,  # lxc network attach-profile
             failure,  # lxc network show conjureup0
             failure,  # lxc network create conjureup0
         ]

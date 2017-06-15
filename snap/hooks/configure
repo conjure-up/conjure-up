@@ -53,6 +53,7 @@ if ! "conjure-up.lxc network show conjureup0|grep -q 'managed: true'"; then
     ip link set conjureup0 down || true
     ip addr del 10.99.0.1/24 dev conjureup0 || true
     ip link delete conjureup0 type bridge || true
+    kill -9 $(pgrep -f 'dnsmasq.*conjureup0') || true
     REMOVE_LXD_SETUP=1
 fi
 
@@ -60,6 +61,7 @@ if ! "conjure-up.lxc network show conjureup1|grep -q 'managed: true'"; then
     ip link set conjureup1 down || true
     ip addr del 10.100.0.1/24 dev conjureup1 || true
     ip link delete conjureup1 type bridge || true
+    kill -9 $(pgrep -f 'dnsmasq.*conjureup1') || true
     REMOVE_LXD_SETUP=1
 fi
 
