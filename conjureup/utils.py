@@ -223,13 +223,15 @@ def snap_version():
 
 
 def send_msg(msg, label, color, attrs=['bold']):
-    if sys.__stdin__.isatty():
+    if app.argv.debug:
+        print("[{}] {}".format(label, msg))
+    elif sys.__stdin__.isatty():
         cprint("[{}] ".format(label),
                color,
                attrs=attrs,
                end="{}\n".format(msg))
     else:
-        print("[{}] {}\n".format(label, msg))
+        print("[{}] {}".format(label, msg))
 
 
 def info(msg):
