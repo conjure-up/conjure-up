@@ -159,11 +159,12 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
         success = MagicMock(returncode=0)
 
         self.mock_utils.run_script.side_effect = [
-            success,  # lxc version
+            success,  # lxd init auto
             success,  # lxd config
             success,  # lxc storage create default disk
             success,  # lxc network show conjureup1
             success,  # lxc network show conjureup0
+            success,  # lxc set default profile
         ]
 
         self.controller.setup('iface')
