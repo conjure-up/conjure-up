@@ -75,42 +75,36 @@ class BaseLXDSetupController:
                     "Problem running lxc storage: {}".format(
                         out.stderr.decode()))
 
-    def set_lxd_init_auto(self, retries=0):
+    def set_lxd_init_auto(self):
         """ Runs lxd init --auto
 
         We want to retry and delay here as LXD daemon may
         not be fully awake yet.
         """
-        retries = retries
-        max_retries = 5
         delay = 2
-        out = utils.run_script("conjure-up.lxd init --auto")
-        if out.returncode != 0:
-            if retries < max_retries:
-                retries += 1
-                time.sleep(delay)
-                self.set_lxd_init_auto(retries)
-            raise Exception(
-                "Problem running lxd init: {}".format(out.stderr.decode()))
+        for attempt in range(5):
+            out = utils.run_script("conjure-up.lxd init --auto")
+            if out.returncode == 0:
+                return
+            time.sleep(delay)
+        raise Exception(
+            "Problem running lxd init: {}".format(out.stderr.decode()))
 
-    def set_lxc_config(self, retries=0):
+    def set_lxc_config(self):
         """ Runs lxc config
 
         We want to retry and delay here as LXD daemon may
         not be fully awake yet.
         """
-        retries = retries
-        max_retries = 5
         delay = 2
-        out = utils.run_script(
-            "conjure-up.lxc config set core.https_address [::]:12001")
-        if out.returncode != 0:
-            if retries < max_retries:
-                retries += 1
-                time.sleep(delay)
-                self.set_lxc_config(retries)
-            raise Exception(
-                "Problem running lxc config: {}".format(out.stderr.decode()))
+        for attempt in range(5):
+            out = utils.run_script(
+                "conjure-up.lxc config set core.https_address [::]:12001")
+            if out.returncode == 0:
+                return
+            time.sleep(delay)
+        raise Exception(
+            "Problem running lxc config: {}".format(out.stderr.decode()))
 
     def set_default_profile(self):
         """ Sets the default profile with the correct parent network bridges
