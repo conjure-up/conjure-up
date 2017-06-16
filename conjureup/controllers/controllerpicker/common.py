@@ -30,6 +30,9 @@ class BaseControllerPicker:
         else:
             app.current_controller = controller
 
+        if app.current_controller not in juju.get_controllers():
+            return controllers.use('bootstrap').render()
+
         c_info = juju.get_controller_info(app.current_controller)
         if c_info['details']['cloud']:
             app.current_cloud = c_info['details']['cloud']
