@@ -168,7 +168,7 @@ async def run_step(step, msg_cb, event_name=None):
     result = app.state.get(
         "conjure-up.{}.{}.result".format(app.config['spell'],
                                          step.filename))
-    return result.decode('utf8')
+    return (result or b'').decode('utf8')
 
 
 def can_sudo(password=None):
