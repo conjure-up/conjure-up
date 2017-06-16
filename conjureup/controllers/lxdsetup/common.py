@@ -1,5 +1,7 @@
 import os
 import textwrap
+import time
+from functools import partial
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -51,23 +53,64 @@ class BaseLXDSetupController:
         iface: interface name
         """
         lxd_init_cmds = [
-            "conjure-up.lxd init --auto",
-            'conjure-up.lxc config set core.https_address [::]:12001',
-            'conjure-up.lxc storage create default dir'
+            partial(self.set_lxd_init_auto),
+            partial(self.set_lxc_config),
+            partial(self.set_lxd_storage),
+            partial(self.setup_bridge_network, iface),
+            partial(self.setup_unused_bridge_network),
+            partial(self.set_default_profile)
         ]
+
         for cmd in lxd_init_cmds:
             app.log.debug("LXD Init: {}".format(cmd))
-            out = utils.run_script(cmd)
-            if out.returncode != 0:
-                if 'already exists' not in out.stderr.decode():
-                    raise Exception(
-                        "Problem running: {}:{}".format(
-                            cmd,
-                            out.stderr.decode('utf8')))
+            cmd()
 
-        self.setup_bridge_network(iface)
-        self.setup_unused_bridge_network()
-        self.set_default_profile()
+    def set_lxd_storage(self):
+        """ Runs lxc storage creation
+        """
+        out = utils.run_script("conjure-up.lxc storage create default dir")
+        if out.returncode != 0:
+            if 'already exists' not in out.stderr.decode():
+                raise Exception(
+                    "Problem running lxc storage: {}".format(
+                        out.stderr.decode()))
+
+    def set_lxd_init_auto(self, retries=0):
+        """ Runs lxd init --auto
+
+        We want to retry and delay here as LXD daemon may
+        not be fully awake yet.
+        """
+        retries = retries
+        max_retries = 5
+        delay = 2
+        out = utils.run_script("conjure-up.lxd init --auto")
+        if out.returncode != 0:
+            if retries < max_retries:
+                retries += 1
+                time.sleep(delay)
+                self.set_lxd_init_auto(retries)
+            raise Exception(
+                "Problem running lxd init: {}".format(out.stderr.decode()))
+
+    def set_lxc_config(self, retries=0):
+        """ Runs lxc config
+
+        We want to retry and delay here as LXD daemon may
+        not be fully awake yet.
+        """
+        retries = retries
+        max_retries = 5
+        delay = 2
+        out = utils.run_script(
+            "conjure-up.lxc config set core.https_address [::]:12001")
+        if out.returncode != 0:
+            if retries < max_retries:
+                retries += 1
+                time.sleep(delay)
+                self.set_lxc_config(retries)
+            raise Exception(
+                "Problem running lxc config: {}".format(out.stderr.decode()))
 
     def set_default_profile(self):
         """ Sets the default profile with the correct parent network bridges
