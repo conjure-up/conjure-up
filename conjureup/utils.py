@@ -159,11 +159,17 @@ async def run_step(step, msg_cb, event_name=None):
                         msg_cb(line)
                     await asyncio.sleep(0.01)
 
-            if proc.returncode != 0:
-                raise Exception("Failure in step {}".format(step.filename))
+    if proc.returncode != 0:
+        status = run(['juju', 'status', '--format=yaml'])
+        app.sentry.context.merge({'extra': {
+            'out_log': Path(step_path + '.out').read_text(),
+            'err_log': Path(step_path + '.err').read_text(),
+            'status': (status.stdout or b'').decode('utf8'),
+        }})
+        raise Exception("Failure in step {}".format(step.filename))
 
-            if event_name is not None:
-                track_event(event_name, "Done", "")
+    if event_name is not None:
+        track_event(event_name, "Done", "")
 
     result = app.state.get(
         "conjure-up.{}.{}.result".format(app.config['spell'],
