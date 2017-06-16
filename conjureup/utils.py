@@ -541,7 +541,7 @@ def get_physical_network_interfaces():
     devices = []
     for device in sys_class_net.glob("*"):
         parts = str(device.resolve()).split('/')
-        if "virtual" in parts or not parts[-1].startswith('eth'):
+        if "virtual" in parts and not parts[-1].startswith('eth'):
             continue
         try:
             if not get_physical_network_ipaddr(device.name):
