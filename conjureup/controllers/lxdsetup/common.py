@@ -53,12 +53,12 @@ class BaseLXDSetupController:
         iface: interface name
         """
         lxd_init_cmds = [
-            partial(self.set_lxd_init_auto),
-            partial(self.set_lxc_config),
-            partial(self.set_lxd_storage),
+            self.set_lxd_init_auto,
+            self.set_lxc_config,
+            self.set_lxd_storage,
             partial(self.setup_bridge_network, iface),
-            partial(self.setup_unused_bridge_network),
-            partial(self.set_default_profile)
+            self.setup_unused_bridge_network,
+            self.set_default_profile
         ]
 
         for cmd in lxd_init_cmds:
