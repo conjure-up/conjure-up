@@ -31,6 +31,7 @@ class BaseBootstrapController:
                 err_log = log_file.read_text('utf8').splitlines()
                 app.log.error("Error bootstrapping controller: "
                               "{}".format(err_log))
+                app.sentry.context.merge({'extra': {'err_log': err_log}})
                 raise Exception('Unable to bootstrap (cloud type: {})'.format(
                     app.current_cloud_type))
 

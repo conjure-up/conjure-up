@@ -3,8 +3,10 @@
 
 import argparse
 import asyncio
+import configparser
 import os
 import os.path as path
+import pathlib
 import platform
 import signal
 import subprocess
@@ -12,6 +14,7 @@ import sys
 import textwrap
 import uuid
 
+import raven
 import yaml
 from prettytable import PrettyTable
 from termcolor import colored
@@ -31,7 +34,7 @@ from conjureup.download import (
     get_remote_url
 )
 from conjureup.log import setup_logging
-from conjureup.telemetry import track_event, track_screen
+from conjureup.telemetry import SENTRY_DSN, track_event, track_screen
 from conjureup.ui import ConjureUI
 
 
@@ -62,6 +65,9 @@ def parse_options(argv):
                         help='Location of conjure-up managed spells directory',
                         default=os.path.expanduser(
                             "~/.cache/conjure-up-spells"))
+    parser.add_argument('--conf-file', dest='conf_file',
+                        help='Path to configuration file', type=pathlib.Path,
+                        default=pathlib.Path("~/.config/conjure-up.conf"))
     parser.add_argument('--apt-proxy', dest='apt_http_proxy',
                         help='Specify APT proxy')
     parser.add_argument('--apt-https-proxy', dest='apt_https_proxy',
@@ -86,6 +92,10 @@ def parse_options(argv):
                         dest='notrack',
                         help='Opt out of sending anonymous usage '
                         'information to Canonical.')
+    parser.add_argument('--noreport', action='store_true',
+                        dest='noreport',
+                        help='Opt out of sending anonymous error reports '
+                        'to Canonical.')
     parser.add_argument('--nosync', action='store_true',
                         dest='nosync',
                         help='Opt out of syncing with spells '
@@ -211,6 +221,16 @@ def main():
                             os.path.join(opts.cache_dir, 'conjure-up.log'),
                             opts.debug)
 
+    if app.argv.conf_file.expanduser().exists():
+        conf = configparser.ConfigParser()
+        conf.read_string(app.argv.conf_file.expanduser().read_text())
+        app.notrack = conf.getboolean('REPORTING', 'notrack', fallback=False)
+        app.noreport = conf.getboolean('REPORTING', 'noreport', fallback=False)
+    if app.argv.notrack:
+        app.notrack = True
+    if app.argv.noreport:
+        app.noreport = True
+
     # Grab current LXD and Juju versions
     app.log.debug("LXD version: {}, "
                   "Juju version: {}, "
@@ -326,6 +346,11 @@ def main():
             sys.exit(1)
 
         show_env()
+
+    app.sentry = raven.Client(
+        dsn=SENTRY_DSN,
+        release=VERSION,
+    )
 
     track_screen("Application Start")
     track_event("OS", platform.platform(), "")

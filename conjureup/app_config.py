@@ -86,6 +86,12 @@ app = SimpleNamespace(
     # Charm store metadata API client
     metadata_controller=None,
 
+    # disable telemetry tracking
+    notrack=False,
+
+    # disable automatic error reporting
+    noreport=False,
+
     # Application environment passed to processing steps
     env=None,
 

@@ -8,11 +8,13 @@ from conjureup.app_config import app
 from conjureup.async import submit
 
 GA_ID = "UA-1018242-61"
+SENTRY_DSN = ('https://27ee3b60dbb8412e8acf6bc159979165:'
+              'b3828e6bfc05432bb35fb12f6f97fdf6@sentry.io/180147')
 TELEMETRY_ASYNC_QUEUE = "telemetry-async-queue"
 
 
 def track_screen(screen_name):
-    if app.argv.notrack:
+    if app.notrack:
         return
     args = dict(cd=screen_name,
                 t="screenview")
@@ -25,7 +27,7 @@ def track_screen(screen_name):
 
 def track_event(category, action, label):
     ""
-    if app.argv.notrack:
+    if app.notrack:
         return
     args = dict(ec=category,
                 ea=action,
@@ -39,7 +41,7 @@ def track_event(category, action, label):
 
 def track_exception(description, is_fatal=True):
     ""
-    if app.argv.notrack:
+    if app.notrack:
         return
     exf = 1 if is_fatal else 0
     args = dict(t='exception',

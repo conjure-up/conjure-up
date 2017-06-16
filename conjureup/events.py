@@ -132,13 +132,24 @@ def handle_exception(loop, context):
         return  # already reporting an error
     Error.set()
     exc = context['exception']
-    track_exception(str(exc))
 
-    # not sure of a cleaner way to log the exception instance
-    try:
-        raise exc
-    except type(exc):
-        app.log.exception('Unhandled exception')
+    track_exception(str(exc))
+    if not app.noreport:
+        try:
+            exc_info = (type(exc), exc, exc.__traceback__)
+            app.sentry.captureException(exc_info, tags={
+                'spell': app.config.get('spell'),
+                'cloud_type': app.current_cloud_type,
+                'region': app.current_region,
+                'jaas': app.is_jaas,
+                'headless': app.headless,
+                'juju_version': utils.juju_version(),
+                'lxd_version': utils.lxd_version(),
+            })
+        except Exception:
+            app.log.exception('Error reporting error')
+
+    app.log.exception('Unhandled exception', exc_info=exc)
 
     if app.headless:
         if hasattr(exc, 'user_message'):
