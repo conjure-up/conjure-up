@@ -531,11 +531,17 @@ def set_terminal_title(title):
 
 def get_physical_network_interfaces():
     """ Returns a list of physical network interfaces
+
+    We whitelist eth due to some instances where users run
+    conjure-up inside a single LXD container. At that point
+    all devices are considered virtual and all network device
+    naming follows the ethX pattern.
     """
     sys_class_net = Path('/sys/class/net')
     devices = []
     for device in sys_class_net.glob("*"):
-        if "virtual" in str(device.resolve()):
+        parts = str(device.resolve()).split('/')
+        if "virtual" in parts and not parts[-1].startswith('eth'):
             continue
         try:
             if not get_physical_network_ipaddr(device.name):
