@@ -51,7 +51,7 @@ class BaseLXDSetupController:
         iface: interface name
         """
         lxd_init_cmds = [
-            "conjure-up.lxc version",
+            "conjure-up.lxd init --auto",
             'conjure-up.lxc config set core.https_address [::]:12001',
             'conjure-up.lxc storage create default dir'
         ]
