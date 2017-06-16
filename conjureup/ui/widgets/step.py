@@ -1,4 +1,3 @@
-import json
 import os
 
 from ubuntui.utils import Color, Padding
@@ -84,8 +83,7 @@ class StepWidget(WidgetWrap):
             lines = outf.readlines()
             if len(lines) < 1:
                 return
-            result = json.loads(lines[-1])
-            self.output.set_text(('body', result['message']))
+            self.output.set_text(('body', lines[-1]))
 
     def clear_output(self):
         self.output.set_text("")
