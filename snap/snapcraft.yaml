@@ -83,7 +83,7 @@ parts:
     build-packages: [lsb-release]
     after: [conjure-up, lxd, go]
   lxd:
-    source-tag: lxd-2.13
+    source-tag: lxd-2.14
   go:
     source-tag: go1.8
   python:
