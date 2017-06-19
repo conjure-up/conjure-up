@@ -148,8 +148,13 @@ class BaseLXDSetupController:
         if out.returncode == 0:
             return  # already configured
 
+        out = utils.run_script(
+            "conjure-up.lxc network show conjureup1|grep -q 'managed: true'")
+        if out.returncode == 0:
+            return  # already managed
+
         out = utils.run_script('conjure-up.lxc network create conjureup1 '
-                               'ipv4.address=10.100.0.1/24 '
+                               'ipv4.address=auto '
                                'ipv4.nat=true '
                                'ipv6.address=none '
                                'ipv6.nat=false')
@@ -165,8 +170,13 @@ class BaseLXDSetupController:
         if out.returncode == 0:
             return  # already configured
 
+        out = utils.run_script(
+            "conjure-up.lxc network show conjureup0|grep -q 'managed: true'")
+        if out.returncode == 0:
+            return  # already managed
+
         out = utils.run_script('conjure-up.lxc network create conjureup0 '
-                               'ipv4.address=10.99.0.1/24 '
+                               'ipv4.address=auto '
                                'ipv4.nat=true '
                                'ipv6.address=none '
                                'ipv6.nat=false')
