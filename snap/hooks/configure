@@ -41,30 +41,3 @@ if [[ ! -f /snap/bin/juju ]]; then
     # to the juju snap if that is installed later.
     ln -s conjure-up.juju /snap/bin/juju
 fi
-
-# We need to make sure that our bridges can be managed by LXD. This ensures
-# that the bridges are always configured via conjure-up properly.
-#
-# If we need to re-setup the bridges make sure our placeholder file is gone.
-# These cases are usually from users reinstalling conjure-up
-REMOVE_LXD_SETUP=0
-
-if ! "conjure-up.lxc network show conjureup0|grep -q 'managed: true'"; then
-    ip link set conjureup0 down || true
-    ip addr del 10.99.0.1/24 dev conjureup0 || true
-    ip link delete conjureup0 type bridge || true
-    kill -9 $(pgrep -f 'dnsmasq.*conjureup0') || true
-    REMOVE_LXD_SETUP=1
-fi
-
-if ! "conjure-up.lxc network show conjureup1|grep -q 'managed: true'"; then
-    ip link set conjureup1 down || true
-    ip addr del 10.100.0.1/24 dev conjureup1 || true
-    ip link delete conjureup1 type bridge || true
-    kill -9 $(pgrep -f 'dnsmasq.*conjureup1') || true
-    REMOVE_LXD_SETUP=1
-fi
-
-if $REMOVE_LXD_SETUP; then
-    rm -rf "$SNAP_USER_DATA/lxd.setup"
-fi
