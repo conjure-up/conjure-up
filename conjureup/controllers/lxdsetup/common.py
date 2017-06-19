@@ -18,11 +18,10 @@ class BaseLXDSetupController:
             self.flag_file = Path(snap_user_data) / 'lxd.setup'
         else:
             self.flag_file = Path(app.env['CONJURE_UP_CACHEDIR']) / 'lxd.setup'
+        if self.flag_file.exists():
+            # Cleanup from previous runs
+            self.flag_file.unlink()
         self.ifaces = utils.get_physical_network_interfaces()
-
-    @property
-    def is_ready(self):
-        return self.flag_file.exists()
 
     @property
     def is_snap_compatible(self):
@@ -43,11 +42,14 @@ class BaseLXDSetupController:
         if not isinstance(iface, str):
             iface = iface.network_interface.value
         self.lxd_init(iface)
-        self.flag_file.touch()
         self.next_screen()
 
     def lxd_init(self, iface):
         """ Runs initial lxd init
+
+        LXD init --auto will return successfully if it's already setup
+        otherwise it'll start a new LXD configuration, can be run
+        multiple times.
 
         Arguments:
         iface: interface name
@@ -148,11 +150,6 @@ class BaseLXDSetupController:
         if out.returncode == 0:
             return  # already configured
 
-        out = utils.run_script(
-            "conjure-up.lxc network show conjureup1|grep -q 'managed: true'")
-        if out.returncode == 0:
-            return  # already managed
-
         out = utils.run_script('conjure-up.lxc network create conjureup1 '
                                'ipv4.address=auto '
                                'ipv4.nat=true '
@@ -169,11 +166,6 @@ class BaseLXDSetupController:
         out = utils.run_script('conjure-up.lxc network show conjureup0')
         if out.returncode == 0:
             return  # already configured
-
-        out = utils.run_script(
-            "conjure-up.lxc network show conjureup0|grep -q 'managed: true'")
-        if out.returncode == 0:
-            return  # already managed
 
         out = utils.run_script('conjure-up.lxc network create conjureup0 '
                                'ipv4.address=auto '
