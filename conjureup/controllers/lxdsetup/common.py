@@ -14,6 +14,7 @@ from conjureup.app_config import app
 class BaseLXDSetupController:
     def __init__(self):
         snap_user_data = os.environ.get('SNAP_USER_DATA', None)
+        self.lxd_common_dir = Path('/var/snap/conjure-up/common/lxd')
         if snap_user_data:
             self.flag_file = Path(snap_user_data) / 'lxd.setup'
         else:
@@ -143,6 +144,24 @@ class BaseLXDSetupController:
                 raise Exception("Problem setting default profile: {}".format(
                     out))
 
+    def kill_dnsmasq(self, iface):
+        """
+        If we are going to create a network make sure dnsmasq isn't
+        holding onto an interface from a previous install.
+        """
+        app.log.debug('Attempting to kill dnsmasq for {}'.format(iface))
+        dnsmasq_pid_path = self.lxd_common_dir / 'networks' /\
+            iface / 'dnsmasq.pid'
+        if dnsmasq_pid_path.exists():
+            app.log.debug('dnsmasq pid found: {}'.format(dnsmasq_pid_path))
+            dnsmasq_pid = dnsmasq_pid_path.read_text().strip()
+            app.log.debug(
+                "dnsmasq already claims {} interface, "
+                "attempting to kill it.".format(iface))
+            out = utils.run_script('kill -9 {}'.format(
+                dnsmasq_pid))
+            app.log.debug("dnsmasq kill result: {}".format(out))
+
     def setup_bridge_network(self, iface):
         """ Sets up our main network bridge to be used with Localhost deployments
         """
@@ -150,6 +169,7 @@ class BaseLXDSetupController:
         if out.returncode == 0:
             return  # already configured
 
+        self.kill_dnsmasq('conjureup1')
         out = utils.run_script('conjure-up.lxc network create conjureup1 '
                                'ipv4.address=auto '
                                'ipv4.nat=true '
@@ -167,6 +187,7 @@ class BaseLXDSetupController:
         if out.returncode == 0:
             return  # already configured
 
+        self.kill_dnsmasq('conjureup0')
         out = utils.run_script('conjure-up.lxc network create conjureup0 '
                                'ipv4.address=auto '
                                'ipv4.nat=true '
