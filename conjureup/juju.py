@@ -673,15 +673,16 @@ def get_controller_info(name=None):
     if name is not None:
         cmd += ' {}'.format(name)
     sh = run(cmd, shell=True, stdout=PIPE, stderr=PIPE)
-    if sh.returncode > 0:
-        raise Exception(
-            "Unable to determine controller: {}".format(
-                sh.stderr.decode('utf8')))
-    out = yaml.safe_load(sh.stdout.decode('utf8'))
+    sh_out = sh.stdout.decode('utf8')
+    sh_err = sh.stderr.decode('utf8')
     try:
-        return next(iter(out.values()))
-    except:
-        return out
+        data = yaml.safe_load(sh_out)
+    except yaml.parser.ParserError:
+        data = None
+    if sh.returncode != 0 or not data:
+        raise Exception("Unable to get info for "
+                        "controller {}: {}".format(name, sh_err))
+    return next(iter(data.values()))
 
 
 def get_controllers():
