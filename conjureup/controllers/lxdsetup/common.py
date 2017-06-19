@@ -5,6 +5,7 @@ from functools import partial
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+import psutil
 from pkg_resources import parse_version
 
 from conjureup import controllers, utils
@@ -14,6 +15,7 @@ from conjureup.app_config import app
 class BaseLXDSetupController:
     def __init__(self):
         snap_user_data = os.environ.get('SNAP_USER_DATA', None)
+        self.lxd_common_dir = Path('/var/snap/conjure-up/common/lxd')
         if snap_user_data:
             self.flag_file = Path(snap_user_data) / 'lxd.setup'
         else:
@@ -143,6 +145,24 @@ class BaseLXDSetupController:
                 raise Exception("Problem setting default profile: {}".format(
                     out))
 
+    def kill_dnsmasq(self, iface):
+        """
+        If we are going to create a network make sure dnsmasq isn't
+        holding onto an interface from a previous install.
+        """
+        app.log.debug('Attempting to kill dnsmasq for {}'.format(iface))
+        for proc in psutil.process_iter():
+            if proc.name == 'dnsmasq' and iface in proc.cmdline():
+                proc.kill()
+
+        # Not entirely comfortable relying on the pids matching
+        # during an upgrade. But remove the pid file if exists.
+        dnsmasq_pid_path = self.lxd_common_dir / 'networks' /\
+            iface / 'dnsmasq.pid'
+
+        if dnsmasq_pid_path.exists():
+            dnsmasq_pid_path.unlink()
+
     def setup_bridge_network(self, iface):
         """ Sets up our main network bridge to be used with Localhost deployments
         """
@@ -150,6 +170,7 @@ class BaseLXDSetupController:
         if out.returncode == 0:
             return  # already configured
 
+        self.kill_dnsmasq('conjureup1')
         out = utils.run_script('conjure-up.lxc network create conjureup1 '
                                'ipv4.address=auto '
                                'ipv4.nat=true '
@@ -167,6 +188,7 @@ class BaseLXDSetupController:
         if out.returncode == 0:
             return  # already configured
 
+        self.kill_dnsmasq('conjureup0')
         out = utils.run_script('conjure-up.lxc network create conjureup0 '
                                'ipv4.address=auto '
                                'ipv4.nat=true '
