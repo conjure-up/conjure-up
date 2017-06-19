@@ -5,9 +5,9 @@ from functools import partial
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+import psutil
 from pkg_resources import parse_version
 
-import psutil
 from conjureup import controllers, utils
 from conjureup.app_config import app
 
