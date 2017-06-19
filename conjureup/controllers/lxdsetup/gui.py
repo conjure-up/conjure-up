@@ -7,9 +7,6 @@ from . import common
 
 class LXDSetupController(common.BaseLXDSetupController):
     def render(self):
-        if self.is_ready:
-            return self.next_screen()
-
         if len(self.ifaces) == 1:
             return self.setup(self.ifaces[0])
 
