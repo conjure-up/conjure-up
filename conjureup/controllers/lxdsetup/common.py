@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 
 from pkg_resources import parse_version
 
+import psutil
 from conjureup import controllers, utils
 from conjureup.app_config import app
 
@@ -150,17 +151,17 @@ class BaseLXDSetupController:
         holding onto an interface from a previous install.
         """
         app.log.debug('Attempting to kill dnsmasq for {}'.format(iface))
+        for proc in psutil.process_iter():
+            if proc.name == 'dnsmasq' and iface in proc.cmdline():
+                proc.kill()
+
+        # Not entirely comfortable relying on the pids matching
+        # during an upgrade. But remove the pid file if exists.
         dnsmasq_pid_path = self.lxd_common_dir / 'networks' /\
             iface / 'dnsmasq.pid'
+
         if dnsmasq_pid_path.exists():
-            app.log.debug('dnsmasq pid found: {}'.format(dnsmasq_pid_path))
-            dnsmasq_pid = dnsmasq_pid_path.read_text().strip()
-            app.log.debug(
-                "dnsmasq already claims {} interface, "
-                "attempting to kill it.".format(iface))
-            out = utils.run_script('kill -9 {}'.format(
-                dnsmasq_pid))
-            app.log.debug("dnsmasq kill result: {}".format(out))
+            dnsmasq_pid_path.unlink()
 
     def setup_bridge_network(self, iface):
         """ Sets up our main network bridge to be used with Localhost deployments
