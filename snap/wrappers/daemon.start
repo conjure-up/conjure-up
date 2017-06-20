@@ -8,6 +8,9 @@ fi
 export LXD_DIR="${SNAP_COMMON}/lxd/"
 export LXD_LXC_TEMPLATE_CONFIG="${SNAP}/lxc/config/"
 export HOME="/tmp/"
+export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
+export LD_LIBRARY_PATH
+LD_LIBRARY_PATH=$SNAP/usr/lib/$(uname -p)-linux-gnu/
 
 # Setup a functional /etc
 if mountpoint -q /etc; then
