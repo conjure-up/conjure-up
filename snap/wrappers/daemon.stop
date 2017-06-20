@@ -1,6 +1,10 @@
 #!/bin/sh
 set -eu
 
+export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
+export LD_LIBRARY_PATH
+LD_LIBRARY_PATH=$SNAP/usr/lib/$(uname -p)-linux-gnu/
+
 if [ -d /sys/kernel/security/apparmor ] && [ "$(cat /proc/self/attr/current)" != "unconfined" ]; then
     exec aa-exec -p unconfined -- "$0" "$@"
 fi
