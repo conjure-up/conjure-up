@@ -44,19 +44,11 @@ fi
 
 # Make sure that LXD ownership is correct
 if [[ -d $SNAP_COMMON/lxd ]]; then
-    user=$(ls -ld "$SNAP_COMMON/lxd"| awk '{print $3}')
-    group=$(ls -ld "$SNAP_COMMON/lxd"| awk '{print $4}')
-    if [[ "$user" != "root" ]] || [[ "$group" != "root" ]]; then
-        chown root:root "$SNAP_COMMON/lxd"
-    fi
+    chown root:root "$SNAP_COMMON/lxd"
 fi
 
 if [[ -f $SNAP_COMMON/lxd/unix.socket ]]; then
-    user=$(ls -l "$SNAP_COMMON/lxd/unix.socket"| awk '{print $3}')
-    group=$(ls -l "$SNAP_COMMON/lxd/unix.socket"| awk '{print $4}')
-    if [[ "$user" != "root" ]] || [[ "$group" != "lxd" ]]; then
-        chown root:lxd "$SNAP_COMMON/lxd/unix.socket"
-        chmod 0660 "$SNAP_COMMON/lxd/unix.socket"
-    fi
+    chown root:lxd "$SNAP_COMMON/lxd/unix.socket"
+    chmod 0660 "$SNAP_COMMON/lxd/unix.socket"
 fi
 
