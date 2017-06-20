@@ -11,11 +11,11 @@ Thank you for trying **conjure-up**! Before reporting a bug please make sure you
 ```
 which juju
 which conjure-up
-which lxd
+which conjure-up.lxd
 juju version
 conjure-up --version
-lxd --version
-lxc config show
+conjure-up.lxd --version
+conjure-up.lxc config show
 cat /etc/lsb-release
 ```
 
