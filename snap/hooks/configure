@@ -52,3 +52,10 @@ if [[ -f $SNAP_COMMON/lxd/unix.socket ]]; then
     chmod 0660 "$SNAP_COMMON/lxd/unix.socket"
 fi
 
+if ! "conjure-up.lxc network show conjureup0|grep -q 'managed: true'"; then
+    ip link delete conjureup0 type bridge || true
+fi
+
+if ! "conjure-up.lxc network show conjureup1|grep -q 'managed: true'"; then
+    ip link delete conjureup1 type bridge || true
+fi
