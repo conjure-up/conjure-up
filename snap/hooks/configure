@@ -41,3 +41,9 @@ if [[ ! -f /snap/bin/juju ]]; then
     # to the juju snap if that is installed later.
     ln -s conjure-up.juju /snap/bin/juju
 fi
+
+# Make sure that ownership is correct
+if [[ -f /var/snap/conjure-up/common/lxd/unix.socket ]]; then
+    chown root:lxd /var/snap/conjure-up/common/lxd/unix.socket
+    chmod 660 /var/snap/conjure-up/common/lxd/unix.socket
+fi
