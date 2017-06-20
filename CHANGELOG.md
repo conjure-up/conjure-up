@@ -1,5 +1,39 @@
 # Change Log
 
+## [2.2.1](https://github.com/conjure-up/conjure-up/tree/2.2.1) (2017-06-20)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.2.0...2.2.1)
+
+**Implemented enhancements:**
+
+- make use of lxd preseed init data [\#949](https://github.com/conjure-up/conjure-up/issues/949)
+- Add Sentry support for tracking errors [\#931](https://github.com/conjure-up/conjure-up/issues/931)
+
+**Fixed bugs:**
+
+- can not select existing controller to deploy to [\#950](https://github.com/conjure-up/conjure-up/issues/950)
+- TypeError 'NoneType' object is not subscriptable [\#946](https://github.com/conjure-up/conjure-up/issues/946)
+- failed to set lxc config [\#943](https://github.com/conjure-up/conjure-up/issues/943)
+- Failed to create LXD conjureup1 network bridge: error: Failed to run: dnsmasq --strict-order --bind-interfaces [\#942](https://github.com/conjure-up/conjure-up/issues/942)
+- hooklib.writer log needs update [\#938](https://github.com/conjure-up/conjure-up/issues/938)
+- Exception: Unable to determine controller: ERROR controller conjure-up-controller not found [\#937](https://github.com/conjure-up/conjure-up/issues/937)
+- JSONDecodeError: Expecting value: line 1 column 2 \(char 1\) [\#935](https://github.com/conjure-up/conjure-up/issues/935)
+- Error Deploying Openstack: Could not find a suitable network interface... with NovaLXD in a nested LXD  [\#916](https://github.com/conjure-up/conjure-up/issues/916)
+- Stuck on "Waiting For Applications To Start" with NovaLXD in a nested LXD [\#915](https://github.com/conjure-up/conjure-up/issues/915)
+
+**Merged pull requests:**
+
+- Improve error handling when getting controller info [\#953](https://github.com/conjure-up/conjure-up/pull/953) ([johnsca](https://github.com/johnsca))
+- Remove dnsmasq hold on an interface during network creation [\#952](https://github.com/conjure-up/conjure-up/pull/952) ([battlemidget](https://github.com/battlemidget))
+- Fix existing controller detection [\#951](https://github.com/conjure-up/conjure-up/pull/951) ([johnsca](https://github.com/johnsca))
+- Bootstrap given controller if not found [\#947](https://github.com/conjure-up/conjure-up/pull/947) ([johnsca](https://github.com/johnsca))
+- Include more info in failed step reports [\#945](https://github.com/conjure-up/conjure-up/pull/945) ([johnsca](https://github.com/johnsca))
+- More lxd retries for times when socket isn't completely ready [\#944](https://github.com/conjure-up/conjure-up/pull/944) ([battlemidget](https://github.com/battlemidget))
+- Fix NoneType error from no step result [\#941](https://github.com/conjure-up/conjure-up/pull/941) ([johnsca](https://github.com/johnsca))
+- fix logger and print output in hooklib writer [\#939](https://github.com/conjure-up/conjure-up/pull/939) ([battlemidget](https://github.com/battlemidget))
+- No longer parsing json data from step output [\#936](https://github.com/conjure-up/conjure-up/pull/936) ([battlemidget](https://github.com/battlemidget))
+- Do not filter out interfaces if run inside a container [\#934](https://github.com/conjure-up/conjure-up/pull/934) ([battlemidget](https://github.com/battlemidget))
+- Add Sentry automatic error reporting [\#933](https://github.com/conjure-up/conjure-up/pull/933) ([johnsca](https://github.com/johnsca))
+
 ## [2.2.0](https://github.com/conjure-up/conjure-up/tree/2.2.0) (2017-06-15)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.2.0-beta4...2.2.0)
 
@@ -619,14 +653,12 @@
 **Fixed bugs:**
 
 - Exception: Tried to login with no current model set. [\#399](https://github.com/conjure-up/conjure-up/issues/399)
-- conjure-up \<namespace\>/\<spell\> fails under snappy [\#365](https://github.com/conjure-up/conjure-up/issues/365)
 
 **Closed issues:**
 
 - applicationlist - dont show configure button if subordinate [\#415](https://github.com/conjure-up/conjure-up/issues/415)
 - controllerpicker: filter blacklist/whitelist [\#413](https://github.com/conjure-up/conjure-up/issues/413)
 - attributeerror with controllerpicker [\#410](https://github.com/conjure-up/conjure-up/issues/410)
-- NovaLXD hook failed: "config-changed" and next steps after installation [\#361](https://github.com/conjure-up/conjure-up/issues/361)
 
 **Merged pull requests:**
 
@@ -645,7 +677,6 @@
 **Fixed bugs:**
 
 - headless mode fails to deploy applications [\#402](https://github.com/conjure-up/conjure-up/issues/402)
-- Told to add credentials when already done so [\#366](https://github.com/conjure-up/conjure-up/issues/366)
 
 **Closed issues:**
 
@@ -654,11 +685,7 @@
 - snap install issue -- snap.conjure-up.bridge.service failed [\#376](https://github.com/conjure-up/conjure-up/issues/376)
 - spells not sorted in spellpicker view [\#374](https://github.com/conjure-up/conjure-up/issues/374)
 - conjure-up \<spell\> tracebacks [\#371](https://github.com/conjure-up/conjure-up/issues/371)
-- remove initial readme view for spell [\#369](https://github.com/conjure-up/conjure-up/issues/369)
 - if no clouds are whitelisted \(e.g. openstack-novalxd spell\), an empty list is shown in the newcloud view [\#405](https://github.com/conjure-up/conjure-up/issues/405)
-- crash in bootstrap because juju beta 16 does not allow bootstrap --upload-tools [\#367](https://github.com/conjure-up/conjure-up/issues/367)
-- headless fails in a snappy environment [\#359](https://github.com/conjure-up/conjure-up/issues/359)
-- show spell friendly name in spellpicker view [\#355](https://github.com/conjure-up/conjure-up/issues/355)
 
 **Merged pull requests:**
 
@@ -686,34 +713,12 @@
 - add alternative install method [\#373](https://github.com/conjure-up/conjure-up/pull/373) ([battlemidget](https://github.com/battlemidget))
 - Fixes \#371 [\#372](https://github.com/conjure-up/conjure-up/pull/372) ([battlemidget](https://github.com/battlemidget))
 - deb packaging updates [\#370](https://github.com/conjure-up/conjure-up/pull/370) ([battlemidget](https://github.com/battlemidget))
-- remove --upload-tools [\#368](https://github.com/conjure-up/conjure-up/pull/368) ([battlemidget](https://github.com/battlemidget))
-- clean up makefile for snappy [\#364](https://github.com/conjure-up/conjure-up/pull/364) ([battlemidget](https://github.com/battlemidget))
-- add description per spell in spells index [\#363](https://github.com/conjure-up/conjure-up/pull/363) ([battlemidget](https://github.com/battlemidget))
 - Fixes \#402 [\#407](https://github.com/conjure-up/conjure-up/pull/407) ([battlemidget](https://github.com/battlemidget))
 - Fixes \#405 [\#406](https://github.com/conjure-up/conjure-up/pull/406) ([battlemidget](https://github.com/battlemidget))
 - add journald logging [\#398](https://github.com/conjure-up/conjure-up/pull/398) ([battlemidget](https://github.com/battlemidget))
 
 ## [2.0.0.8](https://github.com/conjure-up/conjure-up/tree/2.0.0.8) (2016-08-22)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.0.0.6...2.0.0.8)
-
-**Fixed bugs:**
-
-- traceback in lxdsetup on snappy [\#346](https://github.com/conjure-up/conjure-up/issues/346)
-
-**Merged pull requests:**
-
-- Display friendly spell names [\#362](https://github.com/conjure-up/conjure-up/pull/362) ([battlemidget](https://github.com/battlemidget))
-- re-add common lib to openstack spell, more cleanups [\#360](https://github.com/conjure-up/conjure-up/pull/360) ([battlemidget](https://github.com/battlemidget))
-- update to add network bridge [\#358](https://github.com/conjure-up/conjure-up/pull/358) ([battlemidget](https://github.com/battlemidget))
-- make lxd configuration a user task [\#357](https://github.com/conjure-up/conjure-up/pull/357) ([battlemidget](https://github.com/battlemidget))
-- fix parse-whitelist and parse-blacklist [\#354](https://github.com/conjure-up/conjure-up/pull/354) ([battlemidget](https://github.com/battlemidget))
-- use dump plugin for snapcraft [\#353](https://github.com/conjure-up/conjure-up/pull/353) ([battlemidget](https://github.com/battlemidget))
-- Fix shortcut when keyword search matches one spell [\#352](https://github.com/conjure-up/conjure-up/pull/352) ([mikemccracken](https://github.com/mikemccracken))
-- reduce snap to ~56M [\#351](https://github.com/conjure-up/conjure-up/pull/351) ([battlemidget](https://github.com/battlemidget))
-- remove lxd stage-package [\#350](https://github.com/conjure-up/conjure-up/pull/350) ([battlemidget](https://github.com/battlemidget))
-- strip out unused files from snap build [\#349](https://github.com/conjure-up/conjure-up/pull/349) ([battlemidget](https://github.com/battlemidget))
-- update readme [\#348](https://github.com/conjure-up/conjure-up/pull/348) ([battlemidget](https://github.com/battlemidget))
-- remove incorrect license from tests headers [\#345](https://github.com/conjure-up/conjure-up/pull/345) ([battlemidget](https://github.com/battlemidget))
 
 ## [2.0.0.6](https://github.com/conjure-up/conjure-up/tree/2.0.0.6) (2016-07-18)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.0.0.5...2.0.0.6)
