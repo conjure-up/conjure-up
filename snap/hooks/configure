@@ -56,6 +56,7 @@ if [[ -f $SNAP_COMMON/lxd/unix.socket ]]; then
     group=$(ls -l "$SNAP_COMMON/lxd/unix.socket"| awk '{print $4}')
     if [[ "$user" != "root" ]] || [[ "$group" != "lxd" ]]; then
         chown root:lxd "$SNAP_COMMON/lxd/unix.socket"
+        chmod 0660 "$SNAP_COMMON/lxd/unix.socket"
     fi
 fi
 
