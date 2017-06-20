@@ -1,7 +1,5 @@
 name: conjure-up
 version: 2.2.1
-version-script: |
-  echo "$SNAPCRAFT_PROJECT_VERSION-$(date +%Y%m%d.%H%m)"
 summary: Package runtime for conjure-up spells
 description: >
    This package provides conjure-up, an interface to installing spells that
