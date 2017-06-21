@@ -323,11 +323,19 @@ def get_regions(cloud):
     """
     sh = run('juju list-regions {} --format yaml'.format(cloud),
              shell=True, stdout=PIPE, stderr=PIPE)
+    stdout = sh.stdout.decode('utf8')
+    stderr = sh.stderr.decode('utf8')
     if sh.returncode > 0:
-        raise Exception(
-            "Unable to list regions: {}".format(sh.stderr.decode('utf8'))
-        )
-    return yaml.safe_load(sh.stdout.decode('utf8'))
+        raise Exception("Unable to list regions: {}".format(stderr))
+    if 'no regions' in stdout:
+        return {}
+    result = yaml.safe_load(stdout)
+    if not isinstance(result, dict):
+        msg = 'Unexpected response from regions: {}'.format(result)
+        app.log.error(msg)
+        app.sentry.captureMessage(msg)
+        result = {}
+    return result
 
 
 def get_clouds():
