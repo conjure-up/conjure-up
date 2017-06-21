@@ -8,7 +8,7 @@ export LC_ALL=$APPLOC
 export LANG=$APPLOC
 export LANGUAGE=${APPLANG%_*}
 export LD_LIBRARY_PATH
-LD_LIBRARY_PATH=$SNAP/usr/lib/$(uname -p)-linux-gnu/
+LD_LIBRARY_PATH=$SNAP/lib:$SNAP/usr/lib/$(uname -p)-linux-gnu/
 export LXD_DIR=${SNAP_COMMON}/lxd/
 
 # Make sure we access our python and juju binaries first
