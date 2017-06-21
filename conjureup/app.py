@@ -201,9 +201,9 @@ def show_env():
 
 def main():
     if os.geteuid() == 0:
-        utils.info("")
-        utils.info("This should _not_ be run as root or with sudo.")
-        utils.info("")
+        print("")
+        print("  !! This should _not_ be run as root or with sudo. !!")
+        print("")
         sys.exit(1)
 
     utils.set_terminal_title("conjure-up")
