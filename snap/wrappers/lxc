@@ -5,6 +5,6 @@ export VISUAL=${EDITOR}
 
 export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 export LD_LIBRARY_PATH
-LD_LIBRARY_PATH=$SNAP/usr/lib/$(uname -p)-linux-gnu/
+LD_LIBRARY_PATH=$SNAP/lib:$SNAP/usr/lib/$(uname -p)-linux-gnu/
 
 exec "$SNAP/bin/lxc" "$@"
