@@ -1,3 +1,4 @@
+import grp
 import os
 import textwrap
 import time
@@ -10,6 +11,12 @@ from pkg_resources import parse_version
 
 from conjureup import controllers, utils
 from conjureup.app_config import app
+
+
+class LXDInvalidUserError(Exception):
+    """ User is not part of LXD group
+    """
+    pass
 
 
 class BaseLXDSetupController:
@@ -31,6 +38,22 @@ class BaseLXDSetupController:
         """
         return utils.snap_version() >= parse_version('2.25')
 
+    def can_user_acces_lxd(self):
+        """ Makes sure the user is in the LXD group so they can
+        access the daemon
+        """
+        lxd_group = grp.getgrnam('lxd')
+        if os.environ.get('USER', None) not in lxd_group.gr_mem:
+            raise LXDInvalidUserError(
+                "Your user does not exist in the LXD group, "
+                "you can create it with:\n\n"
+                " $ sudo usermod -a -G lxd $USER"
+                "\n\n"
+                "Once complete either log your user out completely, "
+                "reboot, or run: \n\n"
+                " $ newgrp lxd"
+            )
+
     def next_screen(self):
         return controllers.use('controllerpicker').render()
 
@@ -43,6 +66,7 @@ class BaseLXDSetupController:
                 "Once complete, re-run conjure-up.")
         if not isinstance(iface, str):
             iface = iface.network_interface.value
+        self.can_user_acces_lxd()
         self.lxd_init(iface)
         self.next_screen()
 

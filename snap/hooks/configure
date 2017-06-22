@@ -42,6 +42,10 @@ if [[ ! -f /snap/bin/juju ]]; then
     ln -s conjure-up.juju /snap/bin/juju
 fi
 
+# Make sure the LXD group exists as we don't want to assume users have installed
+# LXD from a deb package or previous snap
+groupadd lxd || true
+
 # Make sure that LXD ownership is correct
 if [[ -d $SNAP_COMMON/lxd ]]; then
     chown root:root "$SNAP_COMMON/lxd"
