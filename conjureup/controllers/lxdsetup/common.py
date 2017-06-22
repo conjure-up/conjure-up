@@ -121,13 +121,19 @@ class BaseLXDSetupController:
     def set_lxc_config(self):
         """ Runs lxc config
 
-        We want to retry and delay here as LXD daemon may
-        not be fully awake yet.
+        Assigns an unused port to our LXD daemon, skips if already set.
+        We also want to retry here just incase the daemon isn't ready.
         """
         delay = 2
         for attempt in range(5):
             out = utils.run_script(
-                "conjure-up.lxc config set core.https_address [::]:12001")
+                "conjure-up.lxc config get core.https_address"
+            )
+            if out.stdout.decode().strip():
+                return
+            out = utils.run_script(
+                "conjure-up.lxc config set "
+                "core.https_address [::]:{}".format(utils.get_open_port()))
             if out.returncode == 0:
                 return
             time.sleep(delay)
