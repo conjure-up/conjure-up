@@ -1,6 +1,7 @@
 import asyncio
 import codecs
 import errno
+import json
 import os
 import pty
 import re
@@ -19,6 +20,7 @@ from bundleplacer.bundle import Bundle
 from bundleplacer.charmstore_api import MetadataController
 from bundleplacer.config import Config
 from pkg_resources import parse_version
+from raven.processors import SanitizePasswordsProcessor
 from termcolor import cprint
 
 from conjureup import charm
@@ -622,3 +624,61 @@ class IterQueue(asyncio.Queue):
 
     async def close(self):
         await self.put(self.sentinal)
+
+
+class SanitizeDataProcessor(SanitizePasswordsProcessor):
+    """
+    Sanitize data sent to Sentry.
+
+    Performs the same santiziations as the SanitizePasswordsProcessor, but
+    also sanitizes values.
+    """
+    def sanitize(self, key, value):
+        value = super().sanitize(key, value)
+
+        if value is None:
+            return value
+
+        def _check_str(s):
+            sl = s.lower()
+            for field in self.FIELDS:
+                if field not in sl:
+                    continue
+                if 'invalid' in s or 'error' in s:
+                    return '***(contains invalid {})***'.format(field)
+                else:
+                    return '***(contains {})***'.format(field)
+            return s
+
+        if isinstance(value, str):
+            # handle basic strings
+            value = _check_str(value)
+        elif isinstance(value, bytes):
+            # handle bytes
+            value = _check_str(value.decode('utf8', 'replace'))
+        elif isinstance(value, (list, tuple, set)):
+            # handle list-like
+            orig_type = type(value)
+            value = list(value)
+            for i, item in enumerate(value):
+                value[i] = self.sanitize(key, item)
+            value = orig_type(value)
+        elif isinstance(value, dict):
+            # handle dicts
+            for key, value in value.items():
+                value[key] = self.sanitize(key, value)
+        else:
+            # handle everything else by sanitizing its JSON encoding
+            # note that we don't want to use the JSON encoded value if it's
+            # not being santizied, because it will end up double-encoded
+            value_json = json.dumps(value)
+            sanitized = _check_str(value_json)
+            if sanitized != value_json:
+                value = sanitized
+
+        return value
+
+
+class TestError(Exception):
+    def __init__(self):
+        super().__init__('This is a dummy error for testing reporting')
