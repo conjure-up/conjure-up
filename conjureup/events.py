@@ -120,7 +120,7 @@ PostDeployComplete = Event('PostDeployComplete')
 # Keep a list of exceptions we know that shouldn't be logged
 # into sentry.
 NOTRACK_EXCEPTIONS = [
-    lambda exc: exc is OSError and exc.errno == errno.ENOSPC,
+    lambda exc: isinstance(exc, OSError) and exc.errno == errno.ENOSPC,
     lambda exc: isinstance(exc, LXDInvalidUserError)
 ]
 
