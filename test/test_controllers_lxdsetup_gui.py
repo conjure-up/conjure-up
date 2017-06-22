@@ -115,6 +115,7 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
         self.controller.set_default_profile = MagicMock()
         self.controller.can_user_acces_lxd = MagicMock()
         self.mock_utils.snap_version.return_value = parse_version('2.25')
+        self.mock_utils.get_open_port.return_value = '12001'
         self.mock_parse_version.return_value = parse_version('2.25')
 
     def tearDown(self):
@@ -127,8 +128,7 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
         self.grp_patcher.stop()
 
     def test_snap_version_incompatible(self):
-        """ Test that an invalid snap version fails correctly
-        """
+        "lxdsetup.gui.test_snap_version_incompatible"
         self.mock_utils.snap_version.return_value = parse_version('2.21')
         with self.assertRaises(Exception):
             self.controller.setup('iface')
@@ -140,27 +140,27 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
 
         self.mock_utils.run_script.side_effect = [
             success,  # lxc version
-            success,  # lxd config
+            failure,  # lxc config get core.https_address
+            success,  # lxc config set core.https_address
             success,  # lxc storage create default disk
-            success,  # lxc profile device add disk
             failure,  # lxc network show conjureup1
             success,  # lxc network create conjureup1
             success,  # lxc network attach-profile
             failure,  # lxc network show conjureup0
             success,  # lxc network create conjureup0
-            success,  # lxc network attach-profile
+            success,  # lxc set default profile
         ]
 
         self.controller.setup('iface')
         assert self.controller.next_screen.called
 
     def test_setup_skip(self):
-        "lxdsetup.gui.test_bridge_fail"
+        "lxdsetup.gui.test_setup_skip"
         success = MagicMock(returncode=0)
 
         self.mock_utils.run_script.side_effect = [
             success,  # lxd init auto
-            success,  # lxd config
+            success,  # lxd config get
             success,  # lxc storage create default disk
             success,  # lxc network show conjureup1
             success,  # lxc network show conjureup0
@@ -183,7 +183,7 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
         assert not self.controller.next_screen.called
 
     def test_setup_bridge_fail(self):
-        "lxdsetup.gui.test_bridge_fail"
+        "lxdsetup.gui.test_setup_bridge_fail"
         success = MagicMock(returncode=0)
         failure = MagicMock(returncode=1)
 

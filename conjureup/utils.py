@@ -5,6 +5,7 @@ import os
 import pty
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import uuid
@@ -583,6 +584,17 @@ def get_physical_network_ipaddr(iface):
     except IndexError:
         return None
     return ipv4_addr
+
+
+def get_open_port():
+    """ Gets an unused port
+    """
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(("", 0))
+    s.listen(1)
+    port = s.getsockname()[1]
+    s.close()
+    return port
 
 
 class IterQueue(asyncio.Queue):
