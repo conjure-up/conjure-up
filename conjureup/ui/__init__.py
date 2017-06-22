@@ -4,23 +4,12 @@ from conjureup import async
 from conjureup.app_config import app
 from conjureup.ui.views.shutdown import ShutdownView
 from ubuntui.ev import EventLoop
-import errno
 
 
 class ConjureUI(Frame):
 
     def show_exception_message(self, ex):
-        if isinstance(ex, async.ThreadCancelledException):
-            pass
-        elif hasattr(ex, 'errno') and ex.errno == errno.ENOENT:
-            # handle oserror
-            errmsg = ex.args[1]
-        elif isinstance(ex, TimeoutError):
-            errmsg = 'Timeout: {}'.format(ex)
-        elif hasattr(ex, 'user_message'):
-            errmsg = ex.user_message
-        else:
-            errmsg = str(ex)
+        errmsg = str(ex)
         errmsg += ("\n\n"
                    "Review log messages at ~/.cache/conjure-up/conjure-up.log "
                    "If appropriate, please submit a bug here: "
