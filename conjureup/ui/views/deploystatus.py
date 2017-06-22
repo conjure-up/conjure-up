@@ -110,6 +110,5 @@ class DeployStatusView(WidgetWrap):
                 unit_w.AgentStatus.set_text(unit['agent-status']['status'])
                 unit_w.Icon.set_text(
                     self.status_icon_state(unit['agent-status']['status']))
-        except Exception as e:
-            self.app.log.exception(e)
-            self.app.ui.show_exception_message(e)
+        except Exception:
+            raise
