@@ -1,4 +1,5 @@
 import asyncio
+import errno
 import inspect
 from pathlib import Path
 
@@ -115,6 +116,13 @@ ModelSettled = Event('ModelSettled')
 PostDeployComplete = Event('PostDeployComplete')
 
 
+# Keep a list of exceptions we know that shouldn't be logged
+# into sentry.
+NOTRACK_EXCEPTIONS = [
+    lambda exc: exc is OSError and exc.errno == errno.ENOSPC
+]
+
+
 def unhandled_input(key):
     if key in ['q', 'Q']:
         Shutdown.set()
@@ -134,7 +142,7 @@ def handle_exception(loop, context):
     exc = context['exception']
 
     track_exception(str(exc))
-    if not app.noreport:
+    if not app.noreport or any(pred(exc) for pred in NOTRACK_EXCEPTIONS):
         try:
             exc_info = (type(exc), exc, exc.__traceback__)
             app.sentry.captureException(exc_info, tags={
@@ -152,10 +160,7 @@ def handle_exception(loop, context):
     app.log.exception('Unhandled exception', exc_info=exc)
 
     if app.headless:
-        if hasattr(exc, 'user_message'):
-            msg = exc.user_message
-        else:
-            msg = str(exc)
+        msg = str(exc)
         utils.error(msg)
         Shutdown.set(1)
     else:

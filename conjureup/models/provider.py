@@ -485,9 +485,7 @@ Schema = [
 
 class SchemaError(Exception):
     def __init__(self, cloud):
-        super().__init__("Credentials Error: Could not find schema for: "
-                         "{}".format(cloud))
-        self.user_message = (
+        super().__init__(
             "Unable to find credentials for {}, "
             "you can double check what credentials you "
             "do have available by running "

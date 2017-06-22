@@ -32,9 +32,8 @@ class SpellPickerController:
         elif app.endpoint_type == EndpointType.LOCAL_SEARCH:
             spells = utils.find_spells_matching(app.argv.spell)
         else:
-            e = Exception("Unexpected endpoint type {}".format(
+            raise Exception("Unexpected endpoint type {}".format(
                 app.endpoint_type))
-            app.ui.show_exception_message(e)
 
         # add subdir of spells-dir to spell dict for bundle readme view:
         for category, spell in spells:
