@@ -48,6 +48,7 @@ if [[ -d $SNAP_COMMON/lxd ]]; then
 fi
 
 if [[ -f $SNAP_COMMON/lxd/unix.socket ]]; then
+    groupadd lxd || true
     chown root:lxd "$SNAP_COMMON/lxd/unix.socket"
     chmod 0660 "$SNAP_COMMON/lxd/unix.socket"
 fi

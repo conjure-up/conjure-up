@@ -19,12 +19,6 @@ class LXDInvalidUserError(Exception):
     pass
 
 
-class LXDInvalidGroupError(Exception):
-    """ LXD group does not exist, should be created
-    """
-    pass
-
-
 class BaseLXDSetupController:
     def __init__(self):
         snap_user_data = os.environ.get('SNAP_USER_DATA', None)
@@ -48,25 +42,15 @@ class BaseLXDSetupController:
         """ Makes sure the user is in the LXD group so they can
         access the daemon
         """
-        try:
-            lxd_group = grp.getgrnam('lxd')
-            if os.environ.get('USER', None) not in lxd_group.gr_mem:
-                raise LXDInvalidUserError(
-                    "Your user does not exist in the LXD group, "
-                    "you can create it with:\n\n"
-                    " $ sudo usermod -a -G lxd $USER"
-                    "\n\n"
-                    "Once complete either log your user out completely, "
-                    "reboot, or run: \n\n"
-                    " $ newgrp lxd"
-                )
-        except KeyError:
-            raise LXDInvalidGroupError(
-                "LXD Group does not exist, you can create it with:\n\n"
-                " $ sudo groupadd lxd && sudo usermod -a -G lxd $USER"
+        lxd_group = grp.getgrnam('lxd')
+        if os.environ.get('USER', None) not in lxd_group.gr_mem:
+            raise LXDInvalidUserError(
+                "Your user does not exist in the LXD group, "
+                "you can create it with:\n\n"
+                " $ sudo usermod -a -G lxd $USER"
                 "\n\n"
-                "Once complete either log your user out completely, reboot, "
-                "or run: \n\n"
+                "Once complete either log your user out completely, "
+                "reboot, or run: \n\n"
                 " $ newgrp lxd"
             )
 
