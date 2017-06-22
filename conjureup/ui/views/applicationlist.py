@@ -36,7 +36,7 @@ class ApplicationWidget(WidgetWrap):
         return self._selectable
 
     def update(self):
-        self.unit_w.set_text("Units: {:4d}".format(self.application.num_units))
+        self.unit_w.set_text("Units: {:4}".format(self.application.num_units))
 
     def build_widgets(self, maxlen):
         num_str = "{}".format(self.application.num_units)
