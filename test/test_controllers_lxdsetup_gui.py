@@ -102,12 +102,18 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.lxdsetup.common.parse_version'
         )
         self.mock_parse_version = self.parse_version_patcher.start()
+        self.grp_patcher = patch(
+            'conjureup.controllers.lxdsetup.common.grp'
+        )
+        self.mock_grp = self.grp_patcher.start()
+
         events.Shutdown.clear()
 
         self.controller = LXDSetupController()
         self.controller.flag_file = MagicMock()
         self.controller.next_screen = MagicMock()
         self.controller.set_default_profile = MagicMock()
+        self.controller.can_user_acces_lxd = MagicMock()
         self.mock_utils.snap_version.return_value = parse_version('2.25')
         self.mock_parse_version.return_value = parse_version('2.25')
 
@@ -118,6 +124,7 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
         self.app_patcher.stop()
         self.ev_app_patcher.stop()
         self.parse_version_patcher.stop()
+        self.grp_patcher.stop()
 
     def test_snap_version_incompatible(self):
         """ Test that an invalid snap version fails correctly

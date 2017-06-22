@@ -8,6 +8,7 @@ from urwid import ExitMainLoop
 
 from conjureup import utils
 from conjureup.app_config import app
+from conjureup.controllers.lxdsetup.common import LXDInvalidUserError
 from conjureup.telemetry import track_exception
 
 
@@ -119,7 +120,8 @@ PostDeployComplete = Event('PostDeployComplete')
 # Keep a list of exceptions we know that shouldn't be logged
 # into sentry.
 NOTRACK_EXCEPTIONS = [
-    lambda exc: exc is OSError and exc.errno == errno.ENOSPC
+    lambda exc: isinstance(exc, OSError) and exc.errno == errno.ENOSPC,
+    lambda exc: isinstance(exc, LXDInvalidUserError)
 ]
 
 
@@ -142,7 +144,7 @@ def handle_exception(loop, context):
     exc = context['exception']
 
     track_exception(str(exc))
-    if not app.noreport or any(pred(exc) for pred in NOTRACK_EXCEPTIONS):
+    if not (app.noreport or any(pred(exc) for pred in NOTRACK_EXCEPTIONS)):
         try:
             exc_info = (type(exc), exc, exc.__traceback__)
             app.sentry.captureException(exc_info, tags={
