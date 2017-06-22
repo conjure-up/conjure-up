@@ -353,6 +353,9 @@ def main():
     app.sentry = raven.Client(
         dsn=SENTRY_DSN,
         release=VERSION,
+        processors=(
+            'conjureup.utils.SanitizeDataProcessor',
+        )
     )
 
     track_screen("Application Start")
