@@ -1,7 +1,7 @@
+import grp
 import os
 import textwrap
 import time
-import grp
 from functools import partial
 from pathlib import Path
 from tempfile import NamedTemporaryFile

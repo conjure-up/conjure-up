@@ -8,11 +8,11 @@ from urwid import ExitMainLoop
 
 from conjureup import utils
 from conjureup.app_config import app
-from conjureup.telemetry import track_exception
 from conjureup.controllers.lxdsetup.common import (
-    LXDInvalidUserError,
-    LXDInvalidGroupError
+    LXDInvalidGroupError,
+    LXDInvalidUserError
 )
+from conjureup.telemetry import track_exception
 
 
 class Event(asyncio.Event):
