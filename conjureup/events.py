@@ -9,6 +9,10 @@ from urwid import ExitMainLoop
 from conjureup import utils
 from conjureup.app_config import app
 from conjureup.telemetry import track_exception
+from conjureup.controllers.lxdsetup.common import (
+    LXDInvalidUserError,
+    LXDInvalidGroupError
+)
 
 
 class Event(asyncio.Event):
@@ -119,7 +123,8 @@ PostDeployComplete = Event('PostDeployComplete')
 # Keep a list of exceptions we know that shouldn't be logged
 # into sentry.
 NOTRACK_EXCEPTIONS = [
-    lambda exc: exc is OSError and exc.errno == errno.ENOSPC
+    lambda exc: exc is OSError and exc.errno == errno.ENOSPC,
+    lambda exc: exc is LXDInvalidUserError or exc is LXDInvalidGroupError
 ]
 
 
