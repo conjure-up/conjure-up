@@ -1,5 +1,44 @@
 # Change Log
 
+## [2.2.2](https://github.com/conjure-up/conjure-up/tree/2.2.2) (2017-06-23)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.2.1...2.2.2)
+
+**Fixed bugs:**
+
+- KeyError: 'details' [\#966](https://github.com/conjure-up/conjure-up/issues/966)
+- Conjure-up is not able to use existing maas provider after snap remove and re-install [\#927](https://github.com/conjure-up/conjure-up/issues/927)
+- better error handling in steps [\#889](https://github.com/conjure-up/conjure-up/issues/889)
+- jaas login failures [\#983](https://github.com/conjure-up/conjure-up/issues/983)
+- port 12001 collides with nomachine users [\#975](https://github.com/conjure-up/conjure-up/issues/975)
+- Warn user if not part of LXD group when deploying localhost [\#973](https://github.com/conjure-up/conjure-up/issues/973)
+- conjure-up doesn't handle "This should \_not\_ be run as root or with sudo." messaging correctly anymore. [\#969](https://github.com/conjure-up/conjure-up/issues/969)
+- JujuAPIError: watcher was stopped [\#965](https://github.com/conjure-up/conjure-up/issues/965)
+- OSError: \[Errno 28\] No space left on device [\#963](https://github.com/conjure-up/conjure-up/issues/963)
+- ValueError: Unknown format code 'd' for object of type 'str' [\#962](https://github.com/conjure-up/conjure-up/issues/962)
+- OSError: \[Errno 28\] No space left on device: '/home/ubuntu/.cache/conjure-up/canonical-kubernetes' [\#959](https://github.com/conjure-up/conjure-up/issues/959)
+- permission denied accessing lxd unix.socket [\#956](https://github.com/conjure-up/conjure-up/issues/956)
+- conjure-up localhost unable to locate liblxc.so.1 [\#955](https://github.com/conjure-up/conjure-up/issues/955)
+- AttributeError: 'str' object has no attribute 'keys' [\#954](https://github.com/conjure-up/conjure-up/issues/954)
+- ValueError list.remove\(x\): x not in list [\#948](https://github.com/conjure-up/conjure-up/issues/948)
+
+**Closed issues:**
+
+- conjure-up unable to obtain a node from MAAS [\#876](https://github.com/conjure-up/conjure-up/issues/876)
+
+**Merged pull requests:**
+
+- Fix JAAS registration [\#984](https://github.com/conjure-up/conjure-up/pull/984) ([johnsca](https://github.com/johnsca))
+- Ignore error attempting to deploy unknown application [\#981](https://github.com/conjure-up/conjure-up/pull/981) ([johnsca](https://github.com/johnsca))
+- Fix "Unknown format code" error [\#980](https://github.com/conjure-up/conjure-up/pull/980) ([johnsca](https://github.com/johnsca))
+- Pick unused port for bundled lxd to listen on [\#978](https://github.com/conjure-up/conjure-up/pull/978) ([battlemidget](https://github.com/battlemidget))
+- Verify running user can access LXD daemon [\#976](https://github.com/conjure-up/conjure-up/pull/976) ([battlemidget](https://github.com/battlemidget))
+- Dont track certain exceptions [\#974](https://github.com/conjure-up/conjure-up/pull/974) ([battlemidget](https://github.com/battlemidget))
+- This prepends the $SNAP/lib to ld\_library\_path [\#972](https://github.com/conjure-up/conjure-up/pull/972) ([battlemidget](https://github.com/battlemidget))
+- Handle clouds with no regions [\#971](https://github.com/conjure-up/conjure-up/pull/971) ([johnsca](https://github.com/johnsca))
+- Make sure LD\_LIBRARY\_PATH is set for our lxd/lxc/redis wrappers [\#968](https://github.com/conjure-up/conjure-up/pull/968) ([battlemidget](https://github.com/battlemidget))
+- Ensures correct permissions on lxd unix.socket [\#958](https://github.com/conjure-up/conjure-up/pull/958) ([battlemidget](https://github.com/battlemidget))
+- Sanitize data sent in automated error reporting [\#979](https://github.com/conjure-up/conjure-up/pull/979) ([johnsca](https://github.com/johnsca))
+
 ## [2.2.1](https://github.com/conjure-up/conjure-up/tree/2.2.1) (2017-06-20)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.2.0...2.2.1)
 
@@ -624,7 +663,6 @@
 - app config screen match wireframe - fixed footer charm description [\#422](https://github.com/conjure-up/conjure-up/issues/422)
 - no way to tell conjure-up where to bootstrap to [\#420](https://github.com/conjure-up/conjure-up/issues/420)
 - can't edit unit count [\#418](https://github.com/conjure-up/conjure-up/issues/418)
-- make conjure-up work on trusty [\#389](https://github.com/conjure-up/conjure-up/issues/389)
 
 **Merged pull requests:**
 
@@ -680,11 +718,6 @@
 
 **Closed issues:**
 
-- split clouds view for existing public clouds and creating new clouds [\#395](https://github.com/conjure-up/conjure-up/issues/395)
-- pressing deploy all should removes the \[configure\]\[deploy\] buttons [\#381](https://github.com/conjure-up/conjure-up/issues/381)
-- snap install issue -- snap.conjure-up.bridge.service failed [\#376](https://github.com/conjure-up/conjure-up/issues/376)
-- spells not sorted in spellpicker view [\#374](https://github.com/conjure-up/conjure-up/issues/374)
-- conjure-up \<spell\> tracebacks [\#371](https://github.com/conjure-up/conjure-up/issues/371)
 - if no clouds are whitelisted \(e.g. openstack-novalxd spell\), an empty list is shown in the newcloud view [\#405](https://github.com/conjure-up/conjure-up/issues/405)
 
 **Merged pull requests:**
@@ -692,27 +725,6 @@
 - Add conjureup0 network bridge [\#404](https://github.com/conjure-up/conjure-up/pull/404) ([battlemidget](https://github.com/battlemidget))
 - fix log path in error view [\#403](https://github.com/conjure-up/conjure-up/pull/403) ([battlemidget](https://github.com/battlemidget))
 - squash download errors if download stream length out of range [\#401](https://github.com/conjure-up/conjure-up/pull/401) ([battlemidget](https://github.com/battlemidget))
-- Fixes \#283 [\#397](https://github.com/conjure-up/conjure-up/pull/397) ([battlemidget](https://github.com/battlemidget))
-- update cloud list view [\#396](https://github.com/conjure-up/conjure-up/pull/396) ([battlemidget](https://github.com/battlemidget))
-- add spell selector hover descriptions [\#394](https://github.com/conjure-up/conjure-up/pull/394) ([battlemidget](https://github.com/battlemidget))
-- remove subheader as it is not part of the new designs [\#393](https://github.com/conjure-up/conjure-up/pull/393) ([battlemidget](https://github.com/battlemidget))
-- Remove bundlereadme controller [\#392](https://github.com/conjure-up/conjure-up/pull/392) ([mikemccracken](https://github.com/mikemccracken))
-- update to reflect new step paths [\#391](https://github.com/conjure-up/conjure-up/pull/391) ([battlemidget](https://github.com/battlemidget))
-- fix deb packaging [\#390](https://github.com/conjure-up/conjure-up/pull/390) ([battlemidget](https://github.com/battlemidget))
-- update readme to add lxd as a requirement [\#388](https://github.com/conjure-up/conjure-up/pull/388) ([battlemidget](https://github.com/battlemidget))
-- Feature git spells registry [\#387](https://github.com/conjure-up/conjure-up/pull/387) ([battlemidget](https://github.com/battlemidget))
-- make use of pep420 [\#386](https://github.com/conjure-up/conjure-up/pull/386) ([battlemidget](https://github.com/battlemidget))
-- update travis,makefile to check isort [\#384](https://github.com/conjure-up/conjure-up/pull/384) ([battlemidget](https://github.com/battlemidget))
-- Patch more dev checks [\#383](https://github.com/conjure-up/conjure-up/pull/383) ([battlemidget](https://github.com/battlemidget))
-- go directly to status after deploy-all [\#382](https://github.com/conjure-up/conjure-up/pull/382) ([mikemccracken](https://github.com/mikemccracken))
-- fix imports in utils [\#380](https://github.com/conjure-up/conjure-up/pull/380) ([battlemidget](https://github.com/battlemidget))
-- Add openstack-base spell [\#379](https://github.com/conjure-up/conjure-up/pull/379) ([mikemccracken](https://github.com/mikemccracken))
-- Do not show add-credential button until valid [\#378](https://github.com/conjure-up/conjure-up/pull/378) ([mikemccracken](https://github.com/mikemccracken))
-- rework deploy screen [\#377](https://github.com/conjure-up/conjure-up/pull/377) ([mikemccracken](https://github.com/mikemccracken))
-- Fixes \#374 [\#375](https://github.com/conjure-up/conjure-up/pull/375) ([battlemidget](https://github.com/battlemidget))
-- add alternative install method [\#373](https://github.com/conjure-up/conjure-up/pull/373) ([battlemidget](https://github.com/battlemidget))
-- Fixes \#371 [\#372](https://github.com/conjure-up/conjure-up/pull/372) ([battlemidget](https://github.com/battlemidget))
-- deb packaging updates [\#370](https://github.com/conjure-up/conjure-up/pull/370) ([battlemidget](https://github.com/battlemidget))
 - Fixes \#402 [\#407](https://github.com/conjure-up/conjure-up/pull/407) ([battlemidget](https://github.com/battlemidget))
 - Fixes \#405 [\#406](https://github.com/conjure-up/conjure-up/pull/406) ([battlemidget](https://github.com/battlemidget))
 - add journald logging [\#398](https://github.com/conjure-up/conjure-up/pull/398) ([battlemidget](https://github.com/battlemidget))
