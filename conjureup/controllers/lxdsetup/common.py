@@ -30,7 +30,10 @@ class BaseLXDSetupController:
         if self.flag_file.exists():
             # Cleanup from previous runs
             self.flag_file.unlink()
-        self.ifaces = utils.get_physical_network_interfaces()
+        # FIXME: Temporarily disable interface selection because we use "auto"
+        # until we can figure out how to get more consistent and reliable
+        # manual binding and improve the UI to allow multiple selection
+        self.ifaces = [None]  # utils.get_physical_network_interfaces()
 
     @property
     def is_snap_compatible(self):
@@ -64,7 +67,7 @@ class BaseLXDSetupController:
                 "You must be on a snapd version of 2.25 or newer. "
                 "Please run `sudo apt update && sudo apt dist-upgrade`.\n\n"
                 "Once complete, re-run conjure-up.")
-        if not isinstance(iface, str):
+        if not isinstance(iface, (str, type(None))):
             iface = iface.network_interface.value
         self.can_user_acces_lxd()
         self.lxd_init(iface)
