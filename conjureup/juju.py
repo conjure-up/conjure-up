@@ -202,13 +202,13 @@ def has_jaas_auth():
 async def register_controller(name, endpoint, email, password, twofa,
                               timeout=30, fail_cb=None, timeout_cb=None):
     app.log.info('Registering controller {}'.format(name))
+    cmd = ['juju', 'login', '-B', endpoint, '-c', name]
     proc = await asyncio.create_subprocess_exec(
-        'juju', 'login', '-B', endpoint,
-        stdin=PIPE, stdout=PIPE, stderr=PIPE,
+        *cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE,
     )
     try:
         stdin = b''.join(b'%s\n' % bytes(f, 'utf8')
-                         for f in [name, email, password, twofa])
+                         for f in [email, password, twofa])
         stdout, stderr = await asyncio.wait_for(proc.communicate(stdin),
                                                 timeout)
         stdout = stdout.decode('utf8')
@@ -233,7 +233,7 @@ async def register_controller(name, endpoint, email, password, twofa,
             fail_cb(stderr)
             return False
         else:
-            raise CalledProcessError(stderr)
+            raise CalledProcessError(cmd, stderr)
     app.log.info('Registration complete')
     return True
 
