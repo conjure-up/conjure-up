@@ -645,6 +645,7 @@ class SanitizeDataProcessor(SanitizePasswordsProcessor):
     Performs the same santiziations as the SanitizePasswordsProcessor, but
     also sanitizes values.
     """
+
     def sanitize(self, key, value):
         value = super().sanitize(key, value)
 
