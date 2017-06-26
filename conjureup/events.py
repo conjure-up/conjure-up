@@ -8,7 +8,10 @@ from urwid import ExitMainLoop
 
 from conjureup import utils
 from conjureup.app_config import app
-from conjureup.controllers.lxdsetup.common import LXDInvalidUserError
+from conjureup.controllers.lxdsetup.common import (
+    LXDInvalidUserError,
+    LXDSnapVersionError
+)
 from conjureup.telemetry import track_exception
 
 
@@ -121,7 +124,8 @@ PostDeployComplete = Event('PostDeployComplete')
 # into sentry.
 NOTRACK_EXCEPTIONS = [
     lambda exc: isinstance(exc, OSError) and exc.errno == errno.ENOSPC,
-    lambda exc: isinstance(exc, LXDInvalidUserError)
+    lambda exc: isinstance(exc, (LXDInvalidUserError,
+                                 LXDSnapVersionError))
 ]
 
 
