@@ -19,6 +19,12 @@ class LXDInvalidUserError(Exception):
     pass
 
 
+class LXDSnapVersionError(Exception):
+    """ Snap version is not compatible
+    """
+    pass
+
+
 class BaseLXDSetupController:
     def __init__(self):
         snap_user_data = os.environ.get('SNAP_USER_DATA', None)
@@ -60,7 +66,7 @@ class BaseLXDSetupController:
     def setup(self, iface):
         # Make sure we're using a newer snapd
         if not self.is_snap_compatible:
-            raise Exception(
+            raise LXDSnapVersionError(
                 "You must be on a snapd version of 2.25 or newer. "
                 "Please run `sudo apt update && sudo apt dist-upgrade`.\n\n"
                 "Once complete, re-run conjure-up.")
