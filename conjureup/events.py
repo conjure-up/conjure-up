@@ -143,8 +143,8 @@ def handle_exception(loop, context):
     Error.set()
     exc = context['exception']
 
-    track_exception(str(exc))
     if not (app.noreport or any(pred(exc) for pred in NOTRACK_EXCEPTIONS)):
+        track_exception(str(exc))
         try:
             exc_info = (type(exc), exc, exc.__traceback__)
             app.sentry.captureException(exc_info, tags={
