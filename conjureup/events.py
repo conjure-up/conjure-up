@@ -188,6 +188,9 @@ async def shutdown_watcher():
         app.ui.show_shutdown_message()
 
     try:
+        # Store application configuration state
+        await app.save()
+
         if app.juju.authenticated:
             app.log.info('Disconnecting model')
             await app.juju.client.disconnect()

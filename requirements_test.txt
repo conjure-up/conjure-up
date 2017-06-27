@@ -7,3 +7,4 @@ tox
 q
 ipython
 ipdb
+fakeredis
