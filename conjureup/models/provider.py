@@ -247,11 +247,6 @@ class Azure(BaseProvider):
             widget=StringEditor(),
             key='subscription-id'
         )
-        self.tenant_id = Field(
-            label='tenant id',
-            widget=StringEditor(),
-            key='tenant-id'
-        )
         self.application_password = Field(
             label='application password',
             widget=PasswordEditor(),
@@ -262,7 +257,6 @@ class Azure(BaseProvider):
         return [
             self.application_id,
             self.subscription_id,
-            self.tenant_id,
             self.application_password
         ]
 
