@@ -118,6 +118,9 @@ class AppConfig:
     # Redis State storage endpoint
     state = None
 
+    # Sentry endpoint
+    sentry = None,
+
     # exit code for conjure-up to terminate with
     exit_code = 0
 
@@ -140,7 +143,7 @@ class AppConfig:
         blacklist = ['loop', 'log', 'maas',
                      'juju', 'ui', 'bootstrap',
                      'metadata_controller', 'state',
-                     'env']
+                     'env', 'sentry']
         new_dict = {}
         for k, v in self.__dict__.items():
             if k.startswith('__') or callable(getattr(self, k)):

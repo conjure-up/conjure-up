@@ -203,7 +203,6 @@ async def shutdown_watcher():
             # cancel all other tasks
             if getattr(task, '_coro', None) is not shutdown_watcher:
                 task.cancel()
-        app.loop.stop()
-    except Exception:
-        app.log.exception('Error in cleanup code')
-        raise
+    except Exception as e:
+        app.log.exception('Error in cleanup code: {}'.format(e))
+    app.loop.stop()
