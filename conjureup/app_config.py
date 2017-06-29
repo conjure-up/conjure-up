@@ -82,6 +82,9 @@ class AppConfig:
     # Current Juju cloud region
     current_region = None
 
+    # Current credential name selected
+    current_credential = None
+
     # Current UI View rendered
     current_view = None
 
