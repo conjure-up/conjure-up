@@ -140,7 +140,7 @@ class AppConfig:
         every invocation of conjure-up. Also blacklist env for security
         precautions.
         """
-        blacklist = ['loop', 'log', 'maas',
+        blacklist = ['loop', 'log', 'maas', 'argv',
                      'juju', 'ui', 'bootstrap',
                      'metadata_controller', 'state',
                      'env', 'sentry']
