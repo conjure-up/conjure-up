@@ -180,6 +180,9 @@ class AppConfig:
             setattr(self, k, v)
 
     async def save(self):
+        if not self.config.get('spell'):
+            # don't bother saving if they haven't even picked a spell yet
+            return
         self.log.info('Storing conjure-up state')
         if self.juju.authenticated:
             await self.juju.client.set_config(
