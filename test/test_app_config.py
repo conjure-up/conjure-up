@@ -106,6 +106,6 @@ class AppConfigTestCase(unittest.TestCase):
         assert self.app.current_controller == 'moo'
 
     def test_config_guard_unknown_attribute(self):
-        "app_config.test_config_gard_unknown_attribute"
+        "app_config.test_config_guard_unknown_attribute"
         with self.assertRaises(Exception):
             self.app.chimichanga = "Yum"
