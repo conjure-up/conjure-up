@@ -163,7 +163,7 @@ class AppConfig:
 
     async def save(self):
         self.log.info('Storing conjure-up state')
-        if self.juju.is_authenticated:
+        if self.juju.authenticated:
             await self.juju.client.set_config(
                 {'extra-info': self.to_json()})
             self.log.info('State saved in model config')
@@ -176,7 +176,7 @@ class AppConfig:
     async def restore(self):
         self.log.info('Attempting to load conjure-up cached state.')
         try:
-            if self.juju.is_authenticated:
+            if self.juju.authenticated:
                 result = await self.juju.client.get_config()
                 if 'extra-info' in result:
                     self.log.info(
