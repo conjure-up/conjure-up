@@ -121,6 +121,9 @@ class AppConfig:
     # Sentry endpoint
     sentry = None,
 
+    # Spells index
+    spells_index = None,
+
     # exit code for conjure-up to terminate with
     exit_code = 0
 
@@ -140,7 +143,7 @@ class AppConfig:
         every invocation of conjure-up. Also blacklist env for security
         precautions.
         """
-        blacklist = ['loop', 'log', 'maas', 'argv',
+        blacklist = ['loop', 'log', 'maas', 'argv', 'spells_index',
                      'juju', 'ui', 'bootstrap',
                      'metadata_controller', 'state',
                      'env', 'sentry']
