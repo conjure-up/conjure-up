@@ -127,13 +127,22 @@ class AppConfig:
     # exit code for conjure-up to terminate with
     exit_code = 0
 
+    def __setattr__(self, name, value):
+        """ Gaurds against setting attributes that don't already exist
+        """
+        try:
+            getattr(AppConfig, name)
+        except AttributeError:
+            raise Exception(
+                "Attempted to set an unknown attribute for application config")
+        setattr(self.__class__, name, value)
+
     @property
     def _redis_key(self):
         """ Internal, formatted redis namespace key
         """
-        return "conjure-up.{}.{}.{}".format(self.config['spell'],
-                                            self.current_controller,
-                                            self.current_model)
+        return "conjure-up.{}.{}".format(self.current_cloud_type,
+                                         self.config['spell'])
 
     def to_json(self):
         """

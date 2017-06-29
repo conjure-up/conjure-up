@@ -45,6 +45,7 @@ class AppConfigTestCase(unittest.TestCase):
         self.app.state = fakeredis.FakeStrictRedis()
         self.app.current_controller = "fake-tester-controller"
         self.app.current_model = "fake-tester-model"
+        self.app.current_cloud_type = "ec2"
         self.app.config = {'spell': 'kubernetes-core'}
 
         self.app.juju.client = AsyncMock()
@@ -52,7 +53,6 @@ class AppConfigTestCase(unittest.TestCase):
 
     def test_config_redis_save(self):
         "app_config.test_config_redis_save"
-
         self.app.juju.authenticated = False
         with test_loop() as loop:
             loop.run_until_complete(self.app.save())
@@ -104,3 +104,8 @@ class AppConfigTestCase(unittest.TestCase):
         with test_loop() as loop:
             loop.run_until_complete(self.app.restore())
         assert self.app.current_controller == 'moo'
+
+    def test_config_guard_unknown_attribute(self):
+        "app_config.test_config_gard_unknown_attribute"
+        with self.assertRaises(Exception):
+            self.app.chimichanga = "Yum"
