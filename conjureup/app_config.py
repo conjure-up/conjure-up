@@ -138,7 +138,7 @@ class AppConfig:
         except AttributeError:
             raise Exception(
                 "Attempted to set an unknown attribute for application config")
-        setattr(self.__class__, name, value)
+        super().__setattr__(name, value)
 
     @property
     def _redis_key(self):
