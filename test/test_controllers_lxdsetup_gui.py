@@ -114,6 +114,7 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
         self.controller.next_screen = MagicMock()
         self.controller.set_default_profile = MagicMock()
         self.controller.can_user_acces_lxd = MagicMock()
+        self.controller.kill_dnsmasq = MagicMock()
         self.mock_utils.snap_version.return_value = parse_version('2.25')
         self.mock_utils.get_open_port.return_value = '12001'
         self.mock_parse_version.return_value = parse_version('2.25')
