@@ -21,25 +21,9 @@ class AppConfigTestCase(unittest.TestCase):
     def setUp(self):
         self.expected_keys = [
             'config',
-            'bundles',
-            'current_bundle',
-            'argv',
-            'jaas_ok',
-            'jaas_controller',
-            'is_jaas',
             'current_model',
             'current_controller',
-            'current_cloud',
-            'current_cloud_type',
-            'current_region',
-            'current_view',
-            'session_id',
-            'notrack',
-            'noreport',
-            'complete',
-            'headless',
-            'endpoint_type',
-            'exit_code'
+            'current_cloud_type'
         ]
         self.app = AppConfig()
         self.app.state = fakeredis.FakeStrictRedis()
@@ -58,7 +42,8 @@ class AppConfigTestCase(unittest.TestCase):
             loop.run_until_complete(self.app.save())
 
         results = self.app.state.get(self.app._redis_key)
-        json.loads(results.decode('utf8')).keys() == self.expected_keys
+        assert set(json.loads(results.decode('utf8')).keys()) == set(
+            self.expected_keys)
 
     def test_config_juju_model_save(self):
         "app_config.test_config_juju_model_save"
