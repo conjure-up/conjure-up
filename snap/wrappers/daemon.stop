@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 
+export LXD_DIR="${SNAP_COMMON}/lxd/"
 export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 export LD_LIBRARY_PATH
 LD_LIBRARY_PATH=$SNAP/lib:$SNAP/usr/lib/$(uname -p)-linux-gnu/
@@ -9,20 +10,51 @@ if [ -d /sys/kernel/security/apparmor ] && [ "$(cat /proc/self/attr/current)" !=
     exec aa-exec -p unconfined -- "$0" "$@"
 fi
 
-## LXD
-if [ -e "${SNAP_COMMON}/lxd.pid" ]; then
-    PID=$(cat "${SNAP_COMMON}/lxd.pid")
-    /bin/kill -SIGPWR "$PID"
-    COUNT=0
-    while [ "$COUNT" != "30" ]; do
-        sleep 1
-        COUNT=$((COUNT+1))
-        ps "$PID" >/dev/null 2>&1 || break
-    done
-    ps "$PID" >/dev/null 2>&1 && /bin/kill -9 "$PID"
+# Detect stop reason
+STATUS=$(mktemp)
+chroot /proc/1/root snap changes > "${STATUS}" || true
+
+reason="host shutdown"
+if ! lxc finger >/dev/null 2>&1; then
+    reason="crashed"
+elif grep -q 'Doing.*Auto-refresh.* "conjure-up"' "${STATUS}"; then
+    reason="snap refresh"
+elif grep -q 'Doing.*Refresh "conjure-up"' "${STATUS}"; then
+    reason="snap refresh"
+elif grep -q 'Doing.*Install "conjure-up"' "${STATUS}"; then
+    reason="snap refresh"
+elif grep -q 'Doing.*Remove "conjure-up"' "${STATUS}"; then
+    reason="snap removal"
 fi
 
+rm "${STATUS}"
+echo "=> Stop reason is: ${reason}"
+
+# Handle refreshes
+if [ "${reason}" = "snap refresh" ]; then
+    echo "=> Stopping LXD"
+    if [ -e "${SNAP_COMMON}/lxd.pid" ]; then
+        PID=$(cat "${SNAP_COMMON}/lxd.pid")
+        /bin/kill "$PID"
+        COUNT=0
+        while [ "$COUNT" != "30" ]; do
+            sleep 1
+            COUNT=$((COUNT+1))
+            ps "$PID" >/dev/null 2>&1 || break
+        done
+        ps "$PID" >/dev/null 2>&1 && /bin/kill -9 "$PID"
+    fi
+
+    exit 0
+fi
+
+# Shutdown the daemons
+## LXD
+echo "=> Stopping LXD (with container shutdown)"
+lxd shutdown || true
+
 ## LXCFS
+echo "=> Stopping LXCFS"
 if [ -e "${SNAP_COMMON}/lxcfs.pid" ]; then
     PID=$(cat "${SNAP_COMMON}/lxcfs.pid")
     /bin/kill "$PID"
