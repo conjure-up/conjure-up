@@ -156,7 +156,7 @@ class AppConfig:
         precautions.
         """
         blacklist = ['loop', 'log', 'maas', 'argv', 'spells_index',
-                     'juju', 'ui', 'bootstrap', 'endpoint_type'
+                     'juju', 'ui', 'bootstrap', 'endpoint_type',
                      'metadata_controller', 'state',
                      'env', 'sentry']
         new_dict = {}
