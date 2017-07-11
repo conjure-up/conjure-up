@@ -18,6 +18,7 @@ import raven
 import redis
 import yaml
 from prettytable import PrettyTable
+from raven.transport.requests import RequestsHTTPTransport
 from termcolor import colored
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
@@ -368,7 +369,7 @@ def main():
     app.sentry = raven.Client(
         dsn=SENTRY_DSN,
         release=VERSION,
-        transport=raven.transport.requests.RequestsHTTPTransport,
+        transport=RequestsHTTPTransport,
         processors=(
             'conjureup.utils.SanitizeDataProcessor',
         )
