@@ -368,6 +368,7 @@ def main():
     app.sentry = raven.Client(
         dsn=SENTRY_DSN,
         release=VERSION,
+        transport=raven.transport.requests.RequestsHTTPTransport,
         processors=(
             'conjureup.utils.SanitizeDataProcessor',
         )
