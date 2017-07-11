@@ -13,6 +13,7 @@ import sys
 import uuid
 from collections import Mapping
 from contextlib import contextmanager
+from functools import partial
 from pathlib import Path
 from subprocess import PIPE, Popen, check_call, check_output
 
@@ -200,42 +201,44 @@ async def run_step(step, msg_cb, event_name=None):
 
 
 def sentry_report(message=None, exc_info=None, tags=None, **kwargs):
+    app.loop.run_in_executor(None, partial(_sentry_report,
+                                           message, exc_info, tags, **kwargs))
+
+
+def _sentry_report(message=None, exc_info=None, tags=None, **kwargs):
     if app.noreport:
         return
 
-    async def _sentry_report(event_type, kwargs):
-        try:
-            default_tags = {
-                'spell': app.config.get('spell'),
-                'cloud_type': app.current_cloud_type,
-                'region': app.current_region,
-                'jaas': app.is_jaas,
-                'headless': app.headless,
-                'juju_version': juju_version(),
-                'lxd_version': lxd_version(),
-            }
+    try:
+        default_tags = {
+            'spell': app.config.get('spell'),
+            'cloud_type': app.current_cloud_type,
+            'region': app.current_region,
+            'jaas': app.is_jaas,
+            'headless': app.headless,
+            'juju_version': juju_version(),
+            'lxd_version': lxd_version(),
+        }
 
-            if message is not None and exc_info is None:
-                event_type = 'raven.events.Message'
-                kwargs['message'] = message
-                if 'level' not in kwargs:
-                    kwargs['level'] = logging.WARNING
+        if message is not None and exc_info is None:
+            event_type = 'raven.events.Message'
+            kwargs['message'] = message
+            if 'level' not in kwargs:
+                kwargs['level'] = logging.WARNING
+        else:
+            event_type = 'raven.events.Exception'
+            if exc_info is None or exc_info is True:
+                kwargs['exc_info'] = sys.exc_info()
             else:
-                event_type = 'raven.events.Exception'
-                if exc_info is None or exc_info is True:
-                    kwargs['exc_info'] = sys.exc_info()
-                else:
-                    kwargs['exc_info'] = exc_info
-                if 'level' not in kwargs:
-                    kwargs['level'] = logging.ERROR
+                kwargs['exc_info'] = exc_info
+            if 'level' not in kwargs:
+                kwargs['level'] = logging.ERROR
 
-            kwargs['tags'] = dict(default_tags, **(tags or {}))
+        kwargs['tags'] = dict(default_tags, **(tags or {}))
 
-            app.sentry.capture(event_type, **kwargs)
-        except Exception:
-            app.log.exception('Error reporting error')
-
-    app.loop.create_task(_sentry_report())
+        app.sentry.capture(event_type, **kwargs)
+    except Exception:
+        app.log.exception('Error reporting error')
 
 
 def can_sudo(password=None):
