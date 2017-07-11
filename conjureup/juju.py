@@ -2,6 +2,7 @@
 """
 import asyncio
 import json
+import logging
 import os
 from concurrent import futures
 from pathlib import Path
@@ -12,7 +13,7 @@ import yaml
 from bundleplacer.charmstore_api import CharmStoreID
 from juju.model import Model
 
-from conjureup import consts, events
+from conjureup import consts, events, utils
 from conjureup.app_config import app
 from conjureup.utils import is_linux, juju_path, run, spew
 
@@ -333,7 +334,7 @@ def get_regions(cloud):
     if not isinstance(result, dict):
         msg = 'Unexpected response from regions: {}'.format(result)
         app.log.error(msg)
-        app.sentry.captureMessage(msg)
+        utils.sentry_report(msg, level=logging.ERROR)
         result = {}
     return result
 
