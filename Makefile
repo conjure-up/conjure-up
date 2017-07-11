@@ -13,6 +13,12 @@ sysdeps:
 	@sudo apt-get update
 	@sudo apt-get -qqyf install jq python3-yaml bsdtar bridge-utils software-properties-common snapcraft python3-dev tox shellcheck build-essential
 
+travis-sysdeps:
+	@sudo add-apt-repository -y ppa:ubuntu-lxc/lxd-stable
+	@sudo apt-get update -q
+	@sudo apt-get -y install jq bsdtar python3-dev make snapd python-tox lxd lxd-client redis-server
+	@sudo snap install juju --classic --edge
+
 .PHONY: install
 install: snap
 	@sudo snap install $(NAME)_$(VERSION)_amd64.snap --classic --dangerous
