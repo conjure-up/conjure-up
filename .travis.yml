@@ -30,3 +30,5 @@ script:
   - tox -e py35,flake,isort
   - tox -e conjure-dev
   - sudo -E su $USER -c "source conjure-dev/bin/activate && conjure-up -d --notrack --noreport ghost localhost test-controller test-model"
+after_script:
+  - cat ~/.cache/conjure-up/ghost/steps/*.err
