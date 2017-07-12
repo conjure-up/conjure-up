@@ -287,6 +287,8 @@ def snap_version():
         name_version_str = cmd.stdout.decode().splitlines()[0]
         try:
             name, version = name_version_str.split()
+            if '~' in version:
+                version, series = version.split('~')
             return parse_version(version)
         except:
             raise Exception("Could not determine Snap version.")

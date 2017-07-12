@@ -133,6 +133,9 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
         self.mock_utils.snap_version.return_value = parse_version('2.21')
         with self.assertRaises(Exception):
             self.controller.setup('iface')
+        self.mock_utils.snap_version.return_value = parse_version('2.21~14.04')
+        with self.assertRaises(Exception):
+            self.controller.setup('iface')
 
     def test_setup_success(self):
         "lxdsetup.gui.test_setup_success"
@@ -160,7 +163,6 @@ class LXDSetupGUIFinishTestCase(unittest.TestCase):
         success = MagicMock(returncode=0)
 
         self.mock_utils.run_script.side_effect = [
-            success,  # lxd init auto
             success,  # lxd config get
             success,  # lxc storage create default disk
             success,  # lxc network show conjureup1
