@@ -15,7 +15,9 @@ notifications:
 install:
   - make travis-sysdeps
 env:
-  - PATH=/snap/bin:$PATH
+  global:
+    - PATH=/snap/bin:$PATH
+    - CONJUREUP_REGISTRY_BRANCH=master
 before_script:
   - sudo addgroup lxd || true
   - sudo usermod -a -G lxd $USER || true
@@ -28,3 +30,5 @@ script:
   - tox -e py35,flake,isort
   - tox -e conjure-dev
   - sudo -E su $USER -c "source conjure-dev/bin/activate && conjure-up -d --notrack --noreport ghost localhost test-controller test-model"
+after_script:
+  - cat ~/.cache/conjure-up/ghost/steps/*.err
