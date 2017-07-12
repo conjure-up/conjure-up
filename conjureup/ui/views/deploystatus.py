@@ -100,7 +100,7 @@ class DeployStatusView(WidgetWrap):
         """
         try:
             unit_w.Machine.set_text(unit.get('machine', '-'))
-            unit_w.PublicAddress.set_text(unit['public-address'])
+            unit_w.PublicAddress.set_text(unit.get('public-address') or '')
             unit_w.WorkloadInfo.set_text(unit['workload-status']['info'])
             if unit['workload-status']['status'] != 'unknown':
                 unit_w.AgentStatus.set_text(unit['workload-status']['status'])
