@@ -15,7 +15,9 @@ notifications:
 install:
   - make travis-sysdeps
 env:
-  - PATH=/snap/bin:$PATH
+  global:
+    - PATH=/snap/bin:$PATH
+    - CONJUREUP_REGISTRY_BRANCH=master
 before_script:
   - sudo addgroup lxd || true
   - sudo usermod -a -G lxd $USER || true
