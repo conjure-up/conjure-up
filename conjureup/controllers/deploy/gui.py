@@ -228,6 +228,10 @@ class DeployController:
 
     async def _do_deploy(self, application, msg_cb):
         "launches deploy in background for application"
+        if application not in self.undeployed_applications:
+            app.log.error('Skipping attempt to deploy unavailable '
+                          '{}'.format(application))
+            return
         self.undeployed_applications.remove(application)
 
         default_series = app.metadata_controller.series

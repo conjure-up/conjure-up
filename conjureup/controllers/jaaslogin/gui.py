@@ -1,4 +1,5 @@
 import asyncio
+from subprocess import CalledProcessError
 
 from conjureup import controllers, events, juju
 from conjureup.app_config import app
@@ -14,6 +15,21 @@ class JaaSLoginController:
         self.view = None
 
     def render(self, error=None):
+        app.jaas_controller = 'jaas'
+        self.render_interstitial()
+        app.loop.create_task(self._try_token_auth(error))
+
+    async def _try_token_auth(self, error):
+        app.log.info('Attempting to register JAAS with saved token')
+        try:
+            await juju.register_controller(app.jaas_controller,
+                                           JAAS_DOMAIN,
+                                           '', '', '')
+            controllers.use('deploy').render()
+        except CalledProcessError:
+            self.show_login_screen(error)
+
+    def show_login_screen(self, error):
         track_screen("Login to JaaS")
         app.ui.set_header(
             title="Login to JaaS",
@@ -28,7 +44,6 @@ class JaaSLoginController:
         self.render_interstitial()
 
     async def _register(self, email, password, twofa):
-        app.jaas_controller = 'jaas'
         if not await juju.register_controller(app.jaas_controller,
                                               JAAS_DOMAIN,
                                               email, password, twofa,

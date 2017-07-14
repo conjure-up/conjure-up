@@ -51,7 +51,7 @@ if [[ -d $SNAP_COMMON/lxd ]]; then
     chown root:root "$SNAP_COMMON/lxd"
 fi
 
-if [[ -f $SNAP_COMMON/lxd/unix.socket ]]; then
+if [[ -e $SNAP_COMMON/lxd/unix.socket ]]; then
     chown root:lxd "$SNAP_COMMON/lxd/unix.socket"
     chmod 0660 "$SNAP_COMMON/lxd/unix.socket"
 fi

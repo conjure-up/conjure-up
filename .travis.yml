@@ -1,5 +1,6 @@
 language: python
-sudo: false
+sudo: true
+dist: trusty
 python:
   - "3.5"
 notifications:
@@ -12,7 +13,22 @@ notifications:
     on_failure: change
     on_success: never
 install:
-  - travis_retry pip install tox
+  - make travis-sysdeps
+env:
+  global:
+    - PATH=/snap/bin:$PATH
+    - CONJUREUP_REGISTRY_BRANCH=master
+before_script:
+  - sudo addgroup lxd || true
+  - sudo usermod -a -G lxd $USER || true
+  - sudo ln -s /snap/bin/juju /usr/bin/juju
+  - sudo ln -s /usr/bin/lxc /usr/bin/conjure-up.lxc
+  - sudo ln -s /usr/bin/lxd /usr/bin/conjure-up.lxd
+  - sudo service lxd start || true
+  - sudo service redis-server start || true
 script:
-  - if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then travis_retry tox -e py35; fi
-  - travis_retry tox -e flake,isort
+  - tox -e py35,flake,isort
+  - tox -e conjure-dev
+  - sudo -E su $USER -c "source conjure-dev/bin/activate && conjure-up -d --notrack --noreport ghost localhost test-controller test-model"
+after_script:
+  - cat ~/.cache/conjure-up/ghost/steps/*.err

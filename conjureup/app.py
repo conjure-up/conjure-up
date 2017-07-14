@@ -18,6 +18,7 @@ import raven
 import redis
 import yaml
 from prettytable import PrettyTable
+from raven.transport.requests import RequestsHTTPTransport
 from termcolor import colored
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
@@ -206,6 +207,21 @@ def main():
         print("")
         sys.exit(1)
 
+    # Verify we can access ~/.local/share/juju if it exists
+    juju_dir = pathlib.Path('~/.local/share/juju').expanduser()
+    if juju_dir.exists():
+        try:
+            for f in juju_dir.iterdir():
+                if f.is_file():
+                    f.read_text()
+        except PermissionError:
+            print("")
+            print("  !! Unable to read from ~/.local/share/juju, please "
+                  "double check your permissions on that directory "
+                  "and its files. !!")
+            print("")
+            sys.exit(1)
+
     utils.set_terminal_title("conjure-up")
     opts = parse_options(sys.argv[1:])
     spell = os.path.basename(os.path.abspath(opts.spell))
@@ -353,6 +369,7 @@ def main():
     app.sentry = raven.Client(
         dsn=SENTRY_DSN,
         release=VERSION,
+        transport=RequestsHTTPTransport,
         processors=(
             'conjureup.utils.SanitizeDataProcessor',
         )

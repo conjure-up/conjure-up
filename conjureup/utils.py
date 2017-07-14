@@ -2,6 +2,7 @@ import asyncio
 import codecs
 import errno
 import json
+import logging
 import os
 import pty
 import re
@@ -12,6 +13,7 @@ import sys
 import uuid
 from collections import Mapping
 from contextlib import contextmanager
+from functools import partial
 from pathlib import Path
 from subprocess import PIPE, Popen, check_call, check_output
 
@@ -162,14 +164,32 @@ async def run_step(step, msg_cb, event_name=None):
                         msg_cb(line)
                     await asyncio.sleep(0.01)
 
+    out_log = Path(step_path + '.out').read_text()
+    err_log = Path(step_path + '.err').read_text()
+
     if proc.returncode != 0:
-        status = run(['juju', 'status', '--format=yaml'])
         app.sentry.context.merge({'extra': {
-            'out_log': Path(step_path + '.out').read_text(),
-            'err_log': Path(step_path + '.err').read_text(),
-            'status': (status.stdout or b'').decode('utf8'),
+            'out_log_tail': out_log[-400:],
+            'err_log_tail': err_log[-400:],
         }})
         raise Exception("Failure in step {}".format(step.filename))
+
+    # special case for 00_deploy-done to report masked
+    # charm hook failures that were retried automatically
+    if not app.noreport:
+        failed_apps = set()  # only report each charm once
+        for line in err_log.splitlines():
+            if 'hook failure, will retry' in line:
+                log_leader = line.split()[0]
+                unit_name = log_leader.split(':')[-1]
+                app_name = unit_name.split('/')[0]
+                failed_apps.add(app_name)
+        for app_name in failed_apps:
+            # report each individually so that Sentry will give us a
+            # breakdown of failures per-charm in addition to per-spell
+            sentry_report('Retried hook failure', tags={
+                'app_name': app_name,
+            })
 
     if event_name is not None:
         track_event(event_name, "Done", "")
@@ -178,6 +198,47 @@ async def run_step(step, msg_cb, event_name=None):
         "conjure-up.{}.{}.result".format(app.config['spell'],
                                          step.filename))
     return (result or b'').decode('utf8')
+
+
+def sentry_report(message=None, exc_info=None, tags=None, **kwargs):
+    app.loop.run_in_executor(None, partial(_sentry_report,
+                                           message, exc_info, tags, **kwargs))
+
+
+def _sentry_report(message=None, exc_info=None, tags=None, **kwargs):
+    if app.noreport:
+        return
+
+    try:
+        default_tags = {
+            'spell': app.config.get('spell'),
+            'cloud_type': app.current_cloud_type,
+            'region': app.current_region,
+            'jaas': app.is_jaas,
+            'headless': app.headless,
+            'juju_version': juju_version(),
+            'lxd_version': lxd_version(),
+        }
+
+        if message is not None and exc_info is None:
+            event_type = 'raven.events.Message'
+            kwargs['message'] = message
+            if 'level' not in kwargs:
+                kwargs['level'] = logging.WARNING
+        else:
+            event_type = 'raven.events.Exception'
+            if exc_info is None or exc_info is True:
+                kwargs['exc_info'] = sys.exc_info()
+            else:
+                kwargs['exc_info'] = exc_info
+            if 'level' not in kwargs:
+                kwargs['level'] = logging.ERROR
+
+        kwargs['tags'] = dict(default_tags, **(tags or {}))
+
+        app.sentry.capture(event_type, **kwargs)
+    except Exception:
+        app.log.exception('Error reporting error')
 
 
 def can_sudo(password=None):
@@ -226,6 +287,8 @@ def snap_version():
         name_version_str = cmd.stdout.decode().splitlines()[0]
         try:
             name, version = name_version_str.split()
+            if '~' in version:
+                version, series = version.split('~')
             return parse_version(version)
         except:
             raise Exception("Could not determine Snap version.")
@@ -645,6 +708,7 @@ class SanitizeDataProcessor(SanitizePasswordsProcessor):
     Performs the same santiziations as the SanitizePasswordsProcessor, but
     also sanitizes values.
     """
+
     def sanitize(self, key, value):
         value = super().sanitize(key, value)
 

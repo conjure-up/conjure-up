@@ -8,7 +8,10 @@ from urwid import ExitMainLoop
 
 from conjureup import utils
 from conjureup.app_config import app
-from conjureup.controllers.lxdsetup.common import LXDInvalidUserError
+from conjureup.controllers.lxdsetup.common import (
+    LXDInvalidUserError,
+    LXDSnapVersionError
+)
 from conjureup.telemetry import track_exception
 
 
@@ -121,7 +124,8 @@ PostDeployComplete = Event('PostDeployComplete')
 # into sentry.
 NOTRACK_EXCEPTIONS = [
     lambda exc: isinstance(exc, OSError) and exc.errno == errno.ENOSPC,
-    lambda exc: isinstance(exc, LXDInvalidUserError)
+    lambda exc: isinstance(exc, (LXDInvalidUserError,
+                                 LXDSnapVersionError))
 ]
 
 
@@ -142,22 +146,11 @@ def handle_exception(loop, context):
         return  # already reporting an error
     Error.set()
     exc = context['exception']
+    exc_info = (type(exc), exc, exc.__traceback__)
 
-    track_exception(str(exc))
     if not (app.noreport or any(pred(exc) for pred in NOTRACK_EXCEPTIONS)):
-        try:
-            exc_info = (type(exc), exc, exc.__traceback__)
-            app.sentry.captureException(exc_info, tags={
-                'spell': app.config.get('spell'),
-                'cloud_type': app.current_cloud_type,
-                'region': app.current_region,
-                'jaas': app.is_jaas,
-                'headless': app.headless,
-                'juju_version': utils.juju_version(),
-                'lxd_version': utils.lxd_version(),
-            })
-        except Exception:
-            app.log.exception('Error reporting error')
+        track_exception(str(exc))
+        utils.sentry_report(exc_info=exc_info)
 
     app.log.exception('Unhandled exception', exc_info=exc)
 
@@ -184,6 +177,9 @@ async def shutdown_watcher():
         app.ui.show_shutdown_message()
 
     try:
+        # Store application configuration state
+        await app.save()
+
         if app.juju.authenticated:
             app.log.info('Disconnecting model')
             await app.juju.client.disconnect()
@@ -196,7 +192,6 @@ async def shutdown_watcher():
             # cancel all other tasks
             if getattr(task, '_coro', None) is not shutdown_watcher:
                 task.cancel()
-        app.loop.stop()
-    except Exception:
-        app.log.exception('Error in cleanup code')
-        raise
+    except Exception as e:
+        app.log.exception('Error in cleanup code: {}'.format(e))
+    app.loop.stop()

@@ -2,6 +2,7 @@
 """
 import asyncio
 import json
+import logging
 import os
 from concurrent import futures
 from pathlib import Path
@@ -12,7 +13,7 @@ import yaml
 from bundleplacer.charmstore_api import CharmStoreID
 from juju.model import Model
 
-from conjureup import consts, events
+from conjureup import consts, events, utils
 from conjureup.app_config import app
 from conjureup.utils import is_linux, juju_path, run, spew
 
@@ -202,13 +203,13 @@ def has_jaas_auth():
 async def register_controller(name, endpoint, email, password, twofa,
                               timeout=30, fail_cb=None, timeout_cb=None):
     app.log.info('Registering controller {}'.format(name))
+    cmd = ['juju', 'login', '-B', endpoint, '-c', name]
     proc = await asyncio.create_subprocess_exec(
-        'juju', 'login', '-B', endpoint,
-        stdin=PIPE, stdout=PIPE, stderr=PIPE,
+        *cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE,
     )
     try:
         stdin = b''.join(b'%s\n' % bytes(f, 'utf8')
-                         for f in [name, email, password, twofa])
+                         for f in [email, password, twofa])
         stdout, stderr = await asyncio.wait_for(proc.communicate(stdin),
                                                 timeout)
         stdout = stdout.decode('utf8')
@@ -233,7 +234,7 @@ async def register_controller(name, endpoint, email, password, twofa,
             fail_cb(stderr)
             return False
         else:
-            raise CalledProcessError(stderr)
+            raise CalledProcessError(cmd, stderr)
     app.log.info('Registration complete')
     return True
 
@@ -333,7 +334,7 @@ def get_regions(cloud):
     if not isinstance(result, dict):
         msg = 'Unexpected response from regions: {}'.format(result)
         app.log.error(msg)
-        app.sentry.captureMessage(msg)
+        utils.sentry_report(msg, level=logging.ERROR)
         result = {}
     return result
 
