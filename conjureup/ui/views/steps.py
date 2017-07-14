@@ -1,5 +1,4 @@
-from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import done_btn
+from ubuntui.utils import Padding
 from ubuntui.widgets.hr import HR
 from urwid import Columns, Pile, Text
 
@@ -38,14 +37,12 @@ class RunStepsView(BaseView):
                 ('weight', 0.4, Text('Result'))
             ], dividechars=5),
             HR(),
-            Padding.line_break(''),
         ]
         for step in app.steps:
             widget = StepResult(step)
             self.widgets[step.name] = widget
             rows.extend([
                 widget,
-                Padding.line_break(''),
                 HR(),
             ])
         self.pile = Pile(rows)
