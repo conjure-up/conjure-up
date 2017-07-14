@@ -37,5 +37,5 @@ class SummaryTUIRenderTestCase(unittest.TestCase):
     def test_render_empty(self):
         "call render with empty results"
         with patch("conjureup.controllers.summary.tui.common") as m_c:
-            self.controller.render({})
+            self.controller.render()
             m_c.write_results.assert_called_once_with({}, sentinel.savepath)

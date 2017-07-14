@@ -1,4 +1,5 @@
 import os
+from collections import OrderedDict
 
 from conjureup import events
 from conjureup.app_config import app
@@ -17,8 +18,9 @@ class SummaryController:
     def finish(self):
         events.Shutdown.set(0)
 
-    def render(self, results):
+    def render(self):
         track_screen("Summary")
+        results = OrderedDict((step.title, step.result) for step in app.steps)
         app.log.debug("Rendering summary results: {}".format(results))
 
         common.write_results(results, self.save_path)

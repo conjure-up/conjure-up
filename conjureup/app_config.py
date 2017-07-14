@@ -122,10 +122,19 @@ class AppConfig:
     state = None
 
     # Sentry endpoint
-    sentry = None,
+    sentry = None
 
     # Spells index
-    spells_index = None,
+    spells_index = None
+
+    # Password for sudo, if needed
+    sudo_pass = None
+
+    # Step descriptions
+    steps = None
+
+    # Step user data
+    steps_data = {}
 
     # exit code for conjure-up to terminate with
     exit_code = 0
@@ -158,7 +167,7 @@ class AppConfig:
         blacklist = ['loop', 'log', 'maas', 'argv', 'spells_index',
                      'juju', 'ui', 'bootstrap', 'endpoint_type',
                      'metadata_controller', 'state',
-                     'env', 'sentry']
+                     'env', 'sentry', 'steps', 'sudo_pass']
         new_dict = {}
         for k, v in self.__dict__.items():
             if k.startswith('__') or callable(getattr(self, k)):

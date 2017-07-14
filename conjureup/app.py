@@ -26,7 +26,7 @@ from ubuntui.palette import STYLES
 from conjureup import __version__ as VERSION
 from conjureup import charm, consts, controllers, events, juju, utils
 from conjureup.app_config import app
-from conjureup.controllers.steps.common import get_step_metadata_filenames
+from conjureup.controllers.showsteps.common import load_steps
 from conjureup.download import (
     EndpointType,
     detect_endpoint,
@@ -172,22 +172,17 @@ def apply_proxy():
 def show_env():
     """ Shows environment variables from post deploy actions
     """
-    step_metas = get_step_metadata_filenames()
+    load_steps()
     print("Available environment variables: \n")
     table = PrettyTable()
-    table.field_names = ["ENV", "DEFAULT",
-                         ""]
+    table.field_names = ["ENV", "DEFAULT", ""]
     table.align = 'l'
-    for step_meta_path in step_metas:
-        with open(step_meta_path) as fp:
-            step_metadata = yaml.load(fp.read())
-        if 'additional-input' in step_metadata:
-            for x in step_metadata['additional-input']:
-                default = colored(x['default'], 'green', attrs=['bold'])
-                key = colored(x['key'], 'blue', attrs=['bold'])
-                table.add_row([key, default,
-                               textwrap.fill(step_metadata['description'],
-                                             width=55)])
+    for step in app.steps:
+        for x in step.additional_input:
+            default = colored(x.get('default', ''), 'green', attrs=['bold'])
+            key = colored(x['key'], 'blue', attrs=['bold'])
+            table.add_row([key, default,
+                           textwrap.fill(step.description, width=55)])
     print(table)
     print("")
 
@@ -233,6 +228,15 @@ def main():
     app.state = redis.StrictRedis(host='localhost',
                                   port=opts.redis_port,
                                   db=0)
+    # confirm that the Redis connection is working
+    # XXX perhaps we should start the service if not running
+    try:
+        app.state.get('test')
+    except redis.exceptions.ConnectionError:
+        print("")
+        print("  !! Unable to connect to Redis. !!")
+        print("")
+        sys.exit(1)
     app.env = os.environ.copy()
     app.config = {'metadata': None}
     app.argv = opts
@@ -357,9 +361,6 @@ def main():
     app.env['CONJURE_UP_CACHEDIR'] = app.argv.cache_dir
 
     if app.argv.show_env:
-        if not app.argv.cloud:
-            utils.error("You must specify a cloud for headless mode.")
-            sys.exit(1)
         if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
             utils.error("Please specify a spell for headless mode.")
             sys.exit(1)

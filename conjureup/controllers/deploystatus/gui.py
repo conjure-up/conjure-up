@@ -11,7 +11,7 @@ from . import common
 class DeployStatusController:
     async def _wait_for_applications(self):
         await common.wait_for_applications(app.ui.set_footer)
-        controllers.use('steps').render()
+        controllers.use('runsteps').render()
 
     async def _refresh(self, view):
         await events.ModelConnected.wait()

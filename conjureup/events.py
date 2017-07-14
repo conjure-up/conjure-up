@@ -125,7 +125,8 @@ PostDeployComplete = Event('PostDeployComplete')
 NOTRACK_EXCEPTIONS = [
     lambda exc: isinstance(exc, OSError) and exc.errno == errno.ENOSPC,
     lambda exc: isinstance(exc, (LXDInvalidUserError,
-                                 LXDSnapVersionError))
+                                 LXDSnapVersionError)),
+    lambda exc: isinstance(exc, utils.SudoError),
 ]
 
 
@@ -148,6 +149,8 @@ def handle_exception(loop, context):
     exc = context['exception']
     exc_info = (type(exc), exc, exc.__traceback__)
 
+    if any(pred(exc) for pred in NOTRACK_EXCEPTIONS):
+        app.log.debug('Would not track exception: {}'.format(exc))
     if not (app.noreport or any(pred(exc) for pred in NOTRACK_EXCEPTIONS)):
         track_exception(str(exc))
         utils.sentry_report(exc_info=exc_info)

@@ -7,7 +7,7 @@ from . import common
 class DeployStatusController:
     async def finish(self):
         await common.wait_for_applications(utils.info)
-        return controllers.use('steps').render()
+        return controllers.use('runsteps').render()
 
     def render(self):
         app.loop.create_task(self.finish())

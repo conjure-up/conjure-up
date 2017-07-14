@@ -1,5 +1,6 @@
 import os
 import sys
+from collections import OrderedDict
 
 from prettytable import PrettyTable
 from termcolor import colored
@@ -15,7 +16,8 @@ class SummaryController:
         self.save_path = os.path.join(app.config['spell-dir'],
                                       'results.txt')
 
-    def render(self, results):
+    def render(self):
+        results = OrderedDict((step.title, step.result) for step in app.steps)
         common.write_results(results, self.save_path)
         utils.info("Summary")
         table = PrettyTable()

@@ -132,7 +132,7 @@ async def run_step(step, msg_cb, event_name=None):
     # Define STEP_NAME for use in determining where to store
     # our step results,
     #  redis-cli set "conjure-up.$SPELL_NAME.$STEP_NAME.result" "val"
-    app.env['CONJURE_UP_STEP'] = step.filename
+    app.env['CONJURE_UP_STEP'] = step.name
 
     step_path = Path(app.config['spell-dir']) / 'steps' / step.filename
 
@@ -149,6 +149,13 @@ async def run_step(step, msg_cb, event_name=None):
 
     if not os.access(step_path, os.X_OK):
         raise Exception("Step {} not executable".format(step.title))
+
+    if is_linux() and step.needs_sudo and not await can_sudo():
+        raise SudoError('Step "{}" requires sudo: {}'.format(
+            step.title,
+            'password failed' if app.sudo_pass else
+            'passwordless sudo required',
+        ))
 
     app.log.debug("Executing script: {}".format(step_path))
 
@@ -194,9 +201,9 @@ async def run_step(step, msg_cb, event_name=None):
     if event_name is not None:
         track_event(event_name, "Done", "")
 
-    result = app.state.get(
-        "conjure-up.{}.{}.result".format(app.config['spell'],
-                                         step.filename))
+    result_key = "conjure-up.{}.{}.result".format(app.config['spell'],
+                                                  step.name)
+    result = app.state.get(result_key)
     return (result or b'').decode('utf8')
 
 
@@ -241,19 +248,23 @@ def _sentry_report(message=None, exc_info=None, tags=None, **kwargs):
         app.log.exception('Error reporting error')
 
 
-def can_sudo(password=None):
+async def can_sudo(password=None):
+    if not password and app.sudo_pass:
+        password = app.sudo_pass
     if password:
+        opt = '-S'  # stdin
         password = '{}\n'.format(password).encode('utf8')
-        result = subprocess.run(['sudo', '-S', '/bin/true'],
-                                input=password,
-                                stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
-        if result.returncode != 0:
-            return False
-    result = subprocess.run(['sudo', '-n', '/bin/true'],
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
-    return result.returncode == 0
+    else:
+        opt = '-n'  # non-interactive
+    proc = await asyncio.create_subprocess_exec('sudo', opt, '/bin/true',
+                                                stdin=subprocess.PIPE,
+                                                stdout=subprocess.DEVNULL,
+                                                stderr=subprocess.DEVNULL)
+    if password:
+        await proc.communicate(password)
+    else:
+        await proc.wait()
+    return proc.returncode == 0
 
 
 def lxd_version():
@@ -758,3 +769,7 @@ class SanitizeDataProcessor(SanitizePasswordsProcessor):
 class TestError(Exception):
     def __init__(self):
         super().__init__('This is a dummy error for testing reporting')
+
+
+class SudoError(Exception):
+    pass

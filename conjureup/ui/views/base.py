@@ -14,6 +14,11 @@ class BaseView(WidgetWrap):
     footer = ''
 
     def __init__(self, back=None):
+        """Create a new instance of this view.
+
+        :param back: Callback to invoke when the BACK button is selected.
+            If None, the BACK button will be hidden.
+        """
         self.back = back
         self.frame = Frame(body=self._build_body(),
                            footer=self._build_footer())
@@ -30,8 +35,8 @@ class BaseView(WidgetWrap):
     def build_widget(self):
         """ Build the main widget(s) for the view.
 
-        Return a list of widgets to be rendered in a Pile
-        as the main body of the view.
+        Return a widget, or a list of widgets to be rendered in a Pile,
+        which will be used as the main body of the view.
 
         This **must** be implemented by a subclass.
         """
@@ -55,8 +60,10 @@ class BaseView(WidgetWrap):
                                   focus_map='button_primary focus'))
 
     def _build_body(self):
-        return Padding.center_80(Filler(Pile(self.build_widget()),
-                                        valign="top"))
+        widget = self.build_widget()
+        if isinstance(widget, list):
+            widget = Pile(widget)
+        return Padding.center_80(Filler(widget, valign="top"))
 
     def _build_footer(self):
         buttons = []
@@ -82,7 +89,11 @@ class BaseView(WidgetWrap):
         if not self.buttons_selected:
             self.buttons_selected = True
             self.frame.focus_position = 'footer'
-            self.buttons.focus_position = 3
+            num_buttons = len(self.buttons.contents) - 3  # 3 spacers
+            if num_buttons > 1:
+                self.buttons.focus_position = num_buttons + 1  # last button
+            else:
+                self.buttons.focus_position = 1  # QUIT / BACK
         else:
             self.buttons_selected = False
             self.frame.focus_position = 'body'

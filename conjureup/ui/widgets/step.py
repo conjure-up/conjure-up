@@ -1,4 +1,4 @@
-import os
+import asyncio
 
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import submit_btn
@@ -14,7 +14,7 @@ from urwid import Columns, Pile, Text, WidgetWrap
 from conjureup import utils
 
 
-class StepWidget(WidgetWrap):
+class StepForm(WidgetWrap):
     INPUT_TYPES = {
         'text': StringEditor,
         'password': PasswordEditor,
@@ -22,7 +22,7 @@ class StepWidget(WidgetWrap):
         'integer': IntegerEditor,
     }
 
-    def __init__(self, app, step_model, cb):
+    def __init__(self, app, step_model):
         """
         Arguments:
         step_model: step model
@@ -33,64 +33,24 @@ class StepWidget(WidgetWrap):
         self.model = step_model
 
         self.title = Text(('info_minor', step_model.title))
-        self.description = Text(('info_minor', step_model.description))
+        self.description = Text(('body', step_model.description))
         self.result = Text(step_model.result)
         self.output = Text(('info_minor', ''))
-        self.icon = Text(("info_minor", "\N{BALLOT BOX}"))
+        self.icon = Text(("pending_icon", "\N{BALLOT BOX}"))
         self.sudo_input = None
-
-        self.additional_input = []
-        if len(step_model.additional_input) > 0:
-            for i in step_model.additional_input:
-                if i['type'] in self.INPUT_TYPES:
-                    widget_inst = self.INPUT_TYPES[i['type']](
-                        default=i.get('default'))
-                else:
-                    self.app.log.error('Invalid input type "{}" in step {}; '
-                                       'should be one of: {}'.format(
-                                           i['type'],
-                                           step_model.title,
-                                           ', '.join(self.INPUT_TYPES.keys())))
-                    widget_inst = None
-                widget = {
-                    "label": Text(('body', i['label'])),
-                    "key": i['key'],
-                    "input": widget_inst,
-                }
-                self.additional_input.append(widget)
-        else:
-            widget = {
-                "label": Text(""),
-                "key": "submit",
-                "input": None
-            }
-            self.additional_input.append(widget)
-
-        self.cb = cb
-        self.step_pile = self.build_widget()
-        self.show_output = True
+        self.complete = asyncio.Event()
+        self.build_widget()
+        self.build_fields()
         super().__init__(self.step_pile)
 
     def __repr__(self):
         return "<StepWidget: {}>".format(self.model.title)
 
-    def update(self):
-        if not self.show_output:
-            return
-        if not os.path.exists(self.model.filename + ".out"):
-            return
-        with open(self.model.filename + ".out") as outf:
-            lines = outf.readlines()
-            if len(lines) < 1:
-                return
-            self.output.set_text(('body', lines[-1]))
+    def set_output(self, msg):
+        self.output.set_text(('info_context', msg))
 
     def clear_output(self):
         self.output.set_text("")
-
-    def set_description(self, description, color='info_minor'):
-        self.description.set_text(
-            (color, description))
 
     def set_error(self, msg):
         self.output.set_text(('error_major', msg))
@@ -120,17 +80,16 @@ class StepWidget(WidgetWrap):
             self.icon.set_text(("error_icon", "?"))
 
     @property
+    def current_index(self):
+        """ Returns the current pile index
+        """
+        return self.step_pile.focus_position
+
+    @property
     def current_button_index(self):
         """ Returns the pile index where the button is located
         """
         return len(self.step_pile.contents) - 2
-
-    @property
-    def current_button_widget(self):
-        """ Returns the current button widget
-        """
-        if self.button:
-            return self.button
 
     def clear_button(self):
         """ Clears current button so it can't be pressed again
@@ -149,77 +108,153 @@ class StepWidget(WidgetWrap):
             self.step_pile.options())
 
     def build_widget(self):
-        return Pile([
+        self.step_pile = pile = Pile([
             Columns(
                 [
                     ('fixed', 3, self.icon),
                     self.description,
                 ], dividechars=1),
             Padding.line_break(""),
-            Padding.push_4(self.output)
-        ]
-        )
+            Padding.push_4(self.output),
+        ])
 
-    def generate_additional_input(self):
-        """ Generates additional input fields, useful for doing it after
-        a previous step is run
-        """
-        self.set_description(self.model.description, 'body')
-        self.icon.set_text((
-            'pending_icon',
-            self.icon.get_text()[0]
-        ))
         if utils.is_linux() and self.model.needs_sudo:
-            self.step_pile.contents.append((Padding.line_break(""),
-                                            self.step_pile.options()))
-            can_sudo = utils.can_sudo()
+            pile.contents.append((Padding.line_break(""), pile.options()))
             label = 'This step requires sudo.'
-            if not can_sudo:
-                label += '  Please enter sudo password:'
+            if not self.app.sudo_pass:
+                label += '  Enter sudo password, if needed:'
+                self.sudo_input = PasswordEditor()
             columns = [
                 ('weight', 0.5, Padding.left(Text(('body', label)), left=5)),
             ]
-            if not can_sudo:
-                self.sudo_input = PasswordEditor()
+            if self.sudo_input:
                 columns.append(('weight', 1, Color.string_input(
                     self.sudo_input, focus_map='string_input focus')))
-            self.step_pile.contents.append((Columns(columns, dividechars=3),
-                                            self.step_pile.options()))
+            pile.contents.append((Columns(columns, dividechars=3),
+                                  pile.options()))
 
-        for i in self.additional_input:
-            self.app.log.debug(i)
-            self.step_pile.contents.append((Padding.line_break(""),
-                                            self.step_pile.options()))
+    def build_fields(self):
+        """ Generates widgets for additional input fields.
+        """
+        pile_opts = self.step_pile.options()
+        self.fields = []
+        for i in self.model.additional_input:
+            label = i['label']
+            key = i['key']
+            if i['type'] not in self.INPUT_TYPES:
+                self.app.log.error('Invalid input type "{}" in step {}; '
+                                   'should be one of: {}'.format(
+                                       i['type'],
+                                       self.model.title,
+                                       ', '.join(self.INPUT_TYPES.keys())))
+                field = None
+            else:
+                input_type = self.INPUT_TYPES[i['type']]
+                value = self.app.steps_data[self.model.name][key]
+                field = StepField(key, label, input_type(default=value))
+                self.fields.append(field)
             column_input = [
-                ('weight', 0.5, Padding.left(i['label'], left=5))
+                ('weight', 0.5, Padding.left(field.label_widget, left=5))
             ]
-            if i['input']:
+            if field:
                 column_input.append(
                     ('weight', 1, Color.string_input(
-                        i['input'],
-                        focus_map='string_input focus')))
-            self.step_pile.contents.append(
-                (Columns(column_input, dividechars=3),
-                 self.step_pile.options()))
+                        field.input, focus_map='string_input focus')))
 
-        self.button = submit_btn(label="Run", on_press=self.submit)
-        self.step_pile.contents.append((Padding.line_break(""),
-                                        self.step_pile.options()))
-        self.step_pile.contents.append((Text(""), self.step_pile.options()))
-        self.step_pile.contents.append((HR(), self.step_pile.options()))
-        self.show_button()
-        self.step_pile.focus_position = self.current_button_index
+            self.step_pile.contents.extend([
+                (Padding.line_break(""), pile_opts),
+                (Columns(column_input, dividechars=3), pile_opts),
+            ])
+
+        self.button = submit_btn(label="Next", on_press=self.submit)
+        self.step_pile.contents.extend([
+            (Padding.line_break(""), pile_opts),
+            (Text(""), pile_opts),
+            (HR(), pile_opts),
+        ])
+
+        if self.sudo_input or self.fields:
+            self.show_button()
+            self.step_pile.focus_position = 4
+        else:
+            self.complete.set()
+
+    def lock_form(self):
+        # make unselectable by "focusing" the non-focusable description
+        self.step_pile.focus_position = 0
+        self.clear_button()
 
     def submit(self, btn):
-        for i in self.additional_input:
-            if i['input'] and (
-                    i['input'].value is None and self.model.required):
-                self.app.log.debug("Missing required input: {}".format(i))
-                current_label = i['label'].get_text()[0]
-                i['label'].set_text(
-                    ('error_major',
-                     "{}: Missing required input.".format(current_label)))
-                return
-        self.set_icon_state('waiting')
+        self.app.loop.create_task(self.validate())
+
+    async def validate(self):
         self.clear_button()
-        self.cb(self.model, self)
+        has_error = False
+        if self.sudo_input:
+            self.set_output('Checking sudo...')
+            if not await utils.can_sudo(self.sudo_input.value):
+                self.set_error(
+                    'Sudo failed.  Please check your password and ensure that '
+                    'your sudo timeout is not set to zero.')
+                has_error = True
+            else:
+                self.clear_output()
+        for field in self.fields:
+            if not field.input.value and self.model.required:
+                field.label_widget.set_text(
+                    ('error_major',
+                     "{}: Missing required input.".format(field.label)))
+                has_error = True
+            else:
+                field.label_widget.set_text(('body', field.label))
+        if not has_error:
+            self.set_icon_state('active')
+            self.lock_form()
+            self.complete.set()
+        else:
+            self.show_button()
+
+    def keypress(self, size, key):
+        if key == 'enter':
+            if self.current_index + 2 == self.current_button_index:
+                self.button.keypress(size, 'enter')
+            else:
+                self.step_pile.keypress(size, 'down')
+        else:
+            return super().keypress(size, key)
+
+
+class StepField:
+    def __init__(self, key, label, input):
+        self.key = key
+        self.label = label
+        self.label_widget = Text(('body', label))
+        self.input = input
+
+
+class StepResult(WidgetWrap):
+    def __init__(self, step):
+        self.step = step
+        self.build_widget()
+        return super().__init__(self.pile)
+
+    def build_widget(self):
+        self.icon = Text(("pending_icon", "\N{BALLOT BOX}"))
+        self.result = Text("")
+        self.pile = Pile([
+            Columns(
+                [
+                    ('fixed', 3, self.icon),
+                    Text(('body', self.step.title)),
+                ], dividechars=1),
+            Padding.push_4(Text(('info_context', self.step.description))),
+            Padding.line_break(""),
+            Padding.push_4(self.result),
+        ])
+
+    def mark_running(self):
+        self.icon.set_text(("pending_icon", "\N{HOURGLASS}"))
+
+    def mark_complete(self, result):
+        self.icon.set_text(("success_icon", "\N{BALLOT BOX WITH CHECK}"))
+        self.result.set_text(('info_major', result))
