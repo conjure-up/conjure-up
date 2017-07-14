@@ -236,25 +236,20 @@ class StepResult(WidgetWrap):
     def __init__(self, step):
         self.step = step
         self.build_widget()
-        return super().__init__(self.pile)
+        return super().__init__(self.row)
 
     def build_widget(self):
         self.icon = Text(("pending_icon", "\N{BALLOT BOX}"))
         self.result = Text("")
-        self.pile = Pile([
-            Columns(
-                [
-                    ('fixed', 3, self.icon),
-                    Text(('body', self.step.title)),
-                ], dividechars=1),
-            Padding.push_4(Text(('info_context', self.step.description))),
-            Padding.line_break(""),
-            Padding.push_4(self.result),
-        ])
+        self.row = Columns([
+            ('fixed', 3, self.icon),
+            ('weight', 0.1, Text(('body', self.step.title))),
+            ('weight', 0.4, self.result),
+        ], dividechars=1)
 
     def mark_running(self):
         self.icon.set_text(("pending_icon", "\N{HOURGLASS}"))
 
     def mark_complete(self, result):
         self.icon.set_text(("success_icon", "\N{BALLOT BOX WITH CHECK}"))
-        self.result.set_text(('info_major', result))
+        self.result.set_text(('body', result))

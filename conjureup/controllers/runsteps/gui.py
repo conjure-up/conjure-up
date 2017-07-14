@@ -1,4 +1,4 @@
-from conjureup import controllers, events
+from conjureup import events
 from conjureup.app_config import app
 from conjureup.ui.views.steps import RunStepsView
 
@@ -13,14 +13,11 @@ class RunStepsController:
 
     async def run_steps(self, view):
         for step in app.steps:
-            view.mark_running(step)
+            view.mark_step_running(step)
             step.result = await common.do_step(step, app.ui.set_footer)
-            view.mark_complete(step)
+            view.mark_step_complete(step)
         events.PostDeployComplete.set()
-        view.show_summary_button(self.finish)
-
-    def finish(self):
-        return controllers.use('summary').render()
+        view.mark_complete()
 
 
 _controller_class = RunStepsController

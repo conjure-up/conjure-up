@@ -1,7 +1,7 @@
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import done_btn
 from ubuntui.widgets.hr import HR
-from urwid import Pile
+from urwid import Columns, Pile, Text
 
 from conjureup.app_config import app
 from conjureup.ui.views.base import BaseView
@@ -31,28 +31,36 @@ class RunStepsView(BaseView):
 
     def build_widget(self):
         self.widgets = {}
-        widgets = [
+        rows = [
+            Columns([
+                ('fixed', 3, Text('')),
+                ('weight', 0.1, Text('Application')),
+                ('weight', 0.4, Text('Result'))
+            ], dividechars=5),
             HR(),
             Padding.line_break(''),
         ]
         for step in app.steps:
             widget = StepResult(step)
             self.widgets[step.name] = widget
-            widgets.append(widget)
-        self.pile = Pile(widgets)
+            rows.extend([
+                widget,
+                Padding.line_break(''),
+                HR(),
+            ])
+        self.pile = Pile(rows)
         return self.pile
 
-    def mark_running(self, step):
+    def mark_step_running(self, step):
         self.widgets[step.name].mark_running()
 
-    def mark_complete(self, step):
+    def mark_step_complete(self, step):
         self.widgets[step.name].mark_complete(step.result)
 
-    def show_summary_button(self, callback):
-        self.pile.contents.append(
-            (Padding.center_20(Color.button_primary(
-                done_btn(on_press=lambda *a, **kw: callback(),
-                         label="View Summary"),
-                focus_map='button_primary focus')),
-             self.pile.options()))
-        self.pile.focus_position = len(self.widgets) + 2
+    def mark_complete(self):
+        app.ui.set_header(title="Post-Deploy Steps Complete",
+                          excerpt="Your deployment is now complete")
+        app.ui.set_footer("Your big software is deployed, "
+                          "press the (Q) key to exit.")
+        self.frame.focus_position = 'footer'
+        self.buttons.focus_position = 1
