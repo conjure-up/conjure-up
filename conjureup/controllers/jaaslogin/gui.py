@@ -25,7 +25,7 @@ class JaaSLoginController:
             await juju.register_controller(app.jaas_controller,
                                            JAAS_DOMAIN,
                                            '', '', '')
-            controllers.use('deploy').render()
+            controllers.use('showsteps').render()
         except CalledProcessError:
             self.show_login_screen(error)
 
@@ -58,7 +58,7 @@ class JaaSLoginController:
         app.loop.create_task(juju.add_model(app.current_model,
                                             app.current_controller,
                                             app.current_cloud))
-        controllers.use('deploy').render()
+        controllers.use('showsteps').render()
 
     def render_interstitial(self):
         track_screen("JaaS Login Wait")
