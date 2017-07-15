@@ -1,3 +1,4 @@
+from pathlib import Path
 
 from conjureup import utils
 from conjureup.app_config import app
@@ -47,3 +48,10 @@ async def do_step(step_model, msg_cb):
     set_env(step_model)
 
     return await utils.run_step(step_model, msg_cb)
+
+
+def save_step_results():
+    results_file = Path(app.config['spell-dir']) / 'results.txt'
+    results_file.write_text(''.join([
+        "{}: {}\n".format(step.title, step.result) for step in app.steps
+    ]))

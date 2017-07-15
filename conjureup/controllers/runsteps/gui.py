@@ -16,6 +16,7 @@ class RunStepsController:
             view.mark_step_running(step)
             step.result = await common.do_step(step, app.ui.set_footer)
             view.mark_step_complete(step)
+        common.save_step_results()
         events.PostDeployComplete.set()
         view.mark_complete()
 
