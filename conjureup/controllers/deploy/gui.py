@@ -299,10 +299,14 @@ class DeployController:
         self.sync_assignment_opts()
         common.write_bundle(self.assignments)
 
-        if not events.Bootstrapped.is_set():
-            return controllers.use('bootstrapwait').render()
-        else:
+        if app.current_controller in juju.get_controllers()['controllers']:
+            events.Bootstrapped.set()
+            app.loop.create_task(juju.add_model(app.current_model,
+                                                app.current_controller,
+                                                app.current_cloud))
             return controllers.use('deploystatus').render()
+        else:
+            return controllers.use('bootstrap').render()
 
     def render(self):
         # If bootstrap fails fast, we may be called after the error

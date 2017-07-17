@@ -1,4 +1,4 @@
-from conjureup import controllers, events, juju, utils
+from conjureup import controllers, juju, utils
 from conjureup.app_config import app
 from conjureup.consts import JAAS_CLOUDS, JAAS_ENDPOINT
 
@@ -18,7 +18,8 @@ class BaseControllerPicker:
             app.current_controller = "conjure-up-{}-{}".format(
                 app.current_cloud,
                 utils.gen_hash())
-            return controllers.use('bootstrap').render()
+        else:
+            app.current_controller = controller
 
         if controller == 'jaas':
             if not app.jaas_controller or not juju.has_jaas_auth():
@@ -27,15 +28,4 @@ class BaseControllerPicker:
             # jaas already registered
             app.current_controller = app.jaas_controller
             app.is_jaas = True
-        else:
-            app.current_controller = controller
-
-        if app.current_controller not in juju.get_controllers()['controllers']:
-            return controllers.use('bootstrap').render()
-
-        events.Bootstrapped.set()
-
-        app.loop.create_task(juju.add_model(app.current_model,
-                                            app.current_controller,
-                                            app.current_cloud))
         return controllers.use('showsteps').render()

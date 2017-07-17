@@ -11,7 +11,7 @@ class BaseBootstrapController:
 
     def render(self):
         app.loop.create_task(self.do_bootstrap(app.current_credential))
-        controllers.use('showsteps').render()
+        controllers.use('bootstrapwait').render()
 
     async def do_bootstrap(self, creds):
         if app.is_jaas:
