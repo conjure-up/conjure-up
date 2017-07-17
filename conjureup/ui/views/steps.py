@@ -9,8 +9,8 @@ from conjureup.ui.widgets.step import StepResult
 
 class ShowStepsView(BaseView):
     title = "Additional Application Configuration"
-    excerpt = ("Please provide the information below, which will "
-               "be used for the post-deploy configuration.")
+    subtitle = ("Please provide the information below, which will "
+                "be used for the post-deploy configuration.")
 
     def build_widget(self):
         self.step_pile = Pile([
@@ -26,7 +26,7 @@ class ShowStepsView(BaseView):
 
 class RunStepsView(BaseView):
     title = "Running Post-Deploy Steps"
-    excerpt = "Please wait while the post-deploy steps are run."
+    subtitle = "Please wait while the post-deploy steps are run."
 
     def build_widget(self):
         self.widgets = {}
