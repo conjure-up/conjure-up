@@ -38,4 +38,4 @@ class BaseControllerPicker:
         app.loop.create_task(juju.add_model(app.current_model,
                                             app.current_controller,
                                             app.current_cloud))
-        return controllers.use('deploy').render()
+        return controllers.use('showsteps').render()

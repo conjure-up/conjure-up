@@ -85,4 +85,4 @@ class DeployStatusTUIFinishTestCase(unittest.TestCase):
         self.mock_common.wait_for_applications.return_value = dummy()
         with test_loop() as loop:
             loop.run_until_complete(self.controller.finish())
-        self.mock_controllers.use.assert_called_once_with('steps')
+        self.mock_controllers.use.assert_called_once_with('runsteps')

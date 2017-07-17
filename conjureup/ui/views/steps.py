@@ -1,42 +1,63 @@
-from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import done_btn
+from ubuntui.utils import Padding
 from ubuntui.widgets.hr import HR
-from urwid import Filler, Pile, WidgetWrap
+from urwid import Columns, Pile, Text
+
+from conjureup.app_config import app
+from conjureup.ui.views.base import BaseView
+from conjureup.ui.widgets.step import StepResult
 
 
-class StepsView(WidgetWrap):
+class ShowStepsView(BaseView):
+    title = "Additional Application Configuration"
+    excerpt = ("Please provide the information below, which will "
+               "be used for the post-deploy configuration.")
 
-    def __init__(self, app, steps, cb=None):
-        """ init
+    def build_widget(self):
+        self.step_pile = Pile([
+            HR(),
+            Padding.line_break(''),
+        ])
+        return self.step_pile
 
-        Arguments:
-        cb: process step callback
-        """
-        self.app = app
-        self.cb = cb
-        self.steps = steps
-        self.step_pile = Pile(
-            [Padding.center_90(HR()),
-             Padding.line_break("")] +
-            [Padding.center_90(s) for s in self.steps] +
-            [Padding.line_break("")]
-        )
-        super().__init__(Filler(self.step_pile, valign="top"))
+    def add_step(self, step_widget):
+        self.step_pile.contents.append((step_widget, self.step_pile.options()))
+        self.step_pile.focus_position = len(self.step_pile.contents) - 1
 
-    def get_step_widget(self, index):
-        return self.step_pile[index + 2]
 
-    @property
-    def current_summary_button_index(self):
-        """ Returns the pile index where the summary button is located
-        """
-        return len(self.step_pile.contents) - 1
+class RunStepsView(BaseView):
+    title = "Running Post-Deploy Steps"
+    excerpt = "Please wait while the post-deploy steps are run."
 
-    def buttons(self):
-        self.button = Color.button_primary(
-            done_btn(on_press=self.done, label="View Summary"),
-            focus_map='button_primary focus')
-        return Padding.center_20(self.button)
+    def build_widget(self):
+        self.widgets = {}
+        rows = [
+            Columns([
+                ('fixed', 3, Text('')),
+                ('weight', 0.1, Text('Application')),
+                ('weight', 0.4, Text('Result'))
+            ], dividechars=5),
+            HR(),
+        ]
+        for step in app.steps:
+            widget = StepResult(step)
+            self.widgets[step.name] = widget
+            rows.extend([
+                widget,
+                HR(),
+            ])
+        self.pile = Pile(rows)
+        return self.pile
 
-    def done(self, *args):
-        self.cb()
+    def mark_step_running(self, step):
+        self.widgets[step.name].mark_running()
+
+    def mark_step_complete(self, step):
+        self.widgets[step.name].mark_complete(step.result)
+
+    def mark_complete(self):
+        app.ui.set_header(title="Post-Deploy Steps Complete",
+                          excerpt="Your deployment is now complete")
+        app.ui.set_footer("Your big software is deployed, "
+                          "press the (Q) key to exit.")
+        self.frame.focus_position = 'footer'
+        self.buttons.focus_position = 1

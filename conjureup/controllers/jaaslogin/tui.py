@@ -18,7 +18,7 @@ class JaaSLoginController:
         app.loop.create_task(juju.add_model(app.current_model,
                                             app.current_controller,
                                             app.current_cloud))
-        controllers.use('deploy').render()
+        controllers.use('showsteps').render()
 
 
 _controller_class = JaaSLoginController

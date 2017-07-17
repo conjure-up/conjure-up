@@ -9,9 +9,9 @@ async def wait_for_applications(msg_cb):
     app.log.info(msg)
     msg_cb(msg)
 
-    step = StepModel({},
+    step = StepModel({'title': 'Deployment Watcher'},
                      filename='00_deploy-done',
-                     name='Deployment Watcher')
+                     name='00_deploy-done')
     await utils.run_step(step, msg_cb)
 
     events.ModelSettled.set()
