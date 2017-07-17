@@ -46,6 +46,7 @@ class ShowStepsGUITestCase(unittest.TestCase):
     def test_render(self):
         "call next_step"
         self.controller.results = sentinel.results
+        self.controller.show_steps = MagicMock()
 
         self.mock_app.steps = []
         self.controller.render()
