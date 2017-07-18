@@ -89,6 +89,7 @@ class DeployTUIDoDeployTestCase(unittest.TestCase):
         self.mock_common.pre_deploy.return_value = dummy()
         self.mock_juju.add_machines.return_value = dummy()
         self.mock_juju.deploy_service.return_value = dummy()
+        self.mock_juju.add_model.return_value = dummy()
         self.mock_juju.set_relations.return_value = dummy()
 
     def tearDown(self):
@@ -110,7 +111,8 @@ class DeployTUIDoDeployTestCase(unittest.TestCase):
             loop.run_until_complete(self.controller.do_deploy())
 
         assert self.mock_common.pre_deploy.called
+        assert self.mock_juju.add_model.called
         assert self.mock_juju.add_machines.called
         assert self.mock_juju.deploy_service.called
         assert self.mock_juju.set_relations.called
-        self.mock_controllers.use.assert_called_once_with('deploystatus')
+        self.mock_controllers.use.assert_called_with('deploystatus')
