@@ -10,7 +10,7 @@ from base import MockupView
 class TestView(MockupView):
     title = 'Add-Ons'
     subtitle = ('Would you like to deploy any additional '
-                'workloads to your deployment?')
+                'workloads to your Canonical Kubernetes deployment?')
 
     def build_widget(self):
         return [
@@ -18,7 +18,7 @@ class TestView(MockupView):
                        focus_map='menu_button focus'),
             Color.body(menu_btn(label='Galactic Fog'),
                        focus_map='menu_button focus'),
-            Color.body(menu_btn(label='Istio'),
+            Color.body(menu_btn(label='Rancher'),
                        focus_map='menu_button focus'),
             Text(''),
             Text(''),
