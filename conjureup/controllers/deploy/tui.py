@@ -18,7 +18,13 @@ class DeployController:
         applications = sorted(app.metadata_controller.bundle.services,
                               key=attrgetter('service_name'))
 
+        if not events.Bootstrapped.is_set():
+            controllers.use('bootstrap').render()
+
         await common.pre_deploy(msg_cb=utils.info)
+        await juju.add_model(app.current_model,
+                             app.current_controller,
+                             app.current_cloud)
         await juju.add_machines(applications,
                                 machines,
                                 msg_cb=utils.info)
