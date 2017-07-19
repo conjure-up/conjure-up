@@ -45,6 +45,7 @@ class BootstrapwaitGUIRenderTestCase(unittest.TestCase):
         self.track_screen_patcher = patch(
             'conjureup.controllers.bootstrapwait.gui.track_screen')
         self.mock_track_screen = self.track_screen_patcher.start()
+        events.Bootstrapped.clear()
 
     def tearDown(self):
         self.finish_patcher.stop()
@@ -55,6 +56,11 @@ class BootstrapwaitGUIRenderTestCase(unittest.TestCase):
 
     def test_render(self):
         "call render"
+        events.Bootstrapped.set()
+        self.controller.render()
+        assert not self.mock_app.loop.create_task.called
+
+        events.Bootstrapped.clear()
         self.controller.render()
         self.assertEqual(self.mock_app.loop.create_task.mock_calls, [
             call(sentinel.refresh),
