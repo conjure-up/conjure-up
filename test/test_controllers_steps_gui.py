@@ -50,7 +50,7 @@ class ShowStepsGUITestCase(unittest.TestCase):
 
         self.mock_app.steps = []
         self.controller.render()
-        self.mock_controllers.use.assert_called_once_with('deploy')
+        self.mock_controllers.use.assert_called_once_with('bootstrap')
         assert not self.mock_app.loop.create_task.called
 
         self.mock_app.steps = ['one']

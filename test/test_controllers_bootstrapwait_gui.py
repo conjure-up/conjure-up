@@ -27,6 +27,10 @@ class BootstrapwaitGUIRenderTestCase(unittest.TestCase):
             'BootstrapWaitController.finish')
         self.mock_finish = self.finish_patcher.start()
 
+        self.controllers_patcher = patch(
+            'conjureup.controllers.bootstrapwait.gui.'
+            'controllers')
+        self.mock_controllers = self.controllers_patcher.start()
         self.view_patcher = patch(
             'conjureup.controllers.bootstrapwait.gui.BootstrapWaitView')
         self.view_patcher.start()
@@ -105,4 +109,4 @@ class BootstrapwaitGUIFinishTestCase(unittest.TestCase):
         events.Bootstrapped.set()
         with test_loop() as loop:
             loop.run_until_complete(self.controller.finish())
-        self.mock_controllers.use.assert_called_once_with('deploystatus')
+        self.mock_controllers.use.assert_called_once_with('deploy')

@@ -10,7 +10,13 @@ class BaseBootstrapController:
     msg_cb = NotImplementedError()
 
     def render(self):
-        app.loop.create_task(self.do_bootstrap(app.current_credential))
+        if app.current_controller not in juju.get_controllers()['controllers']:
+            app.loop.create_task(self.do_bootstrap(app.current_credential))
+        else:
+            app.loop.create_task(juju.add_model(app.current_model,
+                                                app.current_controller,
+                                                app.current_cloud))
+            events.Bootstrapped.set()
         controllers.use('bootstrapwait').render()
 
     async def do_bootstrap(self, creds):

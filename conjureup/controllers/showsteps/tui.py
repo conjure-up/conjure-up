@@ -5,7 +5,7 @@ from conjureup.controllers.showsteps import common
 class ShowStepsController:
     def render(self):
         common.load_steps()
-        controllers.use('deploy').render()
+        controllers.use('bootstrap').render()
 
 
 _controller_class = ShowStepsController

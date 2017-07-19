@@ -37,7 +37,7 @@ class ShowStepsController:
             app.steps_data[step.name][field.key] = field.input.value
 
     def finish(self):
-        return controllers.use('deploy').render()
+        return controllers.use('bootstrap').render()
 
 
 _controller_class = ShowStepsController

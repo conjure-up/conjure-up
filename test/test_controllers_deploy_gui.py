@@ -109,8 +109,8 @@ class DeployGUIFinishTestCase(unittest.TestCase):
         self.app_patcher.stop()
         self.ev_app_patcher.stop()
 
-    def test_show_bootstrap(self):
-        "deploy.gui.test_show_bootstrap"
+    def test_show_deploystatus(self):
+        "deploy.gui.test_show_deploystatus"
         events.Bootstrapped.clear()
         self.controller.finish()
-        self.mock_controllers.use.assert_called_once_with('bootstrap')
+        self.mock_controllers.use.assert_called_once_with('deploystatus')
