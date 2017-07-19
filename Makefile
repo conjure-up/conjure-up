@@ -56,8 +56,7 @@ clean:
 	@rm -rf conjure-up
 	@rm -rf dist
 	@rm -rf conjure-dev
-	@find conjureup/ -name \*.pyc -delete
-	@find test/ -name \*.pyc -delete
+	@find . -name \*.pyc -delete
 	@find . -name __pycache__ -delete
 	@rm -rf *.snap
 
