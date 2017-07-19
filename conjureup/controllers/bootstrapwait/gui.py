@@ -10,7 +10,7 @@ from conjureup.ui.views.bootstrapwait import BootstrapWaitView
 class BootstrapWaitController:
     def render(self):
         if events.Bootstrapped.is_set():
-            controllers.use('deploy').render()
+            return controllers.use('deploy').render()
         track_screen("Bootstrap wait")
         app.log.debug("Rendering bootstrap wait")
 
