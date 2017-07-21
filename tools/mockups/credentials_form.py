@@ -40,11 +40,11 @@ class VSphere(BaseProvider):
             storable=False
         )
         self.internal_network = Field(
-            label='internal network',
+            label='virtual switch',
             widget=SelectorHorizontal([
-                '10.10.1.1/24',
-                '172.18.1.1/24']),
-            key='internal-network',
+                'VMNet1',
+                'VMNet1']),
+            key='network',
             storable=False
         )
         self.datasource = Field(
