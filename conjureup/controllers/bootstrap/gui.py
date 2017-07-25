@@ -10,7 +10,9 @@ from . import common
 
 
 class BootstrapController(common.BaseBootstrapController):
-    msg_cb = app.ui.set_footer
+    @property
+    def msg_cb(self):
+        return app.ui.set_footer
 
     def render(self):
         track_screen("Bootstrap")
