@@ -21,25 +21,8 @@ class DeployStatusView(WidgetWrap):
         Schedules UI update on main thread to avoid urwid issues with
         changing listbox state during render.
         """
-        for name, application in sorted(applications.items()):
-            # XXX refactor ubuntui to accept libjuju objects directly
-            service = {
-                'units': {
-                    unit.name: {
-                        'public-address': unit.public_address,
-                        'machine': unit.machine_id,
-                        'agent-status': {
-                            'status': unit.agent_status,
-                            'info': unit.agent_status_message,
-                        },
-                        'workload-status': {
-                            'status': unit.workload_status,
-                            'info': unit.workload_status_message,
-                        },
-                    } for unit in application.units
-                }
-            }
-            service_w = ServiceWidget(application.name, service)
+        for name, service in sorted(applications.items()):
+            service_w = ServiceWidget(name, service)
             for unit in service_w.Units:
                 try:
                     unit_w = self.deployed[unit._name]

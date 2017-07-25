@@ -14,10 +14,6 @@ class JaaSLoginController:
             utils.error('JaaS controller not authenticated')
             return events.Shutdown.set(1)
         app.is_jaas = True
-        events.Bootstrapped.set()
-        app.loop.create_task(juju.add_model(app.current_model,
-                                            app.current_controller,
-                                            app.current_cloud))
         controllers.use('showsteps').render()
 
 

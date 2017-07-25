@@ -185,7 +185,6 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
             proc.returncode))
     elif proc.returncode > 0:
         return False
-    events.Bootstrapped.set()
     events.ModelAvailable.set()
     return True
 

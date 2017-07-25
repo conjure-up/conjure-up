@@ -8,7 +8,7 @@ from conjureup.ui.widgets.step import StepResult
 
 
 class ShowStepsView(BaseView):
-    title = "Additional Application Configuration"
+    title = "Configure Spell"
     subtitle = ("Please provide the information below, which will "
                 "be used for the post-deploy configuration.")
 

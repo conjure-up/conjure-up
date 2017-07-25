@@ -1,7 +1,7 @@
 import asyncio
 from subprocess import CalledProcessError
 
-from conjureup import controllers, events, juju
+from conjureup import controllers, juju
 from conjureup.app_config import app
 from conjureup.consts import JAAS_DOMAIN
 from conjureup.telemetry import track_screen
@@ -53,11 +53,7 @@ class JaaSLoginController:
         app.current_controller = app.jaas_controller
         app.is_jaas = True
         self.authenticating.clear()
-        events.Bootstrapped.set()
         app.log.info('JAAS is registered')
-        app.loop.create_task(juju.add_model(app.current_model,
-                                            app.current_controller,
-                                            app.current_cloud))
         controllers.use('showsteps').render()
 
     def render_interstitial(self):

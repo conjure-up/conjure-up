@@ -3,8 +3,8 @@ Clouds
 Cloud Credentials
 Contoller Picker
 JAAS Login
-Show Steps
+Configure Spell
+Configure Applications
 Boostrap
-BootstrapWait
 Deploy
-Summary
+Post-Deploy Steps
