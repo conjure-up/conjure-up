@@ -7,7 +7,7 @@ from ubuntui.widgets.input import (
     PasswordEditor,
     SelectorHorizontal,
     StringEditor,
-    YesNo,
+    YesNo
 )
 from urwid import Text
 
@@ -16,7 +16,7 @@ from conjureup.juju import get_credential
 from conjureup.utils import (
     arun,
     get_physical_network_interfaces,
-    is_valid_hostname,
+    is_valid_hostname
 )
 
 
