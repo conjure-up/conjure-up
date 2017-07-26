@@ -18,3 +18,4 @@ redis==2.10.5
 raven==6.1.0
 psutil==5.2.2
 awscli==1.11.123
+pyvmomi==6.5.0.2017.5-1
