@@ -33,8 +33,8 @@ async def do_step(step_model, msg_cb):
     # exposed in future processing tasks
     app.env['JUJU_PROVIDERTYPE'] = provider_type
 
-    # Set current credential name
-    app.env['JUJU_CREDENTIAL'] = app.current_credential
+    # Set current credential name (localhost doesn't have one)
+    app.env['JUJU_CREDENTIAL'] = app.current_credential or ''
 
     # Set current juju controller and model
     app.env['JUJU_CONTROLLER'] = app.current_controller
