@@ -20,13 +20,11 @@ class BootstrapController(common.BaseBootstrapController):
         if app.is_jaas or self.is_existing_controller():
             bootstrap_stderr_path = None
             msg = 'Model'
-            app.loop.create_task(self.do_add_model())
         else:
             cache_dir = Path(app.config['spell-dir'])
             bootstrap_stderr_path = cache_dir / '{}-bootstrap.err'.format(
                 app.current_controller)
             msg = 'Controller'
-            app.loop.create_task(self.do_bootstrap())
 
         view = BootstrapWaitView(
             app=app,

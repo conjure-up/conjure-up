@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, call, patch, sentinel
 from conjureup import events
 from conjureup.controllers.bootstrap.gui import BootstrapController
 
-from .helpers import test_loop
+from .helpers import AsyncMock, test_loop
 
 
 class BootstrapGUIRenderTestCase(unittest.TestCase):
@@ -19,10 +19,8 @@ class BootstrapGUIRenderTestCase(unittest.TestCase):
     def setUp(self):
         self.controller = BootstrapController()
 
-        self.controller.do_add_model = MagicMock(
-            return_value=sentinel.do_add_model)
-        self.controller.do_bootstrap = MagicMock(
-            return_value=sentinel.do_bootstrap)
+        self.controller.do_add_model = AsyncMock()
+        self.controller.do_bootstrap = AsyncMock()
         self.controller.wait = MagicMock(
             return_value=sentinel.wait)
         self.controller.is_existing_controller = MagicMock()
@@ -41,6 +39,14 @@ class BootstrapGUIRenderTestCase(unittest.TestCase):
         self.ev_app_patcher = patch(
             'conjureup.events.app', self.mock_app)
         self.ev_app_patcher.start()
+        self.common_app_patcher = patch(
+            'conjureup.controllers.bootstrap.common.app', self.mock_app)
+        self.common_app_patcher.start()
+
+        self.schema_patcher = patch(
+            'conjureup.controllers.bootstrap.common.load_schema')
+        mock_load_schema = self.schema_patcher.start()
+        self.mock_provider = mock_load_schema.return_value = AsyncMock()
 
         self.track_screen_patcher = patch(
             'conjureup.controllers.bootstrap.gui.track_screen')
@@ -52,34 +58,43 @@ class BootstrapGUIRenderTestCase(unittest.TestCase):
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.ev_app_patcher.stop()
+        self.common_app_patcher.stop()
+        self.schema_patcher.stop()
         self.track_screen_patcher.stop()
 
-    def test_render_jaas(self):
+    def test_render(self):
+        self.controller.run = MagicMock(return_value=sentinel.run)
+        self.controller.render()
+        self.assertEqual(self.mock_app.loop.create_task.mock_calls, [
+            call(sentinel.run),
+            call(sentinel.wait)])
+
+    def test_run_jaas(self):
         "call render"
         self.mock_app.is_jaas = True
         self.controller.is_existing_controller.return_value = False
-        self.controller.render()
-        self.assertEqual(self.mock_app.loop.create_task.mock_calls, [
-            call(sentinel.do_add_model),
-            call(sentinel.wait)])
+        with test_loop() as loop:
+            loop.run_until_complete(self.controller.run())
+        assert self.mock_provider.configure_tools.called
+        assert self.controller.do_add_model.called
 
-    def test_render_existing(self):
+    def test_run_existing(self):
         "call render"
         self.mock_app.is_jaas = False
         self.controller.is_existing_controller.return_value = True
-        self.controller.render()
-        self.assertEqual(self.mock_app.loop.create_task.mock_calls, [
-            call(sentinel.do_add_model),
-            call(sentinel.wait)])
+        with test_loop() as loop:
+            loop.run_until_complete(self.controller.run())
+        assert self.mock_provider.configure_tools.called
+        assert self.controller.do_add_model.called
 
-    def test_render_bootstrap(self):
+    def test_run_bootstrap(self):
         "call render"
         self.mock_app.is_jaas = False
         self.controller.is_existing_controller.return_value = False
-        self.controller.render()
-        self.assertEqual(self.mock_app.loop.create_task.mock_calls, [
-            call(sentinel.do_bootstrap),
-            call(sentinel.wait)])
+        with test_loop() as loop:
+            loop.run_until_complete(self.controller.run())
+        assert self.mock_provider.configure_tools.called
+        assert self.controller.do_bootstrap.called
 
 
 class BootstrapGUIWaitTestCase(unittest.TestCase):
