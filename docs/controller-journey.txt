@@ -2,6 +2,9 @@ Spell Picker
 Clouds
 Regions
 Cloud Credentials
+Extended Provider setup
+- vspheresetup
+- lxdsetup
 Contoller Picker
 JAAS Login
 Configure Spell
