@@ -1,6 +1,7 @@
 import ipaddress
 from collections import OrderedDict
 from functools import partial
+from subprocess import CalledProcessError
 from urllib.parse import urljoin, urlparse
 
 from ubuntui.widgets.input import (
@@ -141,12 +142,17 @@ class AWS(BaseProvider):
         """ Configure AWS CLI.
         """
         cred_name = app.current_credential
-        creds = get_credential(app.current_cloud)[cred_name]
+        creds = get_credential(app.current_cloud, cred_name)
         for key, value in creds.items():
-            await arun(['aws', 'configure', 'set', '--profile', cred_name],
-                       input='{}\n{}\n\n\n'.format(creds['access-key'],
-                                                   creds['secret-key']),
-                       check=True)
+            try:
+                await arun(['aws', 'configure', '--profile', cred_name],
+                           input='{}\n{}\n\n\n'.format(creds['access-key'],
+                                                       creds['secret-key']),
+                           check=True)
+            except CalledProcessError as e:
+                app.log.error('Failed to configure AWS CLI profile: {}'.format(
+                    e.stderr))
+                raise
 
 
 class MAAS(BaseProvider):

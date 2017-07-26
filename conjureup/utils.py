@@ -129,7 +129,8 @@ def run_attach(cmd, output_cb=None):
 
 
 async def arun(cmd, input=None, check=False, env=None, encoding='utf8',
-               **kwargs):
+               stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+               stderr=subprocess.PIPE, **kwargs):
     """ Run a command using asyncio.
 
     :param list cmd: List containing the command to run, plus any args.
@@ -138,10 +139,21 @@ async def arun(cmd, input=None, check=False, env=None, encoding='utf8',
     env = dict(app.env, **(env or {}))
 
     proc = await asyncio.create_subprocess_exec(*cmd,
+                                                stdin=stdin,
+                                                stdout=stdout,
+                                                stderr=stderr,
                                                 env=env,
-                                                encoding=encoding,
                                                 **kwargs)
+
+    if isinstance(input, str):
+        input = input.encode(encoding)
+
     stdout_data, stderr_data = await proc.communicate(input)
+
+    if stdout_data is not None:
+        stdout_data = stdout_data.decode(encoding)
+    if stderr_data is not None:
+        stderr_data = stderr_data.decode(encoding)
 
     if check and proc.returncode != 0:
         raise subprocess.CalledProcessError(proc.returncode,
