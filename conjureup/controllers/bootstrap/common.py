@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from conjureup import controllers, events, juju, utils
+from conjureup import events, juju, utils
 from conjureup.app_config import app
 from conjureup.models.step import StepModel
 from conjureup.telemetry import track_event
@@ -9,14 +9,19 @@ from conjureup.telemetry import track_event
 class BaseBootstrapController:
     msg_cb = NotImplementedError()
 
-    def render(self):
-        app.loop.create_task(self.do_bootstrap(app.current_credential))
-        controllers.use('showsteps').render()
+    def is_existing_controller(self):
+        controllers = juju.get_controllers()['controllers']
+        return app.current_controller in controllers
 
-    async def do_bootstrap(self, creds):
-        if app.is_jaas:
-            return
+    async def do_add_model(self):
+        self.emit('Creating Juju model.')
+        await juju.add_model(app.current_model,
+                             app.current_controller,
+                             app.current_cloud)
+        self.emit('Juju model created.')
+        events.Bootstrapped.set()
 
+    async def do_bootstrap(self):
         await self.pre_bootstrap()
         self.emit('Bootstrapping Juju controller.')
         track_event("Juju Bootstrap", "Started", "")
@@ -27,7 +32,7 @@ class BaseBootstrapController:
         success = await juju.bootstrap(app.current_controller,
                                        cloud_with_region,
                                        app.current_model,
-                                       credential=creds)
+                                       credential=app.current_credential)
         if not success:
             log_file = '{}-bootstrap.err'.format(app.current_controller)
             log_file = Path(app.config['spell-dir']) / log_file

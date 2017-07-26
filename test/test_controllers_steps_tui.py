@@ -31,4 +31,4 @@ class StepsTUIRenderTestCase(unittest.TestCase):
         "call render"
         self.controller.render()
         self.mock_common.load_steps.assert_called_once_with()
-        self.mock_controllers.use.assert_called_once_with('deploy')
+        self.mock_controllers.use.assert_called_once_with('configapps')
