@@ -13,7 +13,7 @@ class CloudsController:
         else:
             app.current_model = utils.gen_model()
 
-        return controllers.use('regions').render()
+        return controllers.use('credentials').render()
 
     def render(self):
         if app.current_cloud not in juju.get_clouds().keys():

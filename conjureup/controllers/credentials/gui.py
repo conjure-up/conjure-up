@@ -88,8 +88,17 @@ class CredentialsController(common.BaseCredentialsController):
             cred_f.write(yaml.safe_dump(existing_creds,
                                         default_flow_style=False))
 
-        # if it's a new MAAS cloud, save it now that we have a credential
-        if app.current_cloud_type == 'maas':
+        try:
+            credential.login()
+        except NotImplementedError:
+            # Not all cloud providers require you to login, VSphere is one
+            # that does as this is the only way to capture the available
+            # regions it supports.
+            pass
+
+        # if it's a new MAAS or VSphere cloud, save it now that
+        # we have a credential
+        if app.current_cloud_type in ['maas', 'vsphere']:
             try:
                 juju.get_cloud(app.current_cloud)
             except LookupError:

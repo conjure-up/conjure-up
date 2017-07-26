@@ -51,6 +51,8 @@ async def pre_deploy(msg_cb):
 
     # Set provider type for post-bootstrap
     app.env['JUJU_PROVIDERTYPE'] = app.juju.client.info.provider_type
+    # Set current credential name (localhost doesn't have one)
+    app.env['JUJU_CREDENTIAL'] = app.current_credential or ''
     app.env['JUJU_CONTROLLER'] = app.current_controller
     app.env['JUJU_MODEL'] = app.current_model
     app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir

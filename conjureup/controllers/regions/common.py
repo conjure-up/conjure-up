@@ -34,7 +34,7 @@ class BaseRegionsController:
     @property
     def regions(self):
         if app.current_cloud not in self._regions:
-            if app.current_cloud_type in ['maas', 'vsphere', 'localhost']:
+            if app.current_cloud_type in ['maas', 'localhost']:
                 # No regions for these providers
                 regions = []
             else:
@@ -44,4 +44,9 @@ class BaseRegionsController:
 
     def finish(self, region):
         app.current_region = region
-        controllers.use('credentials').render()
+        if app.current_cloud_type == 'localhost':
+            controllers.use('lxdsetup').render()
+        elif app.current_cloud_type == 'vsphere':
+            controllers.use('vspheresetup').render()
+        else:
+            controllers.use('controllerpicker').render()

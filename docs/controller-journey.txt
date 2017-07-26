@@ -1,7 +1,7 @@
 Spell Picker
 Clouds
-Regions
 Cloud Credentials
+Regions
 Extended Provider setup
 - vspheresetup
 - lxdsetup

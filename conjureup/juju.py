@@ -145,6 +145,13 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
     def add_config(k, v):
         cmd.extend(["--config", "{}={}".format(k, v)])
 
+    def add_model_defaults(k, v):
+        cmd.extend(["--model-default", "{}={}".format(k, v)])
+
+    if app.current_model_defaults:
+        for k, v in app.current_model_defaults.items():
+            add_model_defaults(k, v)
+
     add_config("image-stream", "daily"),
     add_config("enable-os-upgrade", "false"),
     if app.argv.http_proxy:
@@ -756,21 +763,24 @@ def get_model(controller, name):
         "Unable to find model: {}".format(name))
 
 
-async def add_model(name, controller, cloud, allow_exists=True):
+async def add_model(name, controller, cloud, credential=None):
     """ Adds a model to current controller
 
     Arguments:
     controller: controller to add model in
-    allow_exists: re-use an existing model, if one exists.
+    cloud: cloud/region to add model in
+    credential: optional credential name to use (required unless localhost)
     """
-    if allow_exists and await model_available(name):
+    if await model_available(name):
         events.ModelAvailable.set()
         await login()
         return
 
-    proc = await asyncio.create_subprocess_exec(
-        'juju', 'add-model', name, '-c', controller, cloud,
-        stdout=DEVNULL, stderr=PIPE)
+    cmd = ['juju', 'add-model', name, cloud, '--controller', controller]
+    if credential:
+        cmd.extend(['--credential', credential])
+    proc = await asyncio.create_subprocess_exec(*cmd,
+                                                stdout=DEVNULL, stderr=PIPE)
     _, stderr = await proc.communicate()
     if proc.returncode > 0:
         raise Exception(

@@ -19,6 +19,7 @@ from conjureup.utils import (
     get_physical_network_interfaces,
     is_valid_hostname
 )
+from conjureup.vsphere import VSphereClient
 
 
 """ Defining the schema
@@ -28,6 +29,8 @@ The schema contains attributes for rendering proper credentials.
 A typical schema is:
 
 'auth-type': 'access-key' - defines the auth type supported by provider
+'login':     - If subsequent views require specific provider
+               information, make sure to log into those relevant apis
 'fields': [] - editable fields in the ui, each field can contain:
   'label'    - Friendly label to the user
   'widget'   - Input widget
@@ -97,6 +100,12 @@ class BaseProvider:
 
     def fields(self):
         """ Should return a list of fields
+        """
+        raise NotImplementedError
+
+    def login(self):
+        """ Will login to the current provider to expose further information
+        that could be useful in subsequent views
         """
         raise NotImplementedError
 
@@ -445,19 +454,40 @@ class VSphere(BaseProvider):
             widget=PasswordEditor(),
             key='password'
         )
-        self.external_network = Field(
-            label='external network',
-            widget=StringEditor(),
-            key='external-network',
-            storable=False
-        )
+
+    def login(self):
+        """ Configure VSphere client
+        """
+        app.vsphere.client = VSphereClient(username=self.user.value,
+                                           password=self.password.value,
+                                           host=self.endpoint.value)
+        try:
+            app.vsphere.client.login()
+            app.vsphere.authenticated = True
+        except:
+            raise Exception(
+                "Could not log in to VSphere, please "
+                "check your credentials and try again.")
+
+    def cloud_config(self):
+        config = {
+            'type': 'vsphere',
+            'auth-types': ['userpass'],
+            'endpoint': self.endpoint.value,
+            'regions': {
+            }
+        }
+        if not app.vsphere.authenticated:
+            self.login()
+        for dc in app.vsphere.client.get_datacenters():
+            config['regions'][dc.name] = {self.endpoint.value}
+        return config
 
     def fields(self):
         return [
             self.endpoint,
             self.user,
-            self.password,
-            self.external_network
+            self.password
         ]
 
 

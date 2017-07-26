@@ -8,8 +8,7 @@ from conjureup.ui.widgets.select_list import SelectorList
 
 
 class NewCredentialView(SchemaFormView):
-    title = "Credential Creation"
-    subtitle = "New Credential Setup"
+    title = "New Credential Creation"
 
     def __init__(self, *args, **kwargs):
         cloud_type = app.current_cloud_type.upper()

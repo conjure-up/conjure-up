@@ -17,7 +17,4 @@ class BaseCredentialsController:
 
     def finish(self, cred):
         app.current_credential = cred
-        if app.current_cloud_type == 'localhost':
-            controllers.use('lxdsetup').render()
-        else:
-            controllers.use('controllerpicker').render()
+        controllers.use('regions').render()

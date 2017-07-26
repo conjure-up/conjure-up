@@ -107,7 +107,7 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
         self.mock_app.current_cloud = 'cloud'
         self.controller.finish()
         self.mock_controllers.use.assert_has_calls([
-            call('regions'), call().render()])
+            call('credentials'), call().render()])
 
     def test_finish_no_model(self):
         "clouds.finish without existing controller"
@@ -116,4 +116,4 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
         self.mock_app.argv.controller = None
         self.controller.finish()
         self.mock_controllers.use.assert_has_calls([
-            call('regions'), call().render()])
+            call('credentials'), call().render()])

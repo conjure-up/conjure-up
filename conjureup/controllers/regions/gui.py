@@ -16,7 +16,7 @@ class RegionsController(common.BaseRegionsController):
         view.show()
 
     def back(self):
-        return controllers.use('clouds').render()
+        return controllers.use('credentials').render()
 
 
 _controller_class = RegionsController
