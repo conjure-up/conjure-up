@@ -7,11 +7,17 @@ from ubuntui.widgets.input import (
     PasswordEditor,
     SelectorHorizontal,
     StringEditor,
-    YesNo
+    YesNo,
 )
 from urwid import Text
 
-from conjureup.utils import get_physical_network_interfaces, is_valid_hostname
+from conjureup.app_config import app
+from conjureup.juju import get_credential
+from conjureup.utils import (
+    arun,
+    get_physical_network_interfaces,
+    is_valid_hostname,
+)
 
 
 """ Defining the schema
@@ -104,6 +110,11 @@ class BaseProvider:
         """
         return None
 
+    async def configure_tools(self):
+        """ Configure any provider-specific tools.
+        """
+        pass
+
 
 class AWS(BaseProvider):
     AUTH_TYPE = 'access-key'
@@ -125,6 +136,17 @@ class AWS(BaseProvider):
     @property
     def default_region(self):
         return 'us-east-1'
+
+    async def configure_tools(self):
+        """ Configure AWS CLI.
+        """
+        cred_name = app.current_credential
+        creds = get_credential(app.current_cloud)[cred_name]
+        for key, value in creds.items():
+            await arun(['aws', 'configure', 'set', '--profile', cred_name],
+                       input='{}\n{}\n\n\n'.format(creds['access-key'],
+                                                   creds['secret-key']),
+                       check=True)
 
 
 class MAAS(BaseProvider):

@@ -128,6 +128,28 @@ def run_attach(cmd, output_cb=None):
                                          subproc.returncode))
 
 
+async def arun(cmd, input=None, check=False, env=None, encoding='utf8',
+               **kwargs):
+    """ Run a command using asyncio.
+
+    :param list cmd: List containing the command to run, plus any args.
+    :param dict **kwargs:
+    """
+    env = dict(app.env, **(env or {}))
+
+    proc = await asyncio.create_subprocess_exec(*cmd,
+                                                env=env,
+                                                encoding=encoding,
+                                                **kwargs)
+    stdout_data, stderr_data = await proc.communicate(input)
+
+    if check and proc.returncode != 0:
+        raise subprocess.CalledProcessError(proc.returncode,
+                                            cmd,
+                                            stdout_data, stderr_data)
+    return (proc.returncode, stdout_data, stderr_data)
+
+
 async def run_step(step, msg_cb, event_name=None):
     # Define STEP_NAME for use in determining where to store
     # our step results,

@@ -2,6 +2,7 @@ from pathlib import Path
 
 from conjureup import events, juju, utils
 from conjureup.app_config import app
+from conjureup.models.provider import load_schema
 from conjureup.models.step import StepModel
 from conjureup.telemetry import track_event
 
@@ -12,6 +13,15 @@ class BaseBootstrapController:
     def is_existing_controller(self):
         controllers = juju.get_controllers()['controllers']
         return app.current_controller in controllers
+
+    async def run(self):
+        provider = load_schema(app.current_cloud_type)
+        await provider.configure_tools()
+
+        if app.is_jaas or self.is_existing_controller():
+            await self.do_add_model()
+        else:
+            await self.do_bootstrap()
 
     async def do_add_model(self):
         self.emit('Creating Juju model.')
@@ -64,10 +74,10 @@ class BaseBootstrapController:
     async def pre_bootstrap(self):
         """ runs pre bootstrap script if exists
         """
-
         # Set provider type for post-bootstrap
         app.env['JUJU_PROVIDERTYPE'] = juju.get_cloud_types_by_name()[
             app.current_cloud]
+        app.env['JUJU_CREDENTIAL'] = app.current_credential
         app.env['JUJU_CONTROLLER'] = app.current_controller
         app.env['JUJU_MODEL'] = app.current_model
         app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir

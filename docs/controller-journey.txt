@@ -1,5 +1,6 @@
 Spell Picker
 Clouds
+Regions
 Cloud Credentials
 Contoller Picker
 JAAS Login

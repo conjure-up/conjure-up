@@ -10,10 +10,7 @@ class BootstrapController(common.BaseBootstrapController):
     msg_cb = partial(utils.info)
 
     def render(self):
-        if app.is_jaas or self.is_existing_controller():
-            app.loop.create_task(self.do_add_model())
-        else:
-            app.loop.create_task(self.do_bootstrap())
+        app.loop.create_task(self.run())
         app.loop.create_task(self.wait())
 
     async def wait(self):

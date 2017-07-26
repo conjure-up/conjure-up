@@ -35,6 +35,7 @@ class BootstrapController(common.BaseBootstrapController):
         app.ui.set_header(title="Waiting")
         app.ui.set_body(view)
 
+        app.loop.create_task(self.run())
         app.loop.create_task(self.wait(view))
 
     async def wait(self, view):
