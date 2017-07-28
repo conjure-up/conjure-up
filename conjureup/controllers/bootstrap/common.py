@@ -27,7 +27,8 @@ class BaseBootstrapController:
         self.emit('Creating Juju model.')
         await juju.add_model(app.current_model,
                              app.current_controller,
-                             app.current_cloud)
+                             app.current_cloud,
+                             app.current_credential)
         self.emit('Juju model created.')
         events.Bootstrapped.set()
 
