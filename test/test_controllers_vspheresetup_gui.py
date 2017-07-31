@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #
-# tests controllers/lxdsetup/gui.py
+# test vsphere configuration
 #
-# Copyright 2016 Canonical, Ltd.
+# Copyright 2016-2017 Canonical, Ltd.
 
 
 import unittest
