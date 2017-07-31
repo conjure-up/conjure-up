@@ -216,7 +216,8 @@ class StepForm(WidgetWrap):
 
     def keypress(self, size, key):
         if key == 'enter':
-            if self.current_index + 2 == self.current_button_index:
+            if self.current_button_index in (self.current_index,
+                                             self.current_index + 2):
                 self.button.keypress(size, 'enter')
             else:
                 self.step_pile.keypress(size, 'down')
