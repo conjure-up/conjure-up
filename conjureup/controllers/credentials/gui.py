@@ -89,7 +89,7 @@ class CredentialsController(common.BaseCredentialsController):
                                         default_flow_style=False))
 
         try:
-            credential.login()
+            credential.login(cred_name)
         except NotImplementedError:
             # Not all cloud providers require you to login, VSphere is one
             # that does as this is the only way to capture the available
