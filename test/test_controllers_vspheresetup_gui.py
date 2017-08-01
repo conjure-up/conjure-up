@@ -18,6 +18,17 @@ class VSphereSetupGUITestCase(unittest.TestCase):
             'conjureup.controllers.vspheresetup.common.controllers')
         self.mock_controllers = self.controllers_patcher.start()
 
+        self.juju_patcher = patch(
+            'conjureup.controllers.vspheresetup.common.juju')
+        self.mock_juju = self.juju_patcher.start()
+
+        self.schema_patcher = patch(
+            'conjureup.controllers.vspheresetup.common.load_schema')
+        self.mock_schema = self.schema_patcher.start()
+        self.cm_patcher = patch(
+            'conjureup.controllers.vspheresetup.common.CredentialManager')
+        self.mock_cm = self.cm_patcher.start()
+
         self.view_patcher = patch(
             'conjureup.controllers.vspheresetup.gui.VSphereSetupView')
         self.mock_view = self.view_patcher.start()
@@ -32,6 +43,9 @@ class VSphereSetupGUITestCase(unittest.TestCase):
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.controllers_patcher.stop()
+        self.juju_patcher.stop()
+        self.schema_patcher.stop()
+        self.cm_patcher.stop()
 
     def test_render(self):
         "vspheresetup.gui.test_render"

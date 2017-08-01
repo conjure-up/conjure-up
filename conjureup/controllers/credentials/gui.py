@@ -4,6 +4,7 @@ import yaml
 
 from conjureup import controllers, juju, utils
 from conjureup.app_config import app
+from conjureup.models.credential import CredentialManager
 from conjureup.models.provider import load_schema
 from conjureup.ui.views.credentials import (
     CredentialPickerView,
@@ -89,11 +90,16 @@ class CredentialsController(common.BaseCredentialsController):
                                         default_flow_style=False))
 
         try:
-            credential.login(cred_name)
-        except NotImplementedError:
-            # Not all cloud providers require you to login, VSphere is one
-            # that does as this is the only way to capture the available
-            # regions it supports.
+            # Load our recently saved credential so we can login to any
+            # applicable providers
+            credential_manager = CredentialManager(app.current_cloud,
+                                                   cred_name)
+            refresh_credentials = credential_manager.to_dict()
+            refresh_credentials.update({'host': credential.endpoint.value})
+            credential.login(refresh_credentials)
+        except:
+            # Some providers dont expose a login method, just
+            # ignore that
             pass
 
         # if it's a new MAAS or VSphere cloud, save it now that

@@ -13,7 +13,7 @@ from ubuntui.widgets.input import (
 from urwid import Text
 
 from conjureup.app_config import app
-from conjureup.juju import get_credential, get_cloud
+from conjureup.juju import get_credential
 from conjureup.utils import (
     arun,
     get_physical_network_interfaces,
@@ -31,7 +31,6 @@ A typical schema is:
 'auth-type': 'access-key' - defines the auth type supported by provider
 'login':     - If subsequent views require specific provider
                information, make sure to log into those relevant apis
-'_load_credential': Loads any existing credential for provider
 'fields': [] - editable fields in the ui, each field can contain:
   'label'    - Friendly label to the user
   'widget'   - Input widget
@@ -104,18 +103,20 @@ class BaseProvider:
         """
         raise NotImplementedError
 
-    def _load_credential(self, credential_name):
-        self.credential = get_credential(app.current_cloud, credential_name)
-        self.cloud = get_cloud(app.current_cloud)
-
-    def login(self, credential_name):
+    def login(self, credential):
         """ Will login to the current provider to expose further information
         that could be useful in subsequent views
-        """
-        self._load_credential(credential_name)
 
-    def cloud_config(self):
+        Arguments:
+        credential: required credential to login to provider
+        """
+        raise NotImplementedError
+
+    def cloud_config(self, **opts):
         """ Returns a config suitable to store as a cloud
+
+        Arguments:
+        opts: optional arguments to pass to cloud_config
         """
         raise NotImplementedError
 
@@ -460,16 +461,12 @@ class VSphere(BaseProvider):
             key='password'
         )
 
-    def login(self, credential_name):
-        """ Configure VSphere client
-        """
+    def login(self, credential):
         if app.vsphere.authenticated:
             return
-        super().login(credential_name)
-        app.vsphere.client = VSphereClient(
-            username=self.credential['user'],
-            password=self.credential['password'],
-            host=self.cloud['endpoint'])
+
+        app.vsphere.client = VSphereClient(**credential)
+
         try:
             app.vsphere.client.login()
             app.vsphere.authenticated = True
@@ -483,11 +480,8 @@ class VSphere(BaseProvider):
             'type': 'vsphere',
             'auth-types': ['userpass'],
             'endpoint': self.endpoint.value,
-            'regions': {
-            }
+            'regions': {}
         }
-        if not app.vsphere.authenticated:
-            self.login()
         for dc in app.vsphere.client.get_datacenters():
             config['regions'][dc.name] = {self.endpoint.value}
         return config

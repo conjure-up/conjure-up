@@ -1,6 +1,5 @@
 from conjureup import controllers, juju
 from conjureup.app_config import app
-from conjureup.models.provider import VSphere
 
 
 class BaseCredentialsController:
@@ -18,6 +17,4 @@ class BaseCredentialsController:
 
     def finish(self, cred):
         app.current_credential = cred
-        if app.current_cloud_type == 'vsphere':
-            VSphere().login(cred)
         controllers.use('regions').render()
