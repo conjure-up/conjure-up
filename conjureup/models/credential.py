@@ -3,6 +3,12 @@
 from conjureup.juju import get_cloud_types_by_name, get_credential
 
 
+class CredentialManagerInvalidCloudType(Exception):
+    """ Unable to match a credential to the cloud type
+    """
+    pass
+
+
 class BaseCredential:
     """ Base credential for all clouds
     """
@@ -50,17 +56,13 @@ class CredentialManager:
         self.cloud = cloud
         self.credential_obj = self._get_credential_object()
 
-    def get_cloud_type(self, name):
-        for name, cloud_type in get_cloud_types_by_name().items():
-            if name == self.cloud:
-                return cloud_type
-
     def _get_credential_object(self):
-        cloud_type = self.get_cloud_type(self.cloud)
+        cloud_type = get_cloud_types_by_name().get(self.cloud)
         for credential in self.CREDENTIALS:
             if credential.check_cloud_type(cloud_type):
                 return credential(self.cloud,
                                   self.credential_name)
+        raise CredentialManagerInvalidCloudType
 
     def to_dict(self):
         return self.credential_obj.to_dict()
