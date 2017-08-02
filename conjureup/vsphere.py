@@ -7,6 +7,12 @@ from pyVim.connect import Disconnect, SmartConnect
 from pyVmomi import vim
 
 
+class VSphereInvalidLogin(vim.fault.InvalidLogin):
+    """ Login was invalid, could be user or password mismatch
+    """
+    pass
+
+
 class VSphereClient:
     def __init__(self, username, password, host, port=443):
         self.host = host
