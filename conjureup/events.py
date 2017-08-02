@@ -1,6 +1,7 @@
 import asyncio
 import errno
 import inspect
+from concurrent.futures import CancelledError
 from pathlib import Path
 
 from ubuntui.ev import EventLoop
@@ -138,15 +139,15 @@ def unhandled_input(key):
 
 
 def handle_exception(loop, context):
-    if 'exception' not in context:
+    exc = context.get('exception')
+    if exc is None or isinstance(exc, CancelledError):
         return  # not an error, cleanup message
-    if isinstance(context['exception'], ExitMainLoop):
+    if isinstance(exc, ExitMainLoop):
         Shutdown.set()  # use previously stored exit code
         return
     if Error.is_set():
         return  # already reporting an error
     Error.set()
-    exc = context['exception']
     exc_info = (type(exc), exc, exc.__traceback__)
 
     if any(pred(exc) for pred in NOTRACK_EXCEPTIONS):
@@ -155,7 +156,10 @@ def handle_exception(loop, context):
         track_exception(str(exc))
         utils.sentry_report(exc_info=exc_info)
 
-    app.log.exception('Unhandled exception', exc_info=exc)
+    msg = 'Unhandled exception'
+    if 'future' in context:
+        msg += ' in {}'.format(context['future'])
+    app.log.exception(msg, exc_info=exc)
 
     if app.headless:
         msg = str(exc)
@@ -169,17 +173,17 @@ def handle_exception(loop, context):
 async def shutdown_watcher():
     app.log.info('Watching for shutdown')
     try:
-        await Shutdown.wait()
-    except asyncio.CancelledError:
-        pass
+        try:
+            await Shutdown.wait()
+        except asyncio.CancelledError:
+            pass
 
-    app.log.info('Shutting down')
-    if app.headless:
-        utils.warning('Shutting down')
-    else:
-        app.ui.show_shutdown_message()
+        app.log.info('Shutting down')
+        if app.headless:
+            utils.warning('Shutting down')
+        else:
+            app.ui.show_shutdown_message()
 
-    try:
         # Store application configuration state
         await app.save()
 
@@ -193,8 +197,11 @@ async def shutdown_watcher():
 
         for task in asyncio.Task.all_tasks(app.loop):
             # cancel all other tasks
-            if getattr(task, '_coro', None) is not shutdown_watcher:
+            coro = getattr(task, '_coro', None)
+            if coro and coro.cr_code is not shutdown_watcher.__code__:
+                app.log.debug('Cancelling pending task: {}'.format(task))
                 task.cancel()
+        await asyncio.sleep(0.1)  # give tasks a chance to see the cancel
     except Exception as e:
         app.log.exception('Error in cleanup code: {}'.format(e))
     app.loop.stop()
