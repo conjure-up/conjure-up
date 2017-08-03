@@ -1,9 +1,10 @@
 # Getting a development environment started
 
 0. clone the repo
+1. `make sysdeps`
 2. `make dev`
 3. `source conjure-dev/bin/activate`
-3. `make test`
+4. `make test`
 
 # Check tests before submitting a PR
 
