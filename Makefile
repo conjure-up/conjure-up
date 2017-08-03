@@ -11,7 +11,7 @@ CHANNEL := edge
 .PHONY: sysdeps
 sysdeps:
 	@sudo apt-get update
-	@sudo apt-get -qqyf install jq python3-yaml bsdtar bridge-utils software-properties-common snapcraft python3-dev tox shellcheck build-essential
+	@sudo apt-get -qqyf install jq python3-yaml bsdtar bridge-utils software-properties-common snapcraft python3-dev tox shellcheck build-essential redis-server
 
 travis-sysdeps:
 	@sudo add-apt-repository -y ppa:ubuntu-lxc/lxd-stable
