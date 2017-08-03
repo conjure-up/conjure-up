@@ -52,6 +52,7 @@ parts:
     stage-packages:
       - bsdtar
       - jq
+      - pwgen
     after: [python]
   spells:
     source: https://github.com/conjure-up/spells.git
