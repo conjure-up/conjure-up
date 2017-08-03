@@ -30,6 +30,14 @@ juju = SimpleNamespace(
     authenticated=False
 )
 
+vsphere = SimpleNamespace(
+    # Client
+    client=None,
+
+    # Is authenticated?
+    authenticated=False
+)
+
 
 class AppConfig:
     """ Application config storage
@@ -43,6 +51,9 @@ class AppConfig:
 
     # Juju Client
     juju = juju
+
+    # VSphere Client if exists
+    vsphere = vsphere
 
     # The conjure-up UI framework
     ui = None
@@ -69,6 +80,9 @@ class AppConfig:
     is_jaas = False
 
     current_model = None
+
+    # Model defaults
+    current_model_defaults = None
 
     # Current Juju controller selected
     current_controller = None
@@ -165,7 +179,7 @@ class AppConfig:
         precautions.
         """
         blacklist = ['loop', 'log', 'maas', 'argv', 'spells_index',
-                     'juju', 'ui', 'bootstrap', 'endpoint_type',
+                     'juju', 'ui', 'bootstrap', 'endpoint_type', 'vsphere',
                      'metadata_controller', 'state',
                      'env', 'sentry', 'steps', 'sudo_pass']
         new_dict = {}

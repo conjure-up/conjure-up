@@ -90,4 +90,4 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
         "clouds.finish without existing controller"
         self.controller.finish('testcloud')
         self.mock_controllers.use.assert_has_calls([
-            call('regions'), call().render()])
+            call('credentials'), call().render()])

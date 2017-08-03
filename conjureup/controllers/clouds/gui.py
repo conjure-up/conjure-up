@@ -24,7 +24,7 @@ class CloudsController:
             app.current_model = utils.gen_model()
 
         track_event("Cloud selection", app.current_cloud, "")
-        return controllers.use('regions').render()
+        return controllers.use('credentials').render()
 
     def render(self):
         "Pick or create a cloud to bootstrap a new controller on"

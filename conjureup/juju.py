@@ -145,6 +145,13 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
     def add_config(k, v):
         cmd.extend(["--config", "{}={}".format(k, v)])
 
+    def add_model_defaults(k, v):
+        cmd.extend(["--model-default", "{}={}".format(k, v)])
+
+    if app.current_model_defaults:
+        for k, v in app.current_model_defaults.items():
+            add_model_defaults(k, v)
+
     add_config("image-stream", "daily"),
     add_config("enable-os-upgrade", "false"),
     if app.argv.http_proxy:
