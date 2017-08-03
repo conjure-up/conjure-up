@@ -70,6 +70,7 @@ git_rev:
 
 dev: clean
 	tox -e conjure-dev
+	ln -s /usr/bin/lxd conjure-dev/bin/conjure-up.lxd
 	@echo "Run 'source conjure-dev/bin/activate' to enter the dev venv"
 
 # Fix some of the python formatting preferred by pylint
