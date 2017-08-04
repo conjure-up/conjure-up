@@ -6,7 +6,7 @@ from . import common
 
 class CredentialsController(common.BaseCredentialsController):
     def render(self):
-        if app.provider.cloud_type == 'localhost':
+        if app.provider.cloud_type == 'lxd':
             # no credentials required for localhost
             self.finish()
         elif not self.credentials:
