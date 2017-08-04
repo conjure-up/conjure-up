@@ -1,4 +1,4 @@
-from conjureup import controllers, events, juju, utils
+from conjureup import controllers, juju, utils
 from conjureup.app_config import app
 
 
