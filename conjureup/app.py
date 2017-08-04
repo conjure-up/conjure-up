@@ -374,8 +374,8 @@ def main():
                 parse_cli_cloud = app.argv.cloud.split('/')
                 cloud, region = parse_cli_cloud
                 app.log.debug(
-                    "Region found {} for cloud {}".format(app.cloud,
-                                                          app.region))
+                    "Region found {} for cloud {}".format(cloud,
+                                                          region))
             else:
                 cloud = app.argv.cloud
 
