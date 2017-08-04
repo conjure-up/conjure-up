@@ -53,12 +53,6 @@ class CloudsTUIRenderTestCase(unittest.TestCase):
         self.controller.render()
         self.mock_finish.assert_called_once_with()
 
-    def test_render_unknown(self):
-        "Rendering with an unknown cloud should raise"
-        self.controller.render()
-        assert events.Shutdown.is_set()
-        assert not self.mock_finish.called
-
 
 class CloudsTUIFinishTestCase(unittest.TestCase):
 

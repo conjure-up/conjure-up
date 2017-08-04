@@ -60,6 +60,9 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
         self.controllers_patcher = patch(
             'conjureup.controllers.clouds.gui.controllers')
         self.mock_controllers = self.controllers_patcher.start()
+        self.utils_patcher = patch(
+            'conjureup.controllers.clouds.gui.utils')
+        self.mock_utils = self.utils_patcher.start()
 
         self.render_patcher = patch(
             'conjureup.controllers.clouds.gui.CloudsController.render')
@@ -85,9 +88,11 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
         self.render_patcher.stop()
         self.app_patcher.stop()
         self.track_event_patcher.stop()
+        self.utils_patcher.stop()
 
     def test_finish_no_controller(self):
         "clouds.finish without existing controller"
+        self.mock_utils.gen_model.renturn_type = 'abacadaba'
         self.controller.finish('aws')
         self.mock_controllers.use.assert_has_calls([
             call('credentials'), call().render()])

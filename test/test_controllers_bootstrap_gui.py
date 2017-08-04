@@ -36,6 +36,7 @@ class BootstrapGUIRenderTestCase(unittest.TestCase):
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
         self.mock_app.config = {'spell-dir': '/tmp'}
+        self.mock_app.provider = AsyncMock()
         self.ev_app_patcher = patch(
             'conjureup.events.app', self.mock_app)
         self.ev_app_patcher.start()
@@ -69,7 +70,7 @@ class BootstrapGUIRenderTestCase(unittest.TestCase):
         self.controller.is_existing_controller.return_value = False
         with test_loop() as loop:
             loop.run_until_complete(self.controller.run())
-        assert self.mock_provider.configure_tools.called
+        assert self.mock_app.provider.configure_tools.called
         assert self.controller.do_add_model.called
 
     def test_run_existing(self):
@@ -78,7 +79,7 @@ class BootstrapGUIRenderTestCase(unittest.TestCase):
         self.controller.is_existing_controller.return_value = True
         with test_loop() as loop:
             loop.run_until_complete(self.controller.run())
-        assert self.mock_provider.configure_tools.called
+        assert self.mock_app.provider.configure_tools.called
         assert self.controller.do_add_model.called
 
     def test_run_bootstrap(self):
@@ -87,7 +88,7 @@ class BootstrapGUIRenderTestCase(unittest.TestCase):
         self.controller.is_existing_controller.return_value = False
         with test_loop() as loop:
             loop.run_until_complete(self.controller.run())
-        assert self.mock_provider.configure_tools.called
+        assert self.mock_app.provider.configure_tools.called
         assert self.controller.do_bootstrap.called
 
 
