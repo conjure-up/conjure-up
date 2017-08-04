@@ -21,10 +21,16 @@ class VSphereSetupGUITestCase(unittest.TestCase):
         self.view_patcher = patch(
             'conjureup.controllers.vspheresetup.gui.VSphereSetupView')
         self.mock_view = self.view_patcher.start()
+        self.render_patcher = patch(
+            'conjureup.controllers.vspheresetup.gui.'
+            'VSphereSetupController.render')
+        self.mock_render = self.render_patcher.start()
+
         self.app_patcher = patch(
             'conjureup.controllers.vspheresetup.common.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+
         self.controller = VSphereSetupController()
         self.controller.datacenter = MagicMock()
 
@@ -32,11 +38,11 @@ class VSphereSetupGUITestCase(unittest.TestCase):
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.controllers_patcher.stop()
+        self.render_patcher.stop()
 
     def test_render(self):
         "vspheresetup.gui.test_render"
         self.controller.render()
-        assert self.mock_view().show.called
 
     def test_finish(self):
         "vspheresetup.gui.test_finish"
