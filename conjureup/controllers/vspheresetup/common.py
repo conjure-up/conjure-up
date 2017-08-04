@@ -7,7 +7,7 @@ class BaseVSphereSetupController:
         # Assign current datacenter
         app.provider.login()
         for dc in app.provider.get_datacenters():
-            if dc == app.provider.region:
+            if dc.name == app.provider.region:
                 self.datacenter = dc
 
     def finish(self, data):
