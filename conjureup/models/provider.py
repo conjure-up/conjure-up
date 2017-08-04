@@ -153,18 +153,15 @@ class BaseProvider:
             return False
         return True
 
-    def login(self):
+    async def login(self):
         """ Will login to the current provider to expose further information
         that could be useful in subsequent views. This is optional and
         not intended to fail if not defined in the inherited classes.
         """
         pass
 
-    def cloud_config(self):
+    async def cloud_config(self):
         """ Returns a config suitable to store as a cloud
-
-        Arguments:
-        opts: optional arguments to pass to cloud_config
         """
         raise NotImplementedError
 
@@ -192,7 +189,7 @@ class BaseProvider:
                 "Unknown cloud: {}, not updating provider attributes".format(
                     cloud_name))
 
-    def save_form(self):
+    async def save_form(self):
         """ Saves input fields into provider attributes
         """
         for f in self.form.fields():
@@ -258,7 +255,7 @@ class MAAS(BaseProvider):
             ]
         )
 
-    def cloud_config(self):
+    async def cloud_config(self):
         return {
             'type': 'maas',
             'auth-types': ['oauth1'],
@@ -528,7 +525,7 @@ class VSphere(BaseProvider):
             )
         ])
 
-    def login(self):
+    async def login(self):
         if self.authenticated:
             return
 
@@ -537,28 +534,29 @@ class VSphere(BaseProvider):
                                     **cm.to_dict())
 
         try:
-            self.client.login()
+            await app.loop.run_in_executor(None, self.client.login)
             self.authenticated = True
         except VSphereInvalidLogin:
             raise
 
-    def get_datacenters(self):
+    async def get_datacenters(self):
         """ Grab datacenters that will be used at this clouds regions
         """
         if not self.authenticated:
-            self.login()
+            await self.login()
 
-        return self.client.get_datacenters()
+        return await app.loop.run_in_executor(None,
+                                              self.client.get_datacenters)
 
-    def cloud_config(self):
+    async def cloud_config(self):
         config = {
             'type': 'vsphere',
             'auth-types': [self.auth_type],
             'endpoint': self.endpoint,
             'regions': {}
         }
-        for dc in self.get_datacenters():
-            config['regions'][dc] = {self.endpoint}
+        for dc in await self.get_datacenters():
+            config['regions'][dc.name] = {self.endpoint}
         return config
 
 

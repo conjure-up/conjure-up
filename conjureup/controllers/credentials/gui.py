@@ -63,6 +63,9 @@ class CredentialsController(common.BaseCredentialsController):
         self.finish()
 
     def save_credential(self):
+        app.loop.create_task(self._save_credential())
+
+    async def _save_credential(self):
         cred_path = path.join(utils.juju_path(), 'credentials.yaml')
         app.provider.credential = "conjure-{}-{}".format(app.provider.cloud,
                                                          utils.gen_hash())
@@ -89,7 +92,7 @@ class CredentialsController(common.BaseCredentialsController):
         # Persist input fields in current provider, this is so we
         # can login to the provider for things like querying VSphere
         # for datacenters before that custom cloud is known to juju.
-        app.provider.save_form()
+        await app.provider.save_form()
 
         # if it's a new MAAS or VSphere cloud, save it now that
         # we have a credential
@@ -98,7 +101,7 @@ class CredentialsController(common.BaseCredentialsController):
                 juju.get_cloud(app.provider.cloud)
             except LookupError:
                 juju.add_cloud(app.provider.cloud,
-                               app.provider.cloud_config())
+                               await app.provider.cloud_config())
 
         # This should return the credential name so juju bootstrap knows
         # which credential to bootstrap with
