@@ -57,8 +57,8 @@ class DestroyConfirm:
             await asyncio.sleep(1)
 
     def render(self, controller, model):
-        app.current_controller = controller
-        app.current_model = model['name']
+        app.provider.controller = controller
+        app.provider.model = model['name']
         events.ModelAvailable.set()
         self.authenticating.set()
         self.render_interstitial()

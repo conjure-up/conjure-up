@@ -388,26 +388,26 @@ class MaasMachine:
 
 
 def setup_maas():
-    maascreds = juju.get_credential(app.current_cloud)
+    maascreds = juju.get_credential(app.provider.cloud)
     if not maascreds:
         raise Exception(
             "Could not find MAAS credentials for cloud: {}".format(
-                app.current_cloud))
+                app.provider.cloud))
     try:
-        endpoint = juju.get_cloud(app.current_cloud).get('endpoint', None)
+        endpoint = juju.get_cloud(app.provider.cloud).get('endpoint', None)
         app.log.debug(
             "Found endpoint: {} for cloud: {}".format(
                 endpoint,
-                app.current_cloud))
+                app.provider.cloud))
     except LookupError as e:
         app.log.debug("Failed to find cloud in list-clouds, "
                       "attempting to read bootstrap-config")
-        bc = juju.get_bootstrap_config(app.current_controller)
+        bc = juju.get_bootstrap_config(app.provider.controller)
         endpoint = bc.get('endpoint', None)
 
     if endpoint is None:
         raise Exception("Couldn't find endpoint for controller: {}".format(
-            app.current_controller))
+            app.provider.controller))
 
     api_key = maascreds['maas-oauth']
     try:

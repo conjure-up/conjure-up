@@ -38,7 +38,7 @@ class ConfigAppsGUIRenderTestCase(unittest.TestCase):
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
         self.mock_app.metadata_controller.bundle = self.mock_bundle
-        self.mock_app.current_controller = 'testcontroller'
+        self.mock_app.provider.controller = 'testcontroller'
         self.mock_app.bootstrap.running.exception.return_value = None
         self.ev_app_patcher = patch(
             'conjureup.events.app', self.mock_app)
@@ -63,7 +63,7 @@ class ConfigAppsGUIRenderTestCase(unittest.TestCase):
 
     def test_connect_maas(self):
         "Call submit to schedule predeploy if we haven't yet"
-        self.mock_app.current_cloud = 'foo'
+        self.mock_app.provider.cloud = 'foo'
         self.mock_juju.get_cloud_types_by_name.return_value = {'foo': 'maas'}
         self.controller.connect_maas = MagicMock(return_value=sentinel.maas)
         self.controller.render()

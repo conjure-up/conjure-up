@@ -72,7 +72,7 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
         self.cloud_types_patcher = patch(
             'conjureup.juju.get_cloud_types_by_name')
         self.mock_cloud_types = self.cloud_types_patcher.start()
-        self.mock_cloud_types.return_value = {'testcloud': 'maas'}
+        self.mock_cloud_types.return_value = {'aws': 'ec2'}
 
         self.cloudname = 'testcloudname'
 
@@ -88,6 +88,6 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
 
     def test_finish_no_controller(self):
         "clouds.finish without existing controller"
-        self.controller.finish('testcloud')
+        self.controller.finish('aws')
         self.mock_controllers.use.assert_has_calls([
-            call('regions'), call().render()])
+            call('credentials'), call().render()])

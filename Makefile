@@ -59,6 +59,7 @@ clean:
 	@find . -name \*.pyc -delete
 	@find . -name __pycache__ -delete
 	@rm -rf *.snap
+	@rm -rf build
 
 .PHONY: test
 test: auto-format

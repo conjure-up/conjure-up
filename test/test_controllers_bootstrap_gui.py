@@ -43,11 +43,6 @@ class BootstrapGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.bootstrap.common.app', self.mock_app)
         self.common_app_patcher.start()
 
-        self.schema_patcher = patch(
-            'conjureup.controllers.bootstrap.common.load_schema')
-        mock_load_schema = self.schema_patcher.start()
-        self.mock_provider = mock_load_schema.return_value = AsyncMock()
-
         self.track_screen_patcher = patch(
             'conjureup.controllers.bootstrap.gui.track_screen')
         self.mock_track_screen = self.track_screen_patcher.start()
@@ -59,7 +54,6 @@ class BootstrapGUIRenderTestCase(unittest.TestCase):
         self.app_patcher.stop()
         self.ev_app_patcher.stop()
         self.common_app_patcher.stop()
-        self.schema_patcher.stop()
         self.track_screen_patcher.stop()
 
     def test_render(self):

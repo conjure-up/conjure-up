@@ -84,7 +84,7 @@ class AppArchitectureView(WidgetWrap):
             self.frame.focus_position = 'body'
 
     def build_widgets(self):
-        cloud_type = get_cloud_types_by_name()[app.current_cloud]
+        cloud_type = get_cloud_types_by_name()[app.provider.cloud]
         controller_is_maas = cloud_type == 'maas'
         if controller_is_maas:
             extra = (" Press enter on a machine ID to pin it to "

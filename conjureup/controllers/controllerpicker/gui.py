@@ -13,7 +13,7 @@ class ControllerPicker(common.BaseControllerPicker):
 
         filtered_controllers = {n: d
                                 for n, d in existing_controllers.items()
-                                if d['cloud'] == app.current_cloud}
+                                if d['cloud'] == app.provider.cloud}
 
         if not app.jaas_ok and len(filtered_controllers) == 0:
             return self.finish(None)

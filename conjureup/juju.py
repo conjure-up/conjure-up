@@ -104,15 +104,15 @@ async def login():
     if app.juju.authenticated:
         return
 
-    if app.current_controller is None:
+    if app.provider.controller is None:
         raise Exception("Unable to determine current controller")
 
-    if app.current_model is None:
+    if app.provider.model is None:
         raise Exception("Tried to login with no current model set.")
 
     app.juju.client = Model(app.loop)
-    model_name = '{}:{}'.format(app.current_controller,
-                                app.current_model)
+    model_name = '{}:{}'.format(app.provider.controller,
+                                app.provider.model)
 
     if not events.ModelAvailable.is_set():
         await events.ModelAvailable.wait()
@@ -136,14 +136,21 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
     series: define the bootstrap series defaults to xenial
     credential: credentials key
     """
-    if app.current_region is not None:
+    if app.provider.region is not None:
         app.log.debug("Bootstrapping to set region: {}")
-        cloud = "{}/{}".format(app.current_cloud, app.current_region)
+        cloud = "{}/{}".format(app.provider.cloud, app.provider.region)
 
     cmd = ["juju", "bootstrap", cloud, controller, "--default-model", model]
 
     def add_config(k, v):
         cmd.extend(["--config", "{}={}".format(k, v)])
+
+    def add_model_defaults(k, v):
+        cmd.extend(["--model-default", "{}={}".format(k, v)])
+
+    if app.provider.model_defaults:
+        for k, v in app.provider.model_defaults.items():
+            add_model_defaults(k, v)
 
     add_config("image-stream", "daily"),
     add_config("enable-os-upgrade", "false"),
@@ -171,7 +178,7 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
     app.log.debug("bootstrap cmd: {}".format(cmd))
 
     pathbase = os.path.join(app.config['spell-dir'],
-                            '{}-bootstrap').format(app.current_controller)
+                            '{}-bootstrap').format(app.provider.controller)
     with open(pathbase + ".out", 'w') as outf:
         with open(pathbase + ".err", 'w') as errf:
             proc = await asyncio.create_subprocess_exec(*cmd,
@@ -245,7 +252,7 @@ async def model_available(name):
     True/False if juju status was successful and a working model is found
     """
     proc = await asyncio.create_subprocess_exec(
-        'juju', 'status', '-m', ':'.join([app.current_controller, name]),
+        'juju', 'status', '-m', ':'.join([app.provider.controller, name]),
         stderr=DEVNULL,
         stdout=DEVNULL)
     await proc.wait()
@@ -275,8 +282,8 @@ def get_credential(cloud, user=None):
 
     if user and user in creds[cloud].keys():
         return creds[cloud][user]
-    elif app.current_controller in creds[cloud].keys():
-        return creds[cloud][app.current_controller]
+    elif app.provider.controller in creds[cloud].keys():
+        return creds[cloud][app.provider.controller]
     else:
         try:
             return next(iter(creds[cloud].values()))
@@ -374,7 +381,7 @@ def get_compatible_clouds(cloud_types=None):
         # LXD not available on macOS
         cloud_types -= {'localhost'}
 
-    if app.current_controller:
+    if app.provider and app.provider.controller:
         # if we already have a controller, we should query
         # it via the API for what clouds it supports; for now,
         # though, just assume it's JAAS and hard-code the options

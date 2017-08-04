@@ -7,7 +7,6 @@ from conjureup.ui.widgets.select_list import SelectorList
 
 class RegionPickerView(BaseView):
     title = 'Choose a Region'
-    subtitle = 'Please select from a list of available regions'
     footer = 'Please press [ENTER] on highlighted region to proceed.'
 
     def __init__(self, regions, default, submit_cb, *args, **kwargs):
@@ -22,7 +21,7 @@ class RegionPickerView(BaseView):
 
     def build_widget(self):
         return [
-            Text("Choose a Region"),
+            Text("Please select from a list of available regions"),
             HR(),
             SelectorList(self.regions, self.submit_cb),
         ]

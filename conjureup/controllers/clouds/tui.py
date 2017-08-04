@@ -9,23 +9,15 @@ class CloudsController:
 
     def finish(self):
         if app.argv.model:
-            app.current_model = app.argv.model
+            app.provider.model = app.argv.model
         else:
-            app.current_model = utils.gen_model()
+            app.provider.model = utils.gen_model()
 
-        return controllers.use('regions').render()
+        return controllers.use('credentials').render()
 
     def render(self):
-        if app.current_cloud not in juju.get_clouds().keys():
-            formatted_clouds = ", ".join(juju.get_clouds().keys())
-            utils.error(
-                "Unknown Cloud: {}, please choose "
-                "from one of the following: {}".format(app.current_cloud,
-                                                       formatted_clouds))
-            events.Shutdown.set(1)
-            return
         utils.info(
-            "Summoning {} to {}".format(app.argv.spell, app.argv.cloud))
+            "Summoning {} to {}".format(app.argv.spell, app.provider.cloud))
         self.finish()
 
 
