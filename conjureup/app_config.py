@@ -30,14 +30,6 @@ juju = SimpleNamespace(
     authenticated=False
 )
 
-vsphere = SimpleNamespace(
-    # Client
-    client=None,
-
-    # Is authenticated?
-    authenticated=False
-)
-
 
 class AppConfig:
     """ Application config storage
@@ -45,9 +37,6 @@ class AppConfig:
     # MAAS client
     # TODO: move this into MAAS provider
     maas = maas
-    # VSphere Client if exists
-    # TODO: move this into VSphere provider
-    vsphere = vsphere
 
     # Juju bootstrap details
     bootstrap = bootstrap
