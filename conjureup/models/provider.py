@@ -548,7 +548,7 @@ class VSphere(BaseProvider):
         if not self.authenticated:
             self.login()
 
-        return [dc.name for dc in self.client.get_datacenters()]
+        return self.client.get_datacenters()
 
     def cloud_config(self):
         config = {
