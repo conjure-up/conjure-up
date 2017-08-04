@@ -23,7 +23,7 @@ class BootstrapController(common.BaseBootstrapController):
         else:
             cache_dir = Path(app.config['spell-dir'])
             bootstrap_stderr_path = cache_dir / '{}-bootstrap.err'.format(
-                app.current_controller)
+                app.provider.controller)
             msg = 'Controller'
 
         view = BootstrapWaitView(

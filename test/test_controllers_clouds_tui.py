@@ -47,7 +47,7 @@ class CloudsTUIRenderTestCase(unittest.TestCase):
 
     def test_render(self):
         "Rendering with a known cloud should call finish"
-        self.mock_app.current_cloud = "aws"
+        self.mock_app.provider.cloud = "aws"
         t = ['aws']
         self.mock_juju.get_clouds.return_value.keys.return_value = t
         self.controller.render()
@@ -104,10 +104,10 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
         "clouds.finish with an existing controller"
         self.mock_gcc.return_value = 'testcontroller'
         self.mock_app.argv.model = 'testmodel'
-        self.mock_app.current_cloud = 'cloud'
+        self.mock_app.provider.cloud = 'cloud'
         self.controller.finish()
         self.mock_controllers.use.assert_has_calls([
-            call('regions'), call().render()])
+            call('credentials'), call().render()])
 
     def test_finish_no_model(self):
         "clouds.finish without existing controller"
@@ -116,4 +116,4 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
         self.mock_app.argv.controller = None
         self.controller.finish()
         self.mock_controllers.use.assert_has_calls([
-            call('regions'), call().render()])
+            call('credentials'), call().render()])

@@ -34,11 +34,11 @@ async def do_step(step_model, msg_cb):
     app.env['JUJU_PROVIDERTYPE'] = provider_type
 
     # Set current credential name (localhost doesn't have one)
-    app.env['JUJU_CREDENTIAL'] = app.current_credential or ''
+    app.env['JUJU_CREDENTIAL'] = app.provider.credential or ''
 
     # Set current juju controller and model
-    app.env['JUJU_CONTROLLER'] = app.current_controller
-    app.env['JUJU_MODEL'] = app.current_model
+    app.env['JUJU_CONTROLLER'] = app.provider.controller
+    app.env['JUJU_MODEL'] = app.provider.model
 
     if provider_type == "maas":
         app.log.debug("MAAS CONFIG: {}".format(app.maas))

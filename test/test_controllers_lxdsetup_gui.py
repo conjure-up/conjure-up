@@ -38,9 +38,6 @@ class LXDSetupGUIRenderTestCase(unittest.TestCase):
                                            create=True)
         self.ifaces_patcher.start()
 
-        self.schema_patcher = patch.object(LXDSetupController, 'schema')
-        self.schema_patcher.start()
-
         self.controller = LXDSetupController()
         self.controller.next_screen = MagicMock()
         self.controller.setup = MagicMock()
@@ -50,7 +47,6 @@ class LXDSetupGUIRenderTestCase(unittest.TestCase):
         self.utils_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
-        self.schema_patcher.stop()
 
     def test_render(self):
         "lxdsetup.gui.test_render"

@@ -253,8 +253,8 @@ def _sentry_report(message=None, exc_info=None, tags=None, **kwargs):
     try:
         default_tags = {
             'spell': app.config.get('spell'),
-            'cloud_type': app.current_cloud_type,
-            'region': app.current_region,
+            'cloud_type': app.provider.cloud_type,
+            'region': app.provider.region,
             'jaas': app.is_jaas,
             'headless': app.headless,
             'juju_version': juju_version(),
@@ -611,7 +611,7 @@ def gen_model():
 def gen_cloud():
     """ generates a unique cloud
     """
-    name = "cloud-{}".format(app.current_cloud_type)
+    name = "cloud-{}".format(app.provider.cloud_type)
     return "{}-{}".format(name[:24], gen_hash())
 
 

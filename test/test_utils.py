@@ -57,8 +57,8 @@ class UtilsTestCase(unittest.TestCase):
 
         # test implementation
         app.config = {'spell': 'spell'}
-        app.current_cloud_type = 'type'
-        app.current_region = 'region'
+        app.provider.cloud_type = 'type'
+        app.provider.region = 'region'
         app.is_jaas = False
         app.headless = False
         juju_version.return_value = '2.j'

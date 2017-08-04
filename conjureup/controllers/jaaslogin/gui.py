@@ -50,7 +50,7 @@ class JaaSLoginController:
                                               fail_cb=self.fail,
                                               timeout_cb=self.timeout):
             return
-        app.current_controller = app.jaas_controller
+        app.provider.controller = app.jaas_controller
         app.is_jaas = True
         self.authenticating.clear()
         app.log.info('JAAS is registered')

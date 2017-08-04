@@ -36,6 +36,7 @@ from conjureup.download import (
     get_remote_url
 )
 from conjureup.log import setup_logging
+from conjureup.models.provider import SchemaErrorUnknownCloud, load_schema
 from conjureup.telemetry import SENTRY_DSN, track_event, track_screen
 from conjureup.ui import ConjureUI
 
@@ -137,22 +138,6 @@ async def _start(*args, **kwargs):
         return
 
     utils.setup_metadata_controller()
-
-    if os.getenv('CONJUREUP_STATUS_ONLY'):
-        # Developer tool only
-        # format is: CONJUREUP_STATUS_ONLY=1/<controller>/<model>
-        try:
-            _, controller, model = os.getenv(
-                'CONJUREUP_STATUS_ONLY').split('/')
-            app.current_controller = controller
-            app.current_model = model
-            app.env['JUJU_CONTROLLER'] = app.current_controller
-            app.env['JUJU_MODEL'] = app.current_model
-        except ValueError:
-            utils.error("Unable to parse the controller and model to access")
-            sys.exit(1)
-        controllers.use('deploystatus').render()
-        return
 
     controllers.use('clouds').render()
 
@@ -383,24 +368,36 @@ def main():
     app.loop.add_signal_handler(signal.SIGINT, events.Shutdown.set)
     try:
         if app.argv.cloud:
+            cloud = None
+            region = None
             if '/' in app.argv.cloud:
                 parse_cli_cloud = app.argv.cloud.split('/')
-                app.current_cloud, app.current_region = parse_cli_cloud
+                cloud, region = parse_cli_cloud
                 app.log.debug(
-                    "Region found {} for cloud {}".format(app.current_cloud,
-                                                          app.current_region))
+                    "Region found {} for cloud {}".format(app.cloud,
+                                                          app.region))
             else:
-                app.current_cloud = app.argv.cloud
+                cloud = app.argv.cloud
+
+            cloud_types = juju.get_cloud_types_by_name()
+            if cloud not in cloud_types:
+                utils.error('Unknown cloud: {}'.format(cloud))
+                sys.exit(1)
 
             if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
                 utils.error("Please specify a spell for headless mode.")
                 sys.exit(1)
 
-            cloud_types = juju.get_cloud_types_by_name()
-            if app.current_cloud not in cloud_types:
-                utils.error('Unknown cloud: {}'.format(app.current_cloud))
+            app.provider = load_schema(cloud_types[cloud])
+
+            try:
+                app.provider.load(cloud)
+            except SchemaErrorUnknownCloud as e:
+                utils.error(e)
                 sys.exit(1)
-            app.current_cloud_type = cloud_types[app.current_cloud]
+
+            if region:
+                app.provider.region = region
 
             app.headless = True
             app.ui = None

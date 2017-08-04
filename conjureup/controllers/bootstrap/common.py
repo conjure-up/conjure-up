@@ -2,7 +2,6 @@ from pathlib import Path
 
 from conjureup import events, juju, utils
 from conjureup.app_config import app
-from conjureup.models.provider import load_schema
 from conjureup.models.step import StepModel
 from conjureup.telemetry import track_event
 
@@ -12,11 +11,10 @@ class BaseBootstrapController:
 
     def is_existing_controller(self):
         controllers = juju.get_controllers()['controllers']
-        return app.current_controller in controllers
+        return app.provider.controller in controllers
 
     async def run(self):
-        provider = load_schema(app.current_cloud_type)
-        await provider.configure_tools()
+        await app.provider.configure_tools()
 
         if app.is_jaas or self.is_existing_controller():
             await self.do_add_model()
@@ -25,10 +23,10 @@ class BaseBootstrapController:
 
     async def do_add_model(self):
         self.emit('Creating Juju model.')
-        await juju.add_model(app.current_model,
-                             app.current_controller,
-                             app.current_cloud,
-                             app.current_credential)
+        await juju.add_model(app.provider.model,
+                             app.provider.controller,
+                             app.provider.cloud,
+                             app.provider.credential)
         self.emit('Juju model created.')
         events.Bootstrapped.set()
 
@@ -36,23 +34,23 @@ class BaseBootstrapController:
         await self.pre_bootstrap()
         self.emit('Bootstrapping Juju controller.')
         track_event("Juju Bootstrap", "Started", "")
-        cloud_with_region = app.current_cloud
-        if app.current_region:
-            cloud_with_region = '/'.join([app.current_cloud,
-                                          app.current_region])
-        success = await juju.bootstrap(app.current_controller,
+        cloud_with_region = app.provider.cloud
+        if app.provider.region:
+            cloud_with_region = '/'.join([app.provider.cloud,
+                                          app.provider.region])
+        success = await juju.bootstrap(app.provider.controller,
                                        cloud_with_region,
-                                       app.current_model,
-                                       credential=app.current_credential)
+                                       app.provider.model,
+                                       credential=app.provider.credential)
         if not success:
-            log_file = '{}-bootstrap.err'.format(app.current_controller)
+            log_file = '{}-bootstrap.err'.format(app.provider.controller)
             log_file = Path(app.config['spell-dir']) / log_file
             err_log = log_file.read_text('utf8').splitlines()
             app.log.error("Error bootstrapping controller: "
                           "{}".format(err_log))
             app.sentry.context.merge({'extra': {'err_log': err_log[-400:]}})
             raise Exception('Unable to bootstrap (cloud type: {})'.format(
-                app.current_cloud_type))
+                app.provider.cloud_type))
 
         self.emit('Bootstrap complete.')
         track_event("Juju Bootstrap", "Done", "")
@@ -61,8 +59,8 @@ class BaseBootstrapController:
 
         # Set provider type for post-bootstrap
         app.env['JUJU_PROVIDERTYPE'] = app.juju.client.info.provider_type
-        app.env['JUJU_CONTROLLER'] = app.current_controller
-        app.env['JUJU_MODEL'] = app.current_model
+        app.env['JUJU_CONTROLLER'] = app.provider.controller
+        app.env['JUJU_MODEL'] = app.provider.model
 
         step = StepModel({},
                          filename='00_post-bootstrap',
@@ -77,11 +75,11 @@ class BaseBootstrapController:
         """
         # Set provider type for post-bootstrap
         app.env['JUJU_PROVIDERTYPE'] = juju.get_cloud_types_by_name()[
-            app.current_cloud]
+            app.provider.cloud]
         # Set current credential name (localhost doesn't have one)
-        app.env['JUJU_CREDENTIAL'] = app.current_credential or ''
-        app.env['JUJU_CONTROLLER'] = app.current_controller
-        app.env['JUJU_MODEL'] = app.current_model
+        app.env['JUJU_CREDENTIAL'] = app.provider.credential or ''
+        app.env['JUJU_CONTROLLER'] = app.provider.controller
+        app.env['JUJU_MODEL'] = app.provider.model
         app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
 
         step = StepModel({},

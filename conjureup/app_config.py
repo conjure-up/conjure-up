@@ -30,16 +30,30 @@ juju = SimpleNamespace(
     authenticated=False
 )
 
+vsphere = SimpleNamespace(
+    # Client
+    client=None,
+
+    # Is authenticated?
+    authenticated=False
+)
+
 
 class AppConfig:
     """ Application config storage
     """
+    # MAAS client
+    # TODO: move this into MAAS provider
+    maas = maas
+    # VSphere Client if exists
+    # TODO: move this into VSphere provider
+    vsphere = vsphere
 
     # Juju bootstrap details
     bootstrap = bootstrap
 
-    # MAAS client
-    maas = maas
+    # Juju Provider
+    provider = None
 
     # Juju Client
     juju = juju
@@ -67,23 +81,6 @@ class AppConfig:
 
     # Whether the JAAS controller is selected
     is_jaas = False
-
-    current_model = None
-
-    # Current Juju controller selected
-    current_controller = None
-
-    # Current Juju cloud selected
-    current_cloud = None
-
-    # Current Juju cloud type selected
-    current_cloud_type = None
-
-    # Current Juju cloud region
-    current_region = None
-
-    # Current credential name selected
-    current_credential = None
 
     # Current UI View rendered
     current_view = None
@@ -153,7 +150,7 @@ class AppConfig:
     def _redis_key(self):
         """ Internal, formatted redis namespace key
         """
-        return "conjure-up.{}.{}".format(self.current_cloud_type,
+        return "conjure-up.{}.{}".format(self.provider.cloud_type,
                                          self.config['spell'])
 
     def to_json(self):
@@ -165,7 +162,7 @@ class AppConfig:
         precautions.
         """
         blacklist = ['loop', 'log', 'maas', 'argv', 'spells_index',
-                     'juju', 'ui', 'bootstrap', 'endpoint_type',
+                     'juju', 'ui', 'bootstrap', 'endpoint_type', 'vsphere',
                      'metadata_controller', 'state',
                      'env', 'sentry', 'steps', 'sudo_pass']
         new_dict = {}

@@ -37,7 +37,7 @@ class ConfigAppsController:
         """
         bundle = app.metadata_controller.bundle
 
-        if len(bundle.machines) == 0 or app.current_cloud == "localhost":
+        if len(bundle.machines) == 0 or app.provider.cloud == "localhost":
             self.generate_juju_machines()
         else:
             self.sync_assignments()
@@ -67,7 +67,7 @@ class ConfigAppsController:
         for bundle_application in sorted(bundle.services,
                                          key=attrgetter('service_name')):
             if bundle_application.placement_spec:
-                if app.current_cloud == "localhost":
+                if app.provider.cloud == "localhost":
                     app.log.info("Ignoring placement spec because we are "
                                  "deploying to LXD: {}".format(
                                      bundle_application.placement_spec))
@@ -208,7 +208,7 @@ class ConfigAppsController:
         Instead, it just ensures that the data in app.metadata_controller is
         up to date.  This needs to be refactored at a later date.
         """
-        cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
+        cloud_type = juju.get_cloud_types_by_name()[app.provider.cloud]
 
         if cloud_type == 'maas':
             await events.MAASConnected.wait()
@@ -312,7 +312,7 @@ class ConfigAppsController:
                                    key=attrgetter('service_name'))
         self.undeployed_applications = self.applications[:]
 
-        cloud_type = juju.get_cloud_types_by_name()[app.current_cloud]
+        cloud_type = juju.get_cloud_types_by_name()[app.provider.cloud]
         if cloud_type == 'maas':
             app.loop.create_task(self.connect_maas())
 

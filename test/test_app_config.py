@@ -12,6 +12,7 @@ from unittest.mock import MagicMock
 import fakeredis
 
 from conjureup.app_config import AppConfig
+from conjureup.models.provider import AWS
 
 from .helpers import AsyncMock, test_loop
 
@@ -21,15 +22,14 @@ class AppConfigTestCase(unittest.TestCase):
     def setUp(self):
         self.expected_keys = [
             'config',
-            'current_model',
-            'current_controller',
-            'current_cloud_type'
+            'provider'
         ]
         self.app = AppConfig()
         self.app.state = fakeredis.FakeStrictRedis()
-        self.app.current_controller = "fake-tester-controller"
-        self.app.current_model = "fake-tester-model"
-        self.app.current_cloud_type = "ec2"
+        self.app.provider = AWS()
+        self.app.provider.controller = "fake-tester-controller"
+        self.app.provider.model = "fake-tester-model"
+        self.app.provider.cloud_type = "ec2"
         self.app.config = {'spell': 'kubernetes-core'}
 
         self.app.juju.client = AsyncMock()
@@ -75,20 +75,20 @@ class AppConfigTestCase(unittest.TestCase):
         results_json = self.app.state.get(self.app._redis_key)
         results = json.loads(results_json.decode('utf8'))
 
-        assert self.app.current_controller == results['current_controller']
+        assert self.app.app.controller == results['controller']
 
     def test_config_juju_restore(self):
         "app_config.test_config_juju_restore"
         class FakeExtraInfo:
             def __init__(self):
-                self.value = b'{"current_controller": "moo"}'
+                self.value = b'{"controller": "moo"}'
 
         self.app.juju.authenticated = True
         self.app.juju.client.get_config.return_value = {
             "extra-info": FakeExtraInfo()}
         with test_loop() as loop:
             loop.run_until_complete(self.app.restore())
-        assert self.app.current_controller == 'moo'
+        assert self.app.provider.controller == 'moo'
 
     def test_config_guard_unknown_attribute(self):
         "app_config.test_config_guard_unknown_attribute"

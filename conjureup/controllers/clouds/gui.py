@@ -1,5 +1,6 @@
 from conjureup import controllers, juju, utils
 from conjureup.app_config import app
+from conjureup.models.provider import SchemaErrorUnknownCloud, load_schema
 from conjureup.telemetry import track_event, track_screen
 from conjureup.ui.views.cloud import CloudView
 
@@ -10,21 +11,24 @@ class CloudsController:
         self.view = None
 
     def finish(self, cloud):
-        """Save the selected cloud and move on to the region selection screen.
-
+        """ Load the selected cloud provider
         """
-        if cloud == 'maas':
-            app.current_cloud_type = 'maas'
-            app.current_cloud = utils.gen_cloud()
+        if cloud in ['localhost', 'vsphere', 'maas']:
+            app.provider = load_schema(cloud)
         else:
-            app.current_cloud_type = juju.get_cloud_types_by_name()[cloud]
-            app.current_cloud = cloud
+            app.provider = load_schema(juju.get_cloud_types_by_name()[cloud])
 
-        if app.current_model is None:
-            app.current_model = utils.gen_model()
+        try:
+            app.provider.load(cloud)
+        except SchemaErrorUnknownCloud:
+            app.provider.cloud = utils.gen_cloud()
 
-        track_event("Cloud selection", app.current_cloud, "")
-        return controllers.use('regions').render()
+        if app.provider.model is None:
+            app.provider.model = utils.gen_model()
+
+        track_event("Cloud selection", app.provider.cloud, "")
+
+        return controllers.use('credentials').render()
 
     def render(self):
         "Pick or create a cloud to bootstrap a new controller on"

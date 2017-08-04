@@ -108,8 +108,7 @@ class BaseView(WidgetWrap):
 class SchemaFormView(BaseView):
     header = ""
 
-    def __init__(self, schema, submit_cb, *args, **kwargs):
-        self.schema = schema
+    def __init__(self, submit_cb, *args, **kwargs):
         self.submit_cb = submit_cb
         super().__init__(*args, **kwargs)
 
@@ -120,7 +119,7 @@ class SchemaFormView(BaseView):
                 Text(self.header),
                 HR(),
             ])
-        for field in self.schema.fields():
+        for field in app.provider.form.fields():
             label = field.key
             if field.label is not None:
                 label = field.label
@@ -149,5 +148,5 @@ class SchemaFormView(BaseView):
         return [self.button('SAVE', self.submit)]
 
     def submit(self, result):
-        if self.schema.is_valid():
-            self.submit_cb(self.schema)
+        if app.provider.is_valid():
+            self.submit_cb()
