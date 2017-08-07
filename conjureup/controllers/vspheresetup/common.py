@@ -4,6 +4,10 @@ from conjureup import controllers
 from conjureup.app_config import app
 
 
+class VSphereRegionError(Exception):
+    pass
+
+
 class BaseVSphereSetupController:
     def __init__(self):
         self.authenticating = asyncio.Event()

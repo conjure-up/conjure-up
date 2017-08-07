@@ -524,6 +524,7 @@ class VSphere(BaseProvider):
                 key='password'
             )
         ])
+        self._datacenters = None
 
     async def login(self):
         if self.authenticated:
@@ -542,11 +543,15 @@ class VSphere(BaseProvider):
     async def get_datacenters(self):
         """ Grab datacenters that will be used at this clouds regions
         """
+        if self._datacenters is not None:
+            return self._datacenters  # use cached datacenters
+
         if not self.authenticated:
             await self.login()
 
-        return await app.loop.run_in_executor(None,
-                                              self.client.get_datacenters)
+        self._datacenters = await app.loop.run_in_executor(
+            None, self.client.get_datacenters)
+        return self._datacenters
 
     async def cloud_config(self):
         config = {
@@ -556,7 +561,10 @@ class VSphere(BaseProvider):
             'regions': {}
         }
         for dc in await self.get_datacenters():
-            config['regions'][dc.name] = {self.endpoint}
+            config['regions'][dc.name] = {'endpoint': self.endpoint}
+        # this is a new cloud, so we have to
+        # populate the in-memory list of regions
+        self.regions = sorted(config['regions'].keys())
         return config
 
 

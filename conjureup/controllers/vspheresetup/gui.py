@@ -19,6 +19,9 @@ class VSphereSetupController(common.BaseVSphereSetupController):
         for dc in await app.provider.get_datacenters():
             if dc.name == app.provider.region:
                 datacenter = dc
+        if datacenter is None:
+            raise common.VSphereRegionError(
+                'Unable to get info for region {}'.format(app.provider.region))
         self.authenticating.clear()
         self.view = VSphereSetupView(datacenter,
                                      self.finish)
