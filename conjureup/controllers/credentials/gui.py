@@ -17,10 +17,10 @@ class CredentialsController(common.BaseCredentialsController):
         if app.provider.cloud_type == 'localhost':
             # no credentials required for localhost
             self.finish()
-        elif not app.provider.credential:
-            self.render_form()
         elif len(self.credentials) >= 1:
             self.render_picker()
+        elif not app.provider.credential:
+            self.render_form()
         else:
             self.finish()
 
