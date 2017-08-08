@@ -198,7 +198,8 @@ async def shutdown_watcher():
         for task in asyncio.Task.all_tasks(app.loop):
             # cancel all other tasks
             coro = getattr(task, '_coro', None)
-            if coro and coro.cr_code is not shutdown_watcher.__code__:
+            cr_code = getattr(coro, 'cr_code', None)
+            if cr_code is not shutdown_watcher.__code__:
                 app.log.debug('Cancelling pending task: {}'.format(task))
                 task.cancel()
         await asyncio.sleep(0.1)  # give tasks a chance to see the cancel
