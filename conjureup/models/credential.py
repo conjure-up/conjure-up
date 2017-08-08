@@ -1,6 +1,9 @@
 """ Credential Module
 """
-from conjureup.juju import get_cloud_types_by_name, get_credential
+import inspect
+import sys
+
+from conjureup.juju import get_credential
 
 
 class CredentialManagerInvalidCloudType(Exception):
@@ -22,8 +25,8 @@ class BaseCredential:
 
     def load(self):
         try:
-            self.credential = get_credential(self.cloud,
-                                             self.credential_name)
+            self._credential = get_credential(self.cloud,
+                                              self.credential_name)
         except:
             raise Exception(
                 "Could not find credential({}) for cloud({})".format(
@@ -31,39 +34,83 @@ class BaseCredential:
                     self.cloud))
 
     def to_dict(self):
-        """ Returns dictionary of credentials
+        """ Returns dictionary of credential data.
         """
-        raise NotImplementedError
+        return dict(self._credential)
 
     @classmethod
     def check_cloud_type(cls, credential_cloud_type):
         return credential_cloud_type == cls.CLOUD_TYPE
 
 
+class AWSCredential(BaseCredential):
+    CLOUD_TYPE = 'ec2'
+
+    @property
+    def access_key(self):
+        return self._credential['access-key']
+
+    @property
+    def secret_key(self):
+        return self._credential['access-key']
+
+
+class MAASCredential(BaseCredential):
+    CLOUD_TYPE = 'maas'
+
+
+class LocalhostCredential(BaseCredential):
+    CLOUD_TYPE = 'localhost'
+
+
+class AzureCredential(BaseCredential):
+    CLOUD_TYPE = 'azure'
+
+
+class GoogleCredential(BaseCredential):
+    CLOUD_TYPE = 'gce'
+
+
+class CloudSigmaCredential(BaseCredential):
+    CLOUD_TYPE = 'cloudsigma'
+
+
+class JoyentCredential(BaseCredential):
+    CLOUD_TYPE = 'joyent'
+
+
+class OpenStackCredential(BaseCredential):
+    CLOUD_TYPE = 'openstack'
+
+
 class VSphereCredential(BaseCredential):
     CLOUD_TYPE = 'vsphere'
 
+    @property
+    def username(self):
+        return self._credential['user']
+
+    @property
+    def password(self):
+        return self._credential['password']
+
     def to_dict(self):
-        return {'username': self.credential['user'],
-                'password': self.credential['password']}
+        return {'username': self.username,
+                'password': self.password}
 
 
 class CredentialManager:
-    CREDENTIALS = [VSphereCredential]
+    @classmethod
+    def get_credential(cls, cloud, cloud_type, credential_name):
+        mod = sys.modules[__name__]
 
-    def __init__(self, cloud, cloud_type, credential_name):
-        self.credential_name = credential_name
-        self.cloud = cloud
-        self.cloud_type = cloud_type
-        self.credential_obj = self._get_credential_object()
+        def _is_cred(candidate):
+            return (inspect.isclass(candidate) and
+                    issubclass(candidate, BaseCredential) and
+                    candidate is not BaseCredential)
 
-    def _get_credential_object(self):
-        cloud_type = get_cloud_types_by_name().get(self.cloud_type)
-        for credential in self.CREDENTIALS:
+        for name, credential in inspect.getmembers(mod, _is_cred):
             if credential.check_cloud_type(cloud_type):
-                return credential(self.cloud,
-                                  self.credential_name)
-        raise CredentialManagerInvalidCloudType
+                return credential(cloud, credential_name)
 
-    def to_dict(self):
-        return self.credential_obj.to_dict()
+        raise CredentialManagerInvalidCloudType

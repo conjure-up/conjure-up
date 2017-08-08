@@ -14,11 +14,11 @@ class VSphereInvalidLogin(vim.fault.InvalidLogin):
 
 
 class VSphereClient:
-    def __init__(self, username, password, host, port=443):
+    def __init__(self, credential, host, port=443):
         self.host = host
         self.port = port
-        self.username = username
-        self.password = password
+        self.username = credential.username
+        self.password = credential.password
         self.si = None
         self.content = None
 

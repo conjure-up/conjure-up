@@ -183,7 +183,7 @@ class BaseProvider:
             _cloud = get_cloud(cloud_name)
             self.cloud = cloud_name
             self.endpoint = _cloud.get('endpoint', None)
-            self.regions = _cloud.get('regions', {})
+            self.regions = sorted(_cloud.get('regions', {}).keys())
         except LookupError:
             raise SchemaErrorUnknownCloud(
                 "Unknown cloud: {}, not updating provider attributes".format(
@@ -218,17 +218,18 @@ class AWS(BaseProvider):
     async def configure_tools(self):
         """ Configure AWS CLI.
         """
-        creds = CredentialManager(self.cloud, self.cloud_type, self.credential)
-        for key, value in creds.to_dict().items():
-            try:
-                await arun(['aws', 'configure', '--profile', self.credential],
-                           input='{}\n{}\n\n\n'.format(creds['access-key'],
-                                                       creds['secret-key']),
-                           check=True)
-            except CalledProcessError as e:
-                app.log.error('Failed to configure AWS CLI profile: {}'.format(
-                    e.stderr))
-                raise
+        cred = CredentialManager.get_credential(self.cloud,
+                                                self.cloud_type,
+                                                self.credential)
+        try:
+            await arun(['aws', 'configure', '--profile', self.credential],
+                       input='{}\n{}\n\n\n'.format(cred.access_key,
+                                                   cred.secret_key),
+                       check=True)
+        except CalledProcessError as e:
+            app.log.error('Failed to configure AWS CLI profile: {}'.format(
+                e.stderr))
+            raise
 
 
 class MAAS(BaseProvider):
@@ -530,9 +531,10 @@ class VSphere(BaseProvider):
         if self.authenticated:
             return
 
-        cm = CredentialManager(self.cloud, self.cloud_type, self.credential)
-        self.client = VSphereClient(host=self.endpoint,
-                                    **cm.to_dict())
+        cred = CredentialManager.get_credential(self.cloud,
+                                                self.cloud_type,
+                                                self.credential)
+        self.client = VSphereClient(cred, self.endpoint)
 
         try:
             await app.loop.run_in_executor(None, self.client.login)
