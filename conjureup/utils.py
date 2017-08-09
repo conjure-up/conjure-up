@@ -17,7 +17,6 @@ from functools import partial
 from pathlib import Path
 from subprocess import PIPE, Popen, check_call, check_output
 
-import aiofiles
 import yaml
 from bundleplacer.bundle import Bundle
 from bundleplacer.charmstore_api import MetadataController
@@ -160,85 +159,6 @@ async def arun(cmd, input=None, check=False, env=None, encoding='utf8',
                                             cmd,
                                             stdout_data, stderr_data)
     return (proc.returncode, stdout_data, stderr_data)
-
-
-async def run_step(step, msg_cb, event_name=None):
-    # Define STEP_NAME for use in determining where to store
-    # our step results,
-    #  redis-cli set "conjure-up.$SPELL_NAME.$STEP_NAME.result" "val"
-    app.env['CONJURE_UP_STEP'] = step.name
-
-    step_path = Path(app.config['spell-dir']) / 'steps' / step.filename
-
-    if not step_path.is_file():
-        return
-
-    step_path = str(step_path)
-
-    msg = "Running step: {}.".format(step.name)
-    app.log.info(msg)
-    msg_cb(msg)
-    if event_name is not None:
-        track_event(event_name, "Started", "")
-
-    if not os.access(step_path, os.X_OK):
-        raise Exception("Step {} not executable".format(step.title))
-
-    if is_linux() and step.needs_sudo and not await can_sudo():
-        raise SudoError('Step "{}" requires sudo: {}'.format(
-            step.title,
-            'password failed' if app.sudo_pass else
-            'passwordless sudo required',
-        ))
-
-    app.log.debug("Executing script: {}".format(step_path))
-
-    async with aiofiles.open(step_path + ".out", 'w') as outf:
-        async with aiofiles.open(step_path + ".err", 'w') as errf:
-            proc = await asyncio.create_subprocess_exec(step_path,
-                                                        env=app.env,
-                                                        stdout=outf,
-                                                        stderr=errf)
-            async with aiofiles.open(step_path + '.out', 'r') as f:
-                while proc.returncode is None:
-                    async for line in f:
-                        msg_cb(line)
-                    await asyncio.sleep(0.01)
-
-    out_log = Path(step_path + '.out').read_text()
-    err_log = Path(step_path + '.err').read_text()
-
-    if proc.returncode != 0:
-        app.sentry.context.merge({'extra': {
-            'out_log_tail': out_log[-400:],
-            'err_log_tail': err_log[-400:],
-        }})
-        raise Exception("Failure in step {}".format(step.filename))
-
-    # special case for 00_deploy-done to report masked
-    # charm hook failures that were retried automatically
-    if not app.noreport:
-        failed_apps = set()  # only report each charm once
-        for line in err_log.splitlines():
-            if 'hook failure, will retry' in line:
-                log_leader = line.split()[0]
-                unit_name = log_leader.split(':')[-1]
-                app_name = unit_name.split('/')[0]
-                failed_apps.add(app_name)
-        for app_name in failed_apps:
-            # report each individually so that Sentry will give us a
-            # breakdown of failures per-charm in addition to per-spell
-            sentry_report('Retried hook failure', tags={
-                'app_name': app_name,
-            })
-
-    if event_name is not None:
-        track_event(event_name, "Done", "")
-
-    result_key = "conjure-up.{}.{}.result".format(app.config['spell'],
-                                                  step.name)
-    result = app.state.get(result_key)
-    return (result or b'').decode('utf8')
 
 
 def sentry_report(message=None, exc_info=None, tags=None, **kwargs):

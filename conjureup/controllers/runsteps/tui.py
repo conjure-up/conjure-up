@@ -16,7 +16,7 @@ class RunStepsController:
     async def run_steps(self):
         utils.info("Running post-deployment steps")
         for step in app.steps:
-            step.result = await common.do_step(step, utils.info)
+            step.result = await step.run(utils.info)
 
         common.save_step_results()
         self.show_summary()

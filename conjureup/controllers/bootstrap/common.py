@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from conjureup import events, juju, utils
+from conjureup import events, juju
 from conjureup.app_config import app
 from conjureup.models.step import StepModel
 from conjureup.telemetry import track_event
@@ -57,36 +57,19 @@ class BaseBootstrapController:
 
         await juju.login()  # login to the newly created (default) model
 
-        # Set provider type for post-bootstrap
-        app.env['JUJU_PROVIDERTYPE'] = app.juju.client.info.provider_type
-        app.env['JUJU_CONTROLLER'] = app.provider.controller
-        app.env['JUJU_MODEL'] = app.provider.model
-
         step = StepModel({},
                          filename='00_post-bootstrap',
                          name='post-bootstrap')
-        await utils.run_step(step,
-                             self.msg_cb,
-                             'Juju Post-Bootstrap')
+        await step.run(self.msg_cb, 'Juju Post-Bootstrap')
         events.Bootstrapped.set()
 
     async def pre_bootstrap(self):
         """ runs pre bootstrap script if exists
         """
-        # Set provider type for post-bootstrap
-        app.env['JUJU_PROVIDERTYPE'] = juju.get_cloud_types_by_name()[
-            app.provider.cloud]
-        # Set current credential name (localhost doesn't have one)
-        app.env['JUJU_CREDENTIAL'] = app.provider.credential or ''
-        app.env['JUJU_CONTROLLER'] = app.provider.controller
-        app.env['JUJU_MODEL'] = app.provider.model
-        app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
-
         step = StepModel({},
                          filename='00_pre-bootstrap',
                          name='pre-bootstrap')
-        await utils.run_step(step,
-                             self.msg_cb)
+        await step.run(self.msg_cb)
 
     def emit(self, msg):
         app.log.info(msg)

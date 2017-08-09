@@ -14,7 +14,7 @@ class RunStepsController:
     async def run_steps(self, view):
         for step in app.steps:
             view.mark_step_running(step)
-            step.result = await common.do_step(step, app.ui.set_footer)
+            step.result = await step.run(app.ui.set_footer)
             view.mark_step_complete(step)
         common.save_step_results()
         events.PostDeployComplete.set()
