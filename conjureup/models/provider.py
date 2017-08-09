@@ -222,10 +222,13 @@ class AWS(BaseProvider):
                                                 self.cloud_type,
                                                 self.credential)
         try:
-            await arun(['aws', 'configure', '--profile', self.credential],
-                       input='{}\n{}\n\n\n'.format(cred.access_key,
-                                                   cred.secret_key),
-                       check=True)
+            ret, _, _ = await arun(['aws', 'configure', 'list',
+                                    '--profile', self.credential], check=False)
+            if ret != 0:
+                await arun(['aws', 'configure', '--profile', self.credential],
+                           input='{}\n{}\n\n\n'.format(cred.access_key,
+                                                       cred.secret_key),
+                           check=True)
         except CalledProcessError as e:
             app.log.error('Failed to configure AWS CLI profile: {}'.format(
                 e.stderr))
