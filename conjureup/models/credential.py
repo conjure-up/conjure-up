@@ -52,7 +52,7 @@ class AWSCredential(BaseCredential):
 
     @property
     def secret_key(self):
-        return self._credential['access-key']
+        return self._credential['secret-key']
 
 
 class MAASCredential(BaseCredential):
