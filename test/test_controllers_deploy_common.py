@@ -23,9 +23,6 @@ class DeployCommonDoDeployTestCase(unittest.TestCase):
         self.pre_deploy_patcher = patch(
             'conjureup.controllers.deploy.common.pre_deploy')
         self.mock_pre_deploy = self.pre_deploy_patcher.start()
-        self.utils_patcher = patch(
-            'conjureup.controllers.deploy.common.utils')
-        self.mock_utils = self.utils_patcher.start()
         self.app_patcher = patch(
             'conjureup.controllers.deploy.common.app')
         self.mock_app = self.app_patcher.start()
@@ -43,7 +40,6 @@ class DeployCommonDoDeployTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.pre_deploy_patcher.stop()
-        self.utils_patcher.stop()
         self.app_patcher.stop()
         self.events_app_patcher.stop()
         self.juju_patcher.stop()

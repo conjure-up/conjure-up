@@ -1,7 +1,7 @@
 import asyncio
 from operator import attrgetter
 
-from conjureup import events, juju, utils
+from conjureup import events, juju
 from conjureup.app_config import app
 from conjureup.models.step import StepModel
 
@@ -48,20 +48,10 @@ async def pre_deploy(msg_cb):
     """ runs pre deploy script if exists
     """
     await events.ModelConnected.wait()
-
-    # Set provider type for post-bootstrap
-    app.env['JUJU_PROVIDERTYPE'] = app.juju.client.info.provider_type
-    # Set current credential name (localhost doesn't have one)
-    app.env['JUJU_CREDENTIAL'] = app.provider.credential or ''
-    app.env['JUJU_CONTROLLER'] = app.provider.controller
-    app.env['JUJU_MODEL'] = app.provider.model
-    app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
-
     step = StepModel({},
                      filename='00_pre-deploy',
                      name='pre-deploy')
-    await utils.run_step(step,
-                         msg_cb)
+    await step.run(msg_cb)
     events.PreDeployComplete.set()
 
 
@@ -74,7 +64,7 @@ async def wait_for_applications(msg_cb):
     step = StepModel({'title': 'Deployment Watcher'},
                      filename='00_deploy-done',
                      name='00_deploy-done')
-    await utils.run_step(step, msg_cb)
+    await step.run(msg_cb)
 
     events.ModelSettled.set()
     msg = 'Model settled.'

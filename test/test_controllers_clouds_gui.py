@@ -83,12 +83,19 @@ class CloudsGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.clouds.gui.track_event')
         self.mock_track_event = self.track_event_patcher.start()
 
+        self.mock_provider = MagicMock()
+        self.load_schema_patcher = patch(
+            'conjureup.controllers.clouds.gui.load_schema',
+            self.mock_provider)
+        self.mock_load_schema = self.load_schema_patcher.start()
+
     def tearDown(self):
         self.controllers_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
         self.track_event_patcher.stop()
         self.utils_patcher.stop()
+        self.load_schema_patcher.stop()
 
     def test_finish_no_controller(self):
         "clouds.finish without existing controller"
