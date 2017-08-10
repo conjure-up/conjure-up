@@ -21,6 +21,12 @@ class VSphereSetupView(BaseView):
                 [ds.name for ds in self.datacenter.datastore])
         }
 
+        # Set defaults
+        self.vsphere_config['primary-network'].set_default(
+            self.vsphere_config['primary-network'].group[0].label, True)
+        self.vsphere_config['datastore'].set_default(
+            self.vsphere_config['datastore'].group[0].label, True)
+
         super().__init__(*args, **kwargs)
 
     def build_buttons(self):
@@ -45,7 +51,8 @@ class VSphereSetupView(BaseView):
             ], dividechars=1),
             HR(),
             Columns([
-                ('weight', 0.5, Text('external network', align="right")),
+                ('weight', 0.5, Text('external network (optional)',
+                                     align="right")),
                 Color.string_input(
                     self.vsphere_config['external-network'],
                     focus_map='string_input focus')
