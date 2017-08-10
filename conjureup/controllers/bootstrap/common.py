@@ -23,9 +23,13 @@ class BaseBootstrapController:
 
     async def do_add_model(self):
         self.emit('Creating Juju model.')
+        cloud_with_region = app.provider.cloud
+        if app.provider.region:
+            cloud_with_region = '/'.join([app.provider.cloud,
+                                          app.provider.region])
         await juju.add_model(app.provider.model,
                              app.provider.controller,
-                             app.provider.cloud,
+                             cloud_with_region,
                              app.provider.credential)
         self.emit('Juju model created.')
         events.Bootstrapped.set()
