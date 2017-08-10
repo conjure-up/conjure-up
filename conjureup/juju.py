@@ -757,7 +757,7 @@ def get_model(controller, name):
     """
     models = get_models(controller)['models']
     for m in models:
-        if m['name'] == name:
+        if m['short-name'] == name:
             return m
     raise LookupError(
         "Unable to find model: {}".format(name))
