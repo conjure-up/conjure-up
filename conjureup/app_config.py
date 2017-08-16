@@ -125,6 +125,9 @@ class AppConfig:
     # exit code for conjure-up to terminate with
     exit_code = 0
 
+    # Selected Addons
+    addons = None
+
     def __setattr__(self, name, value):
         """ Gaurds against setting attributes that don't already exist
         """

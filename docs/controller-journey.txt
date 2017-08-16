@@ -1,4 +1,5 @@
 Spell Picker
+Addons Picker
 Clouds
 Cloud Credentials
 Regions
