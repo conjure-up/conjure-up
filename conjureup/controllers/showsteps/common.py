@@ -25,13 +25,25 @@ def get_step_metadata_filenames():
     return sorted(steps_dir.glob('step-*.yaml'))
 
 
+def get_addon_metadata_filenames():
+    """ Gets a list of selected addons filenames
+    """
+    steps = []
+    for addon in app.addons:
+        steps_dir = Path(app.config['spell-dir']) / 'addons' / addon
+        steps.extend(sorted(steps_dir.glob('step-*.yaml')))
+    return steps
+
+
 def load_steps():
     """
     Load all step models into app.steps and
     populate app.steps_data, if not already.
     """
+    step_filenames = get_step_metadata_filenames() + \
+        get_addon_metadata_filenames()
     app.steps = []
-    for step_meta_path in get_step_metadata_filenames():
+    for step_meta_path in step_filenames:
         step = load_step(step_meta_path)
         app.steps.append(step)
         step_data = app.steps_data.get(step.name, {})
