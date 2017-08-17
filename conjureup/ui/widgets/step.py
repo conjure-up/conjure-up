@@ -109,11 +109,7 @@ class StepForm(WidgetWrap):
 
     def build_widget(self):
         self.step_pile = pile = Pile([
-            Columns(
-                [
-                    ('fixed', 3, self.icon),
-                    self.description,
-                ], dividechars=1),
+            self.description,
             Padding.line_break(""),
             Padding.push_4(self.output),
         ])
