@@ -126,7 +126,7 @@ class AppConfig:
     exit_code = 0
 
     # Selected Addons
-    addons = None
+    addons = []
 
     def __setattr__(self, name, value):
         """ Gaurds against setting attributes that don't already exist
@@ -178,8 +178,8 @@ class AppConfig:
             setattr(self, k, v)
 
     async def save(self):
-        if not self.config.get('spell'):
-            # don't bother saving if they haven't even picked a spell yet
+        if not self.provider:
+            # don't bother saving if they haven't even picked a cloud yet
             return
         self.log.info('Storing conjure-up state')
         if self.juju.authenticated:

@@ -139,7 +139,10 @@ async def _start(*args, **kwargs):
 
     utils.setup_metadata_controller()
 
-    controllers.use('clouds').render()
+    if app.headless:
+        controllers.use('clouds').render()
+    else:
+        controllers.use('addons').render()
 
 
 def apply_proxy():

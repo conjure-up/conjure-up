@@ -30,7 +30,7 @@ def get_addon_metadata_filenames():
     """
     steps = []
     for addon in app.addons:
-        steps_dir = Path(app.config['spell-dir']) / 'addons' / addon
+        steps_dir = Path(app.config['spell-dir']) / 'addons' / addon / 'steps'
         steps.extend(sorted(steps_dir.glob('step-*.yaml')))
     return steps
 
