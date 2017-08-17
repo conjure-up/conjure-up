@@ -330,7 +330,7 @@ class Localhost(BaseProvider):
     def __init__(self):
         super().__init__()
         self.auth_type = 'interactive'
-        self.cloud_type = 'lxd'
+        self.cloud_type = 'localhost'
         self.network_interface = None
         self.form = Form([Field(
             label='network interface to create a LXD bridge for',
