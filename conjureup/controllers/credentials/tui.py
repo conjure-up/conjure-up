@@ -1,12 +1,13 @@
 from conjureup import events, utils
 from conjureup.app_config import app
+from conjureup.consts import cloud_types
 
 from . import common
 
 
 class CredentialsController(common.BaseCredentialsController):
     def render(self):
-        if app.provider.cloud_type == 'lxd':
+        if app.provider.cloud_type == cloud_types.LOCAL:
             # no credentials required for localhost
             self.finish()
         elif not self.credentials:

@@ -13,6 +13,7 @@ from ubuntui.widgets.input import (
 from urwid import Text
 
 from conjureup.app_config import app
+from conjureup.consts import cloud_types
 from conjureup.juju import get_cloud
 from conjureup.models.credential import CredentialManager
 from conjureup.utils import (
@@ -201,7 +202,7 @@ class AWS(BaseProvider):
     def __init__(self):
         super().__init__()
         self.auth_type = 'access-key'
-        self.cloud_type = 'ec2'
+        self.cloud_type = cloud_types.AWS
         self.access_key = None
         self.secret_key = None
         self.form = Form([Field(label='AWS Access Key',
@@ -239,7 +240,7 @@ class MAAS(BaseProvider):
     def __init__(self):
         super().__init__()
         self.auth_type = 'oauth1'
-        self.cloud_type = 'maas'
+        self.cloud_type = cloud_types.MAAS
         self.endpoint = None
         self.apikey = None
         self.form = Form(
@@ -330,7 +331,7 @@ class Localhost(BaseProvider):
     def __init__(self):
         super().__init__()
         self.auth_type = 'interactive'
-        self.cloud_type = 'localhost'
+        self.cloud_type = cloud_types.LOCALHOST
         self.network_interface = None
         self.form = Form([Field(
             label='network interface to create a LXD bridge for',
@@ -345,7 +346,7 @@ class Azure(BaseProvider):
     def __init__(self):
         super().__init__()
         self.auth_type = 'service-principal-secret'
-        self.cloud_type = 'azure'
+        self.cloud_type = cloud_types.AZURE
         self.application_id = None
         self.subscription_id = None
         self.application_password = None
@@ -373,7 +374,7 @@ class Google(BaseProvider):
     def __init__(self):
         super().__init__()
         self.auth_type = 'oauth2'
-        self.cloud_type = 'gce'
+        self.cloud_type = cloud_types.GCE
         self.private_key = None
         self.project_id = None
         self.client_id = None
@@ -407,7 +408,7 @@ class CloudSigma(BaseProvider):
     def __init__(self):
         super().__init__()
         self.auth_type = 'userpass'
-        self.cloud_type = 'cloudsigma'
+        self.cloud_type = cloud_types.CLOUDSIGMA
         self.username = None
         self.password = None
         self.form = Form([
@@ -429,7 +430,7 @@ class Joyent(BaseProvider):
     def __init__(self):
         super().__init__()
         self.auth_type = 'userpass'
-        self.cloud_type = 'joyent'
+        self.cloud_type = cloud_types.JOYENT
         self.sdc_user = None
         self.sdc_key_id = None
         self.private_key = None
@@ -462,7 +463,7 @@ class OpenStack(BaseProvider):
     def __init__(self):
         super().__init__()
         self.auth_type = 'userpass'
-        self.cloud_type = 'openstack'
+        self.cloud_type = cloud_types.OPENSTACK
         self.username = None
         self.password = None
         self.domain_name = None
@@ -507,7 +508,7 @@ class VSphere(BaseProvider):
     def __init__(self):
         super().__init__()
         self.auth_type = 'userpass'
-        self.cloud_type = 'vsphere'
+        self.cloud_type = cloud_types.VSPHERE
         self.endpoint = None
         self.user = None
         self.password = None
@@ -578,7 +579,7 @@ class Oracle(BaseProvider):
     def __init__(self):
         super().__init__()
         self.auth_type = 'userpass'
-        self.cloud_type = 'oracle'
+        self.cloud_type = cloud_types.ORACLE
         self.identity_domain = None
         self.password = None
         self.username = None

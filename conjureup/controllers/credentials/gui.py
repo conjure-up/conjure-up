@@ -4,6 +4,7 @@ import yaml
 
 from conjureup import controllers, juju, utils
 from conjureup.app_config import app
+from conjureup.consts import cloud_types
 from conjureup.ui.views.credentials import (
     CredentialPickerView,
     NewCredentialView
@@ -14,7 +15,7 @@ from . import common
 
 class CredentialsController(common.BaseCredentialsController):
     def render(self):
-        if app.provider.cloud_type == 'localhost':
+        if app.provider.cloud_type == cloud_types.LOCAL:
             # no credentials required for localhost
             self.finish()
         elif len(self.credentials) >= 1:
