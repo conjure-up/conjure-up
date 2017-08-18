@@ -94,6 +94,12 @@ class StepModel:
             for key, value in step_data.items():
                 app.env[key.upper()] = step_data[key]
 
+        for key, value in app.env.items():
+            if value is None:
+                app.log.warning('Env {} is None; '
+                                'replacing with empty string'.format(key))
+                app.env[key] = ''
+
         app.log.debug("Storing environment")
         async with aiofiles.open(step_path + ".env", 'w') as outf:
             for k, v in app.env.items():
