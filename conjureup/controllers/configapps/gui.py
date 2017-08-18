@@ -6,6 +6,7 @@ from bundleplacer.assignmenttype import AssignmentType, atype_to_label
 
 from conjureup import controllers, events, juju
 from conjureup.app_config import app
+from conjureup.consts import cloud_types
 from conjureup.maas import setup_maas
 from conjureup.telemetry import track_screen
 from conjureup.ui.views.app_architecture_view import AppArchitectureView
@@ -210,7 +211,7 @@ class ConfigAppsController:
         """
         cloud_type = juju.get_cloud_types_by_name()[app.provider.cloud]
 
-        if cloud_type == 'maas':
+        if cloud_type == cloud_types.MAAS:
             await events.MAASConnected.wait()
         app_placements = self.get_all_assignments(application)
         juju_machines = app.metadata_controller.bundle.machines
@@ -221,7 +222,7 @@ class ConfigAppsController:
             machine_attrs = {
                 'series': application.csid.series,
             }
-            if cloud_type == 'maas':
+            if cloud_type == cloud_types.MAAS:
                 machine_attrs['constraints'] = \
                     await self.get_maas_constraints(virt_machine_id)
             else:
@@ -313,7 +314,7 @@ class ConfigAppsController:
         self.undeployed_applications = self.applications[:]
 
         cloud_type = juju.get_cloud_types_by_name()[app.provider.cloud]
-        if cloud_type == 'maas':
+        if cloud_type == cloud_types.MAAS:
             app.loop.create_task(self.connect_maas())
 
         self.list_view = ApplicationListView(self.applications,

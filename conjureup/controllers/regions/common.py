@@ -1,5 +1,6 @@
 from conjureup import controllers, juju
 from conjureup.app_config import app
+from conjureup.consts import cloud_types
 from conjureup.models.provider import load_schema
 
 
@@ -46,9 +47,9 @@ class BaseRegionsController:
 
     def finish(self, region):
         app.provider.region = region
-        if app.provider.cloud_type == 'localhost':
+        if app.provider.cloud_type == cloud_types.LOCAL:
             controllers.use('lxdsetup').render()
-        elif app.provider.cloud_type == 'vsphere':
+        elif app.provider.cloud_type == cloud_types.VSPHERE:
             controllers.use('vspheresetup').render()
         else:
             controllers.use('controllerpicker').render()
