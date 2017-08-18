@@ -83,7 +83,7 @@ class StepModel:
         app.env['JUJU_CREDENTIAL'] = app.provider.credential or ''
         app.env['JUJU_CONTROLLER'] = app.provider.controller
         app.env['JUJU_MODEL'] = app.provider.model
-        app.env['JUJU_REGION'] = app.provider.region
+        app.env['JUJU_REGION'] = app.provider.region or ''
         app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
 
         if provider_type == "maas":
