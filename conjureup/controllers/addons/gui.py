@@ -2,6 +2,7 @@ from conjureup import controllers
 from conjureup.app_config import app
 from conjureup.telemetry import track_screen
 from conjureup.ui.views.addons import AddonsView
+from conjureup.utils import setup_metadata_controller
 
 
 class AddonsController:
@@ -17,6 +18,9 @@ class AddonsController:
 
     def finish(self):
         app.addons = self.view.selected
+        if app.addons:
+            # reload the bundle data w/ addons merged
+            setup_metadata_controller()
         controllers.use('clouds').render()
 
     def back(self):
