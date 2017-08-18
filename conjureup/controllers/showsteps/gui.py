@@ -23,6 +23,8 @@ class ShowStepsController:
 
     async def show_steps(self):
         for step in filter(attrgetter('viewable'), app.steps):
+            if not (step.additional_input or step.needs_sudo):
+                continue
             await self.show_step(step)
 
         return self.finish()
