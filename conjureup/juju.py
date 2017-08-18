@@ -370,11 +370,7 @@ def get_compatible_clouds(cloud_types=None):
     clouds = get_clouds()
     cloud_types = set(cloud_types or (c['type'] for c in clouds.values()))
 
-    if 'lxd' in cloud_types:
-        # normalize 'lxd' cloud type to localhost; 'lxd' can happen
-        # depending on how the controller was bootstrapped
-        cloud_types -= {'lxd'}
-        cloud_types |= {'localhost'}
+    _normalize_cloud_types(cloud_types)
 
     if not is_linux():
         # LXD not available on macOS
@@ -388,6 +384,17 @@ def get_compatible_clouds(cloud_types=None):
 
     whitelist = set(app.config['metadata'].get('cloud-whitelist', []))
     blacklist = set(app.config['metadata'].get('cloud-blacklist', []))
+
+    addons_dir = Path(app.config['spell-dir']) / 'addons'
+    for addon in app.addons:
+        addon_file = addons_dir / addon / 'metadata.yaml'
+        addon_meta = yaml.safe_load(addon_file.read_text())
+        whitelist.update(addon_meta.get('cloud-whitelist', []))
+        blacklist.update(addon_meta.get('cloud-blacklist', []))
+
+    _normalize_cloud_types(whitelist)
+    _normalize_cloud_types(blacklist)
+
     if len(whitelist) > 0:
         return sorted(cloud_types & whitelist)
 
@@ -395,6 +402,26 @@ def get_compatible_clouds(cloud_types=None):
         return sorted(cloud_types ^ blacklist)
 
     return sorted(cloud_types)
+
+
+def _normalize_cloud_types(cloud_types):
+    if 'lxd' in cloud_types:
+        # normalize 'lxd' cloud type to localhost; 'lxd' can happen
+        # depending on how the controller was bootstrapped
+        cloud_types -= {'lxd'}
+        cloud_types |= {'localhost'}
+
+    if 'local' in cloud_types:
+        cloud_types -= {'local'}
+        cloud_types |= {'localhost'}
+
+    if 'aws' in cloud_types:
+        cloud_types -= {'aws'}
+        cloud_types |= {'ec2'}
+
+    if 'google' in cloud_types:
+        cloud_types -= {'google'}
+        cloud_types |= {'gce'}
 
 
 def get_cloud_types_by_name():
