@@ -94,6 +94,12 @@ class StepModel:
             for key, value in step_data.items():
                 app.env[key.upper()] = step_data[key]
 
+        app.log.debug("Storing environment")
+        async with aiofiles.open(step_path + ".env", 'w') as outf:
+            for k, v in app.env.items():
+                if 'JUJU' in k or 'MAAS' in k or 'CONJURE' in k:
+                    await outf.write("{}=\"{}\" ".format(k.upper(), v))
+
         app.log.debug("Executing script: {}".format(step_path))
 
         async with aiofiles.open(step_path + ".out", 'w') as outf:
