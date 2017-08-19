@@ -47,7 +47,7 @@ class ControllerListView(WidgetWrap):
 
     def _build_footer(self):
         footer_pile = Pile([
-            Padding.center_60(Text(
+            Padding.center_90(Text(
                 'The controller is what allows Juju to deploy and manage your '
                 'models/spells.  With JaaS, the controller will be managed '
                 'for you, so that you can focus on your applications and '

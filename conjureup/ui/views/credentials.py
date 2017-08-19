@@ -1,6 +1,5 @@
 from ubuntui.utils import Padding
 from ubuntui.widgets.hr import HR
-from urwid import Text
 
 from conjureup.app_config import app
 from conjureup.ui.views.base import BaseView, SchemaFormView
@@ -36,7 +35,6 @@ class CredentialPickerView(BaseView):
 
     def build_widget(self):
         return [
-            Text("Choose a Credential"),
             HR(),
             SelectorList(self.credentials, self.select_cb),
             Padding.line_break(""),

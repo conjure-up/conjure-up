@@ -28,7 +28,7 @@ class ControllerPicker(common.BaseControllerPicker):
                                   self.finish)
 
         app.ui.set_header(
-            title="Choose a Controller or Create new",
+            title="Controller",
             excerpt=excerpt
         )
         app.ui.set_body(view)
