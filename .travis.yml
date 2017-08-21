@@ -22,8 +22,6 @@ before_script:
   - sudo addgroup lxd || true
   - sudo usermod -a -G lxd $USER || true
   - sudo ln -s /snap/bin/juju /usr/bin/juju
-  - sudo ln -s /usr/bin/lxc /usr/bin/conjure-up.lxc
-  - sudo ln -s /usr/bin/lxd /usr/bin/conjure-up.lxd
   - sudo service lxd start || true
   - sudo service redis-server start || true
 script:

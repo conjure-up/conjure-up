@@ -177,8 +177,7 @@ def _sentry_report(message=None, exc_info=None, tags=None, **kwargs):
             'region': app.provider.region,
             'jaas': app.is_jaas,
             'headless': app.headless,
-            'juju_version': juju_version(),
-            'lxd_version': lxd_version(),
+            'juju_version': juju_version()
         }
 
         if message is not None and exc_info is None:
@@ -219,19 +218,6 @@ async def can_sudo(password=None):
     else:
         await proc.wait()
     return proc.returncode == 0
-
-
-def lxd_version():
-    """ Get current LXD version
-    """
-    if is_darwin():
-        return "N/A"
-
-    cmd = run_script('conjure-up.lxd --version')
-    if cmd.returncode == 0:
-        return parse_version(cmd.stdout.decode().strip())
-    else:
-        raise Exception("Could not determine LXD version.")
 
 
 def juju_version():
@@ -734,4 +720,8 @@ class TestError(Exception):
 
 
 class SudoError(Exception):
+    pass
+
+
+class UtilsHTTPError(Exception):
     pass

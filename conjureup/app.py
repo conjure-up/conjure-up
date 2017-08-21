@@ -243,10 +243,8 @@ def main():
         app.noreport = True
 
     # Grab current LXD and Juju versions
-    app.log.debug("LXD version: {}, "
-                  "Juju version: {}, "
+    app.log.debug("Juju version: {}, "
                   "conjure-up version: {}".format(
-                      utils.lxd_version(),
                       utils.juju_version(),
                       VERSION))
 

@@ -14,8 +14,7 @@ which conjure-up
 which conjure-up.lxd
 juju version
 conjure-up --version
-conjure-up.lxd --version
-conjure-up.lxc config show
+lxc config show
 cat /etc/lsb-release
 ```
 
