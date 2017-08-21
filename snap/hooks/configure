@@ -2,8 +2,6 @@
 
 set -eux
 
-# Setup LXD
-
 # copy bash completions to host system
 cp -a "$SNAP"/bash_completions/* /usr/share/bash-completion/completions/. || true
 
@@ -40,26 +38,4 @@ if [[ ! -f /snap/bin/juju ]]; then
     # list of `snap aliases` but the up-side that it automatically defers
     # to the juju snap if that is installed later.
     ln -s conjure-up.juju /snap/bin/juju
-fi
-
-# Make sure the LXD group exists as we don't want to assume users have installed
-# LXD from a deb package or previous snap
-groupadd lxd || true
-
-# Make sure that LXD ownership is correct
-if [[ -d $SNAP_COMMON/lxd ]]; then
-    chown root:root "$SNAP_COMMON/lxd"
-fi
-
-if [[ -e $SNAP_COMMON/lxd/unix.socket ]]; then
-    chown root:lxd "$SNAP_COMMON/lxd/unix.socket"
-    chmod 0660 "$SNAP_COMMON/lxd/unix.socket"
-fi
-
-if ! "conjure-up.lxc network show conjureup0|grep -q 'managed: true'"; then
-    ip link delete conjureup0 type bridge || true
-fi
-
-if ! "conjure-up.lxc network show conjureup1|grep -q 'managed: true'"; then
-    ip link delete conjureup1 type bridge || true
 fi

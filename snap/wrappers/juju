@@ -2,7 +2,17 @@
 
 
 # Make sure we access our python and juju binaries first
-export LXD_DIR=${SNAP_COMMON}/lxd/
+debian_socket=/var/lib/lxd
+snap_lxd_socket=/var/snap/lxd/common/lxd
+
+lxd_binary=$(which lxd)
+
+# Prefer debian installed lxd, if availible
+if [ "$lxd_binary" = "/usr/bin/lxd" ]; then
+    export LXD_DIR=$debian_socket
+elif [ "$lxd_binary" = "/snap/bin/lxd" ]; then
+    export LXD_DIR=$snap_lxd_socket
+fi
 export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 export LD_LIBRARY_PATH
 LD_LIBRARY_PATH=$SNAP/lib:$SNAP/usr/lib/$(uname -p)-linux-gnu/
