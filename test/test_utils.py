@@ -43,9 +43,8 @@ class UtilsTestCase(unittest.TestCase):
             assert not utils.is_valid_hostname(hostname)
 
     @patch.object(utils, 'juju_version')
-    @patch.object(utils, 'lxd_version')
     @patch.object(utils, 'app')
-    def test_sentry_report(self, app, lxd_version, juju_version):
+    def test_sentry_report(self, app, juju_version):
         # test task schedule
         flag = asyncio.Event()
         with patch.object(utils, '_sentry_report',
@@ -62,7 +61,6 @@ class UtilsTestCase(unittest.TestCase):
         app.is_jaas = False
         app.headless = False
         juju_version.return_value = '2.j'
-        lxd_version.return_value = '2.l'
 
         app.noreport = True
         utils._sentry_report('message', tags={'foo': 'bar'})
@@ -81,8 +79,7 @@ class UtilsTestCase(unittest.TestCase):
                 'jaas': False,
                 'headless': False,
                 'juju_version': '2.j',
-                'lxd_version': '2.l',
-                'foo': 'bar',
+                'foo': 'bar'
             })
 
         app.sentry.capture.reset_mock()
@@ -97,6 +94,5 @@ class UtilsTestCase(unittest.TestCase):
                 'region': 'region',
                 'jaas': False,
                 'headless': False,
-                'juju_version': '2.j',
-                'lxd_version': '2.l',
+                'juju_version': '2.j'
             })

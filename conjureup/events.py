@@ -9,10 +9,6 @@ from urwid import ExitMainLoop
 
 from conjureup import utils
 from conjureup.app_config import app
-from conjureup.controllers.lxdsetup.common import (
-    LXDInvalidUserError,
-    LXDSnapVersionError
-)
 from conjureup.telemetry import track_exception
 
 
@@ -119,14 +115,13 @@ RelationsAdded = NamedEvent('RelationsAdded')
 DeploymentComplete = Event('DeploymentComplete')
 ModelSettled = Event('ModelSettled')
 PostDeployComplete = Event('PostDeployComplete')
+LXDAvailable = Event('LXDAvailable')
 
 
 # Keep a list of exceptions we know that shouldn't be logged
 # into sentry.
 NOTRACK_EXCEPTIONS = [
     lambda exc: isinstance(exc, OSError) and exc.errno == errno.ENOSPC,
-    lambda exc: isinstance(exc, (LXDInvalidUserError,
-                                 LXDSnapVersionError)),
     lambda exc: isinstance(exc, utils.SudoError),
 ]
 
