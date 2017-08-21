@@ -43,6 +43,7 @@ class AddonsView(BaseView):
                     Text(metadata.get('description', ''))
                 ], dividechars=5)
             )
+            self.choices.append(HR())
         return self.choices
 
     def build_buttons(self):
