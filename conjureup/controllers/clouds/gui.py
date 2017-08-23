@@ -16,6 +16,8 @@ class CloudsController(BaseCloudController):
     def finish(self, cloud):
         """ Load the selected cloud provider
         """
+        self.cancel_monitor.set()
+
         if cloud in ['localhost', 'vsphere', 'maas']:
             app.provider = load_schema(cloud)
         else:
