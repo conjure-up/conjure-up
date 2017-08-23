@@ -64,7 +64,7 @@ class CloudsController(BaseCloudController):
                               custom_clouds,
                               cb=self.finish)
 
-        if 'localhost' in cloud_types:
+        if 'localhost' in compatible_clouds:
             app.log.debug(
                 "Starting watcher for verifying LXD server is available.")
             app.loop.create_task(

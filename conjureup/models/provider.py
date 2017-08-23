@@ -349,32 +349,27 @@ class Localhost(BaseProvider):
         self.available = False
         self._set_lxd_dir_env()
 
-        self.form = Form([Field(
-            label='network interface to create a LXD bridge for',
-            widget=SelectorHorizontal(get_physical_network_interfaces()),
-            key='network-interface',
-            storable=False
-        )])
-
     def _set_lxd_dir_env(self):
         """ Sets and updates correct environment
         """
         if Path('/snap/bin/lxd').exists():
             self.lxd_socket_dir = Path('/var/snap/lxd/common/lxd')
             app.env['LXD_DIR'] = str(self.lxd_socket_dir)
-        elif Path('/usr/bin/lxd').exists():
-            self.lxd_socket_dir = Path('/var/lib/lxd')
-            app.env['LXD_DIR'] = str(self.lxd_socket_dir)
 
-    async def query(self, method="GET", segment=''):
+    async def query(self, segment='', method="GET"):
         """ Query lxc api server
 
         Example: lxd v2.17: lxc query /1.0 | jq .
         """
-        segment_prefix = Path('/1.0')
+        if segment.startswith('/1.0'):
+            url = str(segment)
+        else:
+            segment_prefix = Path('/1.0')
+            url = str(segment_prefix / segment)
         try:
             cmd = ['lxc', 'query', '--wait', '-X', method.upper(),
-                   str(segment_prefix / segment)]
+                   url]
+            app.log.debug("LXD query cmd: {}".format(" ".join(cmd)))
             _, out, err = await utils.arun(cmd)
             return json.loads(out)
         except json.decoder.JSONDecodeError:
@@ -387,6 +382,42 @@ class Localhost(BaseProvider):
         except CalledProcessError as e:
             app.log.error(e)
             raise LocalhostError(e)
+
+    async def get_networks(self):
+        """ Grabs lxc network bridges from api
+        """
+        networks = await self.query('networks')
+        bridges = []
+        for net in networks:
+            net_info = await self.query(net)
+            if net_info['type'] == "bridge":
+                bridges.append(net_info)
+        return bridges
+
+    async def get_storage_pools(self):
+        """ Grabs lxc storage pools from api
+        """
+        pools = await self.query('storage-pools')
+        _pools = []
+        for pool in pools:
+            _pools.append(await self.query(pool))
+        return _pools
+
+    async def get_network_info(self, name):
+        """ Gets extended network information for bridge
+        """
+        networks = await self.get_networks()
+        for net in networks:
+            return net if name == net['name'] else {}
+
+    async def get_storage_pool_info(self, name):
+        """ Gets extended storage pool information
+        """
+        pools = await self.get_storage_pools()
+        for pool_path in pools:
+            if name == Path(pool_path).stem:
+                return await self.query(segment=str(pool_path))
+        return {}
 
     async def is_server_available(self):
         """ Waits and checks if LXD server becomes available
