@@ -1,12 +1,10 @@
-import asyncio
-
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import MenuSelectButton, menu_btn
 from ubuntui.widgets.hr import HR
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
-from conjureup import events, juju, lxd
+from conjureup import juju
 from conjureup.consts import cloud_types
 
 
@@ -26,7 +24,6 @@ class CloudView(WidgetWrap):
                 Filler(self._build_widget(), valign='top')),
             footer=self._build_footer())
         super().__init__(self.frame)
-        self.app.loop.create_task(self._monitor_localhost())
 
     def keypress(self, size, key):
         if key in ['tab', 'shift tab']:
@@ -63,21 +60,6 @@ class CloudView(WidgetWrap):
                 ]))
         ])
         return footer_pile
-
-    async def _monitor_localhost(self):
-        """ Checks that localhost/lxd is available and listening,
-        updates widget accordingly
-        """
-        if events.LXDAvailable.is_set():
-            return
-
-        _lxd = lxd.LXDClient()
-        if not await _lxd.is_server_available():
-            await asyncio.sleep(1)
-            await self._monitor_localhost()
-        else:
-            events.LXDAvailable.set()
-            self._enable_localhost_widget()
 
     def _get_localhost_widget_idx(self):
         """ Returns index in pile where localhost widget resides

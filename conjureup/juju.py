@@ -182,7 +182,8 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
         with open(pathbase + ".err", 'w') as errf:
             proc = await asyncio.create_subprocess_exec(*cmd,
                                                         stdout=outf,
-                                                        stderr=errf)
+                                                        stderr=errf,
+                                                        env=app.env)
             app.log.debug('waiting for proc')
             await proc.wait()
             app.log.debug('proc done')
