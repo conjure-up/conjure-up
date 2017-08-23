@@ -17,6 +17,7 @@ class CloudView(WidgetWrap):
         self.custom_clouds = custom_clouds
         self.config = self.app.config
         self.buttons_pile_selected = False
+        self.pile = None
         self.pile_localhost_idx = None
 
         self.frame = Frame(
@@ -93,13 +94,15 @@ class CloudView(WidgetWrap):
         self.pile.contents[idx] = (item, self.pile.options())
 
     def _add_item(self, item):
-        self.pile.contents.append((item, self.pile.options()))
-        self.pile.focus_position = 2
+        if not self.pile:
+            self.pile = Pile([item])
+        else:
+            self.pile.contents.append((item, self.pile.options()))
 
     def _build_widget(self):
-        self.pile = Pile([Text("Public Clouds"), HR()])
-
         if len(self.public_clouds) > 0:
+            self._add_item(Text("Public Clouds"))
+            self._add_item(HR())
             for item in self.public_clouds:
                 self._add_item(
                     Color.body(
@@ -139,9 +142,10 @@ class CloudView(WidgetWrap):
                     self._add_item(
                         Color.info_context(
                             Padding.center_90(
-                                Text("LXD not found, please install with "
-                                     "`sudo snap install lxd` and wait for "
-                                     "this message to disappear."))
+                                Text(
+                                    "LXD not found, please install with "
+                                    "`sudo snap install lxd && lxd init` "
+                                    "and wait for this message to disappear."))
                         )
                     )
                 else:
@@ -152,6 +156,8 @@ class CloudView(WidgetWrap):
                             focus_map='menu_button focus'
                         )
                     )
+
+        self.pile.focus_position = 2
         return self.pile
 
     def submit(self, result):
