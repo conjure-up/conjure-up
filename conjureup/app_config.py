@@ -125,8 +125,11 @@ class AppConfig:
     # exit code for conjure-up to terminate with
     exit_code = 0
 
-    # Selected Addons
-    addons = []
+    # All available addons by name
+    addons = {}
+
+    # Selected addons
+    selected_addons = []
 
     def __setattr__(self, name, value):
         """ Gaurds against setting attributes that don't already exist
@@ -156,7 +159,7 @@ class AppConfig:
         blacklist = ['loop', 'log', 'maas', 'argv', 'spells_index',
                      'juju', 'ui', 'bootstrap', 'endpoint_type', 'provider',
                      'metadata_controller', 'state',
-                     'env', 'sentry', 'steps', 'sudo_pass']
+                     'env', 'sentry', 'steps', 'sudo_pass', 'addons']
         new_dict = {}
         for k, v in self.__dict__.items():
             if k.startswith('__') or callable(getattr(self, k)):

@@ -26,7 +26,6 @@ from ubuntui.palette import STYLES
 from conjureup import __version__ as VERSION
 from conjureup import charm, consts, controllers, events, juju, utils
 from conjureup.app_config import app
-from conjureup.controllers.showsteps.common import load_steps
 from conjureup.download import (
     EndpointType,
     detect_endpoint,
@@ -36,7 +35,9 @@ from conjureup.download import (
     get_remote_url
 )
 from conjureup.log import setup_logging
+from conjureup.models.addon import AddonModel
 from conjureup.models.provider import SchemaErrorUnknownCloud, load_schema
+from conjureup.models.step import StepModel
 from conjureup.telemetry import SENTRY_DSN, track_event, track_screen
 from conjureup.ui import ConjureUI
 
@@ -160,7 +161,6 @@ def apply_proxy():
 def show_env():
     """ Shows environment variables from post deploy actions
     """
-    load_steps()
     print("Available environment variables: \n")
     table = PrettyTable()
     table.field_names = ["ENV", "DEFAULT", ""]
@@ -311,6 +311,8 @@ def main():
                                         spell['key']),
                            app.config['spell-dir'])
             utils.set_spell_metadata()
+            StepModel.load_spell_steps()
+            AddonModel.load_spell_addons()
             app.endpoint_type = EndpointType.LOCAL_DIR
 
     # download spell if necessary
@@ -331,6 +333,8 @@ def main():
                                path.join(opts.cache_dir, spell_name))
         download_local(opts.spell, app.config['spell-dir'])
         utils.set_spell_metadata()
+        StepModel.load_spell_steps()
+        AddonModel.load_spell_addons()
 
     elif app.endpoint_type in [EndpointType.VCS, EndpointType.HTTP]:
 
@@ -343,6 +347,8 @@ def main():
 
         download(remote, app.config['spell-dir'], True)
         utils.set_spell_metadata()
+        StepModel.load_spell_steps()
+        AddonModel.load_spell_addons()
 
     app.env['CONJURE_UP_CACHEDIR'] = app.argv.cache_dir
 

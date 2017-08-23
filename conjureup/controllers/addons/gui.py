@@ -10,15 +10,15 @@ class AddonsController:
         self.view = AddonsView(self.finish, self.back)
 
     def render(self):
-        if not self.view.choices:
+        if not app.addons:
             return self.finish()
 
         track_screen('Addons')
         self.view.show()
 
     def finish(self):
-        app.addons = self.view.selected
-        if app.addons:
+        app.selected_addons = self.view.selected
+        if app.selected_addons:
             # reload the bundle data w/ addons merged
             setup_metadata_controller()
         controllers.use('clouds').render()

@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 import aiofiles
+import yaml
 
 from conjureup import juju
 from conjureup.app_config import app
@@ -13,6 +14,34 @@ from conjureup.utils import SudoError, can_sudo, is_linux, sentry_report
 
 
 class StepModel:
+    @classmethod
+    def load_spell_steps(cls):
+        steps_dir = Path(app.config['spell-dir']) / 'steps'
+        app.steps = []
+        for step_meta_path in sorted(steps_dir.glob('step-*.yaml')):
+            step = StepModel.load(step_meta_path)
+            app.steps.append(step)
+
+    @classmethod
+    def load(cls, step_meta_path):
+        step_name = step_meta_path.stem
+        step_ex_path = step_meta_path.parent / step_name
+        if not step_ex_path.is_file():
+            raise ValidationError(
+                'Step {} has no implementation'.format(step_name))
+        elif not os.access(str(step_ex_path), os.X_OK):
+            raise ValidationError(
+                'Step {} is not executable'.format(step_name))
+        step_metadata = yaml.load(step_meta_path.read_text())
+        step = StepModel(step_metadata, str(step_ex_path), step_name)
+        step_data = app.steps_data.get(step.name, {})
+        for field in step.additional_input:
+            key = field['key']
+            default = field.get('default')
+            value = step_data.get(key, default)
+            step_data[key] = value
+        app.steps_data[step.name] = step_data
+        return step
 
     def __init__(self, step, filename, name):
         self.title = step.get('title', '')
@@ -154,3 +183,9 @@ class StepModel:
                                                       self.name)
         result = app.state.get(result_key)
         return (result or b'').decode('utf8')
+
+
+class ValidationError(Exception):
+    def __init__(self, msg, *args, **kwargs):
+        self.msg = msg
+        super().__init__(msg, *args, **kwargs)

@@ -25,12 +25,6 @@ class ShowStepsGUITestCase(unittest.TestCase):
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
 
-        self.common_patcher = patch(
-            'conjureup.controllers.showsteps.gui.common')
-        self.mock_common = self.common_patcher.start()
-        m_f = self.mock_common.get_step_metadata_filenames
-        m_f.return_value = sentinel.step_metas
-
         self.view_patcher = patch(
             'conjureup.controllers.showsteps.gui.ShowStepsView')
         self.mock_view = self.view_patcher.start()
@@ -40,7 +34,6 @@ class ShowStepsGUITestCase(unittest.TestCase):
     def tearDown(self):
         self.controllers_patcher.stop()
         self.app_patcher.stop()
-        self.common_patcher.stop()
         self.view_patcher.start()
 
     def test_render(self):

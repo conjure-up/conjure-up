@@ -1,6 +1,5 @@
-from pathlib import Path
+from operator import attrgetter
 
-import yaml
 from ubuntui.utils import Padding
 from ubuntui.widgets.hr import HR
 from urwid import CheckBox, Columns, Text
@@ -30,17 +29,14 @@ class AddonsView(BaseView):
 
     def build_widget(self):
         self.choices.append(HR())
-        addons_dir = Path(app.config['spell-dir']) / 'addons'
-        for addon in sorted(addons_dir.glob('*')):
-            metadata = yaml.safe_load((addon / 'metadata.yaml').read_text())
-            self.choices.append(CheckBoxValued(metadata.get('friendly-name',
-                                                            addon.name),
+        for addon in sorted(app.addons.values(), key=attrgetter('name')):
+            self.choices.append(CheckBoxValued(addon.friendly_name,
                                                value=addon.name))
             self.choices.append(Padding.line_break(""))
             self.choices.append(
                 Columns([
                     ('fixed', 3, Text('')),
-                    Text(metadata.get('description', ''))
+                    Text(addon.description)
                 ], dividechars=5)
             )
             self.choices.append(HR())
