@@ -1,5 +1,6 @@
 from conjureup import controllers, juju, utils
 from conjureup.app_config import app
+from conjureup.models.provider import Localhost as LocalhostProvider
 from conjureup.models.provider import SchemaErrorUnknownCloud, load_schema
 from conjureup.telemetry import track_event, track_screen
 from conjureup.ui.views.cloud import CloudView
@@ -62,14 +63,14 @@ class CloudsController(BaseCloudController):
                               cb=self.finish)
 
         if 'localhost' in cloud_types:
-            # Need to load the localhost provider here early so our LXD methods
-            # are available
-            app.provider = load_schema('localhost')
             app.log.debug(
                 "Starting watcher for verifying LXD server is available.")
-            app.loop.create_task(self._monitor_localhost(
-                self.view._enable_localhost_widget
-            ))
+            app.loop.create_task(
+                self._monitor_localhost(
+                    LocalhostProvider(),
+                    self.view._enable_localhost_widget
+                )
+            )
 
         app.ui.set_header(
             title="Choose a Cloud",
