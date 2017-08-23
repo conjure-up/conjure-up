@@ -4,8 +4,10 @@ from conjureup.models.provider import SchemaErrorUnknownCloud, load_schema
 from conjureup.telemetry import track_event, track_screen
 from conjureup.ui.views.cloud import CloudView
 
+from .common import BaseCloudController
 
-class CloudsController:
+
+class CloudsController(BaseCloudController):
 
     def __init__(self):
         self.view = None
@@ -53,16 +55,27 @@ class CloudsController:
         excerpt = app.config.get(
             'description',
             "Where would you like to deploy?")
-        view = CloudView(app,
-                         public_clouds,
-                         custom_clouds,
-                         cb=self.finish)
+
+        self.view = CloudView(app,
+                              public_clouds,
+                              custom_clouds,
+                              cb=self.finish)
+
+        if 'localhost' in cloud_types:
+            # Need to load the localhost provider here early so our LXD methods
+            # are available
+            app.provider = load_schema('localhost')
+            app.log.debug(
+                "Starting watcher for verifying LXD server is available.")
+            app.loop.create_task(self._monitor_localhost(
+                self.view._enable_localhost_widget
+            ))
 
         app.ui.set_header(
             title="Choose a Cloud",
             excerpt=excerpt
         )
-        app.ui.set_body(view)
+        app.ui.set_body(self.view)
         app.ui.set_footer('Please press [ENTER] on highlighted '
                           'Cloud to proceed.')
 

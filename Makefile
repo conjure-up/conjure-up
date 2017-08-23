@@ -18,7 +18,7 @@ travis-sysdeps:
 	@sudo apt-get remove -qy lxd lxd-client
 	@sudo apt-get -y install jq bsdtar python3-dev make snapd python-tox redis-server
 	@sudo snap install juju --classic --edge
-	@sudo snap install lxd --edge
+	@sudo snap refresh lxd --edge
 
 .PHONY: install
 install: snap
