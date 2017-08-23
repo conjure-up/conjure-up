@@ -1,6 +1,6 @@
 import asyncio
 
-from conjureup import events, utils
+from conjureup import events
 from conjureup.app_config import app
 from conjureup.models.provider import LocalhostError, LocalhostJSONError
 
@@ -30,9 +30,5 @@ class BaseCloudController:
             await asyncio.sleep(2)
             await self._monitor_localhost(cb)
         except FileNotFoundError:
-            if app.headless:
-                utils.error("Unable to find lxc executable, please make "
-                            "sure LXD is installed: `sudo snap install lxd`")
-                events.Shutdown.set(1)
             await asyncio.sleep(5)
             await self._monitor_localhost(cb)
