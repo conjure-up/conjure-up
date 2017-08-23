@@ -3,6 +3,8 @@ import os
 from conjureup import controllers, utils
 from conjureup.app_config import app
 from conjureup.download import EndpointType, download_local
+from conjureup.models.addon import AddonModel
+from conjureup.models.step import StepModel
 from conjureup.telemetry import track_screen
 from conjureup.ui.views.spellpicker import SpellPickerView
 
@@ -21,6 +23,8 @@ class SpellPickerController:
                                     spellname),
                        app.config['spell-dir'])
         utils.set_spell_metadata()
+        StepModel.load_spell_steps()
+        AddonModel.load_spell_addons()
         utils.setup_metadata_controller()
         return controllers.use('addons').render()
 

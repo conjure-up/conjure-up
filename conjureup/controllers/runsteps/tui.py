@@ -5,6 +5,7 @@ from termcolor import colored
 
 from conjureup import events, utils
 from conjureup.app_config import app
+from conjureup.models.addon import AddonModel
 
 from . import common
 
@@ -15,7 +16,10 @@ class RunStepsController:
 
     async def run_steps(self):
         utils.info("Running post-deployment steps")
-        for step in app.steps:
+        # technically, you can't currently select addons in headless,
+        # but let's go ahead and be future-proof
+        steps = app.steps + AddonModel.selected_addons_steps()
+        for step in steps:
             step.result = await step.run(utils.info)
 
         common.save_step_results()

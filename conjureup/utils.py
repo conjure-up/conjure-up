@@ -411,13 +411,9 @@ def setup_metadata_controller():
         bundle_data = merge_dicts(bundle_data,
                                   bundle_custom)
 
-    addons_dir = Path(app.config['spell-dir']) / 'addons'
-    for addon in app.addons:
-        addon_bundle_file = addons_dir / addon / 'bundle.yaml'
-        if not addon_bundle_file.exists():
-            continue
-        bundle_addon = yaml.safe_load(addon_bundle_file.read_text())
-        bundle_data = merge_dicts(bundle_data, bundle_addon)
+    for name in app.selected_addons:
+        addon = app.addons[name]
+        bundle_data = merge_dicts(bundle_data, addon.bundle)
 
     bundle = Bundle(bundle_data=bundle_data)
     app.metadata_controller = MetadataController(bundle, Config('bundle-cfg'))
