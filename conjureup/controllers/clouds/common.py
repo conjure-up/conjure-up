@@ -1,33 +1,30 @@
 import asyncio
 
+from juju.utils import run_with_interrupt
+
 from conjureup import events
 from conjureup.models.provider import LocalhostError, LocalhostJSONError
 
 
 class BaseCloudController:
-    retry_count = 0
-    max_retry = 20
+
+    cancel_monitor = asyncio.Event()
 
     async def _monitor_localhost(self, provider, cb):
         """ Checks that localhost/lxd is available and listening,
         updates widget accordingly
         """
-        if events.LXDAvailable.is_set():
-            return
 
-        try:
-            await provider.is_server_available()
-            events.LXDAvailable.set()
-            self.retry_count = 0
-            cb()
-        except (LocalhostError,
-                LocalhostJSONError):
-            if self.retry_count == self.max_retry:
-                raise
-            provider._set_lxd_dir_env()
-            self.retry_count += 1
-            await asyncio.sleep(2)
-            await self._monitor_localhost(provider, cb)
-        except FileNotFoundError:
-            await asyncio.sleep(5)
-            await self._monitor_localhost(provider, cb)
+        while not self.cancel_monitor.is_set():
+            try:
+                await provider.is_server_available()
+                events.LXDAvailable.set()
+                self.cancel_monitor.set()
+                cb()
+            except (LocalhostError, LocalhostJSONError):
+                provider._set_lxd_dir_env()
+                await run_with_interrupt(asyncio.sleep(2),
+                                         self.cancel_monitor)
+            except FileNotFoundError:
+                await run_with_interrupt(asyncio.sleep(5),
+                                         self.cancel_monitor)
