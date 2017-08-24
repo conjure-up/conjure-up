@@ -7,12 +7,7 @@ from subprocess import CalledProcessError
 from urllib.parse import urljoin, urlparse
 
 from pkg_resources import parse_version
-from ubuntui.widgets.input import (
-    PasswordEditor,
-    SelectorHorizontal,
-    StringEditor,
-    YesNo
-)
+from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
 from urwid import Text
 
 from conjureup import utils
@@ -20,11 +15,7 @@ from conjureup.app_config import app
 from conjureup.consts import cloud_types
 from conjureup.juju import get_cloud
 from conjureup.models.credential import CredentialManager
-from conjureup.utils import (
-    arun,
-    get_physical_network_interfaces,
-    is_valid_hostname
-)
+from conjureup.utils import arun, is_valid_hostname
 from conjureup.vsphere import VSphereClient, VSphereInvalidLogin
 
 
