@@ -6,6 +6,10 @@ from urwid import Columns, Pile, Text
 from conjureup.ui.views.base import BaseView
 
 
+class LXDSetupViewError(Exception):
+    pass
+
+
 class LXDSetupView(BaseView):
     title = "LXD Configuration"
 
@@ -20,13 +24,22 @@ class LXDSetupView(BaseView):
                 [pool['name'] for pool in self.devices['storage-pools']]
             )
         }
-        self.lxd_config['network'].set_default(
-            self.lxd_config['network'].group[0].label, True
-        )
 
-        self.lxd_config['storage-pool'].set_default(
-            self.lxd_config['storage-pool'].group[0].label, True
-        )
+        try:
+            self.lxd_config['network'].set_default(
+                self.lxd_config['network'].group[0].label, True
+            )
+
+            self.lxd_config['storage-pool'].set_default(
+                self.lxd_config['storage-pool'].group[0].label, True
+            )
+        except IndexError:
+            raise LXDSetupViewError(
+                "Could not locate any network or storage "
+                "devices to continue. Please make sure you "
+                "have at least 1 network bridge and 1 storage "
+                "pool: see `lxc network list` and `lxc storage "
+                "list`")
         super().__init__(*args, **kwargs)
 
     def build_buttons(self):
