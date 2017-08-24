@@ -1,5 +1,6 @@
 import ipaddress
 
+from conjureup import utils
 from conjureup.app_config import app
 from conjureup.ui.views.lxdsetup import LXDSetupView
 
@@ -21,17 +22,17 @@ class LXDSetupController(common.BaseLXDSetupController):
         app.log.debug(net_info)
         if net_info:
             self.set_state('lxd-network-name', net_info['name'])
-            if net_info['config']:
-                iface = ipaddress.IPv4Interface(
-                    net_info['config']['ipv4.address'])
-                self.set_state('lxd-network', iface.network)
-                self.set_state('lxd-gateway', iface.ip)
-                self.set_state('lxd-network-dhcp-range-start',
-                               iface.ip + 1)
-                # To account for current interface taking 1 ip
-                number_of_hosts = len(list(iface.network.hosts())) - 1
-                self.set_state('lxd-network-dhcp-range-stop',
-                               "{}".format(iface.ip + number_of_hosts))
+            phys_iface_addr = utils.get_physical_network_ipaddr(
+                net_info['name'])
+            iface = ipaddress.IPv4Interface(phys_iface_addr)
+            self.set_state('lxd-network', iface.network)
+            self.set_state('lxd-gateway', iface.ip)
+            self.set_state('lxd-network-dhcp-range-start',
+                           iface.ip + 1)
+            # To account for current interface taking 1 ip
+            number_of_hosts = len(list(iface.network.hosts())) - 1
+            self.set_state('lxd-network-dhcp-range-stop',
+                           "{}".format(iface.ip + number_of_hosts))
         self.set_state('lxd-storage-pool', data['storage-pool'])
         app.log.debug('LXD Info set: (network: {}) '
                       '(gateway: {}) '
