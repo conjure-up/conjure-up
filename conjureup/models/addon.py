@@ -33,7 +33,8 @@ class AddonModel:
         self.metadata = self._read('metadata.yaml')
         self.bundle = self._read('bundle.yaml')
         self.steps = [StepModel.load(step_path)
-                      for step_path in (self.path / 'steps').glob('*.yaml')]
+                      for step_path in
+                      sorted((self.path / 'steps').glob('*.yaml'))]
 
     def _read(self, filename):
         filepath = self.path / filename
