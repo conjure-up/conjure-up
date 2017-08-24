@@ -8,9 +8,9 @@ from ubuntui.ev import EventLoop
 from urwid import ExitMainLoop
 
 from conjureup import utils
-from conjureup.ui.views.lxdsetup import LXDSetupViewError
 from conjureup.app_config import app
 from conjureup.telemetry import track_exception
+from conjureup.ui.views.lxdsetup import LXDSetupViewError
 
 
 class Event(asyncio.Event):
