@@ -18,10 +18,10 @@ class LXDSetupView(BaseView):
         self.cb = cb
         self.lxd_config = {
             'network': SelectorHorizontal(
-                [net['name'] for net in self.devices['networks']]
+                [net for net in self.devices['networks'].keys()]
             ),
             'storage-pool': SelectorHorizontal(
-                [pool['name'] for pool in self.devices['storage-pools']]
+                [pool for pool in self.devices['storage-pools'].keys()]
             )
         }
 
@@ -46,10 +46,10 @@ class LXDSetupView(BaseView):
         return [self.button('SAVE', self.submit)]
 
     def submit(self, result):
-        _formatted_lxd_config = {}
-        for k, v in self.lxd_config.items():
-            _formatted_lxd_config[k] = v.value
-        self.cb(_formatted_lxd_config)
+        network = self.lxd_config['network'].value
+        storage_pool = self.lxd_config['storage-pool'].value
+        self.cb(self.devices['networks'][network],
+                self.devices['storage-pools'][storage_pool])
 
     def build_widget(self):
         rows = [
