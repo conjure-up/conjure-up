@@ -399,7 +399,9 @@ class Localhost(BaseProvider):
         """
         networks = await self.get_networks()
         for net in networks:
-            return net if name == net['name'] else {}
+            if name == net['name']:
+                return net
+        return {}
 
     async def get_storage_pool_info(self, name):
         """ Gets extended storage pool information
