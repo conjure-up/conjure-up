@@ -378,20 +378,25 @@ class Localhost(BaseProvider):
         """ Grabs lxc network bridges from api
         """
         networks = await self.query('networks')
-        bridges = {}
+        bridges = OrderedDict()
         for net in networks:
             net_info = await self.query(net)
             if net_info['type'] == "bridge":
                 bridges[net_info['name']] = net_info
+                if net_info['name'] == 'lxdbr0':
+                    bridges.move_to_end('lxdbr0', last=False)
         return bridges
 
     async def get_storage_pools(self):
         """ Grabs lxc storage pools from api
         """
         pools = await self.query('storage-pools')
-        _pools = {}
+        _pools = OrderedDict()
         for pool in pools:
-            _pools[Path(pool).stem] = await self.query(pool)
+            pool_path = Path(pool)
+            _pools[pool_path.stem] = await self.query(pool)
+            if pool_path.stem == 'default':
+                _pools.move_to_end('default', last=False)
         return _pools
 
     async def is_server_available(self):
