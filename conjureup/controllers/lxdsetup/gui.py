@@ -13,25 +13,18 @@ class LXDSetupControllerError(Exception):
 
 class LXDSetupController(common.BaseLXDSetupController):
     async def get_lxd_devices(self):
-        devices = {
+        self.devices = {
             'networks': await app.provider.get_networks(),
             'storage-pools': await app.provider.get_storage_pools()
         }
 
-        self.view = LXDSetupView(devices, self.finish)
+        self.view = LXDSetupView(self.devices, self.finish)
         self.view.show()
 
-    async def set_lxd_info(self, data):
-        if not (data.get('network', None) or data.get('storage-pool', None)):
-            raise LXDSetupControllerError(
-                "Could not determine a network or storage pool "
-                "to continue. Please make sure you have at least "
-                "1 network bridge and 1 storage pool: see `lxc network list` "
-                "and lxc storage list`. (data: {})".format(data))
-        net_info = await app.provider.get_network_info(data['network'])
-        self.set_state('lxd-network-name', net_info['name'])
+    async def set_lxd_info(self, network, storage_pool):
+        self.set_state('lxd-network-name', network['name'])
         phys_iface_addr = utils.get_physical_network_ipaddr(
-            net_info['name'])
+            network['name'])
         iface = ipaddress.IPv4Interface(phys_iface_addr)
         self.set_state('lxd-network', iface.network)
         self.set_state('lxd-gateway', iface.ip)
@@ -41,18 +34,21 @@ class LXDSetupController(common.BaseLXDSetupController):
         number_of_hosts = len(list(iface.network.hosts())) - 1
         self.set_state('lxd-network-dhcp-range-stop',
                        "{}".format(iface.ip + number_of_hosts))
-        self.set_state('lxd-storage-pool', data['storage-pool'])
-        app.log.debug('LXD Info set: (network: {}) '
+        self.set_state('lxd-storage-pool', storage_pool['name'])
+        app.log.debug('LXD Info set: '
+                      '(name: {}) '
+                      '(network: {}) '
                       '(gateway: {}) '
                       '(dhcp-range-start: {}) '
                       '(dhcp-range-stop: {})'.format(
+                          self.get_state('lxd-network-name'),
                           self.get_state('lxd-network'),
                           self.get_state('lxd-gateway'),
                           self.get_state('lxd-network-dhcp-range-start'),
                           self.get_state('lxd-network-dhcp-range-stop')))
 
-    def finish(self, data):
-        app.loop.create_task(self.set_lxd_info(data))
+    def finish(self, network, storage):
+        app.loop.create_task(self.set_lxd_info(network, storage))
         return self.next_screen()
 
     def render(self):

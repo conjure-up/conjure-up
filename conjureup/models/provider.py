@@ -378,39 +378,21 @@ class Localhost(BaseProvider):
         """ Grabs lxc network bridges from api
         """
         networks = await self.query('networks')
-        bridges = []
+        bridges = {}
         for net in networks:
             net_info = await self.query(net)
             if net_info['type'] == "bridge":
-                bridges.append(net_info)
+                bridges[net_info['name']] = net_info
         return bridges
 
     async def get_storage_pools(self):
         """ Grabs lxc storage pools from api
         """
         pools = await self.query('storage-pools')
-        _pools = []
+        _pools = {}
         for pool in pools:
-            _pools.append(await self.query(pool))
+            _pools[Path(pool).stem] = await self.query(pool)
         return _pools
-
-    async def get_network_info(self, name):
-        """ Gets extended network information for bridge
-        """
-        networks = await self.get_networks()
-        for net in networks:
-            if name == net['name']:
-                return net
-        return {}
-
-    async def get_storage_pool_info(self, name):
-        """ Gets extended storage pool information
-        """
-        pools = await self.get_storage_pools()
-        for pool_path in pools:
-            if name == Path(pool_path).stem:
-                return await self.query(segment=str(pool_path))
-        return {}
 
     async def is_server_available(self):
         """ Waits and checks if LXD server becomes available

@@ -24,6 +24,7 @@ class BaseLXDSetupController:
 
     def __init__(self):
         self.state_key = "conjure-up.{}".format(app.config['spell'])
+        self.devices = {}
 
     def set_state(self, key, value):
         key = "{}.{}".format(self.state_key, key)
