@@ -44,11 +44,13 @@ class DeployController:
         for service in applications:
             units = {}
             view_data[service.service_name] = {'units': units}
+            num_units = service.num_units
             if service.service_name in app.juju.client.applications:
                 juju_app = app.juju.client.applications[service.service_name]
+                num_units = max(service.num_units, len(juju_app.units))
             else:
                 juju_app = None
-            for unit_num in range(service.num_units):
+            for unit_num in range(num_units):
                 if juju_app and len(juju_app.units) > unit_num:
                     unit = juju_app.units[unit_num]
                     name = unit.name
