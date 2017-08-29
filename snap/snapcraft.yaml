@@ -18,18 +18,10 @@ apps:
     aliases: [conjure-down]
   juju:
     command: wrappers/juju
-  redis-server:
-    command: wrappers/redis.daemon.start
-    daemon: simple
   redis-cli:
     command: wrappers/redis-cli
 
 parts:
-  redis:
-    plugin: make
-    source: https://github.com/antirez/redis.git
-    source-tag: 3.2.9
-    make-install-var: PREFIX
   conjure-up:
     source: .
     plugin: python

@@ -15,7 +15,6 @@ import textwrap
 import uuid
 
 import raven
-import redis
 import yaml
 from prettytable import PrettyTable
 from raven.transport.requests import RequestsHTTPTransport
@@ -23,6 +22,7 @@ from termcolor import colored
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 
+from charmhelpers.core import unitdata
 from conjureup import __version__ as VERSION
 from conjureup import charm, consts, controllers, events, juju, utils
 from conjureup.app_config import app
@@ -90,9 +90,6 @@ def parse_options(argv):
                         help='The MAAS node hostname to deploy to. Useful '
                         'for using lower end hardware as the Juju admin '
                         'controller.', metavar='<host>.maas')
-    parser.add_argument('--redis-port', dest='redis_port',
-                        help='Redis port to connect to',
-                        default=6379)
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
     parser.add_argument('--notrack', action='store_true',
@@ -213,18 +210,9 @@ def main():
         os.makedirs(opts.cache_dir)
 
     # Application Config
-    app.state = redis.StrictRedis(host='localhost',
-                                  port=opts.redis_port,
-                                  db=0)
-    # confirm that the Redis connection is working
-    # XXX perhaps we should start the service if not running
-    try:
-        app.state.get('test')
-    except redis.exceptions.ConnectionError:
-        print("")
-        print("  !! Unable to connect to Redis. !!")
-        print("")
-        sys.exit(1)
+    os.environ['UNIT_STATE_DB'] = os.path.join(opts.cache_dir, '.state.db')
+    app.state = unitdata.kv()
+
     app.env = os.environ.copy()
     app.config = {'metadata': None}
     app.argv = opts
