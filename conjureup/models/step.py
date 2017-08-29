@@ -184,7 +184,7 @@ class StepModel:
         result_key = "conjure-up.{}.{}.result".format(app.config['spell'],
                                                       self.name)
         result = app.state.get(result_key)
-        return (result or b'').decode('utf8')
+        return (result or '')
 
 
 class ValidationError(Exception):
