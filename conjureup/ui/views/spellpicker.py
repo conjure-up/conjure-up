@@ -32,7 +32,8 @@ class SpellPickerView(WidgetWrap):
         self.cb = cb
         self.spells = spells
         self.config = self.app.config
-        self.frame = Frame(body=self._build_widget(),
+        self.frame = Frame(header=Padding.center_60(HR()),
+                           body=self._build_widget(),
                            footer=self._build_footer())
 
         self.buttons_pile_selected = False
@@ -97,7 +98,7 @@ class SpellPickerView(WidgetWrap):
     def _build_footer(self):
         self.spell_description = Text("")
         footer_pile = Pile([
-            Padding.line_break(""),
+            Padding.center_60(HR()),
             Padding.center_60(self.spell_description),
             Padding.line_break(""),
             Color.frame_footer(
@@ -109,7 +110,7 @@ class SpellPickerView(WidgetWrap):
         return footer_pile
 
     def _build_widget(self):
-        total_items = [HR()]
+        total_items = []
         prev_cat = None
         for category, spell in self.spells:
             if category == "_unassigned_spells":
@@ -120,7 +121,6 @@ class SpellPickerView(WidgetWrap):
                 total_items.append(Color.label(Text(category)))
                 prev_cat = category
             total_items.append(SpellPickerWidget(spell, self.submit))
-        total_items += [HR()]
 
         self.pile = Pile(total_items)
         return Padding.center_60(Filler(self.pile, valign='top'))
