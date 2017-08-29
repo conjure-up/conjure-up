@@ -97,6 +97,7 @@ class SpellPickerView(WidgetWrap):
     def _build_footer(self):
         self.spell_description = Text("")
         footer_pile = Pile([
+            Padding.line_break(""),
             Padding.center_60(self.spell_description),
             Padding.line_break(""),
             Color.frame_footer(
