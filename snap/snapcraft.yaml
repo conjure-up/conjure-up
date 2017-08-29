@@ -18,8 +18,6 @@ apps:
     aliases: [conjure-down]
   juju:
     command: wrappers/juju
-  redis-cli:
-    command: wrappers/redis-cli
 
 parts:
   conjure-up:

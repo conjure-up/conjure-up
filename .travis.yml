@@ -23,7 +23,6 @@ before_script:
   - sudo usermod -a -G lxd $USER || true
   - sudo ln -s /snap/bin/juju /usr/bin/juju
   - sudo ln -s /snap/bin/lxc /usr/bin/lxc
-  - sudo service redis-server start || true
 script:
   - tox -e py35,flake,isort
   - tox -e conjure-dev

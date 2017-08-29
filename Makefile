@@ -11,12 +11,12 @@ CHANNEL := edge
 .PHONY: sysdeps
 sysdeps:
 	@sudo apt-get update
-	@sudo apt-get -qqyf install jq python3-yaml bsdtar bridge-utils software-properties-common snapcraft python3-dev tox shellcheck build-essential redis-server
+	@sudo apt-get -qqyf install jq python3-yaml bsdtar bridge-utils software-properties-common snapcraft python3-dev tox shellcheck build-essential
 
 travis-sysdeps:
 	@sudo apt-get update -q
 	@sudo apt-get remove -qy lxd lxd-client
-	@sudo apt-get -y install jq bsdtar python3-dev make snapd python-tox redis-server
+	@sudo apt-get -y install jq bsdtar python3-dev make snapd python-tox
 	@sudo snap install juju --classic --edge
 	@sudo snap refresh lxd --edge
 
