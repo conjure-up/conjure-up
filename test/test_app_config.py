@@ -12,6 +12,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from charmhelpers.core import unitdata
+
 from conjureup.app_config import AppConfig
 from conjureup.models.provider import AWS
 

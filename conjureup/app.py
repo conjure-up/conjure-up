@@ -16,13 +16,13 @@ import uuid
 
 import raven
 import yaml
+from charmhelpers.core import unitdata
 from prettytable import PrettyTable
 from raven.transport.requests import RequestsHTTPTransport
 from termcolor import colored
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 
-from charmhelpers.core import unitdata
 from conjureup import __version__ as VERSION
 from conjureup import charm, consts, controllers, events, juju, utils
 from conjureup.app_config import app
