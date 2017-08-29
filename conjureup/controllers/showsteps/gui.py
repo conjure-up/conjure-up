@@ -24,6 +24,9 @@ class ShowStepsController:
         for step in filter(attrgetter('viewable'), steps):
             if not (step.additional_input or step.needs_sudo):
                 continue
+            if step.cloud_whitelist and app.provider.cloud_type \
+               not in step.cloud_whitelist:
+                continue
             await self.show_step(step)
 
         return self.finish()

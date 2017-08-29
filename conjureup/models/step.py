@@ -50,6 +50,7 @@ class StepModel:
         self.viewable = step.get('viewable', False)
         self.needs_sudo = step.get('sudo', False)
         self.additional_input = step.get('additional-input', [])
+        self.cloud_whitelist = step.get('cloud-whitelist', [])
         self.filename = filename
         self.name = name
 
@@ -70,10 +71,11 @@ class StepModel:
             return getattr(StepModel, attr)
 
     def __repr__(self):
-        return "<t: {} d: {} v: {} p:>".format(self.title,
-                                               self.description,
-                                               self.viewable,
-                                               self.filename)
+        return "<t: {} d: {} v: {} c: {} f: {}>".format(self.title,
+                                                        self.description,
+                                                        self.viewable,
+                                                        self.cloud_whitelist,
+                                                        self.filename)
 
     async def run(self, msg_cb, event_name=None):
         # Define STEP_NAME for use in determining where to store
