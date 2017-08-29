@@ -80,7 +80,7 @@ class StepModel:
     async def run(self, msg_cb, event_name=None):
         # Define STEP_NAME for use in determining where to store
         # our step results,
-        #  redis-cli set "conjure-up.$SPELL_NAME.$STEP_NAME.result" "val"
+        #  state set "conjure-up.$SPELL_NAME.$STEP_NAME.result" "val"
         app.env['CONJURE_UP_STEP'] = self.name
 
         step_path = Path(app.config['spell-dir']) / 'steps' / self.filename

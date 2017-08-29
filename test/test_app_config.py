@@ -6,11 +6,12 @@
 
 
 import json
+import os
+import tempfile
 import unittest
 from unittest.mock import MagicMock
 
-import fakeredis
-
+from charmhelpers.core import unitdata
 from conjureup.app_config import AppConfig
 from conjureup.models.provider import AWS
 
@@ -25,7 +26,9 @@ class AppConfigTestCase(unittest.TestCase):
             'provider'
         ]
         self.app = AppConfig()
-        self.app.state = fakeredis.FakeStrictRedis()
+        self.db_file = tempfile.NamedTemporaryFile()
+        os.environ['UNIT_STATE_DB'] = self.db_file.name
+        self.app.state = unitdata.kv()
         self.app.provider = AWS()
         self.app.provider.controller = "fake-tester-controller"
         self.app.provider.model = "fake-tester-model"
@@ -35,15 +38,18 @@ class AppConfigTestCase(unittest.TestCase):
         self.app.juju.client = AsyncMock()
         self.app.log = MagicMock()
 
+    def tearDown(self):
+        self.db_file.close()
+
     @unittest.skip("This requires our app_config.restore/save "
                    "to serialize/deserialize app.provider class")
-    def test_config_redis_save(self):
-        "app_config.test_config_redis_save"
+    def test_config_state_save(self):
+        "app_config.test_config_state_save"
         self.app.juju.authenticated = False
         with test_loop() as loop:
             loop.run_until_complete(self.app.save())
 
-        results = self.app.state.get(self.app._redis_key)
+        results = self.app.state.get(self.app._internal_state_key)
         assert set(json.loads(results.decode('utf8')).keys()) == set(
             self.expected_keys)
 
@@ -56,25 +62,15 @@ class AppConfigTestCase(unittest.TestCase):
 
         assert self.app.juju.client.set_config.called
 
-    def test_config_juju_model_save_removes_redis_cache(self):
-        "app_config.test_config_juju_model_save_remove_redis_cache"
-
-        self.app.state.set(self.app._redis_key, "fake data")
-        self.app.juju.authenticated = True
-        with test_loop() as loop:
-            loop.run_until_complete(self.app.save())
-
-        assert self.app.state.get(self.app._redis_key) is None
-
-    def test_config_redis_restore(self):
-        "app_config.test_config_redis_restore"
+    def test_config_restore(self):
+        "app_config.test_config_restore"
         self.app.juju.authenticated = False
 
         with test_loop() as loop:
             yield self.app.save()
             loop.run_until_complete(self.app.restore())
 
-        results_json = self.app.state.get(self.app._redis_key)
+        results_json = self.app.state.get(self.app._internal_state_key)
         results = json.loads(results_json.decode('utf8'))
 
         assert self.app.app.controller == results['controller']

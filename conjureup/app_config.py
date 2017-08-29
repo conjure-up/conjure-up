@@ -104,7 +104,7 @@ class AppConfig:
     # Reference to asyncio loop so that it can be accessed from other threads
     loop = None
 
-    # Redis State storage endpoint
+    # State storage
     state = None
 
     # Sentry endpoint
@@ -142,8 +142,8 @@ class AppConfig:
         super().__setattr__(name, value)
 
     @property
-    def _redis_key(self):
-        """ Internal, formatted redis namespace key
+    def _internal_state_key(self):
+        """ Internal, formatted namespace key
         """
         return "conjure-up.{}.{}".format(self.provider.cloud_type,
                                          self.config['spell'])
@@ -189,11 +189,11 @@ class AppConfig:
             await self.juju.client.set_config(
                 {'extra-info': self.to_json()})
             self.log.info('State saved in model config')
-            # Check for existing redis key and clear it
-            self.state.delete(self._redis_key)
+            # Check for existing key and clear it
+            self.state.unset(self._internal_state_key)
         else:
-            self.state.set(self._redis_key, self.to_json())
-            self.log.info('State saved in redis')
+            self.state.set(self._internal_state_key, self.to_json())
+            self.log.info('State saved')
 
     async def restore(self):
         self.log.info('Attempting to load conjure-up cached state.')
@@ -205,9 +205,9 @@ class AppConfig:
                         "Found cached state from Juju model, reloading.")
                     self.from_json(result['extra-info'].value)
                     return
-            result = self.state.get(self._redis_key)
+            result = self.state.get(self._internal_state_key)
             if result:
-                self.log.info("Found cached state in Redis, reloading.")
+                self.log.info("Found cached state, reloading.")
                 self.from_json(result.decode('utf8'))
         except json.JSONDecodeError as e:
             # Dont fail fatally if state information is incorrect. Just log it

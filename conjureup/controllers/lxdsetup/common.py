@@ -5,7 +5,7 @@ from conjureup.app_config import app
 class BaseLXDSetupController:
     """ Provides configuration for LXD storage and network
 
-    The following redis keys exist to allow spell/addon authors to make use of
+    The following keys exist to allow spell/addon authors to make use of
     the lxd selections:
 
     conjure-up.<spell>.lxd-network-name
