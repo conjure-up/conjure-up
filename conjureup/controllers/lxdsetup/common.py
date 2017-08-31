@@ -28,12 +28,12 @@ class BaseLXDSetupController:
 
     def set_state(self, key, value):
         key = "{}.{}".format(self.state_key, key)
-        ret = app.state.set(key, value)
+        ret = app.state.set(key, str(value))
         return ret
 
     def get_state(self, key):
         key = "{}.{}".format(self.state_key, key)
-        return app.state.get(key).decode('utf8')
+        return app.state.get(key)
 
     def next_screen(self):
         return controllers.use('controllerpicker').render()
