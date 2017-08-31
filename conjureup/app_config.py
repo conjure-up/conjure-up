@@ -193,6 +193,7 @@ class AppConfig:
             self.state.unset(self._internal_state_key)
         else:
             self.state.set(self._internal_state_key, self.to_json())
+            self.state.flush()
             self.log.info('State saved')
 
     async def restore(self):
