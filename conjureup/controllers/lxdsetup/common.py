@@ -29,6 +29,7 @@ class BaseLXDSetupController:
     def set_state(self, key, value):
         key = "{}.{}".format(self.state_key, key)
         ret = app.state.set(key, str(value))
+        app.state.flush()
         return ret
 
     def get_state(self, key):
