@@ -1,7 +1,5 @@
 name: conjure-up
-version: 2.3-alpha1
-version-script: |
-  echo "$SNAPCRAFT_PROJECT_VERSION-$(date +%Y%m%d.%H%m)"
+version: 2.3.0-rc1
 summary: Package runtime for conjure-up spells
 description: >
    This package provides conjure-up, an interface to installing spells that
@@ -39,6 +37,7 @@ parts:
   spells:
     source: https://github.com/conjure-up/spells.git
     source-type: git
+    source-branch: "2.3.0"
     plugin: dump
     organize:
       "*": spells/
@@ -53,7 +52,7 @@ parts:
   juju:
     source: https://github.com/juju/juju.git
     source-type: git
-    source-branch: "develop"
+    source-tag: "juju-2.2.2"
     source-depth: 1
     plugin: godeps
     go-importpath: github.com/juju/juju
