@@ -15,7 +15,8 @@ class JaaSLoginController:
         self.view = None
 
     def render(self, error=None):
-        app.jaas_controller = 'jaas'
+        if not app.jaas_controller:
+            app.jaas_controller = 'jaas'
         self.render_interstitial()
         app.loop.create_task(self._try_token_auth(error))
 
