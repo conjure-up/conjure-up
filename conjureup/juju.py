@@ -387,7 +387,7 @@ def get_compatible_clouds(cloud_types=None):
     blacklist = set(app.config['metadata'].get('cloud-blacklist', []))
 
     addons_dir = Path(app.config['spell-dir']) / 'addons'
-    for addon in app.addons:
+    for addon in app.selected_addons:
         addon_file = addons_dir / addon / 'metadata.yaml'
         addon_meta = yaml.safe_load(addon_file.read_text())
         whitelist.update(addon_meta.get('cloud-whitelist', []))
