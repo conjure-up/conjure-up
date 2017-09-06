@@ -12,9 +12,10 @@ import unittest
 from unittest.mock import MagicMock
 
 from charmhelpers.core import unitdata
+from ubuntui.widgets.input import StringEditor
 
 from conjureup.app_config import AppConfig
-from conjureup.models.provider import AWS
+from conjureup.models.provider import AWS, Field, Form
 
 from .helpers import AsyncMock, test_loop
 
@@ -53,6 +54,14 @@ class AppConfigTestCase(unittest.TestCase):
         results = self.app.state.get(self.app._internal_state_key)
         assert set(json.loads(results.decode('utf8')).keys()) == set(
             self.expected_keys)
+
+    def test_provider_form_query_key(self):
+        "app_config.provider_form_widget_query_key"
+        self.app.provider.form = Form(
+            [Field(label='test widget',
+                   widget=StringEditor(default='hai2u'),
+                   key='test-key')])
+        assert self.app.provider.form.field('test-key').value == 'hai2u'
 
     def test_config_juju_model_save(self):
         "app_config.test_config_juju_model_save"
