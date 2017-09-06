@@ -280,9 +280,24 @@ class ConfigAppsController:
         for application in self.applications:
             svc_opts[application.service_name] = application.options
 
+        num_units = defaultdict(int)
         for mid, al in self.assignments.items():
-            for svc, _ in al:
+            new_al = []
+            for svc, assignment in al:
+                # svc in the assignments list is out of date,
+                # so get latest from self.applications
+                svc = [a for a in self.applications
+                       if a.service_name == svc.service_name][0]
+                if num_units[svc.service_name] == svc.num_units:
+                    # already have enough units for this application
+                    continue
+                num_units[svc.service_name] += 1
+                new_al.append((svc, assignment))
                 svc.options = svc_opts[svc.service_name]
+            self.assignments[mid] = new_al
+        self.assignments = defaultdict(list, {
+            mid: al for mid, al in self.assignments.items() if al
+        })
 
     async def connect_maas(self):
         """Try to init maas client.
