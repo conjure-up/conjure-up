@@ -95,6 +95,14 @@ class Form:
     def fields(self):
         return self._fields
 
+    def field(self, key):
+        """ Gets widget from field key
+        """
+        for w in self.fields():
+            if key == w.key:
+                return w
+        return None
+
 
 class BaseProvider:
     """ Base provider for all schemas
@@ -186,10 +194,12 @@ class BaseProvider:
                     cloud_name))
 
     async def save_form(self):
-        """ Saves input fields into provider attributes
+        """ Saves input fields into provider attributes, normalizing any keys,
+        currently those with hyphens.
         """
         for f in self.form.fields():
-            setattr(self, f.key, f.widget.value)
+            key = f.key.replace('-', '_')
+            setattr(self, key, f.widget.value)
 
 
 class AWS(BaseProvider):
@@ -198,8 +208,6 @@ class AWS(BaseProvider):
         super().__init__()
         self.auth_type = 'access-key'
         self.cloud_type = cloud_types.AWS
-        self.access_key = None
-        self.secret_key = None
         self.form = Form([Field(label='AWS Access Key',
                                 widget=StringEditor(),
                                 key='access-key'),
@@ -236,8 +244,6 @@ class MAAS(BaseProvider):
         super().__init__()
         self.auth_type = 'oauth1'
         self.cloud_type = cloud_types.MAAS
-        self.endpoint = None
-        self.apikey = None
         self.form = Form(
             [
                 Field(
@@ -266,7 +272,8 @@ class MAAS(BaseProvider):
         """ Validates that a ip address or url is passed.
         If url, check to make sure it ends in the /MAAS endpoint
         """
-        endpoint = self.endpoint.value
+        field = self.form.field('endpoint')
+        endpoint = field.value
         # Is URL?
         if endpoint.startswith('http'):
             url = urlparse(endpoint)
@@ -277,12 +284,12 @@ class MAAS(BaseProvider):
                         "http://maas-server.com:5240/MAAS")
             else:
                 if 'MAAS' not in url.path:
-                    self.endpoint.value = urljoin(url.geturl(), "MAAS")
+                    field.value = urljoin(url.geturl(), "MAAS")
                 return (True, None)
         elif is_valid_hostname(endpoint):
             # Looks like we just have a domain name
-            self.endpoint.value = urljoin("http://{}:5240".format(endpoint),
-                                          "MAAS")
+            field.value = urljoin("http://{}:5240".format(endpoint),
+                                  "MAAS")
             return (True, None)
         else:
             try:
@@ -295,7 +302,7 @@ class MAAS(BaseProvider):
                 else:
                     ip = ip.pop()
                 ipaddress.ip_address(ip)
-                self.endpoint.value = urljoin(
+                field.value = urljoin(
                     "http://{}:{}".format(ip, port), "MAAS")
                 return (True, None)
             except ValueError:
@@ -310,7 +317,8 @@ class MAAS(BaseProvider):
     def _has_correct_api_key(self):
         """ Validates MAAS Api key
         """
-        key = self.apikey.value.split(':')
+        field = self.form.field('maas-oauth')
+        key = (field.value or '').split(':')
         if len(key) != 3:
             return (
                 False,
@@ -427,9 +435,6 @@ class Azure(BaseProvider):
         super().__init__()
         self.auth_type = 'service-principal-secret'
         self.cloud_type = cloud_types.AZURE
-        self.application_id = None
-        self.subscription_id = None
-        self.application_password = None
         self.form = Form([
             Field(
                 label='application id',
@@ -455,10 +460,6 @@ class Google(BaseProvider):
         super().__init__()
         self.auth_type = 'oauth2'
         self.cloud_type = cloud_types.GCE
-        self.private_key = None
-        self.project_id = None
-        self.client_id = None
-        self.client_email = None
         self.form = Form(
             [Field(
                 label='private key',
@@ -489,8 +490,6 @@ class CloudSigma(BaseProvider):
         super().__init__()
         self.auth_type = 'userpass'
         self.cloud_type = cloud_types.CLOUDSIGMA
-        self.username = None
-        self.password = None
         self.form = Form([
             Field(
                 label='username',
@@ -511,10 +510,6 @@ class Joyent(BaseProvider):
         super().__init__()
         self.auth_type = 'userpass'
         self.cloud_type = cloud_types.JOYENT
-        self.sdc_user = None
-        self.sdc_key_id = None
-        self.private_key = None
-        self.algorithm = None
         self.form = Form([
             Field(
                 label='sdc user',
@@ -544,12 +539,6 @@ class OpenStack(BaseProvider):
         super().__init__()
         self.auth_type = 'userpass'
         self.cloud_type = cloud_types.OPENSTACK
-        self.username = None
-        self.password = None
-        self.domain_name = None
-        self.project_domain_name = None
-        self.access_key = None
-        self.secret_key = None
 
         self.form = Form([
             Field(
@@ -589,9 +578,6 @@ class VSphere(BaseProvider):
         super().__init__()
         self.auth_type = 'userpass'
         self.cloud_type = cloud_types.VSPHERE
-        self.endpoint = None
-        self.user = None
-        self.password = None
         self.form = Form([
             Field(
                 label='api endpoint',
@@ -660,9 +646,6 @@ class Oracle(BaseProvider):
         super().__init__()
         self.auth_type = 'userpass'
         self.cloud_type = cloud_types.ORACLE
-        self.identity_domain = None
-        self.password = None
-        self.username = None
         self.form = Form([
             Field(
                 label='identity domain',
