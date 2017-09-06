@@ -260,21 +260,20 @@ class MAAS(BaseProvider):
                     validator=partial(self._has_correct_api_key))
             ]
         )
-        self.endpoint = self.form.field('endpoint')
-        self.maas_oauth = self.form.field('maas-oauth')
 
     async def cloud_config(self):
         return {
             'type': 'maas',
             'auth-types': ['oauth1'],
-            'endpoint': self.endpoint.value
+            'endpoint': self.endpoint
         }
 
     def _has_correct_endpoint(self):
         """ Validates that a ip address or url is passed.
         If url, check to make sure it ends in the /MAAS endpoint
         """
-        endpoint = self.endpoint.value
+        field = self.form.field('endpoint')
+        endpoint = field.value
         # Is URL?
         if endpoint.startswith('http'):
             url = urlparse(endpoint)
@@ -285,12 +284,12 @@ class MAAS(BaseProvider):
                         "http://maas-server.com:5240/MAAS")
             else:
                 if 'MAAS' not in url.path:
-                    self.endpoint.value = urljoin(url.geturl(), "MAAS")
+                    field.value = urljoin(url.geturl(), "MAAS")
                 return (True, None)
         elif is_valid_hostname(endpoint):
             # Looks like we just have a domain name
-            self.endpoint.value = urljoin("http://{}:5240".format(endpoint),
-                                          "MAAS")
+            field.value = urljoin("http://{}:5240".format(endpoint),
+                                  "MAAS")
             return (True, None)
         else:
             try:
@@ -303,7 +302,7 @@ class MAAS(BaseProvider):
                 else:
                     ip = ip.pop()
                 ipaddress.ip_address(ip)
-                self.endpoint.value = urljoin(
+                field.value = urljoin(
                     "http://{}:{}".format(ip, port), "MAAS")
                 return (True, None)
             except ValueError:
@@ -318,7 +317,8 @@ class MAAS(BaseProvider):
     def _has_correct_api_key(self):
         """ Validates MAAS Api key
         """
-        key = self.maas_oauth.value.split(':')
+        field = self.form.field('maas-oauth')
+        key = (field.value or '').split(':')
         if len(key) != 3:
             return (
                 False,
