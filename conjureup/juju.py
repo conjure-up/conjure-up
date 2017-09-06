@@ -269,27 +269,30 @@ def autoload_credentials():
     return True
 
 
-def get_credential(cloud, user=None):
-    """ Get credentials for user
+def get_credential(cloud, cred_name=None):
+    """ Get credential
 
     Arguments:
     cloud: cloud applicable to user credentials
-    user: user listed in the credentials
+    cred_name: name of credential to get, or default
     """
     creds = get_credentials()
     if cloud not in creds.keys():
         return None
 
-    if user and user in creds[cloud].keys():
-        return creds[cloud][user]
-    elif app.provider.controller in creds[cloud].keys():
-        return creds[cloud][app.provider.controller]
+    cred = creds[cloud]
+
+    default_credential = cred.pop('default-credential', None)
+    cred.pop('default-region', None)
+
+    if cred_name is not None and cred_name in cred.keys():
+        return cred[cred_name]
+    elif default_credential is not None and default_credential in cred.keys():
+        return cred[default_credential]
+    elif len(cred) == 1:
+        return cred.values()[0]
     else:
-        try:
-            return next(iter(creds[cloud].values()))
-        except StopIteration:
-            app.log.debug("Unable to pull a credential from: {}".format(cloud))
-            return None
+        return None
 
 
 def get_credentials(secrets=True):

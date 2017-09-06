@@ -388,7 +388,8 @@ class MaasMachine:
 
 
 def setup_maas():
-    maascreds = juju.get_credential(app.provider.cloud)
+    maascreds = juju.get_credential(app.provider.cloud,
+                                    app.provider.credential)
     if not maascreds:
         raise Exception(
             "Could not find MAAS credentials for cloud: {}".format(
@@ -399,7 +400,7 @@ def setup_maas():
             "Found endpoint: {} for cloud: {}".format(
                 endpoint,
                 app.provider.cloud))
-    except LookupError as e:
+    except LookupError:
         app.log.debug("Failed to find cloud in list-clouds, "
                       "attempting to read bootstrap-config")
         bc = juju.get_bootstrap_config(app.provider.controller)
