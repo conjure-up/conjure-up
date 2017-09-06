@@ -23,7 +23,7 @@ class CredentialPickerView(BaseView):
 
     def __init__(self, credentials, default, select_cb, new_cb,
                  *args, **kwargs):
-        if default:
+        if default and default in credentials:
             # sort the default cred to the top
             credentials.remove(default)
             credentials.insert(0, default)
