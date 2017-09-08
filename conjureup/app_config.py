@@ -128,6 +128,9 @@ class AppConfig:
     # All available addons by name
     addons = {}
 
+    # Addon aliases for required spells
+    addons_aliases = {}
+
     # Selected addons
     selected_addons = []
 
