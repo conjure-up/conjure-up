@@ -246,15 +246,22 @@ def snap_version():
 
 
 def send_msg(msg, label, color, attrs=['bold']):
+    if app.argv.color == 'auto':
+        colorized = sys.__stdout__.isatty()
+    elif app.argv.color == 'always':
+        colorized = True
+    else:
+        colorized = False
+
     if app.argv.debug:
         print("[{}] {}".format(label, msg))
-    elif sys.__stdin__.isatty():
+    elif colorized:
         cprint("[{}] ".format(label),
                color,
                attrs=attrs,
-               end="{}\n".format(msg))
+               end="{}\n".format(msg), flush=True)
     else:
-        print("[{}] {}".format(label, msg))
+        print("[{}] {}".format(label, msg), flush=True)
 
 
 def info(msg):
