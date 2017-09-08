@@ -278,8 +278,9 @@ def main():
 
     addons_aliases_index_path = os.path.join(app.config['spells-dir'],
                                              'addons-aliases.yaml')
-    with open(addons_aliases_index_path) as fp:
-        app.addons_aliases = yaml.safe_load(fp.read())
+    if os.path.exists(addons_aliases_index_path):
+        with open(addons_aliases_index_path) as fp:
+            app.addons_aliases = yaml.safe_load(fp.read())
 
     spell_name = spell
     app.endpoint_type = detect_endpoint(opts.spell)
