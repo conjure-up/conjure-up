@@ -198,7 +198,7 @@ def _sentry_report(message=None, exc_info=None, tags=None, **kwargs):
 
         app.sentry.capture(event_type, **kwargs)
     except Exception:
-        app.log.exception('Error reporting error')
+        pass
 
 
 async def can_sudo(password=None):
