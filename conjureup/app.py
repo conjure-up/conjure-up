@@ -139,6 +139,8 @@ async def _start(*args, **kwargs):
 
     if app.headless:
         controllers.use('clouds').render()
+    elif app.selected_addons:
+        controllers.use('clouds').render()
     else:
         controllers.use('addons').render()
 
@@ -274,10 +276,29 @@ def main():
     with open(spells_index_path) as fp:
         app.spells_index = yaml.safe_load(fp.read())
 
+    addons_aliases_index_path = os.path.join(app.config['spells-dir'],
+                                             'addons-aliases.yaml')
+    with open(addons_aliases_index_path) as fp:
+        app.addons_aliases = yaml.safe_load(fp.read())
+
     spell_name = spell
     app.endpoint_type = detect_endpoint(opts.spell)
 
-    if app.endpoint_type == EndpointType.LOCAL_SEARCH:
+    # Check if spell is actually an addon
+    addon = utils.find_addons_matching(opts.spell)
+    if addon:
+        app.log.debug("addon found, setting required spell")
+        utils.set_chosen_spell(addon['spell'],
+                               os.path.join(opts.cache_dir,
+                                            addon['spell']))
+        utils.set_spell_metadata()
+        StepModel.load_spell_steps()
+        AddonModel.load_spell_addons()
+        app.selected_addons = addon['addons']
+        utils.setup_metadata_controller()
+        app.endpoint_type = EndpointType.LOCAL_DIR
+
+    elif app.endpoint_type == EndpointType.LOCAL_SEARCH:
         spells = utils.find_spells_matching(opts.spell)
 
         if len(spells) == 0:

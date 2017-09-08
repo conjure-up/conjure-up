@@ -389,7 +389,6 @@ def setup_metadata_controller():
     spell_dir = Path(app.config['spell-dir'])
     bundle_filename = spell_dir / 'bundle.yaml'
     bundle_custom_filename = spell_dir / 'bundle-custom.yaml'
-
     if bundle_filename.exists():
         # Load bundle data early so we can merge any additional charm options
         bundle_data = yaml.load(bundle_filename.read_text())
@@ -468,6 +467,12 @@ def find_spells():
                 continue
             _spells.append((category, sd))
     return _spells
+
+
+def find_addons_matching(key):
+    if key in app.addons_aliases:
+        return app.addons_aliases[key]
+    return {}
 
 
 def find_spells_matching(key):
