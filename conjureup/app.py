@@ -104,6 +104,10 @@ def parse_options(argv):
                         dest='nosync',
                         help='Opt out of syncing with spells '
                         'registry.')
+    parser.add_argument('--color', type=str, default='auto',
+                        choices=['auto', 'never', 'always'],
+                        help='Whether to use colorized output '
+                             'in headless mode.')
 
     # Channels
     parser.add_argument('--channel', type=str,
