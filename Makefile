@@ -5,7 +5,7 @@ NAME = conjure-up
 CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
-VERSION := 2.4-alpha1
+VERSION := $(shell cat VERSION)
 CHANNEL := edge
 
 .PHONY: sysdeps
@@ -32,8 +32,7 @@ gen-changelog:
 	@github_changelog_generator
 
 update-version:
-	@sed -i -r "s/(^__version__\s=\s)(.*)/\1\"$(VERSION)\"/" conjureup/__init__.py
-	@sed -i -r "s/(^version:\s)(.*)/\1$(VERSION)/" snap/snapcraft.yaml
+	@tools/update-version
 
 snap: sysdeps update-version clean test
 	@snapcraft

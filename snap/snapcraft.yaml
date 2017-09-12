@@ -4,71 +4,80 @@ version-script: |
   echo "$SNAPCRAFT_PROJECT_VERSION-$(date +%Y%m%d.%H%m)"
 summary: Package runtime for conjure-up spells
 description: >
-   This package provides conjure-up, an interface to installing spells that
-   provide the user with an end to end walkthrough experience for installing and
-   using big software.
+  This package provides conjure-up, an interface to installing spells that provide
+  the user with an end to end walkthrough experience for installing and using big
+  software.
 confinement: classic
 grade: stable
-
 apps:
   conjure-up:
     command: wrappers/conjure-up
   conjure-down:
     command: wrappers/conjure-down
-    aliases: [conjure-down]
+    aliases:
+    - conjure-down
   juju:
     command: wrappers/juju
-
 parts:
   conjure-up:
     source: .
     plugin: python
     requirements: requirements.txt
     stage:
-      - -README.md
-      - -debian
-      - -usr/bin/py*
-      - -usr/bin/2to3-3.5
-      - -usr/share/*python*
-      - -usr/lib/python3.5
+    - -README.md
+    - -debian
+    - -usr/bin/py*
+    - -usr/bin/2to3-3.5
+    - -usr/share/*python*
+    - -usr/lib/python3.5
     stage-packages:
-      - bsdtar
-      - jq
-      - pwgen
-    after: [python]
+    - bsdtar
+    - jq
+    - pwgen
+    after:
+    - python
   spells:
     source: https://github.com/conjure-up/spells.git
     source-type: git
     plugin: dump
     organize:
-      "*": spells/
+      '*': spells/
     stage:
-      - -README.md
-    after: [conjure-up]
+    - -README.md
+    after:
+    - conjure-up
   wrappers:
-    plugin: dump
     source: snap/
-    build-packages: [lsb-release]
-    after: [conjure-up]
+    plugin: dump
+    build-packages:
+    - lsb-release
+    after:
+    - conjure-up
   juju:
     source: https://github.com/juju/juju.git
     source-type: git
-    source-branch: "develop"
+    source-branch: develop
     source-depth: 1
     plugin: godeps
     go-importpath: github.com/juju/juju
     go-packages:
-      - github.com/juju/juju/cmd/juju
-      - github.com/juju/juju/cmd/jujud
+    - github.com/juju/juju/cmd/juju
+    - github.com/juju/juju/cmd/jujud
     install: |
       mkdir -p $SNAPCRAFT_PART_INSTALL/bash_completions
       cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
-    build-packages: [lsb-release]
-    after: [conjure-up, go]
+    build-packages:
+    - lsb-release
+    after:
+    - conjure-up
+    - go
   go:
     source-tag: go1.8
   python:
     source: https://www.python.org/ftp/python/3.6.2/Python-3.6.2.tar.xz
     plugin: autotools
-    configflags: [--prefix=/usr]
-    build-packages: [libssl-dev, libsqlite3-dev]
+    configflags:
+    - --prefix=/usr
+    build-packages:
+    - libssl-dev
+    - libsqlite3-dev

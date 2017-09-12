@@ -13,52 +13,13 @@ version here as we will push those patch release version to this same branch.
 
 Prepare the necessary files for a new release.
 
-1. Update `Makefile` and change the `VERSION` variable to reflect the new version.
+1. Update the `VERSION` file to reflect the new version.
 
-```
-#
-# Makefile for conjure
-#
-NAME = conjure-up
-CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-TOPDIR := $(shell basename `pwd`)
-GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
+2. Update the `JUJU_VERSION` file with the branch or tag name to use for Juju.
+   Generally, this should be the latest stable release tag from https://github.com/juju/juju/releases
+   but conjure-up master always tracks the `develop` branch.
 
-# Update the VERSION number here
-VERSION := 2.4.0
-
-CHANNEL := edge
-```
-
-2. Run `make update-version`. This will update all the necessary files to reflect the new version.
-
-3. Prepare `snap/snapcraft.yaml`.
-
-Our build process includes external sources such as Juju and a spells
-repository. conjure-up master branch always tracks Juju's `develop` branch,
-however, when cutting a new release we want to make sure we're using one of
-Juju's stable releases. To determine this go to https://github.com/juju/juju/releases and pick the
-latest release (2.2.3 at the time of this writing).
-
-Once a release is selected update `snap/snapcraft.yaml` to reflect that:
-
-```
-  juju:
-    source: https://github.com/juju/juju.git
-    source-type: git
-    source-tag: "juju-2.2.3"
-    source-depth: 1
-    plugin: godeps
-    go-importpath: github.com/juju/juju
-    go-packages:
-      - github.com/juju/juju/cmd/juju
-      - github.com/juju/juju/cmd/jujud
-    install: |
-      mkdir -p $SNAPCRAFT_PART_INSTALL/bash_completions
-      cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
-    build-packages: [lsb-release]
-    after: [conjure-up, go]
-```
+3. Run `make update-version`. This will update all the necessary files to reflect the new versions.
 
 ### Tagging
 
@@ -103,9 +64,9 @@ for the rest of the world to consume.
 For patch release the above applies with the following differences.
 
 1. Code is cherry picked from master into the release branch.
-2. The `Makefile` version should reflect the next patch release (ie 2.4.1)
-3. `make update-version` to reflect the patch version change
-4. Update Juju version in `snap/snapcraft.yaml` if a new stable release is available.
+2. The `VERSION` file should reflect the next patch release (ie 2.4.1)
+3. Update `JUJU_VERSION` file if a new stable release is available.
+4. `make update-version` to reflect the patch version change
 5. Apply a git tag `git tag 2.4.1`
 6. Then push to Launchpad release branch `git push lp 2.4`
 

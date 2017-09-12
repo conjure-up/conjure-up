@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+# -*- mode: python; -*-
+#
+# version - Updates version string in snapcraft.yaml and __init__.py
+#
+# Copyright 2014 Canonical, Ltd.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This package is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+import yaml
+from pathlib import Path
+from yaml.events import MappingStartEvent, MappingEndEvent
+from yaml.nodes import MappingNode
+from yaml.serializer import Serializer
+
+
+VERSION = Path('VERSION').read_text().strip('\n')
+JUJU_VERSION = Path('JUJU_VERSION').read_text().strip('\n')
+
+
+def update_init():
+    init_file = Path('conjureup/__init__.py')
+    init_file.write_text('__version__ = "{}"\n'.format(VERSION))
+
+
+def update_snapcraft():
+    snapcraft_file = Path('snap/snapcraft.yaml')
+    snapcraft = yaml.safe_load(snapcraft_file.read_text())
+    juju = snapcraft['parts']['juju']
+    juju.pop('source-branch', None)
+    juju.pop('source-tag', None)
+    juju['source-branch'] = JUJU_VERSION
+    snapcraft['version'] = VERSION
+    yaml.add_representer(str, str_presenter)
+    snapcraft_file.write_text(yaml.dump(snapcraft,
+                                        Dumper=OrderedDumper,
+                                        default_flow_style=False,
+                                        indent=2))
+
+
+class OrderedSerializer(Serializer):
+    """
+    Try to keep a mostly stable order for the YAML keys so
+    that we don't get spurious changes in the git diff.
+    """
+    KEY_ORDER = [
+        'name',
+        'version',
+        'version-script',
+        'summary',
+        'description',
+        'confinement',
+        'grade',
+        'apps',
+        'conjure-up',
+        'command',
+        'conjure-down',
+        'aliases',
+        'spells',
+        'wrappers',
+        'juju',
+        'parts',
+        'source',
+        'source-type',
+        'source-branch',
+        'source-tag',
+        'source-depth',
+        'plugin',
+        'organize',
+        'requirements',
+        'stage',
+        'stage-packages',
+        'configflags',
+        'go',
+        'go-importpath',
+        'go-packages',
+        'install',
+        'python',
+        'build-packages',
+        'after',
+    ]
+
+    def serialize_node(self, node, parent, index):
+        if node not in self.serialized_nodes and isinstance(node, MappingNode):
+            alias = self.anchors[node]
+            self.serialized_nodes[node] = True
+            self.descend_resolver(parent, index)
+
+            implicit = (node.tag == self.resolve(MappingNode,
+                                                 node.value,
+                                                 True))
+            self.emit(MappingStartEvent(alias, node.tag, implicit,
+                                        flow_style=node.flow_style))
+
+            def key_func(e):
+                tag = e[0].value
+                if tag in self.KEY_ORDER:
+                    return self.KEY_ORDER.index(tag)
+                else:
+                    return 99999
+
+            for key, value in sorted(node.value, key=key_func):
+                self.serialize_node(key, node, None)
+                self.serialize_node(value, node, key)
+            self.emit(MappingEndEvent())
+        else:
+            return super().serialize_node(node, parent, index)
+
+
+class OrderedDumper(yaml.Dumper, OrderedSerializer):
+    pass
+
+
+def str_presenter(dumper, data):
+    """
+    Represent multiline and long strings as blocks.
+    """
+    if any(len(line) > 79 for line in data.splitlines()):
+        return dumper.represent_scalar('tag:yaml.org,2002:str', data,
+                                       style='>')
+    if '\n' in data:
+        return dumper.represent_scalar('tag:yaml.org,2002:str', data,
+                                       style='|')
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data)
+
+
+if __name__ == '__main__':
+    update_init()
+    update_snapcraft()
