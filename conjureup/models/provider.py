@@ -389,6 +389,10 @@ class Localhost(BaseProvider):
         bridges = OrderedDict()
         for net in networks:
             net_info = await self.query(net)
+            if 'config' in net_info and 'ipv6.address' in net_info['config']:
+                # Juju doesn't support ipv6
+                if net_info['config']['ipv6.address'] != 'none':
+                    continue
             if net_info['type'] == "bridge":
                 bridges[net_info['name']] = net_info
                 if net_info['name'] == 'lxdbr0':
