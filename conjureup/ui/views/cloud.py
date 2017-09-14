@@ -143,9 +143,14 @@ class CloudView(WidgetWrap):
                         Color.info_context(
                             Padding.center_90(
                                 Text(
-                                    "LXD not found, please install with "
-                                    "`sudo snap install lxd && lxd init` "
-                                    "and wait for this message to disappear."))
+                                    "LXD not found, please install and wait "
+                                    "for this message to disappear:\n\n"
+                                    "  $ sudo snap install lxd\n"
+                                    "  $ /snap/bin/lxd init --auto\n"
+                                    "  $ /snap/bin/lxc network create lxdbr0 "
+                                    "ipv4.address=auto ipv4.nat=true "
+                                    "ipv6.address=none ipv6.nat=false "
+                                ))
                         )
                     )
                 else:
