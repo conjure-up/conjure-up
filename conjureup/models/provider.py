@@ -443,7 +443,7 @@ class Azure(BaseProvider):
             Field(
                 label='application id',
                 widget=StringEditor(),
-                key='appnlication-id'
+                key='application-id'
             ),
             Field(
                 label='subscription id',
