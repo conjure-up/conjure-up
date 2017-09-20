@@ -25,15 +25,15 @@ class LXDSetupController(common.BaseLXDSetupController):
         self.set_state('lxd-network-name', network['name'])
         phys_iface_addr = utils.get_physical_network_ipaddr(
             network['name'])
-        iface = ipaddress.IPv4Interface(phys_iface_addr)
+        iface = ipaddress.IPv4Interface("{}/24".format(phys_iface_addr))
         self.set_state('lxd-network', iface.network)
         self.set_state('lxd-gateway', iface.ip)
         self.set_state('lxd-network-dhcp-range-start',
                        iface.ip + 1)
-        # We already know the gateway is x.x.x.1,
-        # subtract 3 puts us at x.x.x.254
+        # To account for current interface taking 1 ip
+        number_of_hosts = len(list(iface.network.hosts())) - 1
         self.set_state('lxd-network-dhcp-range-stop',
-                       "{}".format(iface.ip - 3))
+                       "{}".format(iface.ip + number_of_hosts))
         self.set_state('lxd-storage-pool', storage_pool['name'])
         app.log.debug('LXD Info set: '
                       '(name: {}) '
