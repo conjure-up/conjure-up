@@ -35,7 +35,6 @@ class BaseBootstrapController:
         events.Bootstrapped.set()
 
     async def do_bootstrap(self):
-        await self.pre_bootstrap()
         self.emit('Bootstrapping Juju controller.')
         track_event("Juju Bootstrap", "Started", "")
         cloud_with_region = app.provider.cloud
@@ -60,20 +59,7 @@ class BaseBootstrapController:
         track_event("Juju Bootstrap", "Done", "")
 
         await juju.login()  # login to the newly created (default) model
-
-        step = StepModel({},
-                         filename='00_post-bootstrap',
-                         name='post-bootstrap')
-        await step.run(self.msg_cb, 'Juju Post-Bootstrap')
         events.Bootstrapped.set()
-
-    async def pre_bootstrap(self):
-        """ runs pre bootstrap script if exists
-        """
-        step = StepModel({},
-                         filename='00_pre-bootstrap',
-                         name='pre-bootstrap')
-        await step.run(self.msg_cb)
 
     def emit(self, msg):
         app.log.info(msg)
