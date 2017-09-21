@@ -2,7 +2,6 @@ from pathlib import Path
 
 from conjureup import events, juju
 from conjureup.app_config import app
-from conjureup.models.step import StepModel
 from conjureup.telemetry import track_event
 
 
