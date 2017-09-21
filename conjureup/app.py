@@ -253,7 +253,7 @@ def main():
     app.config['spells-dir'] = spells_dir
     spells_index_path = os.path.join(app.config['spells-dir'],
                                      'spells-index.yaml')
-    spells_registry_branch = os.getenv('CONJUREUP_REGISTRY_BRANCH', 'stable')
+    spells_registry_branch = os.getenv('CONJUREUP_REGISTRY_BRANCH', 'master')
 
     if not app.argv.nosync:
         if not os.path.exists(spells_dir):
