@@ -20,9 +20,6 @@ class DeployCommonDoDeployTestCase(unittest.TestCase):
         async def dummy():
             pass
 
-        self.pre_deploy_patcher = patch(
-            'conjureup.controllers.deploy.common.pre_deploy')
-        self.mock_pre_deploy = self.pre_deploy_patcher.start()
         self.app_patcher = patch(
             'conjureup.controllers.deploy.common.app')
         self.mock_app = self.app_patcher.start()
@@ -33,13 +30,11 @@ class DeployCommonDoDeployTestCase(unittest.TestCase):
             'conjureup.controllers.deploy.common.juju')
         self.mock_juju = self.juju_patcher.start()
 
-        self.mock_pre_deploy.return_value = dummy()
         self.mock_juju.add_machines.return_value = dummy()
         self.mock_juju.deploy_service.return_value = dummy()
         self.mock_juju.set_relations.return_value = dummy()
 
     def tearDown(self):
-        self.pre_deploy_patcher.stop()
         self.app_patcher.stop()
         self.events_app_patcher.stop()
         self.juju_patcher.stop()
@@ -59,7 +54,6 @@ class DeployCommonDoDeployTestCase(unittest.TestCase):
             with patch('conjureup.events.ModelConnected', new_event):
                 loop.run_until_complete(common.do_deploy(msg_cb))
 
-        assert self.mock_pre_deploy.called
         assert self.mock_juju.add_machines.called
         assert self.mock_juju.deploy_service.called
         assert self.mock_juju.set_relations.called

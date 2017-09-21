@@ -29,9 +29,6 @@ class StepModel:
         if not (step_ex_path / 'metadata.yaml').is_file():
             raise ValidationError(
                 'Step {} has no implementation'.format(step_name))
-        # elif not os.access(str(step_ex_path), os.X_OK):
-        #     raise ValidationError(
-        #         'Step {} is not executable'.format(step_name))
         step_metadata = yaml.load(
             (step_meta_path / 'metadata.yaml').read_text())
         step = StepModel(step_metadata, step_name)
@@ -108,6 +105,12 @@ class StepModel:
         if not step_path.is_file():
             return
 
+        if not os.access(str(step_path), os.X_OK):
+            app.log.error(
+                'Unable to run step {}, it is not executable'.format(
+                    step_path.stem))
+            return
+
         step_path = str(step_path)
 
         msg = "Running step: {}.".format(self.name)
@@ -179,7 +182,7 @@ class StepModel:
                 'out_log_tail': out_log[-400:],
                 'err_log_tail': err_log[-400:],
             }})
-            raise Exception("Failure in step {}".format(self.filename))
+            raise Exception("Failure in step {}".format(self.name))
 
         # special case for 00_deploy-done to report masked
         # charm hook failures that were retried automatically
