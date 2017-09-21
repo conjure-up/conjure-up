@@ -14,7 +14,10 @@ async def do_deploy(msg_cb):
     applications = sorted(app.metadata_controller.bundle.services,
                           key=attrgetter('service_name'))
 
-    await pre_deploy(msg_cb=msg_cb)
+    step = StepModel({}, name='before-deploy')
+    await step.before_deploy(msg_cb=msg_cb)
+    events.PreDeployComplete.set()
+
     machine_map = await juju.add_machines(applications,
                                           machines,
                                           msg_cb=msg_cb)
@@ -42,17 +45,6 @@ async def do_deploy(msg_cb):
                                         msg_cb=msg_cb))
     await asyncio.gather(*tasks)
     events.DeploymentComplete.set()
-
-
-async def pre_deploy(msg_cb):
-    """ runs pre deploy script if exists
-    """
-    await events.ModelConnected.wait()
-    step = StepModel({},
-                     filename='00_pre-deploy',
-                     name='pre-deploy')
-    await step.run(msg_cb)
-    events.PreDeployComplete.set()
 
 
 async def wait_for_applications(msg_cb):

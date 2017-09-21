@@ -18,7 +18,7 @@ class StepModel:
     def load_spell_steps(cls):
         steps_dir = Path(app.config['spell-dir']) / 'steps'
         app.steps = []
-        for step_meta_path in sorted(steps_dir.glob('step-*.yaml')):
+        for step_meta_path in sorted(steps_dir.glob('*')):
             step = StepModel.load(step_meta_path)
             app.steps.append(step)
 
@@ -26,14 +26,15 @@ class StepModel:
     def load(cls, step_meta_path):
         step_name = step_meta_path.stem
         step_ex_path = step_meta_path.parent / step_name
-        if not step_ex_path.is_file():
+        if not (step_ex_path / 'metadata.yaml').is_file():
             raise ValidationError(
                 'Step {} has no implementation'.format(step_name))
-        elif not os.access(str(step_ex_path), os.X_OK):
-            raise ValidationError(
-                'Step {} is not executable'.format(step_name))
-        step_metadata = yaml.load(step_meta_path.read_text())
-        step = StepModel(step_metadata, str(step_ex_path), step_name)
+        # elif not os.access(str(step_ex_path), os.X_OK):
+        #     raise ValidationError(
+        #         'Step {} is not executable'.format(step_name))
+        step_metadata = yaml.load(
+            (step_meta_path / 'metadata.yaml').read_text())
+        step = StepModel(step_metadata, step_name)
         step_data = app.steps_data.get(step.name, {})
         for field in step.additional_input:
             key = field['key']
@@ -43,7 +44,7 @@ class StepModel:
         app.steps_data[step.name] = step_data
         return step
 
-    def __init__(self, step, filename, name):
+    def __init__(self, step, name):
         self.title = step.get('title', '')
         self.description = step.get('description', '')
         self.result = ''
@@ -51,8 +52,27 @@ class StepModel:
         self.needs_sudo = step.get('sudo', False)
         self.additional_input = step.get('additional-input', [])
         self.cloud_whitelist = step.get('cloud-whitelist', [])
-        self.filename = filename
         self.name = name
+
+    async def validate_input(self, msg_cb):
+        """ validate-input phase
+        """
+        return await self.run('validate-input', msg_cb)
+
+    async def after_input(self, msg_cb):
+        """ after-input phase
+        """
+        return await self.run('after-input', msg_cb)
+
+    async def before_deploy(self, msg_cb):
+        """ before-deploy phase
+        """
+        return await self.run('before-deploy', msg_cb)
+
+    async def after_deploy(self, msg_cb):
+        """ after-deploy phase
+        """
+        return await self.run('after-deploy', msg_cb)
 
     def __getattr__(self, attr):
         """
@@ -77,13 +97,13 @@ class StepModel:
                                                         self.cloud_whitelist,
                                                         self.filename)
 
-    async def run(self, msg_cb, event_name=None):
+    async def run(self, phase, msg_cb, event_name=None):
         # Define STEP_NAME for use in determining where to store
         # our step results,
         #  state set "conjure-up.$SPELL_NAME.$STEP_NAME.result" "val"
         app.env['CONJURE_UP_STEP'] = self.name
 
-        step_path = Path(app.config['spell-dir']) / 'steps' / self.filename
+        step_path = Path(app.config['spell-dir']) / 'steps' / self.name / phase
 
         if not step_path.is_file():
             return
