@@ -61,10 +61,7 @@ async def wait_for_applications(msg_cb):
     app.log.info(msg)
     msg_cb(msg)
 
-    step = StepModel({'title': 'Deployment Watcher'},
-                     filename='00_deploy-done',
-                     name='00_deploy-done')
-    await step.run(msg_cb)
+    await juju.wait_for_deployment()
 
     events.ModelSettled.set()
     msg = 'Model settled.'

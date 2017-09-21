@@ -878,3 +878,18 @@ def version():
         return out.pop()
     else:
         return out
+
+
+async def wait_for_deployment(retries=5):
+    """ Waits for all deployed applications to settle
+    """
+    if 'CONJURE_UP_MODE' in app.env and app.env['CONJURE_UP_MODE'] == "test":
+        retries = 0
+
+    cmd = ['juju', 'wait', "-r{}".format(retries),
+           "-vwm", "{}:{}".format(app.provider.controller,
+                                  app.provider.model)]
+    ret, _, err = await utils.arun(cmd, env=app.env)
+    if ret != 0:
+        app.log.error(err.decode('utf8'))
+        raise Exception("Some applications failed to start successfully.")
