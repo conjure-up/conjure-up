@@ -41,6 +41,8 @@ class RunStepsView(BaseView):
         ]
         steps = app.steps + AddonModel.selected_addons_steps()
         for step in steps:
+            if not step.has_after_deploy:
+                continue
             widget = StepResult(step)
             self.widgets[step.name] = widget
             rows.extend([

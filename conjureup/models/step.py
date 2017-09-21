@@ -9,6 +9,7 @@ import yaml
 
 from conjureup import juju
 from conjureup.app_config import app
+from conjureup.consts import PHASES
 from conjureup.telemetry import track_event
 from conjureup.utils import SudoError, can_sudo, is_linux, sentry_report
 
@@ -51,25 +52,44 @@ class StepModel:
         self.cloud_whitelist = step.get('cloud-whitelist', [])
         self.name = name
 
+    def _build_phase_path(self, phase):
+        return Path(app.config['spell-dir']) / 'steps' / self.name / phase
+
+    @property
+    def has_validate_input(self):
+        return self._build_phase_path(PHASES.VALIDATE_INPUT).is_file()
+
+    @property
+    def has_after_input(self):
+        return self._build_phase_path(PHASES.AFTER_INPUT).is_file()
+
+    @property
+    def has_before_deploy(self):
+        return self._build_phase_path(PHASES.BEFORE_DEPLOY).is_file()
+
+    @property
+    def has_after_deploy(self):
+        return self._build_phase_path(PHASES.AFTER_DEPLOY).is_file()
+
     async def validate_input(self, msg_cb):
         """ validate-input phase
         """
-        return await self.run('validate-input', msg_cb)
+        return await self.run(PHASES.VALIDATE_INPUT, msg_cb)
 
     async def after_input(self, msg_cb):
         """ after-input phase
         """
-        return await self.run('after-input', msg_cb)
+        return await self.run(PHASES.AFTER_INPUT, msg_cb)
 
     async def before_deploy(self, msg_cb):
         """ before-deploy phase
         """
-        return await self.run('before-deploy', msg_cb)
+        return await self.run(PHASES.BEFORE_DEPLOY, msg_cb)
 
     async def after_deploy(self, msg_cb):
         """ after-deploy phase
         """
-        return await self.run('after-deploy', msg_cb)
+        return await self.run(PHASES.AFTER_DEPLOY, msg_cb)
 
     def __getattr__(self, attr):
         """
@@ -100,7 +120,7 @@ class StepModel:
         #  state set "conjure-up.$SPELL_NAME.$STEP_NAME.result" "val"
         app.env['CONJURE_UP_STEP'] = self.name
 
-        step_path = Path(app.config['spell-dir']) / 'steps' / self.name / phase
+        step_path = self._build_phase_path(phase)
 
         if not step_path.is_file():
             return

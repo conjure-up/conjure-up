@@ -19,3 +19,10 @@ class cloud_types:
     LOCALHOST = 'localhost'
     LOCAL = 'localhost'
     LXD = 'localhost'
+
+
+class PHASES:
+    VALIDATE_INPUT = 'validate-input'
+    AFTER_INPUT = 'after-input'
+    BEFORE_DEPLOY = 'before-deploy'
+    AFTER_DEPLOY = 'after-deploy'

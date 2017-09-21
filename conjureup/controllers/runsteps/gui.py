@@ -15,6 +15,8 @@ class RunStepsController:
     async def run_steps(self, view):
         steps = app.steps + AddonModel.selected_addons_steps()
         for step in steps:
+            if not step.has_after_deploy:
+                continue
             view.mark_step_running(step)
             step.result = await step.after_deploy(app.ui.set_footer)
             view.mark_step_complete(step)
