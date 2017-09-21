@@ -20,7 +20,9 @@ class RunStepsController:
         # but let's go ahead and be future-proof
         steps = app.steps + AddonModel.selected_addons_steps()
         for step in steps:
-            step.result = await step.run(utils.info)
+            if not step.has_after_deploy:
+                continue
+            step.result = await step.after_deploy(utils.info)
 
         common.save_step_results()
         self.show_summary()
