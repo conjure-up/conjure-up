@@ -16,7 +16,7 @@ class RunStepsController:
         steps = app.steps + AddonModel.selected_addons_steps()
         for step in steps:
             view.mark_step_running(step)
-            step.result = await step.run(app.ui.set_footer)
+            step.result = await step.after_deploy(app.ui.set_footer)
             view.mark_step_complete(step)
         common.save_step_results()
         events.PostDeployComplete.set()

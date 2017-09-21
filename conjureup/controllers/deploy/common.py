@@ -3,7 +3,6 @@ from operator import attrgetter
 
 from conjureup import events, juju
 from conjureup.app_config import app
-from conjureup.models.step import StepModel
 
 
 async def do_deploy(msg_cb):
@@ -14,8 +13,8 @@ async def do_deploy(msg_cb):
     applications = sorted(app.metadata_controller.bundle.services,
                           key=attrgetter('service_name'))
 
-    step = StepModel({}, name='before-deploy')
-    await step.before_deploy(msg_cb=msg_cb)
+    for step in app.steps:
+        await step.before_deploy(msg_cb=msg_cb)
     events.PreDeployComplete.set()
 
     machine_map = await juju.add_machines(applications,
