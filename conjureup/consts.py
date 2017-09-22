@@ -6,7 +6,7 @@ JAAS_DOMAIN = 'jimm.jujucharms.com'
 JAAS_ENDPOINT = JAAS_DOMAIN + ':443'
 
 
-class cloud_types(Enum):
+class cloud_types:
     AWS = 'ec2'
     MAAS = 'maas'
     AZURE = 'azure'
