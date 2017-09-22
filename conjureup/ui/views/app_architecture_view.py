@@ -86,7 +86,7 @@ class AppArchitectureView(WidgetWrap):
 
     def build_widgets(self):
         cloud_type = get_cloud_types_by_name()[app.provider.cloud]
-        controller_is_maas = cloud_type == cloud_types.MAAS
+        controller_is_maas = cloud_types(cloud_type) == cloud_types.MAAS
         if controller_is_maas:
             extra = (" Press enter on a machine ID to pin it to "
                      "a specific MAAS node.")

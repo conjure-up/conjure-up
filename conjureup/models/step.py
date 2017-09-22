@@ -31,10 +31,13 @@ class StepModel:
         step_ex_path = step_meta_path.parent / step_name
         if not (step_ex_path / 'metadata.yaml').is_file():
             raise ValidationError(
-                'Step {} has no implementation'.format(step_name))
+                'Step {} has no metadata'.format(step_name))
         step_metadata = yaml.load(
             (step_meta_path / 'metadata.yaml').read_text())
         step = StepModel(step_metadata, step_name)
+        if not any(step._has_phase(phase) for phase in PHASES):
+            raise ValidationError(
+                'Step {} has no implementation'.format(step_name))
         step_data = app.steps_data.get(step.name, {})
         for field in step.additional_input:
             key = field['key']
@@ -55,23 +58,26 @@ class StepModel:
         self.name = name
 
     def _build_phase_path(self, phase):
-        return Path(app.config['spell-dir']) / 'steps' / self.name / phase
+        return Path(app.config['spell-dir']) / 'steps' / self.name / phase.value
+
+    def _has_phase(self, phase):
+        return self._build_phase_path(phase).is_file()
 
     @property
     def has_validate_input(self):
-        return self._build_phase_path(PHASES.VALIDATE_INPUT).is_file()
+        return self._has_phase(PHASES.VALIDATE_INPUT)
 
     @property
     def has_after_input(self):
-        return self._build_phase_path(PHASES.AFTER_INPUT).is_file()
+        return self._has_phase(PHASES.AFTER_INPUT)
 
     @property
     def has_before_deploy(self):
-        return self._build_phase_path(PHASES.BEFORE_DEPLOY).is_file()
+        return self._has_phase(PHASES.BEFORE_DEPLOY)
 
     @property
     def has_after_deploy(self):
-        return self._build_phase_path(PHASES.AFTER_DEPLOY).is_file()
+        return self._has_phase(PHASES.AFTER_DEPLOY)
 
     async def validate_input(self, msg_cb):
         """ validate-input phase

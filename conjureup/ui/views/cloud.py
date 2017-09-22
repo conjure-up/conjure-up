@@ -80,7 +80,7 @@ class CloudView(WidgetWrap):
         """
         idx = self._get_localhost_widget_idx()
         widget = Color.body(
-            menu_btn(label=cloud_types.LOCALHOST,
+            menu_btn(label=cloud_types.LOCALHOST.value,
                      on_press=self.submit),
             focus_map='menu_button focus'
         )
@@ -134,7 +134,7 @@ class CloudView(WidgetWrap):
                     self._add_item(
                         Color.info_context(
                             menu_btn(
-                                label=cloud_types.LOCALHOST,
+                                label=cloud_types.LOCALHOST.value,
                                 on_press=None),
                             focus_map='disabled_button'
                         )
