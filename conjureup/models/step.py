@@ -19,8 +19,10 @@ class StepModel:
     def load_spell_steps(cls):
         steps_dir = Path(app.config['spell-dir']) / 'steps'
         app.steps = []
-        for step_meta_path in sorted(steps_dir.glob('*')):
-            step = StepModel.load(step_meta_path)
+        for step_dir in sorted(steps_dir.glob('*')):
+            if not step_dir.is_dir():
+                continue
+            step = StepModel.load(step_dir)
             app.steps.append(step)
 
     @classmethod
