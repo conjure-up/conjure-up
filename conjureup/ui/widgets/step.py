@@ -6,6 +6,7 @@ from ubuntui.widgets.hr import HR
 from ubuntui.widgets.input import (
     IntegerEditor,
     PasswordEditor,
+    SelectorHorizontal,
     StringEditor,
     YesNo
 )
@@ -20,6 +21,7 @@ class StepForm(WidgetWrap):
         'password': PasswordEditor,
         'boolean': YesNo,
         'integer': IntegerEditor,
+        'choice': SelectorHorizontal
     }
 
     def __init__(self, app, step_model):
@@ -147,7 +149,12 @@ class StepForm(WidgetWrap):
             else:
                 input_type = self.INPUT_TYPES[i['type']]
                 value = self.app.steps_data[self.model.name][key]
-                field = StepField(key, label, input_type(default=value))
+                if input_type == SelectorHorizontal:
+                    select_w = input_type([choice for choice in i['choices']])
+                    select_w.set_default(i['default'], True)
+                    field = StepField(key, label, select_w)
+                else:
+                    field = StepField(key, label, input_type(default=value))
                 self.fields.append(field)
             column_input = [
                 ('weight', 0.5, Padding.left(field.label_widget, left=5))
