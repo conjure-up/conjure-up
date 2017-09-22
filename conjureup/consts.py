@@ -1,10 +1,12 @@
+from enum import Enum
+
 UNSPECIFIED_SPELL = '_unspecified_spell'
 JAAS_CLOUDS = {'ec2', 'azure', 'gce'}
 JAAS_DOMAIN = 'jimm.jujucharms.com'
 JAAS_ENDPOINT = JAAS_DOMAIN + ':443'
 
 
-class cloud_types:
+class cloud_types(Enum):
     AWS = 'ec2'
     MAAS = 'maas'
     AZURE = 'azure'
@@ -21,7 +23,7 @@ class cloud_types:
     LXD = 'localhost'
 
 
-class PHASES:
+class PHASES(Enum):
     VALIDATE_INPUT = 'validate-input'
     AFTER_INPUT = 'after-input'
     BEFORE_DEPLOY = 'before-deploy'
