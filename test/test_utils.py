@@ -96,3 +96,21 @@ class UtilsTestCase(unittest.TestCase):
                 'headless': False,
                 'juju_version': '2.j'
             })
+
+    def test_subtract_dicts(self):
+        d = {
+            'foo': {
+                'bar': 1,
+                'baz': 2,
+            },
+            'qux': [1, 2],
+        }
+        d_orig = utils.merge_dicts(d, {})  # make deep copy
+        # full key delete
+        self.assertEqual(utils.subtract_dicts(d, {'foo': None}),
+                         {'qux': [1, 2]})
+        # ensure no side-effects
+        self.assertEqual(d, d_orig)
+        # sub-key delete
+        self.assertEqual(utils.subtract_dicts(d, {'foo': {'baz': None}}),
+                         {'foo': {'bar': 1}, 'qux': [1, 2]})

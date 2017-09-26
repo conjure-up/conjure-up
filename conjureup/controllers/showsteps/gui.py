@@ -1,6 +1,6 @@
 from operator import attrgetter
 
-from conjureup import controllers
+from conjureup import controllers, utils
 from conjureup.app_config import app
 from conjureup.models.addon import AddonModel
 from conjureup.ui.views.steps import ShowStepsView
@@ -39,8 +39,13 @@ class ShowStepsController:
             app.sudo_pass = step_widget.sudo_input.value
         for field in step_widget.fields:
             app.steps_data[step.name][field.key] = field.input.value
+        await step.after_input(app.ui.set_footer)
 
     def finish(self):
+        steps = app.steps + AddonModel.selected_addons_steps()
+        updates = any(step.bundle_add or step.bundle_remove for step in steps)
+        if updates:
+            utils.setup_metadata_controller()
         return controllers.use('configapps').render()
 
 

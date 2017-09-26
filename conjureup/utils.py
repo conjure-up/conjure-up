@@ -13,6 +13,7 @@ import sys
 import uuid
 from collections import Mapping
 from contextlib import contextmanager
+from itertools import chain
 from functools import partial
 from pathlib import Path
 from subprocess import PIPE, Popen, check_call, check_output
@@ -313,14 +314,62 @@ def merge_dicts(*dicts):
         values = [d[key] for d in dicts if key in d]
         # which ones are mapping types? (aka dict)
         maps = [value for value in values if isinstance(value, Mapping)]
+        lists = [value for value in values if isinstance(value, (list, tuple))]
         if maps:
             # if we have any mapping types, call recursively to merge them
             updated[key] = merge_dicts(*maps)
+        elif lists:
+            # if any values are lists, we want to merge them (non-recursively)
+            # first, ensure all values are lists
+            for i in range(len(values)):
+                if not isinstance(values[i], (list, tuple)):
+                    values[i] = [values[i]]
+            # then, merge all of the lists into a single list
+            updated[key] = list(chain.from_iterable(values))
         else:
             # otherwise, just grab the last value we have, since later
             # arguments take precedence over earlier arguments
             updated[key] = values[-1]
     return updated
+
+
+def subtract_dicts(*dicts):
+    """
+    Return a new dictionary that is the result of subtracting each dict
+    from the previous.  Except for mappings, the values of the subsequent
+    are ignored and simply all matching keys are removed.  If the value is
+    a mapping, however, then only the keys from the sub-mapping are removed,
+    recursively.
+    """
+    result = merge_dicts(dicts[0], {})  # make a deep copy
+    for d in dicts[1:]:
+        for key, value in d.items():
+            if key not in result:
+                continue
+            if isinstance(value, Mapping):
+                result[key] = subtract_dicts(result[key], value)
+                if not result[key]:
+                    # we removed everything from the mapping,
+                    # so remove the whole thing
+                    del result[key]
+            elif isinstance(value, (list, tuple)):
+                if not isinstance(result[key], (list, tuple)):
+                    # if the original value isn't a list, then remove it
+                    # if it matches any of the values in the given list
+                    if result[key] in value:
+                        del result[key]
+                else:
+                    # for lists, remove any matching items (non-recursively)
+                    result[key] = [item
+                                   for item in result[key]
+                                   if item not in value]
+                    if not result[key]:
+                        # we removed everything from the list,
+                        # so remove the whole thing
+                        del result[key]
+            else:
+                del result[key]
+    return result
 
 
 def chown(path, user, group=None, recursive=False):
@@ -420,6 +469,19 @@ def setup_metadata_controller():
     for name in app.selected_addons:
         addon = app.addons[name]
         bundle_data = merge_dicts(bundle_data, addon.bundle)
+
+    steps = list(chain(app.steps,
+                       chain.from_iterable(app.addons[addon].steps
+                                           for addon in app.selected_addons)))
+    for step in steps:
+        if not (step.bundle_add or step.bundle_remove):
+            continue
+        if step.bundle_add:
+            fragment = yaml.safe_load(step.bundle_add.read_text())
+            bundle_data = merge_dicts(bundle_data, fragment)
+        if step.bundle_remove:
+            fragment = yaml.safe_load(step.bundle_remove.read_text())
+            bundle_data = subtract_dicts(bundle_data, fragment)
 
     bundle = Bundle(bundle_data=bundle_data)
     app.metadata_controller = MetadataController(bundle, Config('bundle-cfg'))
