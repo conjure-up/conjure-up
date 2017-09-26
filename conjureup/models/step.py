@@ -24,6 +24,7 @@ class StepModel:
                 continue
             step = StepModel.load(step_dir)
             app.steps.append(step)
+        app.log.debug('steps: {}'.format(app.steps))
 
     @classmethod
     def load(cls, step_meta_path):
@@ -45,6 +46,11 @@ class StepModel:
             value = step_data.get(key, default)
             step_data[key] = value
         app.steps_data[step.name] = step_data
+        # clear transient values
+        step.set_state('bundle-add', None)
+        step.set_state('bundle-remove', None)
+        for phase in PHASES:
+            step.set_state('result', None, phase)
         return step
 
     def __init__(self, step, name):
@@ -57,8 +63,13 @@ class StepModel:
         self.cloud_whitelist = step.get('cloud-whitelist', [])
         self.name = name
 
+    def __repr__(self):
+        return "<StepModel {} v: {} c: {}>".format(
+            self.name, self.viewable, self.cloud_whitelist)
+
     def _build_phase_path(self, phase):
-        return Path(app.config['spell-dir']) / 'steps' / self.name / phase.value
+        return Path(app.config['spell-dir']) / 'steps' / self.name \
+                / phase.value
 
     def _has_phase(self, phase):
         return self._build_phase_path(phase).is_file()
@@ -99,34 +110,75 @@ class StepModel:
         """
         return await self.run(PHASES.AFTER_DEPLOY, msg_cb)
 
-    def __getattr__(self, attr):
+    def get_state(self, key, phase=None):
         """
-        Override attribute lookup since ConsoleUI doesn't implement
-        everything PegagusUI does.
+        Return the state data value for the given key, namespaced by the
+        spell, step, and optionally phase.
         """
+        if phase is None:
+            key = "conjure-up.{}.{}.{}".format(app.config['spell'],
+                                               self.name,
+                                               key)
+        else:
+            key = "conjure-up.{}.{}.{}.{}".format(app.config['spell'],
+                                                  self.name,
+                                                  phase.value,
+                                                  key)
+        return app.state.get(key) or ''
 
-        def nofunc(*args, **kwargs):
-            app.log.debug(attr)
+    def set_state(self, key, value, phase=None):
+        """
+        Set the state data value for the given key, namespaced by the
+        spell, step, and optionally phase.
+        """
+        if phase is None:
+            key = "conjure-up.{}.{}.{}".format(app.config['spell'],
+                                               self.name,
+                                               key)
+        else:
+            key = "conjure-up.{}.{}.{}.{}".format(app.config['spell'],
+                                                  self.name,
+                                                  phase.value,
+                                                  key)
+        app.state.set(key, value)
+        app.state.flush()
 
-        try:
-            getattr(StepModel, attr)
-        except:
-            # Log the invalid attribute call
-            setattr(self.__class__, attr, nofunc)
-            return getattr(StepModel, attr)
+    @property
+    def step_dir(self):
+        return Path(app.config['spell-dir']) / 'steps' / self.name
 
-    def __repr__(self):
-        return "<t: {} d: {} v: {} c: {} f: {}>".format(self.title,
-                                                        self.description,
-                                                        self.viewable,
-                                                        self.cloud_whitelist,
-                                                        self.filename)
+    @property
+    def bundle_add(self):
+        """
+        Return the bundle-add fragment file, if set by this step.
+
+        Return value is a Path object or None.
+        """
+        bundle_add = self.get_state('bundle-add')
+        bundle_add_path = self.step_dir / bundle_add
+        if not bundle_add or not bundle_add_path.exists():
+            return None
+        return bundle_add_path
+
+    @property
+    def bundle_remove(self):
+        """
+        Return the bundle-remove fragment file, if set by this step.
+
+        Return value is a Path object or None.
+        """
+        bundle_remove = self.get_state('bundle-remove')
+        bundle_remove_path = self.step_dir / bundle_remove
+        if not bundle_remove or not bundle_remove_path.exists():
+            return None
+        return bundle_remove_path
 
     async def run(self, phase, msg_cb, event_name=None):
         # Define STEP_NAME for use in determining where to store
         # our step results,
         #  state set "conjure-up.$SPELL_NAME.$STEP_NAME.result" "val"
         app.env['CONJURE_UP_STEP'] = self.name
+        app.env['CONJURE_UP_PHASE'] = phase.value
 
         step_path = self._build_phase_path(phase)
 
@@ -135,20 +187,17 @@ class StepModel:
 
         if not os.access(str(step_path), os.X_OK):
             app.log.error(
-                'Unable to run step {}, it is not executable'.format(
-                    step_path.stem))
+                'Unable to run step {} {}, it is not executable'.format(
+                    step_path.stem, phase.value))
             return
 
         step_path = str(step_path)
 
-        msg = "Running step: {}.".format(self.name)
+        msg = "Running step: {} {}.".format(self.name, phase.value)
         app.log.info(msg)
         msg_cb(msg)
         if event_name is not None:
             track_event(event_name, "Started", "")
-
-        if not os.access(step_path, os.X_OK):
-            raise Exception("Step {} not executable".format(self.title))
 
         if is_linux() and self.needs_sudo and not await can_sudo():
             raise SudoError('Step "{}" requires sudo: {}'.format(
@@ -210,7 +259,8 @@ class StepModel:
                 'out_log_tail': out_log[-400:],
                 'err_log_tail': err_log[-400:],
             }})
-            raise Exception("Failure in step {}".format(self.name))
+            raise Exception("Failure in step {} {}".format(self.name,
+                                                           phase.value))
 
         # special case for 00_deploy-done to report masked
         # charm hook failures that were retried automatically
@@ -232,10 +282,7 @@ class StepModel:
         if event_name is not None:
             track_event(event_name, "Done", "")
 
-        result_key = "conjure-up.{}.{}.result".format(app.config['spell'],
-                                                      self.name)
-        result = app.state.get(result_key)
-        return (result or '')
+        return self.get_state('result', phase)
 
 
 class ValidationError(Exception):
