@@ -13,8 +13,8 @@ import sys
 import uuid
 from collections import Mapping
 from contextlib import contextmanager
-from itertools import chain
 from functools import partial
+from itertools import chain
 from pathlib import Path
 from subprocess import PIPE, Popen, check_call, check_output
 

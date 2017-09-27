@@ -69,7 +69,7 @@ class StepModel:
 
     def _build_phase_path(self, phase):
         return Path(app.config['spell-dir']) / 'steps' / self.name \
-                / phase.value
+            / phase.value
 
     def _has_phase(self, phase):
         return self._build_phase_path(phase).is_file()
