@@ -809,6 +809,14 @@ async def add_model(name, controller, cloud, credential=None):
     cmd = ['juju', 'add-model', name, cloud, '--controller', controller]
     if credential:
         cmd.extend(['--credential', credential])
+
+    def add_model_config(k, v):
+        cmd.extend(["--config", "{}={}".format(k, v)])
+
+    if app.provider.model_defaults:
+        for k, v in app.provider.model_defaults.items():
+            add_model_config(k, v)
+
     proc = await asyncio.create_subprocess_exec(*cmd,
                                                 stdout=DEVNULL, stderr=PIPE)
     _, stderr = await proc.communicate()
