@@ -290,7 +290,7 @@ def get_credential(cloud, cred_name=None):
     elif default_credential is not None and default_credential in cred.keys():
         return cred[default_credential]
     elif len(cred) == 1:
-        return cred.values()[0]
+        return list(cred.values())[0]
     else:
         return None
 
