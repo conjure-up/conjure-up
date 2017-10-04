@@ -7,16 +7,21 @@ TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
 VERSION := $(shell cat VERSION)
 CHANNEL := edge
+PY36 := $(shell apt-cache search --names-only '^python3.6')
 
 .PHONY: sysdeps
 sysdeps:
+	@if [ -z "$(PY36)" ]; then \
+	    sudo add-apt-repository ppa:jonathonf/python-3.6; \
+	fi
 	@sudo apt-get update
-	@sudo apt-get -qqyf install jq python3-yaml bsdtar bridge-utils software-properties-common snapcraft python3-dev tox shellcheck build-essential
+	@sudo apt-get -qqyf install jq bsdtar bridge-utils software-properties-common snapcraft python3.6-dev tox shellcheck build-essential
 
 travis-sysdeps:
+	@sudo add-apt-repository -y ppa:jonathonf/python-3.6
 	@sudo apt-get update -q
 	@sudo apt-get remove -qy lxd lxd-client
-	@sudo apt-get -y install jq bsdtar python3-dev make snapd python-tox
+	@sudo apt-get -y install jq bsdtar python3.6-dev make snapd python-tox
 	@sudo snap install juju --classic --edge
 	@sudo snap refresh lxd --edge
 
