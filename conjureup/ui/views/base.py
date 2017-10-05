@@ -7,6 +7,12 @@ from conjureup import events
 from conjureup.app_config import app
 from conjureup.telemetry import track_screen
 
+SWAP_FOCUS = 'swap focus'
+NEXT_SCREEN = 'next screen'
+PREV_GROUP = 'prev group'
+NEXT_GROUP = 'next group'
+NEXT_GROUP_SUBMIT = 'next group submit'
+
 
 class BaseView(WidgetWrap):
     title = 'Base View'
@@ -23,7 +29,16 @@ class BaseView(WidgetWrap):
         self.frame = Frame(body=self._build_body(),
                            footer=self._build_footer())
         self.buttons_selected = False
+        self.extend_command_map({
+            'tab': SWAP_FOCUS,
+            'shift tab': SWAP_FOCUS,
+        })
         super().__init__(self.frame)
+
+    def extend_command_map(self, command_mappings):
+        self._command_map = self._command_map.copy()
+        for key, command in command_mappings.items():
+            self._command_map[key] = command
 
     def show(self):
         track_screen(self.title)
@@ -85,6 +100,9 @@ class BaseView(WidgetWrap):
         ]))
         return footer
 
+    def next(self):
+        pass
+
     def _swap_focus(self):
         if not self.buttons_selected:
             self.buttons_selected = True
@@ -99,10 +117,16 @@ class BaseView(WidgetWrap):
             self.frame.focus_position = 'body'
 
     def keypress(self, size, key):
-        if key in ['tab', 'shift tab']:
+        command = self._command_map[key]
+        if command == SWAP_FOCUS:
             self._swap_focus()
-        rv = super().keypress(size, key)
-        return rv
+            return
+        elif command == NEXT_SCREEN:
+            self.next()
+            return
+        else:
+            rv = super().keypress(size, key)
+            return rv
 
 
 class SchemaFormView(BaseView):
