@@ -145,12 +145,10 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
     def add_config(k, v):
         cmd.extend(["--config", "{}={}".format(k, v)])
 
-    def add_model_defaults(k, v):
-        cmd.extend(["--model-default", "{}={}".format(k, v)])
-
     if app.provider.model_defaults:
         for k, v in app.provider.model_defaults.items():
-            add_model_defaults(k, v)
+            if v is not None:
+                add_config(k, v)
 
     add_config("image-stream", "daily")
     if app.argv.http_proxy:
@@ -815,7 +813,8 @@ async def add_model(name, controller, cloud, credential=None):
 
     if app.provider.model_defaults:
         for k, v in app.provider.model_defaults.items():
-            add_model_config(k, v)
+            if v is not None:
+                add_model_config(k, v)
 
     proc = await asyncio.create_subprocess_exec(*cmd,
                                                 stdout=DEVNULL, stderr=PIPE)

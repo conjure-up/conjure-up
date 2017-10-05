@@ -1,9 +1,14 @@
 from ubuntui.utils import Color
 from ubuntui.widgets.hr import HR
-from ubuntui.widgets.input import SelectorHorizontal
 from urwid import Columns, Pile, Text
 
-from conjureup.ui.views.base import BaseView
+from conjureup.ui.views.base import (
+    NEXT_GROUP,
+    NEXT_GROUP_SUBMIT,
+    PREV_GROUP,
+    BaseView
+)
+from conjureup.ui.widgets.selectors import OptionalRadioList, RadioList
 
 
 class VSphereSetupView(BaseView):
@@ -13,30 +18,56 @@ class VSphereSetupView(BaseView):
         self.update_cloud_cb = update_cloud_cb
         self.datacenter = datacenter
         self.vsphere_config = {
-            'primary-network': SelectorHorizontal(
+            'primary-network': RadioList(
                 [net.name for net in self.datacenter.network]),
-            'external-network': SelectorHorizontal(
+            'external-network': OptionalRadioList(
                 [net.name for net in self.datacenter.network]),
-            'datastore': SelectorHorizontal(
+            'datastore': RadioList(
                 [ds.name for ds in self.datacenter.datastore])
         }
 
         # Set defaults
-        self.vsphere_config['primary-network'].set_default(
-            self.vsphere_config['primary-network'].group[0].label, True)
-        self.vsphere_config['datastore'].set_default(
-            self.vsphere_config['datastore'].group[0].label, True)
+        self.vsphere_config['primary-network'].select_first_option()
+        self.vsphere_config['datastore'].select_first_option()
+
+        self.extend_command_map({
+            'page up': PREV_GROUP,
+            'page down': NEXT_GROUP,
+            'enter': NEXT_GROUP_SUBMIT,
+        })
 
         super().__init__(*args, **kwargs)
 
     def build_buttons(self):
-        return [self.button('SAVE', self.submit)]
+        return [self.button('SAVE', lambda btn: self.next())]
 
-    def submit(self, result):
+    def next(self):
         _formatted_vsphere_config = {}
         for k, v in self.vsphere_config.items():
-            _formatted_vsphere_config[k] = v.value
+            _formatted_vsphere_config[k] = v.value or ''
         self.update_cloud_cb(_formatted_vsphere_config)
+
+    def keypress(self, size, key):
+        command = self._command_map[key]
+        if command == PREV_GROUP:
+            self.prev_group()
+            return
+        elif command in (NEXT_GROUP, NEXT_GROUP_SUBMIT):
+            self.next_group(command == NEXT_GROUP_SUBMIT)
+            return
+        else:
+            return super().keypress(size, key)
+
+    def prev_group(self):
+        if self.pile.focus_position > 2:
+            self.pile.focus_position -= 2
+
+    def next_group(self, submit=False):
+        try:
+            self.pile.focus_position += 2
+        except IndexError:
+            if submit:
+                self.next()
 
     def build_widget(self):
         rows = [
