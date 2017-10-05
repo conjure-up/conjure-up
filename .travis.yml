@@ -2,7 +2,7 @@ language: python
 sudo: true
 dist: trusty
 python:
-  - "3.5"
+  - "3.6"
 notifications:
   email: false
   irc:
@@ -24,7 +24,7 @@ before_script:
   - sudo ln -s /snap/bin/juju /usr/bin/juju
   - sudo ln -s /snap/bin/lxc /usr/bin/lxc
 script:
-  - tox -e py35,flake,isort
+  - tox -e py36,flake,isort
   - tox -e conjure-dev
   - sudo -E su $USER -c "source conjure-dev/bin/activate && conjure-up -d --notrack --noreport ghost localhost test-controller test-model"
 after_script:
