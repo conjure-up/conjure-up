@@ -174,8 +174,8 @@ def _sentry_report(message=None, exc_info=None, tags=None, **kwargs):
     try:
         default_tags = {
             'spell': app.config.get('spell'),
-            'cloud_type': app.provider.cloud_type,
-            'region': app.provider.region,
+            'cloud_type': app.provider.cloud_type if app.provider else None,
+            'region': app.provider.region if app.provider else None,
             'jaas': app.is_jaas,
             'headless': app.headless,
             'juju_version': juju_version()
