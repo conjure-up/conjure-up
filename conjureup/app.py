@@ -108,6 +108,12 @@ def parse_options(argv):
                         choices=['auto', 'never', 'always'],
                         help='Whether to use colorized output '
                              'in headless mode.')
+    parser.add_argument('--bundle-add', type=pathlib.Path,
+                        help="Path to a bundle fragment file which will be "
+                             "merged with the spell's bundle")
+    parser.add_argument('--bundle-remove', type=pathlib.Path,
+                        help="Path to a bundle fragment file which will be "
+                             "subtracted from the spell's bundle")
 
     # Channels
     parser.add_argument('--channel', type=str,

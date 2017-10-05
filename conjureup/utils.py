@@ -476,12 +476,19 @@ def setup_metadata_controller():
     for step in steps:
         if not (step.bundle_add or step.bundle_remove):
             continue
-        if step.bundle_add:
-            fragment = yaml.safe_load(step.bundle_add.read_text())
-            bundle_data = merge_dicts(bundle_data, fragment)
         if step.bundle_remove:
             fragment = yaml.safe_load(step.bundle_remove.read_text())
             bundle_data = subtract_dicts(bundle_data, fragment)
+        if step.bundle_add:
+            fragment = yaml.safe_load(step.bundle_add.read_text())
+            bundle_data = merge_dicts(bundle_data, fragment)
+
+    if app.argv.bundle_remove:
+        fragment = yaml.safe_load(app.argv.bundle_remove.read_text())
+        bundle_data = subtract_dicts(bundle_data, fragment)
+    if app.argv.bundle_add:
+        fragment = yaml.safe_load(app.argv.bundle_add.read_text())
+        bundle_data = merge_dicts(bundle_data, fragment)
 
     bundle = Bundle(bundle_data=bundle_data)
     app.metadata_controller = MetadataController(bundle, Config('bundle-cfg'))
