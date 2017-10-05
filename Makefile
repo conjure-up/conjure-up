@@ -21,7 +21,8 @@ travis-sysdeps:
 	@sudo add-apt-repository -y ppa:jonathonf/python-3.6
 	@sudo apt-get update -q
 	@sudo apt-get remove -qy lxd lxd-client
-	@sudo apt-get -y install jq bsdtar python3.6-dev make snapd python-tox
+	@sudo apt-get -y install jq bsdtar python3.6-dev make snapd
+	@sudo pip install tox
 	@sudo snap install juju --classic --edge
 	@sudo snap refresh lxd --edge
 
