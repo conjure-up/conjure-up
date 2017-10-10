@@ -125,7 +125,7 @@ class CloudView(WidgetWrap):
                 )
             self._add_item(Padding.line_break(""))
         new_clouds = juju.get_compatible_clouds(
-            ['localhost', 'maas', 'vsphere'])
+            ['localhost', 'maas', 'vsphere', 'openstack'])
         if new_clouds:
             self._add_item(Text("Configure a New Cloud"))
             self._add_item(HR())

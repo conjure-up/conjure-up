@@ -18,7 +18,7 @@ class CloudsController(BaseCloudController):
         """
         self.cancel_monitor.set()
 
-        if cloud in ['localhost', 'vsphere', 'maas']:
+        if cloud in ['localhost', 'vsphere', 'maas', 'openstack']:
             app.provider = load_schema(cloud)
         else:
             app.provider = load_schema(juju.get_cloud_types_by_name()[cloud])

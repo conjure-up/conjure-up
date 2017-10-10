@@ -97,7 +97,7 @@ class CredentialsController(common.BaseCredentialsController):
 
         # if it's a new MAAS or VSphere cloud, save it now that
         # we have a credential
-        if app.provider.cloud_type in ['maas', 'vsphere']:
+        if app.provider.cloud_type in ['maas', 'vsphere', 'openstack']:
             try:
                 juju.get_cloud(app.provider.cloud)
             except LookupError:
