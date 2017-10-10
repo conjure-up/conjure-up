@@ -449,6 +449,10 @@ def get_cloud_types_by_name():
     if 'vsphere' not in clouds:
         clouds['vsphere'] = 'vsphere'
 
+    # Add OpenStack provider type
+    if 'openstack' not in clouds:
+        clouds['openstack'] = 'openstack'
+
     return clouds
 
 
