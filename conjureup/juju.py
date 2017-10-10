@@ -439,7 +439,7 @@ def get_cloud_types_by_name():
         if cloud_type == 'lxd':
             clouds[name] = 'localhost'
 
-    for provider in consts.PROVIDER_TYPES:
+    for provider in consts.CUSTOM_PROVIDERS:
         if provider not in clouds:
             clouds[provider] = provider
 

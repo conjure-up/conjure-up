@@ -1,5 +1,6 @@
 from conjureup import controllers, juju, utils
 from conjureup.app_config import app
+from conjureup.consts import CUSTOM_PROVIDERS
 from conjureup.models.provider import Localhost as LocalhostProvider
 from conjureup.models.provider import SchemaErrorUnknownCloud, load_schema
 from conjureup.telemetry import track_event, track_screen
@@ -18,7 +19,7 @@ class CloudsController(BaseCloudController):
         """
         self.cancel_monitor.set()
 
-        if cloud in ['localhost', 'vsphere', 'maas', 'openstack']:
+        if cloud in CUSTOM_PROVIDERS:
             app.provider = load_schema(cloud)
         else:
             app.provider = load_schema(juju.get_cloud_types_by_name()[cloud])

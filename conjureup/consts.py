@@ -4,7 +4,7 @@ UNSPECIFIED_SPELL = '_unspecified_spell'
 JAAS_CLOUDS = {'ec2', 'azure', 'gce'}
 JAAS_DOMAIN = 'jimm.jujucharms.com'
 JAAS_ENDPOINT = JAAS_DOMAIN + ':443'
-PROVIDER_TYPES = ['localhost', 'maas', 'vsphere', 'openstack']
+CUSTOM_PROVIDERS = ['localhost', 'maas', 'vsphere', 'openstack']
 
 
 class cloud_types:
