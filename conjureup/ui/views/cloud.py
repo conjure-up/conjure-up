@@ -5,7 +5,7 @@ from ubuntui.widgets.hr import HR
 from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup import juju
-from conjureup.consts import cloud_types
+from conjureup.consts import PROVIDER_TYPES, cloud_types
 
 
 class CloudView(WidgetWrap):
@@ -124,8 +124,7 @@ class CloudView(WidgetWrap):
                     )
                 )
             self._add_item(Padding.line_break(""))
-        new_clouds = juju.get_compatible_clouds(
-            ['localhost', 'maas', 'vsphere', 'openstack'])
+        new_clouds = juju.get_compatible_clouds(PROVIDER_TYPES)
         if new_clouds:
             self._add_item(Text("Configure a New Cloud"))
             self._add_item(HR())

@@ -4,7 +4,7 @@ import yaml
 
 from conjureup import controllers, juju, utils
 from conjureup.app_config import app
-from conjureup.consts import cloud_types
+from conjureup.consts import PROVIDER_TYPES, cloud_types
 from conjureup.ui.views.credentials import (
     CredentialPickerView,
     NewCredentialView
@@ -97,7 +97,7 @@ class CredentialsController(common.BaseCredentialsController):
 
         # if it's a new MAAS or VSphere cloud, save it now that
         # we have a credential
-        if app.provider.cloud_type in ['maas', 'vsphere', 'openstack']:
+        if app.provider.cloud_type in PROVIDER_TYPES:
             try:
                 juju.get_cloud(app.provider.cloud)
             except LookupError:
