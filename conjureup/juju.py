@@ -439,19 +439,9 @@ def get_cloud_types_by_name():
         if cloud_type == 'lxd':
             clouds[name] = 'localhost'
 
-    # Since MAAS is a provider type and not identified as a cloud
-    # we special case this so that selecting MAAS acts like any
-    # other cloud selection.
-    if 'maas' not in clouds:
-        clouds['maas'] = 'maas'
-
-    # vSphere is treated in the same vein as MAAS
-    if 'vsphere' not in clouds:
-        clouds['vsphere'] = 'vsphere'
-
-    # Add OpenStack provider type
-    if 'openstack' not in clouds:
-        clouds['openstack'] = 'openstack'
+    for provider in consts.PROVIDER_TYPES:
+        if provider not in clouds:
+            clouds[provider] = provider
 
     return clouds
 
