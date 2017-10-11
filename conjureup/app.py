@@ -437,7 +437,8 @@ def main():
             app.ui = ConjureUI()
 
             EventLoop.build_loop(app.ui, STYLES,
-                                 unhandled_input=events.unhandled_input)
+                                 unhandled_input=events.unhandled_input,
+                                 handle_mouse=False)
             app.loop.create_task(events.shutdown_watcher())
             app.loop.create_task(_start())
             EventLoop.run()
