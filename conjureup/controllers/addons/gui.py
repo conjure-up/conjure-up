@@ -1,19 +1,22 @@
 from conjureup import controllers
 from conjureup.app_config import app
-from conjureup.telemetry import track_event, track_screen
+from conjureup.download import EndpointType
+from conjureup.telemetry import track_event
 from conjureup.ui.views.addons import AddonsView
 from conjureup.utils import setup_metadata_controller
 
 
 class AddonsController:
     def __init__(self):
-        self.view = AddonsView(self.finish, self.back)
+        back = self.back
+        if app.endpoint_type == EndpointType.LOCAL_DIR:
+            back = None
+        self.view = AddonsView(self.finish, back)
 
     def render(self):
         if not app.addons:
             return self.finish()
 
-        track_screen('Addons')
         self.view.show()
 
     def finish(self):
