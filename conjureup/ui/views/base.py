@@ -121,7 +121,7 @@ class BaseView(WidgetWrap):
         if command == SWAP_FOCUS:
             self._swap_focus()
             return
-        elif command == NEXT_SCREEN:
+        elif command == NEXT_SCREEN and not self.buttons_selected:
             self.next()
             return
         else:
