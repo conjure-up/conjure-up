@@ -16,8 +16,8 @@ which conjure-up
 conjure-up --version
 
 which lxc
-lxc config show
-lxc version
+/snap/bin/lxc config show
+/snap/bin/lxc version
 
 cat /etc/lsb-release
 ```
