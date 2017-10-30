@@ -354,6 +354,11 @@ class Localhost(BaseProvider):
         if Path('/snap/bin/lxd').exists():
             self.lxd_socket_dir = Path('/var/snap/lxd/common/lxd')
             app.env['LXD_DIR'] = str(self.lxd_socket_dir)
+        else:
+            raise LocalhostError(
+                "Unable to find /snap/bin/lxd. Make sure `snap list` "
+                "shows lxd as installed, otherwise, run `sudo snap "
+                "install lxd` and restart conjure-up.")
 
     async def query(self, segment='', method="GET"):
         """ Query lxc api server
@@ -366,13 +371,15 @@ class Localhost(BaseProvider):
             segment_prefix = Path('/1.0')
             url = str(segment_prefix / segment)
         try:
-            cmd = ['lxc', 'query', '--wait', '-X', method.upper(),
+            cmd = ['/snap/bin/lxc', 'query', '--wait', '-X', method.upper(),
                    url]
             app.log.debug("LXD query cmd: {}".format(" ".join(cmd)))
             _, out, err = await utils.arun(cmd)
             return json.loads(out)
         except json.decoder.JSONDecodeError:
-            err = "Unable to parse JSON output from LXD"
+            err = ("Unable to parse JSON output from LXD, does "
+                   "`/snap/bin/lxc query --wait -X GET /1.0` "
+                   "return info about the LXD server?")
             app.log.error(err)
             raise LocalhostJSONError(err)
         except FileNotFoundError as e:
