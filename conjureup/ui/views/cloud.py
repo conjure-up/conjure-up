@@ -145,6 +145,7 @@ class CloudView(WidgetWrap):
                                     "LXD not found, please install and wait "
                                     "for this message to disappear:\n\n"
                                     "  $ sudo snap install lxd\n"
+                                    "  $ sudo usermod -a -G lxd <youruser>\n"
                                     "  $ /snap/bin/lxd init --auto\n"
                                     "  $ /snap/bin/lxc network create lxdbr0 "
                                     "ipv4.address=auto ipv4.nat=true "
