@@ -25,7 +25,13 @@ class LXDSetupController(common.BaseLXDSetupController):
         self.set_state('lxd-network-name', network['name'])
         phys_iface_addr = utils.get_physical_network_ipaddr(
             network['name'])
-        iface = ipaddress.IPv4Interface("{}/24".format(phys_iface_addr))
+        try:
+            iface = ipaddress.IPv4Interface("{}/24".format(phys_iface_addr))
+        except ipaddress.AddressValueError:
+            raise LXDSetupControllerError(
+                "Unable to determine ip address of {}, please double check "
+                "`/snap/bin/lxc network edit {}` and make sure an address "
+                "is associated with that bridge.".format(network['name']))
         self.set_state('lxd-network', iface.network)
         self.set_state('lxd-gateway', iface.ip)
         self.set_state('lxd-network-dhcp-range-start',
