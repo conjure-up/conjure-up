@@ -356,8 +356,8 @@ class Localhost(BaseProvider):
             app.env['LXD_DIR'] = str(self.lxd_socket_dir)
         else:
             raise LocalhostError(
-                "Unable to find /snap/bin/lxd. Make sure `snap list` "
-                "shows lxd as installed, otherwise, run `sudo snap "
+                "Unable to find /snap/bin/lxd. Make sure `snap info lxd` "
+                "shows as installed, otherwise, run `sudo snap "
                 "install lxd` and restart conjure-up.")
 
     async def query(self, segment='', method="GET"):
