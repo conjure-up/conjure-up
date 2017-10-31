@@ -5,6 +5,7 @@
 debian_socket=/var/lib/lxd
 snap_lxd_socket=/var/snap/lxd/common/lxd
 
+export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 lxd_binary=$(which lxd)
 
 # Prefer snap installed lxd, if availible
@@ -13,7 +14,6 @@ if [ "$lxd_binary" = "/snap/bin/lxd" ]; then
 elif [ "$lxd_binary" = "/usr/bin/lxd" ]; then
     export LXD_DIR=$debian_socket
 fi
-export PATH=$SNAP/bin:$SNAP/usr/bin:/snap/bin:$PATH
 export LD_LIBRARY_PATH
 LD_LIBRARY_PATH=$SNAP/lib:$SNAP/usr/lib/$(uname -p)-linux-gnu/
 
