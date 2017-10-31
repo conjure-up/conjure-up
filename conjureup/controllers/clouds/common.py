@@ -19,13 +19,14 @@ class BaseCloudController:
             try:
                 compatible = await provider.is_server_compatible()
                 if not compatible:
-                    return await run_with_interrupt(asyncio.sleep(2),
-                                                    self.cancel_monitor)
-
-                await provider.is_server_available()
-                events.LXDAvailable.set()
-                self.cancel_monitor.set()
-                cb()
+                    await run_with_interrupt(asyncio.sleep(2),
+                                             self.cancel_monitor)
+                else:
+                    await provider.is_server_available()
+                    events.LXDAvailable.set()
+                    self.cancel_monitor.set()
+                    cb()
+                    return
             except (LocalhostError, LocalhostJSONError):
                 provider._set_lxd_dir_env()
                 await run_with_interrupt(asyncio.sleep(2),
