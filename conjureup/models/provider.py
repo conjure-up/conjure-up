@@ -346,6 +346,7 @@ class Localhost(BaseProvider):
         self.network_interface = None
         self.minimum_support_version = parse_version('2.17')
         self.available = False
+        self.lxc_bin = None
         self._set_lxd_dir_env()
 
     def _set_lxd_dir_env(self):
@@ -354,11 +355,18 @@ class Localhost(BaseProvider):
         if Path('/snap/bin/lxd').exists():
             self.lxd_socket_dir = Path('/var/snap/lxd/common/lxd')
             app.env['LXD_DIR'] = str(self.lxd_socket_dir)
+            self.lxc_bin = '/snap/bin/lxc'
+        elif Path('/usr/bin/lxd').exists():
+            self.lxd_socket_dir = Path('/var/lib/lxd')
+            app.env['LXD_DIR'] = str(self.lxd_socket_dir)
+            self.lxc_bin = '/usr/bin/lxc'
         else:
             raise LocalhostError(
-                "Unable to find /snap/bin/lxd. Make sure `snap info lxd` "
+                "Unable to find a lxd binary. Make sure `snap info lxd` "
                 "shows as installed, otherwise, run `sudo snap "
                 "install lxd` and restart conjure-up.")
+        app.log.debug("LXD environment set: binary {} lxd_dir {}".format(
+            self.lxc_bin, self.lxd_socket_dir))
 
     async def query(self, segment='', method="GET"):
         """ Query lxc api server
@@ -371,15 +379,15 @@ class Localhost(BaseProvider):
             segment_prefix = Path('/1.0')
             url = str(segment_prefix / segment)
         try:
-            cmd = ['/snap/bin/lxc', 'query', '--wait', '-X', method.upper(),
+            cmd = [self.lxc_bin, 'query', '--wait', '-X', method.upper(),
                    url]
             app.log.debug("LXD query cmd: {}".format(" ".join(cmd)))
             _, out, err = await utils.arun(cmd)
             return json.loads(out)
         except json.decoder.JSONDecodeError:
             err = ("Unable to parse JSON output from LXD, does "
-                   "`/snap/bin/lxc query --wait -X GET /1.0` "
-                   "return info about the LXD server?")
+                   "`{} query --wait -X GET /1.0` "
+                   "return info about the LXD server?".format(self.lxc_bin))
             app.log.error(err)
             raise LocalhostJSONError(err)
         except FileNotFoundError as e:
@@ -433,11 +441,12 @@ class Localhost(BaseProvider):
         """ Checks if LXD server version is compatible with conjure-up
         """
         try:
-            out = await self.query()
-        except LocalhostError:
-            return False
-        server_ver = out['environment']['server_version']
-        return parse_version(server_ver) <= self.minimum_support_version
+            _, out, err = await utils.arun([self.lxc_bin, 'version'])
+            server_ver = out.strip()
+            return parse_version(server_ver) >= self.minimum_support_version
+        except CalledProcessError as e:
+            app.log.error(e)
+            raise LocalhostError(e)
 
 
 class Azure(BaseProvider):
