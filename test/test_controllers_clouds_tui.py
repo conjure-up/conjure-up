@@ -47,11 +47,12 @@ class CloudsTUIRenderTestCase(unittest.TestCase):
 
     def test_render(self):
         "Rendering with a known cloud should call finish"
+        self.controller._check_lxd_compat = MagicMock()
         self.mock_app.provider.cloud = "aws"
         t = ['aws']
         self.mock_juju.get_clouds.return_value.keys.return_value = t
         self.controller.render()
-        self.mock_finish.assert_called_once_with()
+        assert self.mock_app.loop.create_task.called
 
 
 class CloudsTUIFinishTestCase(unittest.TestCase):

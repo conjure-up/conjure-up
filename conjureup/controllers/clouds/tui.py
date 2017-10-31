@@ -1,4 +1,4 @@
-from conjureup import controllers, juju, utils
+from conjureup import controllers, events, juju, utils
 from conjureup.app_config import app
 from conjureup.consts import cloud_types
 
@@ -17,15 +17,25 @@ class CloudsController(BaseCloudController):
 
         return controllers.use('credentials').render()
 
-    def render(self):
+    async def _check_lxd_compat(self):
         utils.info(
             "Summoning {} to {}".format(app.argv.spell, app.provider.cloud))
         if app.provider.cloud_type == cloud_types.LOCALHOST:
+
             try:
                 app.provider._set_lxd_dir_env()
+                client_compatible = await app.provider.is_client_compatible()
+                server_compatible = await app.provider.is_server_compatible()
+                if client_compatible and server_compatible:
+                    self.finish()
+                else:
+                    utils.error("LXD Server or LXC client not compatible")
+                    events.Shutdown.set(1)
             except app.provider.LocalhostError:
                 raise
-        self.finish()
+
+    def render(self):
+        app.loop.create_task(self._check_lxd_compat())
 
 
 _controller_class = CloudsController
