@@ -426,19 +426,21 @@ class Localhost(BaseProvider):
                 _pools.move_to_end('default', last=False)
         return _pools
 
-    async def is_server_available(self):
+    async def is_server_compatible(self):
         """ Waits and checks if LXD server becomes available
 
         We'll want to loop here and ignore most errors until have retries have
         been met
         """
         try:
-            return await self.query()
+            out = await self.query()
+            server_ver = out['environment']['server_version']
+            return parse_version(server_ver) >= self.minimum_support_version
         except (LocalhostError, LocalhostJSONError, FileNotFoundError):
-            raise
+            return False
 
-    async def is_server_compatible(self):
-        """ Checks if LXD server version is compatible with conjure-up
+    async def is_client_compatible(self):
+        """ Checks if LXC version is compatible with conjure-up
         """
         try:
             _, out, err = await utils.arun([self.lxc_bin, 'version'])

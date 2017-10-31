@@ -18,8 +18,9 @@ class BaseCloudController:
         while not self.cancel_monitor.is_set():
             try:
                 provider._set_lxd_dir_env()
-                compatible = await provider.is_server_compatible()
-                if compatible:
+                client_compatible = await provider.is_client_compatible()
+                server_compatible = await provider.is_server_compatible()
+                if client_compatible and server_compatible:
                     events.LXDAvailable.set()
                     self.cancel_monitor.set()
                     cb()
