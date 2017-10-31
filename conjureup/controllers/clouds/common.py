@@ -17,6 +17,11 @@ class BaseCloudController:
 
         while not self.cancel_monitor.is_set():
             try:
+                compatible = await provider.is_server_compatible()
+                if not compatible:
+                    return await run_with_interrupt(asyncio.sleep(2),
+                                                    self.cancel_monitor)
+
                 await provider.is_server_available()
                 events.LXDAvailable.set()
                 self.cancel_monitor.set()
