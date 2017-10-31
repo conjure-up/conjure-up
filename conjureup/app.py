@@ -371,6 +371,7 @@ def main():
         AddonModel.load_spell_addons()
 
     app.env['CONJURE_UP_CACHEDIR'] = app.argv.cache_dir
+    app.env['PATH'] = "/snap/bin:{}".format(app.env['PATH'])
 
     if app.argv.show_env:
         if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
