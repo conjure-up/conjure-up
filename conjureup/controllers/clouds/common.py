@@ -17,15 +17,14 @@ class BaseCloudController:
 
         while not self.cancel_monitor.is_set():
             try:
+                provider._set_lxd_dir_env()
                 compatible = await provider.is_server_compatible()
                 if compatible:
                     events.LXDAvailable.set()
                     self.cancel_monitor.set()
                     cb()
                     return
-            except (LocalhostError, LocalhostJSONError):
-                provider._set_lxd_dir_env()
-            except FileNotFoundError:
+            except (LocalhostError, LocalhostJSONError, FileNotFoundError):
                 pass
             await run_with_interrupt(asyncio.sleep(2),
                                      self.cancel_monitor)
