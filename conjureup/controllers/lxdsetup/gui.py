@@ -30,7 +30,7 @@ class LXDSetupController(common.BaseLXDSetupController):
         except ipaddress.AddressValueError:
             raise LXDSetupControllerError(
                 "Unable to determine ip address of {network}, please double "
-                "check `/snap/bin/lxc network edit {network}` and make "
+                "check `lxc network edit {network}` and make "
                 "sure an address is associated with that bridge.".format(
                     network=network['name']))
         self.set_state('lxd-network', iface.network)

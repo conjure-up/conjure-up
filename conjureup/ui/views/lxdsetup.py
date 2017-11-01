@@ -38,10 +38,10 @@ class LXDSetupView(BaseView):
                 "Could not locate any network or storage "
                 "devices to continue. Please make sure you "
                 "have at least 1 network bridge and 1 storage "
-                "pool: see `/snap/bin/lxc network list` and "
-                "`/snap/bin/lxc storage list`.  \n\n"
+                "pool: see `lxc network list` and "
+                "`lxc storage list`.  \n\n"
                 "Also note that the network bridge must not have "
-                "ipv6 enabled, to disable run `/snap/bin/lxc network set "
+                "ipv6 enabled, to disable run `lxc network set "
                 "lxdbr0 ipv6.address none ipv6.nat false`")
         super().__init__(*args, **kwargs)
 
