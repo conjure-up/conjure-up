@@ -9,6 +9,7 @@ from pathlib import Path
 from subprocess import DEVNULL, PIPE, CalledProcessError
 from tempfile import NamedTemporaryFile
 
+import aiofiles
 import yaml
 from bundleplacer.charmstore_api import CharmStoreID
 from juju.model import Model
@@ -881,7 +882,7 @@ def version():
         return out
 
 
-async def wait_for_deployment(retries=5):
+async def wait_for_deployment(retries=3):
     """ Waits for all deployed applications to settle
     """
     if 'CONJURE_UP_MODE' in app.env and app.env['CONJURE_UP_MODE'] == "test":
@@ -890,7 +891,17 @@ async def wait_for_deployment(retries=5):
     cmd = ['juju', 'wait', "-r{}".format(retries),
            "-vwm", "{}:{}".format(app.provider.controller,
                                   app.provider.model)]
-    ret, _, err = await utils.arun(cmd, env=app.env)
-    if ret != 0:
-        app.log.error(err.decode('utf8'))
+
+    out_path = Path(app.config['spell-dir']) / 'deploy-wait.out'
+    err_path = Path(app.config['spell-dir']) / 'deploy-wait.err'
+
+    for attempt in range(retries + 1):
+        async with aiofiles.open(str(out_path), 'w') as outf:
+            async with aiofiles.open(str(err_path), 'w') as errf:
+                ret, _, _ = await utils.arun(cmd, stdout=outf, stderr=errf)
+        if ret == 0:
+            return
+        await asyncio.sleep(1)
+    else:
+        app.log.error(err_path.read_text())
         raise Exception("Some applications failed to start successfully.")
