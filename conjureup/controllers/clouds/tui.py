@@ -33,6 +33,7 @@ class CloudsController(BaseCloudController):
                     events.Shutdown.set(1)
             except app.provider.LocalhostError:
                 raise
+        self.finish()
 
     def render(self):
         app.loop.create_task(self._check_lxd_compat())
