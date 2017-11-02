@@ -27,13 +27,13 @@ class CloudsController(BaseCloudController):
                 client_compatible = await app.provider.is_client_compatible()
                 server_compatible = await app.provider.is_server_compatible()
                 if client_compatible and server_compatible:
-                    self.finish()
+                    return self.finish()
                 else:
                     utils.error("LXD Server or LXC client not compatible")
                     events.Shutdown.set(1)
             except app.provider.LocalhostError:
                 raise
-        self.finish()
+            self.finish()
 
     def render(self):
         app.loop.create_task(self._check_lxd_compat())
