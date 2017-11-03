@@ -16,15 +16,12 @@ from juju.model import Model
 
 from conjureup import consts, events, utils
 from conjureup.app_config import app
+from conjureup.errors import DeploymentFailure, ControllerNotFoundException
 from conjureup.utils import is_linux, juju_path, run, spew
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
 
 PENDING_DEPLOYS = 0
-
-
-class ControllerNotFoundException(Exception):
-    "An error when a controller can't be found in juju's config"
 
 
 def read_config(name):
@@ -895,13 +892,11 @@ async def wait_for_deployment(retries=3):
     out_path = Path(app.config['spell-dir']) / 'deploy-wait.out'
     err_path = Path(app.config['spell-dir']) / 'deploy-wait.err'
 
-    for attempt in range(retries + 1):
-        async with aiofiles.open(str(out_path), 'w') as outf:
-            async with aiofiles.open(str(err_path), 'w') as errf:
-                ret, _, _ = await utils.arun(cmd, stdout=outf, stderr=errf)
-        if ret == 0:
-            return
-        await asyncio.sleep(1)
-    else:
-        app.log.error(err_path.read_text())
-        raise Exception("Some applications failed to start successfully.")
+    async with aiofiles.open(str(out_path), 'w') as outf:
+        async with aiofiles.open(str(err_path), 'w') as errf:
+            ret, _, _ = await utils.arun(cmd, stdout=outf, stderr=errf)
+    if ret != 0:
+        err_log_tail = err_path.read_text().splitlines()[-10:]
+        app.log.error('\n'.join(err_log_tail))
+        raise DeploymentFailure(
+            "Some applications failed to start successfully.")
