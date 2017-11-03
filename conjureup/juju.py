@@ -16,7 +16,7 @@ from juju.model import Model
 
 from conjureup import consts, events, utils
 from conjureup.app_config import app
-from conjureup.errors import DeploymentFailure, ControllerNotFoundException
+from conjureup.errors import ControllerNotFoundException, DeploymentFailure
 from conjureup.utils import is_linux, juju_path, run, spew
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
