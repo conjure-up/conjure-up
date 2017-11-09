@@ -1,3 +1,9 @@
+class BootstrapError(Exception):
+    "An error when bootstrapping a new controller"
+
+
+class BootstrapInterrupt(BootstrapError):
+    "The bootstrap was interrupted by the user"
 
 
 class ControllerNotFoundException(Exception):
@@ -5,4 +11,4 @@ class ControllerNotFoundException(Exception):
 
 
 class DeploymentFailure(Exception):
-    "A failure from a deployed model."
+    "A failure from a deployed model"

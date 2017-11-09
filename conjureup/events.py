@@ -7,7 +7,7 @@ from pathlib import Path
 from ubuntui.ev import EventLoop
 from urwid import ExitMainLoop
 
-from conjureup import utils
+from conjureup import errors, utils
 from conjureup.app_config import app
 from conjureup.telemetry import track_exception
 from conjureup.ui.views.lxdsetup import LXDSetupViewError
@@ -124,7 +124,8 @@ LXDAvailable = Event('LXDAvailable')
 NOTRACK_EXCEPTIONS = [
     lambda exc: isinstance(exc, OSError) and exc.errno == errno.ENOSPC,
     lambda exc: isinstance(exc, utils.SudoError),
-    lambda exc: isinstance(exc, LXDSetupViewError)
+    lambda exc: isinstance(exc, LXDSetupViewError),
+    lambda exc: isinstance(exc, errors.BootstrapInterrupt),
 ]
 
 
