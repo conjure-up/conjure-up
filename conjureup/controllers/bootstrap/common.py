@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from conjureup import events, juju
+from conjureup import errors, events, juju
 from conjureup.app_config import app
 from conjureup.telemetry import track_event
 
@@ -50,9 +50,11 @@ class BaseBootstrapController:
             err_log = log_file.read_text('utf8').splitlines()
             app.log.error("Error bootstrapping controller: "
                           "{}".format(err_log))
-            app.sentry.context.merge({'extra': {'err_log': err_log[-400:]}})
-            raise Exception('Unable to bootstrap (cloud type: {})'.format(
-                app.provider.cloud_type))
+            err_tail = err_log[-400:]
+            app.sentry.context.merge({'extra': {'err_tail': err_tail}})
+            raise errors.BootstrapError(
+                'Unable to bootstrap (cloud type: {})'.format(
+                    app.provider.cloud_type))
 
         self.emit('Bootstrap complete.')
         track_event("Juju Bootstrap", "Done", "")

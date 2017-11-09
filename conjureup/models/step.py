@@ -1,6 +1,5 @@
 """ Step model
 """
-import asyncio
 import os
 from pathlib import Path
 
@@ -11,7 +10,7 @@ from conjureup import juju
 from conjureup.app_config import app
 from conjureup.consts import PHASES
 from conjureup.telemetry import track_event
-from conjureup.utils import SudoError, can_sudo, is_linux, sentry_report
+from conjureup.utils import SudoError, arun, can_sudo, is_linux, sentry_report
 
 
 class StepModel:
@@ -239,22 +238,14 @@ class StepModel:
 
         app.log.debug("Executing script: {}".format(step_path))
 
-        async with aiofiles.open(step_path + ".out", 'w') as outf:
-            async with aiofiles.open(step_path + ".err", 'w') as errf:
-                proc = await asyncio.create_subprocess_exec(step_path,
-                                                            env=app.env,
-                                                            stdout=outf,
-                                                            stderr=errf)
-                async with aiofiles.open(step_path + '.out', 'r') as f:
-                    while proc.returncode is None:
-                        async for line in f:
-                            msg_cb(line)
-                        await asyncio.sleep(0.01)
+        out_path = step_path + '.out'
+        err_path = step_path + '.err'
+        ret, out_log, err_log = await arun([step_path],
+                                           stdout=out_path,
+                                           stderr=err_path,
+                                           cb_stdout=msg_cb)
 
-        out_log = Path(step_path + '.out').read_text()
-        err_log = Path(step_path + '.err').read_text()
-
-        if proc.returncode != 0:
+        if ret != 0:
             app.sentry.context.merge({'extra': {
                 'out_log_tail': out_log[-400:],
                 'err_log_tail': err_log[-400:],
