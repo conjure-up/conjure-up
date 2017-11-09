@@ -18,6 +18,7 @@ from itertools import chain
 from pathlib import Path
 from subprocess import PIPE, Popen, check_call, check_output
 
+import aiofiles
 import yaml
 from bundleplacer.bundle import Bundle
 from bundleplacer.charmstore_api import MetadataController
@@ -129,36 +130,76 @@ def run_attach(cmd, output_cb=None):
 
 
 async def arun(cmd, input=None, check=False, env=None, encoding='utf8',
-               stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-               stderr=subprocess.PIPE, **kwargs):
+               stdin=PIPE, stdout=PIPE, stderr=PIPE, cb_stdout=None,
+               cb_stderr=None, **kwargs):
     """ Run a command using asyncio.
+
+    If ``stdout`` or ``stderr`` are strings, they will treated as filenames
+    and the data from the proces will be written (streamed) to them. In this
+    case, ``cb_stdout`` and ``cb_stderr`` can be given as callbacks to call
+    with each line from the respective handle.
 
     :param list cmd: List containing the command to run, plus any args.
     :param dict **kwargs:
     """
     env = dict(app.env, **(env or {}))
 
-    proc = await asyncio.create_subprocess_exec(*cmd,
-                                                stdin=stdin,
-                                                stdout=stdout,
-                                                stderr=stderr,
-                                                env=env,
-                                                **kwargs)
+    outf = None
+    errf = None
+    try:
+        if isinstance(stdout, str):
+            outf = await aiofiles.open(stdout, 'w')
+            stdout = PIPE
+        if isinstance(stderr, str):
+            errf = await aiofiles.open(stderr, 'w')
+            stderr = PIPE
 
-    if isinstance(input, str):
-        input = input.encode(encoding)
+        proc = await asyncio.create_subprocess_exec(*cmd,
+                                                    stdin=stdin,
+                                                    stdout=stdout,
+                                                    stderr=stderr,
+                                                    env=env,
+                                                    **kwargs)
 
-    stdout_data, stderr_data = await proc.communicate(input)
+        data = {}
 
-    if stdout_data is not None:
-        stdout_data = stdout_data.decode(encoding)
-    if stderr_data is not None:
-        stderr_data = stderr_data.decode(encoding)
+        async def tstream(source_name, sink, ui_cb):
+            source = getattr(proc, source_name)
+            while proc.returncode is None:
+                async for line in source:
+                    line = line.decode(encoding)
+                    if ui_cb:
+                        ui_cb(line)
+                    data.setdefault(source_name, []).append(line)
+                    if sink:
+                        await sink.write(line)
+                        await sink.flush()
+                await asyncio.sleep(0.01)
+
+        tasks = []
+        if input:
+            if isinstance(input, str):
+                input = input.encode(encoding)
+                tasks.append(proc._feed_stdin(input))
+        if proc.stdout:
+            tasks.append(tstream('stdout', outf, cb_stdout))
+        if proc.stderr:
+            tasks.append(tstream('stderr', errf, cb_stderr))
+
+        await asyncio.gather(*tasks)
+        await proc.wait()
+    finally:
+        if outf:
+            await outf.close()
+        if errf:
+            await errf.close()
+
+    stdout_data = ''.join(data.get('stdout', [])) or None
+    stderr_data = ''.join(data.get('stderr', [])) or None
 
     if check and proc.returncode != 0:
         raise subprocess.CalledProcessError(proc.returncode,
-                                            cmd,
-                                            stdout_data, stderr_data)
+                                            cmd, stdout_data, stderr_data)
     return (proc.returncode, stdout_data, stderr_data)
 
 

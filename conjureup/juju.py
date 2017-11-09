@@ -9,14 +9,12 @@ from pathlib import Path
 from subprocess import DEVNULL, PIPE, CalledProcessError
 from tempfile import NamedTemporaryFile
 
-import aiofiles
 import yaml
 from bundleplacer.charmstore_api import CharmStoreID
 from juju.model import Model
 
-from conjureup import consts, events, utils
+from conjureup import consts, errors, events, utils
 from conjureup.app_config import app
-from conjureup.errors import ControllerNotFoundException, DeploymentFailure
 from conjureup.utils import is_linux, juju_path, run, spew
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
@@ -53,7 +51,7 @@ def get_bootstrap_config(controller_name):
         raise Exception("Could not read Juju's bootstrap-config.yaml")
     cd = bootstrap_config['controllers'].get(controller_name, None)
     if cd is None:
-        raise ControllerNotFoundException(
+        raise errors.ControllerNotFoundException(
             "'{}' not found in Juju's "
             "bootstrap-config.yaml".format(controller_name))
     return cd
@@ -172,21 +170,14 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
         cmd.append("--debug")
     app.log.debug("bootstrap cmd: {}".format(cmd))
 
-    pathbase = os.path.join(app.config['spell-dir'],
-                            '{}-bootstrap').format(app.provider.controller)
-    with open(pathbase + ".out", 'w') as outf:
-        with open(pathbase + ".err", 'w') as errf:
-            proc = await asyncio.create_subprocess_exec(*cmd,
-                                                        stdout=outf,
-                                                        stderr=errf,
-                                                        env=app.env)
-            app.log.debug('waiting for proc')
-            await proc.wait()
-            app.log.debug('proc done')
-    if proc.returncode < 0:
-        raise Exception('Bootstrap killed by user: {}'.format(
-            proc.returncode))
-    elif proc.returncode > 0:
+    log_file = '{}-bootstrap'.format(app.provider.controller)
+    path_base = str(Path(app.config['spell-dir']) / log_file)
+    out_path = path_base + '.out'
+    err_path = path_base + '.err'
+    rc, _, _ = await utils.arun(cmd, stdout=out_path, stderr=err_path)
+    if rc < 0:
+        raise errors.BootstrapInterrupt('Bootstrap killed by user')
+    elif rc > 0:
         return False
     events.ModelAvailable.set()
     return True
@@ -889,14 +880,12 @@ async def wait_for_deployment(retries=3):
            "-vwm", "{}:{}".format(app.provider.controller,
                                   app.provider.model)]
 
-    out_path = Path(app.config['spell-dir']) / 'deploy-wait.out'
-    err_path = Path(app.config['spell-dir']) / 'deploy-wait.err'
+    out_path = str(Path(app.config['spell-dir']) / 'deploy-wait.out')
+    err_path = str(Path(app.config['spell-dir']) / 'deploy-wait.err')
 
-    async with aiofiles.open(str(out_path), 'w') as outf:
-        async with aiofiles.open(str(err_path), 'w') as errf:
-            ret, _, _ = await utils.arun(cmd, stdout=outf, stderr=errf)
+    ret, _, err_log = await utils.arun(cmd, stdout=out_path, stderr=err_path)
     if ret != 0:
-        err_log_tail = err_path.read_text().splitlines()[-10:]
+        err_log_tail = err_log.splitlines()[-10:]
         app.log.error('\n'.join(err_log_tail))
-        raise DeploymentFailure(
+        raise errors.DeploymentFailure(
             "Some applications failed to start successfully.")
