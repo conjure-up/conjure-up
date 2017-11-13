@@ -19,16 +19,15 @@ sysdeps:
 
 travis-sysdeps:
 	@sudo add-apt-repository -y ppa:jonathonf/python-3.6
+	@sudo add-apt-repository -y ppa:ubuntu-lxc/stable
 	@sudo apt-get update -q
-	@sudo apt-get remove -qy lxd lxd-client
-	@sudo apt-get -y install jq bsdtar python3.6-dev make snapd
+	@sudo apt-get -qyf install make snapd lxd lxd-client
 	@sudo pip install tox
-	@sudo snap install juju --classic --edge
-	@sudo snap refresh lxd --edge
+	@sudo snap install snapcraft --edge --classic
 
 .PHONY: install
 install: snap
-	@sudo snap install $(NAME)_$(VERSION)_amd64.snap --classic --dangerous
+	@sudo snap install $(NAME)_$(VERSION)*_amd64.snap --classic --dangerous
 
 release: update-version clean test snap
 	@snapcraft push $(NAME)_$(VERSION)_amd64.snap --release $(CHANNEL)
