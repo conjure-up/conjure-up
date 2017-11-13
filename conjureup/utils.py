@@ -194,8 +194,8 @@ async def arun(cmd, input=None, check=False, env=None, encoding='utf8',
         if errf:
             await errf.close()
 
-    stdout_data = ''.join(data.get('stdout', [])) or None
-    stderr_data = ''.join(data.get('stderr', [])) or None
+    stdout_data = ''.join(data.get('stdout', [])) if proc.stdout else None
+    stderr_data = ''.join(data.get('stderr', [])) if proc.stderr else None
 
     if check and proc.returncode != 0:
         raise subprocess.CalledProcessError(proc.returncode,
