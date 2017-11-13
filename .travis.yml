@@ -21,12 +21,14 @@ env:
 before_script:
   - sudo addgroup lxd || true
   - sudo usermod -a -G lxd $USER || true
-  - sudo ln -s /snap/bin/juju /usr/bin/juju
-  - sudo ln -s /snap/bin/lxc /usr/bin/lxc
 script:
   - tox -e py36,flake,isort
-  - tox -e conjure-dev
-  - sudo -E su $USER -c "source conjure-dev/bin/activate && conjure-up -d --notrack --noreport ghost localhost test-controller test-model"
+  - snapcraft
+  - sudo snap install ./conjure-up*.snap
+  - sudo -E su $USER -c "lxc finger"
+  - sudo -E su $USER -c "lxd init --auto"
+  - sudo -E su $USER -c "lxc network create lxdbr0 ipv4.nat=true ipv4.address=auto ipv6.nat=false ipv6.address=none"
+  - sudo -E su $USER -c "/snap/bin/conjure-up -d --notrack --noreport ghost localhost test-controller test-model"
 after_script:
   - cat ~/.cache/conjure-up/conjure-up.log
   - cat ~/.cache/conjure-up/ghost/*.err
