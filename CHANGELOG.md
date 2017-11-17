@@ -1,5 +1,27 @@
 # Change Log
 
+## [2.4.1](https://github.com/conjure-up/conjure-up/tree/2.4.1) (2017-11-17)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.4.0...2.4.1)
+
+**Fixed bugs:**
+
+- AttributeError: 'NoneType' object has no attribute 'strip' when looking for lxd server version [\#1229](https://github.com/conjure-up/conjure-up/issues/1229)
+
+**Closed issues:**
+
+- Replace charmhelpers with kv [\#1231](https://github.com/conjure-up/conjure-up/issues/1231)
+- attributeerror nonetype object has no attribute 'splitlines' [\#1223](https://github.com/conjure-up/conjure-up/issues/1223)
+- Bootstrap, deploy-wait, and step log files empty in snap [\#1220](https://github.com/conjure-up/conjure-up/issues/1220)
+- Error on post-deploy of kubernete add-ons deis workflow!​ [\#1214](https://github.com/conjure-up/conjure-up/issues/1214)
+
+**Merged pull requests:**
+
+- Replace charmhelpers with kv [\#1234](https://github.com/conjure-up/conjure-up/pull/1234) ([johnsca](https://github.com/johnsca))
+- Be more explicit in what path to use for LXD/LXC error messages [\#1233](https://github.com/conjure-up/conjure-up/pull/1233) ([battlemidget](https://github.com/battlemidget))
+- Fix NoneType has no attribute splitlines [\#1227](https://github.com/conjure-up/conjure-up/pull/1227) ([johnsca](https://github.com/johnsca))
+- Fix detail log files not being written to [\#1221](https://github.com/conjure-up/conjure-up/pull/1221) ([johnsca](https://github.com/johnsca))
+- Differentiate DeploymentFailure error [\#1217](https://github.com/conjure-up/conjure-up/pull/1217) ([johnsca](https://github.com/johnsca))
+
 ## [2.4.0](https://github.com/conjure-up/conjure-up/tree/2.4.0) (2017-11-02)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.3.1...2.4.0)
 
@@ -186,7 +208,6 @@
 - cloud native support [\#895](https://github.com/conjure-up/conjure-up/issues/895)
 - Document how to access containers deployed with Autopilot [\#881](https://github.com/conjure-up/conjure-up/issues/881)
 - Kubectl not finding the "config" file after deployment with error "The connection to the server localhost:8080 was refused" [\#790](https://github.com/conjure-up/conjure-up/issues/790)
-- Adding machines with kvm causes conjure-up Oops \(localhost controller\) [\#610](https://github.com/conjure-up/conjure-up/issues/610)
 - document extending sudo timeout [\#1104](https://github.com/conjure-up/conjure-up/issues/1104)
 - remove status icon in steps view and keep only in runsteps [\#1102](https://github.com/conjure-up/conjure-up/issues/1102)
 - Error on macOS trying to deploy using local controller with MAAS [\#1083](https://github.com/conjure-up/conjure-up/issues/1083)
@@ -196,7 +217,6 @@
 - Improve handling of "cannot get user details" error during JAAS registration [\#745](https://github.com/conjure-up/conjure-up/issues/745)
 - Snap install conjure-up doesn't work if juju is installed [\#719](https://github.com/conjure-up/conjure-up/issues/719)
 - conjure-up continue operations [\#624](https://github.com/conjure-up/conjure-up/issues/624)
-- on error, conjure-up presents 'quit' option that doesn't quit  [\#607](https://github.com/conjure-up/conjure-up/issues/607)
 
 **Merged pull requests:**
 
@@ -598,15 +618,12 @@
 - Snap based installation fails [\#691](https://github.com/conjure-up/conjure-up/issues/691)
 - snap install conjure-up --classic --stable fails in lxd privileged container [\#689](https://github.com/conjure-up/conjure-up/issues/689)
 - conjure-up openstack crash [\#671](https://github.com/conjure-up/conjure-up/issues/671)
-- Unable to conjure-up kubernetes with OpenStack [\#617](https://github.com/conjure-up/conjure-up/issues/617)
 - document running localhost provided spells on remote systems [\#672](https://github.com/conjure-up/conjure-up/issues/672)
 - Document Allow specifying model name in headless [\#670](https://github.com/conjure-up/conjure-up/issues/670)
 - log lxd and juju versions [\#668](https://github.com/conjure-up/conjure-up/issues/668)
 - Documentation: need to install snapd manually [\#658](https://github.com/conjure-up/conjure-up/issues/658)
 - add machine count to destroy confirmation page [\#627](https://github.com/conjure-up/conjure-up/issues/627)
 - track cloud selections [\#622](https://github.com/conjure-up/conjure-up/issues/622)
-- num\_units is not necessary with the architecture view [\#615](https://github.com/conjure-up/conjure-up/issues/615)
-- docs: developer documentation for step writing needs to cover stdout being JSON only [\#614](https://github.com/conjure-up/conjure-up/issues/614)
 
 **Merged pull requests:**
 
@@ -659,9 +676,6 @@
 - gnome-terminal colors get brighter after exiting conjure-up [\#632](https://github.com/conjure-up/conjure-up/issues/632)
 - Support deploying to other regions in a cloud [\#630](https://github.com/conjure-up/conjure-up/issues/630)
 - Conjure-up fails on egress-filtered network due to GA unavailability [\#629](https://github.com/conjure-up/conjure-up/issues/629)
-- Oops when running false for required in a step [\#611](https://github.com/conjure-up/conjure-up/issues/611)
-- conjure-up quits if a charm hook error happens [\#609](https://github.com/conjure-up/conjure-up/issues/609)
-- conjure-up ui does not work on 80x24 terminal [\#605](https://github.com/conjure-up/conjure-up/issues/605)
 
 **Merged pull requests:**
 
@@ -673,9 +687,6 @@
 - Re-adds percentage and pads the logging a bit [\#620](https://github.com/conjure-up/conjure-up/pull/620) ([battlemidget](https://github.com/battlemidget))
 - Fixes \#595 [\#619](https://github.com/conjure-up/conjure-up/pull/619) ([battlemidget](https://github.com/battlemidget))
 - Fix 541 [\#618](https://github.com/conjure-up/conjure-up/pull/618) ([mikemccracken](https://github.com/mikemccracken))
-- bson python library no longer needed [\#616](https://github.com/conjure-up/conjure-up/pull/616) ([battlemidget](https://github.com/battlemidget))
-- Fixes \#495 [\#613](https://github.com/conjure-up/conjure-up/pull/613) ([battlemidget](https://github.com/battlemidget))
-- Point to upstream bug url for reporting bugs [\#612](https://github.com/conjure-up/conjure-up/pull/612) ([battlemidget](https://github.com/battlemidget))
 
 ## [2.1.0-pre-snappy](https://github.com/conjure-up/conjure-up/tree/2.1.0-pre-snappy) (2017-01-14)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.0.2...2.1.0-pre-snappy)
