@@ -6,12 +6,11 @@
 
 
 import json
-import os
 import tempfile
 import unittest
 from unittest.mock import MagicMock
 
-from charmhelpers.core import unitdata
+from kv import KV
 from ubuntui.widgets.input import StringEditor
 
 from conjureup.app_config import AppConfig
@@ -29,8 +28,7 @@ class AppConfigTestCase(unittest.TestCase):
         ]
         self.app = AppConfig()
         self.db_file = tempfile.NamedTemporaryFile()
-        os.environ['UNIT_STATE_DB'] = self.db_file.name
-        self.app.state = unitdata.kv()
+        self.app.state = KV(self.db_file.name)
         self.app.provider = AWS()
         self.app.provider.controller = "fake-tester-controller"
         self.app.provider.model = "fake-tester-model"

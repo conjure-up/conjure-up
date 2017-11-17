@@ -139,8 +139,7 @@ class StepModel:
                                                   self.name,
                                                   phase.value,
                                                   key)
-        app.state.set(key, value)
-        app.state.flush()
+        app.state[key] = value
 
     @property
     def step_dir(self):
