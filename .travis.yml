@@ -30,4 +30,4 @@ script:
 after_script:
   - cat ~/.cache/conjure-up/conjure-up.log
   - cat ~/.cache/conjure-up/ghost/*.err
-  - cat ~/.cache/conjure-up/ghost/steps/*.err
+  - cat ~/.cache/conjure-up/ghost/steps/*/*.err
