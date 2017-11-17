@@ -147,8 +147,8 @@ class CloudView(WidgetWrap):
                                     "  $ sudo snap install lxd\n"
                                     "  $ sudo usermod -a -G lxd <youruser>\n"
                                     "  $ newgrp lxd\n"
-                                    "  $ lxd init --auto\n"
-                                    "  $ lxc network create lxdbr0 "
+                                    "  $ /snap/bin/lxd init --auto\n"
+                                    "  $ /snap/bin/lxc network create lxdbr0 "
                                     "ipv4.address=auto ipv4.nat=true "
                                     "ipv6.address=none ipv6.nat=false "
                                 ))
