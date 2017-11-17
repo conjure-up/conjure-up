@@ -16,7 +16,7 @@ import uuid
 
 import raven
 import yaml
-from charmhelpers.core import unitdata
+from kv import KV
 from prettytable import PrettyTable
 from raven.transport.requests import RequestsHTTPTransport
 from termcolor import colored
@@ -222,10 +222,11 @@ def main():
         os.makedirs(opts.cache_dir)
 
     # Application Config
-    os.environ['UNIT_STATE_DB'] = os.path.join(opts.cache_dir, '.state.db')
-    app.state = unitdata.kv()
+    kv_db = os.path.join(opts.cache_dir, '.state.db')
+    app.state = KV(kv_db)
 
     app.env = os.environ.copy()
+    app.env['KV_DB'] = kv_db
     app.config = {'metadata': None}
     app.argv = opts
     app.log = setup_logging(app,

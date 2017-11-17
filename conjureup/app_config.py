@@ -193,7 +193,7 @@ class AppConfig:
                 {'extra-info': self.to_json()})
             self.log.info('State saved in model config')
             # Check for existing key and clear it
-            self.state.unset(self._internal_state_key)
+            self.state.pop(self._internal_state_key, None)
         else:
             self.state.set(self._internal_state_key, self.to_json())
             self.state.flush()
