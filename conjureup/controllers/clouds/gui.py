@@ -1,8 +1,13 @@
-from conjureup import controllers, juju, utils
+import asyncio
+
+from juju.utils import run_with_interrupt
+
+from conjureup import controllers, events, juju, utils
 from conjureup.app_config import app
 from conjureup.consts import CUSTOM_PROVIDERS
 from conjureup.models.provider import Localhost as LocalhostProvider
 from conjureup.models.provider import SchemaErrorUnknownCloud, load_schema
+from conjureup.models.provider import LocalhostError, LocalhostJSONError
 from conjureup.telemetry import track_event, track_screen
 from conjureup.ui.views.cloud import CloudView
 
@@ -10,6 +15,7 @@ from .common import BaseCloudController
 
 
 class CloudsController(BaseCloudController):
+    cancel_monitor = asyncio.Event()
 
     def __init__(self):
         self.view = None
@@ -46,15 +52,13 @@ class CloudsController(BaseCloudController):
         # filter to only public clouds
         public_clouds = sorted(
             name for name, info in all_clouds.items()
-            if info['defined'] == 'public' and
-            cloud_types[name] in compatible_clouds)
+            if info['defined'] == 'public')
         # filter to custom clouds
         # exclude localhost because we treat that as "configuring a new cloud"
         custom_clouds = sorted(
             name for name, info in all_clouds.items()
             if info['defined'] != 'public' and
-            cloud_types[name] != 'localhost' and
-            cloud_types[name] in compatible_clouds)
+            cloud_types[name] != 'localhost')
 
         excerpt = app.config.get(
             'description',
@@ -63,6 +67,7 @@ class CloudsController(BaseCloudController):
         self.view = CloudView(app,
                               public_clouds,
                               custom_clouds,
+                              compatible_clouds,
                               cb=self.finish)
 
         if 'localhost' in compatible_clouds:
@@ -80,8 +85,27 @@ class CloudsController(BaseCloudController):
             excerpt=excerpt
         )
         app.ui.set_body(self.view)
-        app.ui.set_footer('Please press [ENTER] on highlighted '
-                          'Cloud to proceed.')
+        app.ui.set_footer('')
+
+    async def _monitor_localhost(self, provider, cb):
+        """ Checks that localhost/lxd is available and listening,
+        updates widget accordingly
+        """
+
+        provider._set_lxd_dir_env()
+        while not self.cancel_monitor.is_set():
+            try:
+                client_compatible = await provider.is_client_compatible()
+                server_compatible = await provider.is_server_compatible()
+                if client_compatible and server_compatible:
+                    events.LXDAvailable.set()
+                    self.cancel_monitor.set()
+                    cb()
+                    return
+            except (LocalhostError, LocalhostJSONError, FileNotFoundError):
+                pass
+            await run_with_interrupt(asyncio.sleep(2),
+                                     self.cancel_monitor)
 
 
 _controller_class = CloudsController
