@@ -358,8 +358,13 @@ def get_compatible_clouds(cloud_types=None):
     Returns:
     List of cloud types
     """
-    clouds = get_clouds()
-    cloud_types = set(cloud_types or (c['type'] for c in clouds.values()))
+    if cloud_types is None:
+        clouds = get_clouds()
+        cloud_types = set(c['type'] for c in clouds.values())
+        # custom providers don't show up in list-clouds but are valid types
+        cloud_types |= set(consts.CUSTOM_PROVIDERS)
+    else:
+        cloud_types = set(cloud_types)
 
     _normalize_cloud_types(cloud_types)
 
