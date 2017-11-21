@@ -16,6 +16,7 @@ import uuid
 
 import raven
 import yaml
+from kv import KV
 from prettytable import PrettyTable
 from raven.transport.requests import RequestsHTTPTransport
 from termcolor import colored
@@ -39,7 +40,6 @@ from conjureup.models.provider import SchemaErrorUnknownCloud, load_schema
 from conjureup.models.step import StepModel
 from conjureup.telemetry import SENTRY_DSN, track_event, track_screen
 from conjureup.ui import ConjureUI
-from kv import KV
 
 
 def parse_options(argv):

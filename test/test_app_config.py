@@ -10,11 +10,11 @@ import tempfile
 import unittest
 from unittest.mock import MagicMock
 
+from kv import KV
 from ubuntui.widgets.input import StringEditor
 
 from conjureup.app_config import AppConfig
 from conjureup.models.provider import AWS, Field, Form
-from kv import KV
 
 from .helpers import AsyncMock, test_loop
 
