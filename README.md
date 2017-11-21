@@ -1,4 +1,4 @@
-# conjure-up [![Build Status](https://travis-ci.org/conjure-up/conjure-up.svg?branch=master)](https://travis-ci.org/conjure-up/conjure-up) [![Rocket.Chat](https://demo.rocket.chat/images/join-chat.svg)](https://rocket.ubuntu.com/channel/conjure-up)
+# conjure-up [![Build Status](https://travis-ci.org/conjure-up/conjure-up.svg?branch=master)](https://travis-ci.org/conjure-up/conjure-up)
 > Installing big software like whoa.
 
 # what it is
