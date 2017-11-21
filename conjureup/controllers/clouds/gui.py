@@ -6,8 +6,12 @@ from conjureup import controllers, events, juju, utils
 from conjureup.app_config import app
 from conjureup.consts import CUSTOM_PROVIDERS
 from conjureup.models.provider import Localhost as LocalhostProvider
-from conjureup.models.provider import SchemaErrorUnknownCloud, load_schema
-from conjureup.models.provider import LocalhostError, LocalhostJSONError
+from conjureup.models.provider import (
+    LocalhostError,
+    LocalhostJSONError,
+    SchemaErrorUnknownCloud,
+    load_schema
+)
 from conjureup.telemetry import track_event, track_screen
 from conjureup.ui.views.cloud import CloudView
 
