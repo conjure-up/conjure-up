@@ -48,6 +48,10 @@ async def do_deploy(msg_cb):
 
 async def wait_for_applications(msg_cb):
     await events.DeploymentComplete.wait()
+
+    for step in app.steps:
+        await step.before_wait(msg_cb=msg_cb)
+
     msg = 'Waiting for deployment to settle.'
     app.log.info(msg)
     msg_cb(msg)
