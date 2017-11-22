@@ -86,6 +86,10 @@ class StepModel:
         return self._has_phase(PHASES.BEFORE_DEPLOY)
 
     @property
+    def has_before_wait(self):
+        return self._has_phase(PHASES.BEFORE_WAIT)
+
+    @property
     def has_after_deploy(self):
         return self._has_phase(PHASES.AFTER_DEPLOY)
 
@@ -103,6 +107,11 @@ class StepModel:
         """ before-deploy phase
         """
         return await self.run(PHASES.BEFORE_DEPLOY, msg_cb)
+
+    async def before_wait(self, msg_cb):
+        """ before-deploy phase
+        """
+        return await self.run(PHASES.BEFORE_WAIT, msg_cb)
 
     async def after_deploy(self, msg_cb):
         """ after-deploy phase
