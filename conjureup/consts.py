@@ -28,4 +28,5 @@ class PHASES(Enum):
     VALIDATE_INPUT = 'validate-input'
     AFTER_INPUT = 'after-input'
     BEFORE_DEPLOY = 'before-deploy'
+    BEFORE_WAIT = 'before-wait'
     AFTER_DEPLOY = 'after-deploy'
