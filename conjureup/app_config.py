@@ -175,7 +175,9 @@ class AppConfig:
     def from_json(self, data):
         """ Deserializes application state and updates app_config
         """
-        state = json.loads(data.decode('utf8'))
+        if isinstance(data, bytes):
+            data = data.decode('utf8')
+        state = json.loads(data)
         for k, v in state.items():
             try:
                 getattr(self, k)
@@ -195,8 +197,7 @@ class AppConfig:
             # Check for existing key and clear it
             self.state.pop(self._internal_state_key, None)
         else:
-            self.state.set(self._internal_state_key, self.to_json())
-            self.state.flush()
+            self.state[self._internal_state_key] = self.to_json()
             self.log.info('State saved')
 
     async def restore(self):
@@ -212,7 +213,7 @@ class AppConfig:
             result = self.state.get(self._internal_state_key)
             if result:
                 self.log.info("Found cached state, reloading.")
-                self.from_json(result.decode('utf8'))
+                self.from_json(result)
         except json.JSONDecodeError as e:
             # Dont fail fatally if state information is incorrect. Just log it
             # and move on
