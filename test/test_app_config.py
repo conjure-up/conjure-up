@@ -75,7 +75,7 @@ class AppConfigTestCase(unittest.TestCase):
         self.app.juju.authenticated = False
 
         with test_loop() as loop:
-            yield self.app.save()
+            loop.run_until_complete(self.app.save())
             loop.run_until_complete(self.app.restore())
 
         results_json = self.app.state.get(self.app._internal_state_key)
