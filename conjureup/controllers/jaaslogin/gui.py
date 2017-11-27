@@ -66,7 +66,6 @@ class JaaSLoginController:
         app.ui.set_body(self.view)
         self.authenticating.set()
         app.loop.create_task(self._refresh())
-        self._refresh()
 
     async def _refresh(self):
         while self.authenticating.is_set():
