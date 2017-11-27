@@ -79,9 +79,12 @@ class AppConfigTestCase(unittest.TestCase):
             loop.run_until_complete(self.app.restore())
 
         results_json = self.app.state.get(self.app._internal_state_key)
-        results = json.loads(results_json.decode('utf8'))
+        results = json.loads(results_json)
 
-        assert self.app.app.controller == results['controller']
+        # FIXME: provider is currently blacklisted, so we can't save or
+        # restore state for it; adding that will take a bit of work
+        # assert self.app.provider.controller == results['controller']
+        assert self.app.config['spell'] == results['config']['spell']
 
     @unittest.skip("Also need serialize/deserialize during "
                    "save/restore of app.provider class")
