@@ -14,7 +14,7 @@ from bundleplacer.charmstore_api import CharmStoreID
 from juju.model import Model
 
 from conjureup import consts, errors, events, utils
-from conjureup.app_config import app
+from conjureup.app_config import AppConfigAttributeError, app
 from conjureup.utils import is_linux, juju_path, run, spew
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
@@ -26,6 +26,10 @@ class JujuBinaryNotFound(Exception):
     pass
 
 
+class JujuAttributeError(Exception):
+    pass
+
+
 def _check_bin_candidates(candidates, bin_property):
     """ Checks a list of binary paths to verify they exist and are
     executable
@@ -33,9 +37,12 @@ def _check_bin_candidates(candidates, bin_property):
     # search candidate paths, in order, for the binary (ie juju, juju-wait)
     # we don't use $PATH because we have definite preferences which one we use
     # and we don't want to leave it up to the user
+    if not hasattr(app.juju, bin_property):
+        raise AppConfigAttributeError(
+            "Unknown juju property: {}".format(bin_property))
     for candidate in candidates:
         if os.access(candidate, os.X_OK):
-            bin_property = candidate
+            setattr(app.juju, bin_property, candidate)
             app.log.debug("{} candidate found".format(bin_property))
             break
     else:
@@ -53,7 +60,7 @@ def set_bin_path():
         '/usr/bin/juju',
         '/usr/local/bin/juju',
     ]
-    _check_bin_candidates(candidates, app.juju.bin_path)
+    _check_bin_candidates(candidates, 'bin_path')
     # Update $PATH so that we make sure this candidate is used
     # first.
     app.env['PATH'] = "{}:{}".format(Path(app.juju.bin_path).parent,
@@ -70,7 +77,7 @@ def set_wait_path():
         '/usr/local/bin/juju-wait',
     ]
 
-    _check_bin_candidates(candidates, app.juju.wait_path)
+    _check_bin_candidates(candidates, 'wait_path')
 
 
 def read_config(name):
