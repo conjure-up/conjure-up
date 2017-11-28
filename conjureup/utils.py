@@ -265,7 +265,7 @@ async def can_sudo(password=None):
 def juju_version():
     """ Get current Juju version
     """
-    cmd = run_script('juju version')
+    cmd = run_script('{} version'.format(app.juju.bin_path))
     if cmd.returncode == 0:
         return parse_version(cmd.stdout.decode().strip())
     else:
