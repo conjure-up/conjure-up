@@ -25,6 +25,7 @@ travis-sysdeps:
 	@sudo pip install tox
 	@sudo snap install juju --classic --edge
 	@sudo snap refresh lxd --edge
+	@sudo snap install juju-wait --classic
 
 .PHONY: install
 install: snap

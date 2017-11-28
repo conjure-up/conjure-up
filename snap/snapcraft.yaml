@@ -18,6 +18,9 @@ apps:
     - conjure-down
   juju:
     command: wrappers/juju
+  juju-wait:
+    command: wrappers/juju-wait
+
 parts:
   conjure-up:
     source: .
