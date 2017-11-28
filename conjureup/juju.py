@@ -26,32 +26,51 @@ class JujuBinaryNotFound(Exception):
     pass
 
 
+def _check_bin_candidates(candidates, bin_property):
+    """ Checks a list of binary paths to verify they exist and are
+    executable
+    """
+    # search candidate paths, in order, for the binary (ie juju, juju-wait)
+    # we don't use $PATH because we have definite preferences which one we use
+    # and we don't want to leave it up to the user
+    for candidate in candidates:
+        if os.access(candidate, os.X_OK):
+            bin_property = candidate
+            app.log.debug("{} candidate found".format(bin_property))
+            break
+    else:
+        raise JujuBinaryNotFound(
+            "Unable to locate a candidate executable for {}.".format(
+                candidates))
+
+
 def set_bin_path():
     """ Sets the juju binary path
     """
-    if utils.is_darwin():
-        app.juju.bin_path = '/usr/local/bin/juju'
-    elif Path('/snap/bin/juju').exists():
-        app.juju.bin_path = '/snap/bin/juju'
-    elif Path('/snap/bin/conjure-up.juju').exists():
-        app.juju.bin_path = '/snap/bin/conjure-up.juju'
-    else:
-        raise JujuBinaryNotFound("Unable to locate a juju binary.")
-    app.log.debug("juju binary path: {}".format(app.juju.bin_path))
+    candidates = [
+        '/snap/bin/juju',
+        '/snap/bin/conjure-up.juju',
+        '/usr/bin/juju',
+        '/usr/local/bin/juju',
+    ]
+    _check_bin_candidates(candidates, app.juju.bin_path)
+    # Update $PATH so that we make sure this candidate is used
+    # first.
+    app.env['PATH'] = "{}:{}".format(Path(app.juju.bin_path).parent,
+                                     app.env['PATH'])
 
 
 def set_wait_path():
     """ Sets juju-wait path
     """
-    if utils.is_darwin():
-        app.juju.wait_path = '/usr/local/bin/juju-wait'
-    elif Path('/snap/bin/juju-wait').exists():
-        app.juju.wait_path = '/snap/bin/juju-wait'
-    elif Path('/snap/bin/conjure-up.juju-wait').exists():
-        app.juju.wait_path = '/snap/bin/conjure-up.juju-wait'
-    else:
-        raise JujuBinaryNotFound("Unable to locate a juju-wait binary.")
-    app.log.debug("juju-wait binary path: {}".format(app.juju.wait_path))
+    candidates = [
+        '/snap/bin/juju-wait',
+        '/snap/bin/conjure-up.juju-wait',
+        '/usr/bin/juju-wait',
+        '/usr/local/bin/juju-wait',
+    ]
+
+    _check_bin_candidates(candidates, app.juju.wait_path)
 
 
 def read_config(name):
