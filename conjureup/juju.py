@@ -14,20 +14,12 @@ from bundleplacer.charmstore_api import CharmStoreID
 from juju.model import Model
 
 from conjureup import consts, errors, events, utils
-from conjureup.app_config import AppConfigAttributeError, app
+from conjureup.app_config import app
 from conjureup.utils import is_linux, juju_path, run, spew
 
 JUJU_ASYNC_QUEUE = "juju-async-queue"
 
 PENDING_DEPLOYS = 0
-
-
-class JujuBinaryNotFound(Exception):
-    pass
-
-
-class JujuAttributeError(Exception):
-    pass
 
 
 def _check_bin_candidates(candidates, bin_property):
@@ -38,7 +30,7 @@ def _check_bin_candidates(candidates, bin_property):
     # we don't use $PATH because we have definite preferences which one we use
     # and we don't want to leave it up to the user
     if not hasattr(app.juju, bin_property):
-        raise AppConfigAttributeError(
+        raise errors.AppConfigAttributeError(
             "Unknown juju property: {}".format(bin_property))
     for candidate in candidates:
         if os.access(candidate, os.X_OK):
@@ -46,7 +38,7 @@ def _check_bin_candidates(candidates, bin_property):
             app.log.debug("{} candidate found".format(bin_property))
             break
     else:
-        raise JujuBinaryNotFound(
+        raise errors.JujuBinaryNotFound(
             "Unable to locate a candidate executable for {}.".format(
                 candidates))
 

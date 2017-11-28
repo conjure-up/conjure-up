@@ -12,3 +12,11 @@ class ControllerNotFoundException(Exception):
 
 class DeploymentFailure(Exception):
     "A failure from a deployed model"
+
+
+class JujuBinaryNotFound(Exception):
+    "A failure finding juju or juju-wait executable"
+
+
+class AppConfigAttributeError(Exception):
+    "A failure to lookup attribute in app_config object"
