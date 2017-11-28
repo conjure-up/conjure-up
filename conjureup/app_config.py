@@ -27,7 +27,13 @@ juju = SimpleNamespace(
     client=None,
 
     # Is authenticated?
-    authenticated=False
+    authenticated=False,
+
+    # Path to juju binary
+    bin_path=None,
+
+    # Path to juju-wait binary
+    wait_path=None
 )
 
 

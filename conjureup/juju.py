@@ -22,6 +22,38 @@ JUJU_ASYNC_QUEUE = "juju-async-queue"
 PENDING_DEPLOYS = 0
 
 
+class JujuBinaryNotFound(Exception):
+    pass
+
+
+def set_bin_path():
+    """ Sets the juju binary path
+    """
+    if utils.is_darwin():
+        app.juju.bin_path = '/usr/local/bin/juju'
+    elif Path('/snap/bin/juju').exists():
+        app.juju.bin_path = '/snap/bin/juju'
+    elif Path('/snap/bin/conjure-up.juju').exists():
+        app.juju.bin_path = '/snap/bin/conjure-up.juju'
+    else:
+        raise JujuBinaryNotFound("Unable to locate a juju binary.")
+    app.log.debug("juju binary path: {}".format(app.juju.bin_path))
+
+
+def set_wait_path():
+    """ Sets juju-wait path
+    """
+    if utils.is_darwin():
+        app.juju.wait_path = '/usr/local/bin/juju-wait'
+    elif Path('/snap/bin/juju-wait').exists():
+        app.juju.wait_path = '/snap/bin/juju-wait'
+    elif Path('/snap/bin/conjure-up.juju-wait').exists():
+        app.juju.wait_path = '/snap/bin/conjure-up.juju-wait'
+    else:
+        raise JujuBinaryNotFound("Unable to locate a juju-wait binary.")
+    app.log.debug("juju-wait binary path: {}".format(app.juju.wait_path))
+
+
 def read_config(name):
     """ Reads a juju config file
 
@@ -136,7 +168,8 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
         app.log.debug("Bootstrapping to set region: {}")
         cloud = "{}/{}".format(app.provider.cloud, app.provider.region)
 
-    cmd = ["juju", "bootstrap", cloud, controller, "--default-model", model]
+    cmd = [app.juju.bin_path, "bootstrap",
+           cloud, controller, "--default-model", model]
 
     def add_config(k, v):
         cmd.extend(["--config", "{}={}".format(k, v)])
@@ -250,7 +283,8 @@ def autoload_credentials():
     """ Automatically checks known places for cloud credentials
     """
     try:
-        run('juju autoload-credentials', shell=True, check=True)
+        run('{} autoload-credentials'.format(
+            app.juju.bin_path), shell=True, check=True)
     except CalledProcessError:
         return False
     return True
@@ -293,7 +327,7 @@ def get_credentials(secrets=True):
     Returns:
     List of credentials
     """
-    cmd = 'juju list-credentials --format yaml'
+    cmd = '{} list-credentials --format yaml'.format(app.juju.bin_path)
     if secrets:
         cmd += ' --show-secrets'
     sh = run(cmd, shell=True, stdout=PIPE, stderr=PIPE)
@@ -318,7 +352,8 @@ def get_regions(cloud):
     Returns:
     Dictionary of all known regions for cloud
     """
-    sh = run('juju list-regions {} --format yaml'.format(cloud),
+    sh = run('{} list-regions {} --format yaml'.format(app.juju.bin_path,
+                                                       cloud),
              shell=True, stdout=PIPE, stderr=PIPE)
     stdout = sh.stdout.decode('utf8')
     stderr = sh.stderr.decode('utf8')
@@ -341,7 +376,7 @@ def get_clouds():
     Returns:
     Dictionary of all known clouds including newly created MAAS/Local
     """
-    sh = run('juju list-clouds --format yaml',
+    sh = run('{} list-clouds --format yaml'.format(app.juju.bin_path),
              shell=True, stdout=PIPE, stderr=PIPE)
     if sh.returncode > 0:
         raise Exception(
@@ -457,7 +492,8 @@ def add_cloud(name, config):
                             delete=False) as tempf:
         output = yaml.safe_dump(_config, default_flow_style=False)
         spew(tempf.name, output)
-        sh = run('juju add-cloud {} {}'.format(name, tempf.name),
+        sh = run('{} add-cloud {} {}'.format(app.juju.bin_path,
+                                             name, tempf.name),
                  shell=True, stdout=PIPE, stderr=PIPE)
         if sh.returncode > 0:
             raise Exception(
@@ -518,7 +554,8 @@ def deploy(bundle):
             charmstore path.
     """
     try:
-        return run('juju deploy {}'.format(bundle), shell=True,
+        return run('{} deploy {}'.format(app.juju.bin_path,
+                                         bundle), shell=True,
                    stdout=DEVNULL, stderr=PIPE)
     except CalledProcessError as e:
         raise e
@@ -700,7 +737,8 @@ def get_controller_info(name=None):
     Arguments:
     name: if set shows info controller, otherwise displays current.
     """
-    cmd = 'juju show-controller --format yaml'
+    cmd = '{} show-controller --format yaml'.format(
+        app.juju.bin_path)
     if name is not None:
         cmd += ' {}'.format(name)
     sh = run(cmd, shell=True, stdout=PIPE, stderr=PIPE)
@@ -722,8 +760,9 @@ def get_controllers():
     Returns:
     List of known controllers
     """
-    sh = run('juju list-controllers --format yaml',
-             shell=True, stdout=PIPE, stderr=PIPE)
+    sh = run('{} list-controllers --format yaml'.format(
+        app.juju.bin_path),
+        shell=True, stdout=PIPE, stderr=PIPE)
     if sh.returncode > 0:
         raise LookupError(
             "Unable to list controllers: {}".format(sh.stderr.decode('utf8')))
@@ -845,7 +884,8 @@ def get_models(controller):
     Returns:
     List of known models
     """
-    sh = run('juju list-models --format yaml -c {}'.format(controller),
+    sh = run('{} list-models --format yaml -c {}'.format(app.juju.bin_path,
+                                                         controller),
              shell=True, stdout=PIPE, stderr=PIPE)
     if sh.returncode > 0:
         raise LookupError(
@@ -864,7 +904,9 @@ def get_current_model():
 def version():
     """ Returns version of Juju
     """
-    sh = run('juju version', shell=True, stdout=PIPE, stderr=PIPE)
+    sh = run('{} version'.format(
+        app.juju.bin_path),
+        shell=True, stdout=PIPE, stderr=PIPE)
     if sh.returncode > 0:
         raise Exception(
             "Unable to get Juju Version".format(sh.stderr.decode('utf8')))
@@ -881,7 +923,7 @@ async def wait_for_deployment(retries=3):
     if 'CONJURE_UP_MODE' in app.env and app.env['CONJURE_UP_MODE'] == "test":
         retries = 0
 
-    cmd = ['juju', 'wait', "-r{}".format(retries),
+    cmd = [app.juju.wait_path, "-r{}".format(retries),
            "-vwm", "{}:{}".format(app.provider.controller,
                                   app.provider.model)]
 
