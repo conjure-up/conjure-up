@@ -3,11 +3,6 @@
 import json
 from types import SimpleNamespace
 
-
-class AppConfigAttributeError(Exception):
-    pass
-
-
 bootstrap = SimpleNamespace(
     # Is bootstrap running
     running=False,
