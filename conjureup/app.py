@@ -199,10 +199,6 @@ def main():
         print("")
         sys.exit(1)
 
-    # Make sure juju paths are setup
-    juju.set_bin_path()
-    juju.set_wait_path()
-
     # Verify we can access ~/.local/share/juju if it exists
     juju_dir = pathlib.Path('~/.local/share/juju').expanduser()
     if juju_dir.exists():
@@ -236,6 +232,10 @@ def main():
     app.log = setup_logging(app,
                             os.path.join(opts.cache_dir, 'conjure-up.log'),
                             opts.debug)
+
+    # Make sure juju paths are setup
+    juju.set_bin_path()
+    juju.set_wait_path()
 
     if app.argv.conf_file.expanduser().exists():
         conf = configparser.ConfigParser()
