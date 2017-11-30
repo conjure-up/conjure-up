@@ -55,10 +55,7 @@ class CloudView(WidgetWrap):
                            "  $ sudo snap install lxd\n"
                            "  $ sudo usermod -a -G lxd <youruser>\n"
                            "  $ newgrp lxd\n"
-                           "  $ /snap/bin/lxd init --auto\n"
-                           "  $ /snap/bin/lxc network create lxdbr0 "
-                           "ipv4.address=auto ipv4.nat=true "
-                           "ipv6.address=none ipv6.nat=false ")
+                           "  $ /snap/bin/lxd init")
 
     def __init__(self, app, public_clouds, custom_clouds,
                  compatible_cloud_types, cb=None):
