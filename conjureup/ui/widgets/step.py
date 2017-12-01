@@ -205,7 +205,7 @@ class StepForm(WidgetWrap):
                 self.clear_output()
         for field in self.fields:
             if not field.input.value \
-               and not field.input_type == 'boolean' \
+               and not isinstance(field.input_type, YesNo) \
                and self.model.required:
                 field.label_widget.set_text(
                     ('error_major',
