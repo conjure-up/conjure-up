@@ -57,6 +57,7 @@ class StepModel:
         self.description = step.get('description', '')
         self.result = ''
         self.viewable = step.get('viewable', False)
+        self.required = step.get('required', False)
         self.needs_sudo = step.get('sudo', False)
         self.additional_input = step.get('additional-input', [])
         self.cloud_whitelist = step.get('cloud-whitelist', [])
