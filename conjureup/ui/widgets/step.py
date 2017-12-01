@@ -152,9 +152,10 @@ class StepForm(WidgetWrap):
                 if input_type == SelectorHorizontal:
                     select_w = input_type([choice for choice in i['choices']])
                     select_w.set_default(i['default'], True)
-                    field = StepField(key, label, select_w)
+                    field = StepField(key, label, select_w, i['type'])
                 else:
-                    field = StepField(key, label, input_type(default=value))
+                    field = StepField(key, label,
+                                      input_type(default=value), i['type'])
                 self.fields.append(field)
             column_input = [
                 ('weight', 0.5, Padding.left(field.label_widget, left=5))
@@ -203,7 +204,9 @@ class StepForm(WidgetWrap):
             else:
                 self.clear_output()
         for field in self.fields:
-            if not field.input.value and self.model.required:
+            if not field.input.value \
+               and not field.input_type == 'boolean' \
+               and self.model.required:
                 field.label_widget.set_text(
                     ('error_major',
                      "{}: Missing required input.".format(field.label)))
@@ -229,11 +232,12 @@ class StepForm(WidgetWrap):
 
 
 class StepField:
-    def __init__(self, key, label, input):
+    def __init__(self, key, label, input, input_type):
         self.key = key
         self.label = label
         self.label_widget = Text(('body', label))
         self.input = input
+        self.input_type = input_type
 
 
 class StepResult(WidgetWrap):
