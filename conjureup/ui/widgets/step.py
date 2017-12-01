@@ -204,9 +204,16 @@ class StepForm(WidgetWrap):
             else:
                 self.clear_output()
         for field in self.fields:
-            if not field.input.value \
-               and not isinstance(field.input_type, YesNo) \
-               and self.model.required:
+            missing = False
+            if field.input_type != 'boolean' and \
+                    not field.input.value and \
+                    self.model.required:
+                missing = True
+            elif field.input_type == 'boolean' and \
+                    field.input_type.value is None and \
+                    self.model.required:
+                missing = True
+            if missing:
                 field.label_widget.set_text(
                     ('error_major',
                      "{}: Missing required input.".format(field.label)))
