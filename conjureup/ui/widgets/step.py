@@ -210,7 +210,7 @@ class StepForm(WidgetWrap):
                     self.model.required:
                 missing = True
             elif field.input_type == 'boolean' and \
-                    field.input_type.value is None and \
+                    field.input.value is None and \
                     self.model.required:
                 missing = True
             if missing:
