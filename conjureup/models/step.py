@@ -231,7 +231,7 @@ class StepModel:
 
         for step_name, step_data in app.steps_data.items():
             for key, value in step_data.items():
-                app.env[key.upper()] = step_data[key]
+                app.env[key.upper()] = str(step_data[key])
 
         for key, value in app.env.items():
             if value is None:
