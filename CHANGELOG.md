@@ -1,5 +1,52 @@
 # Change Log
 
+## [Unreleased](https://github.com/conjure-up/conjure-up/tree/HEAD)
+
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.4.2...HEAD)
+
+**Fixed bugs:**
+
+- conjure-up tells me the wrong log location when i specify --cache-dir [\#1254](https://github.com/conjure-up/conjure-up/issues/1254)
+
+**Closed issues:**
+
+- boolean step type failure \(no attribute 'required'\) [\#1255](https://github.com/conjure-up/conjure-up/issues/1255)
+
+**Merged pull requests:**
+
+- skip field input validate if boolean [\#1259](https://github.com/conjure-up/conjure-up/pull/1259) ([battlemidget](https://github.com/battlemidget))
+- Add required attribute to step model [\#1258](https://github.com/conjure-up/conjure-up/pull/1258) ([battlemidget](https://github.com/battlemidget))
+- Use proper cache directory in error view [\#1256](https://github.com/conjure-up/conjure-up/pull/1256) ([battlemidget](https://github.com/battlemidget))
+
+## [2.4.2](https://github.com/conjure-up/conjure-up/tree/2.4.2) (2017-11-30)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.4.1...2.4.2)
+
+**Implemented enhancements:**
+
+- direct user to run `lxd init` and walk through the guided setup process [\#1252](https://github.com/conjure-up/conjure-up/issues/1252)
+- Show disabled clouds, with indication as to why they're disabled [\#1222](https://github.com/conjure-up/conjure-up/issues/1222)
+
+**Fixed bugs:**
+
+- conjure-up was never notified regarding ec2 API error [\#1249](https://github.com/conjure-up/conjure-up/issues/1249)
+- AttributeError: 'KV' object has no attribute 'set' [\#1243](https://github.com/conjure-up/conjure-up/issues/1243)
+- Headless conjure up failed at juju\_wait [\#1242](https://github.com/conjure-up/conjure-up/issues/1242)
+- add pwgen as a dep in conjure-up brew formula [\#1215](https://github.com/conjure-up/conjure-up/issues/1215)
+
+**Closed issues:**
+
+- add hook between bundle deploy and built-in juju-wait [\#1238](https://github.com/conjure-up/conjure-up/issues/1238)
+- Unable to bootstrap Openstack NovaKVM [\#1237](https://github.com/conjure-up/conjure-up/issues/1237)
+
+**Merged pull requests:**
+
+- Update lxd init message to remove auto setup [\#1253](https://github.com/conjure-up/conjure-up/pull/1253) ([battlemidget](https://github.com/battlemidget))
+- bump ubuntui version to support defaults in boolean widgets [\#1251](https://github.com/conjure-up/conjure-up/pull/1251) ([battlemidget](https://github.com/battlemidget))
+- Better handling of determining which juju/juju-wait binaries to use [\#1246](https://github.com/conjure-up/conjure-up/pull/1246) ([battlemidget](https://github.com/battlemidget))
+- Fix AttributeError when saving state [\#1244](https://github.com/conjure-up/conjure-up/pull/1244) ([johnsca](https://github.com/johnsca))
+- Add spell hook for before-wait [\#1239](https://github.com/conjure-up/conjure-up/pull/1239) ([johnsca](https://github.com/johnsca))
+- Show disabled clouds and why they're disabled [\#1235](https://github.com/conjure-up/conjure-up/pull/1235) ([johnsca](https://github.com/johnsca))
+
 ## [2.4.1](https://github.com/conjure-up/conjure-up/tree/2.4.1) (2017-11-17)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.4.0...2.4.1)
 
@@ -216,7 +263,6 @@
 - Add details about spells/deployments on the website [\#791](https://github.com/conjure-up/conjure-up/issues/791)
 - Improve handling of "cannot get user details" error during JAAS registration [\#745](https://github.com/conjure-up/conjure-up/issues/745)
 - Snap install conjure-up doesn't work if juju is installed [\#719](https://github.com/conjure-up/conjure-up/issues/719)
-- conjure-up continue operations [\#624](https://github.com/conjure-up/conjure-up/issues/624)
 
 **Merged pull requests:**
 
@@ -346,7 +392,6 @@
 **Implemented enhancements:**
 
 - decide on top level juju alias [\#917](https://github.com/conjure-up/conjure-up/issues/917)
-- should spell steps have conditions based on cloud provider [\#633](https://github.com/conjure-up/conjure-up/issues/633)
 - FYI "juju login -B" is the new "juju register"... [\#891](https://github.com/conjure-up/conjure-up/issues/891)
 - make sure region selection is always visible [\#883](https://github.com/conjure-up/conjure-up/issues/883)
 - region selection for jaas deployment [\#882](https://github.com/conjure-up/conjure-up/issues/882)
@@ -363,7 +408,6 @@
 - Support juju login for JAAS support [\#708](https://github.com/conjure-up/conjure-up/issues/708)
 - migrate to libjuju [\#697](https://github.com/conjure-up/conjure-up/issues/697)
 - better error feedback on user input screens [\#686](https://github.com/conjure-up/conjure-up/issues/686)
-- export bundle after mutations [\#621](https://github.com/conjure-up/conjure-up/issues/621)
 
 **Fixed bugs:**
 
@@ -597,7 +641,6 @@
 
 - LXD openstack: installation failure [\#688](https://github.com/conjure-up/conjure-up/issues/688)
 - track OS [\#661](https://github.com/conjure-up/conjure-up/issues/661)
-- Allow specifying model name in headless [\#635](https://github.com/conjure-up/conjure-up/issues/635)
 
 **Fixed bugs:**
 
@@ -611,7 +654,6 @@
 - dont set perms on .cache dir if run as root [\#662](https://github.com/conjure-up/conjure-up/issues/662)
 - zesty/yakkety snap conjure-up fails to load iptables rules [\#649](https://github.com/conjure-up/conjure-up/issues/649)
 - conjure-up isn't properly handling a failed bootstrap [\#641](https://github.com/conjure-up/conjure-up/issues/641)
-- conjure-up kubernetes crashes and doesn't run post steps but juju status looks good [\#623](https://github.com/conjure-up/conjure-up/issues/623)
 
 **Closed issues:**
 
@@ -622,8 +664,6 @@
 - Document Allow specifying model name in headless [\#670](https://github.com/conjure-up/conjure-up/issues/670)
 - log lxd and juju versions [\#668](https://github.com/conjure-up/conjure-up/issues/668)
 - Documentation: need to install snapd manually [\#658](https://github.com/conjure-up/conjure-up/issues/658)
-- add machine count to destroy confirmation page [\#627](https://github.com/conjure-up/conjure-up/issues/627)
-- track cloud selections [\#622](https://github.com/conjure-up/conjure-up/issues/622)
 
 **Merged pull requests:**
 
@@ -658,35 +698,20 @@
 - Fixes \#615 [\#660](https://github.com/conjure-up/conjure-up/pull/660) ([battlemidget](https://github.com/battlemidget))
 - Expose MAAS endpoint and api\_key for use in steps [\#657](https://github.com/conjure-up/conjure-up/pull/657) ([battlemidget](https://github.com/battlemidget))
 - Always store constraint values as ints, MiB units [\#655](https://github.com/conjure-up/conjure-up/pull/655) ([mikemccracken](https://github.com/mikemccracken))
-- Allow specifying model in headless mode [\#638](https://github.com/conjure-up/conjure-up/pull/638) ([battlemidget](https://github.com/battlemidget))
 
 ## [2.1.0-beta5](https://github.com/conjure-up/conjure-up/tree/2.1.0-beta5) (2017-02-03)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.0-pre-snappy...2.1.0-beta5)
-
-**Implemented enhancements:**
-
-- allow specifying custom controller in headless mode [\#639](https://github.com/conjure-up/conjure-up/issues/639)
-- add ability to customize model name in UI [\#637](https://github.com/conjure-up/conjure-up/issues/637)
 
 **Closed issues:**
 
 - Remove juju from snap now that's it's classic [\#646](https://github.com/conjure-up/conjure-up/issues/646)
 - Spells-dir expects git repo and public internet access [\#645](https://github.com/conjure-up/conjure-up/issues/645)
 - Crash when running conjure-down [\#644](https://github.com/conjure-up/conjure-up/issues/644)
-- gnome-terminal colors get brighter after exiting conjure-up [\#632](https://github.com/conjure-up/conjure-up/issues/632)
-- Support deploying to other regions in a cloud [\#630](https://github.com/conjure-up/conjure-up/issues/630)
-- Conjure-up fails on egress-filtered network due to GA unavailability [\#629](https://github.com/conjure-up/conjure-up/issues/629)
 
 **Merged pull requests:**
 
 - Adds optional ability to use an existing spell dir [\#647](https://github.com/conjure-up/conjure-up/pull/647) ([battlemidget](https://github.com/battlemidget))
 - Warn if terminal geometry is to small [\#642](https://github.com/conjure-up/conjure-up/pull/642) ([battlemidget](https://github.com/battlemidget))
-- Fixes \#627 [\#640](https://github.com/conjure-up/conjure-up/pull/640) ([battlemidget](https://github.com/battlemidget))
-- Indicate the distribution switch from deb to snap [\#634](https://github.com/conjure-up/conjure-up/pull/634) ([battlemidget](https://github.com/battlemidget))
-- Add conjure-down [\#625](https://github.com/conjure-up/conjure-up/pull/625) ([battlemidget](https://github.com/battlemidget))
-- Re-adds percentage and pads the logging a bit [\#620](https://github.com/conjure-up/conjure-up/pull/620) ([battlemidget](https://github.com/battlemidget))
-- Fixes \#595 [\#619](https://github.com/conjure-up/conjure-up/pull/619) ([battlemidget](https://github.com/battlemidget))
-- Fix 541 [\#618](https://github.com/conjure-up/conjure-up/pull/618) ([mikemccracken](https://github.com/mikemccracken))
 
 ## [2.1.0-pre-snappy](https://github.com/conjure-up/conjure-up/tree/2.1.0-pre-snappy) (2017-01-14)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.0.2...2.1.0-pre-snappy)
