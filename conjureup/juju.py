@@ -731,22 +731,29 @@ async def set_relations(service, msg_cb):
         )
         relations.add(rel_pair)
 
-    for rel_pair in relations:
-        rel_name = '{} <-> {}'.format(*rel_pair)
-        pending = events.PendingRelations.is_set(rel_name)
-        added = events.RelationsAdded.is_set(rel_name)
-        if pending or added:
-            continue
+    app.log.debug('Adding relations for %s: %s',
+                  service.service_name, relations)
+    try:
+        for rel_pair in relations:
+            rel_name = '{} <-> {}'.format(*rel_pair)
+            pending = events.PendingRelations.is_set(rel_name)
+            added = events.RelationsAdded.is_set(rel_name)
+            if pending or added:
+                continue
 
-        msg = "Setting relation {}".format(rel_name)
-        app.log.info(msg)
-        msg_cb(msg)
-        events.PendingRelations.set(rel_name)
-        await app.juju.client.add_relation(*rel_pair)
-        events.PendingRelations.clear(rel_name)
-        events.RelationsAdded.set(rel_name)
+            msg = "Setting relation {}".format(rel_name)
+            app.log.info(msg)
+            msg_cb(msg)
+            events.PendingRelations.set(rel_name)
+            await app.juju.client.add_relation(*rel_pair)
+            events.PendingRelations.clear(rel_name)
+            events.RelationsAdded.set(rel_name)
 
-    events.RelationsAdded.set(service.service_name)
+        events.RelationsAdded.set(service.service_name)
+    except Exception:
+        app.log.exception('Error adding relations for %s',
+                          service.service_name)
+        raise
 
 
 def get_controller_info(name=None):
