@@ -10,17 +10,18 @@ from conjureup.ui.views.spellpicker import SpellPickerView
 
 class SpellPickerController:
     def finish(self, spellname):
-        utils.set_terminal_title("conjure-up {}".format(spellname))
-        utils.set_chosen_spell(spellname,
-                               os.path.join(app.argv.cache_dir,
-                                            spellname))
-        download_local(os.path.join(app.config['spells-dir'],
-                                    spellname),
-                       app.config['spell-dir'])
-        utils.set_spell_metadata()
-        StepModel.load_spell_steps()
-        AddonModel.load_spell_addons()
-        utils.setup_metadata_controller()
+        if spellname != app.config.get('spell'):
+            utils.set_terminal_title("conjure-up {}".format(spellname))
+            utils.set_chosen_spell(spellname,
+                                   os.path.join(app.argv.cache_dir,
+                                                spellname))
+            download_local(os.path.join(app.config['spells-dir'],
+                                        spellname),
+                           app.config['spell-dir'])
+            utils.set_spell_metadata()
+            StepModel.load_spell_steps()
+            AddonModel.load_spell_addons()
+            utils.setup_metadata_controller()
         return controllers.use('addons').render()
 
     def render(self):

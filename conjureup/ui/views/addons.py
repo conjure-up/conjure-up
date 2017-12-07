@@ -5,7 +5,7 @@ from ubuntui.widgets.hr import HR
 from urwid import Columns, Text
 
 from conjureup.app_config import app
-from conjureup.ui.views.base import NEXT_SCREEN, BaseView
+from conjureup.ui.views.base import BaseView
 from conjureup.ui.widgets.selectors import CheckList
 
 
@@ -16,18 +16,18 @@ class AddonsView(BaseView):
               'or select CONTINUE to continue')
 
     def __init__(self, next, back):
-        self.next = next
+        self.next_screen = next
+        self.prev_screen = back or (lambda: None)
         self.choices = CheckList()
-        self.extend_command_map({
-            'enter': NEXT_SCREEN,
-        })
-        super().__init__(back)
+        self.show_back_button = back is not None
+        super().__init__()
 
     def build_widget(self):
         self.choices.append(HR())
         for addon in sorted(app.addons.values(), key=attrgetter('name')):
             self.choices.append_option(label=addon.friendly_name,
-                                       value=addon.name)
+                                       value=addon.name,
+                                       state=addon.name in app.selected_addons)
             self.choices.append(Padding.line_break(""))
             self.choices.append(
                 Columns([
@@ -42,7 +42,7 @@ class AddonsView(BaseView):
 
     def build_buttons(self):
         return [
-            self.button('CONTINUE', lambda btn: self.next())
+            self.button('CONTINUE', self.next_screen)
         ]
 
     @property
