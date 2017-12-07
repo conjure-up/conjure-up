@@ -5,6 +5,7 @@ from juju.utils import run_with_interrupt
 from conjureup import controllers, events, juju, utils
 from conjureup.app_config import app
 from conjureup.consts import CUSTOM_PROVIDERS
+from conjureup.download import EndpointType
 from conjureup.models.provider import Localhost as LocalhostProvider
 from conjureup.models.provider import (
     LocalhostError,
@@ -12,7 +13,7 @@ from conjureup.models.provider import (
     SchemaErrorUnknownCloud,
     load_schema
 )
-from conjureup.telemetry import track_event, track_screen
+from conjureup.telemetry import track_event
 from conjureup.ui.views.cloud import CloudView
 
 from .common import BaseCloudController
@@ -48,8 +49,6 @@ class CloudsController(BaseCloudController):
 
     def render(self):
         "Pick or create a cloud to bootstrap a new controller on"
-        track_screen("Cloud Select")
-
         all_clouds = juju.get_clouds()
         compatible_clouds = juju.get_compatible_clouds()
         cloud_types = juju.get_cloud_types_by_name()
@@ -64,15 +63,15 @@ class CloudsController(BaseCloudController):
             if info['defined'] != 'public' and
             cloud_types[name] != 'localhost')
 
-        excerpt = app.config.get(
-            'description',
-            "Where would you like to deploy?")
-
+        prev_screen = self.prev_screen
+        if app.alias_given or (app.spell_given and not app.addons):
+            prev_screen = None
         self.view = CloudView(app,
                               public_clouds,
                               custom_clouds,
                               compatible_clouds,
-                              cb=self.finish)
+                              cb=self.finish,
+                              back=prev_screen)
 
         if 'localhost' in compatible_clouds:
             app.log.debug(
@@ -83,13 +82,7 @@ class CloudsController(BaseCloudController):
                     self.view._enable_localhost_widget
                 )
             )
-
-        app.ui.set_header(
-            title="Choose a Cloud",
-            excerpt=excerpt
-        )
-        app.ui.set_body(self.view)
-        app.ui.set_footer('')
+        self.view.show()
 
     async def _monitor_localhost(self, provider, cb):
         """ Checks that localhost/lxd is available and listening,
@@ -110,6 +103,10 @@ class CloudsController(BaseCloudController):
                 pass
             await run_with_interrupt(asyncio.sleep(2),
                                      self.cancel_monitor)
+
+    def prev_screen(self):
+        self.cancel_monitor.set()
+        controllers.use('addons').render(going_back=True)
 
 
 _controller_class = CloudsController

@@ -300,6 +300,9 @@ def main():
     spell_name = spell
     app.endpoint_type = detect_endpoint(opts.spell)
 
+    if opts.spell:
+        app.spell_given = True
+
     # Check if spell is actually an addon
     addon = utils.find_addons_matching(opts.spell)
     if addon:
@@ -314,6 +317,7 @@ def main():
         StepModel.load_spell_steps()
         AddonModel.load_spell_addons()
         app.selected_addons = addon['addons']
+        app.alias_given = True
         utils.setup_metadata_controller()
         app.endpoint_type = EndpointType.LOCAL_DIR
 

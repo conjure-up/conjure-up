@@ -1,11 +1,11 @@
-from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
 from ubuntui.widgets.hr import HR
-from urwid import BoxAdapter, Columns, Filler, Frame, Pile, Text, WidgetWrap
+from urwid import Pile, Text, WidgetWrap
 
 from conjureup import events, juju
 from conjureup.consts import CUSTOM_PROVIDERS, cloud_types
+from conjureup.ui.views.base import BaseView
 
 
 class CloudWidget(WidgetWrap):
@@ -49,7 +49,9 @@ class CloudWidget(WidgetWrap):
         self._w = self._enabled_widget if enabled else self._disabled_widget
 
 
-class CloudView(WidgetWrap):
+class CloudView(BaseView):
+    title = "Choose a Cloud"
+    subtitle = "Where would you like to deploy?"
     lxd_unavailable_msg = ("LXD not found, please install and wait "
                            "for this message to disappear:\n\n"
                            "  $ sudo snap install lxd\n"
@@ -58,9 +60,10 @@ class CloudView(WidgetWrap):
                            "  $ /snap/bin/lxd init")
 
     def __init__(self, app, public_clouds, custom_clouds,
-                 compatible_cloud_types, cb=None):
+                 compatible_cloud_types, cb=None, back=None):
         self.app = app
         self.cb = cb
+        self.back = back
         self.public_clouds = public_clouds
         self.custom_clouds = custom_clouds
         self.compatible_cloud_types = compatible_cloud_types
@@ -69,19 +72,13 @@ class CloudView(WidgetWrap):
         self.items = Pile([])
         self.message = Text('')
         self._items_localhost_idx = None
+        self.show_back_button = back is not None
 
-        self.frame = Frame(
-            body=Padding.center_80(
-                Filler(self._build_widget(), valign='top')),
-            footer=self._build_footer())
-        super().__init__(self.frame)
-
-    def keypress(self, size, key):
-        if key in ['tab', 'shift tab']:
-            self._swap_focus()
-        result = super().keypress(size, key)
+        super().__init__()
         self.update_message()
-        return result
+
+    def after_keypress(self):
+        self.update_message()
 
     def update_message(self):
         selected = self.items.focus
@@ -89,45 +86,7 @@ class CloudView(WidgetWrap):
             msg = selected.enabled_msg
         else:
             msg = selected.disabled_msg
-        self.message.set_text(msg)
-
-    def _swap_focus(self):
-        if not self.buttons_pile_selected:
-            self.buttons_pile_selected = True
-            self.frame.focus_position = 'footer'
-            self.buttons_pile.focus_position = 1
-        else:
-            self.buttons_pile_selected = False
-            self.frame.focus_position = 'body'
-
-    def _build_buttons(self):
-        cancel = menu_btn(on_press=self.cancel,
-                          label="\n  QUIT\n")
-        buttons = [
-            Padding.line_break(""),
-            Color.menu_button(cancel,
-                              focus_map='button_primary focus'),
-        ]
-        self.buttons_pile = Pile(buttons)
-        return self.buttons_pile
-
-    def _build_footer(self):
-        footer_pile = Pile([
-            Padding.center_90(HR()),
-            Color.body(BoxAdapter(Filler(Columns([
-                Text(''),
-                ('pack', self.message),
-                Text(''),
-            ]), valign='bottom'), 7)),
-            Padding.line_break(""),
-            Color.frame_footer(
-                Columns([
-                    ('fixed', 2, Text("")),
-                    ('fixed', 13, self._build_buttons())
-                ])),
-        ])
-        self.update_message()
-        return footer_pile
+        self.set_footer(msg)
 
     def _enable_localhost_widget(self):
         """ Sets the proper widget for localhost availability
@@ -140,7 +99,7 @@ class CloudView(WidgetWrap):
     def _add_item(self, item):
         self.items.contents.append((item, self.items.options()))
 
-    def _build_widget(self):
+    def build_widget(self):
         default_selection = None
         cloud_types_by_name = juju.get_cloud_types_by_name()
         if len(self.public_clouds) > 0:
@@ -200,8 +159,11 @@ class CloudView(WidgetWrap):
         self.items.focus_position = default_selection or 2
         return self.items
 
-    def submit(self, result):
-        self.cb(result.label)
+    def submit(self):
+        selected = self.items.focus
+        if selected.enabled:
+            self.cb(selected.name)
 
-    def cancel(self, btn):
-        EventLoop.exit(0)
+    def prev_screen(self):
+        if self.back:
+            self.back()
