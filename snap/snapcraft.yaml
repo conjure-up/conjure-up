@@ -33,6 +33,8 @@ parts:
     - -usr/bin/2to3-3.5
     - -usr/share/*python*
     - -usr/lib/python3.5
+    build-packages:
+    - libsodium-dev
     stage-packages:
     - bsdtar
     - jq
