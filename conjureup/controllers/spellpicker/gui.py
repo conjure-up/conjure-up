@@ -5,15 +5,10 @@ from conjureup.app_config import app
 from conjureup.download import EndpointType, download_local
 from conjureup.models.addon import AddonModel
 from conjureup.models.step import StepModel
-from conjureup.telemetry import track_screen
 from conjureup.ui.views.spellpicker import SpellPickerView
 
 
 class SpellPickerController:
-
-    def __init__(self):
-        self.view = None
-
     def finish(self, spellname):
         utils.set_terminal_title("conjure-up {}".format(spellname))
         utils.set_chosen_spell(spellname,
@@ -30,7 +25,6 @@ class SpellPickerController:
 
     def render(self):
         spells = []
-        track_screen("Spell Picker")
         if app.endpoint_type is None:
             spells += utils.find_spells()
         elif app.endpoint_type == EndpointType.LOCAL_SEARCH:
@@ -55,12 +49,7 @@ class SpellPickerController:
                                sorted(spells,
                                       key=spellcatsorter),
                                self.finish)
-
-        app.ui.set_header(
-            title="Spell Selection",
-            excerpt="Choose from this list of recommended spells"
-        )
-        app.ui.set_body(view)
+        view.show()
 
 
 _controller_class = SpellPickerController

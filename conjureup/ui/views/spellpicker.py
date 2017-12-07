@@ -1,9 +1,9 @@
 from ubuntui.ev import EventLoop
-from ubuntui.utils import Color, Padding
+from ubuntui.utils import Color
 from ubuntui.widgets.buttons import menu_btn
-from ubuntui.widgets.hr import HR
-from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
+from urwid import Text, WidgetWrap
 
+from conjureup.ui.views.base import BaseView
 from conjureup.ui.views.bundle_readme_view import BundleReadmeView
 
 
@@ -25,91 +25,57 @@ class SpellPickerWidget(WidgetWrap):
         )
 
 
-class SpellPickerView(WidgetWrap):
+class SpellPickerView(BaseView):
+    title = "Spell Selection"
+    subtitle = "Choose from this list of recommended spells"
+    show_back_button = False
 
     def __init__(self, app, spells, cb):
         self.app = app
         self.cb = cb
         self.spells = spells
         self.config = self.app.config
-        self.frame = Frame(header=Padding.center_60(HR()),
-                           body=self._build_widget(),
-                           footer=self._build_footer())
+        super().__init__()
+        self.extend_command_map({
+            'r': self.show_readme,
+        })
+        self.update_spell_description()
 
-        self.buttons_pile_selected = False
+    def show_readme(self):
+        _, rows = EventLoop.screen_size()
+        cur_spell = self.selected_spell
+        spellname = cur_spell['name']
+        spelldir = cur_spell['spell-dir']
+        brmv = BundleReadmeView(self.app.metadata_controller,
+                                spellname, spelldir,
+                                self.hide_readme,
+                                int(rows * .75))
+        self.app.ui.set_header("Spell Readme")
+        self.app.ui.set_body(brmv)
+        # brmv.show()
 
-        super().__init__(self.frame)
-        self.handle_focus_changed()
+    def hide_readme(self):
+        self.show()
 
-    def keypress(self, size, key):
-        rv = super().keypress(size, key)
-        if key in ['tab', 'shift tab']:
-            self._swap_focus()
-        self.handle_focus_changed()
-        if key in ['r'] and self.selected_spell_w is not None:
-            _, rows = EventLoop.screen_size()
-            cur_spell = self.selected_spell_w.spell
-            spellname = cur_spell['name']
-            spelldir = cur_spell['spell-dir']
-            brmv = BundleReadmeView(self.app.metadata_controller,
-                                    spellname, spelldir,
-                                    self.handle_readme_done,
-                                    int(rows * .75))
-            self.app.ui.set_header("Spell Readme")
-            self.app.ui.set_body(brmv)
-        return rv
-
-    def handle_readme_done(self):
-        self.app.ui.set_body(self)
-
-    def handle_focus_changed(self):
-        self.selected_spell_w = None
-        fw = self.pile.focus
-        if not isinstance(fw, SpellPickerWidget):
-            return
-
-        if fw != self.selected_spell_w:
-            self.selected_spell_w = fw
-            if fw is None:
-                self.spell_description.set_text("No spell selected")
-            else:
-                self.spell_description.set_text(fw.spell['description'])
-
-    def _swap_focus(self):
-        if not self.buttons_pile_selected:
-            self.buttons_pile_selected = True
-            self.frame.focus_position = 'footer'
-            self.buttons_pile.focus_position = 1
+    @property
+    def selected_spell(self):
+        fw = self.widget.focus
+        if isinstance(fw, SpellPickerWidget):
+            return fw.spell
         else:
-            self.buttons_pile_selected = False
-            self.frame.focus_position = 'body'
+            return None
 
-    def _build_buttons(self):
-        cancel = menu_btn(on_press=self.cancel,
-                          label="\n  QUIT\n")
-        buttons = [
-            Padding.line_break(""),
-            Color.menu_button(cancel,
-                              focus_map='button_primary focus')
-        ]
-        self.buttons_pile = Pile(buttons)
-        return self.buttons_pile
+    def update_spell_description(self):
+        spell = self.selected_spell
+        if spell:
+            self.set_footer(spell['description'])
+        else:
+            self.set_footer("No spell selected")
 
-    def _build_footer(self):
-        self.spell_description = Text("")
-        footer_pile = Pile([
-            Padding.center_60(HR()),
-            Padding.center_60(self.spell_description),
-            Padding.line_break(""),
-            Color.frame_footer(
-                Columns([
-                    ('fixed', 2, Text("")),
-                    ('fixed', 13, self._build_buttons())
-                ]))
-        ])
-        return footer_pile
+    def after_keypress(self):
+        self.update_spell_description()
 
-    def _build_widget(self):
+    def build_widget(self):
         total_items = []
         prev_cat = None
         for category, spell in self.spells:
@@ -122,11 +88,7 @@ class SpellPickerView(WidgetWrap):
                 prev_cat = category
             total_items.append(SpellPickerWidget(spell, self.submit))
 
-        self.pile = Pile(total_items)
-        return Padding.center_60(Filler(self.pile, valign='top'))
+        return total_items
 
-    def submit(self, btn, result):
-        self.cb(result['key'])
-
-    def cancel(self, btn):
-        EventLoop.exit(0)
+    def next_screen(self):
+        self.cb(self.selected_spell['key'])
