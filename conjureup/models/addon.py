@@ -13,6 +13,8 @@ class AddonModel:
         """
         Return a list of all add-ons available for the current spell.
         """
+        app.addons.clear()
+        app.selected_addons.clear()
         addons_dir = Path(app.config['spell-dir']) / 'addons'
         for addon_path in sorted(addons_dir.glob('*')):
             if addon_path.is_dir():

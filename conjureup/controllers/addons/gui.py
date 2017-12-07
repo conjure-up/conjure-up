@@ -7,16 +7,17 @@ from conjureup.utils import setup_metadata_controller
 
 
 class AddonsController:
-    def __init__(self):
-        back = self.back
-        if app.endpoint_type == EndpointType.LOCAL_DIR:
-            back = None
-        self.view = AddonsView(self.finish, back)
-
-    def render(self):
+    def render(self, going_back=False):
         if not app.addons:
-            return self.finish()
+            if going_back:
+                return self.prev_screen()
+            else:
+                return self.next_screen()
 
+        prev_screen = self.prev_screen
+        if app.endpoint_type == EndpointType.LOCAL_DIR:
+            prev_screen = None
+        self.view = AddonsView(self.finish, prev_screen)
         self.view.show()
 
     def finish(self):
@@ -26,9 +27,12 @@ class AddonsController:
                 track_event("Addon Selected", addon, "")
             # reload the bundle data w/ addons merged
             setup_metadata_controller()
+        self.next_screen()
+
+    def next_screen(self):
         controllers.use('clouds').render()
 
-    def back(self):
+    def prev_screen(self):
         controllers.use('spellpicker').render()
 
 
