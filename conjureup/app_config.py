@@ -140,6 +140,10 @@ class AppConfig:
     # Selected addons
     selected_addons = []
 
+    spell_given = False
+
+    alias_given = False
+
     def __setattr__(self, name, value):
         """ Gaurds against setting attributes that don't already exist
         """
