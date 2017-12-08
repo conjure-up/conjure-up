@@ -37,7 +37,7 @@ parts:
     - bsdtar
     - jq
     - pwgen
-    - libsodium
+    - libsodium18
     after:
     - python
   spells:
