@@ -5,7 +5,6 @@ from juju.utils import run_with_interrupt
 from conjureup import controllers, events, juju, utils
 from conjureup.app_config import app
 from conjureup.consts import CUSTOM_PROVIDERS
-from conjureup.download import EndpointType
 from conjureup.models.provider import Localhost as LocalhostProvider
 from conjureup.models.provider import (
     LocalhostError,
@@ -65,6 +64,9 @@ class CloudsController(BaseCloudController):
 
         prev_screen = self.prev_screen
         if app.alias_given or (app.spell_given and not app.addons):
+            # we were given an alias (so spell and addons are locked)
+            # or we were given a spell and there are no addons to change
+            # so we disable the back button
             prev_screen = None
         self.view = CloudView(app,
                               public_clouds,

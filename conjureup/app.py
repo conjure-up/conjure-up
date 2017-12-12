@@ -300,7 +300,7 @@ def main():
     spell_name = spell
     app.endpoint_type = detect_endpoint(opts.spell)
 
-    if opts.spell:
+    if opts.spell != consts.UNSPECIFIED_SPELL:
         app.spell_given = True
 
     # Check if spell is actually an addon

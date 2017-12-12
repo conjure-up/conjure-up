@@ -72,7 +72,7 @@ class SelectList(Pile):
             value = opts[label] if isinstance(opts, Mapping) else label
             self.append_option(label, value)
 
-    def append_option(self, label, value=None):
+    def append_option(self, label, value=None, state=False):
         """
         Add an option to the list.
 
@@ -81,10 +81,10 @@ class SelectList(Pile):
         """
         if value is None:
             value = label
-        self.append(self._create_option(label, value))
+        self.append(self._create_option(label, value, state))
 
-    def _create_option(self, label, value):
-        return self.option_type(label, value)
+    def _create_option(self, label, value, state):
+        return self.option_type(label, value, state)
 
     def append(self, widget, height_type='weight', height_amount=1):
         """
