@@ -24,6 +24,9 @@ SUBMIT_FIELD = 'submit field'
 NEXT_SCREEN = 'next screen'
 PREV_SCREEN = 'prev screen'
 
+FORWARD = +1
+BACKWARD = -1
+
 
 class BaseView(WidgetWrap):
     title = 'Base View'
@@ -191,27 +194,44 @@ class BaseView(WidgetWrap):
     def _check_field(self, field):
         if not field.selectable():
             return False
-        if isinstance(field, WidgetWrap):
-            field = field._w
-        return isinstance(field, Button)
+        # strip decoration, WidgetWrap, and wrapped decoration
+        field = getattr(field, 'base_widget', field)
+        field = getattr(field, '_w', field)
+        field = getattr(field, 'base_widget', field)
+        return not isinstance(field, (Button, Pile))
+
+    def _select_next_field(self, direction):
+        focus_path = [self.widget] + self.widget.get_focus_widgets()
+        while len(focus_path) > 1:
+            # use -2 to get the selected parent of the leaf widget
+            container = focus_path[-2]
+            if hasattr(container, 'contents'):
+                # widget is in fact a container, try to find a field in it
+                if direction == FORWARD:
+                    start = container.focus_position + 1
+                    end = len(container.contents)
+                else:
+                    start = container.focus_position - 1
+                    end = -1  # going backward, range doesn't include end
+                for new_position in range(start, end, direction):
+                    new_field = container.contents[new_position][0]
+                    if not self._check_field(new_field):
+                        # not a field we want to select
+                        continue
+                    container.focus_position = new_position
+                    return True
+            focus_path.pop()
+        else:
+            # no more fields
+            return False
 
     def _first_field(self):
-        for i in range(0, len(self.widget.contents)):
-            candidate = self._widget.contents[i][0]
-            if self._check_field(candidate):
-                self._widget.focus_position = i
-                return True
-        else:
-            return False
+        while self._select_next_field(direction=BACKWARD):
+            pass
 
     def _last_field(self):
-        for i in range(len(self.widget.contents)-1, -1, -1):
-            candidate = self.widget.contents[i][0]
-            if self._check_field(candidate):
-                self.widget.focus_position = i
-                return True
-        else:
-            return False
+        while self._select_next_field(direction=FORWARD):
+            pass
 
     def next_field(self, _leave_body=True):
         """
@@ -220,15 +240,12 @@ class BaseView(WidgetWrap):
         :param bool _leave_body: For internal use only.
         :returns: ``True`` if another field was selected, or ``False``.
         """
-        start = self.widget.focus_position + 1
         if self.frame.focus_position == 'footer':
             self.frame.focus_position = 'body'
             return self._first_field()
-        for i in range(start, len(self.widget.contents)):
-            candidate = self.widget.contents[i][0]
-            if self._check_field(candidate):
-                self.widget.focus_position = i
-                return True
+
+        if self._select_next_field(FORWARD):
+            return True
         else:
             if _leave_body:
                 self._swap_focus()
@@ -241,15 +258,12 @@ class BaseView(WidgetWrap):
 
         :returns: ``True`` if another field was selected, or ``False``.
         """
-        start = self.widget.focus_position - 1
         if self.frame.focus_position == 'footer':
             self.frame.focus_position = 'body'
             return self._last_field()
-        for i in range(start, -1, -1):
-            candidate = self.widget.contents[i][0]
-            if self._check_field(candidate):
-                self.widget.focus_position = i
-                return True
+
+        if self._select_next_field(BACKWARD):
+            return True
         else:
             self._swap_focus()
             return False
@@ -298,8 +312,10 @@ class BaseView(WidgetWrap):
             self.frame.focus_position = 'body'
 
     def keypress(self, size, key):
+        app.log.info('base key: %s, %s', size, key)
         command = self._command_map[key]
         if command in self._command_handlers:
+            # dispatch via _command_handlers (see __init__)
             result = self._command_handlers[command]()
         else:
             result = super().keypress(size, key)
@@ -356,7 +372,7 @@ class SchemaFormView(BaseView):
     def build_buttons(self):
         return [self.button('SAVE', self.submit)]
 
-    def submit(self, result):
+    def submit(self):
         if app.provider.is_valid():
             self.submit_cb()
 

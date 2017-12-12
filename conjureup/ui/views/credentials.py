@@ -21,8 +21,7 @@ class CredentialPickerView(BaseView):
                "or choose to add a new one."
     footer = 'Please press [ENTER] on highlighted credential to proceed.'
 
-    def __init__(self, credentials, default, select_cb, new_cb,
-                 *args, **kwargs):
+    def __init__(self, credentials, default, select_cb, new_cb, back_cb):
         if default and default in credentials:
             # sort the default cred to the top
             credentials.remove(default)
@@ -31,7 +30,8 @@ class CredentialPickerView(BaseView):
         self.credentials = credentials
         self.new_cb = new_cb
         self.select_cb = select_cb
-        super().__init__(*args, **kwargs)
+        self.prev_screen = back_cb
+        super().__init__()
 
     def build_widget(self):
         return [
@@ -41,3 +41,6 @@ class CredentialPickerView(BaseView):
             HR(),
             SelectorList(["Add a new credential"], lambda _: self.new_cb()),
         ]
+
+    def submit(self):
+        self.widget.focus.activate()

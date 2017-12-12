@@ -21,3 +21,10 @@ class SelectorList(WidgetWrap):
 
     def _select(self, item):
         self.on_select(item.label)
+
+    @property
+    def selected(self):
+        return self._pile.focus.base_widget
+
+    def activate(self):
+        self.on_select(self.selected.label)
