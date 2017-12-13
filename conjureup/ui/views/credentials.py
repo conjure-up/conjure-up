@@ -3,7 +3,10 @@ from ubuntui.widgets.hr import HR
 
 from conjureup.app_config import app
 from conjureup.ui.views.base import BaseView, SchemaFormView
-from conjureup.ui.widgets.select_list import SelectorList
+from conjureup.ui.widgets.selectors import MenuSelectButtonList
+
+
+NEW_CRED = Ellipsis  # placeholder for new credential
 
 
 class NewCredentialView(SchemaFormView):
@@ -34,13 +37,15 @@ class CredentialPickerView(BaseView):
         super().__init__()
 
     def build_widget(self):
-        return [
-            HR(),
-            SelectorList(self.credentials, self.select_cb),
-            Padding.line_break(""),
-            HR(),
-            SelectorList(["Add a new credential"], lambda _: self.new_cb()),
-        ]
+        widget = MenuSelectButtonList(self.credentials)
+        widget.append(Padding.line_break(""))
+        widget.append(HR())
+        widget.append_option("Add a new credential", NEW_CRED)
+        return widget
 
     def submit(self):
-        self.widget.focus.activate()
+        value = self.widget.selected
+        if value is NEW_CRED:
+            self.new_cb()
+        else:
+            self.select_cb(value)

@@ -1,57 +1,21 @@
-from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import menu_btn
+from ubuntui.utils import Padding
 from ubuntui.widgets.hr import HR
-from urwid import Pile, Text, WidgetWrap
+from urwid import Text
 
 from conjureup import events, juju
 from conjureup.consts import CUSTOM_PROVIDERS, cloud_types
 from conjureup.ui.views.base import BaseView
-
-
-class CloudWidget(WidgetWrap):
-    default_enabled_msg = 'Press [ENTER] to select this cloud, or use the ' \
-                          'arrow keys to select another cloud.'
-    default_disabled_msg = 'This cloud is disabled due to your selection of ' \
-                           'spell or add-on. Please use the arrow keys to ' \
-                           'select another cloud.'
-
-    def __init__(self,
-                 name,
-                 cb,
-                 enabled=True,
-                 enabled_msg=None,
-                 disabled_msg=None):
-        self.name = name
-        self._enabled_widget = Color.body(
-            menu_btn(label=self.name,
-                     on_press=cb),
-            focus_map='menu_button focus'
-        )
-        self._disabled_widget = Color.info_context(
-            menu_btn(
-                label=name,
-                on_press=None),
-            focus_map='disabled_button'
-        )
-        self.enabled_msg = enabled_msg or self.default_enabled_msg
-        self.disabled_msg = disabled_msg or self.default_disabled_msg
-        self._enabled = enabled
-        super().__init__(self._enabled_widget if enabled
-                         else self._disabled_widget)
-
-    @property
-    def enabled(self):
-        return self._enabled
-
-    @enabled.setter
-    def enabled(self, enabled):
-        self._enabled = enabled
-        self._w = self._enabled_widget if enabled else self._disabled_widget
+from conjureup.ui.widgets.selectors import MenuSelectButtonList
 
 
 class CloudView(BaseView):
     title = "Choose a Cloud"
     subtitle = "Where would you like to deploy?"
+    enabled_msg = 'Press [ENTER] to select this cloud, or use the ' \
+                  'arrow keys to select another cloud.'
+    default_disabled_msg = 'This cloud is disabled due to your selection of ' \
+                           'spell or add-on. Please use the arrow keys to ' \
+                           'select another cloud.'
     lxd_unavailable_msg = ("LXD not found, please install and wait "
                            "for this message to disappear:\n\n"
                            "  $ sudo snap install lxd\n"
@@ -69,7 +33,6 @@ class CloudView(BaseView):
         self.compatible_cloud_types = compatible_cloud_types
         self.config = self.app.config
         self.buttons_pile_selected = False
-        self.items = Pile([])
         self.message = Text('')
         self._items_localhost_idx = None
         self.show_back_button = back is not None
@@ -81,11 +44,12 @@ class CloudView(BaseView):
         self.update_message()
 
     def update_message(self):
-        selected = self.items.focus
+        selected = self.widget.focus
         if selected.enabled:
-            msg = selected.enabled_msg
+            msg = self.enabled_msg
         else:
-            msg = selected.disabled_msg
+            msg = selected.user_data.get('disabled_msg',
+                                         self.default_disabled_msg)
         self.set_footer(msg)
 
     def _enable_localhost_widget(self):
@@ -93,76 +57,61 @@ class CloudView(BaseView):
         """
         if self._items_localhost_idx is None:
             return
-        self.items.contents[self._items_localhost_idx][0].enabled = True
+        self.widget.contents[self._items_localhost_idx][0].enabled = True
         self.update_message()
 
-    def _add_item(self, item):
-        self.items.contents.append((item, self.items.options()))
-
     def build_widget(self):
+        widget = MenuSelectButtonList()
         default_selection = None
         cloud_types_by_name = juju.get_cloud_types_by_name()
         if len(self.public_clouds) > 0:
-            self._add_item(Text("Public Clouds"))
-            self._add_item(HR())
+            widget.append(Text("Public Clouds"))
+            widget.append(HR())
             for cloud_name in self.public_clouds:
                 cloud_type = cloud_types_by_name[cloud_name]
                 allowed = cloud_type in self.compatible_cloud_types
                 if allowed and default_selection is None:
-                    default_selection = len(self.items.contents)
-                self._add_item(
-                    CloudWidget(name=cloud_name,
-                                cb=self.submit,
-                                enabled=allowed)
-                )
-            self._add_item(Padding.line_break(""))
+                    default_selection = len(widget.contents)
+                widget.append_option(cloud_name, enabled=allowed)
+            widget.append(Padding.line_break(""))
         if len(self.custom_clouds) > 0:
-            self._add_item(Text("Your Clouds"))
-            self._add_item(HR())
+            widget.append(Text("Your Clouds"))
+            widget.append(HR())
             for cloud_name in self.custom_clouds:
                 cloud_type = cloud_types_by_name[cloud_name]
                 allowed = cloud_type in self.compatible_cloud_types
                 if allowed and default_selection is None:
-                    default_selection = len(self.items.contents)
-                self._add_item(
-                    CloudWidget(name=cloud_name,
-                                cb=self.submit,
-                                enabled=allowed)
-                )
-            self._add_item(Padding.line_break(""))
+                    default_selection = len(widget.contents)
+                widget.append_option(cloud_name, enabled=allowed)
+            widget.append(Padding.line_break(""))
         new_clouds = juju.get_compatible_clouds(CUSTOM_PROVIDERS)
         if new_clouds:
             lxd_allowed = cloud_types.LOCALHOST in self.compatible_cloud_types
-            self._add_item(Text("Configure a New Cloud"))
-            self._add_item(HR())
+            widget.append(Text("Configure a New Cloud"))
+            widget.append(HR())
             for cloud_type in sorted(CUSTOM_PROVIDERS):
                 if cloud_type == cloud_types.LOCALHOST and lxd_allowed:
-                    self._items_localhost_idx = len(self.items.contents)
+                    self._items_localhost_idx = len(widget.contents)
                     if default_selection is None:
-                        default_selection = len(self.items.contents)
-                    self._add_item(
-                        CloudWidget(name=cloud_type,
-                                    cb=self.submit,
-                                    enabled=events.LXDAvailable.is_set(),
-                                    disabled_msg=self.lxd_unavailable_msg)
-                    )
+                        default_selection = len(widget.contents)
+                    widget.append_option(
+                        cloud_type,
+                        enabled=events.LXDAvailable.is_set(),
+                        user_data={
+                            'disabled_msg': self.lxd_unavailable_msg,
+                        })
                 else:
                     allowed = cloud_type in self.compatible_cloud_types
                     if allowed and default_selection is None:
-                        default_selection = len(self.items.contents)
-                    self._add_item(
-                        CloudWidget(name=cloud_type,
-                                    cb=self.submit,
-                                    enabled=allowed)
-                    )
+                        default_selection = len(widget.contents)
+                    widget.append_option(cloud_type, enabled=allowed)
 
-        self.items.focus_position = default_selection or 2
-        return self.items
+        widget.focus_position = default_selection or 2
+        return widget
 
     def submit(self):
-        selected = self.items.focus
-        if selected.enabled:
-            self.cb(selected.name)
+        if self.widget.selected:
+            self.cb(self.widget.selected)
 
     def prev_screen(self):
         if self.back:

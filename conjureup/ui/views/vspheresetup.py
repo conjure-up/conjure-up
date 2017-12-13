@@ -44,7 +44,7 @@ class VSphereSetupView(BaseView):
     def next(self):
         _formatted_vsphere_config = {}
         for k, v in self.vsphere_config.items():
-            _formatted_vsphere_config[k] = v.value or ''
+            _formatted_vsphere_config[k] = v.selected or ''
         self.update_cloud_cb(_formatted_vsphere_config)
 
     def keypress(self, size, key):

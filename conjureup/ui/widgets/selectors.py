@@ -1,6 +1,7 @@
 from collections.abc import Mapping, Reversible
 
-from urwid import CheckBox, Pile, RadioButton
+from urwid import AttrMap, CheckBox, Pile, RadioButton
+from ubuntui.widgets.buttons import MenuSelectButton
 
 
 class ValuedCheckBox(CheckBox):
@@ -38,6 +39,28 @@ class OptionalValuedRadioButton(ValuedRadioButton):
             self.set_state(False)
 
 
+class ValuedMenuSelectButton(AttrMap):
+    def __init__(self, label, value, enabled=True, user_data=None):
+        super().__init__(MenuSelectButton(label), '')
+        self.value = value
+        self.enabled = enabled
+        self.user_data = user_data or {}
+
+    @property
+    def enabled(self):
+        return self._enabled
+
+    @enabled.setter
+    def enabled(self, enabled):
+        self._enabled = enabled
+        if self._enabled:
+            self.set_attr_map({None: 'body'})
+            self.set_focus_map({None: 'menu_button focus'})
+        else:
+            self.set_attr_map({None: 'info_context'})
+            self.set_focus_map({None: 'disabled_button'})
+
+
 class SelectList(Pile):
     """
     A generic list of selector widgets.
@@ -45,9 +68,12 @@ class SelectList(Pile):
     The type of widgets used as the options must support both a label and a
     value.
     """
-    OPTION_TYPE = None
+    option_type = None
+    allow_multiple = True
+    wrapable = False
 
-    def __init__(self, opts=None, option_type=None):
+    def __init__(self, opts=None, option_type=None, allow_multiple=None,
+                 wrapable=None):
         """
         Create a new list.
 
@@ -60,9 +86,13 @@ class SelectList(Pile):
             by the labels (keys).
         """
         super().__init__([])
-        self.option_type = option_type or self.OPTION_TYPE
+        self.option_type = option_type or self.option_type
         if self.option_type is None:
             raise TypeError('Must specify an option type')
+        if allow_multiple is not None:
+            self.allow_multiple = allow_multiple
+        if wrapable is not None:
+            self.wrapable = wrapable
         if not opts:
             return
         labels = opts.keys() if isinstance(opts, Mapping) else opts
@@ -72,7 +102,7 @@ class SelectList(Pile):
             value = opts[label] if isinstance(opts, Mapping) else label
             self.append_option(label, value)
 
-    def append_option(self, label, value=None, state=False):
+    def append_option(self, label, value=None, **kwargs):
         """
         Add an option to the list.
 
@@ -81,10 +111,10 @@ class SelectList(Pile):
         """
         if value is None:
             value = label
-        self.append(self._create_option(label, value, state))
+        self.append(self._create_option(label, value, **kwargs))
 
-    def _create_option(self, label, value, state):
-        return self.option_type(label, value, state)
+    def _create_option(self, label, value, **kwargs):
+        return self.option_type(label, value, **kwargs)
 
     def append(self, widget, height_type='weight', height_amount=1):
         """
@@ -99,22 +129,82 @@ class SelectList(Pile):
                                                    height_amount)))
 
     @property
+    def option_widgets(self):
+        """
+        List of all child widgets that are instances of ``self.option_type``.
+        """
+        return [item[0] for item in self.contents
+                if isinstance(item[0], self.option_type)]
+
+    @property
     def selected(self):
         """
-        Get the values of all selected options.
-
-        Items are filtered by the ``option_type`` of the list.
+        Get the values of all selected option items.
         """
-        return [item[0].value for item in self.contents
-                if isinstance(item[0], self.option_type) and item[0].state]
+        if not hasattr(self.option_widgets[0], 'state'):
+            if getattr(self.focus, 'enabled', True):
+                return self.focus.value
+            else:
+                return None
+        else:
+            selected = [option.value for option in self.option_widgets
+                        if option.state and getattr(option, 'enabled', True)]
+            if self.allow_multiple:
+                return selected
+            else:
+                return selected[0] if selected else None
+
+    def _move_limit(self, bottom=True):
+        indexes = range(len(self.contents))
+        if bottom:
+            indexes = reversed(indexes)
+        for index in indexes:
+            if self.contents[index][0].selectable():
+                self.focus_position = index
+                break
+
+    def keypress(self, size, key):
+        from conjureup.app_config import app
+        app.log.info('key: %s', key)
+        app.log.info('wrapable: %s', self.wrapable)
+        if not self.wrapable or key not in ('up', 'down', 'home', 'end'):
+            return super().keypress(size, key)
+        if key in ('up', 'down'):
+            new_key = super().keypress(size, key)
+            app.log.info('key: %s', new_key)
+            if not new_key:
+                return
+        if key in ('up', 'end'):
+            # wrap from top, or press end
+            self._move_limit(bottom=True)
+        if key in ('down', 'home'):
+            # wrap from bottom, or press home
+            self._move_limit(bottom=False)
+
+    def select_item(self, index):
+        item = self.option_widgets[index]
+        if hasattr(item, 'set_state'):
+            item.set_state(True)
+        else:
+            real_index = [i for i in range(len(self.contents))
+                          if self.contents[i][0] is item][0]
+            self.focus_position = real_index
+
+    def select_item_by_value(self, value):
+        opts = self.option_widgets
+        for i, opt in enumerate(opts):
+            if opt.value == value:
+                self.select_item(i)
+                break
 
 
 class CheckList(SelectList):
-    OPTION_TYPE = ValuedCheckBox
+    option_type = ValuedCheckBox
 
 
 class RadioList(SelectList):
-    OPTION_TYPE = ValuedRadioButton
+    option_type = ValuedRadioButton
+    allow_multiple = False
 
     def __init__(self, *args, **kwargs):
         self.group = []
@@ -140,12 +230,11 @@ class RadioList(SelectList):
             if isinstance(item, self.option_type):
                 item.set_state(item.value == value)
 
-    @property
-    def value(self):
-        if not self.selected:
-            return None
-        return self.selected[0]
-
 
 class OptionalRadioList(RadioList):
-    OPTION_TYPE = OptionalValuedRadioButton
+    option_type = OptionalValuedRadioButton
+
+
+class MenuSelectButtonList(SelectList):
+    option_type = ValuedMenuSelectButton
+    wrapable = True

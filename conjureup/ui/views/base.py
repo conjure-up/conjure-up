@@ -1,10 +1,12 @@
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
 from ubuntui.widgets.hr import HR
+from ubuntui.widgets.input import Selector
 from urwid import (
     BoxAdapter,
-    Button,
+    CheckBox,
     Columns,
+    Edit,
     Filler,
     Frame,
     Pile,
@@ -16,6 +18,7 @@ from urwid import (
 from conjureup import events
 from conjureup.app_config import app
 from conjureup.telemetry import track_screen
+from conjureup.ui.widgets.selectors import RadioList
 
 SWAP_FOCUS = 'swap focus'
 NEXT_FIELD = 'next field'
@@ -191,13 +194,23 @@ class BaseView(WidgetWrap):
         pass
 
     def _check_field(self, field):
+        """
+        Check if a field is acceptable for selecting with :meth:`.next_field`
+        or :meth:`.prev_field`.
+        """
         if not field.selectable():
             return False
-        # strip decoration, WidgetWrap, and wrapped decoration
-        field = getattr(field, 'base_widget', field)
-        field = getattr(field, '_w', field)
-        field = getattr(field, 'base_widget', field)
-        return not isinstance(field, (Button, Pile))
+        field = field.base_widget  # strip any decoration
+        if isinstance(field, (Edit, CheckBox, Selector, RadioList)):
+            # acceptable to the defense, your honor
+            return True
+        if hasattr(field, 'contents'):
+            # recursively check contents of list-type widget
+            return any(self._check_field(f[0]) for f in field.contents)
+        if hasattr(field, '_w') and field._w is not field:
+            # recursively check wrapped widget
+            return self._check_field(field._w)
+        return False
 
     def _select_next_field(self, direction):
         if not hasattr(self.widget, 'get_focus_widgets'):
