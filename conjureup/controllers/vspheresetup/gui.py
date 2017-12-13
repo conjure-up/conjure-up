@@ -1,5 +1,6 @@
 import asyncio
 
+from conjureup import controllers
 from conjureup.app_config import app
 from conjureup.ui.views.bootstrapwait import BootstrapWaitView
 from conjureup.ui.views.vspheresetup import VSphereSetupView
@@ -24,7 +25,8 @@ class VSphereSetupController(common.BaseVSphereSetupController):
                 'Unable to get info for region {}'.format(app.provider.region))
         self.authenticating.clear()
         self.view = VSphereSetupView(datacenter,
-                                     self.finish)
+                                     self.finish,
+                                     self.back)
         self.view.show()
 
     def render_interstitial(self):
@@ -39,6 +41,9 @@ class VSphereSetupController(common.BaseVSphereSetupController):
         while self.authenticating.is_set():
             self.view.redraw_kitt()
             await asyncio.sleep(1)
+
+    def back(self):
+        controllers.use('providersetup').render(going_back=True)
 
 
 _controller_class = VSphereSetupController
