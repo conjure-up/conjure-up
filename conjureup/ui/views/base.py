@@ -45,15 +45,15 @@ class BaseView(WidgetWrap):
                            footer=self._build_footer())
 
         self.extend_command_map({
-            'control tab': SWAP_FOCUS,
+            'meta s': SWAP_FOCUS,
             'tab': NEXT_FIELD,
             'shift tab': PREV_FIELD,
             'enter': SUBMIT_FIELD,
+            'meta n': NEXT_SCREEN,
             'meta enter': NEXT_SCREEN,
             'meta right': NEXT_SCREEN,
-            'n': NEXT_SCREEN,
-            'b': PREV_SCREEN,
             'meta left': PREV_SCREEN,
+            'meta b': PREV_SCREEN,
         })
         self._command_handlers = {
             SWAP_FOCUS: self._swap_focus,
