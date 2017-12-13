@@ -84,27 +84,25 @@ class CloudView(BaseView):
                     default_selection = len(widget.contents)
                 widget.append_option(cloud_name, enabled=allowed)
             widget.append(Padding.line_break(""))
-        new_clouds = juju.get_compatible_clouds(CUSTOM_PROVIDERS)
-        if new_clouds:
-            lxd_allowed = cloud_types.LOCALHOST in self.compatible_cloud_types
-            widget.append(Text("Configure a New Cloud"))
-            widget.append(HR())
-            for cloud_type in sorted(CUSTOM_PROVIDERS):
-                if cloud_type == cloud_types.LOCALHOST and lxd_allowed:
-                    self._items_localhost_idx = len(widget.contents)
-                    if default_selection is None:
-                        default_selection = len(widget.contents)
-                    widget.append_option(
-                        cloud_type,
-                        enabled=events.LXDAvailable.is_set(),
-                        user_data={
-                            'disabled_msg': self.lxd_unavailable_msg,
-                        })
-                else:
-                    allowed = cloud_type in self.compatible_cloud_types
-                    if allowed and default_selection is None:
-                        default_selection = len(widget.contents)
-                    widget.append_option(cloud_type, enabled=allowed)
+        lxd_allowed = cloud_types.LOCALHOST in self.compatible_cloud_types
+        widget.append(Text("Configure a New Cloud"))
+        widget.append(HR())
+        for cloud_type in sorted(CUSTOM_PROVIDERS):
+            if cloud_type == cloud_types.LOCALHOST and lxd_allowed:
+                self._items_localhost_idx = len(widget.contents)
+                if default_selection is None:
+                    default_selection = len(widget.contents)
+                widget.append_option(
+                    cloud_type,
+                    enabled=events.LXDAvailable.is_set(),
+                    user_data={
+                        'disabled_msg': self.lxd_unavailable_msg,
+                    })
+            else:
+                allowed = cloud_type in self.compatible_cloud_types
+                if allowed and default_selection is None:
+                    default_selection = len(widget.contents)
+                widget.append_option(cloud_type, enabled=allowed)
 
         widget.focus_position = default_selection or 2
         return widget
