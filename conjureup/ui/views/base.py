@@ -49,15 +49,18 @@ class BaseView(WidgetWrap):
             'tab': NEXT_FIELD,
             'shift tab': PREV_FIELD,
             'enter': SUBMIT_FIELD,
-            'control enter': NEXT_SCREEN,
-            'shift control enter': PREV_SCREEN,
+            'meta enter': NEXT_SCREEN,
+            'meta right': NEXT_SCREEN,
+            'n': NEXT_SCREEN,
+            'b': PREV_SCREEN,
+            'meta left': PREV_SCREEN,
         })
         self._command_handlers = {
             SWAP_FOCUS: self._swap_focus,
             NEXT_FIELD: self.next_field,
             PREV_FIELD: self.prev_field,
             SUBMIT_FIELD: self.submit_field,
-            NEXT_SCREEN: self.next_screen,
+            NEXT_SCREEN: self.submit,
             PREV_SCREEN: self.prev_screen,
         }
         super().__init__(self.frame)
