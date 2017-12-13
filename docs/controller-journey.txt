@@ -3,7 +3,7 @@ Addons Picker
 Clouds
 Cloud Credentials
 Regions
-Extended Provider setup
+Provider Setup
 - vspheresetup
 - lxdsetup
 Contoller Picker

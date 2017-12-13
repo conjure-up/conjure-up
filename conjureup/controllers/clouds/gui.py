@@ -46,7 +46,7 @@ class CloudsController(BaseCloudController):
 
         return controllers.use('credentials').render()
 
-    def render(self):
+    def render(self, going_back=False):
         "Pick or create a cloud to bootstrap a new controller on"
         all_clouds = juju.get_clouds()
         compatible_clouds = juju.get_compatible_clouds()

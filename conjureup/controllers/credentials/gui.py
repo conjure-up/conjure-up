@@ -14,16 +14,22 @@ from . import common
 
 
 class CredentialsController(common.BaseCredentialsController):
-    def render(self):
+    def render(self, going_back=False):
         if app.provider.cloud_type == cloud_types.LOCAL:
             # no credentials required for localhost
-            self.finish()
+            if going_back:
+                self.back()
+            else:
+                self.finish()
         elif len(self.credentials) >= 1:
             self.render_picker()
         elif not app.provider.credential:
             self.render_form()
         else:
-            self.finish()
+            if going_back:
+                self.back()
+            else:
+                self.finish()
 
     def render_form(self):
         view = NewCredentialView(self.save_credential, self.back)
@@ -45,7 +51,7 @@ class CredentialsController(common.BaseCredentialsController):
             # take them back to the picker, not to the cloud selection
             self.was_picker = False
             return self.render_picker()
-        return controllers.use('clouds').render()
+        return controllers.use('clouds').render(going_back=True)
 
     def _format_creds(self):
         """ Formats the credentials into strings from the widgets values
