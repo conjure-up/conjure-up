@@ -15,6 +15,7 @@ from . import common
 
 class CredentialsController(common.BaseCredentialsController):
     def render(self, going_back=False):
+        self.load_credentials()
         if app.provider.cloud_type == cloud_types.LOCAL:
             # no credentials required for localhost
             if going_back:

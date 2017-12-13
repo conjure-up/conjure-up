@@ -347,8 +347,6 @@ class BaseView(WidgetWrap):
 
 
 class SchemaFormView(BaseView):
-    header = ""
-
     def __init__(self, submit_cb, back_cb, *args, **kwargs):
         self.submit_cb = submit_cb
         self.back_cb = back_cb
@@ -356,34 +354,27 @@ class SchemaFormView(BaseView):
 
     def build_widget(self):
         total_items = []
-        if self.header:
-            total_items.extend([
-                Text(self.header),
-                HR(),
-            ])
+        label_width = max(len(f.label or f.key)
+                          for f in app.provider.form.fields()) + 2
         for field in app.provider.form.fields():
-            label = field.key
-            if field.label is not None:
-                label = field.label
-
-            col = Columns(
-                [
-                    ('weight', 0.5, Text(label, align='right')),
-                    Color.string_input(
-                        field.widget,
-                        focus_map='string_input focus')
-                ], dividechars=1
-            )
-            total_items.append(col)
-            total_items.append(
+            label = field.label or field.key
+            total_items.extend([
                 Columns(
                     [
-                        ('weight', 0.5, Text("")),
+                        (label_width, Text(label, align='right')),
+                        Color.string_input(
+                            field.widget,
+                            focus_map='string_input focus')
+                    ], dividechars=1
+                ),
+                Columns(
+                    [
+                        (label_width, Text("")),
                         Color.error_major(field.error)
                     ], dividechars=1
-                )
-            )
-            total_items.append(Padding.line_break(""))
+                ),
+                Padding.line_break(""),
+            ])
         return total_items
 
     def build_buttons(self):
