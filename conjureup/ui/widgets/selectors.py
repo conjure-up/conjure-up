@@ -194,6 +194,13 @@ class SelectList(Pile):
                 self.select_item(i)
                 break
 
+    def select_first(self):
+        opts = self.option_widgets
+        for i, opt in enumerate(opts):
+            if getattr(opt, 'enabled', True):
+                self.select_item(i)
+                break
+
 
 class CheckList(SelectList):
     option_type = ValuedCheckBox
@@ -235,3 +242,10 @@ class OptionalRadioList(RadioList):
 class MenuSelectButtonList(SelectList):
     option_type = ValuedMenuSelectButton
     wrapable = True
+
+    def __init__(self, opts=None, default=None, *args, **kwargs):
+        super().__init__(opts, *args, **kwargs)
+        if default:
+            self.select_item_by_value(default)
+        else:
+            self.select_first()

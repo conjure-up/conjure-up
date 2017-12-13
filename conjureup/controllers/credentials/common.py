@@ -7,11 +7,14 @@ class BaseCredentialsController:
         creds = juju.get_credentials().get(app.provider.cloud, {})
         creds.pop('default-region', None)
 
-        app.provider.credential = creds.pop('default-credential', None)
+        default_credential = creds.pop('default-credential', None)
         self.credentials = sorted(creds.keys())
 
         if len(self.credentials) == 1:
-            app.provider.credential = self.credentials[0]
+            default_credential = self.credentials[0]
+
+        if not app.provider.credential:
+            app.provider.credential = default_credential
 
         self.was_picker = False
 

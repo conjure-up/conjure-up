@@ -25,19 +25,15 @@ class CredentialPickerView(BaseView):
     footer = 'Please press [ENTER] on highlighted credential to proceed.'
 
     def __init__(self, credentials, default, select_cb, new_cb, back_cb):
-        if default and default in credentials:
-            # sort the default cred to the top
-            credentials.remove(default)
-            credentials.insert(0, default)
-
         self.credentials = credentials
+        self.default = default
         self.new_cb = new_cb
         self.select_cb = select_cb
         self.prev_screen = back_cb
         super().__init__()
 
     def build_widget(self):
-        widget = MenuSelectButtonList(self.credentials)
+        widget = MenuSelectButtonList(self.credentials, self.default)
         widget.append(Padding.line_break(""))
         widget.append(HR())
         widget.append_option("Add a new credential", NEW_CRED)

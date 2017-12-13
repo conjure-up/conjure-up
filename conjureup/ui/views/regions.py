@@ -10,17 +10,12 @@ class RegionPickerView(BaseView):
     def __init__(self, regions, default, submit_cb, back_cb):
         self.submit_cb = submit_cb
         self.prev_screen = back_cb
-
-        if default:
-            # sort the default cred to the top
-            regions.remove(default)
-            regions.insert(0, default)
-
         self.regions = regions
+        self.default = default
         super().__init__()
 
     def build_widget(self):
-        return MenuSelectButtonList(self.regions)
+        return MenuSelectButtonList(self.regions, self.default)
 
     def submit(self):
         self.submit_cb(self.widget.selected)
