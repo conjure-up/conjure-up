@@ -247,14 +247,14 @@ class MAAS(BaseProvider):
         self.form = Form(
             [
                 Field(
-                    label='api endpoint (http://example.com:5240/MAAS)',
+                    label='API Endpoint (http://example.com:5240/MAAS)',
                     widget=StringEditor(),
                     key='endpoint',
                     storable=False,
                     validator=partial(self._has_correct_endpoint)
                 ),
                 Field(
-                    label='api key',
+                    label='API Key',
                     widget=StringEditor(),
                     key='maas-oauth',
                     validator=partial(self._has_correct_api_key))
@@ -459,17 +459,17 @@ class Azure(BaseProvider):
         self.cloud_type = cloud_types.AZURE
         self.form = Form([
             Field(
-                label='application id',
+                label='Application ID',
                 widget=StringEditor(),
                 key='application-id'
             ),
             Field(
-                label='subscription id',
+                label='Subscription ID',
                 widget=StringEditor(),
                 key='subscription-id'
             ),
             Field(
-                label='application password',
+                label='Application Password',
                 widget=PasswordEditor(),
                 key='application-password'
             )
@@ -484,22 +484,22 @@ class Google(BaseProvider):
         self.cloud_type = cloud_types.GCE
         self.form = Form(
             [Field(
-                label='private key',
+                label='Private Key',
                 widget=StringEditor(),
                 key='private-key'
             ),
                 Field(
-                label='client id',
+                label='Client ID',
                 widget=StringEditor(),
                 key='client-id'
             ),
                 Field(
-                label='client email',
+                label='Client Email',
                 widget=StringEditor(),
                 key='client-email'
             ),
                 Field(
-                label='project id',
+                label='Project ID',
                 widget=StringEditor(),
                 key='project-id'
             )]
@@ -514,12 +514,12 @@ class CloudSigma(BaseProvider):
         self.cloud_type = cloud_types.CLOUDSIGMA
         self.form = Form([
             Field(
-                label='username',
+                label='Username',
                 widget=StringEditor(),
                 key='username'
             ),
             Field(
-                label='password',
+                label='Password',
                 widget=StringEditor(),
                 key='password'
             )
@@ -534,22 +534,22 @@ class Joyent(BaseProvider):
         self.cloud_type = cloud_types.JOYENT
         self.form = Form([
             Field(
-                label='sdc user',
+                label='SDC User',
                 widget=StringEditor(),
                 key='sdc-user'
             ),
             Field(
-                label='sdc key id',
+                label='SDC Key ID',
                 widget=StringEditor(),
                 key='sdc-key-id'
             ),
             Field(
-                label='private key',
+                label='Private Key',
                 widget=StringEditor(),
                 key='private-key'
             ),
             Field(
-                label='algorithm',
+                label='Algorithm',
                 widget=StringEditor(default='rsa-sha256'),
                 key='algorithm'
             )]
@@ -564,32 +564,32 @@ class OpenStack(BaseProvider):
 
         self.form = Form([
             Field(
-                label='username',
+                label='Username',
                 widget=StringEditor(),
                 key='username'
             ),
             Field(
-                label='password',
+                label='Password',
                 widget=PasswordEditor(),
                 key='password'
             ),
             Field(
-                label='domain name',
+                label='Domain Name',
                 widget=StringEditor(),
                 key='domain-name'
             ),
             Field(
-                label='project domain name',
+                label='Project Domain Name',
                 widget=StringEditor(),
                 key='project-domain-name'
             ),
             Field(
-                label='access key',
+                label='Access Key',
                 widget=StringEditor(),
                 key='access-key'
             ),
             Field(
-                label='secret key',
+                label='Secret Key',
                 widget=StringEditor(),
                 key='secret-key'
             )])
@@ -602,18 +602,18 @@ class VSphere(BaseProvider):
         self.cloud_type = cloud_types.VSPHERE
         self.form = Form([
             Field(
-                label='api endpoint',
+                label='API Endpoint',
                 widget=StringEditor(),
                 key='endpoint',
                 storable=False
             ),
             Field(
-                label='user',
+                label='Username',
                 widget=StringEditor(),
                 key='user'
             ),
             Field(
-                label='password',
+                label='Password',
                 widget=PasswordEditor(),
                 key='password'
             )
@@ -670,17 +670,17 @@ class Oracle(BaseProvider):
         self.cloud_type = cloud_types.ORACLE
         self.form = Form([
             Field(
-                label='identity domain',
+                label='Identity Domain',
                 widget=StringEditor(),
                 key='identity-domain'
             ),
             Field(
-                label='username or e-mail',
+                label='Username or Email',
                 widget=StringEditor(),
                 key='username'
             ),
             Field(
-                label='password',
+                label='Password',
                 widget=PasswordEditor(),
                 key='password'
             )

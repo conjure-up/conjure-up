@@ -14,7 +14,7 @@ class NewCredentialView(SchemaFormView):
 
     def __init__(self, *args, **kwargs):
         cloud_type = app.provider.cloud_type.upper()
-        self.header = "Enter your {} credentials:".format(cloud_type)
+        self.subtitle = "Enter your {} credentials".format(cloud_type)
         super().__init__(*args, **kwargs)
 
 
