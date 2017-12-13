@@ -78,6 +78,7 @@ class CloudsController(BaseCloudController):
         if 'localhost' in compatible_clouds:
             app.log.debug(
                 "Starting watcher for verifying LXD server is available.")
+            self.cancel_monitor.clear()
             app.loop.create_task(
                 self._monitor_localhost(
                     LocalhostProvider(),
