@@ -3,6 +3,7 @@ from ubuntui.widgets.hr import HR
 from urwid import Text
 
 from conjureup import events, juju
+from conjureup.app_config import app
 from conjureup.consts import CUSTOM_PROVIDERS, cloud_types
 from conjureup.ui.views.base import BaseView
 from conjureup.ui.widgets.selectors import MenuSelectButtonList
@@ -62,36 +63,32 @@ class CloudView(BaseView):
 
     def build_widget(self):
         widget = MenuSelectButtonList()
-        default_selection = None
         cloud_types_by_name = juju.get_cloud_types_by_name()
+
         if len(self.public_clouds) > 0:
             widget.append(Text("Public Clouds"))
             widget.append(HR())
             for cloud_name in self.public_clouds:
                 cloud_type = cloud_types_by_name[cloud_name]
                 allowed = cloud_type in self.compatible_cloud_types
-                if allowed and default_selection is None:
-                    default_selection = len(widget.contents)
                 widget.append_option(cloud_name, enabled=allowed)
             widget.append(Padding.line_break(""))
+
         if len(self.custom_clouds) > 0:
             widget.append(Text("Your Clouds"))
             widget.append(HR())
             for cloud_name in self.custom_clouds:
                 cloud_type = cloud_types_by_name[cloud_name]
                 allowed = cloud_type in self.compatible_cloud_types
-                if allowed and default_selection is None:
-                    default_selection = len(widget.contents)
                 widget.append_option(cloud_name, enabled=allowed)
             widget.append(Padding.line_break(""))
+
         lxd_allowed = cloud_types.LOCALHOST in self.compatible_cloud_types
         widget.append(Text("Configure a New Cloud"))
         widget.append(HR())
         for cloud_type in sorted(CUSTOM_PROVIDERS):
             if cloud_type == cloud_types.LOCALHOST and lxd_allowed:
                 self._items_localhost_idx = len(widget.contents)
-                if default_selection is None:
-                    default_selection = len(widget.contents)
                 widget.append_option(
                     cloud_type,
                     enabled=events.LXDAvailable.is_set(),
@@ -100,11 +97,12 @@ class CloudView(BaseView):
                     })
             else:
                 allowed = cloud_type in self.compatible_cloud_types
-                if allowed and default_selection is None:
-                    default_selection = len(widget.contents)
                 widget.append_option(cloud_type, enabled=allowed)
 
-        widget.focus_position = default_selection or 2
+        if app.provider and app.provider.cloud:
+            widget.select_item_by_value(app.provider.cloud)
+        else:
+            widget.select_first()
         return widget
 
     def submit(self):
