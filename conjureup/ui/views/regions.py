@@ -1,8 +1,5 @@
-from ubuntui.widgets.hr import HR
-from urwid import Text
-
 from conjureup.ui.views.base import BaseView
-from conjureup.ui.widgets.select_list import SelectorList
+from conjureup.ui.widgets.selectors import MenuSelectButtonList
 
 
 class RegionPickerView(BaseView):
@@ -23,7 +20,7 @@ class RegionPickerView(BaseView):
         super().__init__()
 
     def build_widget(self):
-        return SelectorList(self.regions)
+        return MenuSelectButtonList(self.regions)
 
     def submit(self):
         self.submit_cb(self.widget.selected)

@@ -1,9 +1,9 @@
 from ubuntui.utils import Color
 from ubuntui.widgets.hr import HR
-from ubuntui.widgets.input import SelectorHorizontal
 from urwid import Columns, Text
 
 from conjureup.ui.views.base import BaseView
+from conjureup.ui.widgets.selectors import RadioList
 
 
 class LXDSetupViewError(Exception):
@@ -19,23 +19,11 @@ class LXDSetupView(BaseView):
         self.submit_cb = submit_cb
         self.prev_screen = back_cb
         self.lxd_config = {
-            'network': SelectorHorizontal(
-                [net for net in self.devices['networks'].keys()]
-            ),
-            'storage-pool': SelectorHorizontal(
-                [pool for pool in self.devices['storage-pools'].keys()]
-            )
+            'network': RadioList(self.devices['networks'].keys()),
+            'storage-pool': RadioList(self.devices['storage-pools'].keys()),
         }
 
-        try:
-            self.lxd_config['network'].set_default(
-                self.lxd_config['network'].group[0].label, True
-            )
-
-            self.lxd_config['storage-pool'].set_default(
-                self.lxd_config['storage-pool'].group[0].label, True
-            )
-        except IndexError:
+        if not self.devices['networks'] or not self.devices['storage-pools']:
             raise LXDSetupViewError(
                 "Could not locate any network or storage "
                 "devices to continue. Please make sure you "
@@ -45,14 +33,15 @@ class LXDSetupView(BaseView):
                 "Also note that the network bridge must not have "
                 "ipv6 enabled, to disable run `lxc network set "
                 "lxdbr0 ipv6.address none ipv6.nat false`")
+
         super().__init__()
 
     def build_buttons(self):
         return [self.button('SAVE', self.submit)]
 
     def submit(self):
-        network = self.lxd_config['network'].value
-        storage_pool = self.lxd_config['storage-pool'].value
+        network = self.lxd_config['network'].selected
+        storage_pool = self.lxd_config['storage-pool'].selected
         self.submit_cb(self.devices['networks'][network],
                        self.devices['storage-pools'][storage_pool])
 

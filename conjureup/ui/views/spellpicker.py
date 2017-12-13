@@ -1,28 +1,10 @@
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color
-from ubuntui.widgets.buttons import menu_btn
-from urwid import Text, WidgetWrap
+from urwid import Text
 
 from conjureup.ui.views.base import BaseView
 from conjureup.ui.views.bundle_readme_view import BundleReadmeView
-
-
-class SpellPickerWidget(WidgetWrap):
-
-    def __init__(self, spell, cb):
-        self.spell = spell
-        self.cb = cb
-        super().__init__(self.build_widget())
-
-    def build_widget(self):
-        """ Provides a rendered spell widget suitable for pile
-        """
-        return Color.body(
-            menu_btn(label=self.spell['name'],
-                     on_press=self.cb,
-                     user_data=self.spell),
-            focus_map='menu_button focus'
-        )
+from conjureup.ui.widgets.selectors import MenuSelectButtonList
 
 
 class SpellPickerView(BaseView):
@@ -59,11 +41,7 @@ class SpellPickerView(BaseView):
 
     @property
     def selected_spell(self):
-        fw = self.widget.focus
-        if isinstance(fw, SpellPickerWidget):
-            return fw.spell
-        else:
-            return None
+        return self.widget.selected
 
     def update_spell_description(self):
         spell = self.selected_spell
@@ -76,19 +54,19 @@ class SpellPickerView(BaseView):
         self.update_spell_description()
 
     def build_widget(self):
-        total_items = []
+        widget = MenuSelectButtonList()
         prev_cat = None
         for category, spell in self.spells:
             if category == "_unassigned_spells":
                 category = "other"
             if category != prev_cat:
                 if prev_cat:
-                    total_items.append(Text(""))
-                total_items.append(Color.label(Text(category)))
+                    widget.append(Text(""))
+                widget.append(Color.label(Text(category)))
                 prev_cat = category
-            total_items.append(SpellPickerWidget(spell, self.submit))
-
-        return total_items
+            widget.append_option(spell['name'], spell)
+        widget.focus_position = 1
+        return widget
 
     def next_screen(self):
         self.cb(self.selected_spell['key'])
