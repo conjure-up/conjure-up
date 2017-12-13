@@ -180,8 +180,7 @@ class BaseView(WidgetWrap):
 
         This should be implemented by a subclass.
         """
-        app.log.info('base prev_screen')
-        pass
+        app.log.error('%s: prev_screen not implemented', type(self).__name__)
 
     def next_screen(self):
         """
@@ -201,6 +200,9 @@ class BaseView(WidgetWrap):
         return not isinstance(field, (Button, Pile))
 
     def _select_next_field(self, direction):
+        if not hasattr(self.widget, 'get_focus_widgets'):
+            # top-level widget is not a container, nothing to do
+            return False
         focus_path = [self.widget] + self.widget.get_focus_widgets()
         while len(focus_path) > 1:
             # use -2 to get the selected parent of the leaf widget
@@ -312,7 +314,6 @@ class BaseView(WidgetWrap):
             self.frame.focus_position = 'body'
 
     def keypress(self, size, key):
-        app.log.info('base key: %s, %s', size, key)
         command = self._command_map[key]
         if command in self._command_handlers:
             # dispatch via _command_handlers (see __init__)

@@ -1,7 +1,7 @@
 import ipaddress
 from subprocess import CalledProcessError
 
-from conjureup import utils
+from conjureup import controllers, utils
 from conjureup.app_config import app
 from conjureup.ui.views.lxdsetup import LXDSetupView
 
@@ -19,7 +19,7 @@ class LXDSetupController(common.BaseLXDSetupController):
             'storage-pools': await app.provider.get_storage_pools()
         }
 
-        self.view = LXDSetupView(self.devices, self.finish)
+        self.view = LXDSetupView(self.devices, self.finish, self.back)
         self.view.show()
 
     async def set_lxd_info(self, network, storage_pool):
@@ -78,6 +78,9 @@ class LXDSetupController(common.BaseLXDSetupController):
 
     def render(self):
         app.loop.create_task(self.get_lxd_devices())
+
+    def back(self):
+        controllers.use('providersetup').render(going_back=True)
 
 
 _controller_class = LXDSetupController
