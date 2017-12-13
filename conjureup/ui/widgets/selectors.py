@@ -164,16 +164,13 @@ class SelectList(Pile):
                 break
 
     def keypress(self, size, key):
-        from conjureup.app_config import app
-        app.log.info('key: %s', key)
-        app.log.info('wrapable: %s', self.wrapable)
         if not self.wrapable or key not in ('up', 'down', 'home', 'end'):
             return super().keypress(size, key)
         if key in ('up', 'down'):
+            # do the normal thing, and if successful, return
             new_key = super().keypress(size, key)
-            app.log.info('key: %s', new_key)
-            if not new_key:
-                return
+            if new_key is None:
+                return  # handled by base
         if key in ('up', 'end'):
             # wrap from top, or press end
             self._move_limit(bottom=True)
