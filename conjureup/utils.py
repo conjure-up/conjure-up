@@ -337,6 +337,16 @@ def mkdir(path):
         chown(path, install_user(), recursive=True)
 
 
+def _normalize_bundle(original_bundle, overlay_bundle):
+    """ Normalizes top level application/services keys
+    """
+    if 'applications' in original_bundle and 'services' in overlay_bundle:
+        overlay_bundle['applications'] = overlay_bundle.pop('services')
+
+    if 'services' in original_bundle and 'applications' in overlay_bundle:
+        overlay_bundle['services'] = overlay_bundle.pop('applications')
+
+
 def merge_dicts(*dicts):
     """
     Return a new dictionary that is the result of merging the arguments
@@ -348,6 +358,7 @@ def merge_dicts(*dicts):
     updated = {}
     # grab all keys
     keys = set()
+
     for d in dicts:
         keys = keys.union(set(d))
 
@@ -519,16 +530,20 @@ def setup_metadata_controller():
             continue
         if step.bundle_remove:
             fragment = yaml.safe_load(step.bundle_remove.read_text())
+            _normalize_bundle(bundle_data, fragment)
             bundle_data = subtract_dicts(bundle_data, fragment)
         if step.bundle_add:
             fragment = yaml.safe_load(step.bundle_add.read_text())
+            _normalize_bundle(bundle_data, fragment)
             bundle_data = merge_dicts(bundle_data, fragment)
 
     if app.argv.bundle_remove:
         fragment = yaml.safe_load(app.argv.bundle_remove.read_text())
+        _normalize_bundle(bundle_data, fragment)
         bundle_data = subtract_dicts(bundle_data, fragment)
     if app.argv.bundle_add:
         fragment = yaml.safe_load(app.argv.bundle_add.read_text())
+        _normalize_bundle(bundle_data, fragment)
         bundle_data = merge_dicts(bundle_data, fragment)
 
     bundle = Bundle(bundle_data=bundle_data)
