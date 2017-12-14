@@ -102,14 +102,14 @@ class SelectList(Pile):
             value = opts[label] if isinstance(opts, Mapping) else label
             self.append_option(label, value)
 
-    def append_option(self, label, value=None, **kwargs):
+    def append_option(self, label, value=..., **kwargs):
         """
         Add an option to the list.
 
         The option can have a value that is different from the label.
         If no value is given, the label itself will be the value.
         """
-        if value is None:
+        if value is ...:
             value = label
         self.append(self._create_option(label, value, **kwargs))
 

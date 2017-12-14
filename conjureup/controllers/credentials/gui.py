@@ -33,25 +33,23 @@ class CredentialsController(common.BaseCredentialsController):
                 self.finish()
 
     def render_form(self):
-        view = NewCredentialView(self.save_credential, self.back)
+        view = NewCredentialView(self.save_credential, self.switch_views)
         view.show()
 
     def render_picker(self):
         view = CredentialPickerView(self.credentials, app.provider.credential,
-                                    self.set_credential_from_select,
-                                    self.switch, self.back)
+                                    self.select_credential, self.back)
         view.show()
 
-    def switch(self):
-        self.was_picker = True
-        self.render_form()
-
-    def back(self):
+    def switch_views(self):
         if self.was_picker:
-            # if they were on the picker and chose New, BACK should
-            # take them back to the picker, not to the cloud selection
             self.was_picker = False
             return self.render_picker()
+        else:
+            self.was_picker = True
+            self.render_form()
+
+    def back(self):
         return controllers.use('clouds').render(going_back=True)
 
     def _format_creds(self):
@@ -66,9 +64,12 @@ class CredentialsController(common.BaseCredentialsController):
 
         return formatted
 
-    def set_credential_from_select(self, credential_name):
-        app.provider.credential = credential_name
-        self.finish()
+    def select_credential(self, credential):
+        if credential is None:
+            self.switch_views()
+        else:
+            app.provider.credential = credential
+            self.finish()
 
     def save_credential(self):
         app.loop.create_task(self._save_credential())

@@ -1,6 +1,5 @@
-from conjureup import juju
+from conjureup import controllers, juju
 from conjureup.app_config import app
-from conjureup.telemetry import track_screen
 from conjureup.ui.views.ControllerListView import ControllerListView
 
 from . import common
@@ -17,21 +16,12 @@ class ControllerPicker(common.BaseControllerPicker):
 
         if not app.jaas_ok and len(filtered_controllers) == 0:
             return self.finish(None)
+        view = ControllerListView(app, filtered_controllers,
+                                  self.finish, self.back)
+        view.show()
 
-        track_screen("Controller Picker")
-        excerpt = app.config.get(
-            'description',
-            "Please select an existing controller,"
-            " or choose to bootstrap a new one.")
-        view = ControllerListView(app,
-                                  filtered_controllers,
-                                  self.finish)
-
-        app.ui.set_header(
-            title="Controller",
-            excerpt=excerpt
-        )
-        app.ui.set_body(view)
+    def back(self):
+        controllers.use('providersetup').render(going_back=True)
 
 
 _controller_class = ControllerPicker
