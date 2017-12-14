@@ -4,23 +4,47 @@ from subprocess import CalledProcessError
 from conjureup import controllers, juju
 from conjureup.app_config import app
 from conjureup.consts import JAAS_DOMAIN
-from conjureup.telemetry import track_screen
-from conjureup.ui.views.bootstrapwait import BootstrapWaitView
+from conjureup.ui.views.interstitial import InterstitialView
 from conjureup.ui.views.jaas import JaaSLoginView
 
 
 class JaaSLoginController:
     def __init__(self):
         self.authenticating = asyncio.Event()
-        self.view = None
+        self.login_success = False
+        self.login_error = None
 
-    def render(self, error=None):
+    def render(self, going_back=False):
+        if going_back:
+            self.back()  # if going back, skip this screen entirely
+            return
+
         if not app.jaas_controller:
             app.jaas_controller = 'jaas'
-        self.render_interstitial()
-        app.loop.create_task(self._try_token_auth(error))
 
-    async def _try_token_auth(self, error):
+        if self.login_success:
+            # already authed, don't waste time trying again
+            self.finish()
+        elif self.login_error is not None:
+            # saved error, go straight to form
+            self.render_login()
+        else:
+            # try to auth with cached creds
+            self.render_interstitial()
+            app.loop.create_task(self._try_token_auth())
+
+    def render_interstitial(self):
+        self.authenticating.set()
+        view = InterstitialView(title="JaaS Login Wait",
+                                message="Logging in to JaaS. Please wait.",
+                                event=self.authenticating)
+        view.show()
+
+    def render_login(self):
+        view = JaaSLoginView(self.register, self.back, self.login_error)
+        view.show()
+
+    async def _try_token_auth(self):
         app.log.info('Attempting to register JAAS with saved token')
         try:
             await juju.register_controller(app.jaas_controller,
@@ -28,21 +52,13 @@ class JaaSLoginController:
                                            '', '', '')
             controllers.use('showsteps').render()
         except CalledProcessError:
-            self.show_login_screen(error)
-
-    def show_login_screen(self, error):
-        track_screen("Login to JaaS")
-        app.ui.set_header(
-            title="Login to JaaS",
-            excerpt='Enter your Ubuntu SSO credentials'
-        )
-        app.ui.set_body(JaaSLoginView(app,
-                                      error=error,
-                                      cb=self.register))
+            # empty-but-not-None message to skip retrying token auth
+            self.login_error = ''
+            self.render_login()
 
     def register(self, email=None, password=None, twofa=None):
-        app.loop.create_task(self._register(email, password, twofa))
         self.render_interstitial()
+        app.loop.create_task(self._register(email, password, twofa))
 
     async def _register(self, email, password, twofa):
         if not await juju.register_controller(app.jaas_controller,
@@ -52,25 +68,15 @@ class JaaSLoginController:
                                               timeout_cb=self.timeout):
             return
         app.provider.controller = app.jaas_controller
-        app.is_jaas = True
         self.authenticating.clear()
+        self.login_success = True
+        self.login_error = None
         app.log.info('JAAS is registered')
+        self.finish()
+
+    def finish(self):
+        app.is_jaas = True
         controllers.use('showsteps').render()
-
-    def render_interstitial(self):
-        track_screen("JaaS Login Wait")
-        app.ui.set_header(title="Waiting")
-        self.view = BootstrapWaitView(
-            app=app,
-            message="Logging in to JaaS. Please wait.")
-        app.ui.set_body(self.view)
-        self.authenticating.set()
-        app.loop.create_task(self._refresh())
-
-    async def _refresh(self):
-        while self.authenticating.is_set():
-            self.view.redraw_kitt()
-            await asyncio.sleep(1)
 
     def fail(self, stderr):
         self.authenticating.clear()
@@ -87,7 +93,8 @@ class JaaSLoginController:
             if msg.startswith(prefix):
                 msg = msg[len(prefix):][:-3]  # also strip trailing ])
             msg = 'Login failed, please try again: {}'.format(msg)
-        self.render(error=msg)
+        self.login_error = msg
+        self.render_login()
 
     def timeout(self):
         self.authenticating.clear()
@@ -96,8 +103,11 @@ class JaaSLoginController:
             # registration seems to have worked; maybe we should remove and
             # try again to be safe, but hopefully it's safe to just move on
             return self.finish()
-        self.__remove_alarm()
-        self.render(error='Timed out connecting to JaaS.  Please try again.')
+        self.login_error = 'Timed out connecting to JaaS.  Please try again.'
+        self.render_login()
+
+    def back(self):
+        controllers.use('controllerpicker').render(going_back=True)
 
 
 _controller_class = JaaSLoginController

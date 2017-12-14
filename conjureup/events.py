@@ -130,7 +130,7 @@ NOTRACK_EXCEPTIONS = [
 
 
 def unhandled_input(key):
-    if key in ['q', 'Q']:
+    if key in ['q', 'Q', 'meta q']:
         Shutdown.set()
     if key in ['R']:
         EventLoop.redraw_screen()
