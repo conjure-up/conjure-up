@@ -6,9 +6,6 @@ from conjureup.ui.views.base import BaseView, SchemaFormView
 from conjureup.ui.widgets.selectors import MenuSelectButtonList
 
 
-NEW_CRED = Ellipsis  # placeholder for new credential
-
-
 class NewCredentialView(SchemaFormView):
     title = "New Credential Creation"
 
@@ -24,11 +21,10 @@ class CredentialPickerView(BaseView):
                "or choose to add a new one."
     footer = 'Please press [ENTER] on highlighted credential to proceed.'
 
-    def __init__(self, credentials, default, select_cb, new_cb, back_cb):
+    def __init__(self, credentials, default, submit_cb, back_cb):
         self.credentials = credentials
         self.default = default
-        self.new_cb = new_cb
-        self.select_cb = select_cb
+        self.submit_cb = submit_cb
         self.prev_screen = back_cb
         super().__init__()
 
@@ -36,12 +32,8 @@ class CredentialPickerView(BaseView):
         widget = MenuSelectButtonList(self.credentials, self.default)
         widget.append(Padding.line_break(""))
         widget.append(HR())
-        widget.append_option("Add a new credential", NEW_CRED)
+        widget.append_option("Add a new credential", None)
         return widget
 
     def submit(self):
-        value = self.widget.selected
-        if value is NEW_CRED:
-            self.new_cb()
-        else:
-            self.select_cb(value)
+        self.submit_cb(self.widget.selected)
