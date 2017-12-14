@@ -29,7 +29,7 @@ class BootstrapGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.bootstrap.gui.controllers')
         self.mock_controllers = self.controllers_patcher.start()
         self.view_patcher = patch(
-            'conjureup.controllers.bootstrap.gui.BootstrapWaitView')
+            'conjureup.controllers.bootstrap.gui.InterstitialView')
         self.view_patcher.start()
         self.app_patcher = patch(
             'conjureup.controllers.bootstrap.gui.app')

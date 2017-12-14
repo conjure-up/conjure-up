@@ -3,47 +3,45 @@ from pathlib import Path
 
 from conjureup import controllers, events
 from conjureup.app_config import app
-from conjureup.telemetry import track_screen
-from conjureup.ui.views.bootstrapwait import BootstrapWaitView
+from conjureup.ui.views.interstitial import InterstitialView
 
 from . import common
 
 
 class BootstrapController(common.BaseBootstrapController):
+    def __init__(self):
+        self.bootstrapping = asyncio.Event()
+
     @property
     def msg_cb(self):
         return app.ui.set_footer
 
     def render(self):
-        track_screen("Bootstrap")
-
         if app.is_jaas or self.is_existing_controller():
             bootstrap_stderr_path = None
+            title = 'Creating Model'
             msg = 'Model'
         else:
             cache_dir = Path(app.config['spell-dir'])
             bootstrap_stderr_path = cache_dir / '{}-bootstrap.err'.format(
                 app.provider.controller)
+            title = 'Bootstrapping Controller'
             msg = 'Controller'
 
-        view = BootstrapWaitView(
-            app=app,
+        self.bootstrapping.set()
+        view = InterstitialView(
+            title=title,
             message="Juju {} is initializing. Please wait.".format(msg),
+            event=self.bootstrapping,
             watch_file=bootstrap_stderr_path)
-        app.ui.set_header(title="Waiting")
-        app.ui.set_body(view)
+        view.show()
 
         app.loop.create_task(self.run())
-        app.loop.create_task(self.wait(view))
+        app.loop.create_task(self.wait())
 
-    async def wait(self, view):
-        while not events.Bootstrapped.is_set():
-            if events.Error.is_set():
-                # bootstrap or add_model task failed, so stop refreshing
-                # (the error screen will be shown instead)
-                return
-            view.redraw_kitt()
-            await asyncio.sleep(1)
+    async def wait(self):
+        await events.Bootstrapped.wait()
+        self.bootstrapping.clear()
         controllers.use('deploy').render()
 
 

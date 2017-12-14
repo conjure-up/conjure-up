@@ -15,7 +15,7 @@ class ShowStepsController:
         if not app.steps:
             return self.finish()
 
-        self.view = ShowStepsView()
+        self.view = ShowStepsView(None, self.back)
         self.view.show()
         app.loop.create_task(self.show_steps())
 
@@ -47,6 +47,9 @@ class ShowStepsController:
         if updates:
             utils.setup_metadata_controller()
         return controllers.use('configapps').render()
+
+    def back(self):
+        controllers.use('jaaslogin').render(going_back=True)
 
 
 _controller_class = ShowStepsController

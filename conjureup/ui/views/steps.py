@@ -13,6 +13,11 @@ class ShowStepsView(BaseView):
     subtitle = ("Please provide the information below, which will "
                 "be used for the post-deploy configuration.")
 
+    def __init__(self, submit_cb, back_cb):
+        self.submit_cb = submit_cb
+        self.prev_screen = back_cb
+        super().__init__()
+
     def build_widget(self):
         self.step_pile = Pile([
             HR(),

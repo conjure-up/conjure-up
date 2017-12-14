@@ -135,12 +135,18 @@ class BaseView(WidgetWrap):
                                   focus_map='button_primary focus'))
 
     def _build_body(self):
-        self._widget = self.build_widget()
-        if isinstance(self.widget, list):
-            self._widget = Pile(self.widget)
+        widget = self.build_widget()
+        if isinstance(widget, list):
+            widget = Pile(widget)
+        self._widget = widget
+
+        # for rendering only, we want to wrap widget in a Filler if not already
+        if not isinstance(widget, Filler):
+            widget = Filler(widget, valign="top")
+
         return Pile([
             ('pack', Padding.center_90(HR())),
-            Padding.center_80(Filler(self._widget, valign="top")),
+            Padding.center_80(widget),
         ])
 
     def set_footer(self, message):

@@ -6,7 +6,7 @@ from . import common
 
 
 class ControllerPicker(common.BaseControllerPicker):
-    def render(self):
+    def render(self, going_back=False):
         existing_controllers = juju.get_controllers()['controllers']
         self.check_jaas()
 

@@ -3,14 +3,13 @@ import asyncio
 from conjureup import controllers, events, juju
 from conjureup.app_config import app
 from conjureup.telemetry import track_event, track_screen
-from conjureup.ui.views.bootstrapwait import BootstrapWaitView
+from conjureup.ui.views.interstitial import InterstitialView
 from conjureup.ui.views.destroy_confirm import DestroyConfirmView
 
 
 class DestroyConfirm:
     def __init__(self):
         self.authenticating = asyncio.Event()
-        self.view = None
 
     async def do_destroy(self, model, controller):
         track_event("Destroying model", "Destroy", "")
@@ -41,20 +40,11 @@ class DestroyConfirm:
         app.ui.set_body(view)
 
     def render_interstitial(self):
-        track_screen("Controller Login Wait")
-        app.ui.set_header(title="Waiting")
-        self.view = BootstrapWaitView(
-            app=app,
-            message="Logging in to model. Please wait.")
-        app.ui.set_body(self.view)
         self.authenticating.set()
-        app.loop.create_task(self._refresh())
-        self._refresh()
-
-    async def _refresh(self):
-        while self.authenticating.is_set():
-            self.view.redraw_kitt()
-            await asyncio.sleep(1)
+        view = InterstitialView(title="Controller Login Wait",
+                                message="Logging in to model. Please wait.",
+                                event=self.authenticating)
+        view.show()
 
     def render(self, controller, model):
         app.provider.controller = controller
