@@ -6,14 +6,25 @@
 
 **Fixed bugs:**
 
+- bundle-add fragment hides remainder of applications [\#1270](https://github.com/conjure-up/conjure-up/issues/1270)
+- Deploy getting stuck on setting relations [\#1264](https://github.com/conjure-up/conjure-up/issues/1264)
 - conjure-up tells me the wrong log location when i specify --cache-dir [\#1254](https://github.com/conjure-up/conjure-up/issues/1254)
 
 **Closed issues:**
 
+- boolean step type failure \(expected str, bytes or os.PathLike object, not bool\) [\#1261](https://github.com/conjure-up/conjure-up/issues/1261)
 - boolean step type failure \(no attribute 'required'\) [\#1255](https://github.com/conjure-up/conjure-up/issues/1255)
+- Conjure-up kubernetes juju bootstrap fail [\#1250](https://github.com/conjure-up/conjure-up/issues/1250)
+- Remove problems And VPN problem [\#1240](https://github.com/conjure-up/conjure-up/issues/1240)
 
 **Merged pull requests:**
 
+- Update libjuju to 0.7.0 [\#1273](https://github.com/conjure-up/conjure-up/pull/1273) ([battlemidget](https://github.com/battlemidget))
+- Normalize bundle top level keys for application/services [\#1271](https://github.com/conjure-up/conjure-up/pull/1271) ([battlemidget](https://github.com/battlemidget))
+- Add's libsodium for libjuju updates [\#1268](https://github.com/conjure-up/conjure-up/pull/1268) ([battlemidget](https://github.com/battlemidget))
+- Add test branch for libjuju relation updates [\#1267](https://github.com/conjure-up/conjure-up/pull/1267) ([battlemidget](https://github.com/battlemidget))
+- \[debug\] Add additional debug logging for \#1264 [\#1265](https://github.com/conjure-up/conjure-up/pull/1265) ([johnsca](https://github.com/johnsca))
+- Ensure step field values are always strings [\#1262](https://github.com/conjure-up/conjure-up/pull/1262) ([johnsca](https://github.com/johnsca))
 - skip field input validate if boolean [\#1259](https://github.com/conjure-up/conjure-up/pull/1259) ([battlemidget](https://github.com/battlemidget))
 - Add required attribute to step model [\#1258](https://github.com/conjure-up/conjure-up/pull/1258) ([battlemidget](https://github.com/battlemidget))
 - Use proper cache directory in error view [\#1256](https://github.com/conjure-up/conjure-up/pull/1256) ([battlemidget](https://github.com/battlemidget))
@@ -652,8 +663,6 @@
 - headless conjure-up kubernetes-core fails, while GUI does work [\#676](https://github.com/conjure-up/conjure-up/issues/676)
 - Failed to run pre deploy task: Expecting value: line 1 column 1  [\#674](https://github.com/conjure-up/conjure-up/issues/674)
 - dont set perms on .cache dir if run as root [\#662](https://github.com/conjure-up/conjure-up/issues/662)
-- zesty/yakkety snap conjure-up fails to load iptables rules [\#649](https://github.com/conjure-up/conjure-up/issues/649)
-- conjure-up isn't properly handling a failed bootstrap [\#641](https://github.com/conjure-up/conjure-up/issues/641)
 
 **Closed issues:**
 
@@ -675,20 +684,14 @@
 ## [2.1.0-rc1](https://github.com/conjure-up/conjure-up/tree/2.1.0-rc1) (2017-02-10)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.0-beta5...2.1.0-rc1)
 
-**Implemented enhancements:**
-
-- use juju-wait deprecate 00-deploy\_done script [\#651](https://github.com/conjure-up/conjure-up/issues/651)
-
 **Fixed bugs:**
 
 - conjure-up for openstack lxd fails: "No controllers registered." [\#659](https://github.com/conjure-up/conjure-up/issues/659)
-- traceback in conjure-up [\#653](https://github.com/conjure-up/conjure-up/issues/653)
 
 **Closed issues:**
 
 - Conjure-up openstack on Ubuntu 16.10 Crash [\#656](https://github.com/conjure-up/conjure-up/issues/656)
 - non-integer constraints not handled correctly for add-machines API  [\#654](https://github.com/conjure-up/conjure-up/issues/654)
-- Fresh install of conjure-up fails [\#652](https://github.com/conjure-up/conjure-up/issues/652)
 
 **Merged pull requests:**
 
@@ -701,17 +704,6 @@
 
 ## [2.1.0-beta5](https://github.com/conjure-up/conjure-up/tree/2.1.0-beta5) (2017-02-03)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.0-pre-snappy...2.1.0-beta5)
-
-**Closed issues:**
-
-- Remove juju from snap now that's it's classic [\#646](https://github.com/conjure-up/conjure-up/issues/646)
-- Spells-dir expects git repo and public internet access [\#645](https://github.com/conjure-up/conjure-up/issues/645)
-- Crash when running conjure-down [\#644](https://github.com/conjure-up/conjure-up/issues/644)
-
-**Merged pull requests:**
-
-- Adds optional ability to use an existing spell dir [\#647](https://github.com/conjure-up/conjure-up/pull/647) ([battlemidget](https://github.com/battlemidget))
-- Warn if terminal geometry is to small [\#642](https://github.com/conjure-up/conjure-up/pull/642) ([battlemidget](https://github.com/battlemidget))
 
 ## [2.1.0-pre-snappy](https://github.com/conjure-up/conjure-up/tree/2.1.0-pre-snappy) (2017-01-14)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.0.2...2.1.0-pre-snappy)
