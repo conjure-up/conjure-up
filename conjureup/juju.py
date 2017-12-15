@@ -552,8 +552,7 @@ def constraints_to_dict(constraints):
             elif constraint in ['root-disk', 'mem', 'cores']:
                 value = int(value)
             else:
-                raise Exception(
-                    "Unsupported constraint: {}".format(constraint))
+                pass
             new_constraints[constraint] = value
         except ValueError as e:
             app.log.debug("Skipping constraint: {} ({})".format(c, e))
