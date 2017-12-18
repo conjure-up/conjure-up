@@ -79,8 +79,10 @@ class ConfigAppsController:
                                         bundle_application.placement_spec))
 
             for n in range(bundle_application.num_units):
-                bundle.add_machine(dict(series=bundle.series),
-                                   str(midx))
+                machine = {'series': bundle.series}
+                if bundle_application.constraints:
+                    machine['constraints'] = bundle_application.constraints
+                bundle.add_machine(machine, str(midx))
                 self.add_assignment(bundle_application, str(midx),
                                     AssignmentType.DEFAULT)
                 midx += 1
