@@ -1,24 +1,21 @@
 # Change Log
 
-## [Unreleased](https://github.com/conjure-up/conjure-up/tree/HEAD)
-
-[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.4.2...HEAD)
+## [2.5.0](https://github.com/conjure-up/conjure-up/tree/2.5.0) (2017-12-19)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.4.2...2.5.0)
 
 **Fixed bugs:**
 
+- Application constraints are ignored [\#1272](https://github.com/conjure-up/conjure-up/issues/1272)
 - bundle-add fragment hides remainder of applications [\#1270](https://github.com/conjure-up/conjure-up/issues/1270)
 - Deploy getting stuck on setting relations [\#1264](https://github.com/conjure-up/conjure-up/issues/1264)
-- conjure-up tells me the wrong log location when i specify --cache-dir [\#1254](https://github.com/conjure-up/conjure-up/issues/1254)
-
-**Closed issues:**
-
 - boolean step type failure \(expected str, bytes or os.PathLike object, not bool\) [\#1261](https://github.com/conjure-up/conjure-up/issues/1261)
 - boolean step type failure \(no attribute 'required'\) [\#1255](https://github.com/conjure-up/conjure-up/issues/1255)
-- Conjure-up kubernetes juju bootstrap fail [\#1250](https://github.com/conjure-up/conjure-up/issues/1250)
-- Remove problems And VPN problem [\#1240](https://github.com/conjure-up/conjure-up/issues/1240)
+- conjure-up tells me the wrong log location when i specify --cache-dir [\#1254](https://github.com/conjure-up/conjure-up/issues/1254)
 
 **Merged pull requests:**
 
+- Fix placement spec not being honored [\#1277](https://github.com/conjure-up/conjure-up/pull/1277) ([battlemidget](https://github.com/battlemidget))
+- Copy app constraints to conjure-up created machines [\#1276](https://github.com/conjure-up/conjure-up/pull/1276) ([johnsca](https://github.com/johnsca))
 - Update libjuju to 0.7.0 [\#1273](https://github.com/conjure-up/conjure-up/pull/1273) ([battlemidget](https://github.com/battlemidget))
 - Normalize bundle top level keys for application/services [\#1271](https://github.com/conjure-up/conjure-up/pull/1271) ([battlemidget](https://github.com/battlemidget))
 - Add's libsodium for libjuju updates [\#1268](https://github.com/conjure-up/conjure-up/pull/1268) ([battlemidget](https://github.com/battlemidget))
@@ -688,19 +685,12 @@
 
 - conjure-up for openstack lxd fails: "No controllers registered." [\#659](https://github.com/conjure-up/conjure-up/issues/659)
 
-**Closed issues:**
-
-- Conjure-up openstack on Ubuntu 16.10 Crash [\#656](https://github.com/conjure-up/conjure-up/issues/656)
-- non-integer constraints not handled correctly for add-machines API  [\#654](https://github.com/conjure-up/conjure-up/issues/654)
-
 **Merged pull requests:**
 
 - Better error dialog handling, especially for bootstrap failures [\#667](https://github.com/conjure-up/conjure-up/pull/667) ([mikemccracken](https://github.com/mikemccracken))
 - Fixes \#661 [\#665](https://github.com/conjure-up/conjure-up/pull/665) ([battlemidget](https://github.com/battlemidget))
 - Fixes \#662 [\#664](https://github.com/conjure-up/conjure-up/pull/664) ([battlemidget](https://github.com/battlemidget))
 - Fixes \#615 [\#660](https://github.com/conjure-up/conjure-up/pull/660) ([battlemidget](https://github.com/battlemidget))
-- Expose MAAS endpoint and api\_key for use in steps [\#657](https://github.com/conjure-up/conjure-up/pull/657) ([battlemidget](https://github.com/battlemidget))
-- Always store constraint values as ints, MiB units [\#655](https://github.com/conjure-up/conjure-up/pull/655) ([mikemccracken](https://github.com/mikemccracken))
 
 ## [2.1.0-beta5](https://github.com/conjure-up/conjure-up/tree/2.1.0-beta5) (2017-02-03)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.0-pre-snappy...2.1.0-beta5)
