@@ -263,6 +263,7 @@ class ConfigAppsController:
         sd = bundle._bundle[bundle.application_key][application.service_name]
         sd['num_units'] = application.num_units
         sd['options'] = application.options
+        sd['to'] = application.placement_spec
 
     def do_deploy(self, application, msg_cb):
         def msg_both(*args):
