@@ -532,9 +532,11 @@ def get_cloud(name):
 
 
 def constraints_to_dict(constraints):
-    """Parses a constraint string into a dict. Does not do unit
-    conversion. Expects root-disk, mem and cores to be int values, and
-    root-disk and mem should be in megabytes."""
+    """
+    Parses a constraint string into a dict. If tags and spaces are found they
+    will be converted into a list. All other constraints are passed directly to
+    juju for processing during deployment.
+    """
     new_constraints = {}
     if not isinstance(constraints, str):
         app.log.debug(
@@ -549,8 +551,6 @@ def constraints_to_dict(constraints):
             constraint, value = c.split('=')
             if constraint in ['tags', 'spaces']:
                 value = value.split(',')
-            elif constraint in ['root-disk', 'mem', 'cores']:
-                value = int(value)
             else:
                 pass
             new_constraints[constraint] = value
