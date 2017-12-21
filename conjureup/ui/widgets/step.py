@@ -1,27 +1,31 @@
 import asyncio
 
 from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import submit_btn
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.input import (
     IntegerEditor,
     PasswordEditor,
-    SelectorHorizontal,
     StringEditor,
     YesNo
 )
-from urwid import Columns, Pile, Text, WidgetWrap
+from urwid import Columns, Filler, Pile, Text, WidgetWrap
 
 from conjureup import utils
+from conjureup.ui.widgets.buttons import SubmitButton
+from conjureup.ui.widgets.selectors import (
+    RadioList,
+    ValuedCheckBox,
+    ValuedRadioButton,
+)
 
 
-class StepForm(WidgetWrap):
+class StepForm(Pile):
     INPUT_TYPES = {
         'text': StringEditor,
         'password': PasswordEditor,
         'boolean': YesNo,
         'integer': IntegerEditor,
-        'choice': SelectorHorizontal
+        'choice': RadioList,
     }
 
     def __init__(self, app, step_model):
@@ -37,28 +41,36 @@ class StepForm(WidgetWrap):
         self.title = Text(('info_minor', step_model.title))
         self.description = Text(('body', step_model.description))
         self.result = Text(step_model.result)
-        self.output = Text(('info_minor', ''))
+        self.sudo_label = Text(('body', ''))
         self.icon = Text(("pending_icon", "\N{BALLOT BOX}"))
         self.sudo_input = None
         self.complete = asyncio.Event()
-        self.build_widget()
-        self.build_fields()
-        super().__init__(self.step_pile)
+        self.requires_input = False
+        form_fields = (self._build_form_header() +
+                       self._build_sudo_field() +
+                       self._build_form_fields())
+        super().__init__(form_fields)
+        if self.sudo_input or self.fields:
+            self.show_button()
+            self.focus_position = 4
 
     def __repr__(self):
-        return "<StepWidget: {}>".format(self.model.title)
+        return "<StepForm: {} ()>".format(self.model.title, self.selectable())
 
-    def set_output(self, msg):
-        self.output.set_text(('info_context', msg))
+    def set_sudo_label(self, msg):
+        self.sudo_label.set_text(('info_context', msg))
 
-    def clear_output(self):
-        self.output.set_text("")
+    def clear_sudo_error(self):
+        label = 'This step requires sudo.'
+        if not self.app.sudo_pass:
+            label += '  Enter sudo password, if needed:'
+        self.sudo_label.set_text(label)
 
-    def set_error(self, msg):
-        self.output.set_text(('error_major', msg))
+    def set_sudo_error(self, msg):
+        self.sudo_label.set_text(('error_major', msg))
 
     def clear_error(self):
-        self.clear_output()
+        self.clear_sudo_error()
 
     def set_icon_state(self, result_code):
         """ updates status icon
@@ -82,59 +94,69 @@ class StepForm(WidgetWrap):
             self.icon.set_text(("error_icon", "?"))
 
     @property
-    def current_index(self):
-        """ Returns the current pile index
-        """
-        return self.step_pile.focus_position
-
-    @property
     def current_button_index(self):
         """ Returns the pile index where the button is located
         """
-        return len(self.step_pile.contents) - 2
+        return len(self.contents) - 2
 
     def clear_button(self):
         """ Clears current button so it can't be pressed again
         """
-        self.app.log.debug(
-            "Contents: {}".format(
-                self.step_pile.contents[self.current_button_index]))
-        self.step_pile.contents[self.current_button_index] = (
-            Text(""), self.step_pile.options())
+        self.contents[self.current_button_index] = (Text(""), self.options())
 
-    def show_button(self):
-        self.step_pile.contents[self.current_button_index] = (
-            Padding.right_20(
-                Color.button_primary(self.button,
-                                     focus_map='button_primary focus')),
-            self.step_pile.options())
+    def show_button(self, label=None, disabled=False):
+        self.button.set_label(label or 'Next')
+        if disabled:
+            self.button.on_press = lambda btn: None
+            button = self.button
+        else:
+            self.button.on_press = self.submit
+            button = Color.button_primary(self.button,
+                                          focus_map='button_primary focus')
+        self.contents[self.current_button_index] = (Padding.right_20(button),
+                                                    self.options())
 
-    def build_widget(self):
-        self.step_pile = pile = Pile([
+    def append(self, widget):
+        self.contents.append((widget, self.options()))
+
+    def extend(self, widgets):
+        for widget in widgets:
+            self.append(widget)
+
+    def _build_form_header(self):
+        return [
             self.description,
             Padding.line_break(""),
-            Padding.push_4(self.output),
+            HR(),
+        ]
+
+    def _build_sudo_field(self):
+        if not utils.is_linux() or not self.model.needs_sudo:
+            return []
+
+        rows = []
+        if not self.app.sudo_pass:
+            self.sudo_input = PasswordEditor()
+        self.clear_sudo_error()
+        columns = [
+            ('weight', 0.5, Padding.left(self.sudo_label, left=5)),
+        ]
+        if self.sudo_input:
+            columns.append((
+                'weight', 1,
+                Filler(Color.string_input(self.sudo_input,
+                                          focus_map='string_input focus'),
+                       valign='bottom')))
+        rows.extend([
+            Padding.line_break(""),
+            Columns(columns, dividechars=3, box_columns=[1]),
         ])
+        return rows
 
-        if utils.is_linux() and self.model.needs_sudo:
-            pile.contents.append((Padding.line_break(""), pile.options()))
-            label = 'This step requires sudo.'
-            if not self.app.sudo_pass:
-                label += '  Enter sudo password, if needed:'
-                self.sudo_input = PasswordEditor()
-            columns = [
-                ('weight', 0.5, Padding.left(Text(('body', label)), left=5)),
-            ]
-            if self.sudo_input:
-                columns.append(('weight', 1, Color.string_input(
-                    self.sudo_input, focus_map='string_input focus')))
-            pile.contents.append((Columns(columns, dividechars=3),
-                                  pile.options()))
-
-    def build_fields(self):
+    def _build_form_fields(self):
         """ Generates widgets for additional input fields.
         """
-        pile_opts = self.step_pile.options()
+        form_fields = []
         self.fields = []
         for i in self.model.additional_input:
             label = i['label']
@@ -149,9 +171,9 @@ class StepForm(WidgetWrap):
             else:
                 input_type = self.INPUT_TYPES[i['type']]
                 value = self.app.steps_data[self.model.name][key]
-                if input_type == SelectorHorizontal:
+                if issubclass(input_type, RadioList):
                     select_w = input_type([choice for choice in i['choices']])
-                    select_w.set_default(i['default'], True)
+                    select_w.select_option(i['default'])
                     field = StepField(key, label, select_w, i['type'])
                 else:
                     field = StepField(key, label,
@@ -165,44 +187,53 @@ class StepForm(WidgetWrap):
                     ('weight', 1, Color.string_input(
                         field.input, focus_map='string_input focus')))
 
-            self.step_pile.contents.extend([
-                (Padding.line_break(""), pile_opts),
-                (Columns(column_input, dividechars=3), pile_opts),
+            form_fields.extend([
+                Padding.line_break(""),
+                Columns(column_input, dividechars=3),
             ])
 
-        self.button = submit_btn(label="Next", on_press=self.submit)
-        self.step_pile.contents.extend([
-            (Padding.line_break(""), pile_opts),
-            (Text(""), pile_opts),
-            (HR(), pile_opts),
+        self.button = SubmitButton(label="Next", on_press=self.submit)
+        self.requires_input = self.sudo_input or self.fields
+        form_fields.extend([
+            Padding.line_break(""),
+            self.button if self.requires_input else Text(""),
+            HR(),
         ])
 
-        if self.sudo_input or self.fields:
-            self.show_button()
-            self.step_pile.focus_position = 4
+        if self.requires_input:
+            self.complete.clear()
         else:
             self.complete.set()
 
+        return form_fields
+
     def lock_form(self):
         # make unselectable by "focusing" the non-focusable description
-        self.step_pile.focus_position = 0
+        self.focus_position = 0
         self.clear_button()
 
     def submit(self, btn):
         self.app.loop.create_task(self.validate())
 
     async def validate(self):
-        self.clear_button()
-        has_error = False
+        error_field = None
         if self.sudo_input:
-            self.set_output('Checking sudo...')
+            self.clear_sudo_error()
+            # the sudo form can be at the bottom of a long list of forms and
+            # if there is no focused widget below it, it will get scrolled
+            # off the bottom while checking, making it invisible; so we render
+            # the button disabled and focus it to ensure the user can see the
+            # sudo form
+            self.show_button('Checking sudo...', disabled=True)
+            self.focus_position = self.current_button_index
             if not await utils.can_sudo(self.sudo_input.value):
-                self.set_error(
+                self.set_sudo_error(
                     'Sudo failed.  Please check your password and ensure that '
                     'your sudo timeout is not set to zero.')
-                has_error = True
+                error_field = self.sudo_input
             else:
-                self.clear_output()
+                self.clear_sudo_error()
+        self.clear_button()
         for field in self.fields:
             missing = False
             if field.input_type != 'boolean' and \
@@ -217,25 +248,30 @@ class StepForm(WidgetWrap):
                 field.label_widget.set_text(
                     ('error_major',
                      "{}: Missing required input.".format(field.label)))
-                has_error = True
+                if error_field is None:
+                    error_field = field.input
             else:
                 field.label_widget.set_text(('body', field.label))
-        if not has_error:
+        if not error_field:
             self.set_icon_state('active')
             self.lock_form()
             self.complete.set()
         else:
             self.show_button()
-
-    def keypress(self, size, key):
-        if key == 'enter':
-            if self.current_button_index in (self.current_index,
-                                             self.current_index + 2):
-                self.button.keypress(size, 'enter')
+            # find the first field that errored and select it
+            orig_focus_position = self.focus_position
+            for i in range(len(self.contents)):
+                self.focus_position = i
+                focus_field = self.get_focus_widgets()[-1].base_widget
+                if isinstance(focus_field, (ValuedCheckBox,
+                                            ValuedRadioButton)):
+                    # compare the whole list, not individual item
+                    focus_field = self.get_focus_widgets()[-2].base_widget
+                if focus_field is error_field:
+                    break
             else:
-                self.step_pile.keypress(size, 'down')
-        else:
-            return super().keypress(size, key)
+                # field not found??  restore focus_position
+                self.focus_position = orig_focus_position
 
 
 class StepField:
