@@ -154,6 +154,13 @@ class SelectList(Pile):
             else:
                 return selected[0] if selected else None
 
+    @property
+    def value(self):
+        """
+        Alias for :meth:`.selected`.
+        """
+        return self.selected
+
     def _move_limit(self, bottom=True):
         indexes = range(len(self.contents))
         if bottom:

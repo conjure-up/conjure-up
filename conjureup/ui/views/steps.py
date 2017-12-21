@@ -1,4 +1,3 @@
-from ubuntui.utils import Padding
 from ubuntui.widgets.hr import HR
 from urwid import Columns, Pile, Text
 
@@ -19,15 +18,11 @@ class ShowStepsView(BaseView):
         super().__init__()
 
     def build_widget(self):
-        self.step_pile = Pile([
-            HR(),
-            Padding.line_break(''),
-        ])
-        return self.step_pile
+        return []
 
     def add_step(self, step_widget):
-        self.step_pile.contents.append((step_widget, self.step_pile.options()))
-        self.step_pile.focus_position = len(self.step_pile.contents) - 1
+        self.widget.contents.append((step_widget, self.widget.options()))
+        self.widget.focus_position = len(self.widget.contents) - 1
 
 
 class RunStepsView(BaseView):

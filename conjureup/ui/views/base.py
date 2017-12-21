@@ -10,7 +10,6 @@ from urwid import (
     Filler,
     Frame,
     Pile,
-    RadioButton,
     Text,
     WidgetWrap,
 )
@@ -18,6 +17,7 @@ from urwid import (
 from conjureup import events
 from conjureup.app_config import app
 from conjureup.telemetry import track_screen
+from conjureup.ui.widgets.buttons import SubmitButton
 from conjureup.ui.widgets.selectors import RadioList
 
 SWAP_FOCUS = 'swap focus'
@@ -37,6 +37,14 @@ class BaseView(WidgetWrap):
     footer = ''
     footer_height = 'auto'
     show_back_button = True
+
+    focusable_widget_types = (
+        Edit,
+        CheckBox,
+        Selector,
+        RadioList,
+        SubmitButton,
+    )
 
     def __init__(self):
         """Create a new instance of this view.
@@ -144,10 +152,13 @@ class BaseView(WidgetWrap):
         if not isinstance(widget, Filler):
             widget = Filler(widget, valign="top")
 
-        return Pile([
+        body = Pile([
             ('pack', Padding.center_90(HR())),
             Padding.center_80(widget),
         ])
+        # ensure widget is always focused, even if not (initially) selectable
+        body.focus_position = 1
+        return body
 
     def set_footer(self, message):
         self.footer_msg.set_text(message)
@@ -207,10 +218,10 @@ class BaseView(WidgetWrap):
         Check if a field is acceptable for selecting with :meth:`.next_field`
         or :meth:`.prev_field`.
         """
+        field = field.base_widget  # strip any decoration
         if not field.selectable():
             return False
-        field = field.base_widget  # strip any decoration
-        if isinstance(field, (Edit, CheckBox, Selector, RadioList)):
+        if isinstance(field, self.focusable_widget_types):
             # acceptable to the defense, your honor
             return True
         if hasattr(field, 'contents'):
@@ -294,7 +305,7 @@ class BaseView(WidgetWrap):
 
     def submit_field(self):
         """
-        Submit the current field or form.
+        Submit the current field or view.
 
         By default, this calls ``self.next_field()`` to select the next
         input field, and if there are no more input fields,
@@ -304,14 +315,22 @@ class BaseView(WidgetWrap):
             # activate selected button
             super().keypress((1, 1), 'enter')
             return
-        focused = self.widget.get_focus_widgets()
-        if focused:
-            field = focused[-1]
-            if isinstance(field, RadioButton):
-                # activate the selected radio button
-                field.keypress(1, 'space')
+        # check if current field is submit button
+        field = (self.widget.get_focus_widgets() or [None])[-1].base_widget
+        if isinstance(field, SubmitButton):
+            # activate the selected button
+            field.keypress(1, 'enter')
+            return
+        # move to next field, or submit view
         if not self.next_field(_leave_body=False):
             self.submit()
+            return
+        # check if next field is submit button
+        field = (self.widget.get_focus_widgets() or [None])[-1].base_widget
+        if isinstance(field, SubmitButton):
+            # activate the selected button
+            field.keypress(1, 'enter')
+            return
 
     def submit(self):
         """
