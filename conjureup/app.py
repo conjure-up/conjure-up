@@ -307,6 +307,9 @@ def main():
         utils.set_chosen_spell(addon['spell'],
                                os.path.join(opts.cache_dir,
                                             addon['spell']))
+        download_local(os.path.join(app.config['spells-dir'],
+                                    addon['spell']),
+                       app.config['spell-dir'])
         utils.set_spell_metadata()
         StepModel.load_spell_steps()
         AddonModel.load_spell_addons()
