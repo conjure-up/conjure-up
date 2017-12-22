@@ -11,6 +11,7 @@ from tempfile import NamedTemporaryFile
 
 import yaml
 from bundleplacer.charmstore_api import CharmStoreID
+from juju.constraints import parse as parse_constraints
 from juju.model import Model
 
 from conjureup import consts, errors, events, utils
@@ -604,7 +605,7 @@ async def add_machines(applications, machines, msg_cb):
             events.MachinePending.set(vmid)
             machine = machines[vmid]
             series = machine['series']
-            constraints = constraints_to_dict(machine.get('constraints', ''))
+            constraints = parse_constraints(machine.get('constraints', ''))
             tasks.append(app.juju.client.add_machine(series=series,
                                                      constraints=constraints))
             new_machines[vmid] = None
