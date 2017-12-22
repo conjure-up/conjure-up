@@ -7,7 +7,6 @@ from conjureup.app_config import app
 
 async def do_deploy(msg_cb):
     await events.ModelConnected.wait()
-    cloud_types = juju.get_cloud_types_by_name()
     default_series = app.metadata_controller.series
     machines = app.metadata_controller.bundle.machines
     applications = sorted(app.metadata_controller.bundle.services,
@@ -22,10 +21,7 @@ async def do_deploy(msg_cb):
                                           msg_cb=msg_cb)
     tasks = []
     for service in applications:
-        if cloud_types[app.provider.cloud] == "localhost":
-            # ignore placement when deploying to localhost
-            service.placement_spec = None
-        elif service.placement_spec:
+        if service.placement_spec:
             # remap machine references to actual deployed machine IDs
             # (they will only ever not already match if deploying to
             # an existing model that has other machines)

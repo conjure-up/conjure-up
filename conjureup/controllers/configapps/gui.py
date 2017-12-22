@@ -38,7 +38,7 @@ class ConfigAppsController:
         """
         bundle = app.metadata_controller.bundle
 
-        if len(bundle.machines) == 0 or app.provider.cloud == "localhost":
+        if len(bundle.machines) == 0:
             self.generate_juju_machines()
         else:
             self.sync_assignments()
@@ -67,17 +67,6 @@ class ConfigAppsController:
         midx = 0
         for bundle_application in sorted(bundle.services,
                                          key=attrgetter('service_name')):
-            if bundle_application.placement_spec:
-                if app.provider.cloud == "localhost":
-                    app.log.info("Ignoring placement spec because we are "
-                                 "deploying to LXD: {}".format(
-                                     bundle_application.placement_spec))
-                else:
-                    app.log.warning("Ignoring placement spec because no "
-                                    "machines were set in the "
-                                    "bundle: {}".format(
-                                        bundle_application.placement_spec))
-
             for n in range(bundle_application.num_units):
                 machine = {'series': bundle.series}
                 if bundle_application.constraints:
