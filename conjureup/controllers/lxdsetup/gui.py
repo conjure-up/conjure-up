@@ -1,4 +1,5 @@
 import ipaddress
+from subprocess import CalledProcessError
 
 from conjureup import utils
 from conjureup.app_config import app
@@ -23,6 +24,23 @@ class LXDSetupController(common.BaseLXDSetupController):
 
     async def set_lxd_info(self, network, storage_pool):
         self.set_state('lxd-network-name', network['name'])
+
+        # If using custom bridge names other than `lxdbr0` the
+        # default lxd profile has to be updated to reflect that. This
+        # is because Juju only checks the `default` profile for the
+        # bridge to utilize when bootstraping and deploying.
+        # See: https://git.io/vbp5X
+        try:
+            ret, _, _ = await utils.arun(
+                [app.provider.lxc_bin,
+                 "profile", "device",
+                 "set", "default",
+                 "eth0", "parent", network['name']])
+        except CalledProcessError as e:
+            app.log.error(
+                'Unable to set the default profiles parent network'
+                'device: {}'.format(e.stderr))
+            raise
         phys_iface_addr = utils.get_physical_network_ipaddr(
             network['name'])
         try:
