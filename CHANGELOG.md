@@ -1,5 +1,34 @@
 # Change Log
 
+## [2.5.1](https://github.com/conjure-up/conjure-up/tree/2.5.1) (2018-01-06)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.0...2.5.1)
+
+**Fixed bugs:**
+
+- Fix constraints not being parsed properly [\#1283](https://github.com/conjure-up/conjure-up/issues/1283)
+- conjure-up cannot find storage or network bridge? [\#1279](https://github.com/conjure-up/conjure-up/issues/1279)
+- Applications failed to start successfully reported but juju status shows all units ready [\#1218](https://github.com/conjure-up/conjure-up/issues/1218)
+- OpenStack NovaLXD using old version of LXD inside the controller node [\#1194](https://github.com/conjure-up/conjure-up/issues/1194)
+- lxd default profile inserts lxdbr0 as network device even if custom bridge selected [\#1159](https://github.com/conjure-up/conjure-up/issues/1159)
+- too many machines  [\#1140](https://github.com/conjure-up/conjure-up/issues/1140)
+- Error bootstrapping controller: \['ERROR unknown cloud "vsphere", please try "juju update-clouds"'\] [\#1097](https://github.com/conjure-up/conjure-up/issues/1097)
+- conjure-up initial user issues \(16.04 + snap\) [\#842](https://github.com/conjure-up/conjure-up/issues/842)
+
+**Closed issues:**
+
+- Spell data for aliases not synced properly [\#1280](https://github.com/conjure-up/conjure-up/issues/1280)
+- Openstack Autopilot with Landscape [\#1266](https://github.com/conjure-up/conjure-up/issues/1266)
+- The 'conjure-up==2.4a1' distribution was not found and is required by the application [\#1210](https://github.com/conjure-up/conjure-up/issues/1210)
+
+**Merged pull requests:**
+
+- Update default lxd profile with selected network bridge [\#1288](https://github.com/conjure-up/conjure-up/pull/1288) ([battlemidget](https://github.com/battlemidget))
+- Remove placement restrictions on localhost [\#1285](https://github.com/conjure-up/conjure-up/pull/1285) ([battlemidget](https://github.com/battlemidget))
+- Fix constraints parsing [\#1284](https://github.com/conjure-up/conjure-up/pull/1284) ([battlemidget](https://github.com/battlemidget))
+- Update maintainers for a simplified release process [\#1282](https://github.com/conjure-up/conjure-up/pull/1282) ([battlemidget](https://github.com/battlemidget))
+- Fix \#1280: Spell not synced for aliases [\#1281](https://github.com/conjure-up/conjure-up/pull/1281) ([johnsca](https://github.com/johnsca))
+- Pass along the constraint to juju and let it handle the conversions [\#1278](https://github.com/conjure-up/conjure-up/pull/1278) ([battlemidget](https://github.com/battlemidget))
+
 ## [2.5.0](https://github.com/conjure-up/conjure-up/tree/2.5.0) (2017-12-19)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.4.2...2.5.0)
 
@@ -625,10 +654,6 @@
 ## [2.1.1](https://github.com/conjure-up/conjure-up/tree/2.1.1) (2017-03-03)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.0...2.1.1)
 
-**Fixed bugs:**
-
-- failed to use 'lxd' for conjure-up [\#675](https://github.com/conjure-up/conjure-up/issues/675)
-
 **Closed issues:**
 
 - "LookupError: Unable to list models: error: No controllers registered." [\#707](https://github.com/conjure-up/conjure-up/issues/707)
@@ -648,28 +673,18 @@
 **Implemented enhancements:**
 
 - LXD openstack: installation failure [\#688](https://github.com/conjure-up/conjure-up/issues/688)
-- track OS [\#661](https://github.com/conjure-up/conjure-up/issues/661)
 
 **Fixed bugs:**
 
-- Crash during the install of OpenStack with NovaLXD [\#673](https://github.com/conjure-up/conjure-up/issues/673)
 - kubenetes core spell failed on localhost \(LXD\) [\#690](https://github.com/conjure-up/conjure-up/issues/690)
 - Conjure Up failed on post-processing openstack-base [\#687](https://github.com/conjure-up/conjure-up/issues/687)
 - snap: persists network/iptables configuration on reboot [\#685](https://github.com/conjure-up/conjure-up/issues/685)
 - snap: fix network create on trusty [\#684](https://github.com/conjure-up/conjure-up/issues/684)
-- headless conjure-up kubernetes-core fails, while GUI does work [\#676](https://github.com/conjure-up/conjure-up/issues/676)
-- Failed to run pre deploy task: Expecting value: line 1 column 1  [\#674](https://github.com/conjure-up/conjure-up/issues/674)
-- dont set perms on .cache dir if run as root [\#662](https://github.com/conjure-up/conjure-up/issues/662)
 
 **Closed issues:**
 
 - Snap based installation fails [\#691](https://github.com/conjure-up/conjure-up/issues/691)
 - snap install conjure-up --classic --stable fails in lxd privileged container [\#689](https://github.com/conjure-up/conjure-up/issues/689)
-- conjure-up openstack crash [\#671](https://github.com/conjure-up/conjure-up/issues/671)
-- document running localhost provided spells on remote systems [\#672](https://github.com/conjure-up/conjure-up/issues/672)
-- Document Allow specifying model name in headless [\#670](https://github.com/conjure-up/conjure-up/issues/670)
-- log lxd and juju versions [\#668](https://github.com/conjure-up/conjure-up/issues/668)
-- Documentation: need to install snapd manually [\#658](https://github.com/conjure-up/conjure-up/issues/658)
 
 **Merged pull requests:**
 
@@ -680,17 +695,6 @@
 
 ## [2.1.0-rc1](https://github.com/conjure-up/conjure-up/tree/2.1.0-rc1) (2017-02-10)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.0-beta5...2.1.0-rc1)
-
-**Fixed bugs:**
-
-- conjure-up for openstack lxd fails: "No controllers registered." [\#659](https://github.com/conjure-up/conjure-up/issues/659)
-
-**Merged pull requests:**
-
-- Better error dialog handling, especially for bootstrap failures [\#667](https://github.com/conjure-up/conjure-up/pull/667) ([mikemccracken](https://github.com/mikemccracken))
-- Fixes \#661 [\#665](https://github.com/conjure-up/conjure-up/pull/665) ([battlemidget](https://github.com/battlemidget))
-- Fixes \#662 [\#664](https://github.com/conjure-up/conjure-up/pull/664) ([battlemidget](https://github.com/battlemidget))
-- Fixes \#615 [\#660](https://github.com/conjure-up/conjure-up/pull/660) ([battlemidget](https://github.com/battlemidget))
 
 ## [2.1.0-beta5](https://github.com/conjure-up/conjure-up/tree/2.1.0-beta5) (2017-02-03)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.0-pre-snappy...2.1.0-beta5)
