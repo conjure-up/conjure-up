@@ -43,7 +43,7 @@ class ConfigAppsController:
         else:
             self.sync_assignments()
 
-    def do_configure(self, application, sender):
+    def do_configure(self, application):
         "shows configure view for application"
         cv = ApplicationConfigureView(application,
                                       app.metadata_controller,
@@ -51,7 +51,7 @@ class ConfigAppsController:
         app.ui.set_header("Configure {}".format(application.service_name))
         app.ui.set_body(cv)
 
-    def do_architecture(self, application, sender):
+    def do_architecture(self, application):
         av = AppArchitectureView(application,
                                  self)
         app.ui.set_header(av.header)
@@ -115,11 +115,6 @@ class ConfigAppsController:
             al = [(app, at) for app, at in al if app != application]
             np[m] = al
         self.assignments = np
-
-    def handle_sub_view_done(self):
-        app.ui.set_header(self.list_header)
-        self.list_view.update()
-        app.ui.set_body(self.list_view)
 
     def clear_machine_pins(self):
         """Remove all mappings between juju machines and maas machines.
@@ -192,17 +187,9 @@ class ConfigAppsController:
         return "tags={}".format(machine_tag)
 
     async def ensure_machines(self, application):
-        """If 'application' is assigned to any machine that haven't been added yet,
-        add the machines prior to deployment.
-
-        Note: This no longer actually creates the machine, since the
-        configuration will be filled out before the controller is bootstrapped.
-        Instead, it just ensures that the data in app.metadata_controller is
-        up to date.  This needs to be refactored at a later date.
+        """Ensure that the given application has a machine definition.
         """
-        cloud_type = juju.get_cloud_types_by_name()[app.provider.cloud]
-
-        if cloud_type == cloud_types.MAAS:
+        if app.provider.cloud_type == cloud_types.MAAS:
             await events.MAASConnected.wait()
         app_placements = self.get_all_assignments(application)
         juju_machines = app.metadata_controller.bundle.machines
@@ -213,7 +200,7 @@ class ConfigAppsController:
             machine_attrs = {
                 'series': application.csid.series,
             }
-            if cloud_type == cloud_types.MAAS:
+            if app.provider.cloud_type == cloud_types.MAAS:
                 machine_attrs['constraints'] = \
                     await self.get_maas_constraints(virt_machine_id)
             else:
@@ -227,13 +214,11 @@ class ConfigAppsController:
         juju_machines.update(machines)
         app.metadata_controller.bundle.machines = juju_machines
 
-    async def _do_deploy(self, application, msg_cb):
-        """launches deploy in background for application
+    async def deploy_one(self, application):
+        """Ensures that the data in app.metadata_controller is
+        up to date for the given application and mark it as "deployed".
 
-        Note: This no longer actually deploys the application, since the
-        configuration will be filled out before the controller is bootstrapped.
-        Instead, it just ensures that the data in app.metadata_controller is
-        up to date.  This needs to be refactored at a later date.
+        The actual deploy will happen after bootstrap in another controller.
         """
         if application not in self.undeployed_applications:
             app.log.error('Skipping attempt to deploy unavailable '
@@ -254,18 +239,11 @@ class ConfigAppsController:
         sd['options'] = application.options
         sd['to'] = application.placement_spec
 
-    def do_deploy(self, application, msg_cb):
-        def msg_both(*args):
-            msg_cb(*args)
-            app.ui.set_footer(*args)
-
-        app.loop.create_task(self._do_deploy(application, msg_both))
-
-    def do_deploy_remaining(self):
+    async def deploy_all(self):
         "deploys all un-deployed applications"
         for application in self.undeployed_applications:
-            app.loop.create_task(self._do_deploy(application,
-                                                 app.ui.set_footer))
+            await self.deploy_one(application)
+        self.finish()
 
     def sync_assignment_opts(self):
         svc_opts = {}
@@ -299,22 +277,29 @@ class ConfigAppsController:
         common.write_bundle(self.assignments)
         return controllers.use('bootstrap').render()
 
-    def render(self):
-        track_screen("Configure Applications")
+    def render(self, going_back=False):
+        if going_back:
+            # coming back from config or architecture view
+            self.list_view.show()
+            return
+
         self.applications = sorted(app.metadata_controller.bundle.services,
                                    key=attrgetter('service_name'))
         self.undeployed_applications = self.applications[:]
 
-        cloud_type = juju.get_cloud_types_by_name()[app.provider.cloud]
-        if cloud_type == cloud_types.MAAS:
+        if app.provider.cloud_type == cloud_types.MAAS:
             app.loop.create_task(self.connect_maas())
 
         self.list_view = ApplicationListView(self.applications,
-                                             app.metadata_controller,
-                                             self)
-        self.list_header = "Review and Configure Applications"
-        app.ui.set_header(self.list_header)
-        app.ui.set_body(self.list_view)
+                                             self.deploy_one,
+                                             self.deploy_all,
+                                             self.do_configure,
+                                             self.do_architecture,
+                                             self.back)
+        self.list_view.show()
+
+    def back(self):
+        controllers.use('showsteps').render(going_back=True)
 
 
 _controller_class = ConfigAppsController

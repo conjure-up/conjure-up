@@ -104,17 +104,11 @@ class StepForm(Pile):
         """
         self.contents[self.current_button_index] = (Text(""), self.options())
 
-    def show_button(self, label=None, disabled=False):
+    def show_button(self, label=None, enabled=True):
         self.button.set_label(label or 'Next')
-        if disabled:
-            self.button.on_press = lambda btn: None
-            button = self.button
-        else:
-            self.button.on_press = self.submit
-            button = Color.button_primary(self.button,
-                                          focus_map='button_primary focus')
-        self.contents[self.current_button_index] = (Padding.right_20(button),
-                                                    self.options())
+        self.button.enabled = enabled
+        self.contents[self.current_button_index] = (
+            Padding.right_20(self.button), self.options())
 
     def append(self, widget):
         self.contents.append((widget, self.options()))
@@ -224,7 +218,7 @@ class StepForm(Pile):
             # off the bottom while checking, making it invisible; so we render
             # the button disabled and focus it to ensure the user can see the
             # sudo form
-            self.show_button('Checking sudo...', disabled=True)
+            self.show_button('Checking sudo...', enabled=False)
             self.focus_position = self.current_button_index
             if not await utils.can_sudo(self.sudo_input.value):
                 self.set_sudo_error(

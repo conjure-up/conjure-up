@@ -1,7 +1,8 @@
 from collections.abc import Mapping, Reversible
 
-from urwid import AttrMap, CheckBox, Pile, RadioButton
-from ubuntui.widgets.buttons import MenuSelectButton
+from urwid import CheckBox, Pile, RadioButton
+
+from conjureup.ui.widgets.buttons import ValuedMenuSelectButton
 
 
 class ValuedCheckBox(CheckBox):
@@ -37,28 +38,6 @@ class OptionalValuedRadioButton(ValuedRadioButton):
             self.set_state(True)
         elif self.state is True:
             self.set_state(False)
-
-
-class ValuedMenuSelectButton(AttrMap):
-    def __init__(self, label, value, enabled=True, user_data=None):
-        super().__init__(MenuSelectButton(label), '')
-        self.value = value
-        self.enabled = enabled
-        self.user_data = user_data or {}
-
-    @property
-    def enabled(self):
-        return self._enabled
-
-    @enabled.setter
-    def enabled(self, enabled):
-        self._enabled = enabled
-        if self._enabled:
-            self.set_attr_map({None: 'body'})
-            self.set_focus_map({None: 'menu_button focus'})
-        else:
-            self.set_attr_map({None: 'info_context'})
-            self.set_focus_map({None: 'disabled_button'})
 
 
 class SelectList(Pile):
