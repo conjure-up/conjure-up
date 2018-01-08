@@ -11,9 +11,12 @@ class ShowStepsController:
     def __init__(self):
         self.view = None
 
-    def render(self):
+    def render(self, going_back=False):
         if not app.steps:
-            return self.finish()
+            if going_back:
+                return self.back()
+            else:
+                return self.finish()
 
         self.view = ShowStepsView(None, self.back)
         self.view.show()

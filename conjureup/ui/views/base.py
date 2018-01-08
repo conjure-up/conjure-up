@@ -1,5 +1,4 @@
 from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import menu_btn
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.input import Selector
 from urwid import (
@@ -17,7 +16,11 @@ from urwid import (
 from conjureup import events
 from conjureup.app_config import app
 from conjureup.telemetry import track_screen
-from conjureup.ui.widgets.buttons import SubmitButton
+from conjureup.ui.widgets.buttons import (
+    FooterButton,
+    SecondaryButton,
+    SubmitButton,
+)
 from conjureup.ui.widgets.selectors import RadioList
 
 SWAP_FOCUS = 'swap focus'
@@ -137,10 +140,7 @@ class BaseView(WidgetWrap):
         """ Build a button for the footer with the given label and callback.
 
         """
-        return ('fixed', len(label) + 8,
-                Color.menu_button(menu_btn(on_press=lambda btn: callback(),
-                                           label="\n  {}\n".format(label)),
-                                  focus_map='button_primary focus'))
+        return FooterButton(label, lambda _: callback())
 
     def _build_body(self):
         widget = self.build_widget()
@@ -164,16 +164,17 @@ class BaseView(WidgetWrap):
         self.footer_msg.set_text(message)
 
     def _build_footer(self):
+        def _pack(btn):
+            return ('fixed', len(btn.label) + 4, btn)
         buttons = []
         buttons.append(('fixed', 2, Text("")))
-        buttons.append(self.button('QUIT', events.Shutdown.set))
+        buttons.append(_pack(self.button('QUIT', events.Shutdown.set)))
         if self.show_back_button:
-            buttons.append(('fixed', 2, Text("")))
-            buttons.append(self.button('BACK', self.prev_screen))
+            buttons.append(_pack(self.button('BACK', self.prev_screen)))
         buttons.append(('weight', 2, Text("")))
-        buttons.extend(self.build_buttons())
+        buttons.extend([_pack(btn) for btn in self.build_buttons()])
         buttons.append(('fixed', 2, Text("")))
-        self.buttons = Columns(buttons)
+        self.button_row = Columns(buttons, 2)
 
         self.footer_msg = Text(self.footer)
         footer_widget = Columns([
@@ -192,7 +193,7 @@ class BaseView(WidgetWrap):
             Padding.line_break(""),
             Color.frame_footer(Pile([
                 Padding.line_break(""),
-                self.buttons,
+                self.button_row,
             ])),
         ])
         return footer
@@ -317,7 +318,9 @@ class BaseView(WidgetWrap):
             return
         # check if current field is submit button
         field = (self.widget.get_focus_widgets() or [None])[-1].base_widget
-        if isinstance(field, SubmitButton):
+        app.log.info('submit_field: %s', field)
+        if isinstance(field, (SubmitButton, SecondaryButton)):
+            app.log.info('activating button')
             # activate the selected button
             field.keypress(1, 'enter')
             return
@@ -347,9 +350,9 @@ class BaseView(WidgetWrap):
         if self.frame.focus_position == 'body':
             self.frame.focus_position = 'footer'
             # select last button
-            for i, col in reversed(list(enumerate(self.buttons.contents))):
+            for i, col in reversed(list(enumerate(self.button_row.contents))):
                 if col[0].selectable():
-                    self.buttons.focus_position = i
+                    self.button_row.focus_position = i
                     break
         else:
             self.frame.focus_position = 'body'
