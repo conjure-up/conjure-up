@@ -136,7 +136,10 @@ class ApplicationListView(BaseView):
         if not isinstance(fw, ApplicationWidget):
             self.set_footer("No selected application")
         else:
-            self.set_footer(readme_cache[fw.application.csid.as_str()])
+            self.set_footer(self.get_readme(fw.application))
+
+    def get_readme(self, application):
+        return readme_cache[application.csid.as_str()]
 
     async def _load_readme(self, csid):
         global charmstore
