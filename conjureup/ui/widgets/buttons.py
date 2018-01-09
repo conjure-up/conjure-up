@@ -14,6 +14,9 @@ class StyledButton:
         self.enabled = enabled
         self.user_data = user_data or {}
 
+    def __repr__(self):
+        return '<{} "{}">'.format(type(self).__name__, self.label)
+
     def on_press(self, btn):
         if self.enabled and self._on_press:
             self._on_press(self)

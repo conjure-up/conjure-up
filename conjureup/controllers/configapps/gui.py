@@ -8,7 +8,6 @@ from conjureup import controllers, events, juju
 from conjureup.app_config import app
 from conjureup.consts import cloud_types
 from conjureup.maas import setup_maas
-from conjureup.telemetry import track_screen
 from conjureup.ui.views.app_architecture_view import AppArchitectureView
 from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView
@@ -46,10 +45,8 @@ class ConfigAppsController:
     def do_configure(self, application):
         "shows configure view for application"
         cv = ApplicationConfigureView(application,
-                                      app.metadata_controller,
-                                      self)
-        app.ui.set_header("Configure {}".format(application.service_name))
-        app.ui.set_body(cv)
+                                      lambda: self.render(going_back=True))
+        cv.show()
 
     def do_architecture(self, application):
         av = AppArchitectureView(application,
@@ -280,6 +277,7 @@ class ConfigAppsController:
     def render(self, going_back=False):
         if going_back:
             # coming back from config or architecture view
+            self.list_view.update_units()
             self.list_view.show()
             return
 

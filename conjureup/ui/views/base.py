@@ -47,6 +47,7 @@ class BaseView(WidgetWrap):
         Selector,
         RadioList,
         SubmitButton,
+        SecondaryButton,
     )
 
     def __init__(self):
@@ -317,10 +318,14 @@ class BaseView(WidgetWrap):
             super().keypress((1, 1), 'enter')
             return
         # check if current field is submit button
-        field = (self.widget.get_focus_widgets() or [None])[-1].base_widget
+        focus_widgets = self.widget.get_focus_widgets()
+        if focus_widgets:
+            field = focus_widgets[-1].base_widget
+        else:
+            field = None
         app.log.info('submit_field: %s', field)
         if isinstance(field, (SubmitButton, SecondaryButton)):
-            app.log.info('activating button')
+            app.log.info('activating button: %s', field)
             # activate the selected button
             field.keypress(1, 'enter')
             return

@@ -17,7 +17,6 @@ import logging
 from enum import Enum
 
 from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import PlainButton
 from ubuntui.widgets.input import StringEditor
 from urwid import (
     CheckBox,
@@ -29,6 +28,8 @@ from urwid import (
     WidgetWrap,
     connect_signal
 )
+
+from conjureup.ui.widgets.buttons import SecondaryButton
 
 log = logging.getLogger('conjure')
 
@@ -68,10 +69,14 @@ class OptionWidget(WidgetWrap):
     def selectable(self):
         return True
 
+    @property
+    def focus(self):
+        return self._w.focus
+
     def build_widgets(self):
         desc_text = Text(["\n", strip_solo_dots(self.description)])
 
-        self.reset_button = PlainButton("Reset to Default", self.do_reset)
+        self.reset_button = SecondaryButton("Reset to Default", self.do_reset)
         if self.optype == OptionType.BOOLEAN:
             self.control = CheckBox('', state=bool(self.current_value))
             self.wrapped_control = self.control
@@ -107,9 +112,7 @@ class OptionWidget(WidgetWrap):
             connect_signal(self.control, 'change',
                            self.handle_value_changed)
 
-        button_grid = GridFlow([
-            Color.button_secondary(self.reset_button,
-                                   focus_map='button_secondary focus')],
+        button_grid = GridFlow([self.reset_button],
                                36, 1, 0, 'right')
 
         return Pile([Padding.line_break(""),
