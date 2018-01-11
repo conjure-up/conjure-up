@@ -16,28 +16,30 @@ from conjureup.utils import SudoError, arun, can_sudo, is_linux, sentry_report
 class StepModel:
     @classmethod
     def load_spell_steps(cls):
+        spell_name = app.config['metadata']['friendly-name']
         steps_dir = Path(app.config['spell-dir']) / 'steps'
         app.steps = []
         for step_dir in sorted(steps_dir.glob('*')):
             if not step_dir.is_dir():
                 continue
-            step = StepModel.load(step_dir)
+            step = StepModel.load(step_dir, source=spell_name)
             app.steps.append(step)
         app.log.debug('steps: {}'.format(app.steps))
 
     @classmethod
-    def load(cls, step_meta_path):
+    def load(cls, step_meta_path, source):
         step_name = step_meta_path.stem
         step_ex_path = step_meta_path.parent / step_name
         if not (step_ex_path / 'metadata.yaml').is_file():
             raise ValidationError(
-                'Step {} has no metadata'.format(step_name))
+                'The {} step {} has no metadata'.format(source, step_name))
         step_metadata = yaml.load(
             (step_meta_path / 'metadata.yaml').read_text())
-        step = StepModel(step_metadata, step_name)
+        step = StepModel(step_metadata, step_name, step_ex_path, source)
         if not any(step._has_phase(phase) for phase in PHASES):
             raise ValidationError(
-                'Step {} has no implementation'.format(step_name))
+                'The {} step {} has no implementation'.format(source,
+                                                              step_name))
         step_data = app.steps_data.get(step.name, {})
         for field in step.additional_input:
             key = field['key']
@@ -52,7 +54,7 @@ class StepModel:
             step.set_state('result', None, phase)
         return step
 
-    def __init__(self, step, name):
+    def __init__(self, step, name, step_path, source):
         self.title = step.get('title', '')
         self.description = step.get('description', '')
         self.result = ''
@@ -62,14 +64,15 @@ class StepModel:
         self.additional_input = step.get('additional-input', [])
         self.cloud_whitelist = step.get('cloud-whitelist', [])
         self.name = name
+        self.step_path = step_path
+        self.source = source
 
     def __repr__(self):
-        return "<StepModel {} v: {} c: {}>".format(
-            self.name, self.viewable, self.cloud_whitelist)
+        return "<StepModel {} {} v: {} c: {}>".format(
+            self.source, self.name, self.viewable, self.cloud_whitelist)
 
     def _build_phase_path(self, phase):
-        return Path(app.config['spell-dir']) / 'steps' / self.name \
-            / phase.value
+        return self.step_path / phase.value
 
     def _has_phase(self, phase):
         return self._build_phase_path(phase).is_file()
@@ -152,10 +155,6 @@ class StepModel:
         app.state[key] = value
 
     @property
-    def step_dir(self):
-        return Path(app.config['spell-dir']) / 'steps' / self.name
-
-    @property
     def bundle_add(self):
         """
         Return the bundle-add fragment file, if set by this step.
@@ -163,7 +162,7 @@ class StepModel:
         Return value is a Path object or None.
         """
         bundle_add = self.get_state('bundle-add')
-        bundle_add_path = self.step_dir / bundle_add
+        bundle_add_path = self.step_path / bundle_add
         if not bundle_add or not bundle_add_path.exists():
             return None
         return bundle_add_path
@@ -176,7 +175,7 @@ class StepModel:
         Return value is a Path object or None.
         """
         bundle_remove = self.get_state('bundle-remove')
-        bundle_remove_path = self.step_dir / bundle_remove
+        bundle_remove_path = self.step_path / bundle_remove
         if not bundle_remove or not bundle_remove_path.exists():
             return None
         return bundle_remove_path
@@ -195,20 +194,23 @@ class StepModel:
 
         if not os.access(str(step_path), os.X_OK):
             app.log.error(
-                'Unable to run step {} {}, it is not executable'.format(
-                    step_path.stem, phase.value))
+                'Unable to run {} step {} {}, it is not executable'.format(
+                    self.source, step_path.stem, phase.value))
             return
 
         step_path = str(step_path)
 
-        msg = "Running step: {} {}.".format(self.name, phase.value)
+        msg = "Running {} step: {} {}.".format(self.source,
+                                               self.name,
+                                               phase.value)
         app.log.info(msg)
         msg_cb(msg)
         if event_name is not None:
             track_event(event_name, "Started", "")
 
         if is_linux() and self.needs_sudo and not await can_sudo():
-            raise SudoError('Step "{}" requires sudo: {}'.format(
+            raise SudoError('The "{}" step "{}" requires sudo: {}'.format(
+                self.source,
                 self.title,
                 'password failed' if app.sudo_pass else
                 'passwordless sudo required',
