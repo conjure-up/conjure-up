@@ -1,5 +1,5 @@
-from urwid import AttrMap
 from ubuntui.widgets.buttons import MenuSelectButton, PlainButton
+from urwid import AttrMap
 
 
 class StyledButton:
