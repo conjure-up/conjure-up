@@ -22,7 +22,7 @@ class TestView(MockupView, ShowStepsView):
         self.add_step(StepForm(app, StepModel({
             'description': 'Download Deis CLI',
             'viewable': True,
-        }, '', '')))
+        }, 'filename', 'name', 'source')))
         self.add_step(StepForm(app, StepModel({
             'description': 'Create Admin User',
             'viewable': True,
@@ -37,7 +37,7 @@ class TestView(MockupView, ShowStepsView):
                  'key': 'EMAIL',
                  'type': 'text'},
             ],
-        }, 'filename', 'name')))
+        }, 'filename', 'name', 'source')))
         return self.step_pile
 
 
