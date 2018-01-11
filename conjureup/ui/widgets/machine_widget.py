@@ -13,17 +13,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
-
-from ubuntui.widgets.buttons import PlainButton
-from urwid import AttrMap, Columns, Text, WidgetWrap
+from urwid import Columns, Text
 
 from conjureup.app_config import app
+from conjureup.ui.widgets.base import ContainerWidgetWrap
+from conjureup.ui.widgets.buttons import SecondaryButton
 
-log = logging.getLogger('bundleplacer')
 
-
-class MachineWidget(WidgetWrap):
+class MachineWidget(ContainerWidgetWrap):
 
     """A widget displaying a machine and one action button.
 
@@ -67,11 +64,10 @@ class MachineWidget(WidgetWrap):
         self.unselect_button_label = "Un-pin {} from ".format(
             m.hostname) + "{}"
 
-        self.select_button = PlainButton(self.select_button_label,
-                                         self.handle_button)
+        self.select_button = SecondaryButton(self.select_button_label,
+                                             self.handle_button)
         cols = [Text(m) for m in l]
-        cols += [AttrMap(self.select_button, 'text',
-                         'button_secondary focus')]
+        cols += [self.select_button]
 
         self.columns = Columns(cols)
         return self.columns
@@ -89,7 +85,7 @@ class MachineWidget(WidgetWrap):
                             None)
 
     def __repr__(self):
-        return "widget for " + str(self.machine)
+        return "<MachineWidget for {}>".format(self.machine)
 
     def update(self):
         self.update_machine()

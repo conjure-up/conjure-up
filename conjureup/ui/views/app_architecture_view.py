@@ -1,41 +1,50 @@
 """ Application Architecture View
 
 """
+import asyncio
 import copy
-import logging
 from collections import defaultdict
-
-from ubuntui.ev import EventLoop
-from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import menu_btn
-from ubuntui.widgets.hr import HR
-from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
 
 from conjureup.app_config import app
 from conjureup.consts import cloud_types
+from conjureup.events import Shutdown
 from conjureup.juju import (
     constraints_from_dict,
     constraints_to_dict,
     get_cloud_types_by_name
 )
+from conjureup.ui.views.base import BaseView
 from conjureup.ui.views.machine_pin_view import MachinePinView
 from conjureup.ui.widgets.juju_machines_list import JujuMachinesList
 
-log = logging.getLogger('conjure')
 
+class AppArchitectureView(BaseView):
 
-class AppArchitectureView(WidgetWrap):
-
-    def __init__(self, application, controller):
+    def __init__(self, application, controller, close_cb):
         """
         application: a Service instance representing a juju application
 
         controller: a DeployGUIController instance
         """
-        self.controller = controller
         self.application = application
+        self.controller = controller
+        self.close_cb = close_cb
 
-        self.header = "Architecture"
+        cloud_type = get_cloud_types_by_name()[app.provider.cloud]
+        self.controller_is_maas = cloud_type == cloud_types.MAAS
+
+        self.title = "Architect {}".format(application.service_name)
+        if self.controller_is_maas:
+            extra = (" Press enter on a machine ID to pin it to "
+                     "a specific MAAS node.")
+        else:
+            extra = ""
+        self.subtitle = "Choose where to place {} unit{} of {}.{}".format(
+            self.application.num_units,
+            "" if self.application.num_units == 1 else "s",
+            self.application.service_name,
+            extra)
+
         # Shadow means temporary to the view, they are committed to
         # the controller if the user chooses OK
 
@@ -47,57 +56,20 @@ class AppArchitectureView(WidgetWrap):
                     self.shadow_assignments[machine_id].append((a, at))
 
         # {juju_machine_id : maas machine id}
-        self.shadow_pins = copy.copy(controller.maas_machine_map)
+        self.shadow_pins = copy.copy(self.controller.maas_machine_map)
         self.machine_pin_view = None
 
         self._machines = copy.deepcopy(app.metadata_controller.bundle.machines)
+        self.closed = asyncio.Event()
 
-        self.alarm = None
-        self.widgets = self.build_widgets()
-        self.description_w = Text("")
-        self.buttons_selected = False
-        self.frame = Frame(body=self.build_widgets(),
-                           footer=self.build_footer())
-        super().__init__(self.frame)
-        self.update()
-
-    def selectable(self):
-        return True
+        super().__init__()
+        app.loop.create_task(self.update())
 
     def __repr__(self):
         return "App Architecture View for {}".format(
             self.application.service_name)
 
-    def keypress(self, size, key):
-        # handle keypress first, then get new focus widget
-        rv = super().keypress(size, key)
-        if key in ['tab', 'shift tab']:
-            self._swap_focus()
-        return rv
-
-    def _swap_focus(self):
-        if not self.buttons_selected:
-            self.buttons_selected = True
-            self.frame.focus_position = 'footer'
-            self.buttons.focus_position = 3
-        else:
-            self.buttons_selected = False
-            self.frame.focus_position = 'body'
-
-    def build_widgets(self):
-        cloud_type = get_cloud_types_by_name()[app.provider.cloud]
-        controller_is_maas = cloud_type == cloud_types.MAAS
-        if controller_is_maas:
-            extra = (" Press enter on a machine ID to pin it to "
-                     "a specific MAAS node.")
-        else:
-            extra = ""
-        ws = [Text("Choose where to place {} unit{} of {}.{}".format(
-            self.application.num_units,
-            "" if self.application.num_units == 1 else "s",
-            self.application.service_name,
-            extra))]
-
+    def build_widget(self):
         self.juju_machines_list = JujuMachinesList(
             self.application,
             self._machines,
@@ -107,41 +79,13 @@ class AppArchitectureView(WidgetWrap):
             self.remove_machine,
             self,
             show_filter_box=True,
-            show_pins=controller_is_maas)
-        ws.append(self.juju_machines_list)
+            show_pins=self.controller_is_maas)
+        return self.juju_machines_list
 
-        self.pile = Pile(ws)
-        return Padding.center_90(Filler(self.pile, valign="top"))
+    def build_buttons(self):
+        return [self.button('DONE', self.submit)]
 
-    def build_footer(self):
-        cancel = menu_btn(on_press=self.do_cancel,
-                          label="\n  BACK\n")
-        self.apply_button = menu_btn(on_press=self.do_commit,
-                                     label="\n APPLY\n")
-        self.buttons = Columns([
-            ('fixed', 2, Text("")),
-            ('fixed', 13, Color.menu_button(
-                cancel,
-                focus_map='button_primary focus')),
-            Text(""),
-            ('fixed', 20, Color.menu_button(
-                self.apply_button,
-                focus_map='button_primary focus')),
-            ('fixed', 2, Text(""))
-        ])
-
-        footer = Pile([
-            HR(top=0),
-            Padding.center_90(self.description_w),
-            Padding.line_break(""),
-            Color.frame_footer(Pile([
-                Padding.line_break(""),
-                self.buttons]))
-        ])
-
-        return footer
-
-    def update_now(self, *args):
+    def update_now(self):
         if self.machine_pin_view:
             self.machine_pin_view.update()
             return
@@ -153,9 +97,10 @@ class AppArchitectureView(WidgetWrap):
             self.juju_machines_list.all_assigned = False
         self.juju_machines_list.update()
 
-    def update(self, *args):
-        self.update_now()
-        self.alarm = EventLoop.set_alarm_in(1, self.update)
+    async def update(self):
+        while not (self.closed.is_set() or Shutdown.is_set()):
+            self.update_now()
+            await asyncio.sleep(1)
 
     def do_assign(self, juju_machine_id, assignment_type):
         self.shadow_assignments[juju_machine_id].append((self.application,
@@ -208,11 +153,16 @@ class AppArchitectureView(WidgetWrap):
         return None
 
     def show_pin_chooser(self, juju_machine_id):
-        app.ui.set_header("Pin Machine {}".format(juju_machine_id))
-        self.machine_pin_view = MachinePinView(
-            juju_machine_id, self.application, self)
-        self.update_now()
-        app.ui.set_body(self.machine_pin_view)
+        def _close():
+            self.machine_pin_view = None
+            self.update_now()
+            self.show()
+
+        self.machine_pin_view = MachinePinView(juju_machine_id,
+                                               self.application,
+                                               self,
+                                               _close)
+        self.machine_pin_view.show()
 
     def handle_sub_view_done(self):
         app.ui.set_header(self.header)
@@ -248,12 +198,11 @@ class AppArchitectureView(WidgetWrap):
         md['constraints'] = constraints_from_dict(cd)
         return md
 
-    def do_cancel(self, sender):
-        self.controller.handle_sub_view_done()
-        if self.alarm:
-            EventLoop.remove_alarm(self.alarm)
+    def prev_screen(self):
+        self.closed.set()
+        self.close_cb()
 
-    def do_commit(self, sender):
+    def submit(self):
         """Commit changes to shadow assignments, constraints, and pins"""
         app.metadata_controller.bundle.machines = self._machines
 
@@ -268,6 +217,4 @@ class AppArchitectureView(WidgetWrap):
         for j_m_id, m in self.shadow_pins.items():
             self.controller.set_machine_pin(j_m_id, m)
 
-        self.controller.handle_sub_view_done()
-        if self.alarm:
-            EventLoop.remove_alarm(self.alarm)
+        self.prev_screen()

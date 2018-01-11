@@ -50,9 +50,9 @@ class ConfigAppsController:
 
     def do_architecture(self, application):
         av = AppArchitectureView(application,
-                                 self)
-        app.ui.set_header(av.header)
-        app.ui.set_body(av)
+                                 self,
+                                 lambda: self.render(going_back=True))
+        av.show()
 
     def generate_juju_machines(self):
         """ Add a separate juju machine for each app.

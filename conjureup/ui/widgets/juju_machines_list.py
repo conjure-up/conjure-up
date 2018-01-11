@@ -16,16 +16,17 @@
 import logging
 from operator import attrgetter
 
-from ubuntui.widgets.buttons import PlainButton
-from urwid import AttrMap, Columns, Divider, Pile, Text, WidgetWrap
+from urwid import Columns, Divider, Pile, Text
 
+from conjureup.ui.widgets.base import ContainerWidgetWrap
+from conjureup.ui.widgets.buttons import SecondaryButton
 from conjureup.ui.widgets.filter_box import FilterBox
 from conjureup.ui.widgets.juju_machine_widget import JujuMachineWidget
 
 log = logging.getLogger('bundleplacer')
 
 
-class JujuMachinesList(WidgetWrap):
+class JujuMachinesList(ContainerWidgetWrap):
 
     """A list of machines in a juju bundle, with configurable action
     buttons for each machine.
@@ -107,11 +108,8 @@ class JujuMachinesList(WidgetWrap):
                                    dividechars=2)
         header_widgets.append(header_label_col)
         self.header_padding = len(header_widgets)
-        self.add_new_button = AttrMap(
-            PlainButton("Add New Machine",
-                        on_press=self.do_add_machine),
-            'button_secondary',
-            'button_secondary focus')
+        self.add_new_button = SecondaryButton("Add New Machine",
+                                              self.do_add_machine)
         self.add_new_cols = Columns([Text(s) for s in
                                      [' ', ' ', ' ', ' ', ' ']] +
                                     [self.add_new_button], dividechars=2)
