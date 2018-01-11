@@ -10,6 +10,9 @@ Contoller Picker
 JAAS Login
 Configure Spell
 Configure Applications
+- Configure {App}
+- Architecture
+  - Pin Machine
 Boostrap
 Deploy
 Post-Deploy Steps

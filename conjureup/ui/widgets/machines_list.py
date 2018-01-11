@@ -15,18 +15,19 @@
 
 import logging
 
-from urwid import Columns, Divider, Pile, Text, WidgetWrap
+from urwid import Columns, Divider, Pile, Text
 
 from conjureup.app_config import app
 from conjureup.juju import constraints_from_dict
 from conjureup.maas import MaasMachineStatus, satisfies
+from conjureup.ui.widgets.base import ContainerWidgetWrap
 from conjureup.ui.widgets.filter_box import FilterBox
 from conjureup.ui.widgets.machine_widget import MachineWidget
 
 log = logging.getLogger('bundleplacer')
 
 
-class MachinesList(WidgetWrap):
+class MachinesList(ContainerWidgetWrap):
 
     """A list of machines with configurable action buttons for each
     machine.

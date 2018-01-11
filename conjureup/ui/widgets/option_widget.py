@@ -25,10 +25,10 @@ from urwid import (
     IntEdit,
     Pile,
     Text,
-    WidgetWrap,
     connect_signal
 )
 
+from conjureup.ui.widgets.base import ContainerWidgetWrap
 from conjureup.ui.widgets.buttons import SecondaryButton
 
 log = logging.getLogger('conjure')
@@ -52,7 +52,7 @@ def strip_solo_dots(s):
     return "\n".join(rl)
 
 
-class OptionWidget(WidgetWrap):
+class OptionWidget(ContainerWidgetWrap):
 
     def __init__(self, name, optype, description, default,
                  current_value=None, value_changed_callback=None):
@@ -68,10 +68,6 @@ class OptionWidget(WidgetWrap):
 
     def selectable(self):
         return True
-
-    @property
-    def focus(self):
-        return self._w.focus
 
     def build_widgets(self):
         desc_text = Text(["\n", strip_solo_dots(self.description)])

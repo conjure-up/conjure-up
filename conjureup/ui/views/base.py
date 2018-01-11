@@ -220,6 +220,7 @@ class BaseView(WidgetWrap):
         Check if a field is acceptable for selecting with :meth:`.next_field`
         or :meth:`.prev_field`.
         """
+        app.log.info('_check_field: %s (%s)', field, field.base_widget)
         field = field.base_widget  # strip any decoration
         if not field.selectable():
             return False
@@ -237,8 +238,10 @@ class BaseView(WidgetWrap):
     def _select_next_field(self, direction):
         if not hasattr(self.widget, 'get_focus_widgets'):
             # top-level widget is not a container, nothing to do
+            app.log.info('_select_next_field: not container')
             return False
         focus_path = [self.widget] + self.widget.get_focus_widgets()
+        app.log.info('_select_next_field: %s', focus_path)
         while len(focus_path) > 1:
             # use -2 to get the selected parent of the leaf widget
             container = focus_path[-2]

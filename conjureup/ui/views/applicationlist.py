@@ -4,11 +4,12 @@
 import logging
 from functools import partial
 
-from urwid import Columns, Text, WidgetWrap
+from urwid import Columns, Text
 from juju.model import CharmStore
 
 from conjureup.app_config import app
 from conjureup.ui.views.base import BaseView
+from conjureup.ui.widgets.base import ContainerWidgetWrap
 from conjureup.ui.widgets.buttons import SecondaryButton, SubmitButton
 from conjureup.utils import get_options_whitelist
 
@@ -18,7 +19,7 @@ readme_cache = {}
 charmstore = None
 
 
-class ApplicationWidget(WidgetWrap):
+class ApplicationWidget(ContainerWidgetWrap):
 
     def __init__(self, application, maxlen, deploy_cb, config_cb, arch_cb,
                  hide_config=False):
@@ -39,13 +40,6 @@ class ApplicationWidget(WidgetWrap):
 
     def selectable(self):
         return self._selectable
-
-    @property
-    def focus(self):
-        if self._selectable:
-            return self._w.focus
-        else:
-            return None
 
     def update_units(self):
         self.unit_w.set_text("Units: {:>4}".format(self.application.num_units))

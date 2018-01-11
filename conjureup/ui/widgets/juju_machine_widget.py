@@ -13,11 +13,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
 from collections import defaultdict
 
 from bundleplacer.assignmenttype import AssignmentType, atype_to_label
-from ubuntui.widgets.buttons import MenuSelectButton, PlainButton
 from urwid import (
     AttrMap,
     Columns,
@@ -26,16 +24,15 @@ from urwid import (
     IntEdit,
     Pile,
     Text,
-    WidgetWrap,
     connect_signal
 )
 
 from conjureup import juju, units
+from conjureup.ui.widgets.base import ContainerWidgetWrap
+from conjureup.ui.widgets.buttons import SecondaryButton
 
-log = logging.getLogger('bundleplacer')
 
-
-class JujuMachineWidget(WidgetWrap):
+class JujuMachineWidget(ContainerWidgetWrap):
 
     """A widget displaying a machine and action buttons.
 
@@ -95,10 +92,10 @@ class JujuMachineWidget(WidgetWrap):
     def build_unselected_widgets(self):
         cdict = juju.constraints_to_dict(self.md.get('constraints', ''))
 
-        self.juju_machine_id_button = MenuSelectButton(
-            '{:20s}'.format(self.juju_machine_id), self.show_pin_chooser)
-        self.juju_machine_id_label = Text(
-            "{:20s}".format(self.juju_machine_id))
+        label = str(self.juju_machine_id)
+        self.juju_machine_id_button = SecondaryButton(label,
+                                                      self.show_pin_chooser)
+        self.juju_machine_id_label = Text(label)
         self.cores_field = IntEdit('', str(cdict.get('cores', '')))
         connect_signal(self.cores_field, 'change', self.handle_cores_changed)
         memval = cdict.get('mem', '')
@@ -116,10 +113,9 @@ class JujuMachineWidget(WidgetWrap):
             machine_id_w = self.juju_machine_id_button
         else:
             machine_id_w = self.juju_machine_id_label
-        cols = [machine_id_w, self.cores_field,
-                self.mem_field, self.disk_field]
-        cols = [AttrMap(w, 'string_input',
-                        'string_input_focus') for w in cols]
+        cols = [machine_id_w]
+        for field in (self.cores_field, self.mem_field, self.disk_field):
+            cols.append(AttrMap(field, 'string_input', 'string_input_focus'))
         cols.append(Text("placeholder"))
         self.unselected_columns = Columns(cols, dividechars=2)
         self.update_assignments()
@@ -151,7 +147,7 @@ class JujuMachineWidget(WidgetWrap):
             action = self.do_select
             label = "Select"
 
-        self.select_button = PlainButton(label, action)
+        self.select_button = SecondaryButton(label, action)
 
         cols = [Text(s) for s in assignments]
 
@@ -159,8 +155,7 @@ class JujuMachineWidget(WidgetWrap):
         if self.all_assigned and len(current_assignments) == 0:
             cols.append(Text(""))
         else:
-            cols += [AttrMap(self.select_button, 'text',
-                             'button_secondary focus')]
+            cols.append(self.select_button)
         opts = self.unselected_columns.options()
         self.unselected_columns.contents[4:] = [(w, opts) for w in cols]
 
@@ -186,14 +181,14 @@ class JujuMachineWidget(WidgetWrap):
             pinned_machine = self.controller.get_pin(self.juju_machine_id)
 
             if pinned_machine:
-                pin_label = " {} \N{PENCIL}".format(pinned_machine.hostname)
+                label = "{} \N{RIGHTWARDS ARROW}  {}".format(
+                    self.juju_machine_id, pinned_machine.hostname)
             else:
-                pin_label = " \N{PENCIL}"
-            self.juju_machine_id_button.set_label('{:20s}'.format(
-                self.juju_machine_id + " " + pin_label))
+                label = str(self.juju_machine_id)
+            label = "\N{PENCIL}  {}".format(label)
+            self.juju_machine_id_button.set_label(label)
         else:
-            self.juju_machine_id_label.set_text('{:20s}'.format(
-                self.juju_machine_id))
+            self.juju_machine_id_label.set_text(str(self.juju_machine_id))
 
         self.pile.contents = [(self.unselected_columns, self.pile.options()),
                               (Divider(), self.pile.options())]
@@ -223,17 +218,11 @@ class JujuMachineWidget(WidgetWrap):
         if len(self.action_buttons) == len(allowed_types) + 1:
             return
 
-        self.action_buttons = [AttrMap(PlainButton(label,
-                                                   on_press=func),
-                                       'button_secondary',
-                                       'button_secondary focus')
+        self.action_buttons = [SecondaryButton(label, func)
                                for atype, label, func in all_actions
                                if atype in allowed_types]
-        self.action_buttons.append(
-            AttrMap(PlainButton("Cancel",
-                                on_press=self.do_cancel),
-                    'button_secondary',
-                    'button_secondary focus'))
+        self.action_buttons.append(SecondaryButton("Cancel",
+                                                   self.do_cancel))
 
         opts = self.action_button_cols.options()
         self.action_button_cols.contents = [(b, opts) for b in

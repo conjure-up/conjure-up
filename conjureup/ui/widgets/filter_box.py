@@ -13,22 +13,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
-
 from urwid import (
     AttrMap,
     Columns,
     Edit,
     Pile,
     Text,
-    WidgetWrap,
-    connect_signal
+    connect_signal,
 )
 
-log = logging.getLogger('bundleplacer')
+from conjureup.ui.widgets.base import ContainerWidgetWrap
 
 
-class FilterBox(WidgetWrap):
+class FilterBox(ContainerWidgetWrap):
 
     def __init__(self, edit_changed_cb, label="", info_text=""):
         self.label = Text(label)

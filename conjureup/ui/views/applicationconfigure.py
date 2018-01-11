@@ -2,8 +2,6 @@
 
 """
 
-import logging
-
 from ubuntui.widgets.hr import HR
 from urwid import Columns, Text
 
@@ -12,8 +10,6 @@ from conjureup.app_config import app
 from conjureup.ui.views.base import BaseView
 from conjureup.ui.widgets.buttons import SecondaryButton
 from conjureup.ui.widgets.option_widget import OptionWidget
-
-log = logging.getLogger('conjure')
 
 
 class ApplicationConfigureView(BaseView):
@@ -55,7 +51,7 @@ class ApplicationConfigureView(BaseView):
         svc_opts_whitelist = utils.get_options_whitelist(
             self.application.service_name)
         hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
-        log.info("Hiding options not in the whitelist: {}".format(hidden))
+        app.log.info("Hiding options not in the whitelist: {}".format(hidden))
 
         return self._get_option_widgets(svc_opts_whitelist, options)
 
