@@ -3,8 +3,8 @@ import asyncio
 from conjureup import controllers, events, juju
 from conjureup.app_config import app
 from conjureup.telemetry import track_event, track_screen
-from conjureup.ui.views.interstitial import InterstitialView
 from conjureup.ui.views.destroy_confirm import DestroyConfirmView
+from conjureup.ui.views.interstitial import InterstitialView
 
 
 class DestroyConfirm:

@@ -10,7 +10,7 @@ from urwid import (
     Frame,
     Pile,
     Text,
-    WidgetWrap,
+    WidgetWrap
 )
 
 from conjureup import events
@@ -19,7 +19,7 @@ from conjureup.telemetry import track_screen
 from conjureup.ui.widgets.buttons import (
     FooterButton,
     SecondaryButton,
-    SubmitButton,
+    SubmitButton
 )
 from conjureup.ui.widgets.selectors import RadioList
 

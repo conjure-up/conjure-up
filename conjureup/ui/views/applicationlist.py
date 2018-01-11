@@ -4,8 +4,8 @@
 import logging
 from functools import partial
 
-from urwid import Columns, Text
 from juju.model import CharmStore
+from urwid import Columns, Text
 
 from conjureup.app_config import app
 from conjureup.ui.views.base import BaseView

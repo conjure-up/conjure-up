@@ -6,6 +6,7 @@ class ContainerWidgetWrap(WidgetWrap, WidgetContainerMixin):
     Base for WidgetWraps that wrap containers and want container methods
     to pass through.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

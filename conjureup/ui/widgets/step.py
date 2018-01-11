@@ -15,7 +15,7 @@ from conjureup.ui.widgets.buttons import SubmitButton
 from conjureup.ui.widgets.selectors import (
     RadioList,
     ValuedCheckBox,
-    ValuedRadioButton,
+    ValuedRadioButton
 )
 
 
