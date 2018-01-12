@@ -32,7 +32,6 @@ class AddonModel:
         self.path = Path(app.config['spell-dir']) / 'addons' / name
         self.metadata = self._read('metadata.yaml')
         self.bundle = self._read('bundle.yaml')
-        self.friendly_name = self.metadata['friendly-name']
         self.steps = [StepModel.load(step_path,
                                      source=self.friendly_name)
                       for step_path in
