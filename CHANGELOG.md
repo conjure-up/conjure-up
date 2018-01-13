@@ -1,5 +1,22 @@
 # Change Log
 
+## [2.5.2](https://github.com/conjure-up/conjure-up/tree/2.5.2) (2018-01-13)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.1...2.5.2)
+
+**Fixed bugs:**
+
+- addon steps dont seem to be executing [\#1295](https://github.com/conjure-up/conjure-up/issues/1295)
+
+**Closed issues:**
+
+- Information on the final screen is gone once you quit [\#1294](https://github.com/conjure-up/conjure-up/issues/1294)
+- Unable to do a clean install via conjure-up: ERROR "Could not determine Juju version." [\#1289](https://github.com/conjure-up/conjure-up/issues/1289)
+
+**Merged pull requests:**
+
+- Remove attribute duplicating property [\#1297](https://github.com/conjure-up/conjure-up/pull/1297) ([johnsca](https://github.com/johnsca))
+- Fix addon steps not being run [\#1296](https://github.com/conjure-up/conjure-up/pull/1296) ([johnsca](https://github.com/johnsca))
+
 ## [2.5.1](https://github.com/conjure-up/conjure-up/tree/2.5.1) (2018-01-06)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.0...2.5.1)
 
@@ -210,7 +227,6 @@
 - Exception: Problem setting default profile: CompletedProcess\(args='cat /tmp/tmpcpcb753i |conjure-up.lxc prof... [\#967](https://github.com/conjure-up/conjure-up/issues/967)
 - Stuck in "waiting for applications to start" [\#890](https://github.com/conjure-up/conjure-up/issues/890)
 - Unable to add machine, db locked [\#886](https://github.com/conjure-up/conjure-up/issues/886)
-- Exception: Could not determine LXD version. [\#683](https://github.com/conjure-up/conjure-up/issues/683)
 - Exception: Failure in step 00\_deploy-done [\#1025](https://github.com/conjure-up/conjure-up/issues/1025)
 - ConnectionRefusedError: \[Errno 111\] Connect call failed \('10.218.149.192', 17070\) [\#995](https://github.com/conjure-up/conjure-up/issues/995)
 - Exception: Unable to create model: ERROR failed to open environ: Get https://10.159.252.1:12001/1.0: Unable ... [\#989](https://github.com/conjure-up/conjure-up/issues/989)
@@ -679,19 +695,11 @@
 - kubenetes core spell failed on localhost \(LXD\) [\#690](https://github.com/conjure-up/conjure-up/issues/690)
 - Conjure Up failed on post-processing openstack-base [\#687](https://github.com/conjure-up/conjure-up/issues/687)
 - snap: persists network/iptables configuration on reboot [\#685](https://github.com/conjure-up/conjure-up/issues/685)
-- snap: fix network create on trusty [\#684](https://github.com/conjure-up/conjure-up/issues/684)
 
 **Closed issues:**
 
 - Snap based installation fails [\#691](https://github.com/conjure-up/conjure-up/issues/691)
 - snap install conjure-up --classic --stable fails in lxd privileged container [\#689](https://github.com/conjure-up/conjure-up/issues/689)
-
-**Merged pull requests:**
-
-- Revert "Fixes \#615" [\#682](https://github.com/conjure-up/conjure-up/pull/682) ([battlemidget](https://github.com/battlemidget))
-- Add HACKING.txt [\#681](https://github.com/conjure-up/conjure-up/pull/681) ([mikemccracken](https://github.com/mikemccracken))
-- Warn on upgrading to snap lxd if deb lxd exists [\#678](https://github.com/conjure-up/conjure-up/pull/678) ([battlemidget](https://github.com/battlemidget))
-- Fixes an issue on localhost deploying to nested lxd [\#677](https://github.com/conjure-up/conjure-up/pull/677) ([battlemidget](https://github.com/battlemidget))
 
 ## [2.1.0-rc1](https://github.com/conjure-up/conjure-up/tree/2.1.0-rc1) (2017-02-10)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.0-beta5...2.1.0-rc1)
