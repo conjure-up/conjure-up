@@ -5,6 +5,7 @@
 # Copyright 2016 Canonical, Ltd.
 
 
+import asyncio
 import unittest
 from unittest.mock import MagicMock, call, patch, sentinel
 
@@ -44,9 +45,6 @@ class BootstrapGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.bootstrap.common.app', self.mock_app)
         self.common_app_patcher.start()
 
-        self.track_screen_patcher = patch(
-            'conjureup.controllers.bootstrap.gui.track_screen')
-        self.mock_track_screen = self.track_screen_patcher.start()
         events.Bootstrapped.clear()
 
     def tearDown(self):
@@ -55,7 +53,6 @@ class BootstrapGUIRenderTestCase(unittest.TestCase):
         self.app_patcher.stop()
         self.ev_app_patcher.stop()
         self.common_app_patcher.stop()
-        self.track_screen_patcher.stop()
 
     def test_render(self):
         self.controller.run = MagicMock(return_value=sentinel.run)
@@ -112,26 +109,22 @@ class BootstrapGUIWaitTestCase(unittest.TestCase):
             'conjureup.events.app', self.mock_app)
         self.ev_app_patcher.start()
 
-        self.asleep_patcher = patch('asyncio.sleep')
-        self.mock_asleep = self.asleep_patcher.start()
-
     def tearDown(self):
         events.Bootstrapped.clear()
         self.controllers_patcher.stop()
         self.render_patcher.stop()
         self.app_patcher.stop()
         self.ev_app_patcher.stop()
-        self.asleep_patcher.stop()
 
     def test_wait(self):
-        "call refresh"
         async def set_bs():
+            await asyncio.sleep(0.1)
             events.Bootstrapped.set()
 
         events.Bootstrapped.clear()
-        self.mock_asleep.return_value = set_bs()
-        mock_view = MagicMock()
         with test_loop() as loop:
-            loop.run_until_complete(self.controller.wait(mock_view))
-        mock_view.redraw_kitt.assert_called_once_with()
+            loop.run_until_complete(asyncio.gather(
+                self.controller.wait(),
+                set_bs(),
+            ))
         self.mock_controllers.use.assert_called_once_with('deploy')
