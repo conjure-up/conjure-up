@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import MagicMock, patch, sentinel
 
 from conjureup import events
+from conjureup.consts import cloud_types
 from conjureup.controllers.configapps.gui import ConfigAppsController
 
 
@@ -48,10 +49,6 @@ class ConfigAppsGUIRenderTestCase(unittest.TestCase):
             'conjureup.controllers.configapps.gui.juju')
         self.mock_juju = self.juju_patcher.start()
 
-        self.track_screen_patcher = patch(
-            'conjureup.controllers.configapps.gui.track_screen')
-        self.mock_track_screen = self.track_screen_patcher.start()
-
     def tearDown(self):
         self.finish_patcher.stop()
         self.common_patcher.stop()
@@ -59,12 +56,11 @@ class ConfigAppsGUIRenderTestCase(unittest.TestCase):
         self.app_patcher.stop()
         self.ev_app_patcher.stop()
         self.juju_patcher.stop()
-        self.track_screen_patcher.stop()
 
     def test_connect_maas(self):
         "Call submit to schedule predeploy if we haven't yet"
         self.mock_app.provider.cloud = 'foo'
-        self.mock_juju.get_cloud_types_by_name.return_value = {'foo': 'maas'}
+        self.mock_app.provider.cloud_type = cloud_types.MAAS
         self.controller.connect_maas = MagicMock(return_value=sentinel.maas)
         self.controller.render()
         self.mock_app.loop.create_task.assert_called_once_with(sentinel.maas)
