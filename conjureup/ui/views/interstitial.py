@@ -4,7 +4,7 @@ import unicodedata
 from pathlib import Path
 
 from ubuntui.utils import Padding
-from urwid import Columns, Filler, Pile, Text
+from urwid import Columns, Text
 
 from conjureup import events
 from conjureup.app_config import app
@@ -12,6 +12,7 @@ from conjureup.ui.views.base import BaseView
 
 
 class InterstitialView(BaseView):
+    body_valign = 'middle'
     icons = [('pending_icon', "\u2581"),
              ('pending_icon', "\u2582"),
              ('pending_icon', "\u2583"),
@@ -33,7 +34,7 @@ class InterstitialView(BaseView):
 
     def build_widget(self):
         """ creates a loading screen if nodes do not exist yet """
-        text = [Padding.line_break(""),
+        body = [Padding.line_break(""),
                 Text(self.message, align="center"),
                 Padding.line_break(""),
                 Padding.center_90(self.output),
@@ -44,10 +45,9 @@ class InterstitialView(BaseView):
         for i in self.loading_boxes:
             _boxes.append(('pack', i))
         _boxes.append(('weight', 1, Text('')))
-        _boxes = Columns(_boxes)
+        body.append(Columns(_boxes))
 
-        return Filler(Pile(text + [_boxes]),
-                      valign="middle")
+        return body
 
     def _clear_control_characters(self, text):
         text = text.decode().splitlines()
