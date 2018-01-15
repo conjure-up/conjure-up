@@ -16,6 +16,7 @@ from urwid import (
 from conjureup import events
 from conjureup.app_config import app
 from conjureup.telemetry import track_screen
+from conjureup.ui.widgets.base import Scrollable
 from conjureup.ui.widgets.buttons import (
     FooterButton,
     SecondaryButton,
@@ -29,6 +30,9 @@ PREV_FIELD = 'prev field'
 SUBMIT_FIELD = 'submit field'
 NEXT_SCREEN = 'next screen'
 PREV_SCREEN = 'prev screen'
+SHOW_HELP = 'show help'
+SCROLL_UP = 'scroll up'
+SCROLL_DOWN = 'scroll down'
 
 FORWARD = +1
 BACKWARD = -1
@@ -40,6 +44,7 @@ class BaseView(WidgetWrap):
     footer = ''
     footer_height = 'auto'
     show_back_button = True
+    body_valign = 'top'
 
     focusable_widget_types = (
         Edit,
@@ -53,7 +58,8 @@ class BaseView(WidgetWrap):
     def __init__(self):
         """Create a new instance of this view.
         """
-        self.frame = Frame(body=self._build_body(),
+        self.frame = Frame(header=Padding.center_90(HR()),
+                           body=self._build_body(),
                            footer=self._build_footer())
 
         self.extend_command_map({
@@ -66,6 +72,10 @@ class BaseView(WidgetWrap):
             'meta right': NEXT_SCREEN,
             'meta left': PREV_SCREEN,
             'meta b': PREV_SCREEN,
+            'h': SHOW_HELP,
+            '?': SHOW_HELP,
+            'up': SCROLL_UP,
+            'down': SCROLL_DOWN,
         })
         self._command_handlers = {
             SWAP_FOCUS: self._swap_focus,
@@ -74,6 +84,9 @@ class BaseView(WidgetWrap):
             SUBMIT_FIELD: self.submit_field,
             NEXT_SCREEN: self.submit,
             PREV_SCREEN: self.prev_screen,
+            SHOW_HELP: self.show_help,
+            SCROLL_UP: self.scroll_up,
+            SCROLL_DOWN: self.scroll_down,
         }
         super().__init__(self.frame)
 
@@ -149,17 +162,8 @@ class BaseView(WidgetWrap):
             widget = Pile(widget)
         self._widget = widget
 
-        # for rendering only, we want to wrap widget in a Filler if not already
-        if not isinstance(widget, Filler):
-            widget = Filler(widget, valign="top")
-
-        body = Pile([
-            ('pack', Padding.center_90(HR())),
-            Padding.center_80(widget),
-        ])
-        # ensure widget is always focused, even if not (initially) selectable
-        body.focus_position = 1
-        return body
+        # position widget indented slightly, filled around, and scrollable
+        return Scrollable(Padding.center_80(widget), valign=self.body_valign)
 
     def set_footer(self, message):
         self.footer_msg.set_text(message)
@@ -188,7 +192,6 @@ class BaseView(WidgetWrap):
             footer_widget = BoxAdapter(Filler(footer_widget, valign='bottom'),
                                        self.footer_height)
         footer = Pile([
-            Padding.line_break(""),
             Padding.center_90(HR()),
             Color.body(footer_widget),
             Padding.line_break(""),
@@ -354,6 +357,12 @@ class BaseView(WidgetWrap):
         """
         self.next_screen()
 
+    def scroll_up(self):
+        self.frame.body.scroll_top -= 1
+
+    def scroll_down(self):
+        self.frame.body.scroll_top += 1
+
     def _swap_focus(self):
         if self.frame.focus_position == 'body':
             self.frame.focus_position = 'footer'
@@ -367,7 +376,14 @@ class BaseView(WidgetWrap):
 
     def keypress(self, size, key):
         command = self._command_map[key]
-        if command in self._command_handlers:
+        if command in (SCROLL_UP, SCROLL_DOWN):
+            # special handling for scrolling
+            # try passing through the key first
+            result = super().keypress(size, key)
+            if result == key:
+                # not handled, so dispatch to scrolling
+                result = self._command_handlers[command]()
+        elif command in self._command_handlers:
             # dispatch via _command_handlers (see __init__)
             result = self._command_handlers[command]()
         else:
@@ -380,6 +396,61 @@ class BaseView(WidgetWrap):
         Will be called after a keypress is handled.
         """
         pass
+
+    def show_help(self):
+        help_view = HelpView(close=self.show)
+        help_view.show()
+
+
+class HelpView(BaseView):
+    title = 'Keyboard Navigation'
+    help_defs = (
+        ("q or Q", "If not in a text entry field, these will quit "
+                   "conjure-up."),
+        ("tab", "This should switch to the next field. If there are no "
+                "more fields, it will change focus to the button bar at "
+                "the bottom of the screen."),
+        ("shift tab", "This should switch to the previous field. If on "
+                      "the first field, it should move to the button bar "
+                      "at the bottom. If on the button bar, it should "
+                      "move to the last field."),
+        ("down arrow", "This should move to the next line of a multi-line "
+                       "field, or the next field of a multi-field form. "
+                       "If there are no more lines or fields, it should "
+                       "do nothing."),
+        ("up arrow", "This should move to the previous line of a "
+                     "multi-line field, or the previous field of a "
+                     "multi-field form. If there are no more lines or "
+                     "fields, it should do nothing."),
+        ("page down", "This should move to the next field of a "
+                      "multi-field form, regardless of how many lines "
+                      "that field has. If there are no more fields, it "
+                      "should do nothing."),
+        ("page up", "This should move to the previous field of a "
+                    "multi-field form, regardless of how many line that "
+                    "field has. If there are no more fields, it should do "
+                    "nothing."),
+        ("enter", "This should submit the current field and move to the "
+                  "next one, or submit the current form if there are no "
+                  "more input fields."),
+        ("meta/alt b", "Go to the previous screen, if any."),
+        ("meta/alt s", "Switch between the button bar and the main "
+                       "window input area."),
+        ("h or ?", "Show this help screen"),
+    )
+
+    def __init__(self, close):
+        self.prev_screen = close
+        super().__init__()
+
+    def build_widget(self):
+        key_col_width = max(len(k) for k, _ in self.help_defs) + 2
+        lines = []
+        for key_def, help_text in self.help_defs:
+            lines.append(Columns([(key_col_width, Text(key_def)),
+                                  Text(help_text)]))
+            lines.append(Text(""))
+        return lines
 
 
 class SchemaFormView(BaseView):

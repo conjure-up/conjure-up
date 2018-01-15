@@ -21,6 +21,8 @@ class ConjureUI(Frame):
         async.shutdown()
         EventLoop.remove_alarms()
         self.frame.body = ErrorView(errmsg)
+        # ensure error is shown, even if exception was inside urwid
+        EventLoop.redraw_screen()
         app.log.debug("Showing dialog for exception: {}".format(ex))
 
     def show_error_message(self, msg):
