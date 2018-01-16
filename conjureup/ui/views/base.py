@@ -1,3 +1,5 @@
+from functools import partial
+
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.hr import HR
 from ubuntui.widgets.input import Selector
@@ -33,6 +35,8 @@ PREV_SCREEN = 'prev screen'
 SHOW_HELP = 'show help'
 SCROLL_UP = 'scroll up'
 SCROLL_DOWN = 'scroll down'
+SCROLL_PAGE_UP = 'scroll page up'
+SCROLL_PAGE_DOWN = 'scroll page down'
 
 FORWARD = +1
 BACKWARD = -1
@@ -76,6 +80,8 @@ class BaseView(WidgetWrap):
             '?': SHOW_HELP,
             'up': SCROLL_UP,
             'down': SCROLL_DOWN,
+            'page up': SCROLL_PAGE_UP,
+            'page down': SCROLL_PAGE_DOWN,
         })
         self._command_handlers = {
             SWAP_FOCUS: self._swap_focus,
@@ -85,8 +91,10 @@ class BaseView(WidgetWrap):
             NEXT_SCREEN: self.submit,
             PREV_SCREEN: self.prev_screen,
             SHOW_HELP: self.show_help,
-            SCROLL_UP: self.scroll_up,
-            SCROLL_DOWN: self.scroll_down,
+            SCROLL_UP: partial(self.scroll, -1),
+            SCROLL_DOWN: partial(self.scroll, +1),
+            SCROLL_PAGE_UP: partial(self.scroll, -10),
+            SCROLL_PAGE_DOWN: partial(self.scroll, +10),
         }
         super().__init__(self.frame)
 
@@ -357,11 +365,8 @@ class BaseView(WidgetWrap):
         """
         self.next_screen()
 
-    def scroll_up(self):
-        self.frame.body.scroll_top -= 1
-
-    def scroll_down(self):
-        self.frame.body.scroll_top += 1
+    def scroll(self, amount):
+        self.frame.body.scroll_top += amount
 
     def _swap_focus(self):
         if self.frame.focus_position == 'body':
@@ -376,7 +381,8 @@ class BaseView(WidgetWrap):
 
     def keypress(self, size, key):
         command = self._command_map[key]
-        if command in (SCROLL_UP, SCROLL_DOWN):
+        if command in (SCROLL_UP, SCROLL_DOWN,
+                       SCROLL_PAGE_UP, SCROLL_PAGE_DOWN):
             # special handling for scrolling
             # try passing through the key first
             result = super().keypress(size, key)
@@ -407,30 +413,25 @@ class HelpView(BaseView):
     help_defs = (
         ("q or Q", "If not in a text entry field, these will quit "
                    "conjure-up."),
-        ("tab", "This should switch to the next field. If there are no "
+        ("tab", "This will switch to the next field. If there are no "
                 "more fields, it will change focus to the button bar at "
                 "the bottom of the screen."),
-        ("shift tab", "This should switch to the previous field. If on "
-                      "the first field, it should move to the button bar "
-                      "at the bottom. If on the button bar, it should "
+        ("shift tab", "This will switch to the previous field. If on "
+                      "the first field, it will move to the button bar "
+                      "at the bottom. If on the button bar, it will "
                       "move to the last field."),
-        ("down arrow", "This should move to the next line of a multi-line "
+        ("down arrow", "This will move to the next line of a multi-line "
                        "field, or the next field of a multi-field form. "
-                       "If there are no more lines or fields, it should "
-                       "do nothing."),
-        ("up arrow", "This should move to the previous line of a "
+                       "Otherwise, this will scroll the screen if there "
+                       "is more content than will fit on the screen."),
+        ("up arrow", "This will move to the previous line of a "
                      "multi-line field, or the previous field of a "
-                     "multi-field form. If there are no more lines or "
-                     "fields, it should do nothing."),
-        ("page down", "This should move to the next field of a "
-                      "multi-field form, regardless of how many lines "
-                      "that field has. If there are no more fields, it "
-                      "should do nothing."),
-        ("page up", "This should move to the previous field of a "
-                    "multi-field form, regardless of how many line that "
-                    "field has. If there are no more fields, it should do "
-                    "nothing."),
-        ("enter", "This should submit the current field and move to the "
+                     "multi-field form. Otherwise, this will scroll the "
+                     "screen if there is more content than will fit on the "
+                     "screen."),
+        ("page down", "This will scroll by 10 lines."),
+        ("page up", "This will scroll by 10 lines."),
+        ("enter", "This will submit the current field and move to the "
                   "next one, or submit the current form if there are no "
                   "more input fields."),
         ("meta/alt b", "Go to the previous screen, if any."),

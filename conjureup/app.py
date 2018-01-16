@@ -448,6 +448,7 @@ def main():
 
         else:
             app.ui = ConjureUI()
+            app.ui.set_footer('Press ? for help')
 
             EventLoop.build_loop(app.ui, STYLES,
                                  unhandled_input=events.unhandled_input,
