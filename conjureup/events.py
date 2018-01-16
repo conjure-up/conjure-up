@@ -131,7 +131,7 @@ NOTRACK_EXCEPTIONS = [
 
 def unhandled_input(key):
     if key in ['q', 'Q', 'meta q']:
-        Shutdown.set()
+        app.ui.quit()
     if key in ['R']:
         EventLoop.redraw_screen()
 
@@ -179,8 +179,6 @@ async def shutdown_watcher():
         app.log.info('Shutting down')
         if app.headless:
             utils.warning('Shutting down')
-        else:
-            app.ui.show_shutdown_message()
 
         # Store application configuration state
         await app.save()

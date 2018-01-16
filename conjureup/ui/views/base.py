@@ -13,7 +13,6 @@ from urwid import (
     WidgetWrap
 )
 
-from conjureup import events
 from conjureup.app_config import app
 from conjureup.telemetry import track_screen
 from conjureup.ui.widgets.base import Scrollable
@@ -173,7 +172,7 @@ class BaseView(WidgetWrap):
             return ('fixed', len(btn.label) + 4, btn)
         buttons = []
         buttons.append(('fixed', 2, Text("")))
-        buttons.append(_pack(self.button('QUIT', events.Shutdown.set)))
+        buttons.append(_pack(self.button('QUIT', app.ui.quit)))
         if self.show_back_button:
             buttons.append(_pack(self.button('BACK', self.prev_screen)))
         buttons.append(('weight', 2, Text("")))
