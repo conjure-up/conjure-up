@@ -14,8 +14,8 @@ class ControllerListView(BaseView):
                 ' or choose to bootstrap a new one.')
     footer = ('The controller is what allows Juju to deploy and manage your '
               'models/spells.  With JaaS, the controller will be managed '
-              'for you, so that you can focus on your applications and '
-              'solutions. Alternatively, you can host and manage your own '
+              'for you for free, so that you can focus on your applications '
+              'and solutions. Alternatively, you can host and manage your own '
               'controller on the cloud to which you deploy.')
 
     def __init__(self, app, controllers, submit_cb, back_cb):
@@ -30,7 +30,7 @@ class ControllerListView(BaseView):
         widget = MenuSelectButtonList()
         if self.app.jaas_ok:
             widget.append_option('Juju-as-a-Service (JaaS) '
-                                 'Managed Controller', 'jaas')
+                                 'Free Controller', 'jaas')
         if len(self.controllers) > 0:
             if self.app.jaas_ok:
                 widget.append(HR())
