@@ -70,11 +70,13 @@ class BaseView(WidgetWrap):
             'tab': NEXT_FIELD,
             'shift tab': PREV_FIELD,
             'enter': SUBMIT_FIELD,
+            'n': NEXT_SCREEN,
             'meta n': NEXT_SCREEN,
-            'meta enter': NEXT_SCREEN,
             'meta right': NEXT_SCREEN,
             'meta left': PREV_SCREEN,
             'meta b': PREV_SCREEN,
+            'b': PREV_SCREEN,
+            'meta h': SHOW_HELP,
             'h': SHOW_HELP,
             '?': SHOW_HELP,
             'up': SCROLL_UP,
@@ -230,7 +232,6 @@ class BaseView(WidgetWrap):
         Check if a field is acceptable for selecting with :meth:`.next_field`
         or :meth:`.prev_field`.
         """
-        app.log.info('_check_field: %s (%s)', field, field.base_widget)
         field = field.base_widget  # strip any decoration
         if not field.selectable():
             return False
@@ -248,10 +249,8 @@ class BaseView(WidgetWrap):
     def _select_next_field(self, direction):
         if not hasattr(self.widget, 'get_focus_widgets'):
             # top-level widget is not a container, nothing to do
-            app.log.info('_select_next_field: not container')
             return False
         focus_path = [self.widget] + self.widget.get_focus_widgets()
-        app.log.info('_select_next_field: %s', focus_path)
         while len(focus_path) > 1:
             # use -2 to get the selected parent of the leaf widget
             container = focus_path[-2]
@@ -336,9 +335,7 @@ class BaseView(WidgetWrap):
             field = focus_widgets[-1].base_widget
         else:
             field = None
-        app.log.info('submit_field: %s', field)
         if isinstance(field, (SubmitButton, SecondaryButton)):
-            app.log.info('activating button: %s', field)
             # activate the selected button
             field.keypress(1, 'enter')
             return
@@ -379,20 +376,16 @@ class BaseView(WidgetWrap):
             self.frame.focus_position = 'body'
 
     def keypress(self, size, key):
+        # try passing through the key first
+        # (unless enter, as SUBMIT_FIELD should override default behavior)
+        if key != 'enter':
+            result = super().keypress(size, key)
+            if result != key:
+                return result
+        # not handled, so dispatch via _command_handlers (see __init__)
         command = self._command_map[key]
-        if command in (SCROLL_UP, SCROLL_DOWN,
-                       SCROLL_PAGE_UP, SCROLL_PAGE_DOWN):
-            # special handling for scrolling
-            # try passing through the key first
-            result = super().keypress(size, key)
-            if result == key:
-                # not handled, so dispatch to scrolling
-                result = self._command_handlers[command]()
-        elif command in self._command_handlers:
-            # dispatch via _command_handlers (see __init__)
+        if command in self._command_handlers:
             result = self._command_handlers[command]()
-        else:
-            result = super().keypress(size, key)
         self.after_keypress()
         return result
 
@@ -433,10 +426,13 @@ class HelpView(BaseView):
         ("enter", "This will submit the current field and move to the "
                   "next one, or submit the current form if there are no "
                   "more input fields."),
-        ("meta/alt b", "Go to the previous screen, if any."),
+        ("b or meta/alt b", "Go to the previous screen, if any."),
+        ("n or meta/alt n", "Submit the current screen and continue, if "
+                            "possible (some screens may require interaction "
+                            "before continuing)."),
         ("meta/alt s", "Switch between the button bar and the main "
                        "window input area."),
-        ("h or ?", "Show this help screen"),
+        ("h or ? or meta/alt h", "Show this help screen"),
     )
 
     def __init__(self, close):

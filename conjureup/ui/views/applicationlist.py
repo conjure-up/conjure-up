@@ -2,7 +2,6 @@
 
 """
 import logging
-from functools import partial
 
 from juju.model import CharmStore
 from urwid import Columns, Text
@@ -121,8 +120,7 @@ class ApplicationListView(BaseView):
             label = 'DEPLOY REMAINING'
         else:
             label = 'DEPLOY ALL'
-        return [self.button(label, partial(app.loop.create_task,
-                                           self._deploy_all))]
+        return [self.button(label, self.submit)]
 
     def after_keypress(self):
         "Check if focused widget changed, then update readme."
@@ -196,3 +194,6 @@ class ApplicationListView(BaseView):
             app.loop.create_task(self._deploy_one(application))
         else:
             app.loop.create_task(self._deploy_all())
+
+    def submit(self):
+        app.loop.create_task(self._deploy_all())

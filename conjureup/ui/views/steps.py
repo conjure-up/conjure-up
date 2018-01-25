@@ -61,7 +61,6 @@ class RunStepsView(BaseView):
     def mark_complete(self):
         app.ui.set_header(title="Post-Deploy Steps Complete",
                           excerpt="Your deployment is now complete")
-        app.ui.set_footer("Your big software is deployed, "
-                          "press the (Q) key to exit.")
-        self.frame.focus_position = 'footer'
-        self.buttons.focus_position = 1
+        self.set_footer("Your big software is deployed, "
+                        "press the (Q) key to exit.")
+        self._swap_focus()

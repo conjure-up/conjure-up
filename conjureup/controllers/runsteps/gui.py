@@ -18,7 +18,7 @@ class RunStepsController:
             if not step.has_after_deploy:
                 continue
             view.mark_step_running(step)
-            step.result = await step.after_deploy(app.ui.set_footer)
+            step.result = await step.after_deploy(view.set_footer)
             view.mark_step_complete(step)
         common.save_step_results()
         events.PostDeployComplete.set()

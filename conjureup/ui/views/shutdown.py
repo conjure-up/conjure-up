@@ -27,6 +27,8 @@ class ShutdownView(WidgetWrap):
             ]),
             Padding.line_break(""),
         ])))
+        if events.Error.is_set():
+            self.confirm()
 
     def confirm(self):
         self.message.set_text("Conjure-up is shutting down, please wait.")
@@ -42,4 +44,10 @@ class ShutdownView(WidgetWrap):
             if result == 'right':
                 result = super().keypress(size, 'left')
             return result
+        if key.lower() == 'y':
+            self.confirm()
+            return None
+        if key.lower() == 'n':
+            self.cancel()
+            return None
         return super().keypress(size, key)
