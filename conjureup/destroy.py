@@ -13,7 +13,7 @@ from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 
 from conjureup import __version__ as VERSION
-from conjureup import controllers, events, utils
+from conjureup import controllers, events, juju, utils
 from conjureup.app_config import app
 from conjureup.log import setup_logging
 from conjureup.ui import ConjureUI
@@ -68,6 +68,9 @@ def main():
     app.log = setup_logging(app,
                             os.path.join(opts.cache_dir, 'conjure-down.log'),
                             opts.debug)
+
+    # Make sure juju paths are setup
+    juju.set_bin_path()
 
     app.env = os.environ.copy()
     app.loop = asyncio.get_event_loop()
