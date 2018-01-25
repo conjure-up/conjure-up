@@ -28,6 +28,7 @@ class ShowStepsView(BaseView):
 class RunStepsView(BaseView):
     title = "Running Post-Deploy Steps"
     subtitle = "Please wait while the post-deploy steps are run."
+    show_back_button = False
 
     def build_widget(self):
         self.widgets = {}
