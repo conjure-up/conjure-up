@@ -77,6 +77,7 @@ class ApplicationListView(BaseView):
     title = "Configure Applications"
     subtitle = ""  # set by __init__
     footer = ""  # set by after_keypress
+    footer_align = "left"
 
     def __init__(self, applications, deploy_one, deploy_all,
                  config_cb, arch_cb, back_cb):

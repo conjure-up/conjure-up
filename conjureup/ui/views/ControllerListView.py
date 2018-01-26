@@ -17,6 +17,7 @@ class ControllerListView(BaseView):
               'for you for free, so that you can focus on your applications '
               'and solutions. Alternatively, you can host and manage your own '
               'controller on the cloud to which you deploy.')
+    footer_align = 'left'
 
     def __init__(self, app, controllers, submit_cb, back_cb):
         self.app = app

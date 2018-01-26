@@ -46,6 +46,7 @@ class BaseView(WidgetWrap):
     subtitle = None
     footer = ''
     footer_height = 'auto'
+    footer_align = 'center'
     show_back_button = True
     body_valign = 'top'
 
@@ -190,7 +191,7 @@ class BaseView(WidgetWrap):
         buttons.append(('fixed', 2, Text("")))
         self.button_row = Columns(buttons, 2)
 
-        self.footer_msg = Text(self.footer)
+        self.footer_msg = Text(self.footer, align=self.footer_align)
         footer_widget = Columns([
             Text(''),
             ('pack', self.footer_msg),
@@ -381,6 +382,7 @@ class BaseView(WidgetWrap):
         if key != 'enter':
             result = super().keypress(size, key)
             if result != key:
+                self.after_keypress()
                 return result
         # not handled, so dispatch via _command_handlers (see __init__)
         command = self._command_map[key]

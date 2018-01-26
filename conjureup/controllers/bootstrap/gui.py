@@ -14,7 +14,7 @@ class BootstrapController(common.BaseBootstrapController):
 
     @property
     def msg_cb(self):
-        return app.ui.set_footer
+        return self.view.set_footer
 
     def render(self):
         if app.is_jaas or self.is_existing_controller():
@@ -29,12 +29,12 @@ class BootstrapController(common.BaseBootstrapController):
             msg = 'Controller'
 
         self.bootstrapping.set()
-        view = InterstitialView(
+        self.view = InterstitialView(
             title=title,
             message="Juju {} is initializing. Please wait.".format(msg),
             event=self.bootstrapping,
             watch_file=bootstrap_stderr_path)
-        view.show()
+        self.view.show()
 
         app.loop.create_task(self.run())
         app.loop.create_task(self.wait())
