@@ -1,19 +1,49 @@
 import random
 
-from ubuntui.utils import Color, Padding
+from ubuntui.utils import Color
+from ubuntui.widgets.hr import HR
 from ubuntui.widgets.juju.service import ServiceWidget
 from ubuntui.widgets.table import Table
-from urwid import Text, WidgetWrap
+from urwid import Pile, Text
+
+from conjureup.app_config import app
+from conjureup.ui.views.base import BaseView
 
 
-class DeployStatusView(WidgetWrap):
+class PileTable(Table):
+    # ubuntui's Table uses a ListBox, which is a box widget and thus
+    # incompatible with Scrollable, so this uses a Pile instead.
+    # TODO: Fix or add this in ubuntui
+    def __init__(self):
+        super().__init__()
+        self._pile = Pile([])
 
-    def __init__(self, app):
-        self.app = app
+    def addRow(self, item, use_divider=True):
+        if use_divider and len(self._pile.contents) != 0:
+            self._pile.contents.append((HR(0, 0), self._pile.options()))
+        self._pile.contents.append((item, self._pile.options()))
+
+    def render(self):
+        return self._pile
+
+
+class DeployStatusView(BaseView):
+    show_back_button = False
+
+    def __init__(self):
+        try:
+            name = app.config['metadata']['friendly-name']
+        except KeyError:
+            name = app.config['spell']
+
+        self.title = "Conjuring up {}".format(name)
         self.deployed = {}
         self.unit_w = None
-        self.table = Table()
-        super().__init__(Padding.center_80(self.table.render()))
+        self.table = PileTable()
+        super().__init__()
+
+    def build_widget(self):
+        return self.table.render()
 
     def refresh_nodes(self, applications):
         """Adds services to the view if they don't already exist

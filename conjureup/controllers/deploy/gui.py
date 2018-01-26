@@ -14,18 +14,12 @@ class DeployController:
         """ Render deploy status view
         """
         track_screen("Deploy")
-        view = DeployStatusView(app)
+        view = DeployStatusView()
+        view.show()
 
-        try:
-            name = app.config['metadata']['friendly-name']
-        except KeyError:
-            name = app.config['spell']
-        app.ui.set_header(title="Conjuring up {}".format(name))
-        app.ui.set_body(view)
-
-        app.loop.create_task(common.do_deploy(app.ui.set_footer))
+        app.loop.create_task(common.do_deploy(view.set_footer))
         app.loop.create_task(self._refresh(view))
-        app.loop.create_task(self._wait_for_applications())
+        app.loop.create_task(self._wait_for_applications(view))
 
     async def _refresh(self, view):
         applications = sorted(app.metadata_controller.bundle.services,
@@ -86,8 +80,8 @@ class DeployController:
                 })
         return view_data
 
-    async def _wait_for_applications(self):
-        await common.wait_for_applications(app.ui.set_footer)
+    async def _wait_for_applications(self, view):
+        await common.wait_for_applications(view.set_footer)
         controllers.use('runsteps').render()
 
 

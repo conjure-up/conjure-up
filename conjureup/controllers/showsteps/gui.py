@@ -42,7 +42,7 @@ class ShowStepsController:
             app.sudo_pass = step_widget.sudo_input.value
         for field in step_widget.fields:
             app.steps_data[step.name][field.key] = field.input.value
-        await step.after_input(app.ui.set_footer)
+        await step.after_input(self.view.set_footer)
 
     def finish(self):
         steps = app.steps + AddonModel.selected_addons_steps()
