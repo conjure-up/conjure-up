@@ -19,12 +19,8 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.app_patcher = patch(
             'conjureup.controllers.deploy.gui.app')
         self.mock_app = self.app_patcher.start()
-        self.mock_app.ui = MagicMock(name="app.ui")
 
         self.controller = DeployController()
-        self.track_screen_patcher = patch(
-            'conjureup.controllers.deploy.gui.track_screen')
-        self.mock_track_screen = self.track_screen_patcher.start()
         self.controller._wait_for_applications = MagicMock()
         self.controller._refresh = MagicMock()
         self.common_patcher = patch(
@@ -35,7 +31,6 @@ class DeployGUIRenderTestCase(unittest.TestCase):
         self.common_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
-        self.track_screen_patcher.stop()
 
     def test_render(self):
         "call render"
