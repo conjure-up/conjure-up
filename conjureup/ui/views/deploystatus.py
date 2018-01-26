@@ -29,6 +29,7 @@ class PileTable(Table):
 
 class DeployStatusView(BaseView):
     show_back_button = False
+    metrics_title = 'Deploy Status'
 
     def __init__(self):
         try:

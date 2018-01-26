@@ -19,6 +19,7 @@ from conjureup.ui.widgets.juju_machines_list import JujuMachinesList
 
 
 class AppArchitectureView(BaseView):
+    metrics_title = 'Architect Application'
 
     def __init__(self, application, controller, close_cb):
         """
