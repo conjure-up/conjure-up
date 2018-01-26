@@ -13,6 +13,7 @@ from conjureup.ui.widgets.option_widget import OptionWidget
 
 
 class ApplicationConfigureView(BaseView):
+    metrics_title = 'Configure Application'
 
     def __init__(self, application, close_cb):
         self.title = "Configure {}".format(application.service_name)

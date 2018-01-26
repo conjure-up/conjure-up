@@ -3,7 +3,6 @@ from operator import attrgetter
 
 from conjureup import controllers, events
 from conjureup.app_config import app
-from conjureup.telemetry import track_screen
 from conjureup.ui.views.deploystatus import DeployStatusView
 
 from . import common
@@ -13,7 +12,6 @@ class DeployController:
     def render(self):
         """ Render deploy status view
         """
-        track_screen("Deploy")
         view = DeployStatusView()
         view.show()
 

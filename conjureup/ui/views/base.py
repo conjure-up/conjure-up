@@ -49,6 +49,7 @@ class BaseView(WidgetWrap):
     footer_align = 'center'
     show_back_button = True
     body_valign = 'top'
+    metrics_title = None  # in case we want to track screen w/ different name
 
     focusable_widget_types = (
         Edit,
@@ -131,7 +132,7 @@ class BaseView(WidgetWrap):
         self._command_handlers.update(command_handlers)
 
     def show(self):
-        track_screen(self.title)
+        track_screen(self.metrics_title or self.title)
         app.ui.set_header(title=self.title,
                           excerpt=self.subtitle)
         app.ui.set_body(self)
