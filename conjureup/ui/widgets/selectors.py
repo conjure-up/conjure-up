@@ -116,22 +116,34 @@ class SelectList(Pile):
                 if isinstance(item[0], self.option_type)]
 
     @property
-    def selected(self):
-        """
-        Get the values of all selected option items.
-        """
+    def selected_widgets(self):
         if not hasattr(self.option_widgets[0], 'state'):
-            if getattr(self.focus, 'enabled', True):
-                return self.focus.value
+            widget = self.focus
+            is_opt = isinstance(widget, self.option_type)
+            if is_opt:
+                return widget
             else:
                 return None
         else:
-            selected = [option.value for option in self.option_widgets
+            selected = [option for option in self.option_widgets
                         if option.state and getattr(option, 'enabled', True)]
             if self.allow_multiple:
                 return selected
             else:
                 return selected[0] if selected else None
+
+    @property
+    def selected(self):
+        """
+        Get the values of all selected option items.
+        """
+        widgets = self.selected_widgets
+        if isinstance(widgets, list):
+            return [w.value for w in widgets]
+        elif getattr(widgets, 'enabled', True):
+            return widgets.value
+        else:
+            return None
 
     @property
     def value(self):

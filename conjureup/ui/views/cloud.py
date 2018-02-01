@@ -45,8 +45,10 @@ class CloudView(BaseView):
         self.update_message()
 
     def update_message(self):
-        selected = self.widget.focus
-        if selected.enabled:
+        selected = self.widget.selected_widgets
+        if selected is None:
+            return
+        elif selected.enabled:
             msg = self.enabled_msg
         else:
             msg = selected.user_data.get('disabled_msg',
@@ -59,6 +61,8 @@ class CloudView(BaseView):
         if self._items_localhost_idx is None:
             return
         self.widget.contents[self._items_localhost_idx][0].enabled = True
+        if self.widget.selected_widgets is None:
+            self.widget.select_first()
         self.update_message()
 
     def build_widget(self):
