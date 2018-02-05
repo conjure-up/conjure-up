@@ -140,7 +140,7 @@ class SelectList(Pile):
         widgets = self.selected_widgets
         if isinstance(widgets, list):
             return [w.value for w in widgets]
-        elif getattr(widgets, 'enabled', True):
+        elif widgets and getattr(widgets, 'enabled', True):
             return widgets.value
         else:
             return None
