@@ -1,5 +1,42 @@
 # Change Log
 
+## [2.5.3](https://github.com/conjure-up/conjure-up/tree/2.5.3) (2018-02-08)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.2...2.5.3)
+
+**Implemented enhancements:**
+
+- Ensure consistent and common tab order handling across GUI views [\#744](https://github.com/conjure-up/conjure-up/issues/744)
+
+**Fixed bugs:**
+
+- AttributeError: 'Text' object has no attribute 'enabled' [\#1324](https://github.com/conjure-up/conjure-up/issues/1324)
+- conjure-down fails with `LookupError: Unable to list controllers: /bin/sh: 1: None: not found` [\#1269](https://github.com/conjure-up/conjure-up/issues/1269)
+
+**Closed issues:**
+
+- Architect option throws operand error [\#1309](https://github.com/conjure-up/conjure-up/issues/1309)
+- Update Juju to 2.3.2 [\#1307](https://github.com/conjure-up/conjure-up/issues/1307)
+- OpenStack Installer fails on Ubuntu 16.04.3 LTS with WORKLOAD\_ERROR\_STATES,  IndexError: list index out of range [\#1306](https://github.com/conjure-up/conjure-up/issues/1306)
+- Unable to read add-on selection screen on small windows [\#1305](https://github.com/conjure-up/conjure-up/issues/1305)
+- confirm quit [\#1291](https://github.com/conjure-up/conjure-up/issues/1291)
+- Master hangout -  \(update-status\) Waiting for kube-system pods to start [\#1247](https://github.com/conjure-up/conjure-up/issues/1247)
+- base class for keyboard navigation [\#1226](https://github.com/conjure-up/conjure-up/issues/1226)
+
+**Merged pull requests:**
+
+- Update juju-wait to get fix for IndexError [\#1327](https://github.com/conjure-up/conjure-up/pull/1327) ([johnsca](https://github.com/johnsca))
+- Fix 'NoneType' has no attr 'value' [\#1326](https://github.com/conjure-up/conjure-up/pull/1326) ([johnsca](https://github.com/johnsca))
+- Fix 'has no attribute enabled' error on cloud selection [\#1325](https://github.com/conjure-up/conjure-up/pull/1325) ([johnsca](https://github.com/johnsca))
+- Convert Deploy Status screen to BaseView to enable scrolling [\#1318](https://github.com/conjure-up/conjure-up/pull/1318) ([johnsca](https://github.com/johnsca))
+- Fix a few issues with enhanced keyboard navigation [\#1316](https://github.com/conjure-up/conjure-up/pull/1316) ([johnsca](https://github.com/johnsca))
+- Bug/1309 operand error [\#1314](https://github.com/conjure-up/conjure-up/pull/1314) ([battlemidget](https://github.com/battlemidget))
+- Bug/1269 fix bin path [\#1313](https://github.com/conjure-up/conjure-up/pull/1313) ([battlemidget](https://github.com/battlemidget))
+- Fixes \#1307 [\#1312](https://github.com/conjure-up/conjure-up/pull/1312) ([battlemidget](https://github.com/battlemidget))
+- Make it explicit that JaaS is free [\#1310](https://github.com/conjure-up/conjure-up/pull/1310) ([johnsca](https://github.com/johnsca))
+- Prompt to confirm before quit [\#1304](https://github.com/conjure-up/conjure-up/pull/1304) ([johnsca](https://github.com/johnsca))
+- Add indicator for help and page up/down support [\#1302](https://github.com/conjure-up/conjure-up/pull/1302) ([johnsca](https://github.com/johnsca))
+- Make keyboard navigation consistent [\#1290](https://github.com/conjure-up/conjure-up/pull/1290) ([johnsca](https://github.com/johnsca))
+
 ## [2.5.2](https://github.com/conjure-up/conjure-up/tree/2.5.2) (2018-01-13)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.1...2.5.2)
 
@@ -254,7 +291,6 @@
 - Juju Bootstrap to MAAS should not do --debug [\#742](https://github.com/conjure-up/conjure-up/issues/742)
 - Continues forever but doesn't do anything. [\#729](https://github.com/conjure-up/conjure-up/issues/729)
 - Openstack fails to correctly deploy when network device is not eth0 [\#728](https://github.com/conjure-up/conjure-up/issues/728)
-- Openstack spell fails on next steps [\#711](https://github.com/conjure-up/conjure-up/issues/711)
 
 **Closed issues:**
 
@@ -457,10 +493,6 @@
 - push localhost requirements to the cloud picker [\#772](https://github.com/conjure-up/conjure-up/issues/772)
 - Add sudo support for spells [\#758](https://github.com/conjure-up/conjure-up/issues/758)
 - support bootstrap to a region for public cloud in gui mode [\#715](https://github.com/conjure-up/conjure-up/issues/715)
-- support conjure-up on vmware/vsphere [\#709](https://github.com/conjure-up/conjure-up/issues/709)
-- Support juju login for JAAS support [\#708](https://github.com/conjure-up/conjure-up/issues/708)
-- migrate to libjuju [\#697](https://github.com/conjure-up/conjure-up/issues/697)
-- better error feedback on user input screens [\#686](https://github.com/conjure-up/conjure-up/issues/686)
 
 **Fixed bugs:**
 
@@ -664,42 +696,12 @@
 
 - conjure-up shared libraries leaking out to system ldconfig [\#717](https://github.com/conjure-up/conjure-up/issues/717)
 - Exception calling callback for \<Future at 0x7f4fd00db080 state=finished returned NoneType\> [\#712](https://github.com/conjure-up/conjure-up/issues/712)
-- Setting lxd profile fails [\#695](https://github.com/conjure-up/conjure-up/issues/695)
-- Error deploying to AWS when default region changed - conjure-up does not form correct bootstrap command when juju default aws region set [\#693](https://github.com/conjure-up/conjure-up/issues/693)
 
 ## [2.1.1](https://github.com/conjure-up/conjure-up/tree/2.1.1) (2017-03-03)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.0...2.1.1)
 
-**Closed issues:**
-
-- "LookupError: Unable to list models: error: No controllers registered." [\#707](https://github.com/conjure-up/conjure-up/issues/707)
-- snap won't install due to lxd-service failing to start [\#706](https://github.com/conjure-up/conjure-up/issues/706)
-- Typo in Manual Docs [\#705](https://github.com/conjure-up/conjure-up/issues/705)
-- Error deploying: cannot add application "ceph-osd": DB is locked | conjure-up setup [\#704](https://github.com/conjure-up/conjure-up/issues/704)
-- Unable to install openstack with nova LXD on Ubuntu 16.04. Error stating IpV6 enabled even though disabled [\#703](https://github.com/conjure-up/conjure-up/issues/703)
-- lxd openstack - is there a way to  have custom names or more related names for containers? [\#701](https://github.com/conjure-up/conjure-up/issues/701)
-
-**Merged pull requests:**
-
-- Allow for 'side-loading' additional charm options for applications [\#700](https://github.com/conjure-up/conjure-up/pull/700) ([battlemidget](https://github.com/battlemidget))
-
 ## [2.1.0](https://github.com/conjure-up/conjure-up/tree/2.1.0) (2017-02-22)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.0-rc1...2.1.0)
-
-**Implemented enhancements:**
-
-- LXD openstack: installation failure [\#688](https://github.com/conjure-up/conjure-up/issues/688)
-
-**Fixed bugs:**
-
-- kubenetes core spell failed on localhost \(LXD\) [\#690](https://github.com/conjure-up/conjure-up/issues/690)
-- Conjure Up failed on post-processing openstack-base [\#687](https://github.com/conjure-up/conjure-up/issues/687)
-- snap: persists network/iptables configuration on reboot [\#685](https://github.com/conjure-up/conjure-up/issues/685)
-
-**Closed issues:**
-
-- Snap based installation fails [\#691](https://github.com/conjure-up/conjure-up/issues/691)
-- snap install conjure-up --classic --stable fails in lxd privileged container [\#689](https://github.com/conjure-up/conjure-up/issues/689)
 
 ## [2.1.0-rc1](https://github.com/conjure-up/conjure-up/tree/2.1.0-rc1) (2017-02-10)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.0-beta5...2.1.0-rc1)
