@@ -26,10 +26,14 @@ class BaseBootstrapController:
         if app.provider.region:
             cloud_with_region = '/'.join([app.provider.cloud,
                                           app.provider.region])
+        track_event("Juju Add Model", "Started", "{}{}".format(
+            cloud_with_region, 'on JAAS' if app.is_jaas else ''))
         await juju.add_model(app.provider.model,
                              app.provider.controller,
                              cloud_with_region,
                              app.provider.credential)
+        track_event("Juju Add Model", "Done", "{}{}".format(
+            cloud_with_region, 'on JAAS' if app.is_jaas else ''))
         self.emit('Juju model created.')
         events.Bootstrapped.set()
 

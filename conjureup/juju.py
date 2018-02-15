@@ -12,6 +12,7 @@ from tempfile import NamedTemporaryFile
 import yaml
 from bundleplacer.charmstore_api import CharmStoreID
 from juju.constraints import parse as parse_constraints
+from juju.errors import JujuAuthError
 from juju.model import Model
 
 from conjureup import consts, errors, events, utils
@@ -874,13 +875,24 @@ async def add_model(name, controller, cloud, credential=None):
     if proc.returncode > 0:
         raise Exception(
             "Unable to create model: {}".format(stderr.decode('utf8')))
-    # the CLI has to connect to the model at least once to
-    # populate the model macaroons; model_available does this
-    # and verifies the model is working
-    if not await model_available(name):
-        raise Exception("Unable to connect model after creation")
-    events.ModelAvailable.set()
-    await login()
+    for attempt in range(3):
+        # the CLI has to connect to the model at least once to
+        # populate the model macaroons; model_available does this
+        # and verifies the model is working
+        if not await model_available(name):
+            raise Exception("Unable to connect model after creation")
+        events.ModelAvailable.set()
+        try:
+            await login()
+        except JujuAuthError:
+            # there seems to be a race condition or something where the
+            # call to `juju status` in model_available doesn't actually
+            # give us a properly valid macaroon; so we retry a few times
+            if attempt == 2:
+                raise
+            await asyncio.sleep(1, loop=app.loop)
+        else:
+            break
 
 
 async def destroy_model(controller, model):
