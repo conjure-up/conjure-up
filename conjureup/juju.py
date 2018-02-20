@@ -12,7 +12,7 @@ from tempfile import NamedTemporaryFile
 import yaml
 from bundleplacer.charmstore_api import CharmStoreID
 from juju.constraints import parse as parse_constraints
-from juju.errors import JujuAuthError
+from juju.controller import Controller
 from juju.model import Model
 
 from conjureup import consts, errors, events, utils
@@ -146,29 +146,60 @@ def get_controller_in_cloud(cloud):
     return None
 
 
-async def login():
-    """ Login to Juju API server
+async def model_available():
+    """ Check whether selected model is already available.
     """
-    if app.juju.authenticated:
-        return
-
     if app.provider.controller is None:
-        raise Exception("Unable to determine current controller")
+        raise Exception("No controller selected")
 
     if app.provider.model is None:
-        raise Exception("Tried to login with no current model set.")
+        raise Exception("No model selected.")
+
+    controller = Controller(app.loop)
+    await controller.connect(app.provider.controller)
+    try:
+        models = await controller.list_models()
+        return app.provider.model in models
+    finally:
+        await controller.disconnect()
+
+
+async def connect_model():
+    """ Connect to the selected model.
+    """
+    if app.provider.controller is None:
+        raise Exception("No controller selected")
+
+    if app.provider.model is None:
+        raise Exception("No model selected.")
 
     app.juju.client = Model(app.loop)
     model_name = '{}:{}'.format(app.provider.controller,
                                 app.provider.model)
-
-    if not events.ModelAvailable.is_set():
-        await events.ModelAvailable.wait()
-    app.log.info('Connecting to model {}...'.format(model_name))
-    await app.juju.client.connect_model(model_name)
-    app.juju.authenticated = True
+    await app.juju.client.connect(model_name)
     events.ModelConnected.set()
-    app.log.info('Connected')
+
+
+async def create_model():
+    """ Creates the selected model.
+    """
+    if app.provider.controller is None:
+        raise Exception("No controller selected")
+
+    if app.provider.model is None:
+        raise Exception("No model selected.")
+
+    controller = Controller(app.loop)
+    await controller.connect(app.provider.controller)
+    try:
+        app.juju.client = await controller.add_model(
+            model_name=app.provider.model,
+            cloud_name=app.provider.cloud,
+            region=app.provider.region,
+            credential_name=app.provider.credential)
+        events.ModelConnected.set()
+    finally:
+        await controller.disconnect()
 
 
 async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
@@ -283,20 +314,6 @@ async def register_controller(name, endpoint, email, password, twofa,
             raise CalledProcessError(cmd, stderr)
     app.log.info('Registration complete')
     return True
-
-
-async def model_available(name):
-    """ Checks if juju is available
-
-    Returns:
-    True/False if juju status was successful and a working model is found
-    """
-    proc = await asyncio.create_subprocess_exec(
-        'juju', 'status', '-m', ':'.join([app.provider.controller, name]),
-        stderr=DEVNULL,
-        stdout=DEVNULL)
-    await proc.wait()
-    return proc.returncode == 0
 
 
 def autoload_credentials():
@@ -842,57 +859,6 @@ def get_model(controller, name):
             return m
     raise LookupError(
         "Unable to find model: {}".format(name))
-
-
-async def add_model(name, controller, cloud, credential=None):
-    """ Adds a model to current controller
-
-    Arguments:
-    controller: controller to add model in
-    cloud: cloud/region to add model in
-    credential: optional credential name to use (required unless localhost)
-    """
-    if await model_available(name):
-        events.ModelAvailable.set()
-        await login()
-        return
-
-    cmd = ['juju', 'add-model', name, cloud, '--controller', controller]
-    if credential:
-        cmd.extend(['--credential', credential])
-
-    def add_model_config(k, v):
-        cmd.extend(["--config", "{}={}".format(k, v)])
-
-    if app.provider.model_defaults:
-        for k, v in app.provider.model_defaults.items():
-            if v is not None:
-                add_model_config(k, v)
-
-    proc = await asyncio.create_subprocess_exec(*cmd,
-                                                stdout=DEVNULL, stderr=PIPE)
-    _, stderr = await proc.communicate()
-    if proc.returncode > 0:
-        raise Exception(
-            "Unable to create model: {}".format(stderr.decode('utf8')))
-    for attempt in range(3):
-        # the CLI has to connect to the model at least once to
-        # populate the model macaroons; model_available does this
-        # and verifies the model is working
-        if not await model_available(name):
-            raise Exception("Unable to connect model after creation")
-        events.ModelAvailable.set()
-        try:
-            await login()
-        except JujuAuthError:
-            # there seems to be a race condition or something where the
-            # call to `juju status` in model_available doesn't actually
-            # give us a properly valid macaroon; so we retry a few times
-            if attempt == 2:
-                raise
-            await asyncio.sleep(1, loop=app.loop)
-        else:
-            break
 
 
 async def destroy_model(controller, model):
