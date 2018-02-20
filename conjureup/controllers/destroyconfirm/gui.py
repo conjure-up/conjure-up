@@ -26,7 +26,7 @@ class DestroyConfirm:
             return controllers.use('destroy').render()
 
     async def login(self, controller, model):
-        await juju.login()
+        await juju.connect_model()
         self.authenticating.clear()
         track_screen("Destroy Confirm Model")
         view = DestroyConfirmView(app,

@@ -21,24 +21,28 @@ class BaseBootstrapController:
             await self.do_bootstrap()
 
     async def do_add_model(self):
-        self.emit('Creating Juju model.')
-        cloud_with_region = app.provider.cloud
-        if app.provider.region:
-            cloud_with_region = '/'.join([app.provider.cloud,
-                                          app.provider.region])
-        track_event("Juju Add Model", "Started", "{}{}".format(
-            cloud_with_region, 'on JAAS' if app.is_jaas else ''))
-        await juju.add_model(app.provider.model,
-                             app.provider.controller,
-                             cloud_with_region,
-                             app.provider.credential)
-        track_event("Juju Add Model", "Done", "{}{}".format(
-            cloud_with_region, 'on JAAS' if app.is_jaas else ''))
-        self.emit('Juju model created.')
+        if await juju.model_available():
+            self.emit('Connecting to Juju model {}...'.format(
+                app.provider.model))
+            await juju.connect_model()
+            self.emit('Juju model connected.')
+        else:
+            self.emit('Creating Juju model {}...'.format(
+                app.provider.model))
+            cloud_with_region = app.provider.cloud
+            if app.provider.region:
+                cloud_with_region = '/'.join([app.provider.cloud,
+                                              app.provider.region])
+            track_event("Juju Add Model", "Started", "{}{}".format(
+                cloud_with_region, ' on JAAS' if app.is_jaas else ''))
+            await juju.create_model()
+            track_event("Juju Add Model", "Done", "{}{}".format(
+                cloud_with_region, 'on JAAS' if app.is_jaas else ''))
+            self.emit('Juju model created.')
         events.Bootstrapped.set()
 
     async def do_bootstrap(self):
-        self.emit('Bootstrapping Juju controller.')
+        self.emit('Bootstrapping Juju controller...')
         track_event("Juju Bootstrap", "Started", "")
         cloud_with_region = app.provider.cloud
         if app.provider.region:
@@ -63,7 +67,7 @@ class BaseBootstrapController:
         self.emit('Bootstrap complete.')
         track_event("Juju Bootstrap", "Done", "")
 
-        await juju.login()  # login to the newly created (default) model
+        await juju.connect_model()  # login to newly created (default) model
         events.Bootstrapped.set()
 
     def emit(self, msg):
