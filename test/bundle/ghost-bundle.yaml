@@ -1,0 +1,20 @@
+series: xenial
+services:
+  mysql:
+    charm: cs:xenial/mysql-58
+    num_units: 1
+    options:
+      dataset-size: "80%"
+      max-connections: 20000
+  ghost:
+    charm: cs:ghost
+    num_units: 1
+  haproxy:
+    charm: cs:haproxy
+    num_units: 1
+    expose: True
+relations:
+  - - "mysql:db"
+    - "ghost:database"
+  - - "ghost:website"
+    - "haproxy:reverseproxy"

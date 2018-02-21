@@ -1,44 +1,28 @@
-import asyncio
-from operator import attrgetter
+import os
+from datetime import datetime
 
-from conjureup import events, juju
+from conjureup import events, juju, utils
 from conjureup.app_config import app
 
 
 async def do_deploy(msg_cb):
     await events.ModelConnected.wait()
-    default_series = app.metadata_controller.series
-    machines = app.metadata_controller.bundle.machines
-    applications = sorted(app.metadata_controller.bundle.services,
-                          key=attrgetter('service_name'))
 
     for step in app.steps:
         await step.before_deploy(msg_cb=msg_cb)
     events.PreDeployComplete.set()
 
-    machine_map = await juju.add_machines(applications,
-                                          machines,
-                                          msg_cb=msg_cb)
-    tasks = []
-    for service in applications:
-        if service.placement_spec:
-            # remap machine references to actual deployed machine IDs
-            # (they will only ever not already match if deploying to
-            # an existing model that has other machines)
-            new_placements = []
-            for plabel in service.placement_spec:
-                if ':' in plabel:
-                    ptype, pid = plabel.split(':')
-                    new_placements.append(':'.join([ptype, machine_map[pid]]))
-                else:
-                    new_placements.append(machine_map[plabel])
-            service.placement_spec = new_placements
+    msg = 'Deploying Applications.'
+    app.log.info(msg)
+    msg_cb(msg)
 
-        tasks.append(juju.deploy_service(service, default_series,
-                                         msg_cb=msg_cb))
-        tasks.append(juju.set_relations(service,
-                                        msg_cb=msg_cb))
-    await asyncio.gather(*tasks)
+    datetimestr = datetime.now().strftime("%Y%m%d.%H%m")
+    fn = os.path.join(app.env['CONJURE_UP_CACHEDIR'],
+                      '{}-deployed-{}.yaml'.format(app.env['CONJURE_UP_SPELL'],
+                                                   datetimestr))
+    utils.spew(fn, app.current_bundle.to_yaml())
+    await app.juju.client.deploy(fn)
+
     events.DeploymentComplete.set()
 
 
