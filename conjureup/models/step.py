@@ -226,6 +226,7 @@ class StepModel:
         app.env['JUJU_MODEL'] = app.provider.model
         app.env['JUJU_REGION'] = app.provider.region or ''
         app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
+        app.env['CONJURE_UP_SESSION_ID'] = app.session_id
 
         if provider_type == "maas":
             app.env['MAAS_ENDPOINT'] = app.maas.endpoint
