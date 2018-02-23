@@ -170,6 +170,15 @@ class StepForm(Pile):
                     select_w.select_option(i['default'])
                     field = StepField(key, label, select_w, i['type'])
                 else:
+                    is_yesno = input_type is YesNo
+                    is_intedit = input_type is IntegerEditor
+                    if value is not None and (
+                        (isinstance(value, bool) and not is_yesno) or
+                        (isinstance(value, int) and not is_intedit) or
+                        isinstance(value, float)  # floats must be strings
+                    ):
+                        raise ValueError('Invalid default value for field: '
+                                         '{}'.format(label))
                     field = StepField(key, label,
                                       input_type(default=value), i['type'])
                 self.fields.append(field)
