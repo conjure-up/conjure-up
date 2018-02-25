@@ -1,5 +1,24 @@
 # Change Log
 
+## [2.5.4](https://github.com/conjure-up/conjure-up/tree/2.5.4) (2018-02-25)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.3...2.5.4)
+
+**Fixed bugs:**
+
+- Error Installing Kubernetes on AWS using Conjure-up [\#1311](https://github.com/conjure-up/conjure-up/issues/1311)
+
+**Closed issues:**
+
+- Handle type mismatches between input field and default values better [\#1339](https://github.com/conjure-up/conjure-up/issues/1339)
+- Unable to bootstrap \(cloud type:localhost\) [\#1328](https://github.com/conjure-up/conjure-up/issues/1328)
+
+**Merged pull requests:**
+
+- Check type of default value for step fields [\#1342](https://github.com/conjure-up/conjure-up/pull/1342) ([johnsca](https://github.com/johnsca))
+- Pass session ID to steps [\#1340](https://github.com/conjure-up/conjure-up/pull/1340) ([johnsca](https://github.com/johnsca))
+- Remove some dependencies on Juju CLI now that libjuju supports macaroon auth [\#1334](https://github.com/conjure-up/conjure-up/pull/1334) ([johnsca](https://github.com/johnsca))
+- Retry juju-status + login after creating model [\#1330](https://github.com/conjure-up/conjure-up/pull/1330) ([johnsca](https://github.com/johnsca))
+
 ## [2.5.3](https://github.com/conjure-up/conjure-up/tree/2.5.3) (2018-02-08)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.2...2.5.3)
 
@@ -351,7 +370,6 @@
 - Juju failed to bootstrap: maas [\#817](https://github.com/conjure-up/conjure-up/issues/817)
 - Add details about spells/deployments on the website [\#791](https://github.com/conjure-up/conjure-up/issues/791)
 - Improve handling of "cannot get user details" error during JAAS registration [\#745](https://github.com/conjure-up/conjure-up/issues/745)
-- Snap install conjure-up doesn't work if juju is installed [\#719](https://github.com/conjure-up/conjure-up/issues/719)
 
 **Merged pull requests:**
 
@@ -492,7 +510,6 @@
 - bundlewriter should place generated bundles inside their cached spell dir [\#787](https://github.com/conjure-up/conjure-up/issues/787)
 - push localhost requirements to the cloud picker [\#772](https://github.com/conjure-up/conjure-up/issues/772)
 - Add sudo support for spells [\#758](https://github.com/conjure-up/conjure-up/issues/758)
-- support bootstrap to a region for public cloud in gui mode [\#715](https://github.com/conjure-up/conjure-up/issues/715)
 
 **Fixed bugs:**
 
@@ -553,7 +570,6 @@
 - Reason: Juju failed to bootstrap: maas [\#822](https://github.com/conjure-up/conjure-up/issues/822)
 - conjure-up doesn't set terminal title [\#775](https://github.com/conjure-up/conjure-up/issues/775)
 - Unable to install via: brew install conjure-up --HEAD [\#762](https://github.com/conjure-up/conjure-up/issues/762)
-- rework logging wording for tracking exceptions [\#714](https://github.com/conjure-up/conjure-up/issues/714)
 
 **Merged pull requests:**
 
@@ -594,7 +610,6 @@
 - Incompatibility with LXD 2.13 [\#866](https://github.com/conjure-up/conjure-up/issues/866)
 - Openstack Autopilot deployment on Ubuntu 16.04 LTS [\#851](https://github.com/conjure-up/conjure-up/issues/851)
 - Failed to set profile [\#849](https://github.com/conjure-up/conjure-up/issues/849)
-- Openstack with NovaLXD installation failure [\#724](https://github.com/conjure-up/conjure-up/issues/724)
 
 **Merged pull requests:**
 
@@ -611,7 +626,6 @@
 - oracle provider [\#837](https://github.com/conjure-up/conjure-up/pull/837) ([battlemidget](https://github.com/battlemidget))
 - Fix error handling and logging in conjure-down [\#834](https://github.com/conjure-up/conjure-up/pull/834) ([johnsca](https://github.com/johnsca))
 - Fix add\_machines failure in headless [\#830](https://github.com/conjure-up/conjure-up/pull/830) ([johnsca](https://github.com/johnsca))
-- Switch to libjuju and asyncio [\#713](https://github.com/conjure-up/conjure-up/pull/713) ([johnsca](https://github.com/johnsca))
 
 ## [2.1.5](https://github.com/conjure-up/conjure-up/tree/2.1.5) (2017-04-15)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.4...2.1.5)
@@ -672,7 +686,6 @@
 - "architecture" option to select maas node didn't work [\#755](https://github.com/conjure-up/conjure-up/issues/755)
 - Snap install fails [\#750](https://github.com/conjure-up/conjure-up/issues/750)
 - conjure-up kubernetes gives stacktrace  [\#727](https://github.com/conjure-up/conjure-up/issues/727)
-- Snap conjure-up fails to start [\#718](https://github.com/conjure-up/conjure-up/issues/718)
 
 **Merged pull requests:**
 
@@ -691,11 +704,6 @@
 
 ## [2.1.2](https://github.com/conjure-up/conjure-up/tree/2.1.2) (2017-03-10)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.1...2.1.2)
-
-**Fixed bugs:**
-
-- conjure-up shared libraries leaking out to system ldconfig [\#717](https://github.com/conjure-up/conjure-up/issues/717)
-- Exception calling callback for \<Future at 0x7f4fd00db080 state=finished returned NoneType\> [\#712](https://github.com/conjure-up/conjure-up/issues/712)
 
 ## [2.1.1](https://github.com/conjure-up/conjure-up/tree/2.1.1) (2017-03-03)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.0...2.1.1)
