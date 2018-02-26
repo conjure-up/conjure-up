@@ -50,6 +50,8 @@ class JaaSLoginController:
             await juju.register_controller(app.jaas_controller,
                                            JAAS_DOMAIN,
                                            '', '', '')
+            app.provider.controller = app.jaas_controller
+            app.is_jaas = True
             controllers.use('showsteps').render()
         except CalledProcessError:
             # empty-but-not-None message to skip retrying token auth
