@@ -4,8 +4,59 @@ spec
 """
 from collections import Mapping
 from itertools import chain
-
 import yaml
+
+
+class BundleInvalidApplication(Exception):
+    pass
+
+
+class BundleInvalidFragment(Exception):
+    pass
+
+
+class BundleFragment:
+    def __init__(self, name, fragment):
+        self.fragment = fragment
+        self.name = name
+
+    @property
+    def num_units(self):
+        return int(self.fragment.get('num_units', 0))
+
+    @property
+    def options(self):
+        return self.fragment.get('options', {})
+
+    @property
+    def charm(self):
+        if 'charm' not in self.fragment:
+            raise BundleInvalidFragment(
+                "Unable to locate charm: in bundle fragment: {}".format(
+                    self.fragment))
+        return self.fragment['charm']
+
+    @property
+    def is_subordinate(self):
+        if self.num_units == 0:
+            return True
+        return False
+
+    @property
+    def to(self):
+        return self.fragment.get('to', [])
+
+    def to_dict(self):
+        items = {
+            'charm': self.charm,
+            'num_units': self.num_units,
+            'options': self.options,
+            'to': self.to
+        }
+        expose = self.fragment.get('expose', False)
+        if expose:
+            items['expose'] = expose
+        return items
 
 
 class Bundle:
@@ -130,7 +181,10 @@ class Bundle:
     def applications(self):
         """ Returns list of applications/services
         """
-        return self._bundle['applications'].keys()
+        _applications = []
+        for app in self._bundle['applications'].keys():
+            _applications.append(self._get_application_fragment(app))
+        return _applications
 
     @property
     def machines(self):
@@ -144,7 +198,11 @@ class Bundle:
         """
         return self._bundle.get('relations', [])
 
-    def get_application_fragment(self, app_name):
+    def _get_application_fragment(self, app_name):
         """ Returns bundle fragment
         """
-        return self.applications.get(app_name, {})
+        if app_name not in self._bundle['applications']:
+            raise BundleInvalidApplication(
+                "Unable find a bundle fragment for: {}".format(app_name))
+        _fragment = self._bundle['applications'][app_name]
+        return BundleFragment(app_name, _fragment)

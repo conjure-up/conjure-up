@@ -16,7 +16,7 @@ class ApplicationConfigureView(BaseView):
     metrics_title = 'Configure Application'
 
     def __init__(self, application, close_cb):
-        self.title = "Configure {}".format(application.service_name)
+        self.title = "Configure {}".format(application.name)
         self.application = application
         self.prev_screen = close_cb
         self.options_copy = self.application.options.copy()
@@ -28,7 +28,7 @@ class ApplicationConfigureView(BaseView):
         ws = []
         num_unit_ow = OptionWidget("Units", "int",
                                    "How many units to deploy.",
-                                   self.application.orig_num_units,
+                                   self.application.num_units,
                                    current_value=self.num_units_copy,
                                    value_changed_callback=self.handle_scale)
         ws.append(num_unit_ow)
@@ -46,22 +46,22 @@ class ApplicationConfigureView(BaseView):
         return [self.button('APPLY CHANGES', self.submit)]
 
     def get_whitelisted_option_widgets(self):
-        service_id = self.application.csid.as_str_without_rev()
-        options = app.metadata_controller.get_options(service_id)
+        # TODO: async
+        options = app.juju.charmstore.config(self.application.charm)
 
         svc_opts_whitelist = utils.get_options_whitelist(
-            self.application.service_name)
+            self.application.name)
         hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
         app.log.info("Hiding options not in the whitelist: {}".format(hidden))
 
         return self._get_option_widgets(svc_opts_whitelist, options)
 
     def get_non_whitelisted_option_widgets(self):
-        service_id = self.application.csid.as_str_without_rev()
-        options = app.metadata_controller.get_options(service_id)
+        # TODO: async
+        options = app.juju.charmstore.config(self.application.charm)
 
         svc_opts_whitelist = utils.get_options_whitelist(
-            self.application.service_name)
+            self.application.name)
         hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
         return self._get_option_widgets(hidden, options)
 

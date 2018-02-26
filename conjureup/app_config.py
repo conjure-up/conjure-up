@@ -33,7 +33,10 @@ juju = SimpleNamespace(
     bin_path=None,
 
     # Path to juju-wait binary
-    wait_path=None
+    wait_path=None,
+
+    # Charmstore
+    charmstore=None
 )
 
 

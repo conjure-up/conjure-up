@@ -22,7 +22,7 @@ from raven.transport.requests import RequestsHTTPTransport
 from termcolor import colored
 from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
-
+from juju.model import CharmStore
 from conjureup import __version__ as VERSION
 from conjureup import charm, consts, controllers, events, juju, utils
 from conjureup.app_config import app
@@ -406,6 +406,9 @@ def main():
 
     app.loop = asyncio.get_event_loop()
     app.loop.add_signal_handler(signal.SIGINT, events.Shutdown.set)
+
+    # Enable charmstore querying
+    app.juju.charmstore = CharmStore(app.loop)
     try:
         if app.argv.cloud:
             cloud = None

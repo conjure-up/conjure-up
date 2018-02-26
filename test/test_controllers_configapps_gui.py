@@ -16,9 +16,6 @@ from conjureup.controllers.configapps.gui import ConfigAppsController
 class ConfigAppsGUIRenderTestCase(unittest.TestCase):
 
     def setUp(self):
-        with patch.object(ConfigAppsController, 'init_machines_assignments'):
-            self.controller = ConfigAppsController()
-
         self.mock_bundle = MagicMock(name="bundle")
         self.mock_bundle.machines = {"1": sentinel.machine_1}
         self.mock_service_1 = MagicMock(name="s1")
@@ -26,10 +23,6 @@ class ConfigAppsGUIRenderTestCase(unittest.TestCase):
         self.finish_patcher = patch(
             'conjureup.controllers.configapps.gui.ConfigAppsController.finish')
         self.mock_finish = self.finish_patcher.start()
-
-        self.common_patcher = patch(
-            'conjureup.controllers.configapps.gui.common')
-        self.mock_common = self.common_patcher.start()
 
         self.view_patcher = patch(
             'conjureup.controllers.configapps.gui.ApplicationListView')
@@ -51,7 +44,6 @@ class ConfigAppsGUIRenderTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.finish_patcher.stop()
-        self.common_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.ev_app_patcher.stop()
@@ -61,16 +53,12 @@ class ConfigAppsGUIRenderTestCase(unittest.TestCase):
         "Call submit to schedule predeploy if we haven't yet"
         self.mock_app.provider.cloud = 'foo'
         self.mock_app.provider.cloud_type = cloud_types.MAAS
-        self.controller.connect_maas = MagicMock(return_value=sentinel.maas)
-        self.controller.render()
         self.mock_app.loop.create_task.assert_called_once_with(sentinel.maas)
 
 
 class ConfigAppsGUIFinishTestCase(unittest.TestCase):
 
     def setUp(self):
-        with patch.object(ConfigAppsController, 'init_machines_assignments'):
-            self.controller = ConfigAppsController()
 
         self.controllers_patcher = patch(
             'conjureup.controllers.configapps.gui.controllers')
@@ -80,8 +68,6 @@ class ConfigAppsGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.configapps.gui.juju')
         self.mock_juju = self.juju_patcher.start()
 
-        self.controller.render = MagicMock()
-        self.controller.render = MagicMock()
         self.app_patcher = patch(
             'conjureup.controllers.configapps.gui.app')
         self.mock_app = self.app_patcher.start()
@@ -89,10 +75,6 @@ class ConfigAppsGUIFinishTestCase(unittest.TestCase):
         self.ev_app_patcher = patch(
             'conjureup.events.app', self.mock_app)
         self.ev_app_patcher.start()
-
-        self.common_patcher = patch(
-            'conjureup.controllers.configapps.gui.common')
-        self.mock_common = self.common_patcher.start()
 
     def tearDown(self):
         self.controllers_patcher.stop()
@@ -103,5 +85,4 @@ class ConfigAppsGUIFinishTestCase(unittest.TestCase):
     def test_show_bootstrap(self):
         "deploy.gui.test_show_bootstrap"
         events.Bootstrapped.clear()
-        self.controller.finish()
         self.mock_controllers.use.assert_called_once_with('bootstrap')
