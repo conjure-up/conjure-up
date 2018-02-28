@@ -8,9 +8,61 @@ from itertools import chain
 import yaml
 
 
-class Bundle:
+class BundleInvalidApplication(Exception):
+    pass
+
+
+class BundleInvalidFragment(Exception):
+    pass
+
+
+class BundleApplicationFragment(dict):
+    def __init__(self, name, *args, **kwargs):
+        self.name = name
+        super().__init__(*args, **kwargs)
+
+    @property
+    def num_units(self):
+        return int(self.get('num_units', 0))
+
+    @property
+    def options(self):
+        return self.get('options', {})
+
+    @property
+    def charm(self):
+        if 'charm' not in self:
+            raise BundleInvalidFragment(
+                "Unable to locate charm: in bundle fragment: {}".format(
+                    self.fragment))
+        return self['charm']
+
+    @property
+    def is_subordinate(self):
+        if self.num_units == 0:
+            return True
+        return False
+
+    @property
+    def to(self):
+        return self.get('to', [])
+
+    def to_dict(self):
+        items = {
+            'charm': self.charm,
+            'num_units': self.num_units,
+            'options': self.options,
+            'to': self.to
+        }
+        expose = self.get('expose', False)
+        if expose:
+            items['expose'] = expose
+        return items
+
+
+class Bundle(dict):
     def __init__(self, bundle):
-        self._bundle = self._normalize_bundle(bundle)
+        super().__init__(self._normalize_bundle(bundle))
 
     def _normalize_bundle(self, bundle):
         """ Normalizes bundle for things
@@ -118,33 +170,44 @@ class Bundle:
         any preexisting values
         """
         _fragment = self._normalize_bundle(fragment)
-        self._bundle = self._merge_dicts(self._bundle, _fragment)
+        result = self._merge_dicts(self, _fragment)
+        self.clear()
+        self.update(result)
 
     def subtract(self, fragment):
         """ Subtracts a bundle fragment from existing bundle
         """
         _fragment = self._normalize_bundle(fragment)
-        self._bundle = self._subtract_dicts(self._bundle, _fragment)
+        result = self._subtract_dicts(self, _fragment)
+        self.clear()
+        self.update(result)
 
     @property
     def applications(self):
         """ Returns list of applications/services
         """
-        return self._bundle['applications'].keys()
+        _applications = []
+        for app in self['applications'].keys():
+            _applications.append(self._get_application_fragment(app))
+        return _applications
 
     @property
     def machines(self):
         """ Returns defined machines
         """
-        return self._bundle.get('machines', [])
+        return self.get('machines', [])
 
     @property
     def relations(self):
         """ Returns application relations
         """
-        return self._bundle.get('relations', [])
+        return self.get('relations', [])
 
-    def get_application_fragment(self, app_name):
+    def _get_application_fragment(self, app_name):
         """ Returns bundle fragment
         """
-        return self.applications.get(app_name, {})
+        if app_name not in self['applications']:
+            raise BundleInvalidApplication(
+                "Unable find a bundle fragment for: {}".format(app_name))
+        _fragment = self['applications'][app_name]
+        return BundleApplicationFragment(app_name, _fragment)
