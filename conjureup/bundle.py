@@ -16,26 +16,26 @@ class BundleInvalidFragment(Exception):
     pass
 
 
-class BundleFragment:
-    def __init__(self, name, fragment):
-        self.fragment = fragment
+class BundleApplicationFragment(dict):
+    def __init__(self, name, *args, **kwargs):
         self.name = name
+        super().__init__(*args, **kwargs)
 
     @property
     def num_units(self):
-        return int(self.fragment.get('num_units', 0))
+        return int(self.get('num_units', 0))
 
     @property
     def options(self):
-        return self.fragment.get('options', {})
+        return self.get('options', {})
 
     @property
     def charm(self):
-        if 'charm' not in self.fragment:
+        if 'charm' not in self:
             raise BundleInvalidFragment(
                 "Unable to locate charm: in bundle fragment: {}".format(
                     self.fragment))
-        return self.fragment['charm']
+        return self['charm']
 
     @property
     def is_subordinate(self):
@@ -45,7 +45,7 @@ class BundleFragment:
 
     @property
     def to(self):
-        return self.fragment.get('to', [])
+        return self.get('to', [])
 
     def to_dict(self):
         items = {
@@ -54,15 +54,15 @@ class BundleFragment:
             'options': self.options,
             'to': self.to
         }
-        expose = self.fragment.get('expose', False)
+        expose = self.get('expose', False)
         if expose:
             items['expose'] = expose
         return items
 
 
-class Bundle:
+class Bundle(dict):
     def __init__(self, bundle):
-        self._bundle = self._normalize_bundle(bundle)
+        super().__init__(self._normalize_bundle(bundle))
 
     def _normalize_bundle(self, bundle):
         """ Normalizes bundle for things
@@ -170,20 +170,24 @@ class Bundle:
         any preexisting values
         """
         _fragment = self._normalize_bundle(fragment)
-        self._bundle = self._merge_dicts(self._bundle, _fragment)
+        result = self._merge_dicts(self, _fragment)
+        self.clear()
+        self.update(result)
 
     def subtract(self, fragment):
         """ Subtracts a bundle fragment from existing bundle
         """
         _fragment = self._normalize_bundle(fragment)
-        self._bundle = self._subtract_dicts(self._bundle, _fragment)
+        result = self._subtract_dicts(self, _fragment)
+        self.clear()
+        self.update(result)
 
     @property
     def applications(self):
         """ Returns list of applications/services
         """
         _applications = []
-        for app in self._bundle['applications'].keys():
+        for app in self['applications'].keys():
             _applications.append(self._get_application_fragment(app))
         return _applications
 
@@ -191,19 +195,19 @@ class Bundle:
     def machines(self):
         """ Returns defined machines
         """
-        return self._bundle.get('machines', [])
+        return self.get('machines', [])
 
     @property
     def relations(self):
         """ Returns application relations
         """
-        return self._bundle.get('relations', [])
+        return self.get('relations', [])
 
     def _get_application_fragment(self, app_name):
         """ Returns bundle fragment
         """
-        if app_name not in self._bundle['applications']:
+        if app_name not in self['applications']:
             raise BundleInvalidApplication(
                 "Unable find a bundle fragment for: {}".format(app_name))
-        _fragment = self._bundle['applications'][app_name]
-        return BundleFragment(app_name, _fragment)
+        _fragment = self['applications'][app_name]
+        return BundleApplicationFragment(app_name, _fragment)

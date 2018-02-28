@@ -51,7 +51,7 @@ class BundleTestCase(unittest.TestCase):
         bundle_yaml = (self.bundle_dir / 'ghost-bundle.yaml').read_text()
         bundle = Bundle(yaml.load(bundle_yaml))
         expected_keys = ['series', 'applications', 'relations']
-        assert set(bundle._bundle.keys()) == set(expected_keys)
+        assert set(bundle.keys()) == set(expected_keys)
 
     def test_bundle_applications(self):
         "bundle.test_bundle_applications"
@@ -72,11 +72,11 @@ class BundleTestCase(unittest.TestCase):
         bundle = Bundle(d)
         bundle.subtract({'foo': None})
         # full key delete
-        self.assertEqual(bundle.to_dict(), {'qux': [1, 2]})
+        self.assertEqual(bundle, {'qux': [1, 2]})
 
         bundle = Bundle(d)
         bundle.subtract({'foo': {'baz': None}})
 
         # sub-key delete
-        self.assertEqual(bundle.to_dict(),
+        self.assertEqual(bundle,
                          {'foo': {'bar': 1}, 'qux': [1, 2]})
