@@ -16,6 +16,7 @@ import uuid
 
 import raven
 import yaml
+from juju.model import CharmStore
 from kv import KV
 from prettytable import PrettyTable
 from raven.transport.requests import RequestsHTTPTransport
@@ -406,6 +407,9 @@ def main():
 
     app.loop = asyncio.get_event_loop()
     app.loop.add_signal_handler(signal.SIGINT, events.Shutdown.set)
+
+    # Enable charmstore querying
+    app.juju.charmstore = CharmStore(app.loop)
     try:
         if app.argv.cloud:
             cloud = None

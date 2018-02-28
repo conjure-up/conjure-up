@@ -16,7 +16,7 @@ class ApplicationConfigureView(BaseView):
     metrics_title = 'Configure Application'
 
     def __init__(self, application, close_cb):
-        self.title = "Configure {}".format(application.service_name)
+        self.title = "Configure {}".format(application.name)
         self.application = application
         self.prev_screen = close_cb
         self.options_copy = self.application.options.copy()
@@ -25,45 +25,50 @@ class ApplicationConfigureView(BaseView):
         super().__init__()
 
     def build_widget(self):
+        app.loop.create_task(self._build_widget())
+        return []
+
+    async def _build_widget(self):
         ws = []
         num_unit_ow = OptionWidget("Units", "int",
                                    "How many units to deploy.",
-                                   self.application.orig_num_units,
+                                   self.application.num_units,
                                    current_value=self.num_units_copy,
                                    value_changed_callback=self.handle_scale)
         ws.append(num_unit_ow)
-        ws += self.get_whitelisted_option_widgets()
+        ws += await self.get_whitelisted_option_widgets()
         self.toggle_show_all_button_index = len(ws) + 1
         self.toggle_show_all_button = SecondaryButton(
             "Show Advanced Configuration",
-            self.do_toggle_show_all_config)
+            lambda sender: app.loop.create_task(
+                self.do_toggle_show_all_config()))
         ws += [HR(),
                Columns([('weight', 1, Text(" ")),
                         (36, self.toggle_show_all_button)])]
-        return ws
+        for widget in ws:
+            self.widget.contents.append((widget,
+                                         self.widget.options()))
 
     def build_buttons(self):
         return [self.button('APPLY CHANGES', self.submit)]
 
-    def get_whitelisted_option_widgets(self):
-        service_id = self.application.csid.as_str_without_rev()
-        options = app.metadata_controller.get_options(service_id)
+    async def get_whitelisted_option_widgets(self):
+        options = await app.juju.charmstore.config(self.application.charm)
 
         svc_opts_whitelist = utils.get_options_whitelist(
-            self.application.service_name)
+            self.application.name)
         hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
         app.log.info("Hiding options not in the whitelist: {}".format(hidden))
 
-        return self._get_option_widgets(svc_opts_whitelist, options)
+        return self._get_option_widgets(svc_opts_whitelist, options['Options'])
 
-    def get_non_whitelisted_option_widgets(self):
-        service_id = self.application.csid.as_str_without_rev()
-        options = app.metadata_controller.get_options(service_id)
+    async def get_non_whitelisted_option_widgets(self):
+        options = await app.juju.charmstore.config(self.application.charm)
 
         svc_opts_whitelist = utils.get_options_whitelist(
-            self.application.service_name)
+            self.application.name)
         hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
-        return self._get_option_widgets(hidden, options)
+        return self._get_option_widgets(hidden, options['Options'])
 
     def _get_option_widgets(self, opnames, options):
         ws = []
@@ -84,9 +89,9 @@ class ApplicationConfigureView(BaseView):
             ws.append(ow)
         return ws
 
-    def do_toggle_show_all_config(self, sender):
+    async def do_toggle_show_all_config(self):
         if not self.showing_all:
-            new_ows = self.get_non_whitelisted_option_widgets()
+            new_ows = await self.get_non_whitelisted_option_widgets()
             header = Text("Advanced Configuration Options")
             opts = self.widget.options()
             self.widget.contents.append((header, opts))
