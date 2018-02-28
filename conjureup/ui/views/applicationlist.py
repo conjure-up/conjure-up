@@ -35,7 +35,7 @@ class ApplicationWidget(ContainerWidgetWrap):
 
     def __repr__(self):
         return "<ApplicationWidget for {}>".format(
-            self.application.service_name)
+            self.application)
 
     def selectable(self):
         return self._selectable
@@ -49,7 +49,7 @@ class ApplicationWidget(ContainerWidgetWrap):
         self.unit_w = Text('Units: {:4d}'.format(self.application.num_units),
                            align='right')
         cws = [
-            (maxlen + col_pad, Text(self.application.service_name)),
+            (maxlen + col_pad, Text(self.application.name)),
             (10 + len(num_str), self.unit_w),
             ('weight', 1, Text(" ")),  # placeholder for instance type
             ('weight', 1, Text(" ")),  # placeholder for configure button
@@ -91,22 +91,21 @@ class ApplicationListView(BaseView):
         self.prev_screen = back_cb
         self.any_deployed = False
 
-        for application in applications:
-            csid = application.csid.as_str()
-            if csid not in readme_cache:
-                readme_cache[csid] = 'Loading README...'
-                app.loop.create_task(self._load_readme(csid))
+        for application in self.applications:
+            if application.name not in readme_cache:
+                readme_cache[application.charm] = 'Loading README...'
+                app.loop.create_task(self._load_readme(application.charm))
 
         super().__init__()
         self.after_keypress()  # force footer update
 
     def build_widget(self):
         ws = []
-        max_app_name_len = max([len(a.service_name) for a in
-                                self.applications])
+        max_app_name_len = max(
+            [len(app.name) for app in self.applications])
         for application in self.applications:
             ws.append(Text(""))
-            wl = get_options_whitelist(application.service_name)
+            wl = get_options_whitelist(application.name)
             hide_config = application.subordinate and len(wl) == 0
             ws.append(ApplicationWidget(application,
                                         max_app_name_len,
@@ -129,10 +128,10 @@ class ApplicationListView(BaseView):
         if not isinstance(fw, ApplicationWidget):
             self.set_footer("No selected application")
         else:
-            self.set_footer(self.get_readme(fw.application))
+            self.set_footer(self.get_readme(fw.application.charm))
 
     def get_readme(self, application):
-        return readme_cache[application.csid.as_str()]
+        return readme_cache[application]
 
     async def _load_readme(self, csid):
         global charmstore
