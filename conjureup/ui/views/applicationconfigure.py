@@ -25,6 +25,9 @@ class ApplicationConfigureView(BaseView):
         super().__init__()
 
     def build_widget(self):
+        app.loop.create_task(self._build_widget())
+
+    async def _build_widget(self):
         ws = []
         num_unit_ow = OptionWidget("Units", "int",
                                    "How many units to deploy.",
@@ -32,11 +35,11 @@ class ApplicationConfigureView(BaseView):
                                    current_value=self.num_units_copy,
                                    value_changed_callback=self.handle_scale)
         ws.append(num_unit_ow)
-        ws += self.get_whitelisted_option_widgets()
+        ws += await self.get_whitelisted_option_widgets()
         self.toggle_show_all_button_index = len(ws) + 1
         self.toggle_show_all_button = SecondaryButton(
             "Show Advanced Configuration",
-            self.do_toggle_show_all_config)
+            await self.do_toggle_show_all_config)
         ws += [HR(),
                Columns([('weight', 1, Text(" ")),
                         (36, self.toggle_show_all_button)])]
@@ -45,9 +48,9 @@ class ApplicationConfigureView(BaseView):
     def build_buttons(self):
         return [self.button('APPLY CHANGES', self.submit)]
 
-    def get_whitelisted_option_widgets(self):
+    async def get_whitelisted_option_widgets(self):
         # TODO: async
-        options = app.juju.charmstore.config(self.application.charm)
+        options = await app.juju.charmstore.config(self.application.charm)
 
         svc_opts_whitelist = utils.get_options_whitelist(
             self.application.name)
@@ -56,9 +59,9 @@ class ApplicationConfigureView(BaseView):
 
         return self._get_option_widgets(svc_opts_whitelist, options)
 
-    def get_non_whitelisted_option_widgets(self):
+    async def get_non_whitelisted_option_widgets(self):
         # TODO: async
-        options = app.juju.charmstore.config(self.application.charm)
+        options = await app.juju.charmstore.config(self.application.charm)
 
         svc_opts_whitelist = utils.get_options_whitelist(
             self.application.name)
@@ -84,9 +87,9 @@ class ApplicationConfigureView(BaseView):
             ws.append(ow)
         return ws
 
-    def do_toggle_show_all_config(self, sender):
+    async def do_toggle_show_all_config(self, sender):
         if not self.showing_all:
-            new_ows = self.get_non_whitelisted_option_widgets()
+            new_ows = await self.get_non_whitelisted_option_widgets()
             header = Text("Advanced Configuration Options")
             opts = self.widget.options()
             self.widget.contents.append((header, opts))
