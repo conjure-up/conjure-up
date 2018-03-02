@@ -238,7 +238,11 @@ class ConfigAppsController:
 
     async def deploy_all(self):
         "deploys all un-deployed applications"
-        for application in self.undeployed_applications:
+        # make a copy of undeployed_applications since it gets mutated
+        # by self.deploy_one(), and mutating a list that you're iterating
+        # over causes items to be skipped
+        undeployed = list(self.undeployed_applications)
+        for application in undeployed:
             await self.deploy_one(application)
         self.finish()
 
