@@ -11,6 +11,7 @@ from tempfile import NamedTemporaryFile
 
 import yaml
 from bundleplacer.charmstore_api import CharmStoreID
+from juju.client.jujudata import FileJujuData
 from juju.constraints import parse as parse_constraints
 from juju.controller import Controller
 from juju.model import Model
@@ -353,31 +354,13 @@ def get_credential(cloud, cred_name=None):
         return None
 
 
-def get_credentials(secrets=True):
+def get_credentials():
     """ List credentials
-
-    This will fallback to reading the credentials file directly
-
-    Arguments:
-    secrets: True/False whether to show secrets (ie password)
 
     Returns:
     List of credentials
     """
-    cmd = '{} list-credentials --format yaml'.format(app.juju.bin_path)
-    if secrets:
-        cmd += ' --show-secrets'
-    sh = run(cmd, shell=True, stdout=PIPE, stderr=PIPE)
-    if sh.returncode > 0:
-        try:
-            env = read_config('credentials')
-            return env['credentials']
-        except:
-            raise Exception(
-                "Unable to list credentials: {}".format(
-                    sh.stderr.decode('utf8')))
-    env = yaml.safe_load(sh.stdout.decode('utf8'))
-    return env['credentials']
+    return FileJujuData().credentials()
 
 
 def get_regions(cloud):
