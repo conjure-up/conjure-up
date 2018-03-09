@@ -355,12 +355,15 @@ def get_credential(cloud, cred_name=None):
 
 
 def get_credentials():
-    """ List credentials
+    """ Get all locally cached credentials from Juju.
 
     Returns:
-    List of credentials
+    Dict of credentials by cloud.
     """
-    return FileJujuData().credentials()
+    try:
+        return FileJujuData().credentials()
+    except FileNotFoundError:
+        return {}
 
 
 def get_regions(cloud):

@@ -21,18 +21,14 @@ class CloudsController(BaseCloudController):
         utils.info(
             "Summoning {} to {}".format(app.argv.spell, app.provider.cloud))
         if app.provider.cloud_type == cloud_types.LOCALHOST:
-
-            try:
-                app.provider._set_lxd_dir_env()
-                client_compatible = await app.provider.is_client_compatible()
-                server_compatible = await app.provider.is_server_compatible()
-                if client_compatible and server_compatible:
-                    return self.finish()
-                else:
-                    utils.error("LXD Server or LXC client not compatible")
-                    events.Shutdown.set(1)
-            except app.provider.LocalhostError:
-                raise
+            app.provider._set_lxd_dir_env()
+            client_compatible = await app.provider.is_client_compatible()
+            server_compatible = await app.provider.is_server_compatible()
+            if client_compatible and server_compatible:
+                return self.finish()
+            else:
+                utils.error("LXD Server or LXC client not compatible")
+                events.Shutdown.set(1)
         self.finish()
 
     def render(self):

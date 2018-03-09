@@ -60,5 +60,8 @@ def _post_track(arg_dict):
                   av=VERSION, an="Conjure-Up")
 
     params.update(arg_dict)
-    requests.post("http://www.google-analytics.com/collect",
-                  data=params)
+    try:
+        requests.post("http://www.google-analytics.com/collect",
+                      data=params)
+    except Exception:
+        pass  # ignore failures to submit telemetry
