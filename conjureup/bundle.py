@@ -79,13 +79,13 @@ class Bundle(dict):
     def to_yaml(self):
         """ Returns yaml dump of bundle
         """
-        return yaml.dump(self,
+        return yaml.dump(self.to_dict(),
                          default_flow_style=False)
 
     def to_dict(self):
         """ Returns dictionary representation
         """
-        return self
+        return dict(self)
 
     def _merge_dicts(self, *dicts):
         """
