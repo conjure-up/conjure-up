@@ -1,34 +1,24 @@
 """ Application List view
 
 """
-import logging
-
-from juju.model import CharmStore
 from urwid import Columns, Text
 
 from conjureup.app_config import app
 from conjureup.ui.views.base import BaseView
 from conjureup.ui.widgets.base import ContainerWidgetWrap
-from conjureup.ui.widgets.buttons import SecondaryButton, SubmitButton
-from conjureup.utils import get_options_whitelist
-
-log = logging.getLogger('conjure')
+from conjureup.ui.widgets.buttons import SecondaryButton
 
 readme_cache = {}
-charmstore = None
 
 
 class ApplicationWidget(ContainerWidgetWrap):
 
-    def __init__(self, application, maxlen, deploy_cb, config_cb, arch_cb,
-                 hide_config=False):
+    def __init__(self, application, maxlen, config_cb, arch_cb):
         self.application = application
         self._callbacks = {
-            'deploy': deploy_cb,
             'config': config_cb,
             'arch': arch_cb,
         }
-        self.hide_config = hide_config
         self._selectable = True
         super().__init__(self.build_widgets(maxlen))
         self.columns.focus_position = len(self.columns.contents) - 1
@@ -52,12 +42,9 @@ class ApplicationWidget(ContainerWidgetWrap):
             (maxlen + col_pad, Text(self.application.name)),
             (10 + len(num_str), self.unit_w),
             ('weight', 1, Text(" ")),  # placeholder for instance type
-            ('weight', 1, Text(" ")),  # placeholder for configure button
-            ('weight', 1, Text(" ")),  # placeholder for architecture button
-            (20, SubmitButton("Deploy", self._cb('deploy'))),
+            (20, SecondaryButton("Configure", self._cb('config'))),
+            (20, Text(" ")),  # placeholder for architecture button
         ]
-        if not self.hide_config:
-            cws[3] = (20, SecondaryButton("Configure", self._cb('config')))
 
         if self.application.num_units > 0:
             cws[4] = (20, SecondaryButton("Architect", self._cb('arch')))
@@ -79,17 +66,14 @@ class ApplicationListView(BaseView):
     footer = ""  # set by after_keypress
     footer_align = "left"
 
-    def __init__(self, applications, deploy_one, deploy_all,
-                 config_cb, arch_cb, back_cb):
+    def __init__(self, applications, config_cb, arch_cb, finish_cb, back_cb):
         self.subtitle = "{} Applications in {}:".format(len(applications),
                                                         app.config['spell'])
         self.applications = applications
-        self._deploy_one = deploy_one  # task / coro
-        self._deploy_all = deploy_all  # task / coro
         self._config_cb = config_cb
         self._arch_cb = arch_cb
         self.prev_screen = back_cb
-        self.any_deployed = False
+        self.finish_cb = finish_cb
 
         for application in self.applications:
             if application.name not in readme_cache:
@@ -105,21 +89,14 @@ class ApplicationListView(BaseView):
             [len(app.name) for app in self.applications])
         for application in self.applications:
             ws.append(Text(""))
-            wl = get_options_whitelist(application.name)
-            hide_config = application.subordinate and len(wl) == 0
             ws.append(ApplicationWidget(application,
                                         max_app_name_len,
-                                        self.deploy_one,
                                         self._config_cb,
-                                        self._arch_cb,
-                                        hide_config=hide_config))
+                                        self._arch_cb))
         return ws
 
     def build_buttons(self):
-        if self.any_deployed:
-            label = 'DEPLOY REMAINING'
-        else:
-            label = 'DEPLOY ALL'
+        label = 'DEPLOY'
         return [self.button(label, self.submit)]
 
     def after_keypress(self):
@@ -133,12 +110,9 @@ class ApplicationListView(BaseView):
     def get_readme(self, application):
         return readme_cache[application]
 
-    async def _load_readme(self, csid):
-        global charmstore
-        if charmstore is None:
-            charmstore = CharmStore(app.loop)
-        readme = await charmstore.entity_readme_content(csid)
-        readme_cache[csid] = self._trim_readme(readme)
+    async def _load_readme(self, charm):
+        readme = await app.juju.charmstore.entity_readme_content(charm)
+        readme_cache[charm] = self._trim_readme(readme)
         self.after_keypress()  # update loading message if currently displayed
 
     def _trim_readme(self, readme):
@@ -183,17 +157,5 @@ class ApplicationListView(BaseView):
             if getattr(w, 'application', None) is application:
                 return w
 
-    def deploy_one(self, application):
-        self.any_deployed = True
-        self.show_back_button = False
-        # rebuild footer to update buttons
-        self.frame.footer = self._build_footer()
-        more_remaining = self.next_field()
-        self._widget_for(application).remove_buttons()
-        if more_remaining:
-            app.loop.create_task(self._deploy_one(application))
-        else:
-            app.loop.create_task(self._deploy_all())
-
     def submit(self):
-        app.loop.create_task(self._deploy_all())
+        self.finish_cb()
