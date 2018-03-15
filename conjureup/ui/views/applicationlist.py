@@ -13,11 +13,10 @@ readme_cache = {}
 
 class ApplicationWidget(ContainerWidgetWrap):
 
-    def __init__(self, application, maxlen, config_cb, arch_cb):
+    def __init__(self, application, maxlen, config_cb):
         self.application = application
         self._callbacks = {
             'config': config_cb,
-            'arch': arch_cb,
         }
         self._selectable = True
         super().__init__(self.build_widgets(maxlen))
@@ -43,11 +42,7 @@ class ApplicationWidget(ContainerWidgetWrap):
             (10 + len(num_str), self.unit_w),
             ('weight', 1, Text(" ")),  # placeholder for instance type
             (20, SecondaryButton("Configure", self._cb('config'))),
-            (20, Text(" ")),  # placeholder for architecture button
         ]
-
-        if self.application.num_units > 0:
-            cws[4] = (20, SecondaryButton("Architect", self._cb('arch')))
 
         self.columns = Columns(cws, dividechars=1)
         return self.columns
@@ -66,12 +61,11 @@ class ApplicationListView(BaseView):
     footer = ""  # set by after_keypress
     footer_align = "left"
 
-    def __init__(self, applications, config_cb, arch_cb, finish_cb, back_cb):
+    def __init__(self, applications, config_cb, finish_cb, back_cb):
         self.subtitle = "{} Applications in {}:".format(len(applications),
                                                         app.config['spell'])
         self.applications = applications
         self._config_cb = config_cb
-        self._arch_cb = arch_cb
         self.prev_screen = back_cb
         self.finish_cb = finish_cb
 
@@ -91,8 +85,7 @@ class ApplicationListView(BaseView):
             ws.append(Text(""))
             ws.append(ApplicationWidget(application,
                                         max_app_name_len,
-                                        self._config_cb,
-                                        self._arch_cb))
+                                        self._config_cb))
         return ws
 
     def build_buttons(self):
