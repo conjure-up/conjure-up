@@ -284,7 +284,10 @@ class ConfigAppsController:
             self.list_view.update_units()
             self.list_view.show()
             return
+        app.loop.create_task(common.run_before_config(lambda _: None,
+                                                      self.show_app_list))
 
+    def show_app_list(self):
         self.applications = sorted(app.metadata_controller.bundle.services,
                                    key=attrgetter('service_name'))
         self.undeployed_applications = self.applications[:]

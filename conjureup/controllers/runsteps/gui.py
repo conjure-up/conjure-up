@@ -1,6 +1,5 @@
 from conjureup import events
 from conjureup.app_config import app
-from conjureup.models.addon import AddonModel
 from conjureup.ui.views.steps import RunStepsView
 
 from . import common
@@ -13,8 +12,7 @@ class RunStepsController:
         app.loop.create_task(self.run_steps(view))
 
     async def run_steps(self, view):
-        steps = app.steps + AddonModel.selected_addons_steps()
-        for step in steps:
+        for step in app.all_steps:
             if not step.has_after_deploy:
                 continue
             view.mark_step_running(step)

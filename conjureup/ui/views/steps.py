@@ -2,7 +2,6 @@ from ubuntui.widgets.hr import HR
 from urwid import Columns, Pile, Text
 
 from conjureup.app_config import app
-from conjureup.models.addon import AddonModel
 from conjureup.ui.views.base import BaseView
 from conjureup.ui.widgets.step import StepResult
 
@@ -40,8 +39,7 @@ class RunStepsView(BaseView):
             ], dividechars=5),
             HR(),
         ]
-        steps = app.steps + AddonModel.selected_addons_steps()
-        for step in steps:
+        for step in app.all_steps:
             if not step.has_after_deploy:
                 continue
             widget = StepResult(step)

@@ -42,6 +42,7 @@ class ShowStepsGUITestCase(unittest.TestCase):
         self.controller.show_steps = MagicMock()
 
         self.mock_app.steps = []
+        self.mock_app.has_bundle_modifications = False
         self.controller.render()
         self.mock_controllers.use.assert_called_once_with('configapps')
         assert not self.mock_app.loop.create_task.called
