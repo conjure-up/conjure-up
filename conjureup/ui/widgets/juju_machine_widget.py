@@ -105,7 +105,7 @@ class JujuMachineWidget(ContainerWidgetWrap):
         connect_signal(self.mem_field, 'change', self.handle_mem_changed)
         diskval = cdict.get('root-disk', '')
         if diskval != '':
-            diskval = diskval / 1024
+            diskval = self._format_constraint(diskval) / 1024
         self.disk_field = Edit('', str(diskval))
         connect_signal(self.disk_field, 'change', self.handle_disk_changed)
 
