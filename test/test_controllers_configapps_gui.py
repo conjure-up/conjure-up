@@ -62,7 +62,7 @@ class ConfigAppsGUIRenderTestCase(unittest.TestCase):
         self.mock_app.provider.cloud = 'foo'
         self.mock_app.provider.cloud_type = cloud_types.MAAS
         self.controller.connect_maas = MagicMock(return_value=sentinel.maas)
-        self.controller.render()
+        self.controller.show_app_list()
         self.mock_app.loop.create_task.assert_called_once_with(sentinel.maas)
 
 

@@ -2,7 +2,6 @@ from operator import attrgetter
 
 from conjureup import controllers, utils
 from conjureup.app_config import app
-from conjureup.models.addon import AddonModel
 from conjureup.ui.views.steps import ShowStepsView
 from conjureup.ui.widgets.step import StepForm
 
@@ -23,8 +22,7 @@ class ShowStepsController:
         app.loop.create_task(self.show_steps())
 
     async def show_steps(self):
-        steps = app.steps + AddonModel.selected_addons_steps()
-        for step in filter(attrgetter('viewable'), steps):
+        for step in filter(attrgetter('viewable'), app.all_steps):
             if not (step.additional_input or step.needs_sudo):
                 continue
             if step.cloud_whitelist and app.provider.cloud_type \
@@ -45,9 +43,7 @@ class ShowStepsController:
         await step.after_input(self.view.set_footer)
 
     def finish(self):
-        steps = app.steps + AddonModel.selected_addons_steps()
-        updates = any(step.bundle_add or step.bundle_remove for step in steps)
-        if updates:
+        if app.has_bundle_modifications:
             utils.setup_metadata_controller()
         return controllers.use('configapps').render()
 

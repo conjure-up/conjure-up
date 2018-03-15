@@ -161,6 +161,22 @@ class AppConfig:
         return "conjure-up.{}.{}".format(self.provider.cloud_type,
                                          self.config['spell'])
 
+    @property
+    def all_steps(self):
+        """
+        All steps, including those from selected addons.
+        """
+        from conjureup.models.addon import AddonModel
+        return app.steps + AddonModel.selected_addons_steps()
+
+    @property
+    def has_bundle_modifications(self):
+        """
+        Whether or not any step modifies the bundle.
+        """
+        return any(step.bundle_add or step.bundle_remove
+                   for step in self.all_steps)
+
     def to_json(self):
         """
         Serialize application config to JSON
