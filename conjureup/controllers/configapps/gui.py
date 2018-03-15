@@ -4,7 +4,6 @@ from conjureup import controllers, events, juju
 from conjureup.app_config import app
 from conjureup.consts import cloud_types
 from conjureup.maas import setup_maas
-from conjureup.ui.views.app_architecture_view import AppArchitectureView
 from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView
 
@@ -20,12 +19,6 @@ class ConfigAppsController:
         cv = ApplicationConfigureView(application,
                                       lambda: self.render(going_back=True))
         cv.show()
-
-    def do_architecture(self, application):
-        av = AppArchitectureView(application,
-                                 self,
-                                 lambda: self.render(going_back=True))
-        av.show()
 
     async def get_maas_constraints(self, machine_id):
         if machine_id not in self.maas_machine_map:
@@ -69,7 +62,6 @@ class ConfigAppsController:
 
         self.list_view = ApplicationListView(app.current_bundle.applications,
                                              self.do_configure,
-                                             self.do_architecture,
                                              self.finish,
                                              self.back)
         self.list_view.show()
