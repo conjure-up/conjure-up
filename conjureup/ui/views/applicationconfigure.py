@@ -42,9 +42,10 @@ class ApplicationConfigureView(BaseView):
             "Show Advanced Configuration",
             lambda sender: app.loop.create_task(
                 self.do_toggle_show_all_config()))
-        ws += [HR(),
-               Columns([('weight', 1, Text(" ")),
-                        (36, self.toggle_show_all_button)])]
+        if await self.get_non_whitelisted_option_widgets():
+            ws += [HR(),
+                   Columns([('weight', 1, Text(" ")),
+                            (36, self.toggle_show_all_button)])]
         for widget in ws:
             self.widget.contents.append((widget,
                                          self.widget.options()))
@@ -57,7 +58,8 @@ class ApplicationConfigureView(BaseView):
 
         svc_opts_whitelist = utils.get_options_whitelist(
             self.application.name)
-        hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
+        hidden = [n for n in options['Options'].keys()
+                  if n not in svc_opts_whitelist]
         app.log.info("Hiding options not in the whitelist: {}".format(hidden))
 
         return self._get_option_widgets(svc_opts_whitelist, options['Options'])
@@ -67,7 +69,8 @@ class ApplicationConfigureView(BaseView):
 
         svc_opts_whitelist = utils.get_options_whitelist(
             self.application.name)
-        hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
+        hidden = [n for n in options['Options'].keys()
+                  if n not in svc_opts_whitelist]
         return self._get_option_widgets(hidden, options['Options'])
 
     def _get_option_widgets(self, opnames, options):
