@@ -28,7 +28,7 @@ class BundleApplicationFragment(dict):
     def constraints(self):
         return self._constraints
 
-    @constraints.setter  # NOQA
+    @constraints.setter
     def constraints(self, val):
         self._constraints = val
 
@@ -36,7 +36,7 @@ class BundleApplicationFragment(dict):
     def num_units(self):
         return self._num_units
 
-    @num_units.setter  # NOQA
+    @num_units.setter
     def num_units(self, val):
         self._num_units = val
 
@@ -44,7 +44,7 @@ class BundleApplicationFragment(dict):
     def options(self):
         return self._options
 
-    @options.setter  # NOQA
+    @options.setter
     def options(self, val):
         self._options.update(val)
 
