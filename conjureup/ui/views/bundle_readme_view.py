@@ -19,9 +19,8 @@ log = logging.getLogger('conjure')
 
 class BundleReadmeView(WidgetWrap):
 
-    def __init__(self, metadata_controller, spell_name, spell_dir,
+    def __init__(self, spell_name, spell_dir,
                  done_callback, initial_height):
-        self.metadata_controller = metadata_controller
         self.spell_name = spell_name
         self.spell_dir = spell_dir
         self.done_callback = done_callback

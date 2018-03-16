@@ -20,14 +20,33 @@ class BundleApplicationFragment(dict):
     def __init__(self, name, *args, **kwargs):
         self.name = name
         super().__init__(*args, **kwargs)
+        self._constraints = self.get('constraints', "")
+        self._num_units = int(self.get('num_units', 0))
+        self._options = self.get('options', {})
+
+    @property
+    def constraints(self):
+        return self._constraints
+
+    @constraints.setter  # NOQA
+    def constraints(self, val):
+        self._constraints = val
 
     @property
     def num_units(self):
-        return int(self.get('num_units', 0))
+        return self._num_units
+
+    @num_units.setter  # NOQA
+    def num_units(self, val):
+        self._num_units = val
 
     @property
     def options(self):
-        return self.get('options', {})
+        return self._options
+
+    @options.setter  # NOQA
+    def options(self, val):
+        self._options.update(val)
 
     @property
     def charm(self):
@@ -50,10 +69,15 @@ class BundleApplicationFragment(dict):
     def to_dict(self):
         items = {
             'charm': self.charm,
-            'num_units': self.num_units,
-            'options': self.options,
-            'to': self.to
+            'num_units': self.num_units
         }
+        if self.options:
+            items['options'] = self.options
+        if self.to:
+            items['to'] = self.to
+        if self.constraints:
+            items['constraints'] = self.constraints
+
         expose = self.get('expose', False)
         if expose:
             items['expose'] = expose

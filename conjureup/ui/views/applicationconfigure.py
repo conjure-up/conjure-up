@@ -21,6 +21,7 @@ class ApplicationConfigureView(BaseView):
         self.prev_screen = close_cb
         self.options_copy = self.application.options.copy()
         self.num_units_copy = self.application.num_units
+        self.constraints_copy = self.application.constraints
         self.showing_all = False
         super().__init__()
 
@@ -36,6 +37,15 @@ class ApplicationConfigureView(BaseView):
                                    current_value=self.num_units_copy,
                                    value_changed_callback=self.handle_scale)
         ws.append(num_unit_ow)
+
+        constraints_ow = OptionWidget(
+            "Constraints", "string",
+            "Set constraints on the application, ie. cores=4 mem=4G.",
+            self.application.constraints,
+            current_value=self.constraints_copy,
+            value_changed_callback=self.handle_constraints)
+        ws.append(constraints_ow)
+
         ws += await self.get_whitelisted_option_widgets()
         self.toggle_show_all_button_index = len(ws) + 1
         self.toggle_show_all_button = SecondaryButton(
@@ -116,7 +126,16 @@ class ApplicationConfigureView(BaseView):
     def handle_scale(self, opname, scale):
         self.num_units_copy = scale
 
+    def handle_constraints(self, opname, constraint):
+        self.constraints_copy = constraint
+
     def submit(self):
         self.application.options = self.options_copy
         self.application.num_units = self.num_units_copy
+        self.application.constraints = self.constraints_copy
+        # Apply fragment updates to bundle
+        app.current_bundle.apply({"applications": {
+            self.application.name: self.application.to_dict()
+        }})
+
         self.prev_screen()

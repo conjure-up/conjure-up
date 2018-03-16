@@ -28,13 +28,11 @@ class SpellPickerView(BaseView):
         cur_spell = self.selected_spell
         spellname = cur_spell['name']
         spelldir = cur_spell['spell-dir']
-        brmv = BundleReadmeView(self.app.metadata_controller,
-                                spellname, spelldir,
+        brmv = BundleReadmeView(spellname, spelldir,
                                 self.hide_readme,
                                 int(rows * .75))
         self.app.ui.set_header("Spell Readme")
         self.app.ui.set_body(brmv)
-        # brmv.show()
 
     def hide_readme(self):
         self.show()
