@@ -26,6 +26,8 @@ class BundleApplicationFragment(dict):
 
     @property
     def constraints(self):
+        """ Set/Get application constraints
+        """
         return self._constraints
 
     @constraints.setter
@@ -34,6 +36,8 @@ class BundleApplicationFragment(dict):
 
     @property
     def num_units(self):
+        """ Set/Get number of units for application
+        """
         return self._num_units
 
     @num_units.setter
@@ -42,6 +46,8 @@ class BundleApplicationFragment(dict):
 
     @property
     def options(self):
+        """ Set/Get application options
+        """
         return self._options
 
     @options.setter
@@ -50,6 +56,8 @@ class BundleApplicationFragment(dict):
 
     @property
     def charm(self):
+        """ Provides charmstore endpoint
+        """
         if 'charm' not in self:
             raise BundleInvalidFragment(
                 "Unable to locate charm: in bundle fragment: {}".format(
@@ -58,12 +66,16 @@ class BundleApplicationFragment(dict):
 
     @property
     def is_subordinate(self):
+        """ Returns if application fragment is a charm subordinate
+        """
         if self.num_units == 0:
             return True
         return False
 
     @property
     def to(self):
+        """ Returns machine placement
+        """
         return self.get('to', [])
 
     def to_dict(self):

@@ -2,10 +2,11 @@
 
 """
 
+from juju.constraints import parse as parse_constraints
 from ubuntui.widgets.hr import HR
 from urwid import Columns, Text
 
-from conjureup import utils
+from conjureup import consts, utils
 from conjureup.app_config import app
 from conjureup.ui.views.base import BaseView
 from conjureup.ui.widgets.buttons import SecondaryButton
@@ -22,8 +23,15 @@ class ApplicationConfigureView(BaseView):
         self.options_copy = self.application.options.copy()
         self.num_units_copy = self.application.num_units
         self.constraints_copy = self.application.constraints
+        self.constraints_error_label = Text(('body', ''))
         self.showing_all = False
         super().__init__()
+
+    def set_constraints_error(self, msg):
+        self.constraints_error_label.set_text(('error_major', msg))
+
+    def clear_constraints_error(self):
+        self.constraints_error_label.set_text(('body', ''))
 
     def build_widget(self):
         app.loop.create_task(self._build_widget())
@@ -45,6 +53,7 @@ class ApplicationConfigureView(BaseView):
             current_value=self.constraints_copy,
             value_changed_callback=self.handle_constraints)
         ws.append(constraints_ow)
+        ws.append(self.constraints_error_label)
 
         ws += await self.get_whitelisted_option_widgets()
         self.toggle_show_all_button_index = len(ws) + 1
@@ -130,6 +139,17 @@ class ApplicationConfigureView(BaseView):
         self.constraints_copy = constraint
 
     def submit(self):
+        parsed = set(parse_constraints(self.constraints_copy))
+        has_valid_constraints = parsed.issubset(
+            set(consts.ALLOWED_CONSTRAINTS))
+        if has_valid_constraints:
+            self.clear_constraints_error()
+        else:
+            self.set_constraints_error(
+                "Invalid constraints given, your choices are '{}'".format(
+                    ", ".join(consts.ALLOWED_CONSTRAINTS)))
+            return
+
         self.application.options = self.options_copy
         self.application.num_units = self.num_units_copy
         self.application.constraints = self.constraints_copy
