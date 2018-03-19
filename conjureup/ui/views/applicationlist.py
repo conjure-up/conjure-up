@@ -81,7 +81,7 @@ class ApplicationListView(BaseView):
         ws = []
         max_app_name_len = max(
             [len(app.name) for app in self.applications])
-        for application in self.applications:
+        for application in sorted(self.applications, key=lambda app: app.name):
             ws.append(Text(""))
             ws.append(ApplicationWidget(application,
                                         max_app_name_len,
