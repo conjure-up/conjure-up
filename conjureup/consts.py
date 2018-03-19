@@ -5,6 +5,19 @@ JAAS_CLOUDS = {'ec2', 'azure', 'gce'}
 JAAS_DOMAIN = 'jimm.jujucharms.com'
 JAAS_ENDPOINT = JAAS_DOMAIN + ':443'
 CUSTOM_PROVIDERS = ['localhost', 'maas', 'vsphere', 'openstack']
+ALLOWED_CONSTRAINTS = [
+    'arch',
+    'container',
+    'cpu-cores',
+    'cores',
+    'cpu-power',
+    'mem',
+    'root-disk',
+    'tags',
+    'instance-type',
+    'spaces',
+    'virt-type'
+]
 
 
 class cloud_types:

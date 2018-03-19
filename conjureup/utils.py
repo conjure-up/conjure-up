@@ -20,15 +20,13 @@ from subprocess import PIPE, Popen, check_call, check_output
 
 import aiofiles
 import yaml
-from bundleplacer.bundle import Bundle
-from bundleplacer.charmstore_api import MetadataController
-from bundleplacer.config import Config
 from pkg_resources import parse_version
 from raven.processors import SanitizePasswordsProcessor
 from termcolor import cprint
 
 from conjureup import charm
 from conjureup.app_config import app
+from conjureup.bundle import Bundle
 from conjureup.telemetry import track_event
 
 
@@ -499,7 +497,7 @@ def setup_metadata_controller():
     bundle_custom_filename = spell_dir / 'bundle-custom.yaml'
     if bundle_filename.exists():
         # Load bundle data early so we can merge any additional charm options
-        bundle_data = yaml.load(bundle_filename.read_text())
+        bundle_data = Bundle(yaml.load(bundle_filename.read_text()))
     else:
         bundle_name = app.config['metadata'].get('bundle-name', None)
         if bundle_name is None:
@@ -511,16 +509,15 @@ def setup_metadata_controller():
 
         app.log.debug("Pulling bundle for {} from channel: {}".format(
             bundle_name, bundle_channel))
-        bundle_data = charm.get_bundle(bundle_name, bundle_channel)
+        bundle_data = Bundle(charm.get_bundle(bundle_name, bundle_channel))
 
     if bundle_custom_filename.exists():
         bundle_custom = yaml.load(slurp(bundle_custom_filename))
-        bundle_data = merge_dicts(bundle_data,
-                                  bundle_custom)
+        bundle_data.apply(bundle_custom)
 
     for name in app.selected_addons:
         addon = app.addons[name]
-        bundle_data = merge_dicts(bundle_data, addon.bundle)
+        bundle_data.apply(addon.bundle)
 
     steps = list(chain(app.steps,
                        chain.from_iterable(app.addons[addon].steps
@@ -530,24 +527,19 @@ def setup_metadata_controller():
             continue
         if step.bundle_remove:
             fragment = yaml.safe_load(step.bundle_remove.read_text())
-            _normalize_bundle(bundle_data, fragment)
-            bundle_data = subtract_dicts(bundle_data, fragment)
+            bundle_data.subtract(fragment)
         if step.bundle_add:
             fragment = yaml.safe_load(step.bundle_add.read_text())
-            _normalize_bundle(bundle_data, fragment)
-            bundle_data = merge_dicts(bundle_data, fragment)
+            bundle_data.apply(fragment)
 
     if app.argv.bundle_remove:
         fragment = yaml.safe_load(app.argv.bundle_remove.read_text())
-        _normalize_bundle(bundle_data, fragment)
-        bundle_data = subtract_dicts(bundle_data, fragment)
+        bundle_data.subtract(fragment)
     if app.argv.bundle_add:
         fragment = yaml.safe_load(app.argv.bundle_add.read_text())
-        _normalize_bundle(bundle_data, fragment)
-        bundle_data = merge_dicts(bundle_data, fragment)
+        bundle_data.apply(fragment)
 
-    bundle = Bundle(bundle_data=bundle_data)
-    app.metadata_controller = MetadataController(bundle, Config('bundle-cfg'))
+    app.current_bundle = bundle_data
 
 
 def set_chosen_spell(spell_name, spell_dir):

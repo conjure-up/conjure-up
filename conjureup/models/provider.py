@@ -76,7 +76,7 @@ class Field:
     def value(self):
         return self.widget.value
 
-    @value.setter  # NOQA
+    @value.setter
     def value(self, value):
         self.widget.value = value
 

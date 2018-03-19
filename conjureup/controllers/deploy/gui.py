@@ -20,8 +20,8 @@ class DeployController:
         app.loop.create_task(self._wait_for_applications(view))
 
     async def _refresh(self, view):
-        applications = sorted(app.metadata_controller.bundle.services,
-                              key=attrgetter('service_name'))
+        applications = sorted(app.current_bundle.applications,
+                              key=attrgetter('name'))
         await events.ModelConnected.wait()
         while not events.ModelSettled.is_set():
             if events.Error.is_set():
@@ -35,10 +35,10 @@ class DeployController:
         view_data = {}
         for service in applications:
             units = {}
-            view_data[service.service_name] = {'units': units}
+            view_data[service.name] = {'units': units}
             num_units = service.num_units
-            if service.service_name in app.juju.client.applications:
-                juju_app = app.juju.client.applications[service.service_name]
+            if service.name in app.juju.client.applications:
+                juju_app = app.juju.client.applications[service.name]
                 num_units = max(service.num_units, len(juju_app.units))
             else:
                 juju_app = None
@@ -55,7 +55,7 @@ class DeployController:
                 else:
                     # fill out with placeholder so that the units are
                     # always visible, even if they're not in the model yet
-                    name = '{}/{}'.format(service.service_name, unit_num)
+                    name = '{}/{}'.format(service.name, unit_num)
                     public_address = ''
                     machine = ''
                     agent_status = ''

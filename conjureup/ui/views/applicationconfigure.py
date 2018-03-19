@@ -2,10 +2,12 @@
 
 """
 
+from juju.constraints import parse as parse_constraints
+from juju.constraints import normalize_key
 from ubuntui.widgets.hr import HR
 from urwid import Columns, Text
 
-from conjureup import utils
+from conjureup import consts, utils
 from conjureup.app_config import app
 from conjureup.ui.views.base import BaseView
 from conjureup.ui.widgets.buttons import SecondaryButton
@@ -16,54 +18,84 @@ class ApplicationConfigureView(BaseView):
     metrics_title = 'Configure Application'
 
     def __init__(self, application, close_cb):
-        self.title = "Configure {}".format(application.service_name)
+        self.title = "Configure {}".format(application.name)
         self.application = application
         self.prev_screen = close_cb
         self.options_copy = self.application.options.copy()
         self.num_units_copy = self.application.num_units
+        self.constraints_copy = self.application.constraints
+        self.constraints_error_label = Text(('body', ''))
         self.showing_all = False
         super().__init__()
 
+    def set_constraints_error(self, msg=None):
+        if not msg:
+            msg = (
+                "Invalid constraints given, your choices are '{}'".format(
+                    ", ".join(consts.ALLOWED_CONSTRAINTS)))
+        self.constraints_error_label.set_text(('error_major', msg))
+
+    def clear_constraints_error(self):
+        self.constraints_error_label.set_text(('body', ''))
+
     def build_widget(self):
+        app.loop.create_task(self._build_widget())
+        return []
+
+    async def _build_widget(self):
         ws = []
-        num_unit_ow = OptionWidget("Units", "int",
+        if not self.application.is_subordinate:
+            ws.append(OptionWidget("Units", "int",
                                    "How many units to deploy.",
-                                   self.application.orig_num_units,
+                                   self.application.num_units,
                                    current_value=self.num_units_copy,
-                                   value_changed_callback=self.handle_scale)
-        ws.append(num_unit_ow)
-        ws += self.get_whitelisted_option_widgets()
+                                   value_changed_callback=self.handle_scale))
+
+        constraints_ow = OptionWidget(
+            "Constraints", "string",
+            "Set constraints on the application, ie. cores=4 mem=4G.",
+            self.application.constraints,
+            current_value=self.constraints_copy,
+            value_changed_callback=self.handle_constraints)
+        ws.append(constraints_ow)
+        ws.append(self.constraints_error_label)
+
+        ws += await self.get_whitelisted_option_widgets()
         self.toggle_show_all_button_index = len(ws) + 1
         self.toggle_show_all_button = SecondaryButton(
             "Show Advanced Configuration",
-            self.do_toggle_show_all_config)
-        ws += [HR(),
-               Columns([('weight', 1, Text(" ")),
-                        (36, self.toggle_show_all_button)])]
-        return ws
+            lambda sender: app.loop.create_task(
+                self.do_toggle_show_all_config()))
+        if await self.get_non_whitelisted_option_widgets():
+            ws += [HR(),
+                   Columns([('weight', 1, Text(" ")),
+                            (36, self.toggle_show_all_button)])]
+        for widget in ws:
+            self.widget.contents.append((widget,
+                                         self.widget.options()))
 
     def build_buttons(self):
         return [self.button('APPLY CHANGES', self.submit)]
 
-    def get_whitelisted_option_widgets(self):
-        service_id = self.application.csid.as_str_without_rev()
-        options = app.metadata_controller.get_options(service_id)
+    async def get_whitelisted_option_widgets(self):
+        options = await app.juju.charmstore.config(self.application.charm)
 
         svc_opts_whitelist = utils.get_options_whitelist(
-            self.application.service_name)
-        hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
+            self.application.name)
+        hidden = [n for n in options['Options'].keys()
+                  if n not in svc_opts_whitelist]
         app.log.info("Hiding options not in the whitelist: {}".format(hidden))
 
-        return self._get_option_widgets(svc_opts_whitelist, options)
+        return self._get_option_widgets(svc_opts_whitelist, options['Options'])
 
-    def get_non_whitelisted_option_widgets(self):
-        service_id = self.application.csid.as_str_without_rev()
-        options = app.metadata_controller.get_options(service_id)
+    async def get_non_whitelisted_option_widgets(self):
+        options = await app.juju.charmstore.config(self.application.charm)
 
         svc_opts_whitelist = utils.get_options_whitelist(
-            self.application.service_name)
-        hidden = [n for n in options.keys() if n not in svc_opts_whitelist]
-        return self._get_option_widgets(hidden, options)
+            self.application.name)
+        hidden = [n for n in options['Options'].keys()
+                  if n not in svc_opts_whitelist]
+        return self._get_option_widgets(hidden, options['Options'])
 
     def _get_option_widgets(self, opnames, options):
         ws = []
@@ -84,9 +116,9 @@ class ApplicationConfigureView(BaseView):
             ws.append(ow)
         return ws
 
-    def do_toggle_show_all_config(self, sender):
+    async def do_toggle_show_all_config(self):
         if not self.showing_all:
-            new_ows = self.get_non_whitelisted_option_widgets()
+            new_ows = await self.get_non_whitelisted_option_widgets()
             header = Text("Advanced Configuration Options")
             opts = self.widget.options()
             self.widget.contents.append((header, opts))
@@ -108,7 +140,26 @@ class ApplicationConfigureView(BaseView):
     def handle_scale(self, opname, scale):
         self.num_units_copy = scale
 
+    def handle_constraints(self, opname, constraint):
+        self.constraints_copy = constraint
+
     def submit(self):
+        if self.constraints_copy:
+            try:
+                parsed = set(parse_constraints(self.constraints_copy))
+            except ValueError:
+                return self.set_constraints_error()
+            has_valid_constraints = parsed.issubset(
+                {normalize_key(field) for field in consts.ALLOWED_CONSTRAINTS})
+            if not has_valid_constraints:
+                return self.set_constraints_error()
+
         self.application.options = self.options_copy
         self.application.num_units = self.num_units_copy
+        self.application.constraints = self.constraints_copy
+        # Apply fragment updates to bundle
+        app.current_bundle.apply({"applications": {
+            self.application.name: self.application.to_dict()
+        }})
+
         self.prev_screen()

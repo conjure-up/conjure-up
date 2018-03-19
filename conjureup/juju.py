@@ -4,25 +4,18 @@ import asyncio
 import json
 import logging
 import os
-from concurrent import futures
 from pathlib import Path
 from subprocess import DEVNULL, PIPE, CalledProcessError
 from tempfile import NamedTemporaryFile
 
 import yaml
-from bundleplacer.charmstore_api import CharmStoreID
 from juju.client.jujudata import FileJujuData
-from juju.constraints import parse as parse_constraints
 from juju.controller import Controller
 from juju.model import Model
 
 from conjureup import consts, errors, events, utils
 from conjureup.app_config import app
 from conjureup.utils import is_linux, juju_path, run, spew
-
-JUJU_ASYNC_QUEUE = "juju-async-queue"
-
-PENDING_DEPLOYS = 0
 
 
 def _check_bin_candidates(candidates, bin_property):
@@ -581,183 +574,6 @@ def deploy(bundle):
                    stdout=DEVNULL, stderr=PIPE)
     except CalledProcessError as e:
         raise e
-
-
-async def add_machines(applications, machines, msg_cb):
-    """Add machines to model
-
-    Arguments:
-
-    app: name of app to which the machines belong
-    machines: a mapping of virtual machine numbers to machine attributes.
-    The key 'series' is required, and 'constraints' is the only other
-    supported key
-
-    """
-    if not events.PreDeployComplete.is_set():
-        # block until after pre-deploy
-        await events.PreDeployComplete.wait()
-
-    new_machines = {}
-    tasks = []
-    for vmid in sorted(machines.keys()):
-        if events.MachineCreated.is_set(vmid):
-            tasks.append(asyncio.sleep(0))  # no-op
-        elif events.MachinePending.is_set(vmid):
-            tasks.append(events.MachineCreated.wait(vmid))
-        else:
-            events.MachinePending.set(vmid)
-            machine = machines[vmid]
-            series = machine['series']
-            constraints = parse_constraints(machine.get('constraints', ''))
-            tasks.append(app.juju.client.add_machine(series=series,
-                                                     constraints=constraints))
-            new_machines[vmid] = None
-
-    if new_machines:
-        msg = 'Adding machine{}: {}'.format(
-            's' if len(new_machines) > 1 else '',
-            ', '.join(
-                '{}: ({}, {})'.format(v,
-                                      machines[v]['series'],
-                                      machines[v].get('constraints', ''))
-                for v in sorted(new_machines.keys())),
-        )
-        app.log.info(msg)
-        msg_cb(msg)
-    else:
-        app.log.info('No new machines to add for {}'.format(
-            ', '.join(a.service_name for a in applications)))
-
-    results = await asyncio.gather(*tasks)
-    for vmid, task_result in zip(sorted(machines.keys()), results):
-        if vmid not in new_machines:
-            # this is an events.MachinePending.wait() or no-op result
-            continue
-        events.MachinePending.clear(vmid)
-        events.MachineCreated.set(vmid)
-        new_machines[vmid] = task_result.id
-
-    if new_machines:
-        msg = "Added machine{}: {}".format(
-            's' if len(new_machines) > 1 else '',
-            ', '.join(sorted(new_machines.keys())),
-        )
-        app.log.info(msg)
-        msg_cb(msg)
-
-    for application in applications:
-        app.log.info('Machines available for application {}'.format(
-            application.service_name
-        ))
-        events.AppMachinesCreated.set(application.service_name)
-    return new_machines
-
-
-async def deploy_service(service, default_series, msg_cb):
-    """Juju deploy service.
-
-    If the service's charm ID doesn't have a revno, will query charm
-    store to get latest revno for the charm.
-
-    If the service's charm ID has a series, use that, otherwise use
-    the provided default series.
-
-    Arguments:
-    service: Service to deploy
-    msg_cb: message callback
-    exc_cb: exception handler callback
-
-    Returns a future that will be completed after the deploy has been
-    submitted to juju
-
-    """
-    name = service.service_name
-    if not events.AppMachinesCreated.is_set(name):
-        # block until we have machines
-        await events.AppMachinesCreated.wait(name)
-        app.log.debug('Machines for {} are ready'.format(name))
-
-    if service.csid.rev == "":
-        id_no_rev = service.csid.as_str_without_rev()
-        mc = app.metadata_controller
-        futures.wait([mc.metadata_future])
-        info = mc.get_charm_info(id_no_rev, lambda _: None)
-        service.csid = CharmStoreID(info["Id"])
-
-    deploy_args = {}
-    deploy_args = dict(
-        entity_url=service.csid.as_str(),
-        application_name=service.service_name,
-        num_units=service.num_units,
-        constraints=service.constraints,
-        to=service.placement_spec,
-        config=service.options,
-    )
-
-    msg = 'Deploying {}...'.format(service.service_name)
-    app.log.info(msg)
-    msg_cb(msg)
-    from pprint import pformat
-    app.log.debug(pformat(deploy_args))
-
-    app_inst = await app.juju.client.deploy(**deploy_args)
-
-    if service.expose:
-        msg = 'Exposing {}.'.format(service.service_name)
-        app.log.info(msg)
-        msg_cb(msg)
-        await app_inst.expose()
-
-    msg = '{}: deployed, installing.'.format(service.service_name)
-    app.log.info(msg)
-    msg_cb(msg)
-
-    events.AppDeployed.set(service.service_name)
-
-
-async def set_relations(service, msg_cb):
-    """ Juju set relations
-
-    Arguments:
-    service: service with relations to set
-    """
-    relations = set()
-    for a, b in service.relations:
-        rel_pair = tuple(sorted((a, b)))
-        if rel_pair in relations:
-            continue
-        a_app = a.split(':')[0]
-        b_app = b.split(':')[0]
-        await asyncio.gather(
-            events.AppDeployed.wait(a_app),
-            events.AppDeployed.wait(b_app),
-        )
-        relations.add(rel_pair)
-
-    app.log.debug('Adding relations for %s: %s',
-                  service.service_name, relations)
-    try:
-        for rel_pair in relations:
-            rel_name = '{} <-> {}'.format(*rel_pair)
-            pending = events.PendingRelations.is_set(rel_name)
-            added = events.RelationsAdded.is_set(rel_name)
-            if pending or added:
-                continue
-
-            msg = "Setting relation {}".format(rel_name)
-            app.log.info(msg)
-            msg_cb(msg)
-            events.PendingRelations.set(rel_name)
-            await app.juju.client.add_relation(*rel_pair)
-            events.PendingRelations.clear(rel_name)
-            events.RelationsAdded.set(rel_name)
-
-        events.RelationsAdded.set(service.service_name)
-    except Exception:
-        app.log.exception('Error adding relations for %s',
-                          service.service_name)
-        raise
 
 
 def get_controller_info(name=None):
