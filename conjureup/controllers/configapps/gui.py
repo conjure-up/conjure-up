@@ -7,6 +7,8 @@ from conjureup.maas import setup_maas
 from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView
 
+from . import common
+
 
 class ConfigAppsController:
 
@@ -57,6 +59,10 @@ class ConfigAppsController:
             self.list_view.show()
             return
 
+        app.loop.create_task(common.run_before_config(lambda _: None,
+                                                      self.show_app_list))
+
+    def show_app_list(self):
         if app.provider.cloud_type == cloud_types.MAAS:
             app.loop.create_task(self.connect_maas())
 
