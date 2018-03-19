@@ -1,8 +1,6 @@
 from conjureup import controllers, utils
 from conjureup.app_config import app
 
-from . import common
-
 
 class ConfigAppsController:
     def render(self):
