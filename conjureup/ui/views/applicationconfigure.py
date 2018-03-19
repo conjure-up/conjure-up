@@ -2,7 +2,7 @@
 
 """
 
-from juju.constraints import parse as parse_constraints
+from juju.constraints import parse as parse_constraints, normalize_key
 from ubuntui.widgets.hr import HR
 from urwid import Columns, Text
 
@@ -143,14 +143,15 @@ class ApplicationConfigureView(BaseView):
         self.constraints_copy = constraint
 
     def submit(self):
-        try:
-            parsed = set(parse_constraints(self.constraints_copy))
-        except ValueError:
-            return self.set_constraints_error()
-        has_valid_constraints = parsed.issubset(
-            set(consts.ALLOWED_CONSTRAINTS))
-        if not has_valid_constraints:
-            return self.set_constraints_error()
+        if self.constraints_copy:
+            try:
+                parsed = set(parse_constraints(self.constraints_copy))
+            except ValueError:
+                return self.set_constraints_error()
+            has_valid_constraints = parsed.issubset(
+                {normalize_key(field) for field in consts.ALLOWED_CONSTRAINTS})
+            if not has_valid_constraints:
+                return self.set_constraints_error()
 
         self.application.options = self.options_copy
         self.application.num_units = self.num_units_copy
