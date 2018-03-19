@@ -27,7 +27,11 @@ class ApplicationConfigureView(BaseView):
         self.showing_all = False
         super().__init__()
 
-    def set_constraints_error(self, msg):
+    def set_constraints_error(self, msg=None):
+        if not msg:
+            msg = (
+                "Invalid constraints given, your choices are '{}'".format(
+                    ", ".join(consts.ALLOWED_CONSTRAINTS)))
         self.constraints_error_label.set_text(('error_major', msg))
 
     def clear_constraints_error(self):
@@ -139,16 +143,14 @@ class ApplicationConfigureView(BaseView):
         self.constraints_copy = constraint
 
     def submit(self):
-        parsed = set(parse_constraints(self.constraints_copy))
+        try:
+            parsed = set(parse_constraints(self.constraints_copy))
+        except ValueError:
+            return self.set_constraints_error()
         has_valid_constraints = parsed.issubset(
             set(consts.ALLOWED_CONSTRAINTS))
-        if has_valid_constraints:
-            self.clear_constraints_error()
-        else:
-            self.set_constraints_error(
-                "Invalid constraints given, your choices are '{}'".format(
-                    ", ".join(consts.ALLOWED_CONSTRAINTS)))
-            return
+        if not has_valid_constraints:
+            return self.set_constraints_error()
 
         self.application.options = self.options_copy
         self.application.num_units = self.num_units_copy
