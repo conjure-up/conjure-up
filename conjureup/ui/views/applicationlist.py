@@ -30,13 +30,17 @@ class ApplicationWidget(ContainerWidgetWrap):
         return self._selectable
 
     def update_units(self):
-        self.unit_w.set_text("Units: {:>4}".format(self.application.num_units))
+        if self.application.is_subordinate:
+            num_units = '-'
+        else:
+            num_units = self.application.num_units
+        self.unit_w.set_text("Units: {:>4}".format(num_units))
 
     def build_widgets(self, maxlen):
         num_str = "{}".format(self.application.num_units)
         col_pad = 6
-        self.unit_w = Text('Units: {:4d}'.format(self.application.num_units),
-                           align='right')
+        self.unit_w = Text('', align='right')
+        self.update_units()
         cws = [
             (maxlen + col_pad, Text(self.application.name)),
             (10 + len(num_str), self.unit_w),

@@ -43,12 +43,12 @@ class ApplicationConfigureView(BaseView):
 
     async def _build_widget(self):
         ws = []
-        num_unit_ow = OptionWidget("Units", "int",
+        if not self.application.is_subordinate:
+            ws.append(OptionWidget("Units", "int",
                                    "How many units to deploy.",
                                    self.application.num_units,
                                    current_value=self.num_units_copy,
-                                   value_changed_callback=self.handle_scale)
-        ws.append(num_unit_ow)
+                                   value_changed_callback=self.handle_scale))
 
         constraints_ow = OptionWidget(
             "Constraints", "string",
