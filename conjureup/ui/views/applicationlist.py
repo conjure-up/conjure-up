@@ -1,6 +1,7 @@
 """ Application List view
 
 """
+from theblues.errors import EntityNotFound
 from urwid import Columns, Text
 
 from conjureup.app_config import app
@@ -108,8 +109,14 @@ class ApplicationListView(BaseView):
         return readme_cache[application]
 
     async def _load_readme(self, charm):
-        readme = await app.juju.charmstore.entity_readme_content(charm)
-        readme_cache[charm] = self._trim_readme(readme)
+        try:
+            readme = await app.juju.charmstore.entity_readme_content(charm)
+            readme_cache[charm] = self._trim_readme(readme)
+        except EntityNotFound:
+            readme_cache[charm] = 'No README available'
+        except Exception:
+            app.log.exception('Error loading README')
+            readme_cache[charm] = 'Error loading README'
         self.after_keypress()  # update loading message if currently displayed
 
     def _trim_readme(self, readme):
