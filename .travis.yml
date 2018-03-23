@@ -26,7 +26,7 @@ before_script:
 script:
   - tox -e py36,flake,isort
   - tox -e conjure-dev
-  - sudo -E su $USER -c "source conjure-dev/bin/activate && conjure-up --notrack --noreport ghost localhost test-controller test-model"
+  - sudo -E su $USER -c "source conjure-dev/bin/activate && conjure-up --notrack --noreport battlemidget/ghost localhost test-controller test-model"
 after_failure:
   - cat ~/.cache/conjure-up/ghost/steps/*/*.err
   - cat ~/.cache/conjure-up/conjure-up.log
