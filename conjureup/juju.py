@@ -398,7 +398,7 @@ def get_clouds():
         raise Exception(
             "Unable to list clouds: {}".format(sh.stderr.decode('utf8'))
         )
-    return yaml.safe_load(sh.stdout.decode('utf8'))
+    return yaml.safe_load(sh.stdout.decode('utf8')) or {}
 
 
 def get_compatible_clouds(cloud_types=None):
