@@ -59,8 +59,11 @@ class AppConfig:
     # The conjure-up UI framework
     ui = None
 
-    # Contains metadata and spell name
+    # Contains spell name
     config = None
+
+    # Spell metadata
+    metadata = None
 
     # List of multiple bundles, usually from a charmstore search
     bundles = None
