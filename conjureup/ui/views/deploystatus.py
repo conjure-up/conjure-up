@@ -33,7 +33,7 @@ class DeployStatusView(BaseView):
 
     def __init__(self):
         try:
-            name = app.config['metadata']['friendly-name']
+            name = app.metadata.friendly_name
         except KeyError:
             name = app.config['spell']
 

@@ -16,7 +16,7 @@ from conjureup.utils import SudoError, arun, can_sudo, is_linux, sentry_report
 class StepModel:
     @classmethod
     def load_spell_steps(cls):
-        spell_name = app.config['metadata']['friendly-name']
+        spell_name = app.metadata.friendly_name
         steps_dir = Path(app.config['spell-dir']) / 'steps'
         app.steps = []
         for step_dir in sorted(steps_dir.glob('*')):

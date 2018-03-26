@@ -27,6 +27,7 @@ from termcolor import cprint
 from conjureup import charm
 from conjureup.app_config import app
 from conjureup.bundle import Bundle
+from conjureup.models.metadata import SpellMetadata
 from conjureup.telemetry import track_event
 
 
@@ -499,7 +500,7 @@ def setup_metadata_controller():
         # Load bundle data early so we can merge any additional charm options
         bundle_data = Bundle(yaml.load(bundle_filename.read_text()))
     else:
-        bundle_name = app.config['metadata'].get('bundle-name', None)
+        bundle_name = app.metadata.bundle_name
         if bundle_name is None:
             raise Exception(
                 "Could not determine a bundle to download, please make sure "
@@ -550,33 +551,24 @@ def set_chosen_spell(spell_name, spell_dir):
 
 
 def set_spell_metadata():
-    metadata_path = os.path.join(app.config['spell-dir'],
-                                 'metadata.yaml')
-
-    with open(metadata_path) as fp:
-        metadata = yaml.safe_load(fp.read())
-
-    app.config['metadata'] = metadata
+    app.metadata = SpellMetadata.load(
+        Path(app.config['spell-dir']) / 'metadata.yaml')
 
 
 def get_spell_metadata(spell):
     """ Returns metadata about spell
     """
-    metadata_path = os.path.join(app.config['spells-dir'],
-                                 spell,
-                                 'metadata.yaml')
-    with open(metadata_path) as fp:
-        metadata = yaml.safe_load(fp.read())
+    metadata_path = Path(app.config['spells-dir']) / spell / 'metadata.yaml'
 
-    return metadata
+    return SpellMetadata.load(metadata_path)
 
 
 def __available_on_darwin(key):
     """ Returns True if spell is available on macOS
     """
     metadata = get_spell_metadata(key)
-    if is_darwin() and 'cloud-whitelist' in metadata \
-       and 'localhost' in metadata['cloud-whitelist']:
+    if is_darwin() and metadata.cloud_whitelist \
+       and 'localhost' in metadata.cloud_whitelist:
         return False
     return True
 
@@ -621,11 +613,11 @@ def get_options_whitelist(service_name):
     """returns list of whitelisted option names.
     If there is no whitelist, returns []
     """
-    metadata = app.config.get('metadata', None)
+    metadata = app.metadata
     if metadata is None:
         return []
 
-    options_whitelist = metadata.get('options-whitelist', None)
+    options_whitelist = metadata.options_whitelist
     if options_whitelist is None:
         return []
 

@@ -429,8 +429,8 @@ def get_compatible_clouds(cloud_types=None):
         # though, just assume it's JAAS and hard-code the options
         cloud_types &= consts.JAAS_CLOUDS
 
-    whitelist = set(app.config['metadata'].get('cloud-whitelist', []))
-    blacklist = set(app.config['metadata'].get('cloud-blacklist', []))
+    whitelist = set(app.metadata.cloud_whitelist)
+    blacklist = set(app.metadata.cloud_blacklist)
 
     addons_dir = Path(app.config['spell-dir']) / 'addons'
     for addon in app.selected_addons:
