@@ -62,6 +62,9 @@ class AppConfig:
     # Contains spell name
     config = None
 
+    # Conjurefile
+    conjurefile = None
+
     # Spell metadata
     metadata = None
 
