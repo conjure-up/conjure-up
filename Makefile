@@ -25,7 +25,7 @@ travis-sysdeps:
 	@sudo apt-get -y install jq bsdtar python3.6-dev make snapd libsodium-dev
 	@sudo pip install tox
 	@sudo snap install juju --classic
-	@sudo snap refresh lxd --edge
+	@sudo snap refresh lxd
 	@sudo snap install juju-wait --classic
 
 .PHONY: install
