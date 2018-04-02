@@ -37,6 +37,7 @@ from conjureup.download import (
 )
 from conjureup.log import setup_logging
 from conjureup.models.addon import AddonModel
+from conjureup.models.conjurefile import Conjurefile
 from conjureup.models.provider import SchemaErrorUnknownCloud, load_schema
 from conjureup.models.step import StepModel
 from conjureup.telemetry import SENTRY_DSN, track_event, track_screen
@@ -217,6 +218,7 @@ def main():
 
     utils.set_terminal_title("conjure-up")
     opts = parse_options(sys.argv[1:])
+
     spell = os.path.basename(os.path.abspath(opts.spell))
 
     if not os.path.isdir(opts.cache_dir):
@@ -230,6 +232,12 @@ def main():
     app.env['KV_DB'] = kv_db
     app.config = {'metadata': None}
     app.argv = opts
+
+    # Load conjurefile, merge any overridding options from argv
+    if (pathlib.Path('.') / 'Conjurefile').exists():
+        app.conjurefile = Conjurefile.load(pathlib.Path('.') / 'Conjurefile')
+        app.conjurefile.merge_argv(app.argv)
+
     app.log = setup_logging(app,
                             os.path.join(opts.cache_dir, 'conjure-up.log'),
                             opts.debug)

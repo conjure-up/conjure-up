@@ -1,0 +1,4 @@
+# -*- mode:yaml; -*-
+
+cache_dir: '/tmp/testxxxx'
+registry: 'https://github.com/battlemidget/spells.git'
