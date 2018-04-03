@@ -442,7 +442,7 @@ class Localhost(BaseProvider):
         """ Checks if LXC version is compatible with conjure-up
         """
         try:
-            _, out, err = await utils.arun([self.lxc_bin, 'version'])
+            _, out, err = await utils.arun([self.lxc_bin, '--version'])
             server_ver = out.strip()
             return parse_version(server_ver) >= self.minimum_support_version
         except CalledProcessError as e:
