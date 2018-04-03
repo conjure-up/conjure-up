@@ -3,7 +3,6 @@
 
 import argparse
 import asyncio
-import configparser
 import os
 import os.path as path
 import pathlib
@@ -71,9 +70,9 @@ def parse_options(argv):
                         help='Location of conjure-up managed spells directory',
                         default=os.path.expanduser(
                             "~/.cache/conjure-up-spells"))
-    parser.add_argument('--conf-file', dest='conf_file',
-                        help='Path to configuration file', type=pathlib.Path,
-                        default=pathlib.Path("~/.config/conjure-up.conf"))
+    parser.add_argument('-c', '--conf-file', dest='conf_file',
+                        help='Path to configuration file', action='append',
+                        type=pathlib.Path)
     parser.add_argument('--apt-proxy', dest='apt_http_proxy',
                         help='Specify APT proxy')
     parser.add_argument('--apt-https-proxy', dest='apt_https_proxy',
@@ -116,6 +115,9 @@ def parse_options(argv):
     parser.add_argument('--bundle-remove', type=pathlib.Path,
                         help="Path to a bundle fragment file which will be "
                              "subtracted from the spell's bundle")
+    parser.add_argument('--gen-config', action='store_true',
+                        dest='gen_config',
+                        help='Prints a skeleton Conjurefile to stdout')
 
     # Channels
     parser.add_argument('--channel', type=str,
@@ -219,6 +221,10 @@ def main():
     utils.set_terminal_title("conjure-up")
     opts = parse_options(sys.argv[1:])
 
+    if opts.gen_config:
+        Conjurefile.print_tpl()
+        sys.exit(0)
+
     spell = os.path.basename(os.path.abspath(opts.spell))
 
     if not os.path.isdir(opts.cache_dir):
@@ -234,27 +240,29 @@ def main():
     app.argv = opts
 
     # Load conjurefile, merge any overridding options from argv
+    if not app.argv.conf_file:
+        app.argv.conf_file = []
     if (pathlib.Path('.') / 'Conjurefile').exists():
-        app.conjurefile = Conjurefile.load(pathlib.Path('.') / 'Conjurefile')
-        app.conjurefile.merge_argv(app.argv)
+        app.argv.conf_file.insert(0, pathlib.Path('.') / 'Conjurefile')
+    for conf in app.argv.conf_file:
+        if not conf.exists():
+            print("Unable to locate config {} for processing.".format(
+                str(conf)))
+            sys.exit(1)
+
+    app.conjurefile = Conjurefile.load(app.argv.conf_file)
+    app.conjurefile.merge_argv(app.argv)
 
     app.log = setup_logging(app,
                             os.path.join(opts.cache_dir, 'conjure-up.log'),
-                            opts.debug)
+                            app.conjurefile.get('debug', False))
 
     # Make sure juju paths are setup
     juju.set_bin_path()
     juju.set_wait_path()
 
-    if app.argv.conf_file.expanduser().exists():
-        conf = configparser.ConfigParser()
-        conf.read_string(app.argv.conf_file.expanduser().read_text())
-        app.notrack = conf.getboolean('REPORTING', 'notrack', fallback=False)
-        app.noreport = conf.getboolean('REPORTING', 'noreport', fallback=False)
-    if app.argv.notrack:
-        app.notrack = True
-    if app.argv.noreport:
-        app.noreport = True
+    app.notrack = app.conjurefile.get('notrack', False)
+    app.noreport = app.conjurefile.get('noreport', False)
 
     # Grab current LXD and Juju versions
     app.log.debug("Juju version: {}, "
@@ -419,17 +427,17 @@ def main():
     # Enable charmstore querying
     app.juju.charmstore = CharmStore(app.loop)
     try:
-        if app.argv.cloud:
+        if app.conjurefile.is_valid:
             cloud = None
             region = None
-            if '/' in app.argv.cloud:
-                parse_cli_cloud = app.argv.cloud.split('/')
+            if '/' in app.conjurefile['cloud']:
+                parse_cli_cloud = app.conjurefile['cloud'].split('/')
                 cloud, region = parse_cli_cloud
                 app.log.debug(
                     "Region found {} for cloud {}".format(cloud,
                                                           region))
             else:
-                cloud = app.argv.cloud
+                cloud = app.conjurefile['cloud']
 
             cloud_types = juju.get_cloud_types_by_name()
             if cloud not in cloud_types:
