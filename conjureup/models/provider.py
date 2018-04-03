@@ -379,8 +379,7 @@ class Localhost(BaseProvider):
             segment_prefix = Path('/1.0')
             url = str(segment_prefix / segment)
         try:
-            cmd = [self.lxc_bin, 'query', '--wait', '-X', method.upper(),
-                   url]
+            cmd = [self.lxc_bin, 'query', '--wait', url]
             app.log.debug("LXD query cmd: {}".format(" ".join(cmd)))
             _, out, err = await utils.arun(cmd)
             return json.loads(out)
