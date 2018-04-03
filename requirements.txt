@@ -19,3 +19,4 @@ psutil==5.2.2
 awscli==1.11.123
 pyvmomi==6.5.0.2017.5-1
 kv==0.3.0
+melddict==1.0.1
