@@ -17,12 +17,9 @@ class CloudView(BaseView):
     default_disabled_msg = 'This cloud is disabled due to your selection of ' \
                            'spell or add-on. Please use the arrow keys to ' \
                            'select another cloud.'
-    lxd_unavailable_msg = ("LXD not found, please install and wait "
-                           "for this message to disappear:\n\n"
-                           "  $ sudo snap install lxd\n"
-                           "  $ sudo usermod -a -G lxd <youruser>\n"
-                           "  $ newgrp lxd\n"
-                           "  $ /snap/bin/lxd init")
+    lxd_unavailable_msg = ("conjure-up requires a newer version of LXD. "
+                           "To upgrade, see "
+                           "https://docs.conjure-up.io/devel/en/#users-of-lxd")
 
     def __init__(self, app, public_clouds, custom_clouds,
                  compatible_cloud_types, cb=None, back=None):
