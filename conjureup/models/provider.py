@@ -334,6 +334,10 @@ class LocalhostError(Exception):
     pass
 
 
+class LocalhostIncompatibleError(Exception):
+    pass
+
+
 class LocalhostJSONError(Exception):
     pass
 
@@ -344,7 +348,7 @@ class Localhost(BaseProvider):
         self.auth_type = 'interactive'
         self.cloud_type = cloud_types.LOCALHOST
         self.network_interface = None
-        self.minimum_support_version = parse_version('2.17')
+        self.minimum_support_version = parse_version('3.0.0')
         self.available = False
         self.lxc_bin = None
         self._set_lxd_dir_env()
