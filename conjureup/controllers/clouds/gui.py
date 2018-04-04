@@ -105,11 +105,9 @@ class CloudsController(BaseCloudController):
                     return
                 else:
                     raise LocalhostIncompatibleError(
-                        "Currently installed LXD version is not compatible "
-                        "with conjure-up. Please upgrade your version of LXD, "
-                        "refer to "
-                        "https://docs.conjure-up.io/devel/en/#users-of-lxd "
-                        "for more information.")
+                        "conjure-up requires a newer version of LXD. "
+                        "To upgrade, see "
+                        "https://docs.conjure-up.io/devel/en/#users-of-lxd")
             except (LocalhostError, LocalhostJSONError, FileNotFoundError):
                 pass
             await run_with_interrupt(asyncio.sleep(2),
