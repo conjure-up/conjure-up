@@ -8,6 +8,7 @@ from conjureup.consts import CUSTOM_PROVIDERS
 from conjureup.models.provider import Localhost as LocalhostProvider
 from conjureup.models.provider import (
     LocalhostError,
+    LocalhostIncompatibleError,
     LocalhostJSONError,
     SchemaErrorUnknownCloud,
     load_schema
@@ -102,6 +103,13 @@ class CloudsController(BaseCloudController):
                     self.cancel_monitor.set()
                     cb()
                     return
+                else:
+                    raise LocalhostIncompatibleError(
+                        "Currently installed LXD version is not compatible "
+                        "with conjure-up. Please upgrade your version of LXD, "
+                        "refer to "
+                        "https://docs.conjure-up.io/devel/en/#users-of-lxd "
+                        "for more information.")
             except (LocalhostError, LocalhostJSONError, FileNotFoundError):
                 pass
             await run_with_interrupt(asyncio.sleep(2),
