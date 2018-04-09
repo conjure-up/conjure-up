@@ -1,5 +1,59 @@
 # Change Log
 
+## [2.5.6](https://github.com/conjure-up/conjure-up/tree/2.5.6) (2018-04-04)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.5...2.5.6)
+
+**Implemented enhancements:**
+
+- use juju native bundle deploy [\#1329](https://github.com/conjure-up/conjure-up/issues/1329)
+
+**Fixed bugs:**
+
+- "Architect" kubernetes-worker unsupported operand type\(s\) for /: 'str' and 'int' [\#1365](https://github.com/conjure-up/conjure-up/issues/1365)
+- after-input doesnt run on steps with no viewable additional-input metadata [\#1364](https://github.com/conjure-up/conjure-up/issues/1364)
+- Conjure-up fails if unnecessary network endpoints are unavailable [\#1358](https://github.com/conjure-up/conjure-up/issues/1358)
+- TypeError on configapps [\#1345](https://github.com/conjure-up/conjure-up/issues/1345)
+- Conjure-up crashes upon using the "Architect" screen [\#1333](https://github.com/conjure-up/conjure-up/issues/1333)
+- conjure-up Kubernetes not detecting LXD [\#1331](https://github.com/conjure-up/conjure-up/issues/1331)
+- --add-bundle doesn't support local charms [\#1317](https://github.com/conjure-up/conjure-up/issues/1317)
+
+**Closed issues:**
+
+- No available deployment options Openstack\(even cannot deploy localhost\) [\#1382](https://github.com/conjure-up/conjure-up/issues/1382)
+- Horizon default username and password with snap —classic —edge [\#1378](https://github.com/conjure-up/conjure-up/issues/1378)
+- Automate the debug info gathering process? [\#1360](https://github.com/conjure-up/conjure-up/issues/1360)
+- juju 2.4 credentials changed format [\#1355](https://github.com/conjure-up/conjure-up/issues/1355)
+- conjure-up doesn't work on a freshly installed ubuntu server system unless apt update && apt upgrade actions are performed [\#1332](https://github.com/conjure-up/conjure-up/issues/1332)
+
+**Merged pull requests:**
+
+- Dont fail hard on incompatible LXD since it's an optional component [\#1391](https://github.com/conjure-up/conjure-up/pull/1391) ([battlemidget](https://github.com/battlemidget))
+- Fail with a error message on incompatible lxd versions [\#1390](https://github.com/conjure-up/conjure-up/pull/1390) ([battlemidget](https://github.com/battlemidget))
+- Fix lxc query defaults [\#1389](https://github.com/conjure-up/conjure-up/pull/1389) ([battlemidget](https://github.com/battlemidget))
+- Allow reading from a Conjurefile [\#1388](https://github.com/conjure-up/conjure-up/pull/1388) ([battlemidget](https://github.com/battlemidget))
+- Create metadata model [\#1383](https://github.com/conjure-up/conjure-up/pull/1383) ([battlemidget](https://github.com/battlemidget))
+- Use namespace ghost spell for testing [\#1381](https://github.com/conjure-up/conjure-up/pull/1381) ([battlemidget](https://github.com/battlemidget))
+- Handle Juju returning null from list-clouds [\#1380](https://github.com/conjure-up/conjure-up/pull/1380) ([johnsca](https://github.com/johnsca))
+- Handle errors loading README [\#1376](https://github.com/conjure-up/conjure-up/pull/1376) ([johnsca](https://github.com/johnsca))
+- Fix configapps.gui test broken by merge conflict [\#1375](https://github.com/conjure-up/conjure-up/pull/1375) ([johnsca](https://github.com/johnsca))
+- Feature/juju deploy native [\#1373](https://github.com/conjure-up/conjure-up/pull/1373) ([battlemidget](https://github.com/battlemidget))
+- add docstrings, simple validator for constraints [\#1372](https://github.com/conjure-up/conjure-up/pull/1372) ([battlemidget](https://github.com/battlemidget))
+- Support constraints input in configure [\#1371](https://github.com/conjure-up/conjure-up/pull/1371) ([battlemidget](https://github.com/battlemidget))
+- Fix accessing advanced options [\#1370](https://github.com/conjure-up/conjure-up/pull/1370) ([battlemidget](https://github.com/battlemidget))
+- Add before-config step phase [\#1368](https://github.com/conjure-up/conjure-up/pull/1368) ([johnsca](https://github.com/johnsca))
+- Remove architect code \o/ [\#1367](https://github.com/conjure-up/conjure-up/pull/1367) ([battlemidget](https://github.com/battlemidget))
+- Apply same fix to diskval that was applied to memval [\#1366](https://github.com/conjure-up/conjure-up/pull/1366) ([johnsca](https://github.com/johnsca))
+- Explicitly ignore errors posting telemetry [\#1362](https://github.com/conjure-up/conjure-up/pull/1362) ([johnsca](https://github.com/johnsca))
+- Clean up application list view [\#1361](https://github.com/conjure-up/conjure-up/pull/1361) ([battlemidget](https://github.com/battlemidget))
+- Switch to libjuju's FileJujuData for loading credentials [\#1357](https://github.com/conjure-up/conjure-up/pull/1357) ([johnsca](https://github.com/johnsca))
+- Fix placement sometimes not being populated [\#1353](https://github.com/conjure-up/conjure-up/pull/1353) ([johnsca](https://github.com/johnsca))
+- Put charmstore in app\_config, update application configure view [\#1349](https://github.com/conjure-up/conjure-up/pull/1349) ([battlemidget](https://github.com/battlemidget))
+- Add bundle-fragment container [\#1348](https://github.com/conjure-up/conjure-up/pull/1348) ([battlemidget](https://github.com/battlemidget))
+- Fix JAAS controller selection when token auth succeeds [\#1344](https://github.com/conjure-up/conjure-up/pull/1344) ([johnsca](https://github.com/johnsca))
+
+## [2.5.5](https://github.com/conjure-up/conjure-up/tree/2.5.5) (2018-02-26)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.4...2.5.5)
+
 ## [2.5.4](https://github.com/conjure-up/conjure-up/tree/2.5.4) (2018-02-25)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.3...2.5.4)
 
@@ -14,17 +68,15 @@
 
 **Merged pull requests:**
 
+- Deploy from a bundle file [\#1347](https://github.com/conjure-up/conjure-up/pull/1347) ([battlemidget](https://github.com/battlemidget))
 - Check type of default value for step fields [\#1342](https://github.com/conjure-up/conjure-up/pull/1342) ([johnsca](https://github.com/johnsca))
 - Pass session ID to steps [\#1340](https://github.com/conjure-up/conjure-up/pull/1340) ([johnsca](https://github.com/johnsca))
+- Deploy from a bundle file [\#1337](https://github.com/conjure-up/conjure-up/pull/1337) ([battlemidget](https://github.com/battlemidget))
 - Remove some dependencies on Juju CLI now that libjuju supports macaroon auth [\#1334](https://github.com/conjure-up/conjure-up/pull/1334) ([johnsca](https://github.com/johnsca))
 - Retry juju-status + login after creating model [\#1330](https://github.com/conjure-up/conjure-up/pull/1330) ([johnsca](https://github.com/johnsca))
 
 ## [2.5.3](https://github.com/conjure-up/conjure-up/tree/2.5.3) (2018-02-08)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.2...2.5.3)
-
-**Implemented enhancements:**
-
-- Ensure consistent and common tab order handling across GUI views [\#744](https://github.com/conjure-up/conjure-up/issues/744)
 
 **Fixed bugs:**
 
@@ -256,7 +308,6 @@
 - Update screen selection/ordering [\#897](https://github.com/conjure-up/conjure-up/issues/897)
 - Provide better feedback if shutdown process takes some time [\#835](https://github.com/conjure-up/conjure-up/issues/835)
 - existing controllers filtered by type as well [\#771](https://github.com/conjure-up/conjure-up/issues/771)
-- allow user to select a model on a controller to deploy to [\#753](https://github.com/conjure-up/conjure-up/issues/753)
 
 **Fixed bugs:**
 
@@ -306,10 +357,6 @@
 - Unable to install OpenStack on single node with conjure-up [\#858](https://github.com/conjure-up/conjure-up/issues/858)
 - Snap fails to install, with ERROR: '~ubuntu-lxc' user or team does not exist [\#818](https://github.com/conjure-up/conjure-up/issues/818)
 - syncing spell repository: handle git related conflicts better [\#813](https://github.com/conjure-up/conjure-up/issues/813)
-- headless maas deployments fail with 'services' error [\#757](https://github.com/conjure-up/conjure-up/issues/757)
-- Juju Bootstrap to MAAS should not do --debug [\#742](https://github.com/conjure-up/conjure-up/issues/742)
-- Continues forever but doesn't do anything. [\#729](https://github.com/conjure-up/conjure-up/issues/729)
-- Openstack fails to correctly deploy when network device is not eth0 [\#728](https://github.com/conjure-up/conjure-up/issues/728)
 
 **Closed issues:**
 
@@ -369,7 +416,6 @@
 - conjure-up unable to obtain a node from MAAS [\#876](https://github.com/conjure-up/conjure-up/issues/876)
 - Juju failed to bootstrap: maas [\#817](https://github.com/conjure-up/conjure-up/issues/817)
 - Add details about spells/deployments on the website [\#791](https://github.com/conjure-up/conjure-up/issues/791)
-- Improve handling of "cannot get user details" error during JAAS registration [\#745](https://github.com/conjure-up/conjure-up/issues/745)
 
 **Merged pull requests:**
 
@@ -509,7 +555,6 @@
 - bootstrap exception capture cloud type [\#789](https://github.com/conjure-up/conjure-up/issues/789)
 - bundlewriter should place generated bundles inside their cached spell dir [\#787](https://github.com/conjure-up/conjure-up/issues/787)
 - push localhost requirements to the cloud picker [\#772](https://github.com/conjure-up/conjure-up/issues/772)
-- Add sudo support for spells [\#758](https://github.com/conjure-up/conjure-up/issues/758)
 
 **Fixed bugs:**
 
@@ -547,15 +592,6 @@
 - conjure-up errors on the kubernetes-core spell on OSX [\#776](https://github.com/conjure-up/conjure-up/issues/776)
 - maas deploy error in get\_models [\#774](https://github.com/conjure-up/conjure-up/issues/774)
 - conjure-up breaks bsdtar \(& possibly others\) due to lib install hook [\#770](https://github.com/conjure-up/conjure-up/issues/770)
-- can\_sudo always fails [\#764](https://github.com/conjure-up/conjure-up/issues/764)
-- macOS: steps don't require sudo [\#763](https://github.com/conjure-up/conjure-up/issues/763)
-- KeyError: KeyError\('CONJURE\_UP\_CACHEDIR',\) [\#747](https://github.com/conjure-up/conjure-up/issues/747)
-- output truncated in summary view if current view is filled [\#738](https://github.com/conjure-up/conjure-up/issues/738)
-- confusing error if step00-\* are not executable [\#736](https://github.com/conjure-up/conjure-up/issues/736)
-- password fields - inputs are shown in clear text [\#735](https://github.com/conjure-up/conjure-up/issues/735)
-- not able to use boolean values in steps [\#734](https://github.com/conjure-up/conjure-up/issues/734)
-- strings that don't have a default specified -  didn't show an input box [\#733](https://github.com/conjure-up/conjure-up/issues/733)
-- Conjure-up Openstack-novalxd fails to multiple errors [\#726](https://github.com/conjure-up/conjure-up/issues/726)
 
 **Closed issues:**
 
@@ -569,7 +605,6 @@
 - Conjure-up --bootstrap-to \<hostname\> no progress  'fetching juju agent version 2.1.2 for amd64' [\#824](https://github.com/conjure-up/conjure-up/issues/824)
 - Reason: Juju failed to bootstrap: maas [\#822](https://github.com/conjure-up/conjure-up/issues/822)
 - conjure-up doesn't set terminal title [\#775](https://github.com/conjure-up/conjure-up/issues/775)
-- Unable to install via: brew install conjure-up --HEAD [\#762](https://github.com/conjure-up/conjure-up/issues/762)
 
 **Merged pull requests:**
 
@@ -670,37 +705,9 @@
 - Fix trace from sudo check if no steps [\#769](https://github.com/conjure-up/conjure-up/pull/769) ([johnsca](https://github.com/johnsca))
 - Improve error handling for sudo in GUI flow [\#768](https://github.com/conjure-up/conjure-up/pull/768) ([johnsca](https://github.com/johnsca))
 - Improve can\_sudo check [\#767](https://github.com/conjure-up/conjure-up/pull/767) ([johnsca](https://github.com/johnsca))
-- Fixes \#763 [\#766](https://github.com/conjure-up/conjure-up/pull/766) ([battlemidget](https://github.com/battlemidget))
-- Fixes \#764 [\#765](https://github.com/conjure-up/conjure-up/pull/765) ([battlemidget](https://github.com/battlemidget))
 
 ## [2.2.0-beta1](https://github.com/conjure-up/conjure-up/tree/2.2.0-beta1) (2017-03-23)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.2...2.2.0-beta1)
-
-**Fixed bugs:**
-
-- "not redirected" error on deploy screen for localhost [\#746](https://github.com/conjure-up/conjure-up/issues/746)
-
-**Closed issues:**
-
-- MAAS registration in Landscape requires a URI, not an IP [\#756](https://github.com/conjure-up/conjure-up/issues/756)
-- "architecture" option to select maas node didn't work [\#755](https://github.com/conjure-up/conjure-up/issues/755)
-- Snap install fails [\#750](https://github.com/conjure-up/conjure-up/issues/750)
-- conjure-up kubernetes gives stacktrace  [\#727](https://github.com/conjure-up/conjure-up/issues/727)
-
-**Merged pull requests:**
-
-- Add sudo support for spells [\#761](https://github.com/conjure-up/conjure-up/pull/761) ([johnsca](https://github.com/johnsca))
-- Proposal: Allow re-use of an existing model in headless mode. [\#760](https://github.com/conjure-up/conjure-up/pull/760) ([petevg](https://github.com/petevg))
-- Fix handling of boolean step inputs [\#754](https://github.com/conjure-up/conjure-up/pull/754) ([johnsca](https://github.com/johnsca))
-- Drops global config, simplifies registry remote [\#752](https://github.com/conjure-up/conjure-up/pull/752) ([battlemidget](https://github.com/battlemidget))
-- Improve error handling around JaaS registration [\#751](https://github.com/conjure-up/conjure-up/pull/751) ([johnsca](https://github.com/johnsca))
-- Fixes \#747 [\#749](https://github.com/conjure-up/conjure-up/pull/749) ([battlemidget](https://github.com/battlemidget))
-- Merge with bug fix in bundleplacer upstream [\#748](https://github.com/conjure-up/conjure-up/pull/748) ([mikemccracken](https://github.com/mikemccracken))
-- Add support for JAAS [\#743](https://github.com/conjure-up/conjure-up/pull/743) ([johnsca](https://github.com/johnsca))
-- Fixes \#736 [\#741](https://github.com/conjure-up/conjure-up/pull/741) ([battlemidget](https://github.com/battlemidget))
-- Save bundle file with modifications [\#739](https://github.com/conjure-up/conjure-up/pull/739) ([mikemccracken](https://github.com/mikemccracken))
-- Fix issues with deploying some charms [\#732](https://github.com/conjure-up/conjure-up/pull/732) ([mikemccracken](https://github.com/mikemccracken))
-- s/deployment/model [\#731](https://github.com/conjure-up/conjure-up/pull/731) ([mikemccracken](https://github.com/mikemccracken))
 
 ## [2.1.2](https://github.com/conjure-up/conjure-up/tree/2.1.2) (2017-03-10)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.1...2.1.2)
