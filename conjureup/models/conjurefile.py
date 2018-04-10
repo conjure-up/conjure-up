@@ -1,5 +1,7 @@
-import yaml
 import textwrap
+
+import yaml
+
 from melddict import MeldDict
 
 
@@ -66,6 +68,7 @@ class Conjurefile(MeldDict):
     # notrack: false
     # noreport: false
     """
+
     def __init__(self):
         initial_data = yaml.safe_load(
             textwrap.dedent(Conjurefile.__doc__.strip()))
