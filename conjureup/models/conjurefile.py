@@ -1,7 +1,6 @@
 import textwrap
 
 import yaml
-
 from melddict import MeldDict
 
 
@@ -103,7 +102,7 @@ class Conjurefile(MeldDict):
         for k, v in argv_dict.items():
             if v and k in self:
                 self[k] = v
-            if k in posargs:
+            if k in posargs and argv_dict[k]:
                 self[k] = v
 
     @property
@@ -112,6 +111,6 @@ class Conjurefile(MeldDict):
         Returns whether this conjurefile has minimum set of requirements to run
         a headless install
         """
-        if self.get('spell', None) and self.get('cloud', None):
+        if 'cloud' in self and self['cloud']:
             return True
         return False
