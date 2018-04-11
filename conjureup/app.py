@@ -242,6 +242,9 @@ def main():
     # Load conjurefile, merge any overridding options from argv
     if not app.argv.conf_file:
         app.argv.conf_file = []
+    if pathlib.Path('~/.config/conjure-up.conf').expanduser().exists():
+        app.argv.conf_file.insert(
+            0, pathlib.Path('~/.config/conjure-up.conf').expanduser())
     if (pathlib.Path('.') / 'Conjurefile').exists():
         app.argv.conf_file.insert(0, pathlib.Path('.') / 'Conjurefile')
     for conf in app.argv.conf_file:
