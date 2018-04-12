@@ -61,7 +61,7 @@ class Conjurefile(MeldDict):
     # on_complete: ./my_custom_script.sh
 
     # Debugging
-    debug: true
+    debug: false
 
     # Reporting
     # notrack: false
