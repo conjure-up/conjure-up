@@ -19,7 +19,8 @@ class CloudsController(BaseCloudController):
 
     async def _check_lxd_compat(self):
         utils.info(
-            "Summoning {} to {}".format(app.argv.spell, app.provider.cloud))
+            "Summoning {} to {}".format(
+                app.conjurefile['spell'], app.provider.cloud))
         if app.provider.cloud_type == cloud_types.LOCALHOST:
             app.provider._set_lxd_dir_env()
             client_compatible = await app.provider.is_client_compatible()

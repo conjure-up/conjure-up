@@ -29,7 +29,7 @@ class SpellPickerController:
         if app.endpoint_type is None:
             spells += utils.find_spells()
         elif app.endpoint_type == EndpointType.LOCAL_SEARCH:
-            spells = utils.find_spells_matching(app.argv.spell)
+            spells = utils.find_spells_matching(app.conjurefile['spell'])
         else:
             raise Exception("Unexpected endpoint type {}".format(
                 app.endpoint_type))
