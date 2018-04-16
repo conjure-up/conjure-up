@@ -46,11 +46,10 @@ from conjureup.ui import ConjureUI
 def parse_options(argv):
     parser = argparse.ArgumentParser(prog="conjure-up")
     parser.add_argument('spell', nargs='?',
-                        default=consts.UNSPECIFIED_SPELL,
-                        help="""The name ('openstack-nclxd') or location
+                        help="""The name ('canonical-kubernetes') or location
                         ('githubusername/spellrepo') of a conjure-up
                         spell, or a keyword matching multiple spells
-                        ('openstack')""")
+                        ('kubernetes')""")
     parser.add_argument('-d', '--debug', action='store_true',
                         dest='debug', default=False,
                         help='Enable debug logging.')
@@ -243,8 +242,6 @@ def main():
         Conjurefile.print_tpl()
         sys.exit(0)
 
-    spell = os.path.basename(os.path.abspath(opts.spell))
-
     if not os.path.isdir(opts.cache_dir):
         os.makedirs(opts.cache_dir)
 
@@ -317,14 +314,17 @@ def main():
         with open(addons_aliases_index_path) as fp:
             app.addons_aliases = yaml.safe_load(fp.read())
 
+    spell = os.path.basename(os.path.abspath(app.conjurefile['spell']))
     spell_name = spell
-    app.endpoint_type = detect_endpoint(opts.spell)
 
-    if opts.spell != consts.UNSPECIFIED_SPELL:
+    app.endpoint_type = detect_endpoint(
+        app.conjurefile.get('spell', app.conjurefile['spell']))
+
+    if app.conjurefile['spell'] != consts.UNSPECIFIED_SPELL:
         app.spell_given = True
 
     # Check if spell is actually an addon
-    addon = utils.find_addons_matching(opts.spell)
+    addon = utils.find_addons_matching(app.conjurefile['spell'])
     if addon:
         app.log.debug("addon found, setting required spell")
         utils.set_chosen_spell(addon['spell'],
@@ -342,10 +342,11 @@ def main():
         app.endpoint_type = EndpointType.LOCAL_DIR
 
     elif app.endpoint_type == EndpointType.LOCAL_SEARCH:
-        spells = utils.find_spells_matching(opts.spell)
+        spells = utils.find_spells_matching(app.conjurefile['spell'])
 
         if len(spells) == 0:
-            utils.error("Can't find a spell matching '{}'".format(opts.spell))
+            utils.error("Can't find a spell matching '{}'".format(
+                app.conjurefile['spell']))
             sys.exit(1)
 
         # One result means it was a direct match and we can copy it
@@ -369,21 +370,22 @@ def main():
 
     # download spell if necessary
     elif app.endpoint_type == EndpointType.LOCAL_DIR:
-        if not os.path.isdir(opts.spell):
-            utils.warning("Could not find spell {}".format(opts.spell))
+        if not os.path.isdir(app.conjurefile['spell']):
+            utils.warning("Could not find spell {}".format(
+                app.conjurefile['spell']))
             sys.exit(1)
 
-        if not os.path.exists(os.path.join(opts.spell,
+        if not os.path.exists(os.path.join(app.conjurefile['spell'],
                                            "metadata.yaml")):
-            utils.warning("'{}' does not appear to be a spell. "
-                          "{}/metadata.yaml was not found.".format(
-                              opts.spell, opts.spell))
+            utils.warning("'{spell}' does not appear to be a spell. "
+                          "{spell}/metadata.yaml was not found.".format(
+                              spell=app.conjurefile['spell']))
             sys.exit(1)
 
         spell_name = os.path.basename(os.path.abspath(spell))
         utils.set_chosen_spell(spell_name,
                                path.join(opts.cache_dir, spell_name))
-        download_local(opts.spell, app.config['spell-dir'])
+        download_local(app.conjurefile['spell'], app.config['spell-dir'])
         utils.set_spell_metadata()
         StepModel.load_spell_steps()
         AddonModel.load_spell_addons()
@@ -391,10 +393,12 @@ def main():
     elif app.endpoint_type in [EndpointType.VCS, EndpointType.HTTP]:
 
         utils.set_chosen_spell(spell, path.join(opts.cache_dir, spell))
-        remote = get_remote_url(opts.spell)
+        remote = get_remote_url(app.conjurefile['spell'])
 
         if remote is None:
-            utils.warning("Can't guess URL matching '{}'".format(opts.spell))
+            utils.warning(
+                "Can't guess URL matching '{}'".format(
+                    app.conjurefile['spell']))
             sys.exit(1)
 
         download(remote, app.config['spell-dir'], True)
