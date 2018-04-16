@@ -10,8 +10,8 @@ class CloudsController(BaseCloudController):
         return juju.get_controller(controller) is not None
 
     def finish(self):
-        if app.argv.model:
-            app.provider.model = app.argv.model
+        if app.conjurefile['model']:
+            app.provider.model = app.conjurefile['model']
         else:
             app.provider.model = utils.gen_model()
 
@@ -19,7 +19,8 @@ class CloudsController(BaseCloudController):
 
     async def _check_lxd_compat(self):
         utils.info(
-            "Summoning {} to {}".format(app.argv.spell, app.provider.cloud))
+            "Summoning {} to {}".format(app.conjurefile['spell'],
+                                        app.provider.cloud))
         if app.provider.cloud_type == cloud_types.LOCALHOST:
             app.provider._set_lxd_dir_env()
             client_compatible = await app.provider.is_client_compatible()

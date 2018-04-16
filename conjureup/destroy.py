@@ -6,6 +6,7 @@ Seperate cli application for cleaning up existing controllers
 import argparse
 import asyncio
 import os
+import pathlib
 import signal
 import sys
 
@@ -16,6 +17,7 @@ from conjureup import __version__ as VERSION
 from conjureup import controllers, events, juju, utils
 from conjureup.app_config import app
 from conjureup.log import setup_logging
+from conjureup.models.conjurefile import Conjurefile
 from conjureup.ui import ConjureUI
 
 
@@ -29,10 +31,14 @@ def parse_options(argv):
                         default=os.path.expanduser("~/.cache/conjure-up"))
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
-    parser.add_argument('--notrack', action='store_true',
-                        dest='notrack',
+    parser.add_argument('--no-track', '--notrack', action='store_true',
+                        dest='no_track',
                         help='Opt out of sending anonymous usage '
                         'information to Canonical.')
+    parser.add_argument('--no-report', '--noreport', action='store_true',
+                        dest='no_report',
+                        help='Opt out of sending anonymous error reports '
+                        'to Canonical.')
     parser.add_argument('controller', nargs='?',
                         help="Name of a juju controller to target.")
     parser.add_argument('model', nargs='?',
@@ -52,6 +58,7 @@ async def _start():
 
 def main():
     opts = parse_options(sys.argv[1:])
+    opt_defaults = parse_options([])
 
     if os.geteuid() == 0:
         utils.info("")
@@ -64,10 +71,30 @@ def main():
 
     # Application Config
     app.config = {'metadata': None}
-    app.argv = opts
+
+    # Load conjurefile, merge any overridding options from argv
+    if not opts.conf_file:
+        opts.conf_file = []
+    if pathlib.Path('~/.config/conjure-up.conf').expanduser().exists():
+        opts.conf_file.insert(
+            0, pathlib.Path('~/.config/conjure-up.conf').expanduser())
+    if (pathlib.Path('.') / 'Conjurefile').exists():
+        opts.conf_file.insert(0, pathlib.Path('.') / 'Conjurefile')
+    for conf in opts.conf_file:
+        if not conf.exists():
+            print("Unable to locate config {} for processing.".format(
+                str(conf)))
+            sys.exit(1)
+
+    app.conjurefile = Conjurefile.load(opts.conf_file)
+    app.conjurefile.merge_argv(opts, opt_defaults)
+
     app.log = setup_logging(app,
                             os.path.join(opts.cache_dir, 'conjure-down.log'),
                             opts.debug)
+
+    app.no_track = app.conjurefile['no-track']
+    app.no_report = app.conjurefile['no-report']
 
     # Make sure juju paths are setup
     juju.set_bin_path()
@@ -79,7 +106,7 @@ def main():
     app.loop.create_task(_start())
 
     try:
-        if app.argv.controller and app.argv.model:
+        if app.conjurefile['controller'] and app.conjurefile['model']:
             app.headless = True
             app.ui = None
             app.env['CONJURE_UP_HEADLESS'] = "1"

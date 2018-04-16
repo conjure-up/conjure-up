@@ -74,9 +74,6 @@ class AppConfig:
     # Selected bundle from a Variant view
     current_bundle = None
 
-    # cli opts
-    argv = None
-
     # Is JAAS supported by the current spell
     jaas_ok = True
 
@@ -99,10 +96,10 @@ class AppConfig:
     metadata_controller = None
 
     # disable telemetry tracking
-    notrack = False
+    no_track = False
 
     # disable automatic error reporting
-    noreport = False
+    no_report = False
 
     # Application environment passed to processing steps
     env = None

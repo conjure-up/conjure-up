@@ -225,26 +225,26 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
                 add_config(k, v)
 
     add_config("image-stream", "daily")
-    if app.argv.http_proxy:
-        add_config("http-proxy", app.argv.http_proxy)
-    if app.argv.https_proxy:
-        add_config("https-proxy", app.argv.https_proxy)
-    if app.argv.apt_http_proxy:
-        add_config("apt-http-proxy", app.argv.apt_http_proxy)
-    if app.argv.apt_https_proxy:
-        add_config("apt-https-proxy", app.argv.apt_https_proxy)
-    if app.argv.no_proxy:
-        add_config("no-proxy", app.argv.no_proxy)
-    if app.argv.bootstrap_timeout:
-        add_config("bootstrap-timeout", app.argv.bootstrap_timeout)
-    if app.argv.bootstrap_to:
-        cmd.extend(["--to", app.argv.bootstrap_to])
+    if app.conjurefile['http-proxy']:
+        add_config("http-proxy", app.conjurefile['http-proxy'])
+    if app.conjurefile['https-proxy']:
+        add_config("https-proxy", app.conjurefile['https-proxy'])
+    if app.conjurefile['apt-http-proxy']:
+        add_config("apt-http-proxy", app.conjurefile['apt-http-proxy'])
+    if app.conjurefile['apt-https-proxy']:
+        add_config("apt-https-proxy", app.conjurefile['apt-https-proxy'])
+    if app.conjurefile['no-proxy']:
+        add_config("no-proxy", app.conjurefile['no-proxy'])
+    if app.conjurefile['bootstrap-timeout']:
+        add_config("bootstrap-timeout", app.conjurefile['bootstrap-timeout'])
+    if app.conjurefile['bootstrap-to']:
+        cmd.extend(["--to", app.conjurefile['bootstrap-to']])
 
     cmd.extend(["--bootstrap-series", series])
     if credential is not None:
         cmd.extend(["--credential", credential])
 
-    if app.argv.debug:
+    if app.conjurefile['debug']:
         cmd.append("--debug")
     app.log.debug("bootstrap cmd: {}".format(cmd))
 
