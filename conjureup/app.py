@@ -236,7 +236,11 @@ def main():
                 str(conf)))
             sys.exit(1)
 
-    app.conjurefile = Conjurefile.load(opts.conf_file)
+    try:
+        app.conjurefile = Conjurefile.load(opts.conf_file)
+    except ValueError as e:
+        print(str(e))
+        sys.exit(1)
     app.conjurefile.merge_argv(opts, opt_defaults)
 
     if app.conjurefile['gen-config']:
