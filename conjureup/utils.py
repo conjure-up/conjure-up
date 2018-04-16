@@ -208,7 +208,7 @@ def sentry_report(message=None, exc_info=None, tags=None, **kwargs):
 
 
 def _sentry_report(message=None, exc_info=None, tags=None, **kwargs):
-    if app.noreport:
+    if app.no_report:
         return
 
     try:
@@ -287,14 +287,14 @@ def snap_version():
 
 
 def send_msg(msg, label, color, attrs=['bold']):
-    if app.argv.color == 'auto':
+    if app.conjurefile['color'] == 'auto':
         colorized = sys.__stdout__.isatty()
-    elif app.argv.color == 'always':
+    elif app.conjurefile['color'] == 'always':
         colorized = True
     else:
         colorized = False
 
-    if app.argv.debug:
+    if app.conjurefile['debug']:
         print("[{}] {}".format(label, msg))
     elif colorized:
         cprint("[{}] ".format(label),
@@ -506,7 +506,7 @@ def setup_metadata_controller():
                 "Could not determine a bundle to download, please make sure "
                 "the spell contains a 'bundle-name' field."
             )
-        bundle_channel = app.argv.channel
+        bundle_channel = app.conjurefile['channel']
 
         app.log.debug("Pulling bundle for {} from channel: {}".format(
             bundle_name, bundle_channel))
@@ -533,11 +533,11 @@ def setup_metadata_controller():
             fragment = yaml.safe_load(step.bundle_add.read_text())
             bundle_data.apply(fragment)
 
-    if app.argv.bundle_remove:
-        fragment = yaml.safe_load(app.argv.bundle_remove.read_text())
+    if app.conjurefile['bundle-remove']:
+        fragment = yaml.safe_load(app.conjurefile['bundle-remove'].read_text())
         bundle_data.subtract(fragment)
-    if app.argv.bundle_add:
-        fragment = yaml.safe_load(app.argv.bundle_add.read_text())
+    if app.conjurefile['bundle-add']:
+        fragment = yaml.safe_load(app.conjurefile['bundle-add'].read_text())
         bundle_data.apply(fragment)
 
     app.current_bundle = bundle_data

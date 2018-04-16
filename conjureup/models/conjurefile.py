@@ -1,4 +1,5 @@
 import textwrap
+from pathlib import Path
 
 import yaml
 from melddict import MeldDict
@@ -58,14 +59,14 @@ class Conjurefile(MeldDict):
     # could be anything you choose, whether it's deploying a Helm chart, to
     # scaling out your cluster.
     #
-    # on_complete: ./my_custom_script.sh
+    # on-complete: ./my_custom_script.sh
 
     # Debugging
     debug: false
 
     # Reporting
-    # notrack: false
-    # noreport: false
+    # no-track: false
+    # no-report: false
     """
 
     def __init__(self):
@@ -92,18 +93,24 @@ class Conjurefile(MeldDict):
             cf += yaml.safe_load(p.read_text())
         return cf
 
-    def merge_argv(self, argv):
+    def merge_argv(self, argv, defaults):
         """
         Overrides options in the conjurefile with
         those passed in via sys.argv
         """
-        posargs = ['spell', 'cloud', 'controller', 'model']
         argv_dict = vars(argv)
+        defaults_dict = vars(defaults)
         for k, v in argv_dict.items():
-            if v and k in self:
-                self[k] = v
-            if k in posargs and argv_dict[k]:
-                self[k] = v
+            fk = k.replace('_', '-')
+            if v == defaults_dict[k]:
+                # opt was not overridden on the CLI, so file takes precedence
+                # but we still want to set it to ensure we use the default
+                self[fk] = self.get(fk, v)
+                if isinstance(defaults_dict[k], Path):
+                    self[fk] = Path(self[fk])
+            else:
+                # opt was overridden, so CLI takes precedence
+                self[fk] = v
 
     @property
     def is_valid(self):

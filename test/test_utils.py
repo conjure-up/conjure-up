@@ -62,11 +62,11 @@ class UtilsTestCase(unittest.TestCase):
         app.headless = False
         juju_version.return_value = '2.j'
 
-        app.noreport = True
+        app.no_report = True
         utils._sentry_report('message', tags={'foo': 'bar'})
         assert not app.sentry.capture.called
 
-        app.noreport = False
+        app.no_report = False
         utils._sentry_report('message', tags={'foo': 'bar'})
         app.sentry.capture.assert_called_once_with(
             'raven.events.Message',

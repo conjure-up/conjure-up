@@ -23,15 +23,29 @@ class ConjurefileTestCase(unittest.TestCase):
         "conjurefile.test_argv_override"
         args = argparse.Namespace()
         args.registry = 'https://github.com/conjure-up/spells.git'
+        args.cache_dir = '/tmp/testyyyy'  # hyphen, in file
+        args.no_sync = True  # hyphen, not in file
+        args.color = 'auto'  # default, in file
+        args.spell = '_unspecified_spell'  # default, not in file
+        defaults = argparse.Namespace()
+        defaults.registry = None
+        defaults.cache_dir = None
+        defaults.no_sync = False
+        defaults.color = 'auto'
+        defaults.spell = '_unspecified_spell'
         assert self.conjurefile['registry'] == (
             'https://github.com/battlemidget/spells.git')
-        self.conjurefile.merge_argv(args)
+        self.conjurefile.merge_argv(args, defaults)
         assert self.conjurefile['registry'] == (
             'https://github.com/conjure-up/spells.git')
+        assert self.conjurefile['cache-dir'] == '/tmp/testyyyy'
+        assert self.conjurefile['no-sync'] is True
+        assert self.conjurefile['color'] == 'always'
+        assert self.conjurefile['spell'] == '_unspecified_spell'
 
-    def test_conjurefile_debug_enabled(self):
-        "conjurefile.test_debug_enabled"
-        assert self.conjurefile['debug']
+    def test_conjurefile_debug_disabled(self):
+        "conjurefile.test_debug_disabled"
+        assert not self.conjurefile['debug']
 
     def test_conjurefile_melddict_level_1(self):
         "conjurefile.test_melddict_level_1"
@@ -51,6 +65,9 @@ class ConjurefileTestCase(unittest.TestCase):
         args = argparse.Namespace()
         args.spell = 'canonical-kubernetes'
         args.cloud = 'aws/us-east-1'
-        self.conjurefile.merge_argv(args)
+        defaults = argparse.Namespace()
+        defaults.spell = None
+        defaults.cloud = None
+        self.conjurefile.merge_argv(args, defaults)
         assert self.conjurefile['spell'] == 'canonical-kubernetes'
         assert self.conjurefile['cloud'] == 'aws/us-east-1'

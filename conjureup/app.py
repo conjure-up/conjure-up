@@ -92,16 +92,16 @@ def parse_options(argv):
                         'controller.', metavar='<host>.maas')
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
-    parser.add_argument('--notrack', action='store_true',
-                        dest='notrack',
+    parser.add_argument('--no-track', '--notrack', action='store_true',
+                        dest='no_track',
                         help='Opt out of sending anonymous usage '
                         'information to Canonical.')
-    parser.add_argument('--noreport', action='store_true',
-                        dest='noreport',
+    parser.add_argument('--no-report', '--noreport', action='store_true',
+                        dest='no_report',
                         help='Opt out of sending anonymous error reports '
                         'to Canonical.')
-    parser.add_argument('--nosync', action='store_true',
-                        dest='nosync',
+    parser.add_argument('--no-sync', '--nosync', action='store_true',
+                        dest='no_sync',
                         help='Opt out of syncing with spells '
                         'registry.')
     parser.add_argument('--color', type=str, default='auto',
@@ -162,12 +162,12 @@ def apply_proxy():
     """ Sets up proxy information.
     """
     # Apply proxy information
-    if app.argv.http_proxy:
-        os.environ['HTTP_PROXY'] = app.argv.http_proxy
-        os.environ['http_proxy'] = app.argv.http_proxy
-    if app.argv.https_proxy:
-        os.environ['HTTPS_PROXY'] = app.argv.https_proxy
-        os.environ['https_proxy'] = app.argv.https_proxy
+    if app.conjurefile['http-proxy']:
+        os.environ['HTTP_PROXY'] = app.conjurefile['http-proxy']
+        os.environ['http_proxy'] = app.conjurefile['http-proxy']
+    if app.conjurefile['https-proxy']:
+        os.environ['HTTPS_PROXY'] = app.conjurefile['https-proxy']
+        os.environ['https_proxy'] = app.conjurefile['https-proxy']
 
 
 def show_env():
@@ -219,6 +219,24 @@ def main():
 
     utils.set_terminal_title("conjure-up")
     opts = parse_options(sys.argv[1:])
+    opt_defaults = parse_options([])
+
+    # Load conjurefile, merge any overridding options from argv
+    if not opts.conf_file:
+        opts.conf_file = []
+    if pathlib.Path('~/.config/conjure-up.conf').expanduser().exists():
+        opts.conf_file.insert(
+            0, pathlib.Path('~/.config/conjure-up.conf').expanduser())
+    if (pathlib.Path('.') / 'Conjurefile').exists():
+        opts.conf_file.insert(0, pathlib.Path('.') / 'Conjurefile')
+    for conf in opts.conf_file:
+        if not conf.exists():
+            print("Unable to locate config {} for processing.".format(
+                str(conf)))
+            sys.exit(1)
+
+    app.conjurefile = Conjurefile.load(opts.conf_file)
+    app.conjurefile.merge_argv(opts, opt_defaults)
 
     if opts.gen_config:
         Conjurefile.print_tpl()
@@ -234,24 +252,6 @@ def main():
     app.env = os.environ.copy()
     app.env['KV_DB'] = kv_db
     app.config = {'metadata': None}
-    app.argv = opts
-
-    # Load conjurefile, merge any overridding options from argv
-    if not app.argv.conf_file:
-        app.argv.conf_file = []
-    if pathlib.Path('~/.config/conjure-up.conf').expanduser().exists():
-        app.argv.conf_file.insert(
-            0, pathlib.Path('~/.config/conjure-up.conf').expanduser())
-    if (pathlib.Path('.') / 'Conjurefile').exists():
-        app.argv.conf_file.insert(0, pathlib.Path('.') / 'Conjurefile')
-    for conf in app.argv.conf_file:
-        if not conf.exists():
-            print("Unable to locate config {} for processing.".format(
-                str(conf)))
-            sys.exit(1)
-
-    app.conjurefile = Conjurefile.load(app.argv.conf_file)
-    app.conjurefile.merge_argv(app.argv)
 
     app.log = setup_logging(app,
                             os.path.join(opts.cache_dir, 'conjure-up.log'),
@@ -261,8 +261,8 @@ def main():
     juju.set_bin_path()
     juju.set_wait_path()
 
-    app.notrack = app.conjurefile.get('notrack', False)
-    app.noreport = app.conjurefile.get('noreport', False)
+    app.no_track = app.conjurefile['no-track']
+    app.no_report = app.conjurefile['no-report']
 
     # Grab current LXD and Juju versions
     app.log.debug("Juju version: {}, "
@@ -276,19 +276,19 @@ def main():
     app.session_id = os.getenv('CONJURE_TEST_SESSION_ID',
                                str(uuid.uuid4()))
 
-    spells_dir = app.argv.spells_dir
+    spells_dir = app.conjurefile['spells-dir']
 
     app.config['spells-dir'] = spells_dir
     spells_index_path = os.path.join(app.config['spells-dir'],
                                      'spells-index.yaml')
     spells_registry_branch = os.getenv('CONJUREUP_REGISTRY_BRANCH', 'master')
 
-    if not app.argv.nosync:
+    if not app.conjurefile['no-sync']:
         if not os.path.exists(spells_dir):
             utils.info("No spells found, syncing from registry, please wait.")
         try:
             download_or_sync_registry(
-                app.argv.registry,
+                app.conjurefile['registry'],
                 spells_dir, branch=spells_registry_branch)
         except subprocess.CalledProcessError as e:
             if not os.path.exists(spells_dir):
@@ -406,10 +406,10 @@ def main():
         StepModel.load_spell_steps()
         AddonModel.load_spell_addons()
 
-    app.env['CONJURE_UP_CACHEDIR'] = app.argv.cache_dir
+    app.env['CONJURE_UP_CACHEDIR'] = app.conjurefile['cache-dir']
     app.env['PATH'] = "/snap/bin:{}".format(app.env['PATH'])
 
-    if app.argv.show_env:
+    if app.conjurefile['show-env']:
         if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
             utils.error("Please specify a spell for headless mode.")
             sys.exit(1)

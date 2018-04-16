@@ -13,8 +13,8 @@ class MockupView(BaseView):
             if key in ['q', 'Q']:
                 raise ExitMainLoop()
 
-        app.notrack = True
-        app.noreport = True
+        app.no_track = True
+        app.no_report = True
         app.ui = ConjureUI()
         EventLoop.build_loop(app.ui, STYLES, unhandled_input=_stop)
         super().show()
