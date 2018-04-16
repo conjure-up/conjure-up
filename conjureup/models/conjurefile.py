@@ -90,7 +90,13 @@ class Conjurefile(MeldDict):
         """
         cf = Conjurefile()
         for p in paths:
-            cf += yaml.safe_load(p.read_text())
+            try:
+                new_data = yaml.safe_load(p.read_text())
+                if not isinstance(new_data, dict):
+                    raise ValueError('contents are not a mapping')
+            except Exception as e:
+                raise ValueError('Unable to load {}: {}'.format(p, e))
+            cf += new_data
         return cf
 
     def merge_argv(self, argv, defaults):
