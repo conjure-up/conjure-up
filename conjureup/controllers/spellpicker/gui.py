@@ -13,7 +13,7 @@ class SpellPickerController:
         if spellname != app.config.get('spell'):
             utils.set_terminal_title("conjure-up {}".format(spellname))
             utils.set_chosen_spell(spellname,
-                                   os.path.join(app.argv.cache_dir,
+                                   os.path.join(app.conjurefile['cache-dir'],
                                                 spellname))
             download_local(os.path.join(app.config['spells-dir'],
                                         spellname),
@@ -29,7 +29,7 @@ class SpellPickerController:
         if app.endpoint_type is None:
             spells += utils.find_spells()
         elif app.endpoint_type == EndpointType.LOCAL_SEARCH:
-            spells = utils.find_spells_matching(app.argv.spell)
+            spells = utils.find_spells_matching(app.conjurefile['spell'])
         else:
             raise Exception("Unexpected endpoint type {}".format(
                 app.endpoint_type))

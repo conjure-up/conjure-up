@@ -13,7 +13,7 @@ from conjureup.ui.views.shutdown import ShutdownView
 class ConjureUI(Frame):
 
     def show_exception_message(self, ex):
-        _cache_dir = Path(app.argv.cache_dir) / 'conjure-up.log'
+        _cache_dir = Path(app.conjurefile['cache-dir']) / 'conjure-up.log'
         errmsg = str(ex)
         errmsg += (
             "\n\n Review log messages at {} "

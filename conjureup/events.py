@@ -150,7 +150,7 @@ def handle_exception(loop, context):
 
     if any(pred(exc) for pred in NOTRACK_EXCEPTIONS):
         app.log.debug('Would not track exception: {}'.format(exc))
-    if not (app.noreport or any(pred(exc) for pred in NOTRACK_EXCEPTIONS)):
+    if not (app.no_report or any(pred(exc) for pred in NOTRACK_EXCEPTIONS)):
         track_exception(str(exc))
         utils.sentry_report(exc_info=exc_info)
 

@@ -15,7 +15,7 @@ TELEMETRY_ASYNC_QUEUE = "telemetry-async-queue"
 
 def track_screen(screen_name):
     app.log.debug('Showing screen: {}'.format(screen_name))
-    if app.notrack:
+    if app.no_track:
         return
     args = dict(cd=screen_name,
                 t="screenview")
@@ -29,7 +29,7 @@ def track_screen(screen_name):
 def track_event(category, action, label):
     ""
     app.log.debug('{}: {} {}'.format(category, action, label))
-    if app.notrack:
+    if app.no_track:
         return
     args = dict(ec=category,
                 ea=action,
@@ -43,7 +43,7 @@ def track_event(category, action, label):
 
 def track_exception(description, is_fatal=True):
     ""
-    if app.notrack:
+    if app.no_track:
         return
     exf = 1 if is_fatal else 0
     args = dict(t='exception',

@@ -5,8 +5,8 @@ from conjureup.telemetry import track_event
 
 class Destroy:
     def render(self):
-        app.loop.create_task(self.do_destroy(app.argv.model,
-                                             app.argv.controller))
+        app.loop.create_task(self.do_destroy(app.conjurefile['model'],
+                                             app.conjurefile['controller']))
 
     async def do_destroy(self, model, controller):
         track_event("Destroying model", "Destroy", "")

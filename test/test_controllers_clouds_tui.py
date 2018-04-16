@@ -75,6 +75,7 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.clouds.tui.app')
         self.mock_app = self.app_patcher.start()
         self.mock_app.ui = MagicMock(name="app.ui")
+        self.mock_app.conjurefile = {}
         self.ev_app_patcher = patch(
             'conjureup.events.app', self.mock_app)
         self.ev_app_patcher.start()
@@ -98,7 +99,7 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
     def test_finish_w_model(self):
         "clouds.finish with an existing controller"
         self.mock_gcc.return_value = 'testcontroller'
-        self.mock_app.argv.model = 'testmodel'
+        self.mock_app.conjurefile['model'] = 'testmodel'
         self.mock_app.provider.cloud = 'cloud'
         self.controller.finish()
         self.mock_controllers.use.assert_has_calls([
@@ -107,8 +108,9 @@ class CloudsTUIFinishTestCase(unittest.TestCase):
     def test_finish_no_model(self):
         "clouds.finish without existing controller"
         self.mock_gcc.return_value = None
-        self.mock_app.argv.cloud = 'testcloud'
-        self.mock_app.argv.controller = None
+        self.mock_app.conjurefile['cloud'] = 'testcloud'
+        self.mock_app.conjurefile['controller'] = None
+        self.mock_app.conjurefile['model'] = None
         self.controller.finish()
         self.mock_controllers.use.assert_has_calls([
             call('credentials'), call().render()])

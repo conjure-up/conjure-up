@@ -234,7 +234,7 @@ class StepModel:
         app.env['JUJU_CONTROLLER'] = app.provider.controller
         app.env['JUJU_MODEL'] = app.provider.model
         app.env['JUJU_REGION'] = app.provider.region or ''
-        app.env['CONJURE_UP_SPELLSDIR'] = app.argv.spells_dir
+        app.env['CONJURE_UP_SPELLSDIR'] = app.conjurefile['spells-dir']
         app.env['CONJURE_UP_SESSION_ID'] = app.session_id
 
         if provider_type == "maas":
@@ -276,7 +276,7 @@ class StepModel:
 
         # special case for 00_deploy-done to report masked
         # charm hook failures that were retried automatically
-        if not app.noreport:
+        if not app.no_report:
             failed_apps = set()  # only report each charm once
             for line in err_log.splitlines():
                 if 'hook failure, will retry' in line:
