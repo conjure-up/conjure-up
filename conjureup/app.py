@@ -239,17 +239,17 @@ def main():
     app.conjurefile = Conjurefile.load(opts.conf_file)
     app.conjurefile.merge_argv(opts, opt_defaults)
 
-    if opts.gen_config:
+    if app.conjurefile['gen-config']:
         Conjurefile.print_tpl()
         sys.exit(0)
 
-    spell = os.path.basename(os.path.abspath(opts.spell))
+    spell = os.path.basename(os.path.abspath(app.conjurefile['spell']))
 
-    if not os.path.isdir(opts.cache_dir):
-        os.makedirs(opts.cache_dir)
+    if not os.path.isdir(app.conjurefile['cache-dir']):
+        os.makedirs(app.conjurefile['cache-dir'])
 
     # Application Config
-    kv_db = os.path.join(opts.cache_dir, '.state.db')
+    kv_db = os.path.join(app.conjurefile['cache-dir'], '.state.db')
     app.state = KV(kv_db)
 
     app.env = os.environ.copy()
@@ -257,7 +257,8 @@ def main():
     app.config = {'metadata': None}
 
     app.log = setup_logging(app,
-                            os.path.join(opts.cache_dir, 'conjure-up.log'),
+                            os.path.join(app.conjurefile['cache-dir'],
+                                         'conjure-up.log'),
                             app.conjurefile.get('debug', False))
 
     # Make sure juju paths are setup
@@ -318,17 +319,17 @@ def main():
             app.addons_aliases = yaml.safe_load(fp.read())
 
     spell_name = spell
-    app.endpoint_type = detect_endpoint(opts.spell)
+    app.endpoint_type = detect_endpoint(app.conjurefile['spell'])
 
-    if opts.spell != consts.UNSPECIFIED_SPELL:
+    if app.conjurefile['spell'] != consts.UNSPECIFIED_SPELL:
         app.spell_given = True
 
     # Check if spell is actually an addon
-    addon = utils.find_addons_matching(opts.spell)
+    addon = utils.find_addons_matching(app.conjurefile['spell'])
     if addon:
         app.log.debug("addon found, setting required spell")
         utils.set_chosen_spell(addon['spell'],
-                               os.path.join(opts.cache_dir,
+                               os.path.join(app.conjurefile['cache-dir'],
                                             addon['spell']))
         download_local(os.path.join(app.config['spells-dir'],
                                     addon['spell']),
@@ -342,10 +343,11 @@ def main():
         app.endpoint_type = EndpointType.LOCAL_DIR
 
     elif app.endpoint_type == EndpointType.LOCAL_SEARCH:
-        spells = utils.find_spells_matching(opts.spell)
+        spells = utils.find_spells_matching(app.conjurefile['spell'])
 
         if len(spells) == 0:
-            utils.error("Can't find a spell matching '{}'".format(opts.spell))
+            utils.error("Can't find a spell matching '{}'".format(
+                app.conjurefile['spell']))
             sys.exit(1)
 
         # One result means it was a direct match and we can copy it
@@ -357,7 +359,7 @@ def main():
             app.log.debug("found spell {}".format(spells[0][1]))
             spell = spells[0][1]
             utils.set_chosen_spell(spell_name,
-                                   os.path.join(opts.cache_dir,
+                                   os.path.join(app.conjurefile['cache-dir'],
                                                 spell['key']))
             download_local(os.path.join(app.config['spells-dir'],
                                         spell['key']),
@@ -369,32 +371,35 @@ def main():
 
     # download spell if necessary
     elif app.endpoint_type == EndpointType.LOCAL_DIR:
-        if not os.path.isdir(opts.spell):
-            utils.warning("Could not find spell {}".format(opts.spell))
+        if not os.path.isdir(app.conjurefile['spell']):
+            utils.warning("Could not find spell {}".format(
+                app.conjurefile['spell']))
             sys.exit(1)
 
-        if not os.path.exists(os.path.join(opts.spell,
+        if not os.path.exists(os.path.join(app.conjurefile['spell'],
                                            "metadata.yaml")):
             utils.warning("'{}' does not appear to be a spell. "
                           "{}/metadata.yaml was not found.".format(
-                              opts.spell, opts.spell))
+                              app.conjurefile['spell'], app.conjurefile['spell']))
             sys.exit(1)
 
         spell_name = os.path.basename(os.path.abspath(spell))
         utils.set_chosen_spell(spell_name,
-                               path.join(opts.cache_dir, spell_name))
-        download_local(opts.spell, app.config['spell-dir'])
+                               path.join(app.conjurefile['cache-dir'], spell_name))
+        download_local(app.conjurefile['spell'], app.config['spell-dir'])
         utils.set_spell_metadata()
         StepModel.load_spell_steps()
         AddonModel.load_spell_addons()
 
     elif app.endpoint_type in [EndpointType.VCS, EndpointType.HTTP]:
 
-        utils.set_chosen_spell(spell, path.join(opts.cache_dir, spell))
-        remote = get_remote_url(opts.spell)
+        utils.set_chosen_spell(spell, path.join(
+            app.conjurefile['cache-dir'], spell))
+        remote = get_remote_url(app.conjurefile['spell'])
 
         if remote is None:
-            utils.warning("Can't guess URL matching '{}'".format(opts.spell))
+            utils.warning("Can't guess URL matching '{}'".format(
+                app.conjurefile['spell']))
             sys.exit(1)
 
         download(remote, app.config['spell-dir'], True)
