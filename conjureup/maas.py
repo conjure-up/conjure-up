@@ -410,11 +410,11 @@ def setup_maas():
         raise Exception("Couldn't find endpoint for controller: {}".format(
             app.provider.controller))
 
-    api_key = maascreds['maas-oauth']
     try:
+        api_key = maascreds['maas-oauth']
         consumer_key, token_key, token_secret = api_key.split(':')
-    except:
-        raise Exception("Could not parse MAAS API Key '{}'".format(api_key))
+    except (KeyError, ValueError):
+        raise Exception("Could not parse MAAS API Key")
 
     app.maas.endpoint = endpoint
     app.maas.api_key = api_key
