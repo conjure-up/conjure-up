@@ -126,6 +126,7 @@ NOTRACK_EXCEPTIONS = [
     lambda exc: isinstance(exc, utils.SudoError),
     lambda exc: isinstance(exc, LXDSetupViewError),
     lambda exc: isinstance(exc, errors.BootstrapInterrupt),
+    lambda exc: isinstance(exc, errors.MAASConfigError),
 ]
 
 
