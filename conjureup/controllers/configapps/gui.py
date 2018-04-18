@@ -1,6 +1,6 @@
 import asyncio
 
-from conjureup import controllers, events, juju
+from conjureup import controllers, errors, events
 from conjureup.app_config import app
 from conjureup.consts import cloud_types
 from conjureup.maas import setup_maas
@@ -39,7 +39,7 @@ class ConfigAppsController:
         while True:
             try:
                 await app.loop.run_in_executor(None, setup_maas)
-            except juju.ControllerNotFoundException as e:
+            except errors.ControllerNotFoundException as e:
                 await asyncio.sleep(1)
                 n -= 1
                 if n == 0:
