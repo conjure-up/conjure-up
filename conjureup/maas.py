@@ -8,7 +8,7 @@ from functools import partial
 import requests
 from requests_oauthlib import OAuth1
 
-from conjureup import juju
+from conjureup import errors, juju
 from conjureup.app_config import app
 from conjureup.async import submit
 from conjureup.units import human_to_gb
@@ -391,7 +391,7 @@ def setup_maas():
     maascreds = juju.get_credential(app.provider.cloud,
                                     app.provider.credential)
     if not maascreds:
-        raise Exception(
+        raise errors.MAASConfigError(
             "Could not find MAAS credentials for cloud: {}".format(
                 app.provider.cloud))
     try:
@@ -407,14 +407,14 @@ def setup_maas():
         endpoint = bc.get('endpoint', None)
 
     if endpoint is None:
-        raise Exception("Couldn't find endpoint for controller: {}".format(
-            app.provider.controller))
+        raise errors.MAASConfigError("Couldn't find endpoint for controller: "
+                                     "{}".format(app.provider.controller))
 
     try:
         api_key = maascreds['maas-oauth']
         consumer_key, token_key, token_secret = api_key.split(':')
     except (KeyError, ValueError):
-        raise Exception("Could not parse MAAS API Key")
+        raise errors.MAASConfigError("Could not parse MAAS API Key")
 
     app.maas.endpoint = endpoint
     app.maas.api_key = api_key

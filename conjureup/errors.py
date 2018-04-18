@@ -20,3 +20,7 @@ class JujuBinaryNotFound(Exception):
 
 class AppConfigAttributeError(Exception):
     "A failure to lookup attribute in app_config object"
+
+
+class MAASConfigError(Exception):
+    "An error representing a MAAS configuration issue."
