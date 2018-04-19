@@ -19,8 +19,6 @@ class AddonModel:
         for addon_path in sorted(addons_dir.glob('*')):
             if addon_path.is_dir():
                 app.addons[addon_path.name] = AddonModel(addon_path.name)
-        import ipdb
-        ipdb.set_trace()
 
     @classmethod
     def selected_addons(cls):
