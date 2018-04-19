@@ -19,6 +19,8 @@ class AddonModel:
         for addon_path in sorted(addons_dir.glob('*')):
             if addon_path.is_dir():
                 app.addons[addon_path.name] = AddonModel(addon_path.name)
+        import ipdb
+        ipdb.set_trace()
 
     @classmethod
     def selected_addons(cls):
@@ -35,7 +37,8 @@ class AddonModel:
         self.metadata = self._read('metadata.yaml')
         self.bundle = self._read('bundle.yaml')
         self.steps = [StepModel.load(step_path,
-                                     source=self.friendly_name)
+                                     source=self.friendly_name,
+                                     addon_name=name)
                       for step_path in
                       sorted((self.path / 'steps').glob('*'))
                       if step_path.is_dir()]

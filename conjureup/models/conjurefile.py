@@ -46,7 +46,8 @@ class Conjurefile(MeldDict):
     # charts to the cluster.
     # addons:
     #  helm:
-    #    version: v2.8.1
+    #    01_install-helm:
+    #      helm_version: v2.8.1
 
     # (Optional) Customize any of the steps that are run once the spell is
     # deployed
@@ -127,3 +128,42 @@ class Conjurefile(MeldDict):
         if 'cloud' in self and self['cloud']:
             return True
         return False
+
+    def has_step(self, step_name):
+        """ Verifies a step name is defined
+        """
+        if self.steps and step_name in self.steps:
+            return True
+        return False
+
+    @property
+    def steps(self):
+        """ Conjurefile defined steps
+        """
+        return self.get('steps', {})
+
+    def step(self, step_name, key, addon_name):
+        """ Returns the step's value
+        """
+        # Check addons first
+        is_addon = self.addons.get(addon_name, None)
+        if is_addon and step_name in is_addon:
+            return is_addon[step_name].get(
+                key.lower(), None)
+
+        # Check spell steps
+        if not self.has_step(step_name):
+            return None
+        return self.steps[step_name].get(
+            key.lower(), None)
+
+    def addon(self, addon_name):
+        """ Return addon name step
+        """
+        return self.addons.get(addon_name, None)
+
+    @property
+    def addons(self):
+        """ Conjurefile defined addons
+        """
+        return self.get('addons', {})

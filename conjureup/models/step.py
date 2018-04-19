@@ -27,7 +27,7 @@ class StepModel:
         app.log.debug('steps: {}'.format(app.steps))
 
     @classmethod
-    def load(cls, step_meta_path, source):
+    def load(cls, step_meta_path, source, addon_name=None):
         step_name = step_meta_path.stem
         step_ex_path = step_meta_path.parent / step_name
         if not (step_ex_path / 'metadata.yaml').is_file():
@@ -41,11 +41,16 @@ class StepModel:
                 'The {} step {} has no implementation'.format(source,
                                                               step_name))
         step_data = app.steps_data.get(step.name, {})
+
         for field in step.additional_input:
             key = field['key']
             default = field.get('default')
             value = step_data.get(key, default)
-            step_data[key] = value
+            step_data[key] = app.conjurefile.step(
+                step.name,
+                key,
+                addon_name) or value
+
         app.steps_data[step.name] = step_data
         # clear transient values
         step.set_state('bundle-add', None)
