@@ -157,11 +157,6 @@ class Conjurefile(MeldDict):
         return self.steps[step_name].get(
             key.lower(), None)
 
-    def addon(self, addon_name):
-        """ Return addon name step
-        """
-        return self.addons.get(addon_name, None)
-
     @property
     def addons(self):
         """ Conjurefile defined addons
