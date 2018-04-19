@@ -40,16 +40,11 @@ class ConfigAppsGUIRenderTestCase(unittest.TestCase):
             'conjureup.events.app', self.mock_app)
         self.ev_app_patcher.start()
 
-        self.juju_patcher = patch(
-            'conjureup.controllers.configapps.gui.juju')
-        self.mock_juju = self.juju_patcher.start()
-
     def tearDown(self):
         self.finish_patcher.stop()
         self.view_patcher.stop()
         self.app_patcher.stop()
         self.ev_app_patcher.stop()
-        self.juju_patcher.stop()
 
     def test_connect_maas(self):
         "Call submit to schedule predeploy if we haven't yet"
@@ -69,10 +64,6 @@ class ConfigAppsGUIFinishTestCase(unittest.TestCase):
             'conjureup.controllers.configapps.gui.controllers')
         self.mock_controllers = self.controllers_patcher.start()
 
-        self.juju_patcher = patch(
-            'conjureup.controllers.configapps.gui.juju')
-        self.mock_juju = self.juju_patcher.start()
-
         self.controller.render = MagicMock()
         self.controller.render = MagicMock()
         self.app_patcher = patch(
@@ -85,7 +76,6 @@ class ConfigAppsGUIFinishTestCase(unittest.TestCase):
 
     def tearDown(self):
         self.controllers_patcher.stop()
-        self.juju_patcher.stop()
         self.app_patcher.stop()
         self.ev_app_patcher.stop()
 
