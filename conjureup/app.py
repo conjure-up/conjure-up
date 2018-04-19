@@ -384,12 +384,14 @@ def main():
                                            "metadata.yaml")):
             utils.warning("'{}' does not appear to be a spell. "
                           "{}/metadata.yaml was not found.".format(
-                              app.conjurefile['spell'], app.conjurefile['spell']))
+                              app.conjurefile['spell'],
+                              app.conjurefile['spell']))
             sys.exit(1)
 
         spell_name = os.path.basename(os.path.abspath(spell))
         utils.set_chosen_spell(spell_name,
-                               path.join(app.conjurefile['cache-dir'], spell_name))
+                               path.join(app.conjurefile['cache-dir'],
+                                         spell_name))
         download_local(app.conjurefile['spell'], app.config['spell-dir'])
         utils.set_spell_metadata()
         StepModel.load_spell_steps()
