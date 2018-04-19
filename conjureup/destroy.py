@@ -44,6 +44,9 @@ def parse_options(argv):
     parser.add_argument('model', nargs='?',
                         help="Name of a juju model to target. "
                         "A controller is required.")
+    parser.add_argument('-c', '--conf-file', dest='conf_file',
+                        help='Path to configuration file', action='append',
+                        type=pathlib.Path)
 
     return parser.parse_args(argv)
 
@@ -95,11 +98,11 @@ def main():
 
     app.no_track = app.conjurefile['no-track']
     app.no_report = app.conjurefile['no-report']
+    app.env = os.environ.copy()
 
     # Make sure juju paths are setup
     juju.set_bin_path()
 
-    app.env = os.environ.copy()
     app.loop = asyncio.get_event_loop()
     app.loop.add_signal_handler(signal.SIGINT, events.Shutdown.set)
     app.loop.create_task(events.shutdown_watcher())
