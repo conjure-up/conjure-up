@@ -59,7 +59,7 @@ parts:
   juju:
     source: https://github.com/juju/juju.git
     source-type: git
-    source-branch: juju-2.3.5
+    source-branch: juju-2.3.7
     source-depth: 1
     plugin: godeps
     go-importpath: github.com/juju/juju
@@ -77,7 +77,7 @@ parts:
   go:
     source-tag: go1.8
   python:
-    source: https://www.python.org/ftp/python/3.6.2/Python-3.6.2.tar.xz
+    source: https://www.python.org/ftp/python/3.6.5/Python-3.6.5.tar.xz
     plugin: autotools
     configflags:
     - --prefix=/usr
