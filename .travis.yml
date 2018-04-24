@@ -23,10 +23,11 @@ before_script:
   - sudo usermod -a -G lxd $USER || true
   - sudo ln -s /snap/bin/juju /usr/bin/juju
   - sudo ln -s /snap/bin/lxc /usr/bin/lxc
+  - sudo bash -c 'for i in 5 10 15 30; do [[ -e /var/snap/lxd/common/lxd/unix.socket ]] && break; sleep $i; done'
 script:
   - tox -e py36,flake,isort
   - tox -e conjure-dev
-  - sudo -E su $USER -c "source conjure-dev/bin/activate && conjure-up --notrack --noreport battlemidget/ghost localhost test-controller test-model"
+  - sudo -E su $USER -c "source conjure-dev/bin/activate && conjure-up -c test/Conjurefile.travis"
 after_failure:
   - cat ~/.cache/conjure-up/ghost/steps/*/*.err
   - cat ~/.cache/conjure-up/conjure-up.log

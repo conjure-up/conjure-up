@@ -1,0 +1,8 @@
+# -*- mode:yaml; -*-
+
+spell: battlemidget/ghost
+controller: test-controller
+model: test-model
+cloud: localhost
+no-report: true
+no-track: true
