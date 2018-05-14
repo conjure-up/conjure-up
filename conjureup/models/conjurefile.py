@@ -68,6 +68,23 @@ class Conjurefile(MeldDict):
     # Reporting
     # no-track: false
     # no-report: false
+
+    # Spell Registry
+    # Provide a custom registry endpoint
+    # registry: https://github.com/conjure-up/spells.git
+
+    # Spells Directory
+    # Local directory of spells
+    # spells-dir: /home/user/spells
+
+    # Proxy
+    # apt-proxy: http://localhost:5555
+    # apt-https-proxy: https://localhost:5555
+    # http-proxy: https://localhost:4444
+    # https-proxy: https://localhost:4444
+
+    # Comma separate list of ips to not filter through proxy
+    # no-proxy: 8.8.8.8,172.16.0.1
     """
 
     def __init__(self):
