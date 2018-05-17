@@ -157,9 +157,8 @@ class ApplicationConfigureView(BaseView):
         self.application.options = self.options_copy
         self.application.num_units = self.num_units_copy
         self.application.constraints = self.constraints_copy
-        # Apply fragment updates to bundle
-        app.current_bundle.apply({"applications": {
-            self.application.name: self.application.to_dict()
-        }})
+        # Replace application data with updated info
+        new_data = self.application.to_dict()
+        app.current_bundle['applications'][self.application.name] = new_data
 
         self.prev_screen()
