@@ -1,7 +1,7 @@
 aiofiles==0.3.1
 bundle-placement==0.0.2
 Jinja2==2.9.6
-juju==0.7.4
+juju==0.7.5
 juju-wait==2.6.3
 prettytable==0.7.2
 progressbar2==3.20.0
