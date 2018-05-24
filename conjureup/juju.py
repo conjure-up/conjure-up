@@ -190,7 +190,8 @@ async def create_model():
             model_name=app.provider.model,
             cloud_name=app.provider.cloud,
             region=app.provider.region,
-            credential_name=app.provider.credential)
+            credential_name=app.provider.credential,
+            config=app.conjurefile.get('model-config', None))
         events.ModelConnected.set()
     finally:
         await controller.disconnect()
@@ -239,6 +240,10 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
         add_config("bootstrap-timeout", app.conjurefile['bootstrap-timeout'])
     if app.conjurefile['bootstrap-to']:
         cmd.extend(["--to", app.conjurefile['bootstrap-to']])
+    if app.conjurefile.get('model-config', None):
+        for k, v in app.conjurefile['model-config'].items():
+            if v is not None:
+                add_config(k, v)
 
     cmd.extend(["--bootstrap-series", series])
     if credential is not None:

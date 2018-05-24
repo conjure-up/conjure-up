@@ -5,3 +5,6 @@ registry: 'https://github.com/battlemidget/spells.git'
 
 cloud: 'aws'
 color: 'always'
+
+model-config:
+  extra-info: "This is a model level config setting"
