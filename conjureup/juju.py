@@ -12,6 +12,7 @@ import yaml
 from juju.client.jujudata import FileJujuData
 from juju.controller import Controller
 from juju.model import Model
+from melddict import MeldDict
 
 from conjureup import consts, errors, events, utils
 from conjureup.app_config import app
@@ -190,7 +191,8 @@ async def create_model():
             model_name=app.provider.model,
             cloud_name=app.provider.cloud,
             region=app.provider.region,
-            credential_name=app.provider.credential)
+            credential_name=app.provider.credential,
+            config=app.conjurefile.get('model-config', None))
         events.ModelConnected.set()
     finally:
         await controller.disconnect()
@@ -219,6 +221,8 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
     def add_config(k, v):
         cmd.extend(["--config", "{}={}".format(k, v)])
 
+    app.provider.model_defaults = MeldDict(app.provider.model_defaults or {})
+    app.provider.model_defaults.add(app.conjurefile.get('model-config', {}))
     if app.provider.model_defaults:
         for k, v in app.provider.model_defaults.items():
             if v is not None:

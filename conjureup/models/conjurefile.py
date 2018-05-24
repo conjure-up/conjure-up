@@ -42,6 +42,15 @@ class Conjurefile(MeldDict):
     # (Optional) Model name. This can be any arbitrary name of your Juju Model
     # model: k8s-1
 
+    # (Optional) Model config. Options to set on a controller model
+    # https://docs.jujucharms.com/devel/en/models-config#list-of-model-keys
+    #
+    # Note: See section Proxy below for setting apt(s)/http(s) proxy settings
+    #
+    # model-config:
+    #   vpc-id: VPC1234
+    #   apt-mirror: http://archive.ubuntu.com/ubuntu/
+
     # For the Kubernetes spell you may want Helm installed so you can deploy
     # charts to the cluster.
     # addons:
