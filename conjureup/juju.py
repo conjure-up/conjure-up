@@ -12,6 +12,7 @@ import yaml
 from juju.client.jujudata import FileJujuData
 from juju.controller import Controller
 from juju.model import Model
+from melddict import MeldDict
 
 from conjureup import consts, errors, events, utils
 from conjureup.app_config import app
@@ -220,6 +221,8 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
     def add_config(k, v):
         cmd.extend(["--config", "{}={}".format(k, v)])
 
+    app.provider.model_defaults = MeldDict(app.provider.model_defaults or {})
+    app.provider.model_defaults.add(app.conjurefile.get('model-config', {}))
     if app.provider.model_defaults:
         for k, v in app.provider.model_defaults.items():
             if v is not None:
@@ -240,10 +243,6 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
         add_config("bootstrap-timeout", app.conjurefile['bootstrap-timeout'])
     if app.conjurefile['bootstrap-to']:
         cmd.extend(["--to", app.conjurefile['bootstrap-to']])
-    if app.conjurefile.get('model-config', None):
-        for k, v in app.conjurefile['model-config'].items():
-            if v is not None:
-                add_config(k, v)
 
     cmd.extend(["--bootstrap-series", series])
     if credential is not None:
