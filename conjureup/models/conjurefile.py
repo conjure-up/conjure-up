@@ -94,6 +94,14 @@ class Conjurefile(MeldDict):
 
     # Comma separate list of ips to not filter through proxy
     # no-proxy: 8.8.8.8,172.16.0.1
+
+    # (Optional) Bundle Add
+    # Add a Juju bundle fragment overlay
+    # bundle-add: /home/user/my-bundle-fragment.yaml
+
+    # (Optional) Bundle Remove
+    # Remove a section of a spells bundle fragment
+    # bundle-remove: /home/user/my-bundle-remove-fragment.yaml
     """
 
     def __init__(self):
