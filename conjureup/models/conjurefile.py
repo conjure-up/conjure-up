@@ -32,9 +32,6 @@ class Conjurefile(MeldDict):
     # A provider can also be a cloud/region
     # cloud: aws/us-east-1
     #
-    # (Optional) Set any addons you wish to deploy.
-    #
-
     # (Optional) Controller name. This can be any arbitrary name of your Juju
     # controller.
     # controller: us-dc1
@@ -51,6 +48,8 @@ class Conjurefile(MeldDict):
     #   vpc-id: VPC1234
     #   apt-mirror: http://archive.ubuntu.com/ubuntu/
 
+    # (Optional) Set any addons you wish to deploy.
+    #
     # For the Kubernetes spell you may want Helm installed so you can deploy
     # charts to the cluster.
     # addons:
@@ -85,6 +84,10 @@ class Conjurefile(MeldDict):
     # Spells Directory
     # Local directory of spells
     # spells-dir: /home/user/spells
+
+    # Do not sync with remote spells registry. Should be used in conjuction
+    # with `spells-dir` if custom spells are used.
+    # no-sync: true
 
     # Proxy
     # apt-proxy: http://localhost:5555
