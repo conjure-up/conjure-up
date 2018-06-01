@@ -47,6 +47,10 @@ def parse_options(argv):
     parser.add_argument('-c', '--conf-file', dest='conf_file',
                         help='Path to configuration file', action='append',
                         type=pathlib.Path)
+    parser.add_argument('--color', type=str, default='auto',
+                        choices=['auto', 'never', 'always'],
+                        help='Whether to use colorized output '
+                             'in headless mode.')
 
     return parser.parse_args(argv)
 
