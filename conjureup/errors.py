@@ -24,3 +24,7 @@ class AppConfigAttributeError(Exception):
 
 class MAASConfigError(Exception):
     "An error representing a MAAS configuration issue."
+
+
+class LocalhostLXDBinaryNotFound(Exception):
+    "Unable to find a LXD binary for localhost deployment"
