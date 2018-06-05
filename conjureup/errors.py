@@ -26,5 +26,9 @@ class MAASConfigError(Exception):
     "An error representing a MAAS configuration issue."
 
 
+class LocalhostLXDBinaryNotFound(Exception):
+    "Unable to find a LXD binary for localhost deployment"
+
+
 class LXDSetupControllerError(Exception):
     "Unable to determine LXD network/storage"

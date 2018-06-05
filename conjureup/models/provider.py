@@ -10,7 +10,7 @@ from pkg_resources import parse_version
 from ubuntui.widgets.input import PasswordEditor, StringEditor, YesNo
 from urwid import Text
 
-from conjureup import utils
+from conjureup import errors, utils
 from conjureup.app_config import app
 from conjureup.consts import cloud_types
 from conjureup.juju import get_cloud
@@ -351,7 +351,6 @@ class Localhost(BaseProvider):
         self.minimum_support_version = parse_version('3.0.0')
         self.available = False
         self.lxc_bin = None
-        self._set_lxd_dir_env()
 
     def _set_lxd_dir_env(self):
         """ Sets and updates correct environment
@@ -365,7 +364,7 @@ class Localhost(BaseProvider):
             app.env['LXD_DIR'] = str(self.lxd_socket_dir)
             self.lxc_bin = '/usr/bin/lxc'
         else:
-            raise LocalhostError(
+            raise errors.LocalhostLXDBinaryNotFound(
                 "Unable to find a lxd binary. Make sure `snap info lxd` "
                 "shows as installed, otherwise, run `sudo snap "
                 "install lxd` and restart conjure-up.")

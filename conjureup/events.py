@@ -125,6 +125,7 @@ NOTRACK_EXCEPTIONS = [
     lambda exc: isinstance(exc, OSError) and exc.errno == errno.ENOSPC,
     lambda exc: isinstance(exc, utils.SudoError),
     lambda exc: isinstance(exc, LXDSetupViewError),
+    lambda exc: isinstance(exc, errors.LocalhostLXDBinaryNotFound),
     lambda exc: isinstance(exc, errors.BootstrapInterrupt),
     lambda exc: isinstance(exc, errors.MAASConfigError),
     lambda exc: isinstance(exc, errors.LXDSetupControllerError),

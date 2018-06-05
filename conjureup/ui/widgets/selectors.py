@@ -198,6 +198,21 @@ class SelectList(Pile):
             if getattr(opt, 'enabled', True):
                 self.select_item(i)
                 break
+        else:
+            if opts:
+                self.select_item(0)
+
+    def select_first_of_values(self, values):
+        opts = self.option_widgets
+        for i, opt in enumerate(opts):
+            if opt.value not in values:
+                continue
+            if getattr(opt, 'enabled', True):
+                self.select_item(i)
+                break
+        else:
+            if opts:
+                self.select_item_by_value(values[0])
 
 
 class CheckList(SelectList):
