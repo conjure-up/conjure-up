@@ -189,9 +189,7 @@ class BaseProvider:
             self.endpoint = _cloud.get('endpoint', None)
             self.regions = sorted(_cloud.get('regions', {}).keys())
         except LookupError:
-            raise SchemaErrorUnknownCloud(
-                "Unknown cloud: {}, not updating provider attributes".format(
-                    cloud_name))
+            raise errors.SchemaCloudError(cloud_name)
 
     async def save_form(self):
         """ Saves input fields into provider attributes, normalizing any keys,
@@ -330,18 +328,6 @@ class MAAS(BaseProvider):
         return (True, None)
 
 
-class LocalhostError(Exception):
-    pass
-
-
-class LocalhostIncompatibleError(Exception):
-    pass
-
-
-class LocalhostJSONError(Exception):
-    pass
-
-
 class Localhost(BaseProvider):
     def __init__(self):
         super().__init__()
@@ -364,10 +350,7 @@ class Localhost(BaseProvider):
             app.env['LXD_DIR'] = str(self.lxd_socket_dir)
             self.lxc_bin = '/usr/bin/lxc'
         else:
-            raise errors.LocalhostLXDBinaryNotFound(
-                "Unable to find a lxd binary. Make sure `snap info lxd` "
-                "shows as installed, otherwise, run `sudo snap "
-                "install lxd` and restart conjure-up.")
+            raise errors.LXDBinaryNotFound()
         app.log.debug("LXD environment set: binary {} lxd_dir {}".format(
             self.lxc_bin, self.lxd_socket_dir))
 
@@ -382,22 +365,19 @@ class Localhost(BaseProvider):
             segment_prefix = Path('/1.0')
             url = str(segment_prefix / segment)
         try:
+            if not self.lxc_bin:
+                raise errors.LXDBinaryNotFoundError()
             cmd = [self.lxc_bin, 'query', '--wait', url]
             app.log.debug("LXD query cmd: {}".format(" ".join(cmd)))
             _, out, err = await utils.arun(cmd)
             return json.loads(out)
         except json.decoder.JSONDecodeError:
-            err = ("Unable to parse JSON output from LXD, does "
-                   "`{} query --wait -X GET /1.0` "
-                   "return info about the LXD server?".format(self.lxc_bin))
-            app.log.error(err)
-            raise LocalhostJSONError(err)
-        except FileNotFoundError as e:
-            app.log.error(e)
-            raise
+            raise errors.LXDParseError(self.lxd_bin)
+        except FileNotFoundError:
+            raise errors.LXDBinaryNotFoundError()
         except CalledProcessError as e:
             app.log.error(e)
-            raise LocalhostError(e)
+            raise errors.LXDCompatibilityError()
 
     async def get_networks(self):
         """ Grabs lxc network bridges from api
@@ -438,7 +418,7 @@ class Localhost(BaseProvider):
             out = await self.query()
             server_ver = out['environment']['server_version']
             return parse_version(server_ver) >= self.minimum_support_version
-        except (LocalhostError, LocalhostJSONError, FileNotFoundError):
+        except errors.LXDError:
             return False
 
     async def is_client_compatible(self):
@@ -448,9 +428,11 @@ class Localhost(BaseProvider):
             _, out, err = await utils.arun([self.lxc_bin, '--version'])
             server_ver = out.strip()
             return parse_version(server_ver) >= self.minimum_support_version
+        except FileNotFoundError:
+            return False
         except CalledProcessError as e:
             app.log.error(e)
-            raise LocalhostError(e)
+            return False
 
 
 class Azure(BaseProvider):
@@ -705,27 +687,6 @@ Schema = [
 ]
 
 
-class SchemaError(Exception):
-    def __init__(self, cloud):
-        super().__init__(
-            "Unable to find credentials for {}, "
-            "you can double check what credentials you "
-            "do have available by running "
-            "`juju credentials`. Please see `juju help "
-            "add-credential` for more information.".format(
-                cloud))
-
-
-class SchemaErrorUnknownCloud(Exception):
-    def __init__(self, cloud):
-        super().__init__(
-            "Unable to find cloud for {}, "
-            "you can double check that cloud exists by running "
-            "`juju clouds`. Please see `juju help "
-            "clouds` for more information.".format(
-                cloud))
-
-
 def load_schema(cloud):
     """ Loads a schema
     """
@@ -733,7 +694,7 @@ def load_schema(cloud):
         k, v = s
         if cloud == k:
             return v()
-    raise SchemaError(cloud)
+    raise errors.SchemaCloudError(cloud)
 
 
 SchemaV1 = OrderedDict([

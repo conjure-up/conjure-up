@@ -24,7 +24,7 @@ from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 
 from conjureup import __version__ as VERSION
-from conjureup import charm, consts, controllers, events, juju, utils
+from conjureup import charm, consts, controllers, errors, events, juju, utils
 from conjureup.app_config import app
 from conjureup.download import (
     EndpointType,
@@ -37,7 +37,7 @@ from conjureup.download import (
 from conjureup.log import setup_logging
 from conjureup.models.addon import AddonModel
 from conjureup.models.conjurefile import Conjurefile
-from conjureup.models.provider import SchemaErrorUnknownCloud, load_schema
+from conjureup.models.provider import load_schema
 from conjureup.models.step import StepModel
 from conjureup.telemetry import SENTRY_DSN, track_event, track_screen
 from conjureup.ui import ConjureUI
@@ -466,7 +466,7 @@ def main():
 
             try:
                 app.provider.load(cloud)
-            except SchemaErrorUnknownCloud as e:
+            except errors.SchemaCloudError as e:
                 utils.error(e)
                 sys.exit(1)
 
