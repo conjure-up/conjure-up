@@ -1,5 +1,8 @@
+import asyncio
 import os
 from datetime import datetime
+
+import websockets
 
 from conjureup import events, juju, utils
 from conjureup.app_config import app
@@ -21,7 +24,14 @@ async def do_deploy(msg_cb):
                       '{}-deployed-{}.yaml'.format(app.env['CONJURE_UP_SPELL'],
                                                    datetimestr))
     utils.spew(fn, app.current_bundle.to_yaml())
-    await app.juju.client.deploy(fn)
+    for attempt in range(3):
+        try:
+            await app.juju.client.deploy(fn)
+            break  # success
+        except websockets.ConnectionClosed:
+            if attempt == 2:
+                raise
+            await asyncio.sleep(1)
 
     events.DeploymentComplete.set()
 
