@@ -4,14 +4,9 @@ from juju.utils import run_with_interrupt
 
 from conjureup import controllers, errors, events, juju, utils
 from conjureup.app_config import app
-from conjureup.consts import CUSTOM_PROVIDERS
+from conjureup.consts import CUSTOM_PROVIDERS, cloud_types
 from conjureup.models.provider import Localhost as LocalhostProvider
-from conjureup.models.provider import (
-    LocalhostError,
-    LocalhostJSONError,
-    SchemaErrorUnknownCloud,
-    load_schema
-)
+from conjureup.models.provider import load_schema
 from conjureup.telemetry import track_event
 from conjureup.ui.views.cloud import CloudView
 
@@ -34,9 +29,12 @@ class CloudsController(BaseCloudController):
         else:
             app.provider = load_schema(juju.get_cloud_types_by_name()[cloud])
 
+        if app.provider.cloud_type == cloud_types.LOCALHOST:
+            app.provider._set_lxd_dir_env()
+
         try:
             app.provider.load(cloud)
-        except SchemaErrorUnknownCloud:
+        except errors.SchemaCloudError:
             app.provider.cloud = utils.gen_cloud()
 
         if app.provider.model is None:
@@ -80,14 +78,11 @@ class CloudsController(BaseCloudController):
                 "Starting watcher for verifying LXD server is available.")
             self.cancel_monitor.clear()
             app.loop.create_task(
-                self._monitor_localhost(
-                    LocalhostProvider(),
-                    self.view._enable_localhost_widget
-                )
+                self._monitor_localhost(LocalhostProvider())
             )
         self.view.show()
 
-    async def _monitor_localhost(self, provider, cb):
+    async def _monitor_localhost(self, provider):
         """ Checks that localhost/lxd is available and listening,
         updates widget accordingly
         """
@@ -97,15 +92,21 @@ class CloudsController(BaseCloudController):
                 provider._set_lxd_dir_env()
                 client_compatible = await provider.is_client_compatible()
                 server_compatible = await provider.is_server_compatible()
-                if client_compatible and server_compatible:
-                    events.LXDAvailable.set()
-                    self.cancel_monitor.set()
-                    cb()
-                    return
-            except (LocalhostError, LocalhostJSONError,
-                    errors.LocalhostLXDBinaryNotFound,
-                    FileNotFoundError):
-                pass
+                has_network_bridge = await provider.get_networks()
+                has_storage_pools = await provider.get_storage_pools()
+                if not (client_compatible and server_compatible):
+                    raise errors.LXDCompatibilityError()
+                elif not has_network_bridge:
+                    raise errors.LXDNetworkError()
+                elif not has_storage_pools:
+                    raise errors.LXDStorageError()
+
+                events.LXDAvailable.set()
+                self.cancel_monitor.set()
+                self.view._update_localhost_widget(True)
+                return
+            except errors.LXDError as e:
+                self.view._update_localhost_widget(False, e.message)
             await run_with_interrupt(asyncio.sleep(2),
                                      self.cancel_monitor)
 

@@ -2,12 +2,9 @@ from ubuntui.utils import Color
 from ubuntui.widgets.hr import HR
 from urwid import Columns, Text
 
+from conjureup import errors
 from conjureup.ui.views.base import BaseView
 from conjureup.ui.widgets.selectors import RadioList
-
-
-class LXDSetupViewError(Exception):
-    pass
 
 
 class LXDSetupView(BaseView):
@@ -23,16 +20,10 @@ class LXDSetupView(BaseView):
             'storage-pool': RadioList(self.devices['storage-pools'].keys()),
         }
 
-        if not self.devices['networks'] or not self.devices['storage-pools']:
-            raise LXDSetupViewError(
-                "Could not locate any network or storage "
-                "devices to continue. Please make sure you "
-                "have at least 1 network bridge and 1 storage "
-                "pool: see `lxc network list` and "
-                "`lxc storage list`.  \n\n"
-                "Also note that the network bridge must not have "
-                "ipv6 enabled, to disable run `lxc network set "
-                "lxdbr0 ipv6.address none ipv6.nat false`")
+        if not self.devices['networks']:
+            raise errors.LXDNetworkError()
+        if not self.devices['storage-pools']:
+            raise errors.LXDStorageError()
 
         super().__init__()
 

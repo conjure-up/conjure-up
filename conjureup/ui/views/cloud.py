@@ -17,9 +17,7 @@ class CloudView(BaseView):
     default_disabled_msg = 'This cloud is disabled due to your selection of ' \
                            'spell or add-on. Please use the arrow keys to ' \
                            'select another cloud.'
-    lxd_unavailable_msg = ("LXD version 3.0.0 or greater is required. "
-                           "To install or upgrade, see "
-                           "https://docs.conjure-up.io/devel/en/#users-of-lxd")
+    lxd_unavailable_msg = "Checking for LXD..."
 
     def __init__(self, app, public_clouds, custom_clouds,
                  compatible_cloud_types, cb=None, back=None):
@@ -52,12 +50,15 @@ class CloudView(BaseView):
                                          self.default_disabled_msg)
         self.set_footer(msg)
 
-    def _enable_localhost_widget(self):
+    def _update_localhost_widget(self, enabled, message=None):
         """ Sets the proper widget for localhost availability
         """
         if self._items_localhost_idx is None:
             return
-        self.widget.contents[self._items_localhost_idx][0].enabled = True
+        widget = self.widget.contents[self._items_localhost_idx][0]
+        widget.enabled = enabled
+        if message:
+            widget.user_data['disabled_msg'] = message
         if self.widget.selected_widgets is None:
             self.widget.select_first()
         self.update_message()
