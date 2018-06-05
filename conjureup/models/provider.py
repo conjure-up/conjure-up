@@ -351,7 +351,6 @@ class Localhost(BaseProvider):
         self.minimum_support_version = parse_version('3.0.0')
         self.available = False
         self.lxc_bin = None
-        self._set_lxd_dir_env()
 
     def _set_lxd_dir_env(self):
         """ Sets and updates correct environment
