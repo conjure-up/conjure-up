@@ -24,3 +24,7 @@ class AppConfigAttributeError(Exception):
 
 class MAASConfigError(Exception):
     "An error representing a MAAS configuration issue."
+
+
+class LXDSetupControllerError(Exception):
+    "Unable to determine LXD network/storage"

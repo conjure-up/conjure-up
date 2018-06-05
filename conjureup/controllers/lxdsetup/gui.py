@@ -1,15 +1,11 @@
 import ipaddress
 from subprocess import CalledProcessError
 
-from conjureup import controllers, utils
+from conjureup import controllers, errors, utils
 from conjureup.app_config import app
 from conjureup.ui.views.lxdsetup import LXDSetupView
 
 from . import common
-
-
-class LXDSetupControllerError(Exception):
-    pass
 
 
 class LXDSetupController(common.BaseLXDSetupController):
@@ -46,7 +42,7 @@ class LXDSetupController(common.BaseLXDSetupController):
         try:
             iface = ipaddress.IPv4Interface("{}/24".format(phys_iface_addr))
         except ipaddress.AddressValueError:
-            raise LXDSetupControllerError(
+            raise errors.LXDSetupControllerError(
                 "Unable to determine ip address of {network}, please double "
                 "check `lxc network edit {network}` and make "
                 "sure an address is associated with that bridge.".format(
