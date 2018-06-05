@@ -2,12 +2,7 @@ import asyncio
 
 from juju.utils import run_with_interrupt
 
-from conjureup import (
-    controllers,
-    errors,
-    events,
-    juju,
-    utils)
+from conjureup import controllers, errors, events, juju, utils
 from conjureup.app_config import app
 from conjureup.consts import CUSTOM_PROVIDERS
 from conjureup.models.provider import Localhost as LocalhostProvider
