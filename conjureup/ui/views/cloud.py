@@ -102,6 +102,8 @@ class CloudView(BaseView):
 
         if app.provider and app.provider.cloud:
             widget.select_item_by_value(app.provider.cloud)
+        elif app.metadata.cloud_whitelist:
+            widget.select_first_of_values(app.metadata.cloud_whitelist)
         else:
             widget.select_first()
         return widget
