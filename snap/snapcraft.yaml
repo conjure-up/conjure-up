@@ -75,7 +75,7 @@ parts:
     - conjure-up
     - go
   go:
-    source-tag: go1.8
+    source-tag: go1.10.2
   python:
     source: https://www.python.org/ftp/python/3.6.5/Python-3.6.5.tar.xz
     plugin: autotools
