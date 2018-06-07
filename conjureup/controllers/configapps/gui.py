@@ -63,6 +63,8 @@ class ConfigAppsController:
                                                       self.show_app_list))
 
     def show_app_list(self):
+        if not app.metadata.needs_juju:
+            return controllers.use('deploy').render()
         if app.provider.cloud_type == cloud_types.MAAS:
             app.loop.create_task(self.connect_maas())
 

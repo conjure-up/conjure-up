@@ -33,7 +33,7 @@ class AddonsController:
         if app.metadata.needs_juju:
             controllers.use('clouds').render()
         else:
-            controllers.use('deploy').render()
+            controllers.use('showsteps').render()
 
     def prev_screen(self):
         controllers.use('spellpicker').render()

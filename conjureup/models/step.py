@@ -283,7 +283,7 @@ class StepModel:
 
         # special case for 00_deploy-done to report masked
         # charm hook failures that were retried automatically
-        if not app.no_report or app.metadata.needs_juju:
+        if not app.no_report and app.metadata.needs_juju:
             failed_apps = set()  # only report each charm once
             for line in err_log.splitlines():
                 if 'hook failure, will retry' in line:
