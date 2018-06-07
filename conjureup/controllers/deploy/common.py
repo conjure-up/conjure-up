@@ -5,11 +5,12 @@ from datetime import datetime
 import websockets
 
 from conjureup import events, juju, utils
+from conjureup.consts import spell_types
 from conjureup.app_config import app
 
 
 async def do_deploy(msg_cb):
-    if app.metadata.needs_juju:
+    if app.metadata.spell_type == spell_types.JUJU:
         await events.ModelConnected.wait()
 
     for step in app.steps:
@@ -20,7 +21,7 @@ async def do_deploy(msg_cb):
     app.log.info(msg)
     msg_cb(msg)
 
-    if app.metadata.needs_juju:
+    if app.metadata.spell_type == spell_types.JUJU:
         datetimestr = datetime.now().strftime("%Y%m%d.%H%m")
         fn = os.path.join(app.env['CONJURE_UP_CACHEDIR'],
                           '{}-deployed-{}.yaml'.format(
@@ -49,7 +50,7 @@ async def wait_for_applications(msg_cb):
     app.log.info(msg)
     msg_cb(msg)
 
-    if app.metadata.needs_juju:
+    if app.metadata.spell_type == spell_types.JUJU:
         await juju.wait_for_deployment()
 
     events.ModelSettled.set()

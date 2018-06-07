@@ -2,7 +2,7 @@ import asyncio
 
 from conjureup import controllers, errors, events
 from conjureup.app_config import app
-from conjureup.consts import cloud_types
+from conjureup.consts import cloud_types, spell_types
 from conjureup.maas import setup_maas
 from conjureup.ui.views.applicationconfigure import ApplicationConfigureView
 from conjureup.ui.views.applicationlist import ApplicationListView
@@ -63,8 +63,6 @@ class ConfigAppsController:
                                                       self.show_app_list))
 
     def show_app_list(self):
-        if not app.metadata.needs_juju:
-            return controllers.use('deploy').render()
         if app.provider.cloud_type == cloud_types.MAAS:
             app.loop.create_task(self.connect_maas())
 

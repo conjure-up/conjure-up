@@ -1,4 +1,5 @@
 from conjureup import controllers
+from conjureup.consts import spell_types
 from conjureup.app_config import app
 from conjureup.download import EndpointType
 from conjureup.telemetry import track_event
@@ -30,9 +31,9 @@ class AddonsController:
         self.next_screen()
 
     def next_screen(self):
-        if app.metadata.needs_juju:
+        if app.metadata.spell_type == spell_types.JUJU:
             controllers.use('clouds').render()
-        else:
+        elif app.metadata.spell_type == spell_types.SNAP:
             controllers.use('showsteps').render()
 
     def prev_screen(self):

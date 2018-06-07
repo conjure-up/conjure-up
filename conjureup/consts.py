@@ -20,6 +20,11 @@ ALLOWED_CONSTRAINTS = [
 ]
 
 
+class spell_types:
+    SNAP = 'snap'
+    JUJU = 'juju'
+
+
 class cloud_types:
     AWS = 'ec2'
     MAAS = 'maas'

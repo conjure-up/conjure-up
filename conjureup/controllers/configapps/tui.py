@@ -1,4 +1,5 @@
 from conjureup import controllers, utils
+from conjureup.consts import spell_types
 from conjureup.app_config import app
 
 from . import common
@@ -10,7 +11,7 @@ class ConfigAppsController:
                                                       self.finish))
 
     def finish(self):
-        if app.metadata.needs_juju:
+        if app.metadata.spell_type == spell_types.JUJU:
             controllers.use('bootstrap').render()
         else:
             controllers.use('deploy').render()

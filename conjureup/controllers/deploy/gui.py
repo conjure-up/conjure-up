@@ -2,6 +2,7 @@ import asyncio
 from operator import attrgetter
 
 from conjureup import controllers, events
+from conjureup.consts import spell_types
 from conjureup.app_config import app
 from conjureup.ui.views.deploystatus import DeployStatusView
 
@@ -20,7 +21,7 @@ class DeployController:
         app.loop.create_task(self._wait_for_applications(view))
 
     async def _refresh(self, view):
-        if not app.metadata.needs_juju:
+        if not app.metadata.spell_type == spell_types.SNAP:
             return
         applications = sorted(app.current_bundle.applications,
                               key=attrgetter('name'))

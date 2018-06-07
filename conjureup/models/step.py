@@ -8,7 +8,7 @@ import yaml
 
 from conjureup import juju
 from conjureup.app_config import app
-from conjureup.consts import PHASES
+from conjureup.consts import PHASES, spell_types
 from conjureup.telemetry import track_event
 from conjureup.utils import SudoError, arun, can_sudo, is_linux, sentry_report
 
@@ -233,7 +233,7 @@ class StepModel:
         app.env['CONJURE_UP_SPELLSDIR'] = app.conjurefile['spells-dir']
         app.env['CONJURE_UP_SESSION_ID'] = app.session_id
 
-        if app.metadata.needs_juju:
+        if app.metadata.spell_type == spell_types.JUJU:
             cloud_types = juju.get_cloud_types_by_name()
             provider_type = cloud_types[app.provider.cloud]
 
@@ -283,7 +283,7 @@ class StepModel:
 
         # special case for 00_deploy-done to report masked
         # charm hook failures that were retried automatically
-        if not app.no_report and app.metadata.needs_juju:
+        if not app.no_report and app.metadata.spell_type == spell_types.JUJU:
             failed_apps = set()  # only report each charm once
             for line in err_log.splitlines():
                 if 'hook failure, will retry' in line:
