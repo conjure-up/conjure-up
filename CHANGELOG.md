@@ -1,5 +1,56 @@
 # Change Log
 
+## [2.5.7](https://github.com/conjure-up/conjure-up/tree/2.5.7) (2018-06-06)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.6...2.5.7)
+
+**Fixed bugs:**
+
+- No clear instruction why LXD\(localhost\) provider is not available with localhost-only spells [\#1441](https://github.com/conjure-up/conjure-up/issues/1441)
+- Rackspace: image-stream=daily causes error [\#1398](https://github.com/conjure-up/conjure-up/issues/1398)
+- Unable to list controllers: /bin/sh: 1: None: not found  [\#1352](https://github.com/conjure-up/conjure-up/issues/1352)
+- conjure-down app.env\['PATH'\] -- NoneType object is not subscriptable [\#1338](https://github.com/conjure-up/conjure-up/issues/1338)
+- Conjure-up fails while creating juju model with the following. exception: json: cannot unmarshal string into Go struct field Value.tags of type \[\]string [\#1301](https://github.com/conjure-up/conjure-up/issues/1301)
+- conjure-down of localhost lxd openstack fails with AttributeError: 'NoneType' object has no attribute 'controller' [\#1182](https://github.com/conjure-up/conjure-up/issues/1182)
+
+**Closed issues:**
+
+- LXDSetupControllerError: Unable to determine ip address of lxdbr0, please double check `lxc network edit lxdbr0` and make ... [\#1454](https://github.com/conjure-up/conjure-up/issues/1454)
+- LocalhostError: Unable to find a lxd binary. Make sure `snap info lxd` shows as installed, otherwise, run `sudo s... [\#1449](https://github.com/conjure-up/conjure-up/issues/1449)
+- Can we use conjure-up for NovaLXD or NovaKVM without internet ? [\#1446](https://github.com/conjure-up/conjure-up/issues/1446)
+- Too many placement specifications after config change [\#1435](https://github.com/conjure-up/conjure-up/issues/1435)
+- Check lxd storage and networking earlier [\#1431](https://github.com/conjure-up/conjure-up/issues/1431)
+- Conjure-up fails while "Juju Model is initializing" [\#1429](https://github.com/conjure-up/conjure-up/issues/1429)
+- trying to deploy kubernetes: LXD Server or LXC client not compatible [\#1427](https://github.com/conjure-up/conjure-up/issues/1427)
+- NTP not supported in containers: please configure on host [\#1417](https://github.com/conjure-up/conjure-up/issues/1417)
+- Unable to boot strap \(cloud type: localhost\)  [\#1416](https://github.com/conjure-up/conjure-up/issues/1416)
+- fix travis-ci [\#1414](https://github.com/conjure-up/conjure-up/issues/1414)
+-  Waiting for kube-system pods to start [\#1412](https://github.com/conjure-up/conjure-up/issues/1412)
+- Update website - http://webchat.freenode.net/ [\#1411](https://github.com/conjure-up/conjure-up/issues/1411)
+- No attribute ControllerNotFound [\#1405](https://github.com/conjure-up/conjure-up/issues/1405)
+- why not installed? [\#1400](https://github.com/conjure-up/conjure-up/issues/1400)
+- cannot change profile for the next exec call: No such file or directory [\#1392](https://github.com/conjure-up/conjure-up/issues/1392)
+
+**Merged pull requests:**
+
+- Retry deploy on ConnectionClosed [\#1460](https://github.com/conjure-up/conjure-up/pull/1460) ([johnsca](https://github.com/johnsca))
+- Add network and storage check for LXD to cloud screen [\#1459](https://github.com/conjure-up/conjure-up/pull/1459) ([johnsca](https://github.com/johnsca))
+- Dont track LXD network errors [\#1455](https://github.com/conjure-up/conjure-up/pull/1455) ([battlemidget](https://github.com/battlemidget))
+- Bump to Juju 2.3.8 [\#1453](https://github.com/conjure-up/conjure-up/pull/1453) ([battlemidget](https://github.com/battlemidget))
+- Updates the raven python lib to latest stable [\#1452](https://github.com/conjure-up/conjure-up/pull/1452) ([battlemidget](https://github.com/battlemidget))
+- Add LXD no binary found to sentry exception list [\#1450](https://github.com/conjure-up/conjure-up/pull/1450) ([battlemidget](https://github.com/battlemidget))
+- Put color as an option [\#1447](https://github.com/conjure-up/conjure-up/pull/1447) ([gonfva](https://github.com/gonfva))
+- Pass model-config options from conjurefile to juju [\#1444](https://github.com/conjure-up/conjure-up/pull/1444) ([battlemidget](https://github.com/battlemidget))
+- Update libjuju [\#1439](https://github.com/conjure-up/conjure-up/pull/1439) ([johnsca](https://github.com/johnsca))
+- Replace app data after configure rather than merge [\#1436](https://github.com/conjure-up/conjure-up/pull/1436) ([johnsca](https://github.com/johnsca))
+- Update deps and make use of conjurefile for testing [\#1415](https://github.com/conjure-up/conjure-up/pull/1415) ([battlemidget](https://github.com/battlemidget))
+- conjure-down fixes [\#1408](https://github.com/conjure-up/conjure-up/pull/1408) ([battlemidget](https://github.com/battlemidget))
+- Process addons/steps in conjurefile [\#1407](https://github.com/conjure-up/conjure-up/pull/1407) ([battlemidget](https://github.com/battlemidget))
+- Fix AttributeError: ControllerNotFoundException [\#1406](https://github.com/conjure-up/conjure-up/pull/1406) ([johnsca](https://github.com/johnsca))
+- Fix missed usages of argv/opts values to Conjurefile [\#1403](https://github.com/conjure-up/conjure-up/pull/1403) ([johnsca](https://github.com/johnsca))
+- Fix Conjurefile opts not being used in some places [\#1401](https://github.com/conjure-up/conjure-up/pull/1401) ([johnsca](https://github.com/johnsca))
+- Bump Juju version [\#1395](https://github.com/conjure-up/conjure-up/pull/1395) ([battlemidget](https://github.com/battlemidget))
+- Update Conjurefile templating [\#1394](https://github.com/conjure-up/conjure-up/pull/1394) ([battlemidget](https://github.com/battlemidget))
+
 ## [2.5.6](https://github.com/conjure-up/conjure-up/tree/2.5.6) (2018-04-04)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.5...2.5.6)
 
@@ -307,7 +358,6 @@
 - add redis for state caching and step-2-step intercommunication [\#901](https://github.com/conjure-up/conjure-up/issues/901)
 - Update screen selection/ordering [\#897](https://github.com/conjure-up/conjure-up/issues/897)
 - Provide better feedback if shutdown process takes some time [\#835](https://github.com/conjure-up/conjure-up/issues/835)
-- existing controllers filtered by type as well [\#771](https://github.com/conjure-up/conjure-up/issues/771)
 
 **Fixed bugs:**
 
@@ -356,7 +406,6 @@
 - Problem with container IPs - Juju can't reach them [\#865](https://github.com/conjure-up/conjure-up/issues/865)
 - Unable to install OpenStack on single node with conjure-up [\#858](https://github.com/conjure-up/conjure-up/issues/858)
 - Snap fails to install, with ERROR: '~ubuntu-lxc' user or team does not exist [\#818](https://github.com/conjure-up/conjure-up/issues/818)
-- syncing spell repository: handle git related conflicts better [\#813](https://github.com/conjure-up/conjure-up/issues/813)
 
 **Closed issues:**
 
@@ -409,13 +458,11 @@
 - AttributeError: 'NoneType' object has no attribute 'keys' [\#1006](https://github.com/conjure-up/conjure-up/issues/1006)
 - cloud native support [\#895](https://github.com/conjure-up/conjure-up/issues/895)
 - Document how to access containers deployed with Autopilot [\#881](https://github.com/conjure-up/conjure-up/issues/881)
-- Kubectl not finding the "config" file after deployment with error "The connection to the server localhost:8080 was refused" [\#790](https://github.com/conjure-up/conjure-up/issues/790)
 - document extending sudo timeout [\#1104](https://github.com/conjure-up/conjure-up/issues/1104)
 - remove status icon in steps view and keep only in runsteps [\#1102](https://github.com/conjure-up/conjure-up/issues/1102)
 - Error on macOS trying to deploy using local controller with MAAS [\#1083](https://github.com/conjure-up/conjure-up/issues/1083)
 - conjure-up unable to obtain a node from MAAS [\#876](https://github.com/conjure-up/conjure-up/issues/876)
 - Juju failed to bootstrap: maas [\#817](https://github.com/conjure-up/conjure-up/issues/817)
-- Add details about spells/deployments on the website [\#791](https://github.com/conjure-up/conjure-up/issues/791)
 
 **Merged pull requests:**
 
@@ -552,9 +599,6 @@
 - embed lxd [\#850](https://github.com/conjure-up/conjure-up/issues/850)
 - enable oracle provider [\#833](https://github.com/conjure-up/conjure-up/issues/833)
 - \[ARM64\] Need conjure-up snap in snap store [\#828](https://github.com/conjure-up/conjure-up/issues/828)
-- bootstrap exception capture cloud type [\#789](https://github.com/conjure-up/conjure-up/issues/789)
-- bundlewriter should place generated bundles inside their cached spell dir [\#787](https://github.com/conjure-up/conjure-up/issues/787)
-- push localhost requirements to the cloud picker [\#772](https://github.com/conjure-up/conjure-up/issues/772)
 
 **Fixed bugs:**
 
@@ -581,17 +625,6 @@
 - Conjure-up screen does not get past adding machine\['0'\] [\#819](https://github.com/conjure-up/conjure-up/issues/819)
 - entering sudo password fails to allow a snap to install [\#816](https://github.com/conjure-up/conjure-up/issues/816)
 - error during conjure-up landscape to an existing maas controller [\#814](https://github.com/conjure-up/conjure-up/issues/814)
-- Conjure up isn't bootstraping juju [\#810](https://github.com/conjure-up/conjure-up/issues/810)
-- conjure-up error: Unable to find credentials for cloud looking for local-host [\#807](https://github.com/conjure-up/conjure-up/issues/807)
-- Deployment of kubernetes-core crashes on 2.2-beta3 [\#806](https://github.com/conjure-up/conjure-up/issues/806)
-- azure: need to make sure generated model names are less than 80 char [\#795](https://github.com/conjure-up/conjure-up/issues/795)
-- Calling incorrect ensure\_machines when cloud name != maas [\#794](https://github.com/conjure-up/conjure-up/issues/794)
-- Deploying with Juju 2.2 beta1 and vsphere provider - Conjure-up errors with: Application did not start successfully [\#785](https://github.com/conjure-up/conjure-up/issues/785)
-- on OSX conjure-up openstack throws traceback [\#779](https://github.com/conjure-up/conjure-up/issues/779)
-- OS X "Unable to find model" [\#778](https://github.com/conjure-up/conjure-up/issues/778)
-- conjure-up errors on the kubernetes-core spell on OSX [\#776](https://github.com/conjure-up/conjure-up/issues/776)
-- maas deploy error in get\_models [\#774](https://github.com/conjure-up/conjure-up/issues/774)
-- conjure-up breaks bsdtar \(& possibly others\) due to lib install hook [\#770](https://github.com/conjure-up/conjure-up/issues/770)
 
 **Closed issues:**
 
@@ -604,7 +637,6 @@
 - Failing to connect to LXD server when deploying spells [\#841](https://github.com/conjure-up/conjure-up/issues/841)
 - Conjure-up --bootstrap-to \<hostname\> no progress  'fetching juju agent version 2.1.2 for amd64' [\#824](https://github.com/conjure-up/conjure-up/issues/824)
 - Reason: Juju failed to bootstrap: maas [\#822](https://github.com/conjure-up/conjure-up/issues/822)
-- conjure-up doesn't set terminal title [\#775](https://github.com/conjure-up/conjure-up/issues/775)
 
 **Merged pull requests:**
 
@@ -635,10 +667,6 @@
 
 ## [2.2.0-beta3](https://github.com/conjure-up/conjure-up/tree/2.2.0-beta3) (2017-05-09)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.5...2.2.0-beta3)
-
-**Fixed bugs:**
-
-- conjure-up from edge r154 nonetype exception deploying landscape on maas [\#773](https://github.com/conjure-up/conjure-up/issues/773)
 
 **Closed issues:**
 
@@ -671,40 +699,8 @@
 ## [2.1.3](https://github.com/conjure-up/conjure-up/tree/2.1.3) (2017-04-12)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.2.0-beta2...2.1.3)
 
-**Fixed bugs:**
-
-- The "install-dependencies" and "install" make targets don't work. [\#804](https://github.com/conjure-up/conjure-up/issues/804)
-
-**Closed issues:**
-
-- error to build Openstack Cloud  [\#812](https://github.com/conjure-up/conjure-up/issues/812)
-- deploy of Landscape in Openstack Autopilot is in permanent pending status [\#805](https://github.com/conjure-up/conjure-up/issues/805)
-- Expired timestamp [\#803](https://github.com/conjure-up/conjure-up/issues/803)
-- Error while conjuring up kubernetes-core "Applications did not start successfully" [\#802](https://github.com/conjure-up/conjure-up/issues/802)
-- Upgrade to Ocata breaks openstack-novaxld [\#801](https://github.com/conjure-up/conjure-up/issues/801)
-
-**Merged pull requests:**
-
-- Feature/better input validation/686 [\#809](https://github.com/conjure-up/conjure-up/pull/809) ([battlemidget](https://github.com/battlemidget))
-- Fix error with normalization of lxd / localhost [\#808](https://github.com/conjure-up/conjure-up/pull/808) ([johnsca](https://github.com/johnsca))
-- Bug/738/scroll results summary [\#800](https://github.com/conjure-up/conjure-up/pull/800) ([battlemidget](https://github.com/battlemidget))
-- Fix normalization of lxd / localhost cloud type [\#799](https://github.com/conjure-up/conjure-up/pull/799) ([johnsca](https://github.com/johnsca))
-- More cloud type checks [\#798](https://github.com/conjure-up/conjure-up/pull/798) ([battlemidget](https://github.com/battlemidget))
-- Fixes \#794 - checks correct cloud type for maas/enable default series [\#797](https://github.com/conjure-up/conjure-up/pull/797) ([battlemidget](https://github.com/battlemidget))
-- Fixes \#795 shorten model name to max 28 characters [\#796](https://github.com/conjure-up/conjure-up/pull/796) ([battlemidget](https://github.com/battlemidget))
-- Filter controllers by cloud by type instead of name [\#793](https://github.com/conjure-up/conjure-up/pull/793) ([johnsca](https://github.com/johnsca))
-- Fix "invalid file" error when reading spell bundle [\#792](https://github.com/conjure-up/conjure-up/pull/792) ([johnsca](https://github.com/johnsca))
-
 ## [2.2.0-beta2](https://github.com/conjure-up/conjure-up/tree/2.2.0-beta2) (2017-03-30)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.2.0-beta1...2.2.0-beta2)
-
-**Merged pull requests:**
-
-- Fixes \#775 [\#786](https://github.com/conjure-up/conjure-up/pull/786) ([battlemidget](https://github.com/battlemidget))
-- Fixes \#556 [\#783](https://github.com/conjure-up/conjure-up/pull/783) ([battlemidget](https://github.com/battlemidget))
-- Fix trace from sudo check if no steps [\#769](https://github.com/conjure-up/conjure-up/pull/769) ([johnsca](https://github.com/johnsca))
-- Improve error handling for sudo in GUI flow [\#768](https://github.com/conjure-up/conjure-up/pull/768) ([johnsca](https://github.com/johnsca))
-- Improve can\_sudo check [\#767](https://github.com/conjure-up/conjure-up/pull/767) ([johnsca](https://github.com/johnsca))
 
 ## [2.2.0-beta1](https://github.com/conjure-up/conjure-up/tree/2.2.0-beta1) (2017-03-23)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.2...2.2.0-beta1)
