@@ -10,7 +10,10 @@ class ConfigAppsController:
                                                       self.finish))
 
     def finish(self):
-        controllers.use('bootstrap').render()
+        if app.metadata.needs_juju:
+            controllers.use('bootstrap').render()
+        else:
+            controllers.use('deploy').render()
 
 
 _controller_class = ConfigAppsController
