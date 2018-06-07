@@ -50,6 +50,12 @@ class SpellMetadata(dict):
         """
         return self.get('cloud-blacklist', [])
 
+    @property
+    def needs_juju(self):
+        """ returns if the spell needs juju to deploy
+        """
+        return self.get('needs-juju', True)
+
     @classmethod
     def load(cls, path):
         """ Load spell metadata

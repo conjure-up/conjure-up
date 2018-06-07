@@ -20,6 +20,8 @@ class DeployController:
         app.loop.create_task(self._wait_for_applications(view))
 
     async def _refresh(self, view):
+        if not app.metadata.needs_juju:
+            return
         applications = sorted(app.current_bundle.applications,
                               key=attrgetter('name'))
         await events.ModelConnected.wait()

@@ -493,6 +493,8 @@ def setup_metadata_controller():
     controller. You can also further customize the bundle by providing a local
     bundle-custom.yaml that will be deep merged over whatever bundle is
     referenced. """
+    if not app.metadata.needs_juju:
+        return
     spell_dir = Path(app.config['spell-dir'])
     bundle_filename = spell_dir / 'bundle.yaml'
     bundle_custom_filename = spell_dir / 'bundle-custom.yaml'

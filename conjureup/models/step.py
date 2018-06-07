@@ -230,21 +230,23 @@ class StepModel:
                 'passwordless sudo required',
             ))
 
-        cloud_types = juju.get_cloud_types_by_name()
-        provider_type = cloud_types[app.provider.cloud]
-
-        app.env['JUJU_PROVIDERTYPE'] = provider_type
-        # not all providers have a credential, e.g., localhost
-        app.env['JUJU_CREDENTIAL'] = app.provider.credential or ''
-        app.env['JUJU_CONTROLLER'] = app.provider.controller
-        app.env['JUJU_MODEL'] = app.provider.model
-        app.env['JUJU_REGION'] = app.provider.region or ''
         app.env['CONJURE_UP_SPELLSDIR'] = app.conjurefile['spells-dir']
         app.env['CONJURE_UP_SESSION_ID'] = app.session_id
 
-        if provider_type == "maas":
-            app.env['MAAS_ENDPOINT'] = app.maas.endpoint
-            app.env['MAAS_APIKEY'] = app.maas.api_key
+        if app.metadata.needs_juju:
+            cloud_types = juju.get_cloud_types_by_name()
+            provider_type = cloud_types[app.provider.cloud]
+
+            app.env['JUJU_PROVIDERTYPE'] = provider_type
+            # not all providers have a credential, e.g., localhost
+            app.env['JUJU_CREDENTIAL'] = app.provider.credential or ''
+            app.env['JUJU_CONTROLLER'] = app.provider.controller
+            app.env['JUJU_MODEL'] = app.provider.model
+            app.env['JUJU_REGION'] = app.provider.region or ''
+
+            if provider_type == "maas":
+                app.env['MAAS_ENDPOINT'] = app.maas.endpoint
+                app.env['MAAS_APIKEY'] = app.maas.api_key
 
         for step_name, step_data in app.steps_data.items():
             for key, value in step_data.items():
@@ -281,7 +283,7 @@ class StepModel:
 
         # special case for 00_deploy-done to report masked
         # charm hook failures that were retried automatically
-        if not app.no_report:
+        if not app.no_report or app.metadata.needs_juju:
             failed_apps = set()  # only report each charm once
             for line in err_log.splitlines():
                 if 'hook failure, will retry' in line:
