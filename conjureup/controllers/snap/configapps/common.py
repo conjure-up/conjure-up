@@ -1,4 +1,4 @@
-from conjureup import utils
+from conjureup import controllers
 from conjureup.app_config import app
 
 
@@ -8,5 +8,5 @@ async def run_before_config(msg_cb, done_cb):
             continue
         await step.before_config(msg_cb)
     if app.has_bundle_modifications:
-        utils.setup_metadata_controller()
+        controllers.setup_metadata_controller()
     done_cb()

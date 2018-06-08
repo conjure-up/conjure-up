@@ -149,7 +149,7 @@ async def _start(*args, **kwargs):
         controllers.use('spellpicker').render()
         return
 
-    utils.setup_metadata_controller()
+    controllers.setup_metadata_controller()
 
     if app.headless:
         controllers.use('clouds').render()
@@ -343,7 +343,7 @@ def main():
         AddonModel.load_spell_addons()
         app.selected_addons = addon['addons']
         app.alias_given = True
-        utils.setup_metadata_controller()
+        controllers.setup_metadata_controller()
         app.endpoint_type = EndpointType.LOCAL_DIR
 
     elif app.endpoint_type == EndpointType.LOCAL_SEARCH:

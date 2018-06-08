@@ -44,7 +44,7 @@ class ShowStepsController:
 
     def finish(self):
         if app.has_bundle_modifications:
-            utils.setup_metadata_controller()
+            controllers.setup_metadata_controller()
         return controllers.use('configapps').render()
 
     def back(self):

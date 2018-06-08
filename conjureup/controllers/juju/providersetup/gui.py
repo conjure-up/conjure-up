@@ -1,3 +1,3 @@
-from conjureup.controllers.providersetup import common
+from conjureup.controllers.juju.providersetup import common
 
 _controller_class = common.ProviderSetupController

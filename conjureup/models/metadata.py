@@ -4,6 +4,7 @@ This is the information found metadata.yaml in the
 current spells top-level directory
 """
 import yaml
+from conjureup.consts import spell_types
 
 
 class SpellMetadataException(Exception):
@@ -51,10 +52,10 @@ class SpellMetadata(dict):
         return self.get('cloud-blacklist', [])
 
     @property
-    def needs_juju(self):
-        """ returns if the spell needs juju to deploy
+    def spell_type(self):
+        """ returns spell type
         """
-        return self.get('needs-juju', True)
+        return self.get('spell-type', spell_types.JUJU)
 
     @classmethod
     def load(cls, path):

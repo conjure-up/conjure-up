@@ -19,14 +19,11 @@ from pathlib import Path
 from subprocess import PIPE, Popen, check_call, check_output
 
 import aiofiles
-import yaml
 from pkg_resources import parse_version
 from raven.processors import SanitizePasswordsProcessor
 from termcolor import cprint
 
-from conjureup import charm
 from conjureup.app_config import app
-from conjureup.bundle import Bundle
 from conjureup.models.metadata import SpellMetadata
 from conjureup.telemetry import track_event
 
@@ -486,63 +483,6 @@ def install_user():
     if user is None:
         raise Exception("Unable to determine current user.")
     return user
-
-
-def setup_metadata_controller():
-    """ Pulls in a local bundle or via charmstore api and sets up our
-    controller. You can also further customize the bundle by providing a local
-    bundle-custom.yaml that will be deep merged over whatever bundle is
-    referenced. """
-    if not app.metadata.needs_juju:
-        return
-    spell_dir = Path(app.config['spell-dir'])
-    bundle_filename = spell_dir / 'bundle.yaml'
-    bundle_custom_filename = spell_dir / 'bundle-custom.yaml'
-    if bundle_filename.exists():
-        # Load bundle data early so we can merge any additional charm options
-        bundle_data = Bundle(yaml.load(bundle_filename.read_text()))
-    else:
-        bundle_name = app.metadata.bundle_name
-        if bundle_name is None:
-            raise Exception(
-                "Could not determine a bundle to download, please make sure "
-                "the spell contains a 'bundle-name' field."
-            )
-        bundle_channel = app.conjurefile['channel']
-
-        app.log.debug("Pulling bundle for {} from channel: {}".format(
-            bundle_name, bundle_channel))
-        bundle_data = Bundle(charm.get_bundle(bundle_name, bundle_channel))
-
-    if bundle_custom_filename.exists():
-        bundle_custom = yaml.load(slurp(bundle_custom_filename))
-        bundle_data.apply(bundle_custom)
-
-    for name in app.selected_addons:
-        addon = app.addons[name]
-        bundle_data.apply(addon.bundle)
-
-    steps = list(chain(app.steps,
-                       chain.from_iterable(app.addons[addon].steps
-                                           for addon in app.selected_addons)))
-    for step in steps:
-        if not (step.bundle_add or step.bundle_remove):
-            continue
-        if step.bundle_remove:
-            fragment = yaml.safe_load(step.bundle_remove.read_text())
-            bundle_data.subtract(fragment)
-        if step.bundle_add:
-            fragment = yaml.safe_load(step.bundle_add.read_text())
-            bundle_data.apply(fragment)
-
-    if app.conjurefile['bundle-remove']:
-        fragment = yaml.safe_load(app.conjurefile['bundle-remove'].read_text())
-        bundle_data.subtract(fragment)
-    if app.conjurefile['bundle-add']:
-        fragment = yaml.safe_load(app.conjurefile['bundle-add'].read_text())
-        bundle_data.apply(fragment)
-
-    app.current_bundle = bundle_data
 
 
 def set_chosen_spell(spell_name, spell_dir):

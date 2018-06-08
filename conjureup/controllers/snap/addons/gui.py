@@ -3,7 +3,6 @@ from conjureup.app_config import app
 from conjureup.download import EndpointType
 from conjureup.telemetry import track_event
 from conjureup.ui.views.addons import AddonsView
-from conjureup.utils import setup_metadata_controller
 
 
 class AddonsController:
@@ -26,7 +25,7 @@ class AddonsController:
             for addon in app.selected_addons:
                 track_event("Addon Selected", addon, "")
             # reload the bundle data w/ addons merged
-            setup_metadata_controller()
+            controllers.setup_metadata_controller()
         self.next_screen()
 
     def next_screen(self):

@@ -21,7 +21,7 @@ class SpellPickerController:
             utils.set_spell_metadata()
             StepModel.load_spell_steps()
             AddonModel.load_spell_addons()
-            utils.setup_metadata_controller()
+            controllers.setup_metadata_controller()
         return controllers.use('addons').render()
 
     def render(self):
