@@ -187,6 +187,8 @@ class AppConfig:
         if not self.provider:
             # don't bother saving if they haven't even picked a cloud yet
             return
+        if not self.conjurefile:
+            return
         self.log.info('Storing conjure-up state')
         if self.juju.authenticated:
             await self.juju.client.set_config(

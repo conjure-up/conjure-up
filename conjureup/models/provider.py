@@ -372,7 +372,7 @@ class Localhost(BaseProvider):
             _, out, err = await utils.arun(cmd)
             return json.loads(out)
         except json.decoder.JSONDecodeError:
-            raise errors.LXDParseError(self.lxd_bin)
+            raise errors.LXDParseError(self.lxc_bin)
         except FileNotFoundError:
             raise errors.LXDBinaryNotFoundError()
         except CalledProcessError as e:
