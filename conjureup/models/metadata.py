@@ -4,6 +4,7 @@ This is the information found metadata.yaml in the
 current spells top-level directory
 """
 import yaml
+
 from conjureup.consts import spell_types
 
 

@@ -1,7 +1,3 @@
-class SpellPickerController:
-
-    def render(self):
-        pass
-
+from conjureup.controllers.spellpicker.tui import SpellPickerController
 
 _controller_class = SpellPickerController

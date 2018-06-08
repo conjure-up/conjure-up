@@ -10,7 +10,7 @@ class ConfigAppsController:
                                                       self.finish))
 
     def finish(self):
-        controllers.use('bootstrap').render()
+        controllers.use('deploy').render()
 
 
 _controller_class = ConfigAppsController
