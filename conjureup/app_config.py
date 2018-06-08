@@ -183,40 +183,6 @@ class AppConfig:
         return any(step.bundle_add or step.bundle_remove
                    for step in self.all_steps)
 
-    def to_json(self):
-        """
-        Serialize application config to JSON
-
-        We blacklist several items as they are intended to be reloaded during
-        every invocation of conjure-up. Also blacklist env for security
-        precautions.
-        """
-        blacklist = ['loop', 'log', 'maas', 'argv', 'spells_index',
-                     'juju', 'ui', 'bootstrap', 'endpoint_type', 'provider',
-                     'metadata_controller', 'state',
-                     'env', 'sentry', 'steps', 'sudo_pass', 'addons']
-        new_dict = {}
-        for k, v in self.__dict__.items():
-            if k.startswith('__') or callable(getattr(self, k)):
-                continue
-            if k in blacklist:
-                continue
-            new_dict[k] = v
-        return json.dumps(new_dict)
-
-    def from_json(self, data):
-        """ Deserializes application state and updates app_config
-        """
-        if isinstance(data, bytes):
-            data = data.decode('utf8')
-        state = json.loads(data)
-        for k, v in state.items():
-            try:
-                getattr(self, k)
-            except AttributeError:
-                continue
-            setattr(self, k, v)
-
     async def save(self):
         if not self.provider:
             # don't bother saving if they haven't even picked a cloud yet
@@ -224,12 +190,18 @@ class AppConfig:
         self.log.info('Storing conjure-up state')
         if self.juju.authenticated:
             await self.juju.client.set_config(
-                {'extra-info': self.to_json()})
+                {'extra-info': json.dumps(self.conjurefile)})
             self.log.info('State saved in model config')
             # Check for existing key and clear it
             self.state.pop(self._internal_state_key, None)
         else:
-            self.state[self._internal_state_key] = self.to_json()
+            # sanitize
+            self.conjurefile['conf-file'] = [
+                str(conf_path)
+                for conf_path in self.conjurefile['conf-file']
+            ]
+            self.state[self._internal_state_key] = json.dumps(
+                self.conjurefile)
             self.log.info('State saved')
 
     async def restore(self):
@@ -245,7 +217,7 @@ class AppConfig:
             result = self.state.get(self._internal_state_key)
             if result:
                 self.log.info("Found cached state, reloading.")
-                self.from_json(result)
+                self.conjurefile = json.loads(result)
         except json.JSONDecodeError as e:
             # Dont fail fatally if state information is incorrect. Just log it
             # and move on
