@@ -1,5 +1,4 @@
 aiofiles==0.3.1
-bundle-placement==0.0.2
 Jinja2==2.9.6
 juju==0.7.5
 juju-wait==2.6.3
@@ -11,7 +10,6 @@ requests-oauthlib==0.8.0
 termcolor==1.1.0
 ubuntui==0.1.9
 urwid==1.3.1
-ws4py==0.3.4
 git+https://github.com/battlemidget/env.git@1.0.0
 sh==1.12.13
 raven==6.9.0
