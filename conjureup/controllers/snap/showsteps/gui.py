@@ -1,5 +1,5 @@
 from conjureup import controllers
-from conjureup.controllers.showsteps.gui import ShowStepsController
+from conjureup.controllers.base.showsteps.gui import ShowStepsController
 
 
 class SnapShowStepsController(ShowStepsController):

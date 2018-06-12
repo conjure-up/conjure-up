@@ -1,3 +1,3 @@
-from conjureup.controllers.spellpicker.gui import SpellPickerController
+from conjureup.controllers.base.spellpicker.gui import SpellPickerController
 
 _controller_class = SpellPickerController

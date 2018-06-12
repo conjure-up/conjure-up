@@ -1,3 +1,3 @@
-from conjureup.controllers.showsteps.gui import ShowStepsController
+from conjureup.controllers.base.showsteps.gui import ShowStepsController
 
 _controller_class = ShowStepsController
