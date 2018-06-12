@@ -1,6 +1,6 @@
 from operator import attrgetter
 
-from conjureup import controllers, utils
+from conjureup import controllers
 from conjureup.app_config import app
 from conjureup.ui.views.steps import ShowStepsView
 from conjureup.ui.widgets.step import StepForm
