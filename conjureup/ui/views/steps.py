@@ -2,6 +2,7 @@ from ubuntui.widgets.hr import HR
 from urwid import Columns, Pile, Text
 
 from conjureup.app_config import app
+from conjureup.consts import spell_types
 from conjureup.ui.views.base import BaseView
 from conjureup.ui.widgets.step import StepResult
 
@@ -60,6 +61,11 @@ class RunStepsView(BaseView):
     def mark_complete(self):
         app.ui.set_header(title="Post-Deploy Steps Complete",
                           excerpt="Your deployment is now complete")
-        self.set_footer("Your big software is deployed, "
-                        "press the (Q) key to exit.")
+
+        if app.metadata.spell_type == spell_types.JUJU:
+            self.set_footer("Your big software is deployed, "
+                            "press the (Q) key to exit.")
+        else:
+            self.set_footer("Your software is deployed, "
+                            "press the (Q) key to exit")
         self._swap_focus()

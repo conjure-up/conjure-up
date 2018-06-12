@@ -7,6 +7,8 @@ from itertools import chain
 
 import yaml
 
+from conjureup.consts import spell_types
+
 
 class BundleInvalidApplication(Exception):
     pass
@@ -96,8 +98,64 @@ class BundleApplicationFragment(dict):
         return items
 
 
+class SnapBundleApplicationFragment(dict):
+    def __init__(self, name, *args, **kwargs):
+        self.name = name
+        super().__init__(*args, **kwargs)
+        self._snap = self.get('snap', name)
+        self._channel = self.get('channel', 'stable')
+        self._options = self.get('options', {})
+        self._confinement = self.get('confinement', None)
+
+    @property
+    def snap(self):
+        """ Set/Get snap
+        """
+        return self._snap
+
+    @snap.setter
+    def snap(self, val):
+        self._snap = val
+
+    @property
+    def confinement(self):
+        """ Get confinment
+        """
+        return self._confinement
+
+    @confinement.setter
+    def confinement(self, val):
+        """ Set confinement value
+        """
+        self._confinement = val
+
+    @property
+    def channel(self):
+        """ Set/Get snap channel
+        """
+        return self._channel
+
+    @channel.setter
+    def channel(self, val):
+        self._channel = val
+
+    @property
+    def options(self):
+        """ Set/Get application options
+        """
+        return self._options
+
+    @options.setter
+    def options(self, val):
+        self._options.update(val)
+
+    def to_dict(self):
+        return self
+
+
 class Bundle(dict):
-    def __init__(self, bundle):
+    def __init__(self, bundle, spell_type=spell_types.JUJU):
+        self.spell_type = spell_type
         super().__init__(self._normalize_bundle(bundle))
 
     def _normalize_bundle(self, bundle):
@@ -246,4 +304,6 @@ class Bundle(dict):
             raise BundleInvalidApplication(
                 "Unable find a bundle fragment for: {}".format(app_name))
         _fragment = self['applications'][app_name]
+        if self.spell_type == spell_types.SNAP:
+            return SnapBundleApplicationFragment(app_name, _fragment)
         return BundleApplicationFragment(app_name, _fragment)

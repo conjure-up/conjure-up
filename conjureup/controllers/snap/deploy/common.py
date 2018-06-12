@@ -1,16 +1,12 @@
-import asyncio
 import os
 from datetime import datetime
+from subprocess import CalledProcessError
 
-import websockets
-
-from conjureup import events, juju, utils
+from conjureup import errors, events, utils
 from conjureup.app_config import app
 
 
 async def do_deploy(msg_cb):
-    await events.ModelConnected.wait()
-
     for step in app.steps:
         await step.before_deploy(msg_cb=msg_cb)
     events.PreDeployComplete.set()
@@ -25,14 +21,21 @@ async def do_deploy(msg_cb):
                           app.env['CONJURE_UP_SPELL'],
                           datetimestr))
     utils.spew(fn, app.current_bundle.to_yaml())
-    for attempt in range(3):
-        try:
-            await app.juju.client.deploy(fn)
-            break  # success
-        except websockets.ConnectionClosed:
-            if attempt == 2:
-                raise
-            await asyncio.sleep(1)
+    try:
+        for _app in app.current_bundle.applications:
+            cmd = ['sudo', 'snap', 'install',
+                   _app.snap, '--channel', _app.channel]
+            if hasattr(_app, 'confinement') and _app.confinement:
+                cmd += ['--{}'.format(_app.confinement)]
+            ret, out, err = await utils.arun(
+                cmd,
+                cb_stdout=msg_cb)
+            if ret > 0:
+                raise errors.DeploymentFailure(err)
+    except CalledProcessError as e:
+        app.log.error(
+            "Could not snap install application: {}".format(e))
+        raise
 
     events.DeploymentComplete.set()
 
@@ -47,7 +50,7 @@ async def wait_for_applications(msg_cb):
     app.log.info(msg)
     msg_cb(msg)
 
-    await juju.wait_for_deployment()
+    # await juju.wait_for_deployment()
 
     events.ModelSettled.set()
     msg = 'Model settled.'

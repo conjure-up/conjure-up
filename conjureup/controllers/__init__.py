@@ -61,7 +61,45 @@ def setup_metadata_controller():
 def _setup_snap_metadata_controller():
     """ Sets metadata for a snap spell
     """
-    return
+    spell_dir = Path(app.config['spell-dir'])
+    bundle_filename = spell_dir / 'bundle.yaml'
+    bundle_custom_filename = spell_dir / 'bundle-custom.yaml'
+    if bundle_filename.exists():
+        # Load bundle data early so we can merge any additional charm options
+        bundle_data = Bundle(yaml.load(bundle_filename.read_text()),
+                             spell_type=app.metadata.spell_type)
+    else:
+        bundle_data = Bundle(spell_type=app.metadata.spell_type)
+
+    if bundle_custom_filename.exists():
+        bundle_custom = yaml.load(slurp(bundle_custom_filename))
+        bundle_data.apply(bundle_custom)
+
+    for name in app.selected_addons:
+        addon = app.addons[name]
+        bundle_data.apply(addon.bundle)
+
+    steps = list(chain(app.steps,
+                       chain.from_iterable(app.addons[addon].steps
+                                           for addon in app.selected_addons)))
+    for step in steps:
+        if not (step.bundle_add or step.bundle_remove):
+            continue
+        if step.bundle_remove:
+            fragment = yaml.safe_load(step.bundle_remove.read_text())
+            bundle_data.subtract(fragment)
+        if step.bundle_add:
+            fragment = yaml.safe_load(step.bundle_add.read_text())
+            bundle_data.apply(fragment)
+
+    if app.conjurefile['bundle-remove']:
+        fragment = yaml.safe_load(app.conjurefile['bundle-remove'].read_text())
+        bundle_data.subtract(fragment)
+    if app.conjurefile['bundle-add']:
+        fragment = yaml.safe_load(app.conjurefile['bundle-add'].read_text())
+        bundle_data.apply(fragment)
+
+    app.current_bundle = bundle_data
 
 
 def _setup_juju_metadata_controller():
@@ -134,13 +172,18 @@ def use(controller):
         # we don't want to allow any new controllers to be rendered
         return NoopController()
 
+    if app.metadata and hasattr(app.metadata, 'spell_type'):
+        spell_type = app.metadata.spell_type
+    else:
+        spell_type = consts.spell_types.JUJU
+
     if app.headless:
         pkg = ("conjureup.controllers.{}.{}.tui".format(
-            app.metadata.spell_type,
+            spell_type,
             controller))
     else:
         pkg = ("conjureup.controllers.{}.{}.gui".format(
-            app.metadata.spell_type, controller))
+            spell_type, controller))
     module = import_module(pkg)
     if '_controller_class' in dir(module):
         return module._controller_class()
