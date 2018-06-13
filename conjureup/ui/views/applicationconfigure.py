@@ -2,8 +2,8 @@
 
 """
 
-from juju.constraints import parse as parse_constraints
 from juju.constraints import normalize_key
+from juju.constraints import parse as parse_constraints
 from ubuntui.widgets.hr import HR
 from urwid import Columns, Text
 
