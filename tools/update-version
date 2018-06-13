@@ -18,12 +18,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import yaml
 from pathlib import Path
-from yaml.events import MappingStartEvent, MappingEndEvent
+
+import yaml
+from yaml.events import MappingEndEvent, MappingStartEvent
 from yaml.nodes import MappingNode
 from yaml.serializer import Serializer
-
 
 VERSION = Path('VERSION').read_text().strip('\n')
 JUJU_VERSION = Path('JUJU_VERSION').read_text().strip('\n')
