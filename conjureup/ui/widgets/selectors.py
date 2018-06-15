@@ -191,6 +191,8 @@ class SelectList(Pile):
             if opt.value == value:
                 self.select_item(i)
                 break
+        else:
+            self.select_first()
 
     def select_first(self):
         opts = self.option_widgets
