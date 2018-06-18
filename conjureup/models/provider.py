@@ -364,6 +364,7 @@ class Localhost(BaseProvider):
         else:
             segment_prefix = Path('/1.0')
             url = str(segment_prefix / segment)
+        out, err = None, None
         try:
             if not self.lxc_bin:
                 raise errors.LXDBinaryNotFoundError()
@@ -372,6 +373,10 @@ class Localhost(BaseProvider):
             _, out, err = await utils.arun(cmd)
             return json.loads(out)
         except json.decoder.JSONDecodeError:
+            # log what we got for out and err; it's possible the user may
+            # get a different result when they run it manually
+            app.log.error('LXD Parse error: stdout: {}'.format(out))
+            app.log.error('LXD Parse error: stderr: {}'.format(err))
             raise errors.LXDParseError(self.lxc_bin)
         except FileNotFoundError:
             raise errors.LXDBinaryNotFoundError()
