@@ -510,7 +510,7 @@ def __available_on_darwin(key):
     """ Returns True if spell is available on macOS
     """
     metadata = get_spell_metadata(key)
-    if is_darwin() and metadata.cloud_whitelist \
+    if metadata.cloud_whitelist \
        and 'localhost' in metadata.cloud_whitelist:
         return False
     if metadata.spell_type == consts.spell_types.SNAP:
@@ -524,7 +524,7 @@ def find_spells():
     _spells = []
     for category, cat_dict in app.spells_index.items():
         for sd in cat_dict['spells']:
-            if not __available_on_darwin(sd['key']):
+            if is_darwin() and not __available_on_darwin(sd['key']):
                 continue
             _spells.append((category, sd))
     return _spells
@@ -540,7 +540,7 @@ def find_spells_matching(key):
     if key in app.spells_index:
         _spells = []
         for sd in app.spells_index[key]['spells']:
-            if not __available_on_darwin(sd['key']):
+            if is_darwin() and not __available_on_darwin(sd['key']):
                 continue
             _spells.append((key, sd))
         return _spells
@@ -548,7 +548,7 @@ def find_spells_matching(key):
     for category, d in app.spells_index.items():
         for spell in d['spells']:
             if spell['key'] == key:
-                if not __available_on_darwin(spell['key']):
+                if is_darwin() and not __available_on_darwin(spell['key']):
                     continue
                 return [(category, spell)]
     return []
