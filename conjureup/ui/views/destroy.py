@@ -4,10 +4,13 @@ from operator import itemgetter
 from ubuntui.ev import EventLoop
 from ubuntui.utils import Color, Padding
 from ubuntui.widgets.buttons import menu_btn
-from urwid import Columns, Filler, Frame, Pile, Text, WidgetWrap
+from urwid import Filler, Pile, Text
+from conjureup.ui.views.base import BaseView
 
 
-class DestroyView(WidgetWrap):
+class DestroyView(BaseView):
+    title = "Destroy Deployment"
+    subtitle = "Please choose a deployment to destroy"
 
     def __init__(self, app, models, cb):
         self.app = app
@@ -15,46 +18,7 @@ class DestroyView(WidgetWrap):
         self.controllers = models.keys()
         self.models = models
         self.config = self.app.config
-        self.buttons_pile_selected = False
-        self.frame = Frame(body=self._build_widget(),
-                           footer=self._build_footer())
-        super().__init__(self.frame)
-
-    def keypress(self, size, key):
-        if key in ['tab', 'shift tab']:
-            self._swap_focus()
-        return super().keypress(size, key)
-
-    def _swap_focus(self):
-        if not self.buttons_pile_selected:
-            self.buttons_pile_selected = True
-            self.frame.focus_position = 'footer'
-            self.buttons_pile.focus_position = 1
-        else:
-            self.buttons_pile_selected = False
-            self.frame.focus_position = 'body'
-
-    def _build_buttons(self):
-        cancel = menu_btn(on_press=self.cancel,
-                          label="\n  QUIT\n")
-        buttons = [
-            Padding.line_break(""),
-            Color.menu_button(cancel,
-                              focus_map='button_primary focus'),
-        ]
-        self.buttons_pile = Pile(buttons)
-        return self.buttons_pile
-
-    def _build_footer(self):
-        footer_pile = Pile([
-            Padding.line_break(""),
-            Color.frame_footer(
-                Columns([
-                    ('fixed', 2, Text("")),
-                    ('fixed', 13, self._build_buttons())
-                ]))
-        ])
-        return footer_pile
+        super().__init__()
 
     def _total_machines(self, model):
         """ Returns total machines in model
@@ -64,7 +28,7 @@ class DestroyView(WidgetWrap):
             return 0
         return len(machines.keys())
 
-    def _build_widget(self):
+    def build_widget(self):
         total_items = []
         for controller in sorted(self.controllers):
             models = self.models[controller]['models']
