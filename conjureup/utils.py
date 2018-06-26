@@ -23,6 +23,7 @@ from pkg_resources import parse_version
 from raven.processors import SanitizePasswordsProcessor
 from termcolor import cprint
 
+from conjureup import consts
 from conjureup.app_config import app
 from conjureup.models.metadata import SpellMetadata
 from conjureup.telemetry import track_event
@@ -512,11 +513,13 @@ def __available_on_darwin(key):
     if is_darwin() and metadata.cloud_whitelist \
        and 'localhost' in metadata.cloud_whitelist:
         return False
+    if metadata.spell_type == consts.spell_types.SNAP:
+        return False
     return True
 
 
 def find_spells():
-    """ Find spells, excluding localhost only spells if not linux
+    """ Find spells, excluding localhost only and snap spells if not linux
     """
     _spells = []
     for category, cat_dict in app.spells_index.items():
