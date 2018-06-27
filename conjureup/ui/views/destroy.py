@@ -1,16 +1,16 @@
-from functools import partial
 from operator import itemgetter
 
-from ubuntui.ev import EventLoop
-from ubuntui.utils import Color, Padding
-from ubuntui.widgets.buttons import menu_btn
-from urwid import Filler, Pile, Text
+from ubuntui.utils import Padding
+from ubuntui.widgets.hr import HR
+from urwid import Text
 from conjureup.ui.views.base import BaseView
+from conjureup.ui.widgets.selectors import MenuSelectButtonList
 
 
 class DestroyView(BaseView):
     title = "Destroy Deployment"
     subtitle = "Please choose a deployment to destroy"
+    show_back_button = False
 
     def __init__(self, app, models, cb):
         self.app = app
@@ -29,40 +29,22 @@ class DestroyView(BaseView):
         return len(machines.keys())
 
     def build_widget(self):
-        total_items = []
-        for controller in sorted(self.controllers):
-            models = self.models[controller]['models']
-            if len(models) > 0:
-                total_items.append(Color.label(
-                    Text("{} ({})".format(controller,
-                                          models[0].get('cloud', "")))
-                ))
+        widget = MenuSelectButtonList()
+        if len(self.controllers) > 0:
+            widget.append(Text("Juju Controllers"))
+            widget.append(HR())
+            for controller in sorted(self.controllers):
+                widget.append_option(controller)
+                models = self.models[controller]['models']
+                if len(models) > 0:
+                    widget.append(Padding.line_break(""))
+                    widget.append(Text("Juju Models"))
+                    widget.append(HR())
                 for model in sorted(models, key=itemgetter('name')):
-                    if model['name'] == "controller":
-                        continue
-                    if model['life'] == 'dying':
-                        continue
+                    widget.append_option(model['short-name'])
+        widget.select_first()
+        return widget
 
-                    label = "  {}, Machine Count: {}{}".format(
-                        model['name'],
-                        self._total_machines(model),
-                        ", Running since: {}".format(
-                            model['status'].get('since'))
-                        if 'since' in model['status'] else '')
-                    total_items.append(
-                        Color.body(
-                            menu_btn(label=label,
-                                     on_press=partial(self.submit,
-                                                      controller,
-                                                      model)),
-                            focus_map='menu_button focus'
-                        ))
-                total_items.append(Padding.line_break(""))
-            total_items.append(Padding.line_break(""))
-        return Padding.center_80(Filler(Pile(total_items), valign='top'))
-
-    def submit(self, controller, model, btn):
-        self.cb(controller, model)
-
-    def cancel(self, btn):
-        EventLoop.exit(0)
+    def submit(self):
+        if self.widget.selected:
+            self.cb(self.widget.selected)

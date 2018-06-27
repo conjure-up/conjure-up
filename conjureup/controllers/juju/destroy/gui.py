@@ -8,8 +8,9 @@ class Destroy:
     def __init__(self):
         self.view = None
 
-    def finish(self, controller, model):
-        return controllers.use('destroyconfirm').render(controller, model)
+    def finish(self, selection):
+        # return controllers.use('destroyconfirm').render(controller, model)
+        print(selection)
 
     def render(self):
         models_map = {}
