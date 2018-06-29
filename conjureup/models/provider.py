@@ -350,7 +350,7 @@ class Localhost(BaseProvider):
             app.env['LXD_DIR'] = str(self.lxd_socket_dir)
             self.lxc_bin = '/usr/bin/lxc'
         else:
-            raise errors.LXDBinaryNotFound()
+            raise errors.LXDBinaryNotFoundError()
         app.log.debug("LXD environment set: binary {} lxd_dir {}".format(
             self.lxc_bin, self.lxd_socket_dir))
 
