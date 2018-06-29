@@ -1,5 +1,46 @@
 # Change Log
 
+## [Unreleased](https://github.com/conjure-up/conjure-up/tree/HEAD)
+
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.8...HEAD)
+
+**Closed issues:**
+
+- Python 3.7 support [\#1484](https://github.com/conjure-up/conjure-up/issues/1484)
+
+## [2.5.8](https://github.com/conjure-up/conjure-up/tree/2.5.8) (2018-06-29)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.7...2.5.8)
+
+**Implemented enhancements:**
+
+- MAAS introspection [\#896](https://github.com/conjure-up/conjure-up/issues/896)
+
+**Fixed bugs:**
+
+- Error setting up microk8s on Azure [\#1478](https://github.com/conjure-up/conjure-up/issues/1478)
+- unable to attach aws ebs as persistent volume for kubernetes [\#1195](https://github.com/conjure-up/conjure-up/issues/1195)
+- make sure conjure-up uses localcharms from a custom bundle [\#1032](https://github.com/conjure-up/conjure-up/issues/1032)
+
+**Closed issues:**
+
+- LXDBinaryNotFound when install Kubernetes via conjure-up [\#1477](https://github.com/conjure-up/conjure-up/issues/1477)
+- AttributeError: 'Localhost' object has no attribute 'lxd\_bin' [\#1464](https://github.com/conjure-up/conjure-up/issues/1464)
+- juju add-worker kubernetes-worker stuck on 'Waiting for kubelet to start' [\#1462](https://github.com/conjure-up/conjure-up/issues/1462)
+- Localhost cluster fails after restart [\#1448](https://github.com/conjure-up/conjure-up/issues/1448)
+
+**Merged pull requests:**
+
+- Python 3.7 compatibility [\#1486](https://github.com/conjure-up/conjure-up/pull/1486) ([battlemidget](https://github.com/battlemidget))
+- Fix incorrect exception name for LXDBinaryNotFoundError [\#1485](https://github.com/conjure-up/conjure-up/pull/1485) ([johnsca](https://github.com/johnsca))
+- Dont allow snap spell types on macos [\#1480](https://github.com/conjure-up/conjure-up/pull/1480) ([battlemidget](https://github.com/battlemidget))
+- Log actual data for LXDParseError [\#1473](https://github.com/conjure-up/conjure-up/pull/1473) ([johnsca](https://github.com/johnsca))
+- Fix unable to select cloud when only public clouds are whitelisted [\#1471](https://github.com/conjure-up/conjure-up/pull/1471) ([johnsca](https://github.com/johnsca))
+- Cleanup unused python deps [\#1469](https://github.com/conjure-up/conjure-up/pull/1469) ([battlemidget](https://github.com/battlemidget))
+- Update controllers for spell-type snap [\#1467](https://github.com/conjure-up/conjure-up/pull/1467) ([battlemidget](https://github.com/battlemidget))
+- File/Directory restructure for handling spell types [\#1466](https://github.com/conjure-up/conjure-up/pull/1466) ([battlemidget](https://github.com/battlemidget))
+- Fixes 1464 [\#1465](https://github.com/conjure-up/conjure-up/pull/1465) ([battlemidget](https://github.com/battlemidget))
+- Adds support for bypassing juju and performing custom deploys [\#1463](https://github.com/conjure-up/conjure-up/pull/1463) ([battlemidget](https://github.com/battlemidget))
+
 ## [2.5.7](https://github.com/conjure-up/conjure-up/tree/2.5.7) (2018-06-06)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.6...2.5.7)
 
@@ -405,7 +446,6 @@
 - better error handling in steps [\#889](https://github.com/conjure-up/conjure-up/issues/889)
 - Problem with container IPs - Juju can't reach them [\#865](https://github.com/conjure-up/conjure-up/issues/865)
 - Unable to install OpenStack on single node with conjure-up [\#858](https://github.com/conjure-up/conjure-up/issues/858)
-- Snap fails to install, with ERROR: '~ubuntu-lxc' user or team does not exist [\#818](https://github.com/conjure-up/conjure-up/issues/818)
 
 **Closed issues:**
 
@@ -462,7 +502,6 @@
 - remove status icon in steps view and keep only in runsteps [\#1102](https://github.com/conjure-up/conjure-up/issues/1102)
 - Error on macOS trying to deploy using local controller with MAAS [\#1083](https://github.com/conjure-up/conjure-up/issues/1083)
 - conjure-up unable to obtain a node from MAAS [\#876](https://github.com/conjure-up/conjure-up/issues/876)
-- Juju failed to bootstrap: maas [\#817](https://github.com/conjure-up/conjure-up/issues/817)
 
 **Merged pull requests:**
 
@@ -597,8 +636,6 @@
 - region selection for jaas deployment [\#882](https://github.com/conjure-up/conjure-up/issues/882)
 - add prebootstrap process hook [\#863](https://github.com/conjure-up/conjure-up/issues/863)
 - embed lxd [\#850](https://github.com/conjure-up/conjure-up/issues/850)
-- enable oracle provider [\#833](https://github.com/conjure-up/conjure-up/issues/833)
-- \[ARM64\] Need conjure-up snap in snap store [\#828](https://github.com/conjure-up/conjure-up/issues/828)
 
 **Fixed bugs:**
 
@@ -618,13 +655,6 @@
 - Failures in automated tests [\#854](https://github.com/conjure-up/conjure-up/issues/854)
 - conjure-down failed with “login\(\) got an unexpected keyword arument ‘force’ “ [\#845](https://github.com/conjure-up/conjure-up/issues/845)
 - conjure-up crashes on macos [\#839](https://github.com/conjure-up/conjure-up/issues/839)
-- conjure-down stacktraces [\#832](https://github.com/conjure-up/conjure-up/issues/832)
-- libjuju: headless failure to add machines [\#829](https://github.com/conjure-up/conjure-up/issues/829)
-- There was an error during the pre deploy processing phase, failure to set profile [\#825](https://github.com/conjure-up/conjure-up/issues/825)
-- \_\_init\_\_\(\) got an unexpected keyword argument 'default' [\#821](https://github.com/conjure-up/conjure-up/issues/821)
-- Conjure-up screen does not get past adding machine\['0'\] [\#819](https://github.com/conjure-up/conjure-up/issues/819)
-- entering sudo password fails to allow a snap to install [\#816](https://github.com/conjure-up/conjure-up/issues/816)
-- error during conjure-up landscape to an existing maas controller [\#814](https://github.com/conjure-up/conjure-up/issues/814)
 
 **Closed issues:**
 
@@ -635,8 +665,6 @@
 - Landscape install waiting status 16.04 conjure-up [\#844](https://github.com/conjure-up/conjure-up/issues/844)
 - MAAS is not completing a successful node deployment [\#843](https://github.com/conjure-up/conjure-up/issues/843)
 - Failing to connect to LXD server when deploying spells [\#841](https://github.com/conjure-up/conjure-up/issues/841)
-- Conjure-up --bootstrap-to \<hostname\> no progress  'fetching juju agent version 2.1.2 for amd64' [\#824](https://github.com/conjure-up/conjure-up/issues/824)
-- Reason: Juju failed to bootstrap: maas [\#822](https://github.com/conjure-up/conjure-up/issues/822)
 
 **Merged pull requests:**
 
@@ -687,8 +715,6 @@
 - Add better add cloud [\#840](https://github.com/conjure-up/conjure-up/pull/840) ([battlemidget](https://github.com/battlemidget))
 - Add message to indicate shutdown [\#838](https://github.com/conjure-up/conjure-up/pull/838) ([johnsca](https://github.com/johnsca))
 - oracle provider [\#837](https://github.com/conjure-up/conjure-up/pull/837) ([battlemidget](https://github.com/battlemidget))
-- Fix error handling and logging in conjure-down [\#834](https://github.com/conjure-up/conjure-up/pull/834) ([johnsca](https://github.com/johnsca))
-- Fix add\_machines failure in headless [\#830](https://github.com/conjure-up/conjure-up/pull/830) ([johnsca](https://github.com/johnsca))
 
 ## [2.1.5](https://github.com/conjure-up/conjure-up/tree/2.1.5) (2017-04-15)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.4...2.1.5)
