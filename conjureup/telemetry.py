@@ -5,7 +5,6 @@ import requests
 
 from conjureup import __version__ as VERSION
 from conjureup.app_config import app
-from conjureup.async import submit
 
 GA_ID = "UA-1018242-61"
 SENTRY_DSN = ('https://27ee3b60dbb8412e8acf6bc159979165:'
@@ -22,8 +21,7 @@ def track_screen(screen_name):
     if 'spell' in app.config:
         args['cd1'] = app.config['spell']
 
-    submit(partial(_post_track, args), lambda _: None,
-           queue_name=TELEMETRY_ASYNC_QUEUE)
+    app.loop.run_in_executor(None, partial(_post_track, args))
 
 
 def track_event(category, action, label):
@@ -37,8 +35,7 @@ def track_event(category, action, label):
                 t='event')
     if 'spell' in app.config:
         args['cd1'] = app.config['spell']
-    submit(partial(_post_track, args), lambda _: None,
-           queue_name=TELEMETRY_ASYNC_QUEUE)
+    app.loop.run_in_executor(None, partial(_post_track, args))
 
 
 def track_exception(description, is_fatal=True):
@@ -51,8 +48,7 @@ def track_exception(description, is_fatal=True):
                 exf=exf)
     if 'spell' in app.config:
         args['cd1'] = app.config['spell']
-    submit(partial(_post_track, args), lambda _: None,
-           queue_name=TELEMETRY_ASYNC_QUEUE)
+    app.loop.run_in_executor(None, partial(_post_track, args))
 
 
 def _post_track(arg_dict):

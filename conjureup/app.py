@@ -145,6 +145,9 @@ async def _start(*args, **kwargs):
     # override the one set by urwid, which happens in MainLoop.run()
     app.loop.set_exception_handler(events.handle_exception)
 
+    track_screen("Application Start")
+    track_event("OS", platform.platform(), "")
+
     if app.endpoint_type in [None, EndpointType.LOCAL_SEARCH]:
         controllers.use('spellpicker').render()
         return
@@ -431,9 +434,6 @@ def main():
             'conjureup.utils.SanitizeDataProcessor',
         )
     )
-
-    track_screen("Application Start")
-    track_event("OS", platform.platform(), "")
 
     app.loop = asyncio.get_event_loop()
     app.loop.add_signal_handler(signal.SIGINT, events.Shutdown.set)
