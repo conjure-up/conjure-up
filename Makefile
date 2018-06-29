@@ -7,7 +7,7 @@ TOPDIR := $(shell basename `pwd`)
 GIT_REV := $(shell git log --oneline -n1| cut -d" " -f1)
 VERSION := $(shell cat VERSION)
 CHANNEL := edge
-PY37 := $(shell apt-cache search --names-only '^python3.6')
+PY37 := $(shell apt-cache search --names-only '^python3.7')
 
 .PHONY: sysdeps
 sysdeps:
@@ -70,22 +70,20 @@ clean:
 
 .PHONY: test
 test: auto-format
-	# NB: Remove once pyyaml 4.2 officially released
-	PIP_PRE=1 tox -e py35,flake,isort
+	@tox -e py37,flake,isort
 	@shellcheck snap/wrappers/*
 
 git_rev:
 	@echo $(GIT_REV)
 
 dev: clean
-	# NB: Remove once pyyaml 4.2 officially released
-	PIP_PRE=1 tox -e conjure-dev
+	@tox -e conjure-dev
 	@echo "Run 'source conjure-dev/bin/activate' to enter the dev venv"
 
 # Fix some of the python formatting preferred by pylint
 auto-format:
-	PIP_PRE=1 tox -e isort -- isort -rc -m 3 conjureup test tools
-	PIP_PRE=1 tox -e isort -- autopep8 --in-place --recursive conjureup test tools
+	@tox -e isort -- isort -rc -m 3 conjureup test tools
+	@tox -e isort -- autopep8 --in-place --recursive conjureup test tools
 
 
 all: release

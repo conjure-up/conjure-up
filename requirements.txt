@@ -18,4 +18,5 @@ awscli==1.11.123
 pyvmomi==6.5.0.2017.5-1
 kv==0.3.0
 melddict==1.0.1
+# NB: Remove once websockets 5.0.2 is out
 git+https://github.com/aaugustin/websockets
