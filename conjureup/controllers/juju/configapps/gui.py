@@ -22,18 +22,8 @@ class ConfigAppsController:
                                       lambda: self.render(going_back=True))
         cv.show()
 
-    async def get_maas_constraints(self, machine_id):
-        if machine_id not in self.maas_machine_map:
-            return ''
-        maas_machine = self.maas_machine_map[machine_id]
-        await app.loop.run_in_executor(
-            None, app.maas.client.assign_id_tags, [maas_machine])
-        machine_tag = maas_machine.instance_id.split('/')[-2]
-        return "tags={}".format(machine_tag)
-
     async def connect_maas(self):
-        """Try to init maas client.
-        loops until we get an unexpected exception or we succeed.
+        """ Verify we have a valid connection to MAAS
         """
         n = 30
         while True:
