@@ -5,7 +5,6 @@ from ubuntui.frame import Frame  # noqa
 from ubuntui.views import ErrorView
 from urwid import Overlay
 
-from conjureup import async
 from conjureup.app_config import app
 from conjureup.ui.views.shutdown import ShutdownView
 
@@ -21,7 +20,6 @@ class ConjureUI(Frame):
             "https://github.com/conjure-up/conjure-up/issues/new".format(
                 _cache_dir))
 
-        async.shutdown()
         EventLoop.remove_alarms()
         self.frame.body = ErrorView(errmsg)
         # ensure error is shown, even if exception was inside urwid

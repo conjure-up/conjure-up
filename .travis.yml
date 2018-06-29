@@ -1,8 +1,8 @@
 language: python
 sudo: true
-dist: trusty
+dist: xenial
 python:
-  - "3.6"
+  - "3.7-dev"
 notifications:
   email: false
   irc:
@@ -18,6 +18,7 @@ env:
   global:
     - PATH=/snap/bin:$PATH
     - CONJUREUP_REGISTRY_BRANCH=master
+    - PIP_PRE=1
 before_script:
   - sudo addgroup lxd || true
   - sudo usermod -a -G lxd $USER || true

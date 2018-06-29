@@ -1,10 +1,10 @@
 aiofiles==0.3.1
 Jinja2==2.9.6
-juju==0.7.5
+juju==0.9.0
 juju-wait==2.6.3
 prettytable==0.7.2
 progressbar2==3.20.0
-PyYAML==3.12
+PyYAML>=4.0
 requests==2.18.4
 requests-oauthlib==0.8.0
 termcolor==1.1.0
@@ -18,3 +18,4 @@ awscli==1.11.123
 pyvmomi==6.5.0.2017.5-1
 kv==0.3.0
 melddict==1.0.1
+git+https://github.com/aaugustin/websockets
