@@ -3,6 +3,7 @@ sudo: true
 dist: xenial
 python:
   - "3.7-dev"
+cache: pip
 notifications:
   email: false
   irc:
@@ -26,7 +27,7 @@ before_script:
   - sudo ln -s /snap/bin/lxc /usr/bin/lxc
   - sudo bash -c 'for i in 5 10 15 30; do [[ -e /var/snap/lxd/common/lxd/unix.socket ]] && break; sleep $i; done'
 script:
-  - tox -e py36,flake,isort
+  - tox -e py37,flake,isort
   - tox -e conjure-dev
   - sudo -E su $USER -c "source conjure-dev/bin/activate && conjure-up -c test/Conjurefile.travis"
 after_failure:
