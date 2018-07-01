@@ -1,12 +1,12 @@
 # Change Log
 
-## [Unreleased](https://github.com/conjure-up/conjure-up/tree/HEAD)
-
-[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.8...HEAD)
+## [2.5.9](https://github.com/conjure-up/conjure-up/tree/2.5.9) (2018-07-01)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.8...2.5.9)
 
 **Closed issues:**
 
 - Python 3.7 support [\#1484](https://github.com/conjure-up/conjure-up/issues/1484)
+- Unable to find a storage pool for LXD [\#1483](https://github.com/conjure-up/conjure-up/issues/1483)
 
 ## [2.5.8](https://github.com/conjure-up/conjure-up/tree/2.5.8) (2018-06-29)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.7...2.5.8)
@@ -398,7 +398,6 @@
 - use state server for handling step results [\#910](https://github.com/conjure-up/conjure-up/issues/910)
 - add redis for state caching and step-2-step intercommunication [\#901](https://github.com/conjure-up/conjure-up/issues/901)
 - Update screen selection/ordering [\#897](https://github.com/conjure-up/conjure-up/issues/897)
-- Provide better feedback if shutdown process takes some time [\#835](https://github.com/conjure-up/conjure-up/issues/835)
 
 **Fixed bugs:**
 
