@@ -2,6 +2,7 @@
 from functools import partial
 
 import requests
+import asyncio
 
 from conjureup import __version__ as VERSION
 from conjureup.app_config import app
@@ -21,6 +22,8 @@ def track_screen(screen_name):
     if 'spell' in app.config:
         args['cd1'] = app.config['spell']
 
+    if not app.loop:
+        app.loop = asyncio.get_event_loop()
     app.loop.run_in_executor(None, partial(_post_track, args))
 
 
@@ -35,6 +38,8 @@ def track_event(category, action, label):
                 t='event')
     if 'spell' in app.config:
         args['cd1'] = app.config['spell']
+    if not app.loop:
+        app.loop = asyncio.get_event_loop()
     app.loop.run_in_executor(None, partial(_post_track, args))
 
 
@@ -48,6 +53,8 @@ def track_exception(description, is_fatal=True):
                 exf=exf)
     if 'spell' in app.config:
         args['cd1'] = app.config['spell']
+    if not app.loop:
+        app.loop = asyncio.get_event_loop()
     app.loop.run_in_executor(None, partial(_post_track, args))
 
 
