@@ -1,8 +1,8 @@
 
+import asyncio
 from functools import partial
 
 import requests
-import asyncio
 
 from conjureup import __version__ as VERSION
 from conjureup.app_config import app
