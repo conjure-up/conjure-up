@@ -70,7 +70,7 @@ clean:
 
 .PHONY: test
 test: auto-format
-	@tox -e py37,flake,isort
+	@tox -e py3,flake,isort
 	@shellcheck snap/wrappers/*
 
 git_rev:
