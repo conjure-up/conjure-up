@@ -63,6 +63,11 @@ def parse_options(argv):
     parser.add_argument('--registry', dest='registry',
                         help='Spells Registry',
                         default='https://github.com/conjure-up/spells.git')
+    parser.add_argument('-b', '--branch', '--registry-branch',
+                        dest='registry_branch',
+                        help='Branch to use on the spells registry',
+                        default=os.getenv('CONJUREUP_REGISTRY_BRANCH',
+                                          'master'))
     parser.add_argument('--cache-dir', dest='cache_dir',
                         help='Download directory for spells',
                         default=os.path.expanduser("~/.cache/conjure-up"))
@@ -102,9 +107,13 @@ def parse_options(argv):
                         help='Opt out of sending anonymous error reports '
                         'to Canonical.')
     parser.add_argument('--no-sync', '--nosync', action='store_true',
-                        dest='no_sync',
+                        dest='no_sync', default=False,
                         help='Opt out of syncing with spells '
                         'registry.')
+    parser.add_argument('--sync', action='store_false',
+                        dest='no_sync', default=False,
+                        help='Re-enable syncing with spells '
+                        'registry, if disabled with --no-sync.')
     parser.add_argument('--color', type=str, default='auto',
                         choices=['auto', 'never', 'always'],
                         help='Whether to use colorized output '
@@ -292,7 +301,6 @@ def main():
     app.config['spells-dir'] = spells_dir
     spells_index_path = os.path.join(app.config['spells-dir'],
                                      'spells-index.yaml')
-    spells_registry_branch = os.getenv('CONJUREUP_REGISTRY_BRANCH', 'master')
 
     if not app.conjurefile['no-sync']:
         if not os.path.exists(spells_dir):
@@ -300,7 +308,7 @@ def main():
         try:
             download_or_sync_registry(
                 app.conjurefile['registry'],
-                spells_dir, branch=spells_registry_branch)
+                spells_dir, branch=app.conjurefile['registry-branch'])
         except subprocess.CalledProcessError as e:
             if not os.path.exists(spells_dir):
                 utils.error("Could not load from registry")
