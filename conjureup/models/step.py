@@ -237,6 +237,7 @@ class StepModel:
             cloud_types = juju.get_cloud_types_by_name()
             provider_type = cloud_types[app.provider.cloud]
 
+            app.env['JUJU_CLOUD'] = app.provider.cloud or ''
             app.env['JUJU_PROVIDERTYPE'] = provider_type
             # not all providers have a credential, e.g., localhost
             app.env['JUJU_CREDENTIAL'] = app.provider.credential or ''
