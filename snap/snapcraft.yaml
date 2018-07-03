@@ -31,7 +31,7 @@ parts:
     - -usr/bin/py*
     - -usr/bin/2to3-3.5
     - -usr/share/*python*
-    - -usr/lib/python3.5
+    - -usr/lib/python3.7
     stage-packages:
     - bsdtar
     - jq
@@ -86,3 +86,4 @@ parts:
     - libsqlite3-dev
     - zlib1g-dev
     - libffi-dev
+    - libc6
