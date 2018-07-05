@@ -77,7 +77,7 @@ parts:
   go:
     source-tag: go1.10.3
   python:
-    source: https://www.python.org/ftp/python/3.7.0/Python-3.7.0.tar.xz
+    source: https://www.python.org/ftp/python/3.6.6/Python-3.6.6.tar.xz
     plugin: autotools
     configflags:
     - --prefix=/usr
