@@ -31,12 +31,12 @@ parts:
     - -usr/bin/py*
     - -usr/bin/2to3-3.5
     - -usr/share/*python*
-    - -usr/lib/python3.7
+    - -usr/lib/python3.5
     stage-packages:
     - bsdtar
     - jq
     - pwgen
-    - libsodium23
+    - libsodium18
     after:
     - python
   spells:
@@ -84,6 +84,3 @@ parts:
     build-packages:
     - libssl-dev
     - libsqlite3-dev
-    - zlib1g-dev
-    - libffi-dev
-    - libc6
