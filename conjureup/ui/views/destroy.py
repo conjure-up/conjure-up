@@ -1,8 +1,5 @@
 from operator import itemgetter
 
-from ubuntui.utils import Padding
-from ubuntui.widgets.hr import HR
-from urwid import Text
 from conjureup.ui.views.base import BaseView
 from conjureup.ui.widgets.selectors import MenuSelectButtonList
 
@@ -12,11 +9,12 @@ class DestroyView(BaseView):
     subtitle = "Please choose a deployment to destroy"
     show_back_button = False
 
-    def __init__(self, app, models, cb):
+    def __init__(self, app, models, show_snaps, cb):
         self.app = app
         self.cb = cb
         self.controllers = models.keys()
         self.models = models
+        self.show_snaps = show_snaps
         self.config = self.app.config
         super().__init__()
 
@@ -31,17 +29,19 @@ class DestroyView(BaseView):
     def build_widget(self):
         widget = MenuSelectButtonList()
         if len(self.controllers) > 0:
-            widget.append(Text("Juju Controllers"))
-            widget.append(HR())
             for controller in sorted(self.controllers):
-                widget.append_option(controller)
                 models = self.models[controller]['models']
-                if len(models) > 0:
-                    widget.append(Padding.line_break(""))
-                    widget.append(Text("Juju Models"))
-                    widget.append(HR())
                 for model in sorted(models, key=itemgetter('name')):
-                    widget.append_option(model['short-name'])
+                    if model['name'] == 'admin/controller':
+                        continue
+                    widget.append_option(
+                        label="{} ({})".format(
+                            model['name'],
+                            model['cloud']),
+                        value=model['short-name'])
+        if self.show_snaps:
+            widget.append_option(label='microk8s (localhost)',
+                                 value='microk8s')
         widget.select_first()
         return widget
 

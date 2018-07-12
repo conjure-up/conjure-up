@@ -4,7 +4,7 @@ from conjureup.telemetry import track_event
 
 
 class Destroy:
-    def render(self):
+    def render(self, show_snaps=False):
         app.loop.create_task(self.do_destroy(app.conjurefile['model'],
                                              app.conjurefile['controller']))
 
