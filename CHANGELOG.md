@@ -1,5 +1,27 @@
 # Change Log
 
+## [2.6.0](https://github.com/conjure-up/conjure-up/tree/2.6.0) (2018-07-16)
+[Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.9...2.6.0)
+
+**Implemented enhancements:**
+
+- Feature Request: support custom model config [\#1241](https://github.com/conjure-up/conjure-up/issues/1241)
+
+**Closed issues:**
+
+- Some applications failed to start successfully [\#1493](https://github.com/conjure-up/conjure-up/issues/1493)
+- 'set' object does not support indexing [\#1491](https://github.com/conjure-up/conjure-up/issues/1491)
+- Error when running conjure-up and choosing Openstack with NovaKVM : 'set' object does not support indexing                           [\#1487](https://github.com/conjure-up/conjure-up/issues/1487)
+
+**Merged pull requests:**
+
+- Update libjuju 0.9.1 [\#1497](https://github.com/conjure-up/conjure-up/pull/1497) ([battlemidget](https://github.com/battlemidget))
+- Uses pyyaml 3.13 proper [\#1496](https://github.com/conjure-up/conjure-up/pull/1496) ([battlemidget](https://github.com/battlemidget))
+- Fix case where no whitelisted clouds are enabled [\#1492](https://github.com/conjure-up/conjure-up/pull/1492) ([johnsca](https://github.com/johnsca))
+- Send cloud name to steps [\#1490](https://github.com/conjure-up/conjure-up/pull/1490) ([johnsca](https://github.com/johnsca))
+- Add option for branch and force sync [\#1489](https://github.com/conjure-up/conjure-up/pull/1489) ([johnsca](https://github.com/johnsca))
+- Test multiple pythons, fix lint [\#1488](https://github.com/conjure-up/conjure-up/pull/1488) ([battlemidget](https://github.com/battlemidget))
+
 ## [2.5.9](https://github.com/conjure-up/conjure-up/tree/2.5.9) (2018-07-01)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.8...2.5.9)
 
@@ -229,7 +251,6 @@
 - lxd default profile inserts lxdbr0 as network device even if custom bridge selected [\#1159](https://github.com/conjure-up/conjure-up/issues/1159)
 - too many machines  [\#1140](https://github.com/conjure-up/conjure-up/issues/1140)
 - Error bootstrapping controller: \['ERROR unknown cloud "vsphere", please try "juju update-clouds"'\] [\#1097](https://github.com/conjure-up/conjure-up/issues/1097)
-- conjure-up initial user issues \(16.04 + snap\) [\#842](https://github.com/conjure-up/conjure-up/issues/842)
 
 **Closed issues:**
 
@@ -422,8 +443,6 @@
 - make sure localhost deployments survive reboots [\#985](https://github.com/conjure-up/conjure-up/issues/985)
 - timeout in sentry code [\#970](https://github.com/conjure-up/conjure-up/issues/970)
 - Exception: Problem setting default profile: CompletedProcess\(args='cat /tmp/tmpcpcb753i |conjure-up.lxc prof... [\#967](https://github.com/conjure-up/conjure-up/issues/967)
-- Stuck in "waiting for applications to start" [\#890](https://github.com/conjure-up/conjure-up/issues/890)
-- Unable to add machine, db locked [\#886](https://github.com/conjure-up/conjure-up/issues/886)
 - Exception: Failure in step 00\_deploy-done [\#1025](https://github.com/conjure-up/conjure-up/issues/1025)
 - ConnectionRefusedError: \[Errno 111\] Connect call failed \('10.218.149.192', 17070\) [\#995](https://github.com/conjure-up/conjure-up/issues/995)
 - Exception: Unable to create model: ERROR failed to open environ: Get https://10.159.252.1:12001/1.0: Unable ... [\#989](https://github.com/conjure-up/conjure-up/issues/989)
@@ -442,9 +461,6 @@
 - Error Deploying Openstack: Could not find a suitable network interface... with NovaLXD in a nested LXD  [\#916](https://github.com/conjure-up/conjure-up/issues/916)
 - Stuck on "Waiting For Applications To Start" with NovaLXD in a nested LXD [\#915](https://github.com/conjure-up/conjure-up/issues/915)
 - make sure MTU 1500 is set for lxd profiles [\#904](https://github.com/conjure-up/conjure-up/issues/904)
-- better error handling in steps [\#889](https://github.com/conjure-up/conjure-up/issues/889)
-- Problem with container IPs - Juju can't reach them [\#865](https://github.com/conjure-up/conjure-up/issues/865)
-- Unable to install OpenStack on single node with conjure-up [\#858](https://github.com/conjure-up/conjure-up/issues/858)
 
 **Closed issues:**
 
@@ -495,12 +511,9 @@
 - Move steps view before deploy status [\#1009](https://github.com/conjure-up/conjure-up/issues/1009)
 - KeyError: 'getgrnam\(\): name not found: lxd' [\#1007](https://github.com/conjure-up/conjure-up/issues/1007)
 - AttributeError: 'NoneType' object has no attribute 'keys' [\#1006](https://github.com/conjure-up/conjure-up/issues/1006)
-- cloud native support [\#895](https://github.com/conjure-up/conjure-up/issues/895)
-- Document how to access containers deployed with Autopilot [\#881](https://github.com/conjure-up/conjure-up/issues/881)
 - document extending sudo timeout [\#1104](https://github.com/conjure-up/conjure-up/issues/1104)
 - remove status icon in steps view and keep only in runsteps [\#1102](https://github.com/conjure-up/conjure-up/issues/1102)
 - Error on macOS trying to deploy using local controller with MAAS [\#1083](https://github.com/conjure-up/conjure-up/issues/1083)
-- conjure-up unable to obtain a node from MAAS [\#876](https://github.com/conjure-up/conjure-up/issues/876)
 
 **Merged pull requests:**
 
@@ -630,40 +643,16 @@
 **Implemented enhancements:**
 
 - decide on top level juju alias [\#917](https://github.com/conjure-up/conjure-up/issues/917)
-- FYI "juju login -B" is the new "juju register"... [\#891](https://github.com/conjure-up/conjure-up/issues/891)
-- make sure region selection is always visible [\#883](https://github.com/conjure-up/conjure-up/issues/883)
-- region selection for jaas deployment [\#882](https://github.com/conjure-up/conjure-up/issues/882)
-- add prebootstrap process hook [\#863](https://github.com/conjure-up/conjure-up/issues/863)
-- embed lxd [\#850](https://github.com/conjure-up/conjure-up/issues/850)
 
 **Fixed bugs:**
 
 - lxdbr0 set as default for localhost cloud [\#921](https://github.com/conjure-up/conjure-up/issues/921)
 - credentials being populated incorrectly [\#907](https://github.com/conjure-up/conjure-up/issues/907)
 - unexpected keyword argument 'agent-version' [\#903](https://github.com/conjure-up/conjure-up/issues/903)
-- Unable to deploy kubernetes-core using --edge and MAAS Version 2.1.5+bzr5596-0ubuntu1 \(16.04.1\) [\#894](https://github.com/conjure-up/conjure-up/issues/894)
-- selecting existing maas controller bootstraps a new machine [\#892](https://github.com/conjure-up/conjure-up/issues/892)
-- saving of credentials happens prior to a current\_controller being set [\#888](https://github.com/conjure-up/conjure-up/issues/888)
-- Cannot retrieve charm "cs:haproxy-41"  [\#874](https://github.com/conjure-up/conjure-up/issues/874)
-- snap configure hook could just run `lxc version` to determine if installation needed [\#873](https://github.com/conjure-up/conjure-up/issues/873)
-- snap configure hook shouldn't use just "zesty" to determine archive lxd suitability [\#872](https://github.com/conjure-up/conjure-up/issues/872)
-- snap install fails with spurious `apt-get` errors [\#871](https://github.com/conjure-up/conjure-up/issues/871)
-- ubuntui version in requirements.txt [\#868](https://github.com/conjure-up/conjure-up/issues/868)
-- charm not found error when deploying spell from an edge channel [\#862](https://github.com/conjure-up/conjure-up/issues/862)
-- Duplicate machines \(co-location\) not properly handled by "deploy all" [\#857](https://github.com/conjure-up/conjure-up/issues/857)
-- Failures in automated tests [\#854](https://github.com/conjure-up/conjure-up/issues/854)
-- conjure-down failed with “login\(\) got an unexpected keyword arument ‘force’ “ [\#845](https://github.com/conjure-up/conjure-up/issues/845)
-- conjure-up crashes on macos [\#839](https://github.com/conjure-up/conjure-up/issues/839)
 
 **Closed issues:**
 
 - Invalid signature when conjure-up juju [\#914](https://github.com/conjure-up/conjure-up/issues/914)
-- Installing OpenStack from Landscape not working [\#893](https://github.com/conjure-up/conjure-up/issues/893)
-- Conjure-up openstack deployment stuck at last step "additional-application-tasks"  [\#885](https://github.com/conjure-up/conjure-up/issues/885)
-- Can not attach volume to an instance [\#884](https://github.com/conjure-up/conjure-up/issues/884)
-- Landscape install waiting status 16.04 conjure-up [\#844](https://github.com/conjure-up/conjure-up/issues/844)
-- MAAS is not completing a successful node deployment [\#843](https://github.com/conjure-up/conjure-up/issues/843)
-- Failing to connect to LXD server when deploying spells [\#841](https://github.com/conjure-up/conjure-up/issues/841)
 
 **Merged pull requests:**
 
@@ -677,43 +666,12 @@
 - Adds redis-server to snap [\#902](https://github.com/conjure-up/conjure-up/pull/902) ([battlemidget](https://github.com/battlemidget))
 - Move cloud selection screen forward [\#900](https://github.com/conjure-up/conjure-up/pull/900) ([johnsca](https://github.com/johnsca))
 - WIP: First crack at asyncio tailing of step output [\#898](https://github.com/conjure-up/conjure-up/pull/898) ([battlemidget](https://github.com/battlemidget))
-- Add screens for selecting region and credential [\#887](https://github.com/conjure-up/conjure-up/pull/887) ([johnsca](https://github.com/johnsca))
-- Include our own LXD to not conflict with rest of users system. \(\#852\) [\#880](https://github.com/conjure-up/conjure-up/pull/880) ([battlemidget](https://github.com/battlemidget))
 
 ## [2.2.0-beta4](https://github.com/conjure-up/conjure-up/tree/2.2.0-beta4) (2017-05-11)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.2.0-beta3...2.2.0-beta4)
 
-**Closed issues:**
-
-- Juju beta4 breaks auth [\#878](https://github.com/conjure-up/conjure-up/issues/878)
-
-**Merged pull requests:**
-
-- Fix JAAS registration for 2.2-beta4 [\#879](https://github.com/conjure-up/conjure-up/pull/879) ([johnsca](https://github.com/johnsca))
-- Allow to run without installation [\#870](https://github.com/conjure-up/conjure-up/pull/870) ([techtonik](https://github.com/techtonik))
-
 ## [2.2.0-beta3](https://github.com/conjure-up/conjure-up/tree/2.2.0-beta3) (2017-05-09)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.5...2.2.0-beta3)
-
-**Closed issues:**
-
-- Incompatibility with LXD 2.13 [\#866](https://github.com/conjure-up/conjure-up/issues/866)
-- Openstack Autopilot deployment on Ubuntu 16.04 LTS [\#851](https://github.com/conjure-up/conjure-up/issues/851)
-- Failed to set profile [\#849](https://github.com/conjure-up/conjure-up/issues/849)
-
-**Merged pull requests:**
-
-- Update HACKING.md [\#869](https://github.com/conjure-up/conjure-up/pull/869) ([techtonik](https://github.com/techtonik))
-- Adds pre-bootstrap hook [\#864](https://github.com/conjure-up/conjure-up/pull/864) ([battlemidget](https://github.com/battlemidget))
-- Fix headless deploy blocking indefinitely [\#861](https://github.com/conjure-up/conjure-up/pull/861) ([johnsca](https://github.com/johnsca))
-- Fix extra machines being created [\#860](https://github.com/conjure-up/conjure-up/pull/860) ([johnsca](https://github.com/johnsca))
-- Revert "Include our own LXD to not conflict with rest of users system." [\#853](https://github.com/conjure-up/conjure-up/pull/853) ([battlemidget](https://github.com/battlemidget))
-- Include our own LXD to not conflict with rest of users system. [\#852](https://github.com/conjure-up/conjure-up/pull/852) ([battlemidget](https://github.com/battlemidget))
-- integrate region selection in credentials view [\#847](https://github.com/conjure-up/conjure-up/pull/847) ([battlemidget](https://github.com/battlemidget))
-- Fix conjure-down [\#846](https://github.com/conjure-up/conjure-up/pull/846) ([johnsca](https://github.com/johnsca))
-- Add better add cloud [\#840](https://github.com/conjure-up/conjure-up/pull/840) ([battlemidget](https://github.com/battlemidget))
-- Add message to indicate shutdown [\#838](https://github.com/conjure-up/conjure-up/pull/838) ([johnsca](https://github.com/johnsca))
-- oracle provider [\#837](https://github.com/conjure-up/conjure-up/pull/837) ([battlemidget](https://github.com/battlemidget))
 
 ## [2.1.5](https://github.com/conjure-up/conjure-up/tree/2.1.5) (2017-04-15)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.1.4...2.1.5)
