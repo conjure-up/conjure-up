@@ -1,10 +1,11 @@
 import asyncio
 
-from conjureup import controllers, events, juju
+from conjureup import events, juju
 from conjureup.app_config import app
 from conjureup.telemetry import track_event, track_screen
 from conjureup.ui.views.destroy_confirm import DestroyConfirmView
 from conjureup.ui.views.interstitial import InterstitialView
+from conjureup.controllers.base.destroy import gui
 
 
 class DestroyConfirm:
@@ -17,13 +18,13 @@ class DestroyConfirm:
             "Destroying model {} in controller {}".format(model, controller))
         await juju.destroy_model(controller, model)
         app.ui.set_footer("")
-        controllers.use('destroy').render()
+        gui.Destroy().render(show_snaps=False)
 
     def finish(self, controller_name=None, model_name=None):
         if controller_name and model_name:
             app.loop.create_task(self.do_destroy(model_name, controller_name))
         else:
-            return controllers.use('destroy').render()
+            gui.Destroy().render(show_snaps=False)
 
     async def login(self, controller, model):
         await juju.connect_model()
@@ -48,7 +49,7 @@ class DestroyConfirm:
 
     def render(self, controller, model):
         app.provider.controller = controller
-        app.provider.model = model['name']
+        app.provider.model = model
         events.ModelAvailable.set()
         self.authenticating.set()
         self.render_interstitial()
