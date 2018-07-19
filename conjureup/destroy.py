@@ -14,7 +14,7 @@ from ubuntui.ev import EventLoop
 from ubuntui.palette import STYLES
 
 from conjureup import __version__ as VERSION
-from conjureup import events, juju, utils, snap
+from conjureup import events, juju, utils
 from conjureup.controllers.base.destroy import (gui, tui)
 from conjureup.app_config import app
 from conjureup.log import setup_logging
@@ -61,14 +61,10 @@ async def _start():
     # override the one set by urwid, which happens in MainLoop.run()
     app.loop.set_exception_handler(events.handle_exception)
 
-    show_snaps = False
-    if snap.is_installed('microk8s'):
-        show_snaps = True
-
     if app.headless:
-        tui.Destroy().render(show_snaps=show_snaps)
+        tui.Destroy().render()
     else:
-        gui.Destroy().render(show_snaps=show_snaps)
+        gui.Destroy().render()
 
 
 def main():

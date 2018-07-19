@@ -1,4 +1,4 @@
-from conjureup import juju, errors
+from conjureup import errors, snap
 from conjureup.models.provider import load_schema
 from conjureup.app_config import app
 from conjureup.ui.views.destroy import DestroyView
@@ -17,20 +17,17 @@ class Destroy:
                 app.provider.load(selection['cloud'])
             except errors.SchemaCloudError as e:
                 raise e
-            return gui.DestroyConfirm().render(selection['controller'],
-                                               selection['model'])
+            return gui.DestroyConfirm().render(selection)
 
         if selection['type'] == 'snap':
-            print("Uninstalling {}".format(selection['snap']))
+            return gui.DestroyConfirm().render(selection)
 
-    def render(self, show_snaps=False):
-        deployed_map = {}
-        existing_controllers = juju.get_controllers()['controllers']
-        for cname, d in existing_controllers.items():
-            deployed_map[cname] = {'controller': d}
-            deployed_map[cname].update(**juju.get_models(cname))
+    def render(self):
+        show_snaps = False
+        if snap.is_installed('microk8s'):
+            show_snaps = True
+
         self.view = DestroyView(app,
-                                deployed_map=deployed_map,
                                 show_snaps=show_snaps,
                                 cb=self.finish)
         self.view.show()

@@ -1,3 +1,4 @@
+from conjureup import juju
 from conjureup.ui.views.base import BaseView
 from conjureup.ui.widgets.selectors import MenuSelectButtonList
 
@@ -7,23 +8,21 @@ class DestroyView(BaseView):
     subtitle = "Please choose a deployment to destroy"
     show_back_button = False
 
-    def __init__(self, app, deployed_map, show_snaps, cb):
+    def __init__(self, app, show_snaps, cb):
         self.app = app
         self.cb = cb
-        self.deployed_map = deployed_map
+        self.deployed_map = {}
         self.show_snaps = show_snaps
         self.config = self.app.config
+        existing_controllers = juju.get_controllers()['controllers']
+        for cname, d in existing_controllers.items():
+            self.deployed_map[cname] = {'controller': d}
+            self.deployed_map[cname].update(**juju.get_models(cname))
+
         super().__init__()
 
-    def _total_machines(self, model):
-        """ Returns total machines in model
-        """
-        machines = model.get('machines', None)
-        if machines is None:
-            return 0
-        return len(machines.keys())
-
     def build_widget(self):
+        # NB: I dont like this currently, but leaving in for now.
         widget = MenuSelectButtonList()
         if self.deployed_map:
             for name, deploy in self.deployed_map.items():

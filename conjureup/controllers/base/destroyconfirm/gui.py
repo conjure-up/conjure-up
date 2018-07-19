@@ -11,6 +11,9 @@ from conjureup.controllers.base.destroy import gui
 class DestroyConfirm:
     def __init__(self):
         self.authenticating = asyncio.Event()
+        self.destroying = asyncio.Event()
+        self.view = None
+        self.deploy_map = None
 
     async def do_destroy(self, model, controller):
         track_event("Destroying model", "Destroy", "")
@@ -18,27 +21,30 @@ class DestroyConfirm:
             "Destroying model {} in controller {}".format(model, controller))
         await juju.destroy_model(controller, model)
         app.ui.set_footer("")
-        gui.Destroy().render(show_snaps=False)
+        return gui.Destroy().render()
 
-    def finish(self, controller_name=None, model_name=None):
-        if controller_name and model_name:
-            app.loop.create_task(self.do_destroy(model_name, controller_name))
+    def finish(self):
+        self.destroying.set()
+        view = InterstitialView(title="Destroying Deployment",
+                                message="Destroying Deployment. Please wait.",
+                                event=self.destroying)
+        view.show()
+
+        if self.deploy_map['type'] == 'juju':
+            app.loop.create_task(self.do_destroy(
+                self.deploy_map['model'], self.deploy_map['controller']))
         else:
-            gui.Destroy().render(show_snaps=False)
+            gui.Destroy().render()
+
+    def back(self):
+        return gui.Destroy().render()
 
     async def login(self, controller, model):
         await juju.connect_model()
         self.authenticating.clear()
         track_screen("Destroy Confirm Model")
-        view = DestroyConfirmView(app,
-                                  controller,
-                                  model,
-                                  cb=self.finish)
-        app.ui.set_header(
-            title="Destroy Confirmation",
-            excerpt="Are you sure you wish to destroy the deployment?"
-        )
-        app.ui.set_body(view)
+        self.view = DestroyConfirmView(self.finish, self.back)
+        self.view.show()
 
     def render_interstitial(self):
         self.authenticating.set()
@@ -47,13 +53,17 @@ class DestroyConfirm:
                                 event=self.authenticating)
         view.show()
 
-    def render(self, controller, model):
-        app.provider.controller = controller
-        app.provider.model = model
-        events.ModelAvailable.set()
-        self.authenticating.set()
-        self.render_interstitial()
-        app.loop.create_task(self.login(controller, model))
+    def render(self, selection):
+        self.deploy_map = selection
+        if self.deploy_map['type'] == 'juju':
+            controller = self.deploy_map['controller']
+            model = self.deploy_map['model']
+            app.provider.controller = controller
+            app.provider.model = model
+            events.ModelAvailable.set()
+            self.authenticating.set()
+            self.render_interstitial()
+            app.loop.create_task(self.login(controller, model))
 
 
 _controller_class = DestroyConfirm
