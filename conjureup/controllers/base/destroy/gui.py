@@ -17,10 +17,7 @@ class Destroy:
                 app.provider.load(selection['cloud'])
             except errors.SchemaCloudError as e:
                 raise e
-            return gui.DestroyConfirm().render(selection)
-
-        if selection['type'] == 'snap':
-            return gui.DestroyConfirm().render(selection)
+        return gui.DestroyConfirm().render(selection)
 
     def render(self):
         show_snaps = False

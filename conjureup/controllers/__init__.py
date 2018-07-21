@@ -172,10 +172,13 @@ def use(controller):
         # we don't want to allow any new controllers to be rendered
         return NoopController()
 
-    if app.metadata and hasattr(app.metadata, 'spell_type'):
-        spell_type = app.metadata.spell_type
+    # TODO: Do more dynamic lookup of base modules
+    if controller in ['addons', 'destroy',
+                      'destroyconfirm', 'showsteps',
+                      'spellpicker']:
+        spell_type = 'base'
     else:
-        spell_type = consts.spell_types.JUJU
+        spell_type = app.metadata.spell_type
 
     if app.headless:
         pkg = ("conjureup.controllers.{}.{}.tui".format(

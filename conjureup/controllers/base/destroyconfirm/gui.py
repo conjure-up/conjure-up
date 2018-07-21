@@ -1,6 +1,6 @@
 import asyncio
 
-from conjureup import events, juju
+from conjureup import events, juju, utils
 from conjureup.app_config import app
 from conjureup.telemetry import track_event, track_screen
 from conjureup.ui.views.destroy_confirm import DestroyConfirmView
@@ -20,8 +20,16 @@ class DestroyConfirm:
         app.ui.set_footer(
             "Destroying model {} in controller {}".format(model, controller))
         await juju.destroy_model(controller, model)
+        app.ui.set_footer(
+            "Waiting for model cleanup"
+        )
         app.ui.set_footer("")
         return gui.Destroy().render()
+
+    async def do_destroy_snap(self):
+        """ Only one snap for now
+        """
+        
 
     def finish(self):
         self.destroying.set()
@@ -33,8 +41,10 @@ class DestroyConfirm:
         if self.deploy_map['type'] == 'juju':
             app.loop.create_task(self.do_destroy(
                 self.deploy_map['model'], self.deploy_map['controller']))
-        else:
-            gui.Destroy().render()
+        elif self.deploy_map['type'] == 'snap':
+            app.loop.create_task(self.do_destroy_snap(
+                self.deploy_map['snap']
+            ))
 
     def back(self):
         return gui.Destroy().render()

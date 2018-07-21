@@ -49,3 +49,4 @@ class PHASES(Enum):
     BEFORE_DEPLOY = 'before-deploy'
     BEFORE_WAIT = 'before-wait'
     AFTER_DEPLOY = 'after-deploy'
+    UNINSTALL = 'uninstall'

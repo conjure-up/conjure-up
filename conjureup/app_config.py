@@ -2,6 +2,8 @@
 """
 import json
 from types import SimpleNamespace
+from conjureup.consts import spell_types
+
 
 bootstrap = SimpleNamespace(
     # Is bootstrap running
@@ -190,7 +192,7 @@ class AppConfig:
         if not self.conjurefile:
             return
         self.log.info('Storing conjure-up state')
-        if self.juju.authenticated:
+        if self.metadata and self.metadata.spell_type == spell_types.JUJU:
             await self.juju.client.set_config(
                 {'extra-info': json.dumps(self.conjurefile)})
             self.log.info('State saved in model config')

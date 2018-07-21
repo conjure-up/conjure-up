@@ -106,6 +106,10 @@ class StepModel:
     def has_after_deploy(self):
         return self._has_phase(PHASES.AFTER_DEPLOY)
 
+    @property
+    def has_uninstall(self):
+        return self._has_uninstall(PHASES.UNINSTALL)
+
     async def validate_input(self, msg_cb):
         """ validate-input phase
         """
@@ -135,6 +139,11 @@ class StepModel:
         """ after-deploy phase
         """
         return await self.run(PHASES.AFTER_DEPLOY, msg_cb)
+
+    async def uninstall(self, msg_cb):
+        """ uninstall phase
+        """
+        return await self.run(PHASES.UNINSTALL, msg_cb)
 
     def get_state(self, key, phase=None):
         """

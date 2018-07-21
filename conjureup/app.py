@@ -127,6 +127,10 @@ def parse_options(argv):
     parser.add_argument('--gen-config', action='store_true',
                         dest='gen_config',
                         help='Prints a skeleton Conjurefile to stdout')
+    parser.add_argument('--destroy', action='store_true',
+                        dest='destroy',
+                        help='Interface to uninstall '
+                        'deployments, used with `conjure-down`')
 
     # Channels
     parser.add_argument('--channel', type=str,
@@ -153,6 +157,11 @@ async def _start(*args, **kwargs):
     # NB: we have to set the exception handler here because we need to
     # override the one set by urwid, which happens in MainLoop.run()
     app.loop.set_exception_handler(events.handle_exception)
+
+    if app.conjurefile['destroy']:
+        track_screen('Destroy Deployment Start')
+        controllers.use('destroy').render()
+        return
 
     track_screen("Application Start")
     track_event("OS", platform.platform(), "")

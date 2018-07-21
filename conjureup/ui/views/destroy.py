@@ -18,7 +18,6 @@ class DestroyView(BaseView):
         for cname, d in existing_controllers.items():
             self.deployed_map[cname] = {'controller': d}
             self.deployed_map[cname].update(**juju.get_models(cname))
-
         super().__init__()
 
     def build_widget(self):
@@ -38,6 +37,9 @@ class DestroyView(BaseView):
                     value=value_map)
                 for model in deploy['models']:
                     if model['name'] == 'admin/controller':
+                        continue
+                    if model['life'] != 'alive' or \
+                       model['status']['current'] != 'available':
                         continue
                     value_map['model'] = model['short-name']
                     widget.append_option(
