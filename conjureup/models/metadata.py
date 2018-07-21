@@ -4,7 +4,7 @@ This is the information found metadata.yaml in the
 current spells top-level directory
 """
 import yaml
-
+from melddict import MeldDict
 from conjureup.consts import spell_types
 
 
@@ -12,9 +12,9 @@ class SpellMetadataException(Exception):
     pass
 
 
-class SpellMetadata(dict):
+class SpellMetadata(MeldDict):
     def __init__(self, metadata):
-        super().__init__(metadata)
+        super().__init__(self.add(metadata))
 
     @property
     def friendly_name(self):

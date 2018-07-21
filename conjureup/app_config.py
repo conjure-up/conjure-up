@@ -186,32 +186,40 @@ class AppConfig:
                    for step in self.all_steps)
 
     async def save(self):
-        if not self.provider:
-            # don't bother saving if they haven't even picked a cloud yet
+        if not self.provider or not self.conjurefile or not self.metadata:
+            # don't bother saving if none of the state requirements are met
             return
-        if not self.conjurefile:
-            return
+
         self.log.info('Storing conjure-up state')
-        if self.metadata and self.metadata.spell_type == spell_types.JUJU:
+        # sanitize
+        self.conjurefile['conf-file'] = [
+            str(conf_path)
+            for conf_path in self.conjurefile['conf-file']
+        ]
+
+        extra_info = {
+            'conjurefile': self.conjurefile,
+            'spell-metadata': self.metadata
+        }
+
+        if self.metadata.spell_type == spell_types.JUJU:
             await self.juju.client.set_config(
-                {'extra-info': json.dumps(self.conjurefile)})
+                {'extra-info': json.dumps(extra_info)})
             self.log.info('State saved in model config')
-            # Check for existing key and clear it
             self.state.pop(self._internal_state_key, None)
         else:
-            # sanitize
-            self.conjurefile['conf-file'] = [
-                str(conf_path)
-                for conf_path in self.conjurefile['conf-file']
-            ]
             self.state[self._internal_state_key] = json.dumps(
-                self.conjurefile)
+                extra_info)
             self.log.info('State saved')
 
     async def restore(self):
+        """
+        Restore a previous spell cached state, primarily useful
+        during a conjure-down or a day 2 operation
+        """
         self.log.info('Attempting to load conjure-up cached state.')
         try:
-            if self.juju.authenticated:
+            if self.juju.client:
                 result = await self.juju.client.get_config()
                 if 'extra-info' in result:
                     self.log.info(
@@ -221,7 +229,9 @@ class AppConfig:
             result = self.state.get(self._internal_state_key)
             if result:
                 self.log.info("Found cached state, reloading.")
-                self.conjurefile = json.loads(result)
+                json_result = json.loads(result)
+                self.conjurefile = json_result.get('conjurefile', {})
+                self.metadata = json_result.get('spell-metadata', {})
         except json.JSONDecodeError as e:
             # Dont fail fatally if state information is incorrect. Just log it
             # and move on

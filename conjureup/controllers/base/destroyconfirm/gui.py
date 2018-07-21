@@ -1,11 +1,10 @@
 import asyncio
 
-from conjureup import events, juju, utils
+from conjureup import events, juju, controllers
 from conjureup.app_config import app
 from conjureup.telemetry import track_event, track_screen
 from conjureup.ui.views.destroy_confirm import DestroyConfirmView
 from conjureup.ui.views.interstitial import InterstitialView
-from conjureup.controllers.base.destroy import gui
 
 
 class DestroyConfirm:
@@ -24,12 +23,11 @@ class DestroyConfirm:
             "Waiting for model cleanup"
         )
         app.ui.set_footer("")
-        return gui.Destroy().render()
+        return controllers.use('destroy').render()
 
     async def do_destroy_snap(self):
         """ Only one snap for now
         """
-        
 
     def finish(self):
         self.destroying.set()
@@ -47,7 +45,7 @@ class DestroyConfirm:
             ))
 
     def back(self):
-        return gui.Destroy().render()
+        return controllers.use('destroy').render()
 
     async def login(self, controller, model):
         await juju.connect_model()
