@@ -2,4 +2,4 @@
 #
 # General script to alias conjure-up --destroy
 
-exec conjure-down --destroy "$@"
+exec conjure-down --destroy

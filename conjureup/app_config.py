@@ -199,7 +199,7 @@ class AppConfig:
 
         extra_info = {
             'conjurefile': self.conjurefile,
-            'spell-metadata': self.metadata
+            'config': self.config,
         }
 
         if self.metadata.spell_type == spell_types.JUJU:
@@ -224,14 +224,14 @@ class AppConfig:
                 if 'extra-info' in result:
                     self.log.info(
                         "Found cached state from Juju model, reloading.")
-                    self.from_json(result['extra-info'].value)
-                    return
-            result = self.state.get(self._internal_state_key)
+                    result = result['extra-info'].value
+            else:
+                result = self.state.get(self._internal_state_key)
             if result:
                 self.log.info("Found cached state, reloading.")
-                json_result = json.loads(result)
-                self.conjurefile = json_result.get('conjurefile', {})
-                self.metadata = json_result.get('spell-metadata', {})
+                result = json.loads(result)
+                self.conjurefile = result.get('conjurefile', {})
+                self.config = result.get('config', {})
         except json.JSONDecodeError as e:
             # Dont fail fatally if state information is incorrect. Just log it
             # and move on

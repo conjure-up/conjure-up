@@ -1,4 +1,4 @@
-from conjureup import errors, snap, controllers
+from conjureup import errors, controllers
 from conjureup.models.provider import load_schema
 from conjureup.app_config import app
 from conjureup.ui.views.destroy import DestroyView
@@ -19,14 +19,7 @@ class Destroy:
         return controllers.use('destroyconfirm').render(selection)
 
     def render(self):
-        # TODO: Get a list of spells with a spell-type: snap,
-        # and if installed, list them here.
-        show_snaps = False
-        if snap.is_installed('microk8s'):
-            show_snaps = True
-
         self.view = DestroyView(app,
-                                show_snaps=show_snaps,
                                 cb=self.finish)
         self.view.show()
 

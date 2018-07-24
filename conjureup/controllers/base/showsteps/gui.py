@@ -19,7 +19,19 @@ class ShowStepsController:
 
         self.view = ShowStepsView(None, self.back)
         self.view.show()
-        app.loop.create_task(self.show_steps())
+        if not app.conjurefile['destroy']:
+            app.loop.create_task(self.show_steps())
+        else:
+            app.loop.create_task(self.show_uninstall_steps())
+
+    async def show_uninstall_steps(self):
+        for step in filter(attrgetter('viewable'), app.all_steps):
+            if not step.has_uninstall:
+                continue
+            if not (step.additional_input or step.needs_sudo):
+                continue
+            await self.show_step(step)
+        return self.finish()
 
     async def show_steps(self):
         for step in filter(attrgetter('viewable'), app.all_steps):
@@ -45,6 +57,8 @@ class ShowStepsController:
     def finish(self):
         if app.has_bundle_modifications:
             controllers.setup_metadata_controller()
+        if app.conjurefile['destroy']:
+            return controllers.use('runsteps').render()
         return controllers.use('configapps').render()
 
     def back(self):

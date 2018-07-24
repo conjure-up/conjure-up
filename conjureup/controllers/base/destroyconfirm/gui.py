@@ -14,7 +14,7 @@ class DestroyConfirm:
         self.view = None
         self.deploy_map = None
 
-    async def do_destroy(self, model, controller):
+    async def do_destroy(self, model=None, controller=None):
         track_event("Destroying model", "Destroy", "")
         app.ui.set_footer(
             "Destroying model {} in controller {}".format(model, controller))
@@ -28,6 +28,7 @@ class DestroyConfirm:
     async def do_destroy_snap(self):
         """ Only one snap for now
         """
+        pass
 
     def finish(self):
         self.destroying.set()

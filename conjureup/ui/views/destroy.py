@@ -4,8 +4,8 @@ from conjureup.ui.widgets.selectors import MenuSelectButtonList
 
 
 class DestroyView(BaseView):
-    title = "Destroy Deployment"
-    subtitle = "Please choose a deployment to destroy"
+    title = "Destroy"
+    subtitle = "Please choose a deployed spell to destroy"
     show_back_button = False
 
     def __init__(self, app, show_snaps, cb):
