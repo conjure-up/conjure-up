@@ -158,11 +158,6 @@ async def _start(*args, **kwargs):
     # override the one set by urwid, which happens in MainLoop.run()
     app.loop.set_exception_handler(events.handle_exception)
 
-    if app.conjurefile['destroy']:
-        track_screen('Destroy Deployment Start')
-        controllers.use('destroy').render()
-        return
-
     track_screen("Application Start")
     track_event("OS", platform.platform(), "")
 

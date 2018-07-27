@@ -14,6 +14,10 @@ class SpellPickerView(BaseView):
 
     def __init__(self, app, spells, cb):
         self.app = app
+        if self.app.conjurefile['destroy']:
+            self.title = "Spell Destroy"
+            self.subtitle = (
+                "Choose from the list of deployed spells to destroy")
         self.cb = cb
         self.spells = spells
         self.config = self.app.config
@@ -51,7 +55,7 @@ class SpellPickerView(BaseView):
     def after_keypress(self):
         self.update_spell_description()
 
-    def build_widget(self):
+    def spell_select_widget(self):
         widget = MenuSelectButtonList()
         prev_cat = None
         for category, spell in self.spells:
@@ -66,5 +70,36 @@ class SpellPickerView(BaseView):
         widget.focus_position = 1
         return widget
 
+    def destroy_widget(self):
+        widget = MenuSelectButtonList()
+        prev_cat = None
+        for category, spell in self.spells:
+            if 'deploys' not in spell:
+                continue
+            if category == "_unassigned_spells":
+                category = "other"
+            if category != prev_cat:
+                if prev_cat:
+                    widget.append(Text(""))
+                widget.append(Color.label(Text(category)))
+                prev_cat = category
+            widget.append(Color.label(Text("  {}".format(spell['name']))))
+            for deploy in spell['deploys']:
+                if deploy['controller'] and deploy['model']:
+                    spell['current_selection'] = deploy
+                    widget.append_option('- Deployed to {}/{}'.format(
+                        deploy['controller'], deploy['model']),
+                                         spell)
+                else:
+                    spell['current_selection'] = deploy
+                    widget.append_option('- Deployed', spell)
+        widget.focus_position = 2
+        return widget
+
+    def build_widget(self):
+        if self.app.conjurefile['destroy']:
+            return self.destroy_widget()
+        return self.spell_select_widget()
+
     def next_screen(self):
-        self.cb(self.selected_spell['key'])
+        self.cb(self.selected_spell)

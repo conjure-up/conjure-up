@@ -108,7 +108,7 @@ class StepModel:
 
     @property
     def has_uninstall(self):
-        return self._has_uninstall(PHASES.UNINSTALL)
+        return self._has_phase(PHASES.UNINSTALL)
 
     async def validate_input(self, msg_cb):
         """ validate-input phase

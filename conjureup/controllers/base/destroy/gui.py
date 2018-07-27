@@ -13,7 +13,7 @@ class Destroy:
 
     def __init__(self):
         self.view = None
-        self.spells = []
+        self.deployed_spells = []
 
     async def _query_model_config(self, controller, model):
         if not app.juju.client:
@@ -45,7 +45,7 @@ class Destroy:
         return {}
 
     def finish(self, spellname):
-        for spell in self.spells:
+        for spell in self.deployed_spells:
             if spellname == spell['spellname']:
                 if 'controller' in spell:
                     app.provider.controller = spell['controller']
@@ -60,35 +60,13 @@ class Destroy:
         controllers.setup_metadata_controller()
         return controllers.use('destroyconfirm').render()
 
-    async def query_deployments(self):
-        """ Get a list of deployed spells
-        """
-        existing_controllers = juju.get_controllers()['controllers']
-        for cname in existing_controllers.keys():
-            # TODO: this could take a while; we should show an interstitial
-            models = juju.get_models(cname)
-            if not models:
-                continue
-            for model in models['models']:
-                model_config = await self._query_model_config(
-                    cname,
-                    model['short-name'])
-                spell_name = model_config.get('config', {}).get('spell',
-                                                                '(unknown)')
-                self.spells.append(
-                    {'spellname': spell_name,
-                     'controller': cname,
-                     'model': model})
-        if snap.is_installed('microk8s'):
-            self.spells.append({'spellname': 'microk8s'})
-
         self.view = DestroyView(app,
-                                spells=self.spells,
+                                spells=self.deployed_spells,
                                 cb=self.finish)
         self.view.show()
 
     def render(self):
-        app.loop.create_task(self.query_deployments())
+        pass
 
 
 _controller_class = Destroy
