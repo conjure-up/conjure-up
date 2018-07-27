@@ -3,7 +3,11 @@ sudo: true
 dist: xenial
 python:
   - "3.6"
-  - "3.7-dev"
+  - "3.7"
+  - "3.8-dev"
+matrix:
+  allow_failures:
+  - python: 3.8-dev
 cache: pip
 notifications:
   email: false
