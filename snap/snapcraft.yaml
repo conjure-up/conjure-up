@@ -32,6 +32,8 @@ parts:
     - -usr/bin/2to3-3.5
     - -usr/share/*python*
     - -usr/lib/python3.5
+    build-packages:
+    - lsb-release
     stage-packages:
     - bsdtar
     - jq
@@ -39,6 +41,9 @@ parts:
     - libsodium18
     after:
     - python
+    override-prime: |
+      mkdir -p bin/wrappers
+      cp $SNAPCRAFT_PART_INSTALL/../src/wrappers/* bin/wrappers
   spells:
     source: https://github.com/conjure-up/spells.git
     source-type: git
@@ -49,14 +54,8 @@ parts:
     - -README.md
     after:
     - conjure-up
-  wrappers:
-    source: snap/
-    plugin: dump
-    build-packages:
-    - lsb-release
-    after:
-    - conjure-up
   juju:
+    build-attributes: ['no-patchelf']
     source: https://github.com/juju/juju.git
     source-type: git
     source-branch: juju-2.4.3
@@ -66,7 +65,7 @@ parts:
     go-packages:
     - github.com/juju/juju/cmd/juju
     - github.com/juju/juju/cmd/jujud
-    install: |
+    override-build: |
       mkdir -p $SNAPCRAFT_PART_INSTALL/bash_completions
       cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
     build-packages:
