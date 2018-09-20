@@ -11,15 +11,15 @@ confinement: classic
 grade: stable
 apps:
   conjure-up:
-    command: wrappers/conjure-up
+    command: bin/wrappers/conjure-up
   conjure-down:
-    command: wrappers/conjure-down
+    command: bin/wrappers/conjure-down
     aliases:
     - conjure-down
   juju:
-    command: wrappers/juju
+    command: bin/wrappers/juju
   juju-wait:
-    command: wrappers/juju-wait
+    command: bin/wrappers/juju-wait
 parts:
   conjure-up:
     source: .
@@ -42,6 +42,7 @@ parts:
     after:
     - python
     override-prime: |
+      snapcraftctl prime
       mkdir -p bin/wrappers
       cp $SNAPCRAFT_PART_INSTALL/../src/wrappers/* bin/wrappers
   spells:
