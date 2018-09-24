@@ -56,7 +56,6 @@ parts:
     after:
     - conjure-up
   juju:
-    build-attributes: ['no-patchelf']
     source: https://github.com/juju/juju.git
     source-type: git
     source-branch: juju-2.4.3
@@ -67,6 +66,7 @@ parts:
     - github.com/juju/juju/cmd/juju
     - github.com/juju/juju/cmd/jujud
     override-build: |
+      snapcraftctl build
       mkdir -p $SNAPCRAFT_PART_INSTALL/bash_completions
       cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
     build-packages:
