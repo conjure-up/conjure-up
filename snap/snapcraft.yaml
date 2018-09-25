@@ -41,10 +41,11 @@ parts:
     - libsodium18
     after:
     - python
-    override-prime: |
-      snapcraftctl prime
-      mkdir -p bin/wrappers
-      cp $SNAPCRAFT_PART_INSTALL/../src/wrappers/* bin/wrappers
+  wrappers:
+    plugin: dump
+    source: wrappers
+    organize:
+      '*': bin/wrappers/
   spells:
     source: https://github.com/conjure-up/spells.git
     source-type: git
