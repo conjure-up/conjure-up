@@ -88,9 +88,7 @@ class DestroyConfirmView(WidgetWrap):
 
     def _build_widget(self):
         applications = self.app.juju.client.applications
-        total_items = []
-        total_items.append(Instruction("Deployment Information:"))
-        total_items.append(HR())
+        total_items = [Instruction("Deployment Information:"), HR()]
         tbl = Pile([
             Columns([('fixed', 15, Text("Name")),
                      Text(self.model['name'])]),
