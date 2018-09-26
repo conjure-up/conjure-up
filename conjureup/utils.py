@@ -738,7 +738,7 @@ class SanitizeDataProcessor(SanitizePasswordsProcessor):
 
         def _check_str(s):
             sl = s.lower()
-            for field in self.FIELDS:
+            for field in self.KEYS:
                 if field not in sl:
                     continue
                 if 'invalid' in s or 'error' in s:
