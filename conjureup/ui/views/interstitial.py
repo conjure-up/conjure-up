@@ -40,8 +40,7 @@ class InterstitialView(BaseView):
                 Padding.center_90(self.output),
                 Padding.line_break("")]
 
-        _boxes = []
-        _boxes.append(('weight', 1, Text('')))
+        _boxes = [('weight', 1, Text(''))]
         for i in self.loading_boxes:
             _boxes.append(('pack', i))
         _boxes.append(('weight', 1, Text('')))
