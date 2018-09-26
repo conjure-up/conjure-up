@@ -55,8 +55,7 @@ class CredentialsController(common.BaseCredentialsController):
     def _format_creds(self):
         """ Formats the credentials into strings from the widgets values
         """
-        formatted = {}
-        formatted['auth-type'] = app.provider.auth_type
+        formatted = {'auth-type': app.provider.auth_type}
         for field in app.provider.form.fields():
             if not field.storable:
                 continue
