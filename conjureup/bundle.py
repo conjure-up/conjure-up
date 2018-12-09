@@ -61,9 +61,8 @@ class BundleApplicationFragment(dict):
         """ Provides charmstore endpoint
         """
         if 'charm' not in self:
-            raise BundleInvalidFragment(
-                "Unable to locate charm: in bundle fragment: {}".format(
-                    self.fragment))
+            raise BundleInvalidFragment("Unable to locate 'charm' in "
+                                        "bundle fragment: {}".format(self))
         return self['charm']
 
     @property
