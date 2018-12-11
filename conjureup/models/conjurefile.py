@@ -98,6 +98,9 @@ class Conjurefile(MeldDict):
     # Comma separate list of ips to not filter through proxy
     # no-proxy: 8.8.8.8,172.16.0.1
 
+    # Override Juju default controller series
+    # bootstrap-series: bionic
+
     # (Optional) Bundle Add
     # Add a Juju bundle fragment overlay
     # bundle-add: /home/user/my-bundle-fragment.yaml

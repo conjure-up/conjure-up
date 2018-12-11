@@ -198,8 +198,7 @@ async def create_model():
         await controller.disconnect()
 
 
-async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
-                    credential=None):
+async def bootstrap(controller, cloud, model='conjure-up', credential=None):
     """ Performs juju bootstrap
 
     If not LXD pass along the newly defined credentials
@@ -208,7 +207,6 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
     controller: name of your controller
     cloud: name of local or public cloud to deploy to
     model: name of default model to create
-    series: define the bootstrap series defaults to xenial
     credential: credentials key
     """
     if app.provider.region is not None:
@@ -243,8 +241,9 @@ async def bootstrap(controller, cloud, model='conjure-up', series="xenial",
         add_config("bootstrap-timeout", app.conjurefile['bootstrap-timeout'])
     if app.conjurefile['bootstrap-to']:
         cmd.extend(["--to", app.conjurefile['bootstrap-to']])
+    if app.conjurefile['bootstrap-series']:
+        cmd.extend(["--bootstrap-series", app.conjurefile['bootstrap-series']])
 
-    cmd.extend(["--bootstrap-series", series])
     if credential is not None:
         cmd.extend(["--credential", credential])
 
