@@ -1,6 +1,6 @@
 # Change Log
 
-## [2.6.2]() (2018-12-12)
+## [2.6.2](https://github.com/conjure-up/conjure-up/tree/2.6.2) (2018-12-12)
 
 **Implemented enhancements:**
 
@@ -12,7 +12,7 @@
 - Fix error handling for invalid bundles (#1554)
 - Update spells to fix CDK with Calico (conjure-up/spells#239)
 
-## [2.6.1]() (2018-9-20)
+## [2.6.1](https://github.com/conjure-up/conjure-up/tree/2.6.1) (2018-9-20)
 
 **Implemented enhancements:**
 
