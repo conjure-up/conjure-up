@@ -1,5 +1,24 @@
 # Change Log
 
+## [2.6.2](https://github.com/conjure-up/conjure-up/tree/2.6.2) (2018-12-12)
+
+**Implemented enhancements:**
+
+- Update libjuju to support Juju 2.5 (#1557)
+- Add bootstrap series override to Conjurefile (#1555)
+
+**Closed issues:**
+
+- Fix error handling for invalid bundles (#1554)
+- Update spells to fix CDK with Calico (conjure-up/spells#239)
+
+## [2.6.1](https://github.com/conjure-up/conjure-up/tree/2.6.1) (2018-9-20)
+
+**Implemented enhancements:**
+
+- Update libjuju to improve charm store query performance (#1512)
+- Update bundled Juju version to 2.4.3
+
 ## [2.6.0](https://github.com/conjure-up/conjure-up/tree/2.6.0) (2018-07-16)
 [Full Changelog](https://github.com/conjure-up/conjure-up/compare/2.5.9...2.6.0)
 
