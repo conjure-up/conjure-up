@@ -96,6 +96,8 @@ def parse_options(argv):
                         help='The MAAS node hostname to deploy to. Useful '
                         'for using lower end hardware as the Juju admin '
                         'controller.', metavar='<host>.maas')
+    parser.add_argument('--bootstrap-series', dest='bootstrap_series',
+                        help="Override Juju's default controller series.")
     parser.add_argument(
         '--version', action='version', version='%(prog)s {}'.format(VERSION))
     parser.add_argument('--no-track', '--notrack', action='store_true',
