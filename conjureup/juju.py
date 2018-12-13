@@ -241,7 +241,7 @@ async def bootstrap(controller, cloud, model='conjure-up', credential=None):
         add_config("bootstrap-timeout", app.conjurefile['bootstrap-timeout'])
     if app.conjurefile['bootstrap-to']:
         cmd.extend(["--to", app.conjurefile['bootstrap-to']])
-    if app.conjurefile.get('bootstrap-series'):
+    if app.conjurefile['bootstrap-series']:
         cmd.extend(["--bootstrap-series", app.conjurefile['bootstrap-series']])
 
     if credential is not None:
