@@ -1,5 +1,11 @@
 # Change Log
 
+## [2.6.4](https://github.com/conjure-up/conjure-up/tree/2.6.4) (2018-12-13)
+
+**Fixed bugs:**
+
+- Bump libjuju version to pick up subordinate fix (juju/python-libjuju#277) (#1560)
+
 ## [2.6.3](https://github.com/conjure-up/conjure-up/tree/2.6.3) (2018-12-13)
 
 **Fixed bugs:**
