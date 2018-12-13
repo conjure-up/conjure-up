@@ -1,5 +1,16 @@
 # Change Log
 
+## [2.6.3](https://github.com/conjure-up/conjure-up/tree/2.6.3) (2018-12-13)
+
+**Fixed bugs:**
+
+- Fix bootstrap-series KeyError (#1558)
+
+**Closed issues:**
+
+- Fix error handling for invalid bundles (#1554)
+- Update spells to fix CDK with Calico (conjure-up/spells#239)
+
 ## [2.6.2](https://github.com/conjure-up/conjure-up/tree/2.6.2) (2018-12-12)
 
 **Implemented enhancements:**

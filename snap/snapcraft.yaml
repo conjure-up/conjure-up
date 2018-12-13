@@ -1,5 +1,5 @@
 name: conjure-up
-version: 2.6.2
+version: 2.6.3
 version-script: |
   echo "$SNAPCRAFT_PROJECT_VERSION-$(date +%Y%m%d.%H%m)"
 summary: Package runtime for conjure-up spells
@@ -32,20 +32,15 @@ parts:
     - -usr/bin/2to3-3.5
     - -usr/share/*python*
     - -usr/lib/python3.5
-    build-packages:
-    - lsb-release
     stage-packages:
     - bsdtar
     - jq
     - pwgen
     - libsodium18
+    build-packages:
+    - lsb-release
     after:
     - python
-  wrappers:
-    plugin: dump
-    source: wrappers
-    organize:
-      '*': bin/wrappers/
   spells:
     source: https://github.com/conjure-up/spells.git
     source-type: git
@@ -56,6 +51,11 @@ parts:
     - -README.md
     after:
     - conjure-up
+  wrappers:
+    source: wrappers
+    plugin: dump
+    organize:
+      '*': bin/wrappers/
   juju:
     source: https://github.com/juju/juju.git
     source-type: git
@@ -66,15 +66,15 @@ parts:
     go-packages:
     - github.com/juju/juju/cmd/juju
     - github.com/juju/juju/cmd/jujud
-    override-build: |
-      snapcraftctl build
-      mkdir -p $SNAPCRAFT_PART_INSTALL/bash_completions
-      cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
     build-packages:
     - lsb-release
     after:
     - conjure-up
     - go
+    override-build: |
+      snapcraftctl build
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bash_completions
+      cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
   go:
     source-tag: go1.10.3
   python:
