@@ -40,16 +40,19 @@ class ControllerListView(BaseView):
             widget.append(Padding.line_break(""))
             cdict = defaultdict(lambda: defaultdict(list))
             for cname, d in self.controllers.items():
-                cdict[d['cloud']][d.get('region', None)].append(cname)
+                cdict[d['cloud']][d.get('region', None)].append((cname, d))
 
             for cloudname, cloud_d in sorted(cdict.items()):
                 widget.append(Color.label(Text("  {}".format(cloudname))))
                 for regionname, controllers in cloud_d.items():
-                    for controller in sorted(controllers):
-                        label = "    {}".format(controller)
+                    for controller_name, controller in sorted(controllers):
+                        label = "    {}".format(controller_name)
                         if regionname:
                             label += " ({})".format(regionname)
-                        widget.append_option(label, controller)
+                        widget.append_option(
+                            label,
+                            controller,
+                            enabled=controller.get('api-endpoints'))
                 widget.append(Padding.line_break(""))
             widget.append(Padding.line_break(""))
         widget.append(HR())
@@ -57,5 +60,19 @@ class ControllerListView(BaseView):
         widget.select_first()
         return widget
 
+    def after_keypress(self):
+        selected = self.widget.selected_widgets
+        if selected is None:
+            return
+        elif selected.enabled:
+            msg = self.footer
+        else:
+            msg = ('This controller has no endpoints, so it cannot be used. '
+                   'To clean it up, run: juju unregister {}'.format(
+                       selected.label.strip().split()[0]))
+        self.set_footer(msg)
+
     def submit(self):
+        if not self.widget.selected:
+            return  # tried to select disabled controller
         self.submit_cb(self.widget.selected)
