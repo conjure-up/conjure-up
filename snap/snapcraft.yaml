@@ -1,5 +1,5 @@
 name: conjure-up
-version: 2.6.4
+version: 2.6.5
 version-script: |
   echo "$SNAPCRAFT_PROJECT_VERSION-$(date +%Y%m%d.%H%m)"
 summary: Package runtime for conjure-up spells
@@ -59,7 +59,7 @@ parts:
   juju:
     source: https://github.com/juju/juju.git
     source-type: git
-    source-branch: juju-2.4.3
+    source-branch: juju-2.5.0
     source-depth: 1
     plugin: godeps
     go-importpath: github.com/juju/juju
