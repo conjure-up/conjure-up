@@ -51,7 +51,7 @@ class ControllerListView(BaseView):
                             label += " ({})".format(regionname)
                         widget.append_option(
                             label,
-                            controller,
+                            controller_name,
                             enabled=controller.get('api-endpoints'))
                 widget.append(Padding.line_break(""))
             widget.append(Padding.line_break(""))
