@@ -1,5 +1,22 @@
 # Change Log
 
+## [2.6.6](https://github.com/conjure-up/conjure-up/tree/2.6.6) (2019-02-04)
+
+**Fixed bugs:**
+
+- Fix unable to select new controller (#1581)
+
+## [2.6.5](https://github.com/conjure-up/conjure-up/tree/2.6.5) (2019-01-31)
+
+**Implemented enhancements:**
+
+- Update Juju to 2.5.0
+- Update libjuju
+
+**Fixed bugs:**
+
+- Disable controllers which have no endpoints
+
 ## [2.6.4](https://github.com/conjure-up/conjure-up/tree/2.6.4) (2018-12-13)
 
 **Fixed bugs:**
