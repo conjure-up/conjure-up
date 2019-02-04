@@ -73,6 +73,7 @@ class ControllerListView(BaseView):
         self.set_footer(msg)
 
     def submit(self):
-        if not self.widget.selected:
+        sw = self.widget.selected_widgets
+        if not (sw and sw.enabled):
             return  # tried to select disabled controller
         self.submit_cb(self.widget.selected)
