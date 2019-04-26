@@ -1,5 +1,5 @@
 aiofiles==0.3.1
-Jinja2==2.9.6
+Jinja2==2.10.1
 juju==0.11.3
 juju-wait==2.6.3
 prettytable==0.7.2
