@@ -59,7 +59,7 @@ parts:
   juju:
     source: https://github.com/juju/juju.git
     source-type: git
-    source-branch: juju-2.5.0
+    source-branch: juju-2.6.2
     source-depth: 1
     plugin: dep
     go-importpath: github.com/juju/juju
