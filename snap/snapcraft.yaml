@@ -9,13 +9,12 @@ description: >
   software.
 confinement: classic
 grade: stable
+base: core18
 apps:
   conjure-up:
     command: bin/wrappers/conjure-up
   conjure-down:
     command: bin/wrappers/conjure-down
-    aliases:
-    - conjure-down
   juju:
     command: bin/wrappers/juju
   juju-wait:
@@ -24,23 +23,20 @@ parts:
   conjure-up:
     source: .
     plugin: python
-    requirements: requirements.txt
+    requirements:
+    - requirements.txt
     stage:
     - -README.md
-    - -debian
-    - -usr/bin/py*
-    - -usr/bin/2to3-3.5
     - -usr/share/*python*
-    - -usr/lib/python3.5
     stage-packages:
     - bsdtar
     - jq
     - pwgen
-    - libsodium18
+    - libsodium23
+    stage-snaps:
+    - juju
     build-packages:
     - lsb-release
-    after:
-    - python
   spells:
     source: https://github.com/conjure-up/spells.git
     source-type: git
@@ -56,32 +52,3 @@ parts:
     plugin: dump
     organize:
       '*': bin/wrappers/
-  juju:
-    source: https://github.com/juju/juju.git
-    source-type: git
-    source-branch: juju-2.6.2
-    source-depth: 1
-    plugin: dep
-    go-importpath: github.com/juju/juju
-    go-packages:
-    - github.com/juju/juju/cmd/juju
-    - github.com/juju/juju/cmd/jujud
-    build-packages:
-    - lsb-release
-    after:
-    - conjure-up
-    - go
-    override-build: |
-      snapcraftctl build
-      mkdir -p $SNAPCRAFT_PART_INSTALL/bash_completions
-      cp -a etc/bash_completion.d/juju* $SNAPCRAFT_PART_INSTALL/bash_completions/.
-  go:
-    source-tag: go1.10.3
-  python:
-    source: https://www.python.org/ftp/python/3.6.6/Python-3.6.6.tar.xz
-    plugin: autotools
-    configflags:
-    - --prefix=/usr
-    build-packages:
-    - libssl-dev
-    - libsqlite3-dev
