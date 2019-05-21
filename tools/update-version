@@ -137,4 +137,4 @@ def str_presenter(dumper, data):
 
 if __name__ == '__main__':
     update_init()
-    update_snapcraft()
+    # update_snapcraft()
