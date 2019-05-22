@@ -1,6 +1,6 @@
 aiofiles==0.3.1
 Jinja2==2.10.1
-juju==0.11.5
+juju==0.11.6
 juju-wait==2.6.3
 prettytable==0.7.2
 progressbar2==3.20.0
