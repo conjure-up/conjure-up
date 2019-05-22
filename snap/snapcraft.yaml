@@ -32,7 +32,7 @@ parts:
     - bsdtar
     - jq
     - pwgen
-    - libsodium18
+    - libsodium23
     stage-snaps:
     - juju
     build-packages:
