@@ -26,8 +26,6 @@ from yaml.nodes import MappingNode
 from yaml.serializer import Serializer
 
 VERSION = Path('VERSION').read_text().strip('\n')
-JUJU_VERSION = Path('JUJU_VERSION').read_text().strip('\n')
-
 
 def update_init():
     init_file = Path('conjureup/__init__.py')
@@ -37,10 +35,6 @@ def update_init():
 def update_snapcraft():
     snapcraft_file = Path('snap/snapcraft.yaml')
     snapcraft = yaml.safe_load(snapcraft_file.read_text())
-    juju = snapcraft['parts']['juju']
-    juju.pop('source-branch', None)
-    juju.pop('source-tag', None)
-    juju['source-branch'] = JUJU_VERSION
     snapcraft['version'] = VERSION
     yaml.add_representer(str, str_presenter)
     snapcraft_file.write_text(yaml.dump(snapcraft,
@@ -62,6 +56,7 @@ class OrderedSerializer(Serializer):
         'description',
         'confinement',
         'grade',
+        'base',
         'apps',
         'conjure-up',
         'command',
@@ -137,4 +132,4 @@ def str_presenter(dumper, data):
 
 if __name__ == '__main__':
     update_init()
-    # update_snapcraft()
+    update_snapcraft()
