@@ -395,7 +395,7 @@ def get_clouds():
     Returns:
     Dictionary of all known clouds including newly created MAAS/Local
     """
-    sh = run('{} list-clouds --format yaml'.format(app.juju.bin_path),
+    sh = run('{} list-clouds --local --format yaml'.format(app.juju.bin_path),
              shell=True, stdout=PIPE, stderr=PIPE)
     if sh.returncode > 0:
         raise Exception(
