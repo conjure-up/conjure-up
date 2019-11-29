@@ -15,7 +15,7 @@ sysdeps:
 	    sudo add-apt-repository -y ppa:deadsnakes/ppa; \
 	fi
 	@sudo apt-get update
-	@sudo apt-get -qqyf install jq bsdtar bridge-utils software-properties-common snapcraft python3.7-dev tox shellcheck build-essential
+	@sudo apt-get -qqyf install jq bsdtar bridge-utils software-properties-common snapcraft python3-all-dev tox shellcheck build-essential
 
 travis-sysdeps:
 	@sudo add-apt-repository -y ppa:deadsnakes/ppa
