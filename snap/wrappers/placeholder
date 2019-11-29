@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+# 'make test' will fail if this directory doesn't exist or doesn't contain any script.
