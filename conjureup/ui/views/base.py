@@ -182,7 +182,8 @@ class BaseView(WidgetWrap):
     def _build_footer(self):
         def _pack(btn):
             return ('fixed', len(btn.label) + 4, btn)
-        buttons = [('fixed', 2, Text("")), _pack(self.button('QUIT', app.ui.quit))]
+        buttons = [('fixed', 2, Text("")), _pack(
+            self.button('QUIT', app.ui.quit))]
         if self.show_back_button:
             buttons.append(_pack(self.button('BACK', self.prev_screen)))
         buttons.append(('weight', 2, Text("")))

@@ -27,6 +27,7 @@ from yaml.serializer import Serializer
 
 VERSION = Path('VERSION').read_text().strip('\n')
 
+
 def update_init():
     init_file = Path('conjureup/__init__.py')
     init_file.write_text('__version__ = "{}"\n'.format(VERSION))
