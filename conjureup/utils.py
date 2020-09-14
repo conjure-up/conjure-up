@@ -123,7 +123,8 @@ def run_attach(cmd, output_cb=None):
     else:
         raise Exception("Problem running {0} "
                         "{1}:{2}".format(cmd,
-                                         subproc.returncode))
+                                         subproc.returncode,
+                                         errors))
 
 
 async def arun(cmd, input=None, check=False, env=None, encoding='utf8',

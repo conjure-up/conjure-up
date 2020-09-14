@@ -717,7 +717,7 @@ def version():
         shell=True, stdout=PIPE, stderr=PIPE)
     if sh.returncode > 0:
         raise Exception(
-            "Unable to get Juju Version".format(sh.stderr.decode('utf8')))
+            "Unable to get Juju Version: {}".format(sh.stderr.decode('utf8')))
     out = sh.stdout.decode('utf8')
     if isinstance(out, list):
         return out.pop()

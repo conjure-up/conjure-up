@@ -55,7 +55,7 @@ class StepForm(Pile):
             self.focus_position = 4
 
     def __repr__(self):
-        return "<StepForm: {} ()>".format(self.model.title, self.selectable())
+        return "<StepForm: {} ({})>".format(self.model.title, self.selectable())
 
     def set_sudo_label(self, msg):
         self.sudo_label.set_text(('info_context', msg))
