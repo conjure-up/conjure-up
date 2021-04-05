@@ -44,10 +44,12 @@ def set_bin_path():
     """ Sets the juju binary path
     """
     candidates = [
+        os.environ['JUJU'],
         '/snap/bin/juju',
         '/snap/bin/conjure-up.juju',
         '/usr/bin/juju',
         '/usr/local/bin/juju',
+
     ]
     _check_bin_candidates(candidates, 'bin_path')
     # Update $PATH so that we make sure this candidate is used
@@ -60,6 +62,7 @@ def set_wait_path():
     """ Sets juju-wait path
     """
     candidates = [
+        os.environ['JUJU_WAIT'],
         '/snap/bin/juju-wait',
         '/snap/bin/conjure-up.juju-wait',
         '/usr/bin/juju-wait',
