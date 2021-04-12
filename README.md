@@ -1,10 +1,14 @@
 # NOTICE: conjure-up is EOL
 
-Please note that `conjure-up` has reached end-of-life. Most popular features
-are now available natively with `juju` and `snap`. See Canonical's official
-[Charmed Kubernetes](https://ubuntu.com/kubernetes/docs),
-[MicroK8s](https://microk8s.io/), and [OpenStack](https://ubuntu.com/openstack)
-documentation for current best practices to administer these platforms.
+Please note that `conjure-up` has reached end-of-life. Most of the features of
+this installer are now available natively with `juju` and `snap`.
+
+For the latest recommended way to install and operate the following Canonical
+software, please see the linked documentation.
+
+- [Charmed Kubernetes](https://ubuntu.com/kubernetes/docs)
+- [MicroK8s](https://microk8s.io/)
+- [OpenStack](https://ubuntu.com/openstack)
 
 # conjure-up [![Build Status](https://travis-ci.org/conjure-up/conjure-up.svg?branch=master)](https://travis-ci.org/conjure-up/conjure-up)
 > Installing big software like whoa.
