@@ -49,7 +49,6 @@ def set_bin_path():
         '/snap/bin/conjure-up.juju',
         '/usr/bin/juju',
         '/usr/local/bin/juju',
-
     ]
     _check_bin_candidates(candidates, 'bin_path')
     # Update $PATH so that we make sure this candidate is used
